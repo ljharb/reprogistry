@@ -1,0 +1,31 @@
+name: "cache packages list"
+on:
+  schedule:
+    - cron: "*/5 * * * *"
+
+permissions:
+  contents: read
+
+jobs:
+  cache:
+    permissions:
+      contents: write
+
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+          ref: data
+
+      - run: curl --remote-name-all https://raw.githubusercontent.com/herodevs/hd-critical-packages/refs/heads/main/npm.json
+
+      - run: jq -r '.[].Name' npm.json > packages.txt
+      - run: rm npm.json
+
+      - run: git diff && git status
+
+      - name: commit changes
+        uses: elstudio/actions-js-build/commit@v4
+        with:
+          commitMessage: "update list of packages"
