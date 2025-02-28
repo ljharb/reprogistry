@@ -37,42 +37,10 @@ jobs:
         env:
           PACKAGE: ${{ inputs.package }}
 
-      - uses: actions/github-script@v7
+      - run: node scripts/versions.mjs
         id: versions
         env:
           PACKAGE: ${{ inputs.package }}
-        with:
-          result-encoding: string
-          script: |
-            const { readFile } = require('fs/promises');
-            const path = require('path');
-
-            const { version: reproduceVersion } = require('reproduce/package.json');
-            const { packument } = require('pacote');
-
-            const pkg = process.env.PACKAGE;
-
-            const pkgDir = path.join(process.cwd(), 'results', pkg);
-
-            const versions = await packument(`${pkg}@*`).then(({ versions }) => Object.keys(versions));
-
-            const existingData = Object.fromEntries(
-                await Promise.all(versions.map(async (v) => [
-                    v,
-                    JSON.parse(await readFile(path.join(pkgDir, v), 'utf8').catch(() => '[]'))
-                ])),
-            );
-            const missingRepros = versions.filter((v) => {
-                if (!(v in existingData) || !(existingData[v]?.length > 0)) {
-                  return true;
-                }
-                if (!existingData[v].some((r) => r.reproduceVersion === reproduceVersion)) {
-                  return true;
-                }
-                return false;
-            });
-
-            return missingRepros.join('|');
 
       - run: |
           curl --fail-with-body \

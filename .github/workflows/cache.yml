@@ -30,7 +30,7 @@ jobs:
 
       - uses: ljharb/actions/node/install@main
         with:
-          node-version: "node"
+          node-version: node
 
       - name: validate package name
         run: npx validate-npm-package-name-cli "${PACKAGE}"
@@ -41,57 +41,10 @@ jobs:
         env:
           PACKAGE: ${{ github.event.client_payload.package || inputs.package }}
 
-      - uses: actions/github-script@v7
+      - run: node scripts/cache.mjs
         env:
           PACKAGE: ${{ github.event.client_payload.package || inputs.package }}
           VERSIONS: ${{ github.event.client_payload.versions || inputs.versions }}
-        with:
-          script: |
-            const { readFile, writeFile } = require('fs/promises');
-            const path = require('path');
-
-            const { reproduce } = require('reproduce');
-            const semverCompare = require('semver/functions/compare');
-            const Range = require('semver/classes/range');
-
-            const pkg = process.env.PACKAGE;
-
-            const pkgDir = path.join(process.cwd(), 'results', pkg);
-
-            const versions = new Range(process.env.VERSIONS);
-
-            const [
-              results,
-              existingData,
-            ] = await Promise.all([
-              reproduce(`${pkg}@${versions}`),
-              Promise.all(versions.map(async (v) => [
-                  v,
-                  JSON.parse(await readFile(path.join(pkgDir, v), 'utf8').catch(() => '[]'))
-              ]).then(Object.fromEntries)),
-            ]);
-
-            await Promise.all(results.map(async (result) => {
-                const dataPath = path.join(pkgDir, result.version);
-                const existing = existingData[result.version];
-
-                existing.push(result);
-                existing.sort((a, b) => {
-                    const dA = new Date(a.timestamp);
-                    const dB = new Date(b.timestamp);
-                    if (+dA !== +dB) {
-                        return dA - dB;
-                    }
-                    const vv = semverCompare(a.version, b.version);
-                    if (vv !== 0) {
-                        return vv;
-                    }
-
-                    return semverCompare(a.reproduceVersion, b.reproduceVersion);
-                });
-
-                await writeFile(dataPath, JSON.stringify(existing, null, '\t'));
-            }));
 
       - run: git diff && git status
 
