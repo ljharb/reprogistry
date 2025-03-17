@@ -34,7 +34,7 @@ await Promise.all(results.map(async (result) => {
 	if (!result) {
 		return;
 	}
-	const dataPath = path.join(pkgDir, result.package.version);
+	const dataPath = path.join(pkgDir, result.package.version.replace(/^v?/, 'v'));
 	const existing = existingData[/** @type {Version} */ (result.package.version)] ?? [];
 
 	existing.push(result);
@@ -52,5 +52,5 @@ await Promise.all(results.map(async (result) => {
 		return semverCompare(a.reproduceVersion, b.reproduceVersion);
 	});
 
-	await writeFile(dataPath, JSON.stringify(existing, null, '\t'));
+	await writeFile(dataPath, JSON.stringify(existing, null, '\t') + '\n');
 }));
