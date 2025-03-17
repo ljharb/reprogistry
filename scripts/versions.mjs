@@ -5,7 +5,9 @@ import path from 'path';
 const require = createRequire(import.meta.url);
 const { version: reproduceVersion } = require('reproduce/package.json');
 
-import { packument } from 'pacote';
+import pacote from 'pacote';
+const { packument } = pacote;
+
 import { setOutput } from '@actions/core';
 
 const { PACKAGE: pkg } = process.env;
