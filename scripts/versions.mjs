@@ -12,8 +12,8 @@ const { PACKAGE: pkg } = process.env;
 
 const pkgDir = path.join(process.cwd(), 'results', /** @type {string} */ (pkg));
 
-/** @typedef {import('reproduce').reproduce.Version} Version */
-/** @typedef {import('reproduce').reproduce.ReproduceResult} ReproduceResult */
+/** @typedef {`${number}.${number}.${number}${'' | '-${string}'}`} Version */
+/** @typedef {import('reproduce').ReproduceResult} ReproduceResult */
 
 const versions = /** @type {Version[]} */ (
 	await packument(`${pkg}@*`).then(({ versions: vs }) => Object.keys(vs))
