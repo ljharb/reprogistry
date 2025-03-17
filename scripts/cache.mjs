@@ -35,7 +35,7 @@ await Promise.all(results.map(async (result) => {
 		return;
 	}
 	const dataPath = path.join(pkgDir, result.package.version);
-	const existing = existingData[/** @type {Version} */ (result.package.version)];
+	const existing = existingData[/** @type {Version} */ (result.package.version)] ?? [];
 
 	existing.push(result);
 	existing.sort((a, b) => {
