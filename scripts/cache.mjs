@@ -6,7 +6,7 @@ import { compare as semverCompare, Range } from 'semver';
 
 const { PACKAGE: pkg, VERSIONS } = process.env;
 
-const pkgDir = path.join(process.cwd(), 'results', /** @type {string} */ (pkg));
+const pkgDir = path.join(process.cwd(), 'data', 'results', /** @type {string} */ (pkg));
 
 /** @typedef {`${number}.${number}.${number}${'' | '-${string}'}`} Version */
 /** @typedef {import('reproduce').ReproduceResult} ReproduceResult */

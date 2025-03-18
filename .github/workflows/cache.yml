@@ -25,8 +25,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
+          fetch-depth: 0
           persist-credentials: true
-          ref: data
+
+      - run: git submodule init && git submodule update --recursive
+      - run: cd data && git merge origin/data && cd ..
 
       - uses: ljharb/actions/node/install@main
         with:
@@ -37,7 +40,7 @@ jobs:
         env:
           PACKAGE: ${{ github.event.client_payload.package || inputs.package }}
 
-      - run: mkdir -p "results/${PACKAGE}"
+      - run: mkdir -p "data/results/${PACKAGE}"
         env:
           PACKAGE: ${{ github.event.client_payload.package || inputs.package }}
 
@@ -46,9 +49,10 @@ jobs:
           PACKAGE: ${{ github.event.client_payload.package || inputs.package }}
           VERSIONS: ${{ github.event.client_payload.versions || inputs.versions }}
 
-      - run: git diff && git status
+      - run: (cd data && git diff && git status && git checkout -b data)
 
       - name: commit changes
         uses: elstudio/actions-js-build/commit@v4
         with:
+          wdPath: data
           commitMessage: "`${{ github.event.client_payload.package || inputs.package }}`: update results"
