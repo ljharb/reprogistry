@@ -52,5 +52,5 @@ await Promise.all(results.map(async (result) => {
 		return semverCompare(a.reproduceVersion, b.reproduceVersion);
 	});
 
-	await writeFile(dataPath, JSON.stringify(existing, null, '\t') + '\n');
+	await writeFile(dataPath, `${JSON.stringify(existing, null, '\t')}\n`);
 }));
