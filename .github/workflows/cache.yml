@@ -23,12 +23,13 @@ jobs:
 
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0
           persist-credentials: true
+          submodules: true
 
-      - run: git submodule init && git submodule update --recursive
+      #- run: git submodule init && git submodule update --recursive
       - run: cd data && git merge origin/data && cd ..
 
       - uses: ljharb/actions/node/install@main
@@ -52,7 +53,12 @@ jobs:
       - run: (cd data && git diff && git status && git checkout -b data)
 
       - name: commit changes
-        uses: elstudio/actions-js-build/commit@v4
-        with:
-          wdPath: data
-          commitMessage: "`${{ github.event.client_payload.package || inputs.package }}`: update results"
+        run: |
+          set -e
+          cd data
+          git config --global user.email "${GITHUB_ACTOR}@users.noreply.github.com"
+          git config --global user.name "${GITHUB_ACTOR}"
+          git config --global push.autoSetupRemote true
+          git add .
+          git commit -m '`${{ github.event.client_payload.package || inputs.package }}`: update results'
+          git push
