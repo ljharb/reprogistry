@@ -19,11 +19,14 @@ permissions:
 jobs:
   filter:
     runs-on: ubuntu-latest
+    outputs:
+      package: ${{ inputs.package }}
+      missingRepros: ${{ steps.versions.outputs.missingRepros }}
     permissions:
       contents: write
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0
           persist-credentials: false
@@ -45,14 +48,13 @@ jobs:
         env:
           PACKAGE: ${{ inputs.package }}
 
-      - run: |
-          curl --fail-with-body \
-            -H "Accept: application/vnd.github.everest-preview+json" \
-            -H "Authorization: token ${GH_TOKEN}" \
-            --request POST \
-            --data "{ \"event_type\": \"version-results\", \"client_payload\": { \"package\": \"${PACKAGE}\", \"versions\": \"${VERSIONS}\" } }" \
-            https://api.github.com/repos/ljharb/reprogistry/dispatches
+      - name: Summary
+        run: |
+          echo "::notice::Package: ${PACKAGE}"
+          echo "::notice::Missing reproductions: ${VERSIONS}"
+          VERSION_COUNT=$(echo "${VERSIONS}" | grep -o '||' | wc -l)
+          VERSION_COUNT=$((VERSION_COUNT + 1))
+          echo "::notice::Total missing versions: ${VERSION_COUNT}"
         env:
           PACKAGE: ${{ inputs.package }}
           VERSIONS: ${{ steps.versions.outputs.missingRepros }}
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -1,0 +1,185 @@
+name: "cron - process packages"
+
+on:
+  #schedule:
+    # Run every 5 minutes
+    #- cron: '*/5 * * * *'
+  workflow_dispatch:
+    inputs:
+      batch_size:
+        description: 'Number of packages to process in this run'
+        required: false
+        default: '10'
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  get-package:
+    runs-on: ubuntu-latest
+    concurrency:
+      group: package-queue
+      cancel-in-progress: false
+    outputs:
+      packages: ${{ steps.get-package.outputs.packages }}
+    
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          ref: data
+      
+      - name: Create cache directory
+        run: mkdir -p .cache
+      
+      - name: Restore packages queue cache
+        id: cache-queue
+        uses: actions/cache/restore@v4
+        with:
+          path: .cache/packages-queue.txt
+          key: packages-queue-${{ github.run_id }}
+          restore-keys: |
+            packages-queue-
+      
+      - name: Initialize or replenish queue
+        run: |
+          if [ ! -f .cache/packages-queue.txt ] || [ ! -s .cache/packages-queue.txt ]; then
+            echo "::notice::Queue is empty or doesn't exist, copying from packages.txt"
+            cp packages.txt .cache/packages-queue.txt
+            REMAINING=$(wc -l < .cache/packages-queue.txt)
+            echo "::notice::Initialized queue with $REMAINING packages"
+          else
+            REMAINING=$(wc -l < .cache/packages-queue.txt)
+            echo "::notice::Queue has $REMAINING packages remaining"
+          fi
+      
+      - name: Get next packages from queue
+        id: get-package
+        run: |
+          BATCH_SIZE="${{ inputs.batch_size || '10' }}"
+
+          # Get the first N packages from the queue
+          PACKAGES=$(head -n "${BATCH_SIZE}" .cache/packages-queue.txt)
+
+          if [ -z "${PACKAGES}" ]; then
+            echo "::error::Queue is empty, this shouldn't happen"
+            exit 1
+          fi
+
+          # Convert to JSON array
+          PACKAGES_JSON=$(echo "${PACKAGES}" | jq -R -s -c 'split("\n") | map(select(length > 0))')
+          echo "packages=${PACKAGES_JSON}" >> $GITHUB_OUTPUT
+
+          PACKAGE_COUNT=$(echo "${PACKAGES_JSON}" | jq 'length')
+          echo "::notice::Processing ${PACKAGE_COUNT} packages: ${PACKAGES_JSON}"
+
+          # Remove the first N lines from the queue
+          tail -n +$((BATCH_SIZE + 1)) .cache/packages-queue.txt > .cache/packages-queue.txt.tmp
+          mv .cache/packages-queue.txt.tmp .cache/packages-queue.txt
+
+          REMAINING=$(wc -l < .cache/packages-queue.txt)
+          echo "::notice::Packages remaining in queue: ${REMAINING}"
+      
+      - name: Save queue cache
+        uses: actions/cache/save@v4
+        if: always()
+        with:
+          path: .cache/packages-queue.txt
+          key: packages-queue-${{ github.run_id }}
+  
+  process-package:
+    needs: get-package
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        package: ${{ fromJson(needs.get-package.outputs.packages) }}
+    outputs:
+      results: ${{ steps.collect.outputs.results }}
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - run: git submodule init && git submodule update --recursive
+      - run: cd data && git merge origin/data && cd ..
+
+      - uses: ljharb/actions/node/install@main
+        with:
+          node-version: "node"
+
+      - name: validate package name
+        run: npx validate-npm-package-name-cli "${PACKAGE}"
+        env:
+          PACKAGE: ${{ matrix.package }}
+
+      - run: node scripts/versions.mjs
+        id: versions
+        env:
+          PACKAGE: ${{ matrix.package }}
+
+      - name: Save result
+        id: save
+        run: |
+          # Sanitize package name for filename (replace / with --)
+          SAFE_NAME=$(echo "${{ matrix.package }}" | sed 's/\//__/g')
+          mkdir -p /tmp/results
+          echo "${{ matrix.package }}||${{ steps.versions.outputs.missingRepros }}" > "/tmp/results/${SAFE_NAME}.txt"
+          echo "safe_name=${SAFE_NAME}" >> $GITHUB_OUTPUT
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: result-${{ steps.save.outputs.safe_name }}
+          path: /tmp/results/${{ steps.save.outputs.safe_name }}.txt
+          retention-days: 1
+
+  write-to-queue:
+    needs: process-package
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          ref: data
+          submodules: true
+          persist-credentials: true
+
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: result-*
+          path: /tmp/results
+          merge-multiple: true
+
+      - run: mkdir -p data/.cache
+
+      - name: Append to cache queue
+        run: |
+          touch data/.cache/cache-queue.txt
+          cat /tmp/results/*.txt >> data/.cache/cache-queue.txt 2>/dev/null || true
+          QUEUE_SIZE=$(wc -l < data/.cache/cache-queue.txt)
+          echo "::notice::Cache queue now has ${QUEUE_SIZE} entries"
+
+      - run: cd data && git merge origin/data && cd ..
+
+      - name: Commit and push queue
+        run: |
+          cd data
+          git config --global user.email "${GITHUB_ACTOR}@users.noreply.github.com"
+          git config --global user.name "${GITHUB_ACTOR}"
+          git add .cache/cache-queue.txt
+          if git diff --cached --quiet; then
+            echo "::notice::No changes to queue"
+          else
+            git commit -m 'queue: add cache tasks'
+            git fetch origin data
+            git rebase origin/data
+            git push
+          fi

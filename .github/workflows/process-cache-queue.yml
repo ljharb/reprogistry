@@ -1,0 +1,86 @@
+name: "cron: process cache queue"
+
+on:
+  schedule:
+    # Run every 2 minutes
+    - cron: '*/2 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  process-queue:
+    runs-on: ubuntu-latest
+    concurrency:
+      group: cache-queue-processor
+      cancel-in-progress: false
+
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          ref: data
+          submodules: true
+          persist-credentials: true
+
+      - name: Get next cache task
+        id: get-task
+        run: |
+          QUEUE_FILE="data/.cache/cache-queue.txt"
+
+          if [ ! -f "${QUEUE_FILE}" ] || [ ! -s "${QUEUE_FILE}" ]; then
+            echo "::notice::Cache queue is empty"
+            echo "empty=true" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
+          # Get the first line
+          TASK=$(head -n 1 "${QUEUE_FILE}")
+
+          if [ -z "${TASK}" ]; then
+            echo "::notice::Cache queue is empty"
+            echo "empty=true" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
+          # Split package||versions (using awk since || is two characters)
+          PACKAGE=$(echo "${TASK}" | awk -F'\\|\\|' '{print $1}')
+          VERSIONS=$(echo "${TASK}" | awk -F'\\|\\|' '{for(i=2;i<=NF;i++) printf "%s%s", (i>2?"||":""), $i}')
+
+          echo "package=${PACKAGE}" >> $GITHUB_OUTPUT
+          echo "versions=${VERSIONS}" >> $GITHUB_OUTPUT
+          echo "empty=false" >> $GITHUB_OUTPUT
+
+          echo "::notice::Processing cache task for package: ${PACKAGE}"
+
+          # Remove the first line from queue
+          tail -n +2 "${QUEUE_FILE}" > "${QUEUE_FILE}.tmp"
+          mv "${QUEUE_FILE}.tmp" "${QUEUE_FILE}"
+
+          REMAINING=$(wc -l < "${QUEUE_FILE}")
+          echo "::notice::Tasks remaining in cache queue: ${REMAINING}"
+
+      - name: Commit updated queue
+        if: steps.get-task.outputs.empty == 'false'
+        run: |
+          cd data
+          git config --global user.email "${GITHUB_ACTOR}@users.noreply.github.com"
+          git config --global user.name "${GITHUB_ACTOR}"
+          git add .cache/cache-queue.txt
+          git commit -m 'queue: remove processed cache task' || true
+          git fetch origin data
+          git rebase origin/data || (git rebase --abort && git merge origin/data)
+          git push
+
+      - name: Dispatch to cache workflow
+        if: steps.get-task.outputs.empty == 'false'
+        uses: peter-evans/repository-dispatch@v3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          event-type: version-results
+          client-payload: |
+            {
+              "package": "${{ steps.get-task.outputs.package }}",
+              "versions": "${{ steps.get-task.outputs.versions }}"
+            }
