@@ -83,23 +83,34 @@ async function performComparison(result) {
 		// Download published tarball from npm
 		await downloadFile(result.package.location, publishedTarball);
 
-		// Find rebuilt tarball in reproduce cache
-		const rebuiltTarball = getRebuiltTarballPath(result.package.name, result.package.version);
-
-		// Try to pack from the cloned source if tarball doesn't exist
+		// Get the source directory from reproduce's cache
 		const cacheDir = process.platform === 'darwin'
 			? path.join(process.env.HOME || '', 'Library', 'Caches', 'reproduce')
 			: path.join(process.env.XDG_CACHE_HOME || path.join(process.env.HOME || '', '.cache'), 'reproduce');
 		const sourceDir = path.join(cacheDir, result.package.name);
 
-		let rebuiltTarballPath = rebuiltTarball;
+		// Extract the git ref from the source spec (e.g., "github:ljharb/qs#abc123")
+		const sourceSpec = result.source.spec;
+		const refMatch = sourceSpec.match(/#([^:]+)(?::path:.*)?$/);
+		const gitRef = refMatch ? refMatch[1] : 'HEAD';
+
+		// Checkout the correct commit and pack
+		let rebuiltTarballPath;
 		try {
-			// Pack the source to get a tarball
-			execSync(`cd "${sourceDir}" && npm pack --pack-destination "${tempDir}" >/dev/null 2>&1`, { stdio: 'pipe' });
-			const safeName = result.package.name.replace(/^@/, '').replace(/\//, '-');
-			rebuiltTarballPath = path.join(tempDir, `${safeName}-${result.package.version}.tgz`);
-		} catch {
-			// Fall back to using pre-existing tarball if pack fails
+			// Checkout the specific commit
+			execSync(`cd "${sourceDir}" && git checkout "${gitRef}" 2>/dev/null`, { stdio: 'pipe' });
+
+			// Run npm pack to create the tarball
+			const packOutput = execSync(`cd "${sourceDir}" && npm pack --pack-destination "${tempDir}" 2>/dev/null`, { stdio: 'pipe' });
+			const tarballName = packOutput.toString().trim().split('\n').pop();
+			rebuiltTarballPath = path.join(tempDir, tarballName || '');
+
+			if (!tarballName) {
+				throw new Error('npm pack produced no output');
+			}
+		} catch (packErr) {
+			console.error(`Pack failed for ${result.package.name}@${result.package.version}:`, /** @type {Error} */ (packErr).message);
+			return null;
 		}
 
 		// Extract both tarballs
