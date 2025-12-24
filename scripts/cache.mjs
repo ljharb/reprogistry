@@ -102,8 +102,13 @@ async function performComparison(result) {
 			execSync(`cd "${sourceDir}" && git fetch --depth 1 origin "${gitRef}" 2>/dev/null || git fetch origin "${gitRef}" 2>/dev/null || git fetch --unshallow origin 2>/dev/null || true`, { stdio: 'pipe' });
 			execSync(`cd "${sourceDir}" && git checkout "${gitRef}"`, { stdio: 'pipe' });
 
-			// Run npm pack to create the tarball
-			const packOutput = execSync(`cd "${sourceDir}" && npm pack --pack-destination "${tempDir}"`, { stdio: 'pipe' });
+			// Install dependencies and run npm pack with node_modules/.bin in PATH
+			// This is needed because prepack scripts may use local binaries
+			execSync(`cd "${sourceDir}" && npm install`, { stdio: 'pipe' });
+			const packOutput = execSync(
+				`cd "${sourceDir}" && npm pack --pack-destination "${tempDir}"`,
+				{ stdio: 'pipe', env: { ...process.env, PATH: `${sourceDir}/node_modules/.bin:${process.env.PATH}` } },
+			);
 			const tarballName = packOutput.toString().trim().split('\n').pop();
 			rebuiltTarballPath = path.join(tempDir, tarballName || '');
 
