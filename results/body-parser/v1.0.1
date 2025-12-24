@@ -1,0 +1,112 @@
+[
+	{
+		"reproduceVersion": "1.1.4",
+		"timestamp": "2025-12-24T17:55:56.542Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:11.7.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "body-parser@1.0.1",
+			"name": "body-parser",
+			"version": "1.0.1",
+			"location": "https://registry.npmjs.org/body-parser/-/body-parser-1.0.1.tgz",
+			"integrity": "sha512-JNr7xm9WN153w4il8wiWv4w86F0VYhlkOdAYKLrfJvviT7IIJgL9U7JpGn173TaFB4sWy+/6Q/4LP3+bK6Ki1g=="
+		},
+		"source": {
+			"spec": "github:expressjs/body-parser#HEAD",
+			"location": "https://github.com/expressjs/body-parser.git",
+			"integrity": "sha512-8pRNRzP3UVRw3QINFZx5Itozy1ElRvMyy9+3ULeqLa6aAJTDfx0rUbIb6YX1kwxKC6A+0zR2ROdh7ETD8cLbkQ=="
+		},
+		"comparisonHash": "7055403c0ee3123a111994fbc48e15cb4430626a",
+		"diff": {
+			"files": {
+				".npmignore": {
+					"match": false,
+					"packageHash": "a963eca407ca32675dbaeeff3ab8391db935047656eb64c45308e2d0c2e0df0d",
+					"size": 5,
+					"status": "missing-in-source"
+				},
+				".travis.yml": {
+					"match": false,
+					"packageHash": "aee82265ad2119fa4f4755855f599826e3274f3dfaa20026c4cb6cdd4133d0c6",
+					"size": 35,
+					"status": "missing-in-source"
+				},
+				"HISTORY.md": {
+					"match": false,
+					"packageHash": "3ad2669d98c874630f555e9f15193dd2da41e634ae3a63bf65ad74bf51c87dd2",
+					"size": 74,
+					"status": "missing-in-source"
+				},
+				"Makefile": {
+					"match": false,
+					"packageHash": "83db9edffd6eb987ca14c42e3fa831d2920779c8fbc2a06fdaf32dd8bdea8634",
+					"size": 113,
+					"status": "missing-in-source"
+				},
+				"README.md": {
+					"diff": "--- published/README.md\n+++ rebuilt/README.md\n@@ -1,60 +1,494 @@\n-# Body Parser [![Build Status](https://travis-ci.org/expressjs/body-parser.png)](https://travis-ci.org/expressjs/body-parser)\n+# body-parser\n \n-Connect's body parsing middleware.\n+[![NPM Version][npm-version-image]][npm-url]\n+[![NPM Downloads][npm-downloads-image]][npm-url]\n+[![Build Status][ci-image]][ci-url]\n+[![Test Coverage][coveralls-image]][coveralls-url]\n+[![OpenSSF Scorecard Badge][ossf-scorecard-badge]][ossf-scorecard-visualizer]\n+\n+Node.js body parsing middleware.\n+\n+Parse incoming request bodies in a middleware before your handlers, available\n+under the `req.body` property.\n+\n+**Note** As `req.body`'s shape is based on user-controlled input, all\n+properties and values in this object are untrusted and should be validated\n+before trusting. For example, `req.body.foo.toString()` may fail in multiple\n+ways, for example the `foo` property may not be there or may not be a string,\n+and `toString` may not be a function and instead a string or other user input.\n+\n+[Learn about the anatomy of an HTTP transaction in Node.js](https://nodejs.org/en/learn/http/anatomy-of-an-http-transaction).\n+\n+_This does not handle multipart bodies_, due to their complex and typically\n+large nature. For multipart bodies, you may be interested in the following\n+modules:\n+\n+  * [busboy](https://www.npmjs.com/package/busboy#readme) and\n+    [connect-busboy](https://www.npmjs.com/package/connect-busboy#readme)\n+  * [multiparty](https://www.npmjs.com/package/multiparty#readme) and\n+    [connect-multiparty](https://www.npmjs.com/package/connect-multiparty#readme)\n+  * [formidable](https://www.npmjs.com/package/formidable#readme)\n+  * [multer](https://www.npmjs.com/package/multer#readme)\n+\n+This module provides the following parsers:\n+\n+  * [JSON body parser](#bodyparserjsonoptions)\n+  * [Raw body parser](#bodyparserrawoptions)\n+  * [Text body parser](#bodyparsertextoptions)\n+  * [URL-encoded form body parser](#bodyparserurlencodedoptions)\n+\n+Other body parsers you might be interested in:\n+\n+- [body](https://www.npmjs.com/package/body#readme)\n+- [co-body](https://www.npmjs.com/package/co-body#readme)\n+\n+## Installation\n+\n+```sh\n+$ npm install body-parser\n+```\n \n ## API\n \n ```js\n-var bodyParser = require('body-parser');\n+const bodyParser = require('body-parser')\n+```\n+\n+The `bodyParser` object exposes various factories to create middlewares. All\n+middlewares will populate the `req.body` property with the parsed body when\n+the `Content-Type` request header matches the `type` option.\n+\n+The various errors returned by this module are described in the\n+[errors section](#errors).\n+\n+### bodyParser.json([options])\n+\n+Returns middleware that only parses `json` and only looks at requests where\n+the `Content-Type` header matches the `type` option. This parser accepts any\n+Unicode encoding of the body and supports automatic inflation of `gzip`,\n+`br` (brotli) and `deflate` encodings.\n+\n+A new `body` object containing the parsed data is populated on the `request`\n+object after the middleware (i.e. `req.body`).\n+\n+#### Options\n+\n+The `json` function takes an optional `options` object that may contain any of\n+the following keys:\n+\n+##### defaultCharset\n+\n+Specify the default character set for the json content if the charset is not\n+specified in the `Content-Type` header of the request. Defaults to `utf-8`.\n+\n+##### inflate\n+\n+When set to `true`, then deflated (compressed) bodies will be inflated; when\n+`false`, deflated bodies are rejected. Defaults to `true`.\n+\n+##### limit\n+\n+Controls the maximum request body size. If this is a number, then the value\n+specifies the number of bytes; if it is a string, the value is passed to the\n+[bytes](https://www.npmjs.com/package/bytes) library for parsing. Defaults\n+to `'100kb'`.\n",
+					"match": false,
+					"packageHash": "39b28dae556a345b36c4f3f9d75a3fcf5f097315a8d13190114132431b419171",
+					"size": 2050,
+					"sourceHash": "53c415a71cc43724ad31c503e95c561ac1633748a6a679a3a9af5d59a2e25ed5",
+					"status": "content"
+				},
+				"index.js": {
+					"diff": "--- published/index.js\n+++ rebuilt/index.js\n@@ -1,118 +1,80 @@\n-var getBody = require('raw-body');\n-var http = require('http');\n-var qs = require('qs');\n-\n-exports = module.exports = bodyParser;\n-exports.json = json;\n-exports.urlencoded = urlencoded;\n-\n-function bodyParser(options){\n-  var _urlencoded = urlencoded(options);\n-  var _json = json(options);\n-\n-  return function bodyParser(req, res, next) {\n-    _json(req, res, function(err){\n-      if (err) return next(err);\n-      _urlencoded(req, res, next);\n-    });\n-  }\n-}\n-\n-function json(options){\n-  options = options || {};\n-  var strict = options.strict !== false;\n-\n-  return function jsonParser(req, res, next) {\n-    if (req._body) return next();\n-    req.body = req.body || {};\n-\n-    if (!hasBody(req)) return next();\n-\n-    // check Content-Type\n-    if (!json.regexp.test(mime(req))) return next();\n-\n-    // flag as parsed\n-    req._body = true;\n-\n-    // parse\n-    getBody(req, {\n-      limit: options.limit || '100kb',\n-      length: req.headers['content-length'],\n-      encoding: 'utf8'\n-    }, function (err, buf) {\n-      if (err) return next(err);\n-\n-      var first = buf.trim()[0];\n-\n-      if (0 == buf.length) {\n-        return next(error(400, 'invalid json, empty body'));\n-      }\n-\n-      if (strict && '{' != first && '[' != first) return next(error(400, 'invalid json'));\n-      try {\n-        req.body = JSON.parse(buf, options.reviver);\n-      } catch (err){\n-        err.body = buf;\n-        err.status = 400;\n-        return next(err);\n-      }\n-      next();\n-    })\n-  };\n-}\n-\n-function urlencoded(options){\n-  options = options || {};\n-\n-  return function urlencodedParser(req, res, next) {\n-    if (req._body) return next();\n-    req.body = req.body || {};\n-\n-    if (!hasBody(req)) return next();\n-\n-    // check Content-Type\n-    if ('application/x-www-form-urlencoded' != mime(req)) return next();\n-\n-    // flag as parsed\n-    req._body = true;\n-\n-    // parse\n-    getBody(req, {\n-      limit: options.limit || '100kb',\n-      length: req.headers['content-length'],\n-      encoding: 'utf8'\n-    }, function (err, buf) {\n-      if (err) return next(err);\n-\n-      try {\n-        req.body = buf.length\n-          ? qs.parse(buf)\n-          : {};\n-      } catch (err){\n-        err.body = buf;\n-        return next(err);\n-      }\n-      next();\n-    })\n-  }\n",
+					"match": false,
+					"packageHash": "e0a953682d7f00021b4f6ba7d70510ed3e4a4486ae08f340748fe18f9b9a8f93",
+					"size": 2714,
+					"sourceHash": "959a9ef61b7d129c67df8a0c628c1a82406deca1d415da21aa21f047fd9ec1d8",
+					"status": "content"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -1,33 +1,52 @@\n {\n   \"name\": \"body-parser\",\n-  \"description\": \"Connect's body parsing middleware\",\n-  \"version\": \"1.0.1\",\n-  \"author\": {\n-    \"name\": \"Jonathan Ong\",\n-    \"email\": \"me@jongleberry.com\",\n-    \"url\": \"http://jongleberry.com\",\n-    \"twitter\": \"https://twitter.com/jongleberry\"\n-  },\n+  \"description\": \"Node.js body parsing middleware\",\n+  \"version\": \"2.2.1\",\n+  \"contributors\": [\n+    \"Douglas Christopher Wilson <doug@somethingdoug.com>\",\n+    \"Jonathan Ong <me@jongleberry.com> (http://jongleberry.com)\"\n+  ],\n   \"license\": \"MIT\",\n-  \"repository\": {\n-    \"type\": \"git\",\n-    \"url\": \"https://github.com/expressjs/body-parser.git\"\n-  },\n-  \"bugs\": {\n-    \"mail\": \"me@jongleberry.com\",\n-    \"url\": \"https://github.com/expressjs/body-parser/issues\"\n+  \"repository\": \"expressjs/body-parser\",\n+  \"funding\": {\n+    \"type\": \"opencollective\",\n+    \"url\": \"https://opencollective.com/express\"\n   },\n   \"dependencies\": {\n-    \"raw-body\": \"~1.1.2\",\n-    \"qs\": \"~0.6.6\"\n+    \"bytes\": \"^3.1.2\",\n+    \"content-type\": \"^1.0.5\",\n+    \"debug\": \"^4.4.3\",\n+    \"http-errors\": \"^2.0.0\",\n+    \"iconv-lite\": \"^0.7.0\",\n+    \"on-finished\": \"^2.4.1\",\n+    \"qs\": \"^6.14.0\",\n+    \"raw-body\": \"^3.0.1\",\n+    \"type-is\": \"^2.0.1\"\n   },\n   \"devDependencies\": {\n-    \"connect\": \"*\",\n-    \"mocha\": \"*\",\n-    \"should\": \"*\",\n-    \"supertest\": \"*\"\n+    \"eslint\": \"^8.57.1\",\n+    \"eslint-config-standard\": \"^14.1.1\",\n+    \"eslint-plugin-import\": \"^2.31.0\",\n+    \"eslint-plugin-markdown\": \"^3.0.1\",\n+    \"eslint-plugin-node\": \"^11.1.0\",\n+    \"eslint-plugin-promise\": \"^6.6.0\",\n+    \"eslint-plugin-standard\": \"^4.1.0\",\n+    \"mocha\": \"^11.1.0\",\n+    \"nyc\": \"^17.1.0\",\n+    \"supertest\": \"^7.0.0\"\n+  },\n+  \"files\": [\n+    \"lib/\",\n+    \"LICENSE\",\n+    \"index.js\"\n+  ],\n+  \"engines\": {\n+    \"node\": \">=18\"\n   },\n   \"scripts\": {\n-    \"test\": \"make test\"\n+    \"lint\": \"eslint .\",\n+    \"test\": \"mocha --reporter spec --check-leaks test/\",\n+    \"test-ci\": \"nyc --reporter=lcovonly --reporter=text npm test\",\n+    \"test-cov\": \"nyc --reporter=html --reporter=text npm test\"\n   }\n }\n",
+					"match": false,
+					"packageHash": "a2cc76179ae93d3874c9ad25b5eb446204c5fb11ab41c3b8377faf3f5b8529f7",
+					"size": 724,
+					"sourceHash": "06c3deb5e4f340b0b3461c757666b8820565652a93a22a025ee44f9721d73435",
+					"status": "content"
+				},
+				"LICENSE": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/read.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/types/json.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/types/raw.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/types/text.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/types/urlencoded.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/utils.js": {
+					"match": false,
+					"status": "missing-in-package"
+				}
+			},
+			"summary": {
+				"differentFiles": 3,
+				"matchingFiles": 0,
+				"missingInPackage": 7,
+				"missingInSource": 4,
+				"score": 0,
+				"totalFiles": 14
+			}
+		}
+	}
+]
