@@ -97,6 +97,9 @@ async function performComparison(result) {
 		// Checkout the correct commit and pack
 		let rebuiltTarballPath;
 		try {
+			// Fetch all refs to ensure the commit is available (reproduce may do shallow clone)
+			execSync(`cd "${sourceDir}" && git fetch --unshallow 2>/dev/null || git fetch origin 2>/dev/null || true`, { stdio: 'pipe' });
+
 			// Checkout the specific commit
 			execSync(`cd "${sourceDir}" && git checkout "${gitRef}" 2>/dev/null`, { stdio: 'pipe' });
 
