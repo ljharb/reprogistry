@@ -9,6 +9,7 @@ import { reproduce } from 'reproduce';
 import { compare as semverCompare, Range } from 'semver';
 
 import { compareDirectories, filterNonMatching } from './compare.mjs';
+import COMPARISON_HASH from './comparison-hash.mjs';
 
 const { PACKAGE: pkg, VERSIONS } = process.env;
 
@@ -19,7 +20,7 @@ const pkgDir = path.join(process.cwd(), 'data', 'results', /** @type {string} */
 /** @typedef {import('./compare.mjs').ComparisonResult} ComparisonResult */
 
 /**
- * @typedef {ReproduceResult & { diff?: { files: Record<string, import('./compare.mjs').FileComparison>, summary: import('./compare.mjs').ComparisonSummary } }} EnhancedResult
+ * @typedef {ReproduceResult & { comparisonHash?: string, diff?: { files: Record<string, import('./compare.mjs').FileComparison>, summary: import('./compare.mjs').ComparisonSummary } }} EnhancedResult
  */
 
 /**
@@ -70,8 +71,8 @@ async function performComparison(result) {
 
 		// Extract the git ref and repo URL from the source spec (e.g., "github:ljharb/qs#abc123")
 		const sourceSpec = result.source.spec;
-		const refMatch = sourceSpec.match(/#([^:]+)(?::path:.*)?$/);
-		const gitRef = refMatch ? refMatch[1] : 'HEAD';
+		const refMatch = sourceSpec.match(/#(?<ref>[^:]+)(?::path:.*)?$/);
+		const gitRef = refMatch?.groups?.ref ?? 'HEAD';
 
 		// Convert source location to clone URL
 		const repoUrl = result.source.location.replace(/^git\+/, '');
@@ -93,7 +94,7 @@ async function performComparison(result) {
 			execSync(`cd "${sourceDir}" && npm install`, { stdio: 'pipe' });
 			const packOutput = execSync(
 				`cd "${sourceDir}" && npm pack --pack-destination "${tempDir}"`,
-				{ stdio: 'pipe', env: { ...process.env, PATH: `${sourceDir}/node_modules/.bin:${process.env.PATH}` } },
+				{ env: { ...process.env, PATH: `${sourceDir}/node_modules/.bin:${process.env.PATH}` }, stdio: 'pipe' },
 			);
 			const tarballName = packOutput.toString().trim().split('\n').pop();
 			rebuiltTarballPath = path.join(tempDir, tarballName || '');
@@ -120,7 +121,7 @@ async function performComparison(result) {
 		return null;
 	} finally {
 		// Cleanup temp directory
-		await rm(tempDir, { recursive: true, force: true }).catch(() => {});
+		await rm(tempDir, { force: true, recursive: true }).catch(() => {});
 	}
 }
 
@@ -150,7 +151,7 @@ for (const result of results) {
 	}
 
 	/** @type {EnhancedResult} */
-	const enhancedResult = { ...result };
+	const enhancedResult = { ...result, comparisonHash: COMPARISON_HASH };
 
 	// Perform file-level comparison
 	const comparison = await performComparison(result);
