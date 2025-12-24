@@ -51,10 +51,47 @@ async function extractTarball(tarballPath, destDir) {
 }
 
 /**
+ * Parse source location to extract clone URL and subdirectory for monorepos.
+ *
+ * @param {string} location - Source location URL
+ * @returns {{ cloneUrl: string, subdir: string | null }} Clone URL and optional subdirectory
+ */
+function parseSourceLocation(location) {
+	// Handle git+https://... format
+	let url = location.replace(/^git\+/, '');
+
+	// Handle GitHub tree URLs (monorepos): https://github.com/org/repo/tree/branch/path/to/package
+	const treeMatch = url.match(/^(?<base>https:\/\/github\.com\/[^/]+\/[^/]+)\/tree\/[^/]+\/(?<subdir>.+)$/);
+	if (treeMatch?.groups) {
+		return {
+			cloneUrl: `${treeMatch.groups.base}.git`,
+			subdir: treeMatch.groups.subdir,
+		};
+	}
+
+	// Handle GitHub blob URLs (shouldn't happen but just in case)
+	const blobMatch = url.match(/^(?<base>https:\/\/github\.com\/[^/]+\/[^/]+)\/blob\//);
+	if (blobMatch?.groups) {
+		return {
+			cloneUrl: `${blobMatch.groups.base}.git`,
+			subdir: null,
+		};
+	}
+
+	// Regular git URL - ensure it ends with .git
+	if (!url.endsWith('.git') && url.includes('github.com')) {
+		url = `${url}.git`;
+	}
+
+	return { cloneUrl: url, subdir: null };
+}
+
+/**
  * Perform file-level comparison between published and rebuilt packages.
  *
  * @param {ReproduceResult} result - Reproduce result
- * @returns {Promise<ComparisonResult | null>} Comparison result or null if comparison failed
+ * @returns {Promise<ComparisonResult>} Comparison result
+ * @throws {Error} If comparison fails
  */
 async function performComparison(result) {
 	const tempDir = path.join(tmpdir(), `reproduce-compare-${Date.now()}`);
@@ -74,38 +111,32 @@ async function performComparison(result) {
 		const refMatch = sourceSpec.match(/#(?<ref>[^:]+)(?::path:.*)?$/);
 		const gitRef = refMatch?.groups?.ref ?? 'HEAD';
 
-		// Convert source location to clone URL
-		const repoUrl = result.source.location.replace(/^git\+/, '');
+		// Parse source location to get clone URL and subdirectory
+		const { cloneUrl, subdir } = parseSourceLocation(result.source.location);
+		const packageDir = subdir ? path.join(sourceDir, subdir) : sourceDir;
 
-		// Clone and checkout the correct commit
-		let rebuiltTarballPath;
-		try {
-			// Clone the repo (shallow clone of the specific commit)
-			execSync(`git clone --depth 1 "${repoUrl}" "${sourceDir}" 2>/dev/null || git clone "${repoUrl}" "${sourceDir}"`, { stdio: 'pipe' });
+		// Clone the repo (shallow clone of the specific commit)
+		execSync(`git clone --depth 1 "${cloneUrl}" "${sourceDir}" 2>/dev/null || git clone "${cloneUrl}" "${sourceDir}"`, { stdio: 'pipe' });
 
-			// Fetch and checkout the specific commit
-			execSync(`cd "${sourceDir}" && git fetch --depth 1 origin "${gitRef}" 2>/dev/null || git fetch origin "${gitRef}" 2>/dev/null || git fetch --unshallow origin 2>/dev/null || true`, { stdio: 'pipe' });
-			execSync(`cd "${sourceDir}" && git checkout "${gitRef}"`, { stdio: 'pipe' });
+		// Fetch and checkout the specific commit
+		execSync(`cd "${sourceDir}" && git fetch --depth 1 origin "${gitRef}" 2>/dev/null || git fetch origin "${gitRef}" 2>/dev/null || git fetch --unshallow origin 2>/dev/null || true`, { stdio: 'pipe' });
+		execSync(`cd "${sourceDir}" && git checkout "${gitRef}"`, { stdio: 'pipe' });
 
-			/*
-			 * Install dependencies and run npm pack with node_modules/.bin in PATH
-			 * This is needed because prepack scripts may use local binaries
-			 */
-			execSync(`cd "${sourceDir}" && npm install`, { stdio: 'pipe' });
-			const packOutput = execSync(
-				`cd "${sourceDir}" && npm pack --pack-destination "${tempDir}"`,
-				{ env: { ...process.env, PATH: `${sourceDir}/node_modules/.bin:${process.env.PATH}` }, stdio: 'pipe' },
-			);
-			const tarballName = packOutput.toString().trim().split('\n').pop();
-			rebuiltTarballPath = path.join(tempDir, tarballName || '');
-
-			if (!tarballName) {
-				throw new Error('npm pack produced no output');
-			}
-		} catch (packErr) {
-			console.error(`Pack failed for ${result.package.name}@${result.package.version}:`, /** @type {Error} */ (packErr).message);
-			return null;
+		/*
+		 * Install dependencies and run npm pack with node_modules/.bin in PATH
+		 * This is needed because prepack scripts may use local binaries
+		 * For monorepos, run in the package subdirectory
+		 */
+		execSync(`cd "${packageDir}" && npm install`, { stdio: 'pipe' });
+		const packOutput = execSync(
+			`cd "${packageDir}" && npm pack --pack-destination "${tempDir}"`,
+			{ env: { ...process.env, PATH: `${packageDir}/node_modules/.bin:${process.env.PATH}` }, stdio: 'pipe' },
+		);
+		const tarballName = packOutput.toString().trim().split('\n').pop();
+		if (!tarballName) {
+			throw new Error('npm pack produced no output');
 		}
+		const rebuiltTarballPath = path.join(tempDir, tarballName);
 
 		// Extract both tarballs
 		await extractTarball(publishedTarball, publishedDir);
@@ -116,9 +147,6 @@ async function performComparison(result) {
 
 		// Only store non-matching files to save space
 		return filterNonMatching(comparison);
-	} catch (err) {
-		console.error(`Comparison failed for ${result.package.name}@${result.package.version}:`, /** @type {Error} */ (err).message);
-		return null;
 	} finally {
 		// Cleanup temp directory
 		await rm(tempDir, { force: true, recursive: true }).catch(() => {});
@@ -150,14 +178,15 @@ for (const result of results) {
 		continue;
 	}
 
-	/** @type {EnhancedResult} */
-	const enhancedResult = { ...result, comparisonHash: COMPARISON_HASH };
-
-	// Perform file-level comparison
+	// Perform file-level comparison (throws on failure)
 	const comparison = await performComparison(result);
-	if (comparison) {
-		enhancedResult.diff = comparison;
-	}
+
+	/** @type {EnhancedResult} */
+	const enhancedResult = {
+		...result,
+		comparisonHash: COMPARISON_HASH,
+		diff: comparison,
+	};
 
 	const dataPath = path.join(pkgDir, result.package.version.replace(/^v?/, 'v'));
 	const existing = existingData[/** @type {Version} */ (result.package.version)] ?? [];
