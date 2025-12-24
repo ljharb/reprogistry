@@ -76,6 +76,7 @@ async function performComparison(result) {
 	const publishedDir = path.join(tempDir, 'published');
 	const rebuiltDir = path.join(tempDir, 'rebuilt');
 	const publishedTarball = path.join(tempDir, 'published.tgz');
+	const sourceDir = path.join(tempDir, 'source');
 
 	try {
 		await mkdir(tempDir, { recursive: true });
@@ -83,28 +84,26 @@ async function performComparison(result) {
 		// Download published tarball from npm
 		await downloadFile(result.package.location, publishedTarball);
 
-		// Get the source directory from reproduce's cache
-		const cacheDir = process.platform === 'darwin'
-			? path.join(process.env.HOME || '', 'Library', 'Caches', 'reproduce')
-			: path.join(process.env.XDG_CACHE_HOME || path.join(process.env.HOME || '', '.cache'), 'reproduce');
-		const sourceDir = path.join(cacheDir, result.package.name);
-
-		// Extract the git ref from the source spec (e.g., "github:ljharb/qs#abc123")
+		// Extract the git ref and repo URL from the source spec (e.g., "github:ljharb/qs#abc123")
 		const sourceSpec = result.source.spec;
 		const refMatch = sourceSpec.match(/#([^:]+)(?::path:.*)?$/);
 		const gitRef = refMatch ? refMatch[1] : 'HEAD';
 
-		// Checkout the correct commit and pack
+		// Convert source location to clone URL
+		const repoUrl = result.source.location.replace(/^git\+/, '');
+
+		// Clone and checkout the correct commit
 		let rebuiltTarballPath;
 		try {
-			// Fetch all refs to ensure the commit is available (reproduce may do shallow clone)
-			execSync(`cd "${sourceDir}" && git fetch --unshallow 2>/dev/null || git fetch origin 2>/dev/null || true`, { stdio: 'pipe' });
+			// Clone the repo (shallow clone of the specific commit)
+			execSync(`git clone --depth 1 "${repoUrl}" "${sourceDir}" 2>/dev/null || git clone "${repoUrl}" "${sourceDir}"`, { stdio: 'pipe' });
 
-			// Checkout the specific commit
-			execSync(`cd "${sourceDir}" && git checkout "${gitRef}" 2>/dev/null`, { stdio: 'pipe' });
+			// Fetch and checkout the specific commit
+			execSync(`cd "${sourceDir}" && git fetch --depth 1 origin "${gitRef}" 2>/dev/null || git fetch origin "${gitRef}" 2>/dev/null || git fetch --unshallow origin 2>/dev/null || true`, { stdio: 'pipe' });
+			execSync(`cd "${sourceDir}" && git checkout "${gitRef}"`, { stdio: 'pipe' });
 
 			// Run npm pack to create the tarball
-			const packOutput = execSync(`cd "${sourceDir}" && npm pack --pack-destination "${tempDir}" 2>/dev/null`, { stdio: 'pipe' });
+			const packOutput = execSync(`cd "${sourceDir}" && npm pack --pack-destination "${tempDir}"`, { stdio: 'pipe' });
 			const tarballName = packOutput.toString().trim().split('\n').pop();
 			rebuiltTarballPath = path.join(tempDir, tarballName || '');
 
