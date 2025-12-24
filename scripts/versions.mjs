@@ -35,7 +35,8 @@ const missingRepros = versions.filter((v) => {
 	if (!(v in existingData) || !(existingData[v]?.length > 0)) {
 		return true;
 	}
-	const latestResult = existingData[v].find((r) => r.reproduceVersion === reproduceVersion);
+	// Use findLast to get the most recent result (array is sorted oldest-first)
+	const latestResult = existingData[v].findLast((r) => r.reproduceVersion === reproduceVersion);
 	// Recheck if no result with current reproduce version
 	if (!latestResult) {
 		return true;
