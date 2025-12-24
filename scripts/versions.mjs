@@ -23,7 +23,7 @@ const versions = /** @type {Version[]} */ (
 
 const existingEntries = await Promise.all(versions.map(async (v) => /** @type {const} */ ([
 	v,
-	/** @type {ReproduceResult[]} */ (JSON.parse(await readFile(path.join(pkgDir, v), 'utf8').catch(() => '[]'))),
+	/** @type {ReproduceResult[]} */ (JSON.parse(await readFile(path.join(pkgDir, v.replace(/^v?/, 'v')), 'utf8').catch(() => '[]'))),
 ])));
 const existingData = /** @type {{ [k in typeof versions[number]]: ReproduceResult[] }} */ (
 	Object.fromEntries(existingEntries)

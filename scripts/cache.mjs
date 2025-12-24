@@ -147,7 +147,7 @@ const [
 		/** @type {Promise<{ [k in Version]: EnhancedResult[] }>} */ (
 			Promise.all(versions.map(async (v) => /** @type {const} */ ([
 				v,
-				/** @type {EnhancedResult[]} */ (JSON.parse(await readFile(path.join(pkgDir, v), 'utf8').catch(() => '[]'))),
+				/** @type {EnhancedResult[]} */ (JSON.parse(await readFile(path.join(pkgDir, v.replace(/^v?/, 'v')), 'utf8').catch(() => '[]'))),
 			]))).then(Object.fromEntries)
 		),
 	]))
