@@ -1,0 +1,328 @@
+[
+	{
+		"reproduceVersion": "1.1.4",
+		"timestamp": "2025-12-24T21:49:44.373Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:11.7.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "uglify-js@2.4.7",
+			"name": "uglify-js",
+			"version": "2.4.7",
+			"location": "https://registry.npmjs.org/uglify-js/-/uglify-js-2.4.7.tgz",
+			"integrity": "sha512-SORQvjl/5d8iz7b6Mb3ZGPW9ShBcgZBiAApL1JhVskHvI6+DEaEXJ9iKcVYg8lZKqxF4db+ybYY2OLPvp7/4Lg=="
+		},
+		"source": {
+			"spec": "github:mishoo/UglifyJS2#HEAD",
+			"location": "https://github.com/mishoo/UglifyJS2.git",
+			"integrity": "sha512-hoSKPnnS6Fh7GW5DVFheIZKT00zNRQuYQP25SzDa16aVqoYF5VngQNPOWHYYMwy2k4K5FFd1VxlZv8tIUYkgTA=="
+		},
+		"comparisonHash": "7055403c0ee3123a111994fbc48e15cb4430626a",
+		"diff": {
+			"files": {
+				".npmignore": {
+					"match": false,
+					"packageHash": "9008437292883ab1d073a6ee449b558f2ed115dfb0c71b42b92cec886f9820f4",
+					"size": 19,
+					"status": "missing-in-source"
+				},
+				".travis.yml": {
+					"match": false,
+					"packageHash": "6c63e8fd87e9be13958144ab223bbf5aaf239dfa20f7b248b0d4e85ec483425f",
+					"size": 89,
+					"status": "missing-in-source"
+				},
+				"LICENSE": {
+					"diff": "--- published/LICENSE\n+++ rebuilt/LICENSE\n@@ -1,6 +1,6 @@\n UglifyJS is released under the BSD license:\n \n-Copyright 2012-2013 (c) Mihai Bazon <mihai.bazon@gmail.com>\n+Copyright 2012-2024 (c) Mihai Bazon <mihai.bazon@gmail.com>\n \n Redistribution and use in source and binary forms, with or without\n modification, are permitted provided that the following conditions\n",
+					"match": false,
+					"packageHash": "c71bc295812c13e3025461cd409327b081b97d9a01cd4766e0dd82515a01e598",
+					"size": 1348,
+					"sourceHash": "422ee8d0b531a3e3c3c730b4dbd6f590ff786853897b9992888e34fcdacbe526",
+					"status": "content"
+				},
+				"README.md": {
+					"diff": "--- published/README.md\n+++ rebuilt/README.md\n@@ -1,14 +1,14 @@\n-UglifyJS 2\n+UglifyJS 3\n ==========\n-[![Build Status](https://travis-ci.org/mishoo/UglifyJS2.png)](https://travis-ci.org/mishoo/UglifyJS2)\n \n-UglifyJS is a JavaScript parser, minifier, compressor or beautifier toolkit.\n+UglifyJS is a JavaScript parser, minifier, compressor and beautifier toolkit.\n \n-This page documents the command line utility.  For\n-[API and internals documentation see my website](http://lisperator.net/uglifyjs/).\n-There's also an\n-[in-browser online demo](http://lisperator.net/uglifyjs/#demo) (for Firefox,\n-Chrome and probably Safari).\n+#### Note:\n+- `uglify-js` supports JavaScript and most language features in ECMAScript.\n+- For more exotic parts of ECMAScript, process your source file with transpilers\n+  like [Babel](https://babeljs.io/) before passing onto `uglify-js`.\n+- `uglify-js@3` has a simplified [API](#api-reference) and [CLI](#command-line-usage)\n+  that is not backwards compatible with [`uglify-js@2`](https://github.com/mishoo/UglifyJS/tree/v2.x).\n \n Install\n -------\n@@ -24,115 +24,171 @@\n \n     npm install uglify-js\n \n-From Git:\n-\n-    git clone git://github.com/mishoo/UglifyJS2.git\n-    cd UglifyJS2\n-    npm link .\n-\n-Usage\n------\n+# Command line usage\n \n     uglifyjs [input files] [options]\n \n-UglifyJS2 can take multiple input files.  It's recommended that you pass the\n+UglifyJS can take multiple input files.  It's recommended that you pass the\n input files first, then pass the options.  UglifyJS will parse input files\n in sequence and apply any compression options.  The files are parsed in the\n same global scope, that is, a reference from a file to some\n variable/function declared in another file will be matched properly.\n \n-If you want to read from STDIN instead, pass a single dash instead of input\n-files.\n+If no input file is specified, UglifyJS will read from STDIN.\n+\n+If you wish to pass your options before the input files, separate the two with\n+a double dash to prevent input files being used as option arguments:\n \n-The available options are:\n+    uglifyjs --compress --mangle -- input.js\n+\n+### Command line options\n \n ```\n-  --source-map       Specify an output file where to generate source map.\n-                                                                        [string]\n-  --source-map-root  The path to the original source to be included in the\n-                     source map.                                        [string]\n-  --source-map-url   The path to the source map to be added in //#\n-                     sourceMappingURL.  Defaults to the value passed with\n-                     --source-map.                                      [string]\n-  --in-source-map    Input source map, useful if you're compressing JS that was\n-                     generated from some other original code.\n-  --screw-ie8        Pass this flag if you don't care about full compliance\n-                     with Internet Explorer 6-8 quirks (by default UglifyJS\n-                     will try to be IE-proof).                         [boolean]\n-  --expr             Parse a single expression, rather than a program (for\n-                     parsing JSON)                                     [boolean]\n-  -p, --prefix       Skip prefix for original filenames that appear in source\n-                     maps. For example -p 3 will drop 3 directories from file\n-                     names and ensure they are relative paths. You can also\n-                     specify -p relative, which will make UglifyJS figure out\n-                     itself the relative paths between original sources, the\n-                     source map and the output file.                    [string]\n-  -o, --output       Output file (default STDOUT).\n-  -b, --beautify     Beautify output/specify output options.            [string]\n-  -m, --mangle       Mangle names/pass mangler options.                 [string]\n-  -r, --reserved     Reserved names to exclude from mangling.\n-  -c, --compress     Enable compressor/pass compressor options. Pass options\n-                     like -c hoist_vars=false,if_return=false. Use -c with no\n-                     argument to use the default compression options.   [string]\n-  -d, --define       Global definitions                                 [string]\n-  -e, --enclose      Embed everything in a big function, with a configurable\n-                     parameter/argument list.                           [string]\n-  --comments         Preserve copyright comments in the output. By default this\n-                     works like Google Closure, keeping JSDoc-style comments\n-                     that contain \"@license\" or \"@preserve\". You can optionally\n-                     pass one of the following arguments to this flag:\n-                     - \"all\" to keep all comments\n-                     - a valid JS regexp (needs to start with a slash) to keep\n-                     only comments that match.\n-                     Note that currently not *all* comments can be kept when\n-                     compression is on, because of dead code removal or\n",
+					"match": false,
+					"packageHash": "187e1c3845e586fe3b3b4626d3472b6458947dec9958009e9119dac7144ca34a",
+					"size": 26066,
+					"sourceHash": "1501070fe3ec0c88310b1d18a42606a1b25b0bfcf223b3574040886d814b2579",
+					"status": "content"
+				},
+				"bin/uglifyjs": {
+					"diff": "--- published/bin/uglifyjs\n+++ rebuilt/bin/uglifyjs\n@@ -3,444 +3,622 @@\n \n \"use strict\";\n \n-var UglifyJS = require(\"../tools/node\");\n-var sys = require(\"util\");\n-var optimist = require(\"optimist\");\n+require(\"../tools/tty\");\n+\n var fs = require(\"fs\");\n+var info = require(\"../package.json\");\n var path = require(\"path\");\n-var async = require(\"async\");\n-var acorn;\n-var ARGS = optimist\n-    .usage(\"$0 input1.js [input2.js ...] [options]\\n\\\n-Use a single dash to read input from the standard input.\\\n-\\n\\n\\\n-NOTE: by default there is no mangling/compression.\\n\\\n-Without [options] it will simply parse input files and dump the AST\\n\\\n-with whitespace and comments discarded.  To achieve compression and\\n\\\n-mangling you need to use `-c` and `-m`.\\\n-\")\n-    .describe(\"source-map\", \"Specify an output file where to generate source map.\")\n-    .describe(\"source-map-root\", \"The path to the original source to be included in the source map.\")\n-    .describe(\"source-map-url\", \"The path to the source map to be added in //# sourceMappingURL.  Defaults to the value passed with --source-map.\")\n-    .describe(\"in-source-map\", \"Input source map, useful if you're compressing JS that was generated from some other original code.\")\n-    .describe(\"screw-ie8\", \"Pass this flag if you don't care about full compliance with Internet Explorer 6-8 quirks (by default UglifyJS will try to be IE-proof).\")\n-    .describe(\"expr\", \"Parse a single expression, rather than a program (for parsing JSON)\")\n-    .describe(\"p\", \"Skip prefix for original filenames that appear in source maps. \\\n-For example -p 3 will drop 3 directories from file names and ensure they are relative paths. \\\n-You can also specify -p relative, which will make UglifyJS figure out itself the relative paths between original sources, \\\n-the source map and the output file.\")\n-    .describe(\"o\", \"Output file (default STDOUT).\")\n-    .describe(\"b\", \"Beautify output/specify output options.\")\n-    .describe(\"m\", \"Mangle names/pass mangler options.\")\n-    .describe(\"r\", \"Reserved names to exclude from mangling.\")\n-    .describe(\"c\", \"Enable compressor/pass compressor options. \\\n-Pass options like -c hoist_vars=false,if_return=false. \\\n-Use -c with no argument to use the default compression options.\")\n-    .describe(\"d\", \"Global definitions\")\n-    .describe(\"e\", \"Embed everything in a big function, with a configurable parameter/argument list.\")\n-\n-    .describe(\"comments\", \"Preserve copyright comments in the output. \\\n-By default this works like Google Closure, keeping JSDoc-style comments that contain \\\"@license\\\" or \\\"@preserve\\\". \\\n-You can optionally pass one of the following arguments to this flag:\\n\\\n-- \\\"all\\\" to keep all comments\\n\\\n-- a valid JS regexp (needs to start with a slash) to keep only comments that match.\\n\\\n-\\\n-Note that currently not *all* comments can be kept when compression is on, \\\n-because of dead code removal or cascading statements into sequences.\")\n-\n-    .describe(\"preamble\", \"Preamble to prepend to the output.  You can use this to insert a \\\n-comment, for example for licensing information.  This will not be \\\n-parsed, but the source map will adjust for its presence.\")\n-\n-    .describe(\"stats\", \"Display operations run time on STDERR.\")\n-    .describe(\"acorn\", \"Use Acorn for parsing.\")\n-    .describe(\"spidermonkey\", \"Assume input files are SpiderMonkey AST format (as JSON).\")\n-    .describe(\"self\", \"Build itself (UglifyJS2) as a library (implies --wrap=UglifyJS --export-all)\")\n-    .describe(\"wrap\", \"Embed everything in a big function, making the “exports” and “global” variables available. \\\n-You need to pass an argument to this option to specify the name that your module will take when included in, say, a browser.\")\n-    .describe(\"export-all\", \"Only used when --wrap, this tells UglifyJS to add code to automatically export all globals.\")\n-    .describe(\"lint\", \"Display some scope warnings\")\n-    .describe(\"v\", \"Verbose\")\n-    .describe(\"V\", \"Print version number and exit.\")\n-    .describe(\"noerr\", \"Don't throw an error for unknown options in -c, -b or -m.\")\n-\n-    .alias(\"p\", \"prefix\")\n-    .alias(\"o\", \"output\")\n-    .alias(\"v\", \"verbose\")\n-    .alias(\"b\", \"beautify\")\n-    .alias(\"m\", \"mangle\")\n-    .alias(\"c\", \"compress\")\n-    .alias(\"d\", \"define\")\n-    .alias(\"r\", \"reserved\")\n-    .alias(\"V\", \"version\")\n-    .alias(\"e\", \"enclose\")\n-\n-    .string(\"source-map\")\n-    .string(\"source-map-root\")\n-    .string(\"source-map-url\")\n-    .string(\"b\")\n-    .string(\"m\")\n-    .string(\"c\")\n-    .string(\"d\")\n-    .string(\"e\")\n-    .string(\"comments\")\n-    .string(\"wrap\")\n-    .string(\"p\")\n-\n-    .boolean(\"expr\")\n-    .boolean(\"screw-ie8\")\n-    .boolean(\"export-all\")\n-    .boolean(\"self\")\n-    .boolean(\"v\")\n-    .boolean(\"stats\")\n-    .boolean(\"acorn\")\n",
+					"match": false,
+					"packageHash": "ff590593aef50e34a9164c9374b97cbc03345350b376f46ddc37be4528b979ad",
+					"size": 14519,
+					"sourceHash": "5cfb9db8f3324089b295b17bc76988ad3c7cd7e522f979a0c6f66c87ab2f2375",
+					"status": "content"
+				},
+				"lib/ast.js": {
+					"diff": "--- published/lib/ast.js\n+++ rebuilt/lib/ast.js\n@@ -1,7 +1,7 @@\n /***********************************************************************\n \n   A JavaScript tokenizer / parser / beautifier / compressor.\n-  https://github.com/mishoo/UglifyJS2\n+  https://github.com/mishoo/UglifyJS\n \n   -------------------------------- (C) ---------------------------------\n \n@@ -44,161 +44,404 @@\n \"use strict\";\n \n function DEFNODE(type, props, methods, base) {\n-    if (arguments.length < 4) base = AST_Node;\n-    if (!props) props = [];\n-    else props = props.split(/\\s+/);\n+    if (typeof base === \"undefined\") base = AST_Node;\n+    props = props ? props.split(/\\s+/) : [];\n     var self_props = props;\n-    if (base && base.PROPS)\n-        props = props.concat(base.PROPS);\n-    var code = \"return function AST_\" + type + \"(props){ if (props) { \";\n-    for (var i = props.length; --i >= 0;) {\n-        code += \"this.\" + props[i] + \" = props.\" + props[i] + \";\";\n-    }\n-    var proto = base && new base;\n-    if (proto && proto.initialize || (methods && methods.initialize))\n-        code += \"this.initialize();\";\n-    code += \"}}\";\n-    var ctor = new Function(code)();\n-    if (proto) {\n-        ctor.prototype = proto;\n+    if (base && base.PROPS) props = props.concat(base.PROPS);\n+    var code = [\n+        \"return function AST_\", type, \"(props){\",\n+        // not essential, but speeds up compress by a few percent\n+        \"this._bits=0;\",\n+        \"if(props){\",\n+    ];\n+    props.forEach(function(prop) {\n+        code.push(\"this.\", prop, \"=props.\", prop, \";\");\n+    });\n+    code.push(\"}\");\n+    var proto = Object.create(base && base.prototype);\n+    if (methods.initialize || proto.initialize) code.push(\"this.initialize();\");\n+    code.push(\"};\");\n+    var ctor = new Function(code.join(\"\"))();\n+    ctor.prototype = proto;\n+    ctor.prototype.CTOR = ctor;\n+    ctor.prototype.TYPE = ctor.TYPE = type;\n+    if (base) {\n         ctor.BASE = base;\n+        base.SUBCLASSES.push(ctor);\n     }\n-    if (base) base.SUBCLASSES.push(ctor);\n-    ctor.prototype.CTOR = ctor;\n-    ctor.PROPS = props || null;\n+    ctor.DEFMETHOD = function(name, method) {\n+        this.prototype[name] = method;\n+    };\n+    ctor.PROPS = props;\n     ctor.SELF_PROPS = self_props;\n     ctor.SUBCLASSES = [];\n-    if (type) {\n-        ctor.prototype.TYPE = ctor.TYPE = type;\n-    }\n-    if (methods) for (i in methods) if (methods.hasOwnProperty(i)) {\n-        if (/^\\$/.test(i)) {\n-            ctor[i.substr(1)] = methods[i];\n+    for (var name in methods) if (HOP(methods, name)) {\n+        if (/^\\$/.test(name)) {\n+            ctor[name.substr(1)] = methods[name];\n         } else {\n-            ctor.prototype[i] = methods[i];\n+            ctor.DEFMETHOD(name, methods[name]);\n         }\n     }\n-    ctor.DEFMETHOD = function(name, method) {\n-        this.prototype[name] = method;\n-    };\n+    if (typeof exports !== \"undefined\") exports[\"AST_\" + type] = ctor;\n     return ctor;\n-};\n+}\n \n-var AST_Token = DEFNODE(\"Token\", \"type value line col pos endpos nlb comments_before file\", {\n+var AST_Token = DEFNODE(\"Token\", \"type value line col pos endline endcol endpos nlb comments_before comments_after file raw\", {\n }, null);\n \n var AST_Node = DEFNODE(\"Node\", \"start end\", {\n-    clone: function() {\n+    _clone: function(deep) {\n+        if (deep) {\n+            var self = this.clone();\n+            return self.transform(new TreeTransformer(function(node) {\n+                if (node !== self) {\n+                    return node.clone(true);\n+                }\n",
+					"match": false,
+					"packageHash": "389877e17c882b3d645e022a4de288137b2d19cb5c6f03f225362401313c63ff",
+					"size": 32353,
+					"sourceHash": "ad8c4bf530f144fcd79687d518f6ccf5eda9767cdcc29f3000d68d6c43a04fd4",
+					"status": "content"
+				},
+				"lib/compress.js": {
+					"diff": "--- published/lib/compress.js\n+++ rebuilt/lib/compress.js\n@@ -1,7 +1,7 @@\n /***********************************************************************\n \n   A JavaScript tokenizer / parser / beautifier / compressor.\n-  https://github.com/mishoo/UglifyJS2\n+  https://github.com/mishoo/UglifyJS\n \n   -------------------------------- (C) ---------------------------------\n \n@@ -48,721 +48,5817 @@\n         return new Compressor(options, false_by_default);\n     TreeTransformer.call(this, this.before, this.after);\n     this.options = defaults(options, {\n-        sequences     : !false_by_default,\n-        properties    : !false_by_default,\n-        dead_code     : !false_by_default,\n-        drop_debugger : !false_by_default,\n-        unsafe        : false,\n-        unsafe_comps  : false,\n-        conditionals  : !false_by_default,\n-        comparisons   : !false_by_default,\n-        evaluate      : !false_by_default,\n-        booleans      : !false_by_default,\n-        loops         : !false_by_default,\n-        unused        : !false_by_default,\n-        hoist_funs    : !false_by_default,\n-        hoist_vars    : false,\n-        if_return     : !false_by_default,\n-        join_vars     : !false_by_default,\n-        cascade       : !false_by_default,\n-        side_effects  : !false_by_default,\n-        pure_getters  : false,\n-        pure_funcs    : null,\n-        negate_iife   : !false_by_default,\n-        screw_ie8     : false,\n-\n-        warnings      : true,\n-        global_defs   : {}\n+        annotations     : !false_by_default,\n+        arguments       : !false_by_default,\n+        arrows          : !false_by_default,\n+        assignments     : !false_by_default,\n+        awaits          : !false_by_default,\n+        booleans        : !false_by_default,\n+        collapse_vars   : !false_by_default,\n+        comparisons     : !false_by_default,\n+        conditionals    : !false_by_default,\n+        dead_code       : !false_by_default,\n+        default_values  : !false_by_default,\n+        directives      : !false_by_default,\n+        drop_console    : false,\n+        drop_debugger   : !false_by_default,\n+        evaluate        : !false_by_default,\n+        expression      : false,\n+        functions       : !false_by_default,\n+        global_defs     : false,\n+        hoist_exports   : !false_by_default,\n+        hoist_funs      : false,\n+        hoist_props     : !false_by_default,\n+        hoist_vars      : false,\n+        ie              : false,\n+        if_return       : !false_by_default,\n+        imports         : !false_by_default,\n+        inline          : !false_by_default,\n+        join_vars       : !false_by_default,\n+        keep_fargs      : false_by_default,\n+        keep_fnames     : false,\n+        keep_infinity   : false,\n+        loops           : !false_by_default,\n+        merge_vars      : !false_by_default,\n+        module          : false,\n+        negate_iife     : !false_by_default,\n+        objects         : !false_by_default,\n+        optional_chains : !false_by_default,\n+        passes          : 1,\n+        properties      : !false_by_default,\n+        pure_funcs      : null,\n+        pure_getters    : !false_by_default && \"strict\",\n+        reduce_funcs    : !false_by_default,\n+        reduce_vars     : !false_by_default,\n+        rests           : !false_by_default,\n+        sequences       : !false_by_default,\n+        side_effects    : !false_by_default,\n+        spreads         : !false_by_default,\n+        strings         : !false_by_default,\n+        switches        : !false_by_default,\n+        templates       : !false_by_default,\n+        top_retain      : null,\n+        toplevel        : !!(options && !options[\"expression\"] && options[\"top_retain\"]),\n+        typeofs         : !false_by_default,\n+        unsafe          : false,\n+        unsafe_comps    : false,\n+        unsafe_Function : false,\n+        unsafe_math     : false,\n+        unsafe_proto    : false,\n+        unsafe_regexp   : false,\n+        unsafe_undefined: false,\n+        unused          : !false_by_default,\n",
+					"match": false,
+					"packageHash": "ead5e5d4cad7a3ba9b2316c42a13fdf5f0cdafb32231f83c0512feec76cdac43",
+					"size": 98164,
+					"sourceHash": "fc0362af499759c9ebe08f25e3741729eef19073180ea47666d877f49a9ffeb7",
+					"status": "content"
+				},
+				"lib/mozilla-ast.js": {
+					"diff": "--- published/lib/mozilla-ast.js\n+++ rebuilt/lib/mozilla-ast.js\n@@ -1,7 +1,7 @@\n /***********************************************************************\n \n   A JavaScript tokenizer / parser / beautifier / compressor.\n-  https://github.com/mishoo/UglifyJS2\n+  https://github.com/mishoo/UglifyJS\n \n   -------------------------------- (C) ---------------------------------\n \n@@ -43,111 +43,569 @@\n \n \"use strict\";\n \n-(function(){\n-\n+(function() {\n     var MOZ_TO_ME = {\n-        TryStatement : function(M) {\n+        Program: function(M) {\n+            return new AST_Toplevel({\n+                start: my_start_token(M),\n+                end: my_end_token(M),\n+                body: normalize_directives(M.body.map(from_moz)),\n+            });\n+        },\n+        ArrowFunctionExpression: function(M) {\n+            var argnames = [], rest = null;\n+            M.params.forEach(function(param) {\n+                if (param.type == \"RestElement\") {\n+                    rest = from_moz(param.argument);\n+                } else {\n+                    argnames.push(from_moz(param));\n+                }\n+            });\n+            var fn = new (M.async ? AST_AsyncArrow : AST_Arrow)({\n+                start: my_start_token(M),\n+                end: my_end_token(M),\n+                argnames: argnames,\n+                rest: rest,\n+            });\n+            var node = from_moz(M.body);\n+            if (node instanceof AST_BlockStatement) {\n+                fn.body = normalize_directives(node.body);\n+                fn.value = null;\n+            } else {\n+                fn.body = [];\n+                fn.value = node;\n+            }\n+            return fn;\n+        },\n+        FunctionDeclaration: function(M) {\n+            var ctor;\n+            if (M.async) {\n+                ctor = M.generator ? AST_AsyncGeneratorDefun : AST_AsyncDefun;\n+            } else {\n+                ctor = M.generator ? AST_GeneratorDefun : AST_Defun;\n+            }\n+            var argnames = [], rest = null;\n+            M.params.forEach(function(param) {\n+                if (param.type == \"RestElement\") {\n+                    rest = from_moz(param.argument);\n+                } else {\n+                    argnames.push(from_moz(param));\n+                }\n+            });\n+            return new ctor({\n+                start: my_start_token(M),\n+                end: my_end_token(M),\n+                name: from_moz(M.id),\n+                argnames: argnames,\n+                rest: rest,\n+                body: normalize_directives(from_moz(M.body).body),\n+            });\n+        },\n+        FunctionExpression: function(M) {\n+            var ctor;\n+            if (M.async) {\n+                ctor = M.generator ? AST_AsyncGeneratorFunction : AST_AsyncFunction;\n+            } else {\n+                ctor = M.generator ? AST_GeneratorFunction : AST_Function;\n+            }\n+            var argnames = [], rest = null;\n+            M.params.forEach(function(param) {\n+                if (param.type == \"RestElement\") {\n+                    rest = from_moz(param.argument);\n+                } else {\n+                    argnames.push(from_moz(param));\n+                }\n+            });\n+            return new ctor({\n+                start: my_start_token(M),\n+                end: my_end_token(M),\n+                name: from_moz(M.id),\n+                argnames: argnames,\n+                rest: rest,\n+                body: normalize_directives(from_moz(M.body).body),\n+            });\n+        },\n",
+					"match": false,
+					"packageHash": "0b4aaba39b2fb4bff1cc440e2919d25cc663c37f1ddb01354bd81e262638e4d3",
+					"size": 11359,
+					"sourceHash": "1d17d118518e28143d87234226639dcf4045c070cd6855e8185a143b629237df",
+					"status": "content"
+				},
+				"lib/output.js": {
+					"diff": "--- published/lib/output.js\n+++ rebuilt/lib/output.js\n@@ -1,7 +1,7 @@\n /***********************************************************************\n \n   A JavaScript tokenizer / parser / beautifier / compressor.\n-  https://github.com/mishoo/UglifyJS2\n+  https://github.com/mishoo/UglifyJS\n \n   -------------------------------- (C) ---------------------------------\n \n@@ -43,37 +43,120 @@\n \n \"use strict\";\n \n-function OutputStream(options) {\n+function is_some_comments(comment) {\n+    // multiline comment\n+    return comment.type == \"comment2\" && /@preserve|@license|@cc_on/i.test(comment.value);\n+}\n \n+function OutputStream(options) {\n     options = defaults(options, {\n-        indent_start  : 0,\n-        indent_level  : 4,\n-        quote_keys    : false,\n-        space_colon   : true,\n-        ascii_only    : false,\n-        inline_script : false,\n-        width         : 80,\n-        max_line_len  : 32000,\n-        beautify      : false,\n-        source_map    : null,\n-        bracketize    : false,\n-        semicolons    : true,\n-        comments      : false,\n-        preserve_line : false,\n-        screw_ie8     : false,\n-        preamble      : null,\n+        annotations      : false,\n+        ascii_only       : false,\n+        beautify         : false,\n+        braces           : false,\n+        comments         : false,\n+        extendscript     : false,\n+        galio            : false,\n+        ie               : false,\n+        indent_level     : 4,\n+        indent_start     : 0,\n+        inline_script    : true,\n+        keep_quoted_props: false,\n+        max_line_len     : false,\n+        module           : false,\n+        preamble         : null,\n+        preserve_line    : false,\n+        quote_keys       : false,\n+        quote_style      : 0,\n+        semicolons       : true,\n+        shebang          : true,\n+        source_map       : null,\n+        v8               : false,\n+        webkit           : false,\n+        width            : 80,\n+        wrap_iife        : false,\n     }, true);\n \n-    var indentation = 0;\n+    // Convert comment option to RegExp if necessary and set up comments filter\n+    var comment_filter = return_false; // Default case, throw all comments away\n+    if (options.comments) {\n+        var comments = options.comments;\n+        if (typeof options.comments === \"string\" && /^\\/.*\\/[a-zA-Z]*$/.test(options.comments)) {\n+            var regex_pos = options.comments.lastIndexOf(\"/\");\n+            comments = new RegExp(\n+                options.comments.substr(1, regex_pos - 1),\n+                options.comments.substr(regex_pos + 1)\n+            );\n+        }\n+        if (comments instanceof RegExp) {\n+            comment_filter = function(comment) {\n+                return comment.type != \"comment5\" && comments.test(comment.value);\n+            };\n+        } else if (typeof comments === \"function\") {\n+            comment_filter = function(comment) {\n+                return comment.type != \"comment5\" && comments(this, comment);\n+            };\n+        } else if (comments === \"some\") {\n+            comment_filter = is_some_comments;\n+        } else { // NOTE includes \"all\" option\n+            comment_filter = return_true;\n+        }\n+    }\n+\n+    function make_indent(value) {\n+        if (typeof value == \"number\") return new Array(value + 1).join(\" \");\n+        if (!value) return \"\";\n+        if (!/^\\s*$/.test(value)) throw new Error(\"unsupported indentation: \" + JSON.stringify(\"\" + value));\n+        return value;\n+    }\n+\n",
+					"match": false,
+					"packageHash": "b12fd2f5346b7e7ce924fd8c7e5836aa9c238c1860bdfdfe71a3937ae9527b77",
+					"size": 41817,
+					"sourceHash": "5c6c5668deeb8ebe0b08587922cb3ba304e8a7c40639db57650b237863cf931c",
+					"status": "content"
+				},
+				"lib/parse.js": {
+					"diff": "--- published/lib/parse.js\n+++ rebuilt/lib/parse.js\n@@ -1,7 +1,7 @@\n /***********************************************************************\n \n   A JavaScript tokenizer / parser / beautifier / compressor.\n-  https://github.com/mishoo/UglifyJS2\n+  https://github.com/mishoo/UglifyJS\n \n   -------------------------------- (C) ---------------------------------\n \n@@ -44,22 +44,23 @@\n \n \"use strict\";\n \n-var KEYWORDS = 'break case catch const continue debugger default delete do else finally for function if in instanceof new return switch throw try typeof var void while with';\n-var KEYWORDS_ATOM = 'false null true';\n-var RESERVED_WORDS = 'abstract boolean byte char class double enum export extends final float goto implements import int interface long native package private protected public short static super synchronized this throws transient volatile'\n-    + \" \" + KEYWORDS_ATOM + \" \" + KEYWORDS;\n-var KEYWORDS_BEFORE_EXPRESSION = 'return new delete throw else case';\n+var KEYWORDS = \"break case catch class const continue debugger default delete do else extends finally for function if in instanceof new return switch throw try typeof var void while with\";\n+var KEYWORDS_ATOM = \"false null true\";\n+var RESERVED_WORDS = [\n+    \"abstract async await boolean byte char double enum export final float goto implements import int interface let long native package private protected public short static super synchronized this throws transient volatile yield\",\n+    KEYWORDS_ATOM,\n+    KEYWORDS,\n+].join(\" \");\n+var KEYWORDS_BEFORE_EXPRESSION = \"return new delete throw else case\";\n \n KEYWORDS = makePredicate(KEYWORDS);\n RESERVED_WORDS = makePredicate(RESERVED_WORDS);\n KEYWORDS_BEFORE_EXPRESSION = makePredicate(KEYWORDS_BEFORE_EXPRESSION);\n KEYWORDS_ATOM = makePredicate(KEYWORDS_ATOM);\n \n-var OPERATOR_CHARS = makePredicate(characters(\"+-*&%=<>!?|~^\"));\n-\n-var RE_HEX_NUMBER = /^0x[0-9a-f]+$/i;\n-var RE_OCT_NUMBER = /^0[0-7]+$/;\n-var RE_DEC_NUMBER = /^\\d*\\.?\\d*(?:e[+-]?\\d*(?:\\d\\.?|\\.?\\d)\\d*)?$/i;\n+var RE_BIN_NUMBER = /^0b([01]+)$/i;\n+var RE_HEX_NUMBER = /^0x([0-9a-f]+)$/i;\n+var RE_OCT_NUMBER = /^0o?([0-7]+)$/i;\n \n var OPERATORS = makePredicate([\n     \"in\",\n@@ -80,6 +81,7 @@\n     \"*\",\n     \"/\",\n     \"%\",\n+    \"**\",\n     \">>\",\n     \"<<\",\n     \">>>\",\n@@ -98,122 +100,136 @@\n     \"/=\",\n     \"*=\",\n     \"%=\",\n+    \"**=\",\n     \">>=\",\n     \"<<=\",\n     \">>>=\",\n+    \"&=\",\n     \"|=\",\n     \"^=\",\n-    \"&=\",\n     \"&&\",\n-    \"||\"\n+    \"||\",\n+    \"??\",\n+    \"&&=\",\n+    \"||=\",\n+    \"??=\",\n ]);\n \n-var WHITESPACE_CHARS = makePredicate(characters(\" \\u00a0\\n\\r\\t\\f\\u000b\\u200b\\u180e\\u2000\\u2001\\u2002\\u2003\\u2004\\u2005\\u2006\\u2007\\u2008\\u2009\\u200a\\u202f\\u205f\\u3000\"));\n-\n-var PUNC_BEFORE_EXPRESSION = makePredicate(characters(\"[{(,.;:\"));\n-\n-var PUNC_CHARS = makePredicate(characters(\"[]{}(),;:\"));\n-\n-var REGEXP_MODIFIERS = makePredicate(characters(\"gmsiy\"));\n+var NEWLINE_CHARS = \"\\n\\r\\u2028\\u2029\";\n+var OPERATOR_CHARS = \"+-*&%=<>!?|~^\";\n+var PUNC_OPENERS = \"[{(\";\n+var PUNC_SEPARATORS = \",;:\";\n+var PUNC_CLOSERS = \")}]\";\n+var PUNC_AFTER_EXPRESSION = PUNC_SEPARATORS + PUNC_CLOSERS;\n+var PUNC_BEFORE_EXPRESSION = PUNC_OPENERS + PUNC_SEPARATORS;\n+var PUNC_CHARS = PUNC_BEFORE_EXPRESSION + \"`\" + PUNC_CLOSERS;\n+var WHITESPACE_CHARS = NEWLINE_CHARS + \" \\u00a0\\t\\f\\u000b\\u200b\\u2000\\u2001\\u2002\\u2003\\u2004\\u2005\\u2006\\u2007\\u2008\\u2009\\u200a\\u202f\\u205f\\u3000\\uFEFF\";\n+var NON_IDENTIFIER_CHARS = makePredicate(characters(\"./'\\\"#\" + OPERATOR_CHARS + PUNC_CHARS + WHITESPACE_CHARS));\n+\n+NEWLINE_CHARS = makePredicate(characters(NEWLINE_CHARS));\n+OPERATOR_CHARS = makePredicate(characters(OPERATOR_CHARS));\n+PUNC_AFTER_EXPRESSION = makePredicate(characters(PUNC_AFTER_EXPRESSION));\n+PUNC_BEFORE_EXPRESSION = makePredicate(characters(PUNC_BEFORE_EXPRESSION));\n+PUNC_CHARS = makePredicate(characters(PUNC_CHARS));\n+WHITESPACE_CHARS = makePredicate(characters(WHITESPACE_CHARS));\n \n /* -----[ Tokenizer ]----- */\n",
+					"match": false,
+					"packageHash": "e3bc8717ecf27ec46f24c85323638576b06262eaeb9cd728f34e5a41b2fbecc4",
+					"size": 51920,
+					"sourceHash": "6c3fe2ab9ffd38253d036e579d2258d914ce2b1e59bccefb9f4d6344a1079133",
+					"status": "content"
+				},
+				"lib/scope.js": {
+					"diff": "--- published/lib/scope.js\n+++ rebuilt/lib/scope.js\n@@ -1,7 +1,7 @@\n /***********************************************************************\n \n   A JavaScript tokenizer / parser / beautifier / compressor.\n-  https://github.com/mishoo/UglifyJS2\n+  https://github.com/mishoo/UglifyJS\n \n   -------------------------------- (C) ---------------------------------\n \n@@ -43,516 +43,841 @@\n \n \"use strict\";\n \n-function SymbolDef(scope, index, orig) {\n+function SymbolDef(id, scope, orig, init) {\n+    this._bits = 0;\n+    this.defun = undefined;\n+    this.eliminated = 0;\n+    this.id = id;\n+    this.init = init;\n+    this.mangled_name = null;\n     this.name = orig.name;\n     this.orig = [ orig ];\n-    this.scope = scope;\n     this.references = [];\n-    this.global = false;\n-    this.mangled_name = null;\n-    this.undeclared = false;\n-    this.constant = false;\n-    this.index = index;\n-};\n+    this.replaced = 0;\n+    this.safe_ids = undefined;\n+    this.scope = scope;\n+}\n \n SymbolDef.prototype = {\n-    unmangleable: function(options) {\n-        return (this.global && !(options && options.toplevel))\n-            || this.undeclared\n-            || (!(options && options.eval) && (this.scope.uses_eval || this.scope.uses_with));\n+    forEach: function(fn) {\n+        this.orig.forEach(fn);\n+        this.references.forEach(fn);\n     },\n     mangle: function(options) {\n-        if (!this.mangled_name && !this.unmangleable(options)) {\n-            var s = this.scope;\n-            if (!options.screw_ie8 && this.orig[0] instanceof AST_SymbolLambda)\n-                s = s.parent_scope;\n-            this.mangled_name = s.next_mangled(options, this);\n+        if (this.mangled_name) return;\n+        var cache = this.global && options.cache && options.cache.props;\n+        if (cache && cache.has(this.name)) {\n+            this.mangled_name = cache.get(this.name);\n+        } else if (!this.unmangleable(options)) {\n+            var def = this.redefined();\n+            if (def) {\n+                this.mangled_name = def.mangled_name || def.name;\n+            } else {\n+                this.mangled_name = next_mangled_name(this, options);\n+            }\n+            if (cache) cache.set(this.name, this.mangled_name);\n         }\n-    }\n+    },\n+    redefined: function() {\n+        var self = this;\n+        var scope = self.defun;\n+        if (!scope) return;\n+        var name = self.name;\n+        var def = scope.variables.get(name)\n+            || scope instanceof AST_Toplevel && scope.globals.get(name)\n+            || self.orig[0] instanceof AST_SymbolConst && find_if(function(def) {\n+                return def.name == name;\n+            }, scope.enclosed);\n+        if (def && def !== self) return def.redefined() || def;\n+    },\n+    unmangleable: function(options) {\n+        if (this.exported) return true;\n+        if (this.undeclared) return true;\n+        if (!options.eval && this.scope.pinned()) return true;\n+        if (options.keep_fargs && is_funarg(this)) return true;\n+        if (options.keep_fnames) {\n+            var sym = this.orig[0];\n+            if (sym instanceof AST_SymbolClass) return true;\n+            if (sym instanceof AST_SymbolDefClass) return true;\n+            if (sym instanceof AST_SymbolDefun) return true;\n+            if (sym instanceof AST_SymbolLambda) return true;\n+        }\n+        if (!options.toplevel && this.global) return true;\n+        return false;\n+    },\n };\n \n-AST_Toplevel.DEFMETHOD(\"figure_out_scope\", function(options){\n+DEF_BITPROPS(SymbolDef, [\n+    \"const_redefs\",\n",
+					"match": false,
+					"packageHash": "39d12ee7e4092fb7504c3ebbf5e7253f30f151f4124972c3c0c1bddfd60c7420",
+					"size": 20478,
+					"sourceHash": "929db106ee1e2696fc2a3b5b1d8d61828078009cfe741d908b631149db987670",
+					"status": "content"
+				},
+				"lib/sourcemap.js": {
+					"diff": "--- published/lib/sourcemap.js\n+++ rebuilt/lib/sourcemap.js\n@@ -1,7 +1,7 @@\n /***********************************************************************\n \n   A JavaScript tokenizer / parser / beautifier / compressor.\n-  https://github.com/mishoo/UglifyJS2\n+  https://github.com/mishoo/UglifyJS\n \n   -------------------------------- (C) ---------------------------------\n \n@@ -43,39 +43,153 @@\n \n \"use strict\";\n \n-// a small wrapper around fitzgen's source-map library\n+var vlq_char = characters(\"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/\");\n+var vlq_bits = vlq_char.reduce(function(map, ch, bits) {\n+    map[ch] = bits;\n+    return map;\n+}, Object.create(null));\n+\n+function vlq_decode(indices, str) {\n+    var value = 0;\n+    var shift = 0;\n+    for (var i = 0, j = 0; i < str.length; i++) {\n+        var bits = vlq_bits[str[i]];\n+        value += (bits & 31) << shift;\n+        if (bits & 32) {\n+            shift += 5;\n+        } else {\n+            indices[j++] += value & 1 ? 0x80000000 | -(value >> 1) : value >> 1;\n+            value = shift = 0;\n+        }\n+    }\n+    return j;\n+}\n+\n+function vlq_encode(num) {\n+    var result = \"\";\n+    num = Math.abs(num) << 1 | num >>> 31;\n+    do {\n+        var bits = num & 31;\n+        if (num >>>= 5) bits |= 32;\n+        result += vlq_char[bits];\n+    } while (num);\n+    return result;\n+}\n+\n+function create_array_map() {\n+    var map = new Dictionary();\n+    var array = [];\n+    array.index = function(name) {\n+        var index = map.get(name);\n+        if (!(index >= 0)) {\n+            index = array.length;\n+            array.push(name);\n+            map.set(name, index);\n+        }\n+        return index;\n+    };\n+    return array;\n+}\n+\n function SourceMap(options) {\n-    options = defaults(options, {\n-        file : null,\n-        root : null,\n-        orig : null,\n-    });\n-    var generator = new MOZ_SourceMap.SourceMapGenerator({\n-        file       : options.file,\n-        sourceRoot : options.root\n+    var sources = create_array_map();\n+    var sources_content = options.includeSources && new Dictionary();\n+    var names = create_array_map();\n+    var mappings = \"\";\n+    if (options.orig) Object.keys(options.orig).forEach(function(name) {\n+        var map = options.orig[name];\n+        var indices = [ 0, 0, 1, 0, 0 ];\n+        options.orig[name] = {\n+            names: map.names,\n+            mappings: map.mappings.split(/;/).map(function(line) {\n+                indices[0] = 0;\n+                return line.split(/,/).map(function(segment) {\n+                    return indices.slice(0, vlq_decode(indices, segment));\n+                });\n+            }),\n+            sources: map.sources,\n+        };\n+        if (!sources_content || !map.sourcesContent) return;\n+        for (var i = 0; i < map.sources.length; i++) {\n+            var content = map.sourcesContent[i];\n+            if (content) sources_content.set(map.sources[i], content);\n+        }\n     });\n-    var orig_map = options.orig && new MOZ_SourceMap.SourceMapConsumer(options.orig);\n-    function add(source, gen_line, gen_col, orig_line, orig_col, name) {\n-        if (orig_map) {\n-            var info = orig_map.originalPositionFor({\n",
+					"match": false,
+					"packageHash": "b956d819537e7e3298cabccdece941e96d628b7677eb036a19f2884e3f34499b",
+					"size": 3107,
+					"sourceHash": "78f33bdc59b9e321bfbc14a994a7ac9bb6212d95299cf1ee7a16005c68c7a74b",
+					"status": "content"
+				},
+				"lib/transform.js": {
+					"diff": "--- published/lib/transform.js\n+++ rebuilt/lib/transform.js\n@@ -1,7 +1,7 @@\n /***********************************************************************\n \n   A JavaScript tokenizer / parser / beautifier / compressor.\n-  https://github.com/mishoo/UglifyJS2\n+  https://github.com/mishoo/UglifyJS\n \n   -------------------------------- (C) ---------------------------------\n \n@@ -43,8 +43,6 @@\n \n \"use strict\";\n \n-// Tree transformer helpers.\n-\n function TreeTransformer(before, after) {\n     TreeWalker.call(this);\n     this.before = before;\n@@ -52,167 +50,201 @@\n }\n TreeTransformer.prototype = new TreeWalker;\n \n-(function(undefined){\n-\n-    function _(node, descend) {\n-        node.DEFMETHOD(\"transform\", function(tw, in_list){\n-            var x, y;\n-            tw.push(this);\n-            if (tw.before) x = tw.before(this, descend, in_list);\n-            if (x === undefined) {\n-                if (!tw.after) {\n-                    x = this;\n-                    descend(x, tw);\n-                } else {\n-                    tw.stack[tw.stack.length - 1] = x = this.clone();\n-                    descend(x, tw);\n-                    y = tw.after(x, in_list);\n-                    if (y !== undefined) x = y;\n-                }\n-            }\n-            tw.pop();\n-            return x;\n-        });\n-    };\n-\n+(function(DEF) {\n     function do_list(list, tw) {\n-        return MAP(list, function(node){\n+        return List(list, function(node) {\n             return node.transform(tw, true);\n         });\n-    };\n-\n-    _(AST_Node, noop);\n+    }\n \n-    _(AST_LabeledStatement, function(self, tw){\n+    DEF(AST_Node, noop);\n+    DEF(AST_LabeledStatement, function(self, tw) {\n         self.label = self.label.transform(tw);\n         self.body = self.body.transform(tw);\n     });\n-\n-    _(AST_SimpleStatement, function(self, tw){\n+    DEF(AST_SimpleStatement, function(self, tw) {\n         self.body = self.body.transform(tw);\n     });\n-\n-    _(AST_Block, function(self, tw){\n+    DEF(AST_Block, function(self, tw) {\n         self.body = do_list(self.body, tw);\n     });\n-\n-    _(AST_DWLoop, function(self, tw){\n+    DEF(AST_Do, function(self, tw) {\n+        self.body = self.body.transform(tw);\n+        self.condition = self.condition.transform(tw);\n+    });\n+    DEF(AST_While, function(self, tw) {\n         self.condition = self.condition.transform(tw);\n         self.body = self.body.transform(tw);\n     });\n-\n-    _(AST_For, function(self, tw){\n+    DEF(AST_For, function(self, tw) {\n         if (self.init) self.init = self.init.transform(tw);\n         if (self.condition) self.condition = self.condition.transform(tw);\n         if (self.step) self.step = self.step.transform(tw);\n         self.body = self.body.transform(tw);\n     });\n-\n-    _(AST_ForIn, function(self, tw){\n+    DEF(AST_ForEnumeration, function(self, tw) {\n         self.init = self.init.transform(tw);\n         self.object = self.object.transform(tw);\n         self.body = self.body.transform(tw);\n     });\n-\n",
+					"match": false,
+					"packageHash": "4c0facd5a8b68b332cc8ba228f908ac84ab48d1ca806e8e9fdcf144f0f32ef37",
+					"size": 6942,
+					"sourceHash": "13192f62904caed015955350c82dd2fe22fc977ad6ffaed95ba1af1751ef2db7",
+					"status": "content"
+				},
+				"lib/utils.js": {
+					"diff": "--- published/lib/utils.js\n+++ rebuilt/lib/utils.js\n@@ -1,7 +1,7 @@\n /***********************************************************************\n \n   A JavaScript tokenizer / parser / beautifier / compressor.\n-  https://github.com/mishoo/UglifyJS2\n+  https://github.com/mishoo/UglifyJS\n \n   -------------------------------- (C) ---------------------------------\n \n@@ -43,257 +43,258 @@\n \n \"use strict\";\n \n-function array_to_hash(a) {\n-    var ret = Object.create(null);\n-    for (var i = 0; i < a.length; ++i)\n-        ret[a[i]] = true;\n-    return ret;\n-};\n-\n-function slice(a, start) {\n-    return Array.prototype.slice.call(a, start || 0);\n-};\n-\n function characters(str) {\n     return str.split(\"\");\n-};\n+}\n \n function member(name, array) {\n-    for (var i = array.length; --i >= 0;)\n-        if (array[i] == name)\n-            return true;\n-    return false;\n-};\n+    return array.indexOf(name) >= 0;\n+}\n \n function find_if(func, array) {\n-    for (var i = 0, n = array.length; i < n; ++i) {\n-        if (func(array[i]))\n-            return array[i];\n-    }\n-};\n+    for (var i = array.length; --i >= 0;) if (func(array[i])) return array[i];\n+}\n \n-function repeat_string(str, i) {\n-    if (i <= 0) return \"\";\n-    if (i == 1) return str;\n-    var d = repeat_string(str, i >> 1);\n-    d += d;\n-    if (i & 1) d += str;\n-    return d;\n-};\n+function configure_error_stack(ex, cause) {\n+    var stack = ex.name + \": \" + ex.message;\n+    Object.defineProperty(ex, \"stack\", {\n+        get: function() {\n+            if (cause) {\n+                cause.name = \"\" + ex.name;\n+                stack = \"\" + cause.stack;\n+                var msg = \"\" + cause.message;\n+                cause = null;\n+                var index = stack.indexOf(msg);\n+                if (index < 0) {\n+                    index = 0;\n+                } else {\n+                    index += msg.length;\n+                    index = stack.indexOf(\"\\n\", index) + 1;\n+                }\n+                stack = stack.slice(0, index) + stack.slice(stack.indexOf(\"\\n\", index) + 1);\n+            }\n+            return stack;\n+        },\n+    });\n+}\n \n function DefaultsError(msg, defs) {\n-    this.msg = msg;\n+    this.message = msg;\n     this.defs = defs;\n-};\n-\n-DefaultsError.croak = function(msg, defs) {\n-    throw new DefaultsError(msg, defs);\n-};\n+    try {\n+        throw new Error(msg);\n+    } catch (cause) {\n+        configure_error_stack(this, cause);\n+    }\n+}\n+DefaultsError.prototype = Object.create(Error.prototype);\n+DefaultsError.prototype.constructor = DefaultsError;\n+DefaultsError.prototype.name = \"DefaultsError\";\n \n function defaults(args, defs, croak) {\n",
+					"match": false,
+					"packageHash": "3ed3c839659e5912b54f653a056c843e4278c94654c5fac98f8a20dcc2594636",
+					"size": 8963,
+					"sourceHash": "6d5cbbc2ecb652f4f98c56e49f64c61c63938d9a16634f80bbfe06e4992a6285",
+					"status": "content"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -1,30 +1,56 @@\n {\n-    \"name\": \"uglify-js\",\n-    \"description\": \"JavaScript parser, mangler/compressor and beautifier toolkit\",\n-    \"homepage\": \"http://lisperator.net/uglifyjs\",\n-    \"main\": \"tools/node.js\",\n-    \"version\": \"2.4.7\",\n-    \"engines\": { \"node\" : \">=0.4.0\" },\n-    \"maintainers\": [{\n-        \"name\": \"Mihai Bazon\",\n-        \"email\": \"mihai.bazon@gmail.com\",\n-        \"web\": \"http://lisperator.net/\"\n-    }],\n-    \"repository\": {\n-        \"type\": \"git\",\n-        \"url\": \"https://github.com/mishoo/UglifyJS2.git\"\n-    },\n-    \"dependencies\": {\n-        \"async\"      : \"~0.2.6\",\n-        \"source-map\" : \"~0.1.7\",\n-        \"optimist\"   : \"~0.3.5\",\n-        \"uglify-to-browserify\": \"~1.0.0\"\n-    },\n-    \"browserify\": {\n-        \"transform\": [ \"uglify-to-browserify\" ]\n-    },\n-    \"bin\": {\n-        \"uglifyjs\" : \"bin/uglifyjs\"\n-    },\n-    \"scripts\": {\"test\": \"node test/run-tests.js\"}\n+  \"name\": \"uglify-js\",\n+  \"description\": \"JavaScript parser, mangler/compressor and beautifier toolkit\",\n+  \"author\": \"Mihai Bazon <mihai.bazon@gmail.com> (http://lisperator.net/)\",\n+  \"license\": \"BSD-2-Clause\",\n+  \"version\": \"3.19.3\",\n+  \"engines\": {\n+    \"node\": \">=0.8.0\"\n+  },\n+  \"maintainers\": [\n+    \"Alex Lam <alexlamsl@gmail.com>\",\n+    \"Mihai Bazon <mihai.bazon@gmail.com> (http://lisperator.net/)\"\n+  ],\n+  \"repository\": \"mishoo/UglifyJS\",\n+  \"main\": \"tools/node.js\",\n+  \"bin\": {\n+    \"uglifyjs\": \"bin/uglifyjs\"\n+  },\n+  \"files\": [\n+    \"bin\",\n+    \"lib\",\n+    \"tools\",\n+    \"LICENSE\"\n+  ],\n+  \"devDependencies\": {\n+    \"acorn\": \"~8.7.1\",\n+    \"semver\": \"~6.3.0\"\n+  },\n+  \"scripts\": {\n+    \"test\": \"node test/compress.js && node test/mocha.js\"\n+  },\n+  \"keywords\": [\n+    \"cli\",\n+    \"compress\",\n+    \"compressor\",\n+    \"ecma\",\n+    \"ecmascript\",\n+    \"es\",\n+    \"es5\",\n+    \"javascript\",\n+    \"js\",\n+    \"jsmin\",\n+    \"min\",\n+    \"minification\",\n+    \"minifier\",\n+    \"minify\",\n+    \"optimize\",\n+    \"optimizer\",\n+    \"pack\",\n+    \"packer\",\n+    \"parse\",\n+    \"parser\",\n+    \"uglifier\",\n+    \"uglify\"\n+  ]\n }\n",
+					"match": false,
+					"packageHash": "4db0c4ca3054a9848959392cf8b746480f867c070fef83aa2f6f3d6a27166aff",
+					"size": 854,
+					"sourceHash": "4e7908267a1b0dfd5af0004dba63e8392ffc509ae986d5931017a55d7d65167d",
+					"status": "content"
+				},
+				"test/compress/arrays.js": {
+					"match": false,
+					"packageHash": "36592c43662dec28db53da857d2c74ab32fc768e09c54da8d5abf598ec35c4f7",
+					"size": 2427,
+					"status": "missing-in-source"
+				},
+				"test/compress/blocks.js": {
+					"match": false,
+					"packageHash": "16834628453a6656db26e2ba8a164d3f3c04010820eff46d9512bcda93211c6f",
+					"size": 770,
+					"status": "missing-in-source"
+				},
+				"test/compress/concat-strings.js": {
+					"match": false,
+					"packageHash": "0fc76d51e0b5d09154243732520d0e1d932c2f62ff11bc4535cb5c009ddbb991",
+					"size": 635,
+					"status": "missing-in-source"
+				},
+				"test/compress/conditionals.js": {
+					"match": false,
+					"packageHash": "8ccfe9c8696c2a50c05860630f12960c7f1f1db68f8c2b334c25b6c25005e1d2",
+					"size": 2596,
+					"status": "missing-in-source"
+				},
+				"test/compress/dead-code.js": {
+					"match": false,
+					"packageHash": "1189121dafb25453d59c50eb4b9500f6abdfd983d53668881d5e9c5596b53ff2",
+					"size": 1903,
+					"status": "missing-in-source"
+				},
+				"test/compress/debugger.js": {
+					"match": false,
+					"packageHash": "cbafffc78070faaac701a2a3fbb49466b8493fc720698e9040ae2589eb6940d1",
+					"size": 319,
+					"status": "missing-in-source"
+				},
+				"test/compress/drop-unused.js": {
+					"match": false,
+					"packageHash": "4116a4235b8b64494534e4bdd386584d52363ae310004091bf5a796eda4d1d91",
+					"size": 3042,
+					"status": "missing-in-source"
+				},
+				"test/compress/issue-105.js": {
+					"match": false,
+					"packageHash": "714f252342104c5ac77c82adc6239a76fab7a157b4a1982740b960494b524c39",
+					"size": 534,
+					"status": "missing-in-source"
+				},
+				"test/compress/issue-12.js": {
+					"match": false,
+					"packageHash": "5cc1980cd2f45a504ce90c980641f537857229801164875ef5a6b43dc2bae008",
+					"size": 265,
+					"status": "missing-in-source"
+				},
+				"test/compress/issue-126.js": {
+					"match": false,
+					"packageHash": "186924e5922477f15201251b8aeb44c15c1dfe0bccd696db75c85b2c85c97e9b",
+					"size": 839,
+					"status": "missing-in-source"
+				},
+				"test/compress/issue-143.js": {
+					"match": false,
+					"packageHash": "c081cdeb0d13b28f6d762479de75852cb7db6cbba1972fcf7d386d2c8f615383",
+					"size": 1096,
+					"status": "missing-in-source"
+				},
+				"test/compress/issue-22.js": {
+					"match": false,
+					"packageHash": "3ca58ca4a6b54b817c89c684c73b0906a4a79e862c2e86c37204a99a252647ed",
+					"size": 336,
+					"status": "missing-in-source"
+				},
+				"test/compress/issue-267.js": {
+					"match": false,
+					"packageHash": "5c8b465fcd1211b1d4796f73a140b713b107a886e1fbfa89910d43eb0f1873de",
+					"size": 198,
+					"status": "missing-in-source"
+				},
+				"test/compress/issue-269.js": {
+					"match": false,
+					"packageHash": "03d42af46d5087d18e190851e346676beffdfc3bf7cd246c7040f27fbb438015",
+					"size": 800,
+					"status": "missing-in-source"
+				},
+				"test/compress/issue-44.js": {
+					"match": false,
+					"packageHash": "bf1117060e6224b0650fabf566210bbbe025b3298e03195925dfec9beec8abcb",
+					"size": 601,
+					"status": "missing-in-source"
+				},
+				"test/compress/issue-59.js": {
+					"match": false,
+					"packageHash": "74379d630896d9c044ccc2a6e32dcdebb5809f1f3c597efd7a77ed34265b6a2e",
+					"size": 551,
+					"status": "missing-in-source"
+				},
+				"test/compress/labels.js": {
+					"match": false,
+					"packageHash": "49a08c6cf0c8b70d71c7bfa616c44206357e3ec3bd287688bdfbd50d67b57ad1",
+					"size": 3104,
+					"status": "missing-in-source"
+				},
+				"test/compress/loops.js": {
+					"match": false,
+					"packageHash": "24d3915c7c9b34c69520a2ccfa7f95d1020a21985fb54b3a4af8b0ba1589721b",
+					"size": 2146,
+					"status": "missing-in-source"
+				},
+				"test/compress/negate-iife.js": {
+					"match": false,
+					"packageHash": "8794fa1ad791e0bdb8308be9bfb7e9b615e47321029de9ac0bf33e52e457f83b",
+					"size": 1613,
+					"status": "missing-in-source"
+				},
+				"test/compress/properties.js": {
+					"match": false,
+					"packageHash": "d64e2522e739418e559c5efc5ad7e3fd6c15ea760358aae84b79487a5d91b579",
+					"size": 1011,
+					"status": "missing-in-source"
+				},
+				"test/compress/sequences.js": {
+					"match": false,
+					"packageHash": "4c47c159a8491b654c0960e012fc486d62f813da565ee887a73fbaf9d963ae6f",
+					"size": 2842,
+					"status": "missing-in-source"
+				},
+				"test/compress/switch.js": {
+					"match": false,
+					"packageHash": "b953d279d67d363f4e0907c513e26c1ef4309be4bd53b421da1099bc270010eb",
+					"size": 5001,
+					"status": "missing-in-source"
+				},
+				"test/compress/typeof.js": {
+					"match": false,
+					"packageHash": "9be203f5707e18b941a9d5181a2afdf406ba02e5043ba9945243df766413a8b5",
+					"size": 483,
+					"status": "missing-in-source"
+				},
+				"test/run-tests.js": {
+					"match": false,
+					"packageHash": "091fdce0cfe3761c52f725377f9f1d4180756f834ab9cee1c280803cd4835e95",
+					"size": 5403,
+					"status": "missing-in-source"
+				},
+				"tools/node.js": {
+					"diff": "--- published/tools/node.js\n+++ rebuilt/tools/node.js\n@@ -1,147 +1,73 @@\n-var path = require(\"path\");\n var fs = require(\"fs\");\n-var vm = require(\"vm\");\n-var sys = require(\"util\");\n \n-var UglifyJS = vm.createContext({\n-    sys           : sys,\n-    console       : console,\n-    MOZ_SourceMap : require(\"source-map\")\n-});\n-\n-function load_global(file) {\n-    file = path.resolve(path.dirname(module.filename), file);\n-    try {\n-        var code = fs.readFileSync(file, \"utf8\");\n-        return vm.runInContext(code, UglifyJS, file);\n-    } catch(ex) {\n-        // XXX: in case of a syntax error, the message is kinda\n-        // useless. (no location information).\n-        sys.debug(\"ERROR in file: \" + file + \" / \" + ex);\n-        process.exit(1);\n-    }\n-};\n-\n-var FILES = exports.FILES = [\n-    \"../lib/utils.js\",\n-    \"../lib/ast.js\",\n-    \"../lib/parse.js\",\n-    \"../lib/transform.js\",\n-    \"../lib/scope.js\",\n-    \"../lib/output.js\",\n-    \"../lib/compress.js\",\n-    \"../lib/sourcemap.js\",\n-    \"../lib/mozilla-ast.js\"\n-].map(function(file){\n-    return path.join(path.dirname(fs.realpathSync(__filename)), file);\n-});\n-\n-FILES.forEach(load_global);\n-\n-UglifyJS.AST_Node.warn_function = function(txt) {\n-    sys.error(\"WARN: \" + txt);\n-};\n-\n-// XXX: perhaps we shouldn't export everything but heck, I'm lazy.\n-for (var i in UglifyJS) {\n-    if (UglifyJS.hasOwnProperty(i)) {\n-        exports[i] = UglifyJS[i];\n-    }\n-}\n-\n-exports.minify = function(files, options) {\n-    options = UglifyJS.defaults(options, {\n-        outSourceMap : null,\n-        sourceRoot   : null,\n-        inSourceMap  : null,\n-        fromString   : false,\n-        warnings     : false,\n-        mangle       : {},\n-        output       : null,\n-        compress     : {}\n+exports.FILES = [\n+    require.resolve(\"../lib/utils.js\"),\n+    require.resolve(\"../lib/ast.js\"),\n+    require.resolve(\"../lib/transform.js\"),\n+    require.resolve(\"../lib/parse.js\"),\n+    require.resolve(\"../lib/scope.js\"),\n+    require.resolve(\"../lib/compress.js\"),\n+    require.resolve(\"../lib/output.js\"),\n+    require.resolve(\"../lib/sourcemap.js\"),\n+    require.resolve(\"../lib/mozilla-ast.js\"),\n+    require.resolve(\"../lib/propmangle.js\"),\n+    require.resolve(\"../lib/minify.js\"),\n+    require.resolve(\"./exports.js\"),\n+];\n+\n+new Function(\"domprops\", \"exports\", function() {\n+    var code = exports.FILES.map(function(file) {\n+        return fs.readFileSync(file, \"utf8\");\n     });\n-    if (typeof files == \"string\")\n-        files = [ files ];\n-\n-    UglifyJS.base54.reset();\n-\n-    // 1. parse\n-    var toplevel = null;\n-    files.forEach(function(file){\n-        var code = options.fromString\n-            ? file\n-            : fs.readFileSync(file, \"utf8\");\n-        toplevel = UglifyJS.parse(code, {\n-            filename: options.fromString ? \"?\" : file,\n-            toplevel: toplevel\n-        });\n-    });\n-\n",
+					"match": false,
+					"packageHash": "65bbf5c1fa8ed5165fcee11f6863f6b933275eb068d297f9f96c5be80898d7ef",
+					"size": 4630,
+					"sourceHash": "043d758abdf62ecc8fd1dd33e0d941663a77fefa26eab432f82eccfc1ed83d18",
+					"status": "content"
+				},
+				"lib/minify.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/propmangle.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"tools/domprops.html": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"tools/domprops.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"tools/exports.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"tools/tty.js": {
+					"match": false,
+					"status": "missing-in-package"
+				}
+			},
+			"summary": {
+				"differentFiles": 14,
+				"matchingFiles": 0,
+				"missingInPackage": 6,
+				"missingInSource": 26,
+				"score": 0,
+				"totalFiles": 46
+			}
+		}
+	}
+]
