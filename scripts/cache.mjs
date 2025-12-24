@@ -50,22 +50,6 @@ async function extractTarball(tarballPath, destDir) {
 }
 
 /**
- * Get the rebuilt tarball path from reproduce's cache.
- *
- * @param {string} packageName - Package name
- * @param {string} version - Package version
- * @returns {string} Path to rebuilt tarball
- */
-function getRebuiltTarballPath(packageName, version) {
-	const cacheDir = process.platform === 'darwin'
-		? path.join(process.env.HOME || '', 'Library', 'Caches', 'reproduce')
-		: path.join(process.env.XDG_CACHE_HOME || path.join(process.env.HOME || '', '.cache'), 'reproduce');
-
-	const safeName = packageName.replace(/^@/, '').replace(/\//, '-');
-	return path.join(cacheDir, packageName, `${safeName}-${version}.tgz`);
-}
-
-/**
  * Perform file-level comparison between published and rebuilt packages.
  *
  * @param {ReproduceResult} result - Reproduce result
@@ -102,8 +86,10 @@ async function performComparison(result) {
 			execSync(`cd "${sourceDir}" && git fetch --depth 1 origin "${gitRef}" 2>/dev/null || git fetch origin "${gitRef}" 2>/dev/null || git fetch --unshallow origin 2>/dev/null || true`, { stdio: 'pipe' });
 			execSync(`cd "${sourceDir}" && git checkout "${gitRef}"`, { stdio: 'pipe' });
 
-			// Install dependencies and run npm pack with node_modules/.bin in PATH
-			// This is needed because prepack scripts may use local binaries
+			/*
+			 * Install dependencies and run npm pack with node_modules/.bin in PATH
+			 * This is needed because prepack scripts may use local binaries
+			 */
 			execSync(`cd "${sourceDir}" && npm install`, { stdio: 'pipe' });
 			const packOutput = execSync(
 				`cd "${sourceDir}" && npm pack --pack-destination "${tempDir}"`,

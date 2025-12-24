@@ -7,6 +7,7 @@
  * @module compare
  */
 
+import { execSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { readFile, readdir, stat } from 'node:fs/promises';
 import { join, relative } from 'node:path';
@@ -18,6 +19,7 @@ import { join, relative } from 'node:path';
  * @property {string} [packageHash] - SHA-256 hash of file in published package
  * @property {string} [sourceHash] - SHA-256 hash of file in rebuilt source
  * @property {number} [size] - File size in bytes (from package)
+ * @property {string} [diff] - Unified diff for text files, or description for binary
  */
 
 /**
@@ -45,13 +47,13 @@ import { join, relative } from 'node:path';
  */
 async function getFiles(dir, base = dir) {
 	/** @type {string[]} */
-	var files = [];
-	var entries = await readdir(dir, { withFileTypes: true });
+	let files = [];
+	const entries = await readdir(dir, { withFileTypes: true });
 
-	for (var entry of entries) {
-		var fullPath = join(dir, entry.name);
+	for (const entry of entries) {
+		const fullPath = join(dir, entry.name);
 		if (entry.isDirectory()) {
-			var subFiles = await getFiles(fullPath, base);
+			const subFiles = await getFiles(fullPath, base);
 			files = files.concat(subFiles);
 		} else if (entry.isFile()) {
 			files.push(relative(base, fullPath));
@@ -68,7 +70,7 @@ async function getFiles(dir, base = dir) {
  * @returns {Promise<string>} Hex-encoded SHA-256 hash
  */
 async function hashFile(filePath) {
-	var content = await readFile(filePath);
+	const content = await readFile(filePath);
 	return createHash('sha256').update(content).digest('hex');
 }
 
@@ -79,8 +81,68 @@ async function hashFile(filePath) {
  * @returns {Promise<number>} File size in bytes
  */
 async function getFileSize(filePath) {
-	var stats = await stat(filePath);
+	const stats = await stat(filePath);
 	return stats.size;
+}
+
+/**
+ * Check if file content appears to be binary.
+ *
+ * @param {Buffer} content - File content
+ * @returns {boolean} True if file appears to be binary
+ */
+function isBinary(content) {
+	// Check for null bytes in first 8KB (common binary indicator)
+	const sample = content.subarray(0, 8192);
+	for (let i = 0; i < sample.length; i++) {
+		if (sample[i] === 0) {
+			return true;
+		}
+	}
+	return false;
+}
+
+/**
+ * Generate a unified diff between two files.
+ *
+ * @param {string} file1 - Path to first file
+ * @param {string} file2 - Path to second file
+ * @param {string} label1 - Label for first file
+ * @param {string} label2 - Label for second file
+ * @returns {Promise<string>} Unified diff output or description
+ */
+async function generateDiff(file1, file2, label1, label2) {
+	const [content1, content2] = await Promise.all([
+		readFile(file1),
+		readFile(file2),
+	]);
+
+	// Check if either file is binary
+	if (isBinary(content1) || isBinary(content2)) {
+		return '[binary files differ]';
+	}
+
+	try {
+		// Use diff command for unified diff, limit to 50 lines of context
+		const diffOutput = execSync(
+			`diff -u --label "${label1}" --label "${label2}" "${file1}" "${file2}" | head -100`,
+			{
+				encoding: 'utf8', stdio: [
+					'pipe', 'pipe', 'pipe',
+				],
+			},
+		);
+		return diffOutput || '[files are identical]';
+	} catch (err) {
+		// diff returns exit code 1 when files differ, which throws
+		if (err && typeof err === 'object' && 'stdout' in err) {
+			const output = /** @type {{ stdout: string }} */ (err).stdout;
+			if (output) {
+				return output;
+			}
+		}
+		return '[diff failed]';
+	}
 }
 
 /**
@@ -91,32 +153,34 @@ async function getFileSize(filePath) {
  * @returns {Promise<ComparisonResult>} Detailed comparison result
  */
 export async function compareDirectories(packageDir, sourceDir) {
-	var [packageFiles, sourceFiles] = await Promise.all([
+	const [packageFiles, sourceFiles] = await Promise.all([
 		getFiles(packageDir),
 		getFiles(sourceDir),
 	]);
 
-	var packageSet = new Set(packageFiles);
-	var sourceSet = new Set(sourceFiles);
-	var allFiles = new Set([...packageFiles, ...sourceFiles]);
+	const packageSet = new Set(packageFiles);
+	const sourceSet = new Set(sourceFiles);
+	const allFiles = new Set([...packageFiles, ...sourceFiles]);
 
 	/** @type {Record<string, FileComparison>} */
-	var files = {};
+	const files = {};
 
-	var matchingFiles = 0;
-	var differentFiles = 0;
-	var missingInSource = 0;
-	var missingInPackage = 0;
+	let matchingFiles = 0;
+	let differentFiles = 0;
+	let missingInSource = 0;
+	let missingInPackage = 0;
 
-	for (var file of allFiles) {
-		var inPackage = packageSet.has(file);
-		var inSource = sourceSet.has(file);
+	for (const file of allFiles) {
+		const inPackage = packageSet.has(file);
+		const inSource = sourceSet.has(file);
 
 		if (inPackage && inSource) {
-			var packagePath = join(packageDir, file);
-			var sourcePath = join(sourceDir, file);
+			const packagePath = join(packageDir, file);
+			const sourcePath = join(sourceDir, file);
 
-			var [packageHash, sourceHash, size] = await Promise.all([
+			const [
+				packageHash, sourceHash, size,
+			] = await Promise.all([
 				hashFile(packagePath),
 				hashFile(sourcePath),
 				getFileSize(packagePath),
@@ -125,33 +189,40 @@ export async function compareDirectories(packageDir, sourceDir) {
 			if (packageHash === sourceHash) {
 				files[file] = {
 					match: true,
+					packageHash,
+					size,
+					sourceHash,
 					status: 'match',
-					packageHash: packageHash,
-					sourceHash: sourceHash,
-					size: size,
 				};
 				matchingFiles += 1;
 			} else {
+				const diffContent = await generateDiff(
+					packagePath,
+					sourcePath,
+					`published/${file}`,
+					`rebuilt/${file}`,
+				);
 				files[file] = {
+					diff: diffContent,
 					match: false,
+					packageHash,
+					size,
+					sourceHash,
 					status: 'content',
-					packageHash: packageHash,
-					sourceHash: sourceHash,
-					size: size,
 				};
 				differentFiles += 1;
 			}
 		} else if (inPackage && !inSource) {
-			var pkgPath = join(packageDir, file);
-			var [pkgHash, pkgSize] = await Promise.all([
+			const pkgPath = join(packageDir, file);
+			const [pkgHash, pkgSize] = await Promise.all([
 				hashFile(pkgPath),
 				getFileSize(pkgPath),
 			]);
 			files[file] = {
 				match: false,
-				status: 'missing-in-source',
 				packageHash: pkgHash,
 				size: pkgSize,
+				status: 'missing-in-source',
 			};
 			missingInSource += 1;
 		} else {
@@ -163,18 +234,18 @@ export async function compareDirectories(packageDir, sourceDir) {
 		}
 	}
 
-	var totalFiles = allFiles.size;
-	var score = totalFiles > 0 ? matchingFiles / totalFiles : 1;
+	const totalFiles = allFiles.size;
+	const score = totalFiles > 0 ? matchingFiles / totalFiles : 1;
 
 	return {
-		files: files,
+		files,
 		summary: {
-			totalFiles: totalFiles,
-			matchingFiles: matchingFiles,
-			differentFiles: differentFiles,
-			missingInSource: missingInSource,
-			missingInPackage: missingInPackage,
-			score: score,
+			differentFiles,
+			matchingFiles,
+			missingInPackage,
+			missingInSource,
+			score,
+			totalFiles,
 		},
 	};
 }
@@ -188,9 +259,9 @@ export async function compareDirectories(packageDir, sourceDir) {
  */
 export function filterNonMatching(result) {
 	/** @type {Record<string, FileComparison>} */
-	var filtered = {};
+	const filtered = {};
 
-	for (var file of Object.keys(result.files)) {
+	for (const file of Object.keys(result.files)) {
 		if (!result.files[file].match) {
 			filtered[file] = result.files[file];
 		}
