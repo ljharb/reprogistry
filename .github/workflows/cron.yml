@@ -1,9 +1,9 @@
 name: "cron - process packages"
 
 on:
-  #schedule:
+  schedule:
     # Run every 5 minutes
-    #- cron: '*/5 * * * *'
+    - cron: '*/5 * * * *'
   workflow_dispatch:
     inputs:
       batch_size:
@@ -23,16 +23,16 @@ jobs:
       cancel-in-progress: false
     outputs:
       packages: ${{ steps.get-package.outputs.packages }}
-    
+
     steps:
       - uses: actions/checkout@v6
         with:
           fetch-depth: 0
           ref: data
-      
+
       - name: Create cache directory
         run: mkdir -p .cache
-      
+
       - name: Restore packages queue cache
         id: cache-queue
         uses: actions/cache/restore@v4
@@ -41,7 +41,7 @@ jobs:
           key: packages-queue-${{ github.run_id }}
           restore-keys: |
             packages-queue-
-      
+
       - name: Initialize or replenish queue
         run: |
           if [ ! -f .cache/packages-queue.txt ] || [ ! -s .cache/packages-queue.txt ]; then
@@ -53,7 +53,7 @@ jobs:
             REMAINING=$(wc -l < .cache/packages-queue.txt)
             echo "::notice::Queue has $REMAINING packages remaining"
           fi
-      
+
       - name: Get next packages from queue
         id: get-package
         run: |
@@ -80,14 +80,14 @@ jobs:
 
           REMAINING=$(wc -l < .cache/packages-queue.txt)
           echo "::notice::Packages remaining in queue: ${REMAINING}"
-      
+
       - name: Save queue cache
         uses: actions/cache/save@v4
         if: always()
         with:
           path: .cache/packages-queue.txt
           key: packages-queue-${{ github.run_id }}
-  
+
   process-package:
     needs: get-package
     runs-on: ubuntu-latest
