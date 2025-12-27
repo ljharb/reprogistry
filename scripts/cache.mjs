@@ -5,6 +5,7 @@ import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { pipeline } from 'node:stream/promises';
 
+import pacote from 'pacote';
 import { reproduce } from 'reproduce';
 import { compare as semverCompare, Range } from 'semver';
 
@@ -153,9 +154,11 @@ async function performComparison(result) {
 	}
 }
 
-const versions = /** @type {Version[]} */ (
-	new Range(/** @type {string} */ (VERSIONS)).set.flat(1).map((x) => x.value)
-);
+// Fetch all versions from npm and filter by the provided semver range
+const packument = await pacote.packument(/** @type {string} */ (pkg));
+const allVersions = /** @type {Version[]} */ (Object.keys(packument.versions));
+const range = new Range(/** @type {string} */ (VERSIONS));
+const versions = allVersions.filter((v) => range.test(v));
 
 const [
 	results,
@@ -173,13 +176,23 @@ const [
 );
 
 // Process results sequentially to avoid overwhelming the system
+/** @type {Error[]} */
+const errors = [];
+
 for (const result of results) {
 	if (!result) {
 		continue;
 	}
 
-	// Perform file-level comparison (throws on failure)
-	const comparison = await performComparison(result);
+	// Perform file-level comparison
+	let comparison;
+	try {
+		comparison = await performComparison(result);
+	} catch (err) {
+		console.error(`Comparison failed for ${result.package.name}@${result.package.version}:`, /** @type {Error} */ (err).message);
+		errors.push(/** @type {Error} */ (err));
+		continue;
+	}
 
 	/** @type {EnhancedResult} */
 	const enhancedResult = {
@@ -207,4 +220,8 @@ for (const result of results) {
 	});
 
 	await writeFile(dataPath, `${JSON.stringify(existing, null, '\t')}\n`);
+}
+
+if (errors.length > 0) {
+	throw new Error(`${errors.length} version(s) failed comparison`);
 }
