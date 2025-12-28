@@ -58,8 +58,8 @@ async function extractTarball(tarballPath, destDir) {
  * @returns {{ cloneUrl: string, subdir: string | null }} Clone URL and optional subdirectory
  */
 function parseSourceLocation(location) {
-	// Handle git+https://... format
-	let url = location.replace(/^git\+/, '');
+	// Handle git+https://... and git:// formats
+	let url = location.replace(/^git\+/, '').replace(/^git:\/\//, 'https://');
 
 	// Handle GitHub tree URLs (monorepos): https://github.com/org/repo/tree/branch/path/to/package
 	const treeMatch = url.match(/^(?<base>https:\/\/github\.com\/[^/]+\/[^/]+)\/tree\/[^/]+\/(?<subdir>.+)$/);
