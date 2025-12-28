@@ -160,36 +160,58 @@ const allVersions = /** @type {Version[]} */ (Object.keys(packument.versions));
 const range = new Range(/** @type {string} */ (VERSIONS));
 const versions = allVersions.filter((v) => range.test(v));
 
-const [
-	results,
-	existingData,
-] = (
-	await Promise.all(/** @type {const} */ ([
-		Promise.all(versions.map(async (v) => reproduce(`${pkg}@${v}`))),
-		/** @type {Promise<{ [k in Version]: EnhancedResult[] }>} */ (
-			Promise.all(versions.map(async (v) => /** @type {const} */ ([
-				v,
-				/** @type {EnhancedResult[]} */ (JSON.parse(await readFile(path.join(pkgDir, v.replace(/^v?/, 'v')), 'utf8').catch(() => '[]'))),
-			]))).then(Object.fromEntries)
-		),
-	]))
+console.log(`Found ${allVersions.length} total versions, ${versions.length} match range "${VERSIONS}"`);
+
+// Load existing data first
+const existingData = /** @type {{ [k in Version]: EnhancedResult[] }} */ (
+	Object.fromEntries(
+		await Promise.all(versions.map(async (v) => /** @type {const} */ ([
+			v,
+			/** @type {EnhancedResult[]} */ (JSON.parse(await readFile(path.join(pkgDir, v.replace(/^v?/, 'v')), 'utf8').catch(() => '[]'))),
+		]))),
+	)
 );
+
+// Run reproduce sequentially to avoid overwhelming npm/system
+/** @type {(import('reproduce').ReproduceResult | null)[]} */
+const results = [];
+for (const v of versions) {
+	console.log(`Reproducing ${pkg}@${v}...`);
+	try {
+		const result = await reproduce(`${pkg}@${v}`);
+		results.push(result);
+		if (!result) {
+			console.log(`  -> No source tracking available`);
+		}
+	} catch (err) {
+		console.error(`  -> Reproduce failed: ${/** @type {Error} */ (err).message}`);
+		results.push(null);
+	}
+}
+
+const withResults = results.filter(Boolean).length;
+console.log(`Reproduce complete: ${withResults}/${versions.length} versions have source tracking`);
 
 // Process results sequentially to avoid overwhelming the system
 /** @type {Error[]} */
 const errors = [];
 
+let successCount = 0;
 for (const result of results) {
 	if (!result) {
 		continue;
 	}
 
+	console.log(`Comparing ${result.package.name}@${result.package.version}...`);
+
 	// Perform file-level comparison
 	let comparison;
 	try {
 		comparison = await performComparison(result);
+		successCount++;
+		console.log(`  -> Score: ${Math.round((comparison.summary?.score ?? 0) * 100)}%`);
 	} catch (err) {
-		console.error(`Comparison failed for ${result.package.name}@${result.package.version}:`, /** @type {Error} */ (err).message);
+		console.error(`  -> Comparison failed: ${/** @type {Error} */ (err).message}`);
 		errors.push(/** @type {Error} */ (err));
 		continue;
 	}
@@ -242,6 +264,8 @@ for (const result of results) {
 
 	await writeFile(dataPath, `${JSON.stringify(deduped, null, '\t')}\n`);
 }
+
+console.log(`\nSummary: ${successCount} versions compared successfully, ${errors.length} failed`);
 
 if (errors.length > 0) {
 	throw new Error(`${errors.length} version(s) failed comparison`);
