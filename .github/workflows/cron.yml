@@ -148,8 +148,7 @@ jobs:
       - uses: actions/checkout@v6
         with:
           fetch-depth: 0
-          ref: data
-          submodules: true
+          ref: queue
           persist-credentials: true
 
       - uses: actions/download-artifact@v4
@@ -158,28 +157,22 @@ jobs:
           path: /tmp/results
           merge-multiple: true
 
-      - run: mkdir -p data/.cache
-
       - name: Append to cache queue
         run: |
-          touch data/.cache/cache-queue.txt
-          cat /tmp/results/*.txt >> data/.cache/cache-queue.txt 2>/dev/null || true
-          QUEUE_SIZE=$(wc -l < data/.cache/cache-queue.txt)
+          cat /tmp/results/*.txt >> cache-queue.txt 2>/dev/null || true
+          QUEUE_SIZE=$(wc -l < cache-queue.txt)
           echo "::notice::Cache queue now has ${QUEUE_SIZE} entries"
-
-      - run: cd data && git merge origin/data && cd ..
 
       - name: Commit and push queue
         run: |
-          cd data
           git config --global user.email "${GITHUB_ACTOR}@users.noreply.github.com"
           git config --global user.name "${GITHUB_ACTOR}"
-          git add .cache/cache-queue.txt
+          git add cache-queue.txt
           if git diff --cached --quiet; then
             echo "::notice::No changes to queue"
           else
             git commit -m 'queue: add cache tasks'
-            git fetch origin data
-            git rebase origin/data
+            git fetch origin queue
+            git rebase origin/queue
             git push
           fi

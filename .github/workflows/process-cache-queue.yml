@@ -20,14 +20,13 @@ jobs:
       - uses: actions/checkout@v6
         with:
           fetch-depth: 0
-          ref: data
-          submodules: true
+          ref: queue
           persist-credentials: true
 
       - name: Get next cache task
         id: get-task
         run: |
-          QUEUE_FILE="data/.cache/cache-queue.txt"
+          QUEUE_FILE="cache-queue.txt"
 
           if [ ! -f "${QUEUE_FILE}" ] || [ ! -s "${QUEUE_FILE}" ]; then
             echo "::notice::Cache queue is empty"
@@ -64,13 +63,12 @@ jobs:
       - name: Commit updated queue
         if: steps.get-task.outputs.empty == 'false'
         run: |
-          cd data
           git config --global user.email "${GITHUB_ACTOR}@users.noreply.github.com"
           git config --global user.name "${GITHUB_ACTOR}"
-          git add .cache/cache-queue.txt
+          git add cache-queue.txt
           git commit -m 'queue: remove processed cache task' || true
-          git fetch origin data
-          git rebase origin/data || (git rebase --abort && git merge origin/data)
+          git fetch origin queue
+          git rebase origin/queue || (git rebase --abort && git merge origin/queue)
           git push
 
       - name: Dispatch to cache workflow
