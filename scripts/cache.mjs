@@ -205,21 +205,42 @@ for (const result of results) {
 	const existing = existingData[/** @type {Version} */ (result.package.version)] ?? [];
 
 	existing.push(enhancedResult);
-	existing.sort((a, b) => {
+
+	// Dedupe: keep only the latest result per reproduceVersion, preferring those with diff data
+	/** @type {Map<string, EnhancedResult>} */
+	const byReproduceVersion = new Map();
+	for (const r of existing) {
+		const key = r.reproduceVersion;
+		const prev = byReproduceVersion.get(key);
+		if (!prev) {
+			byReproduceVersion.set(key, r);
+		} else {
+			// Prefer result with diff data, then latest timestamp
+			const prevHasDiff = prev.diff && prev.diff.summary;
+			const currHasDiff = r.diff && r.diff.summary;
+			if (currHasDiff && !prevHasDiff) {
+				byReproduceVersion.set(key, r);
+			} else if (currHasDiff === prevHasDiff) {
+				// Both have or both lack diff - keep latest
+				if (new Date(r.timestamp) > new Date(prev.timestamp)) {
+					byReproduceVersion.set(key, r);
+				}
+			}
+			// else: prev has diff, curr doesn't - keep prev
+		}
+	}
+
+	const deduped = [...byReproduceVersion.values()];
+	deduped.sort((a, b) => {
 		const dA = Number(new Date(a.timestamp));
 		const dB = Number(new Date(b.timestamp));
 		if (dA !== dB) {
 			return dA - dB;
 		}
-		const vv = semverCompare(a.package.version, b.package.version);
-		if (vv !== 0) {
-			return vv;
-		}
-
 		return semverCompare(a.reproduceVersion, b.reproduceVersion);
 	});
 
-	await writeFile(dataPath, `${JSON.stringify(existing, null, '\t')}\n`);
+	await writeFile(dataPath, `${JSON.stringify(deduped, null, '\t')}\n`);
 }
 
 if (errors.length > 0) {
