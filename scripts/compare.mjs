@@ -64,17 +64,6 @@ async function getFiles(dir, base = dir) {
 }
 
 /**
- * Calculate SHA-256 hash of a file.
- *
- * @param {string} filePath - Path to file
- * @returns {Promise<string>} Hex-encoded SHA-256 hash
- */
-async function hashFile(filePath) {
-	const content = await readFile(filePath);
-	return createHash('sha256').update(content).digest('hex');
-}
-
-/**
  * Get file size.
  *
  * @param {string} filePath - Path to file
@@ -100,6 +89,35 @@ function isBinary(content) {
 		}
 	}
 	return false;
+}
+
+/**
+ * Normalize line endings in text content (convert CRLF to LF).
+ * Returns original buffer for binary files.
+ *
+ * @param {Buffer} content - File content
+ * @returns {Buffer} Content with normalized line endings
+ */
+function normalizeLineEndings(content) {
+	if (isBinary(content)) {
+		return content;
+	}
+	// Convert CRLF (\r\n) to LF (\n)
+	const text = content.toString('utf8');
+	const normalized = text.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+	return Buffer.from(normalized, 'utf8');
+}
+
+/**
+ * Calculate SHA-256 hash of a file with normalized line endings for text files.
+ *
+ * @param {string} filePath - Path to file
+ * @returns {Promise<string>} Hex-encoded SHA-256 hash
+ */
+async function hashFileNormalized(filePath) {
+	const content = await readFile(filePath);
+	const normalized = normalizeLineEndings(content);
+	return createHash('sha256').update(normalized).digest('hex');
 }
 
 /**
@@ -181,8 +199,8 @@ export async function compareDirectories(packageDir, sourceDir) {
 			const [
 				packageHash, sourceHash, size,
 			] = await Promise.all([
-				hashFile(packagePath),
-				hashFile(sourcePath),
+				hashFileNormalized(packagePath),
+				hashFileNormalized(sourcePath),
 				getFileSize(packagePath),
 			]);
 
@@ -215,7 +233,7 @@ export async function compareDirectories(packageDir, sourceDir) {
 		} else if (inPackage && !inSource) {
 			const pkgPath = join(packageDir, file);
 			const [pkgHash, pkgSize] = await Promise.all([
-				hashFile(pkgPath),
+				hashFileNormalized(pkgPath),
 				getFileSize(pkgPath),
 			]);
 			files[file] = {
