@@ -1,0 +1,49 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2025-12-29T21:46:58.749Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:11.7.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "qs@6.10.5",
+			"name": "qs",
+			"version": "6.10.5",
+			"location": "https://registry.npmjs.org/qs/-/qs-6.10.5.tgz",
+			"integrity": "sha512-O5RlPh0VFtR78y79rgcgKK4wbAI0C5zGVLztOIdpWX6ep368q5Hv6XRxDvXuZ9q3C6v+e3n8UfZZJw7IIG27eQ==",
+			"publishedAt": "2022-06-06T22:52:18.062Z",
+			"publishedWith": {
+				"node": "18.3.0",
+				"npm": "8.11.0"
+			}
+		},
+		"source": {
+			"integrity": null,
+			"location": "git+https://github.com/ljharb/qs.git",
+			"spec": "github:ljharb/qs#95bc0185e157d400da4f43f1fcf1c7f008fd847e"
+		},
+		"comparisonHash": "8a2a8dcbb729bf3ee9216e490c955701f0ddebe1",
+		"diff": {
+			"files": {
+				"dist/qs.js": {
+					"diff": "--- published/dist/qs.js\n+++ rebuilt/dist/qs.js\n@@ -430,7 +430,7 @@\n                 for (var i = 0; i < valuesArray.length; ++i) {\n                     valuesJoined += (i === 0 ? '' : ',') + formatter(encoder(valuesArray[i], defaults.encoder, charset, 'value', format));\n                 }\n-                return [formatter(keyValue) + (isArray(obj) && valuesArray.length === 1 ? '[]' : '') + '=' + valuesJoined];\n+                return [formatter(keyValue) + '=' + valuesJoined];\n             }\n             return [formatter(keyValue) + '=' + formatter(encoder(obj, defaults.encoder, charset, 'value', format))];\n         }\n@@ -454,8 +454,6 @@\n         objKeys = sort ? keys.sort(sort) : keys;\n     }\n \n-    var adjustedPrefix = generateArrayPrefix === 'comma' && isArray(obj) && obj.length === 1 ? prefix + '[]' : prefix;\n-\n     for (var j = 0; j < objKeys.length; ++j) {\n         var key = objKeys[j];\n         var value = typeof key === 'object' && typeof key.value !== 'undefined' ? key.value : obj[key];\n@@ -465,8 +463,8 @@\n         }\n \n         var keyPrefix = isArray(obj)\n-            ? typeof generateArrayPrefix === 'function' ? generateArrayPrefix(adjustedPrefix, key) : adjustedPrefix\n-            : adjustedPrefix + (allowDots ? '.' + key : '[' + key + ']');\n+            ? typeof generateArrayPrefix === 'function' ? generateArrayPrefix(prefix, key) : prefix\n+            : prefix + (allowDots ? '.' + key : '[' + key + ']');\n \n         sideChannel.set(object, step);\n         var valueSideChannel = getSideChannel();\n@@ -1471,9 +1469,8 @@\n     return $replace.call(str, sepRegex, '$&_');\n }\n \n-var utilInspect = require('./util.inspect');\n-var inspectCustom = utilInspect.custom;\n-var inspectSymbol = isSymbol(inspectCustom) ? inspectCustom : null;\n+var inspectCustom = require('./util.inspect').custom;\n+var inspectSymbol = inspectCustom && isSymbol(inspectCustom) ? inspectCustom : null;\n \n module.exports = function inspect_(obj, options, depth, seen) {\n     var opts = options || {};\n@@ -1563,7 +1560,7 @@\n         return inspect_(value, opts, depth + 1, seen);\n     }\n \n-    if (typeof obj === 'function' && !isRegExp(obj)) { // in older engines, regexes are callable\n+    if (typeof obj === 'function') {\n         var name = nameOf(obj);\n         var keys = arrObjKeys(obj, inspect);\n         return '[Function' + (name ? ': ' + name : ' (anonymous)') + ']' + (keys.length > 0 ? ' { ' + $join.call(keys, ', ') + ' }' : '');\n@@ -1593,15 +1590,15 @@\n     }\n     if (isError(obj)) {\n         var parts = arrObjKeys(obj, inspect);\n-        if (!('cause' in Error.prototype) && 'cause' in obj && !isEnumerable.call(obj, 'cause')) {\n+        if ('cause' in obj && !isEnumerable.call(obj, 'cause')) {\n             return '{ [' + String(obj) + '] ' + $join.call($concat.call('[cause]: ' + inspect(obj.cause), parts), ', ') + ' }';\n         }\n         if (parts.length === 0) { return '[' + String(obj) + ']'; }\n         return '{ [' + String(obj) + '] ' + $join.call(parts, ', ') + ' }';\n     }\n     if (typeof obj === 'object' && customInspect) {\n-        if (inspectSymbol && typeof obj[inspectSymbol] === 'function' && utilInspect) {\n-            return utilInspect(obj, { depth: maxDepth - depth });\n+        if (inspectSymbol && typeof obj[inspectSymbol] === 'function') {\n+            return obj[inspectSymbol]();\n         } else if (customInspect !== 'symbol' && typeof obj.inspect === 'function') {\n             return obj.inspect();\n         }\n",
+					"match": false,
+					"packageHash": "9c53e92b5d95e5708c1c8c7040f36135d0c7201a76d104bac1a6bed76926b124",
+					"size": 68798,
+					"sourceHash": "755291a36c25173d92d6d3565641ef109014c5479cecb90b01ac871de2e0ce3a",
+					"status": "content"
+				}
+			},
+			"summary": {
+				"differentFiles": 1,
+				"matchingFiles": 16,
+				"missingInPackage": 0,
+				"missingInSource": 0,
+				"score": 0.9411764705882353,
+				"totalFiles": 17
+			}
+		}
+	}
+]

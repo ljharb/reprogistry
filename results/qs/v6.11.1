@@ -1,0 +1,49 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2025-12-29T21:47:15.613Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:11.7.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "qs@6.11.1",
+			"name": "qs",
+			"version": "6.11.1",
+			"location": "https://registry.npmjs.org/qs/-/qs-6.11.1.tgz",
+			"integrity": "sha512-0wsrzgTz/kAVIeuxSjnpGC56rzYtr6JT/2BwEvMaPhFIoYa1aGO8LbzuU1R0uUYQkLpWBTOj0l/CLAJB64J6nQ==",
+			"publishedAt": "2023-03-06T22:25:03.220Z",
+			"publishedWith": {
+				"node": "19.7.0",
+				"npm": "9.5.0"
+			}
+		},
+		"source": {
+			"integrity": null,
+			"location": "git+https://github.com/ljharb/qs.git",
+			"spec": "github:ljharb/qs#9dca37f15de317fe9ad0ced907cdf250ba310880"
+		},
+		"comparisonHash": "8a2a8dcbb729bf3ee9216e490c955701f0ddebe1",
+		"diff": {
+			"files": {
+				"dist/qs.js": {
+					"diff": "--- published/dist/qs.js\n+++ rebuilt/dist/qs.js\n@@ -323,6 +323,7 @@\n };\n \n var isArray = Array.isArray;\n+var split = String.prototype.split;\n var push = Array.prototype.push;\n var pushToArray = function (arr, valueOrArray) {\n     push.apply(arr, isArray(valueOrArray) ? valueOrArray : [valueOrArray]);\n@@ -424,6 +425,14 @@\n     if (isNonNullishPrimitive(obj) || utils.isBuffer(obj)) {\n         if (encoder) {\n             var keyValue = encodeValuesOnly ? prefix : encoder(prefix, defaults.encoder, charset, 'key', format);\n+            if (generateArrayPrefix === 'comma' && encodeValuesOnly) {\n+                var valuesArray = split.call(String(obj), ',');\n+                var valuesJoined = '';\n+                for (var i = 0; i < valuesArray.length; ++i) {\n+                    valuesJoined += (i === 0 ? '' : ',') + formatter(encoder(valuesArray[i], defaults.encoder, charset, 'value', format));\n+                }\n+                return [formatter(keyValue) + (commaRoundTrip && isArray(obj) && valuesArray.length === 1 ? '[]' : '') + '=' + valuesJoined];\n+            }\n             return [formatter(keyValue) + '=' + formatter(encoder(obj, defaults.encoder, charset, 'value', format))];\n         }\n         return [formatter(prefix) + '=' + formatter(String(obj))];\n@@ -438,9 +447,6 @@\n     var objKeys;\n     if (generateArrayPrefix === 'comma' && isArray(obj)) {\n         // we need to join elements in\n-        if (encodeValuesOnly && encoder) {\n-            obj = utils.maybeMap(obj, encoder);\n-        }\n         objKeys = [{ value: obj.length > 0 ? obj.join(',') || null : void undefined }];\n     } else if (isArray(filter)) {\n         objKeys = filter;\n@@ -473,7 +479,7 @@\n             commaRoundTrip,\n             strictNullHandling,\n             skipNulls,\n-            generateArrayPrefix === 'comma' && encodeValuesOnly && isArray(obj) ? null : encoder,\n+            encoder,\n             filter,\n             sort,\n             allowDots,\n@@ -1071,8 +1077,6 @@\n \t'%AsyncIteratorPrototype%': needsEval,\n \t'%Atomics%': typeof Atomics === 'undefined' ? undefined : Atomics,\n \t'%BigInt%': typeof BigInt === 'undefined' ? undefined : BigInt,\n-\t'%BigInt64Array%': typeof BigInt64Array === 'undefined' ? undefined : BigInt64Array,\n-\t'%BigUint64Array%': typeof BigUint64Array === 'undefined' ? undefined : BigUint64Array,\n \t'%Boolean%': Boolean,\n \t'%DataView%': typeof DataView === 'undefined' ? undefined : DataView,\n \t'%Date%': Date,\n@@ -1128,14 +1132,6 @@\n \t'%WeakSet%': typeof WeakSet === 'undefined' ? undefined : WeakSet\n };\n \n-try {\n-\tnull.error; // eslint-disable-line no-unused-expressions\n-} catch (e) {\n-\t// https://github.com/tc39/proposal-shadowrealm/pull/384#issuecomment-1364264229\n-\tvar errorProto = getProto(getProto(e));\n-\tINTRINSICS['%Error.prototype%'] = errorProto;\n-}\n-\n var doEval = function doEval(name) {\n \tvar value;\n \tif (name === '%AsyncFunction%') {\n@@ -1221,7 +1217,6 @@\n var $spliceApply = bind.call(Function.apply, Array.prototype.splice);\n var $replace = bind.call(Function.call, String.prototype.replace);\n var $strSlice = bind.call(Function.call, String.prototype.slice);\n-var $exec = bind.call(Function.call, RegExp.prototype.exec);\n \n /* adapted from https://github.com/lodash/lodash/blob/4.17.15/dist/lodash.js#L6735-L6744 */\n var rePropName = /[^%.[\\]]+|\\[(?:(-?\\d+(?:\\.\\d+)?)|([\"'])((?:(?!\\2)[^\\\\]|\\\\.)*?)\\2)\\]|(?=(?:\\.|\\[\\])(?:\\.|\\[\\]|%$))/g;\n@@ -1277,9 +1272,6 @@\n \t\tthrow new $TypeError('\"allowMissing\" argument must be a boolean');\n \t}\n \n-\tif ($exec(/^%?[^%]*%?$/, name) === null) {\n-\t\tthrow new $SyntaxError('`%` may not be present anywhere but at the beginning and end of the intrinsic name');\n-\t}\n \tvar parts = stringToPath(name);\n \tvar intrinsicBaseName = parts.length > 0 ? parts[0] : '';\n \n@@ -1623,20 +1615,16 @@\n     }\n     if (isMap(obj)) {\n         var mapParts = [];\n-        if (mapForEach) {\n-            mapForEach.call(obj, function (value, key) {\n-                mapParts.push(inspect(key, obj, true) + ' => ' + inspect(value, obj));\n-            });\n-        }\n+        mapForEach.call(obj, function (value, key) {\n+            mapParts.push(inspect(key, obj, true) + ' => ' + inspect(value, obj));\n+        });\n         return collectionOf('Map', mapSize.call(obj), mapParts, indent);\n     }\n",
+					"match": false,
+					"packageHash": "db716b0dbb193f9196cb485f7b263dc091af55b356f77db6b0df4fab106d8402",
+					"size": 69470,
+					"sourceHash": "27d7d7811ddfa98771316d5dc83bbd370e81b982ce982a12ee0a0e319fd20964",
+					"status": "content"
+				}
+			},
+			"summary": {
+				"differentFiles": 1,
+				"matchingFiles": 16,
+				"missingInPackage": 0,
+				"missingInSource": 0,
+				"score": 0.9411764705882353,
+				"totalFiles": 17
+			}
+		}
+	}
+]

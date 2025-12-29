@@ -1,0 +1,49 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2025-12-29T21:43:36.032Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:11.7.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "qs@6.5.1",
+			"name": "qs",
+			"version": "6.5.1",
+			"location": "https://registry.npmjs.org/qs/-/qs-6.5.1.tgz",
+			"integrity": "sha512-eRzhrN1WSINYCDCbrz796z37LOe3m5tmW7RQf6oBntukAG1nmovJvhnwHHRMAfeoItc1m2Hk02WER2aQ/iqs+A==",
+			"publishedAt": "2017-09-09T07:54:59.287Z",
+			"publishedWith": {
+				"node": "8.4.0",
+				"npm": "5.3.0"
+			}
+		},
+		"source": {
+			"integrity": "sha512-BES7eebDL9eSXUoxT9JgEyJT1jZhhW8kf718PF2dNpXdR15cqftCYWzH+a2IOagtsEtNzoR9VpOeiMpFmFEjQA==",
+			"location": "git+https://github.com/ljharb/qs.git",
+			"spec": "github:ljharb/qs#0e838daa71f91fecda456441ac64e615f38bed8b"
+		},
+		"comparisonHash": "8a2a8dcbb729bf3ee9216e490c955701f0ddebe1",
+		"diff": {
+			"files": {
+				"dist/qs.js": {
+					"diff": "--- published/dist/qs.js\n+++ rebuilt/dist/qs.js\n@@ -80,38 +80,36 @@\n     return obj;\n };\n \n-var parseObject = function (chain, val, options) {\n-    var leaf = val;\n+var parseObject = function parseObjectRecursive(chain, val, options) {\n+    if (!chain.length) {\n+        return val;\n+    }\n \n-    for (var i = chain.length - 1; i >= 0; --i) {\n-        var obj;\n-        var root = chain[i];\n+    var root = chain.shift();\n \n-        if (root === '[]') {\n+    var obj;\n+    if (root === '[]') {\n+        obj = [];\n+        obj = obj.concat(parseObject(chain, val, options));\n+    } else {\n+        obj = options.plainObjects ? Object.create(null) : {};\n+        var cleanRoot = root.charAt(0) === '[' && root.charAt(root.length - 1) === ']' ? root.slice(1, -1) : root;\n+        var index = parseInt(cleanRoot, 10);\n+        if (\n+            !isNaN(index)\n+            && root !== cleanRoot\n+            && String(index) === cleanRoot\n+            && index >= 0\n+            && (options.parseArrays && index <= options.arrayLimit)\n+        ) {\n             obj = [];\n-            obj = obj.concat(leaf);\n+            obj[index] = parseObject(chain, val, options);\n         } else {\n-            obj = options.plainObjects ? Object.create(null) : {};\n-            var cleanRoot = root.charAt(0) === '[' && root.charAt(root.length - 1) === ']' ? root.slice(1, -1) : root;\n-            var index = parseInt(cleanRoot, 10);\n-            if (\n-                !isNaN(index)\n-                && root !== cleanRoot\n-                && String(index) === cleanRoot\n-                && index >= 0\n-                && (options.parseArrays && index <= options.arrayLimit)\n-            ) {\n-                obj = [];\n-                obj[index] = leaf;\n-            } else {\n-                obj[cleanRoot] = leaf;\n-            }\n+            obj[cleanRoot] = parseObject(chain, val, options);\n         }\n-\n-        leaf = obj;\n     }\n \n-    return leaf;\n+    return obj;\n };\n \n var parseKeys = function parseQueryStringKeys(givenKey, val, options) {\n@@ -349,7 +347,7 @@\n     var serializeDate = typeof options.serializeDate === 'function' ? options.serializeDate : defaults.serializeDate;\n     var encodeValuesOnly = typeof options.encodeValuesOnly === 'boolean' ? options.encodeValuesOnly : defaults.encodeValuesOnly;\n     if (typeof options.format === 'undefined') {\n-        options.format = formats['default'];\n+        options.format = formats.default;\n     } else if (!Object.prototype.hasOwnProperty.call(formats.formatters, options.format)) {\n         throw new TypeError('Unknown format option provided.');\n     }\n@@ -433,30 +431,7 @@\n     return array;\n }());\n \n-var compactQueue = function compactQueue(queue) {\n-    var obj;\n-\n-    while (queue.length) {\n-        var item = queue.pop();\n-        obj = item.obj[item.prop];\n-\n-        if (Array.isArray(obj)) {\n-            var compacted = [];\n-\n-            for (var j = 0; j < obj.length; ++j) {\n-                if (typeof obj[j] !== 'undefined') {\n-                    compacted.push(obj[j]);\n-                }\n-            }\n-\n-            item.obj[item.prop] = compacted;\n-        }\n-    }\n-\n-    return obj;\n-};\n-\n",
+					"match": false,
+					"packageHash": "4f8321fbea52c83c0e3777fa9eeca5dc14886bcb0e0cbecef54a7f2fe5c30450",
+					"size": 19227,
+					"sourceHash": "4e04531e83f4c77bfd6bb4ecd163a6d964b50ef480ec8bf8667961f6cb443847",
+					"status": "content"
+				}
+			},
+			"summary": {
+				"differentFiles": 1,
+				"matchingFiles": 17,
+				"missingInPackage": 0,
+				"missingInSource": 0,
+				"score": 0.9444444444444444,
+				"totalFiles": 18
+			}
+		}
+	}
+]

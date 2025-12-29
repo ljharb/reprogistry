@@ -1,0 +1,49 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2025-12-29T21:43:49.166Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:11.7.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "qs@6.7.0",
+			"name": "qs",
+			"version": "6.7.0",
+			"location": "https://registry.npmjs.org/qs/-/qs-6.7.0.tgz",
+			"integrity": "sha512-VCdBRNFTX1fyE7Nb6FYoURo/SPe62QCaAyzJvUjwRaIsc+NePBEniHlvxFmmX56+HZphIGtV0XeCirBtpDrTyQ==",
+			"publishedAt": "2019-03-22T20:48:51.184Z",
+			"publishedWith": {
+				"node": "11.12.0",
+				"npm": "6.7.0"
+			}
+		},
+		"source": {
+			"integrity": "sha512-Q25qn/b8kwTJ4KJojuHYbDcRyQP0on+7xTGq4GCtBVIH829bBOnSaWy2Bmnnag0rh4Dn8z8M2Sn/KVVtYYZbLg==",
+			"location": "git+https://github.com/ljharb/qs.git",
+			"spec": "github:ljharb/qs#125e103b61f2bef245970f5a2a8dceffe5aab59a"
+		},
+		"comparisonHash": "8a2a8dcbb729bf3ee9216e490c955701f0ddebe1",
+		"diff": {
+			"files": {
+				"dist/qs.js": {
+					"diff": "--- published/dist/qs.js\n+++ rebuilt/dist/qs.js\n@@ -44,7 +44,6 @@\n     arrayLimit: 20,\n     charset: 'utf-8',\n     charsetSentinel: false,\n-    comma: false,\n     decoder: utils.decode,\n     delimiter: '&',\n     depth: 5,\n@@ -116,11 +115,6 @@\n         if (val && options.interpretNumericEntities && charset === 'iso-8859-1') {\n             val = interpretNumericEntities(val);\n         }\n-\n-        if (val && options.comma && val.indexOf(',') > -1) {\n-            val = val.split(',');\n-        }\n-\n         if (has.call(obj, key)) {\n             obj[key] = utils.combine(obj[key], val);\n         } else {\n@@ -220,41 +214,31 @@\n     return parseObject(keys, val, options);\n };\n \n-var normalizeParseOptions = function normalizeParseOptions(opts) {\n-    if (!opts) {\n-        return defaults;\n-    }\n+module.exports = function (str, opts) {\n+    var options = opts ? utils.assign({}, opts) : {};\n \n-    if (opts.decoder !== null && opts.decoder !== undefined && typeof opts.decoder !== 'function') {\n+    if (options.decoder !== null && options.decoder !== undefined && typeof options.decoder !== 'function') {\n         throw new TypeError('Decoder has to be a function.');\n     }\n \n-    if (typeof opts.charset !== 'undefined' && opts.charset !== 'utf-8' && opts.charset !== 'iso-8859-1') {\n+    options.ignoreQueryPrefix = options.ignoreQueryPrefix === true;\n+    options.delimiter = typeof options.delimiter === 'string' || utils.isRegExp(options.delimiter) ? options.delimiter : defaults.delimiter;\n+    options.depth = typeof options.depth === 'number' ? options.depth : defaults.depth;\n+    options.arrayLimit = typeof options.arrayLimit === 'number' ? options.arrayLimit : defaults.arrayLimit;\n+    options.parseArrays = options.parseArrays !== false;\n+    options.decoder = typeof options.decoder === 'function' ? options.decoder : defaults.decoder;\n+    options.allowDots = typeof options.allowDots === 'undefined' ? defaults.allowDots : !!options.allowDots;\n+    options.plainObjects = typeof options.plainObjects === 'boolean' ? options.plainObjects : defaults.plainObjects;\n+    options.allowPrototypes = typeof options.allowPrototypes === 'boolean' ? options.allowPrototypes : defaults.allowPrototypes;\n+    options.parameterLimit = typeof options.parameterLimit === 'number' ? options.parameterLimit : defaults.parameterLimit;\n+    options.strictNullHandling = typeof options.strictNullHandling === 'boolean' ? options.strictNullHandling : defaults.strictNullHandling;\n+\n+    if (typeof options.charset !== 'undefined' && options.charset !== 'utf-8' && options.charset !== 'iso-8859-1') {\n         throw new Error('The charset option must be either utf-8, iso-8859-1, or undefined');\n     }\n-    var charset = typeof opts.charset === 'undefined' ? defaults.charset : opts.charset;\n-\n-    return {\n-        allowDots: typeof opts.allowDots === 'undefined' ? defaults.allowDots : !!opts.allowDots,\n-        allowPrototypes: typeof opts.allowPrototypes === 'boolean' ? opts.allowPrototypes : defaults.allowPrototypes,\n-        arrayLimit: typeof opts.arrayLimit === 'number' ? opts.arrayLimit : defaults.arrayLimit,\n-        charset: charset,\n-        charsetSentinel: typeof opts.charsetSentinel === 'boolean' ? opts.charsetSentinel : defaults.charsetSentinel,\n-        comma: typeof opts.comma === 'boolean' ? opts.comma : defaults.comma,\n-        decoder: typeof opts.decoder === 'function' ? opts.decoder : defaults.decoder,\n-        delimiter: typeof opts.delimiter === 'string' || utils.isRegExp(opts.delimiter) ? opts.delimiter : defaults.delimiter,\n-        depth: typeof opts.depth === 'number' ? opts.depth : defaults.depth,\n-        ignoreQueryPrefix: opts.ignoreQueryPrefix === true,\n-        interpretNumericEntities: typeof opts.interpretNumericEntities === 'boolean' ? opts.interpretNumericEntities : defaults.interpretNumericEntities,\n-        parameterLimit: typeof opts.parameterLimit === 'number' ? opts.parameterLimit : defaults.parameterLimit,\n-        parseArrays: opts.parseArrays !== false,\n-        plainObjects: typeof opts.plainObjects === 'boolean' ? opts.plainObjects : defaults.plainObjects,\n-        strictNullHandling: typeof opts.strictNullHandling === 'boolean' ? opts.strictNullHandling : defaults.strictNullHandling\n-    };\n-};\n-\n-module.exports = function (str, opts) {\n-    var options = normalizeParseOptions(opts);\n+    if (typeof options.charset === 'undefined') {\n+        options.charset = defaults.charset;\n+    }\n \n     if (str === '' || str === null || typeof str === 'undefined') {\n         return options.plainObjects ? Object.create(null) : {};\n@@ -280,13 +264,11 @@\n \n var utils = require('./utils');\n var formats = require('./formats');\n-var has = Object.prototype.hasOwnProperty;\n \n var arrayPrefixGenerators = {\n     brackets: function brackets(prefix) { // eslint-disable-line func-name-matching\n         return prefix + '[]';\n     },\n-    comma: 'comma',\n     indices: function indices(prefix, key) { // eslint-disable-line func-name-matching\n         return prefix + '[' + key + ']';\n     },\n@@ -312,7 +294,6 @@\n     encode: true,\n     encoder: utils.encode,\n",
+					"match": false,
+					"packageHash": "085ea530c850a31be36cfafdb09136f97ceabe493b6ab9b96f2de3912ab4fe25",
+					"size": 24660,
+					"sourceHash": "a2c4a0e7c3b2c7c4973b763208e751a235af7e8905dbbb89c0c2d51d5275f717",
+					"status": "content"
+				}
+			},
+			"summary": {
+				"differentFiles": 1,
+				"matchingFiles": 17,
+				"missingInPackage": 0,
+				"missingInSource": 0,
+				"score": 0.9444444444444444,
+				"totalFiles": 18
+			}
+		}
+	}
+]
