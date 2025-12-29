@@ -43,8 +43,24 @@ var EXEC_OPTIONS = {
 	],
 };
 
+// Helper to merge objects without Object.assign (for older Node compatibility)
+function merge() {
+	var result = {};
+	for (var i = 0; i < arguments.length; i++) {
+		var obj = arguments[i];
+		if (obj) {
+			for (var key in obj) {
+				if (Object.prototype.hasOwnProperty.call(obj, key)) {
+					result[key] = obj[key];
+				}
+			}
+		}
+	}
+	return result;
+}
+
 function exec(command, options) {
-	return execSync(command, Object.assign({}, EXEC_OPTIONS, options)).toString().trim();
+	return execSync(command, merge(EXEC_OPTIONS, options)).toString().trim();
 }
 
 function isNvmAvailable() {
@@ -55,7 +71,7 @@ function execWithNodeVersion(nodeVersion, command, options) {
 	var version = nodeVersion.replace(/^v/, '');
 	var nvmCmd = 'source "' + NVM_SCRIPT + '" && nvm use ' + version + ' --silent && ' + command;
 
-	return execSync(nvmCmd, Object.assign({}, EXEC_OPTIONS, options, { shell: '/bin/bash' })).toString().trim();
+	return execSync(nvmCmd, merge(EXEC_OPTIONS, options, { shell: '/bin/bash' })).toString().trim();
 }
 
 function ensureNodeVersion(nodeVersion) {
@@ -68,7 +84,7 @@ function ensureNodeVersion(nodeVersion) {
 	try {
 		var installed = execSync(
 			'source "' + NVM_SCRIPT + '" && nvm ls ' + version + ' 2>/dev/null',
-			Object.assign({}, EXEC_OPTIONS, { shell: '/bin/bash' }),
+			merge(EXEC_OPTIONS, { shell: '/bin/bash' }),
 		).toString();
 
 		if (installed.indexOf(version) !== -1 && installed.indexOf('N/A') === -1) {
@@ -78,7 +94,7 @@ function ensureNodeVersion(nodeVersion) {
 		console.log('  -> Installing node ' + version + ' via nvm...');
 		execSync(
 			'source "' + NVM_SCRIPT + '" && nvm install ' + version,
-			Object.assign({}, EXEC_OPTIONS, { shell: '/bin/bash' }),
+			merge(EXEC_OPTIONS, { shell: '/bin/bash' }),
 		);
 		return true;
 	} catch (err) {
@@ -102,47 +118,79 @@ function npmInstall(dir, options) {
 	options = options || {};
 	var cmd = 'npm install --ignore-scripts --no-audit --no-fund';
 
-	if (options.before && options.npmVersion) {
-		if (semver.gte(options.npmVersion, NPM_BEFORE_VERSION)) {
-			cmd += ' --before="' + options.before + '"';
+	if (!options.before) {
+		throw new Error('npmInstall requires a --before timestamp for reproducible builds');
+	}
+
+	if (!options.npmVersion) {
+		throw new Error('npmInstall requires npmVersion to verify --before support');
+	}
+
+	if (!semver.gte(options.npmVersion, NPM_BEFORE_VERSION)) {
+		throw new Error('npm version ' + options.npmVersion + ' does not support --before (requires >= ' + NPM_BEFORE_VERSION + ')');
+	}
+
+	cmd += ' --before="' + options.before + '"';
+	console.log('  -> Using --before="' + options.before + '" with npm ' + options.npmVersion);
+
+	// Set NPM_CONFIG_BEFORE env var for transitive npm calls (e.g., prepack scripts)
+	var envWithBefore = {};
+	for (var key in process.env) {
+		if (Object.prototype.hasOwnProperty.call(process.env, key)) {
+			envWithBefore[key] = process.env[key];
 		}
 	}
+	envWithBefore.NPM_CONFIG_BEFORE = options.before;
 
 	var fullCmd = 'cd "' + dir + '" && ' + cmd;
 
 	if (options.nodeVersion && isNvmAvailable()) {
 		try {
-			execWithNodeVersion(options.nodeVersion, fullCmd);
+			execWithNodeVersion(options.nodeVersion, fullCmd, { env: envWithBefore });
 			return;
 		} catch (e) {
 			console.error('  -> Failed with node ' + options.nodeVersion + ', falling back to current: ' + e.message);
 		}
 	}
 
-	exec(fullCmd);
+	exec(fullCmd, { env: envWithBefore });
 }
 
 function npmPack(dir, options) {
 	options = options || {};
 	var cmd = 'cd "' + dir + '" && npm pack --dry-run --json';
 
+	// Set NPM_CONFIG_BEFORE env var for prepack scripts
+	var packEnv = null;
+	if (options.before) {
+		packEnv = {};
+		for (var key in process.env) {
+			if (Object.prototype.hasOwnProperty.call(process.env, key)) {
+				packEnv[key] = process.env[key];
+			}
+		}
+		packEnv.NPM_CONFIG_BEFORE = options.before;
+		console.log('  -> npm pack using NPM_CONFIG_BEFORE="' + options.before + '"');
+	}
+
+	var execOpts = packEnv ? { env: packEnv } : {};
 	var output;
 	if (options.nodeVersion && isNvmAvailable()) {
 		try {
-			output = execWithNodeVersion(options.nodeVersion, cmd);
+			output = execWithNodeVersion(options.nodeVersion, cmd, execOpts);
 		} catch (e) {
 			console.error('  -> npm pack failed with node ' + options.nodeVersion + ', falling back to current: ' + e.message);
-			output = exec(cmd);
+			output = exec(cmd, execOpts);
 		}
 	} else {
-		output = exec(cmd);
+		output = exec(cmd, execOpts);
 	}
 
 	return JSON.parse(output)[0];
 }
 
 module.exports = async function reproduce(spec, opts) {
-	opts = Object.assign({
+	opts = merge({
 		cache: {},
 		cacheDir: DEFAULT_CACHE_DIR,
 		cacheFile: DEFAULT_CACHE_FILE,
@@ -211,8 +259,12 @@ module.exports = async function reproduce(spec, opts) {
 			if (packument.time && packument.time[manifest.version]) {
 				publishTime = packument.time[manifest.version];
 			}
-		} catch (e) { // eslint-disable-line no-unused-vars
-			// Ignore - we'll proceed without --before
+		} catch (e) {
+			console.error('  -> Failed to fetch packument for publish time: ' + e.message);
+		}
+
+		if (!publishTime) {
+			throw new Error('Could not determine publish time for ' + spec + ' - required for --before');
 		}
 
 		try {
@@ -233,6 +285,7 @@ module.exports = async function reproduce(spec, opts) {
 
 			packed = npmPack(packageDir, {
 				nodeVersion: useOriginalNode ? originalNodeVersion : null,
+				before: publishTime,
 			});
 		} catch (e) {
 			console.error('  -> Reproduce error: ' + e.message);
