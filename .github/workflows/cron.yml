@@ -128,14 +128,26 @@ jobs:
         run: |
           # Sanitize package name for filename (replace / with --)
           SAFE_NAME=$(echo "${{ matrix.package }}" | sed 's/\//__/g')
-          mkdir -p /tmp/results
+          mkdir -p /tmp/results /tmp/removals
           echo "${{ matrix.package }}||${{ steps.versions.outputs.missingRepros }}" > "/tmp/results/${SAFE_NAME}.txt"
           echo "safe_name=${SAFE_NAME}" >> $GITHUB_OUTPUT
+
+          # If package was marked for removal, save removal info
+          if [ "${{ steps.versions.outputs.removed }}" = "true" ]; then
+            echo "${{ matrix.package }}||${{ steps.versions.outputs.removedReason }}" > "/tmp/removals/${SAFE_NAME}.txt"
+          fi
 
       - uses: actions/upload-artifact@v4
         with:
           name: result-${{ steps.save.outputs.safe_name }}
           path: /tmp/results/${{ steps.save.outputs.safe_name }}.txt
+          retention-days: 1
+
+      - uses: actions/upload-artifact@v4
+        if: steps.versions.outputs.removed == 'true'
+        with:
+          name: removal-${{ steps.save.outputs.safe_name }}
+          path: /tmp/removals/${{ steps.save.outputs.safe_name }}.txt
           retention-days: 1
 
   write-to-queue:
@@ -176,3 +188,71 @@ jobs:
             git rebase origin/queue
             git push
           fi
+
+  remove-packages:
+    needs: process-package
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: removal-*
+          path: /tmp/removals
+          merge-multiple: true
+        continue-on-error: true
+
+      - name: Check for removals
+        id: check
+        run: |
+          if [ -d /tmp/removals ] && [ "$(ls -A /tmp/removals 2>/dev/null)" ]; then
+            echo "has_removals=true" >> $GITHUB_OUTPUT
+          else
+            echo "has_removals=false" >> $GITHUB_OUTPUT
+            echo "::notice::No packages to remove"
+          fi
+
+      - uses: actions/checkout@v6
+        if: steps.check.outputs.has_removals == 'true'
+        with:
+          fetch-depth: 0
+          ref: data
+          persist-credentials: true
+
+      - name: Remove packages from list
+        if: steps.check.outputs.has_removals == 'true'
+        run: |
+          git config --global user.email "${GITHUB_ACTOR}@users.noreply.github.com"
+          git config --global user.name "${GITHUB_ACTOR}"
+
+          for file in /tmp/removals/*.txt; do
+            [ -f "$file" ] || continue
+            CONTENT=$(cat "$file")
+            PACKAGE=$(echo "$CONTENT" | cut -d'|' -f1)
+            REASON=$(echo "$CONTENT" | cut -d'|' -f3)
+
+            if grep -q "^${PACKAGE}$" packages.txt; then
+              grep -v "^${PACKAGE}$" packages.txt > packages.txt.tmp
+              mv packages.txt.tmp packages.txt
+
+              # Verify the package was actually removed
+              if grep -q "^${PACKAGE}$" packages.txt; then
+                echo "::error::Failed to remove ${PACKAGE} from packages.txt"
+                exit 1
+              fi
+
+              git add packages.txt
+              git commit -m "[Remove] \`${PACKAGE}\`: ${REASON}"
+              echo "::notice::Removed ${PACKAGE}: ${REASON}"
+            else
+              echo "::notice::Package ${PACKAGE} not found in packages.txt"
+            fi
+          done
+
+      - name: Push changes
+        if: steps.check.outputs.has_removals == 'true'
+        run: |
+          git fetch origin data
+          git rebase origin/data
+          git push

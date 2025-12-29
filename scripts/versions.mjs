@@ -19,9 +19,32 @@ const pkgDir = path.join(process.cwd(), 'data', 'results', /** @type {string} */
 /** @typedef {`${number}.${number}.${number}${'' | '-${string}'}`} Version */
 /** @typedef {import('reproduce').ReproduceResult & { diff?: object, comparisonHash?: string }} EnhancedResult */
 
-const versions = /** @type {Version[]} */ (
-	await packument(`${pkg}@*`).then(({ versions: vs }) => Object.keys(vs))
-);
+let packumentResult;
+try {
+	packumentResult = await packument(`${pkg}@*`);
+} catch (err) {
+	if (err && err.code === 'E404') {
+		// Verify the 404 by making a direct request to the npm registry
+		const registryUrl = `https://registry.npmjs.org/${encodeURIComponent(pkg).replace('%40', '@')}`;
+		const verifyResponse = await fetch(registryUrl);
+		if (verifyResponse.status === 404) {
+			console.log(`Package ${pkg} confirmed not found on npm (verified via registry), marking for removal`);
+			setOutput('missingRepros', '');
+			setOutput('removed', 'true');
+			setOutput('removedReason', 'package no longer exists on npm');
+			process.exit(0);
+		}
+		// If verification didn't confirm 404, treat as transient error
+		console.error(`Package ${pkg} got E404 from pacote but registry returned ${verifyResponse.status}, treating as error`);
+		throw err;
+	}
+	throw err; // re-throw non-404 errors
+}
+if (!packumentResult || !packumentResult.versions) {
+	throw new Error(`Unexpected empty packument for ${pkg}`);
+}
+
+const versions = /** @type {Version[]} */ (Object.keys(packumentResult.versions));
 
 const existingEntries = await Promise.all(versions.map(async (v) => /** @type {const} */ ([
 	v,
