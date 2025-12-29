@@ -20,6 +20,9 @@ var pkg = require('../package.json');
 // npm >= 5.0.0 supports --before flag for time-based dependency resolution
 var NPM_BEFORE_VERSION = '5.0.0';
 
+// Minimum Node.js version that can be installed via nvm in GitHub Actions
+var MIN_NODE_VERSION = '0.8.0';
+
 // NVM_DIR for nvm integration
 var NVM_DIR = process.env.NVM_DIR || path.join(os.homedir(), '.nvm');
 var NVM_SCRIPT = path.join(NVM_DIR, 'nvm.sh');
@@ -274,6 +277,12 @@ module.exports = async function reproduce(spec, opts) {
 
 		var originalNodeVersion = manifest._nodeVersion || null;
 		var useOriginalNode = false;
+
+		// Clamp node version to minimum installable version
+		if (originalNodeVersion && semver.lt(semver.coerce(originalNodeVersion), MIN_NODE_VERSION)) {
+			console.log('  -> Node ' + originalNodeVersion + ' is below minimum, clamping to ' + MIN_NODE_VERSION);
+			originalNodeVersion = MIN_NODE_VERSION;
+		}
 
 		if (originalNodeVersion && isNvmAvailable()) {
 			useOriginalNode = ensureNodeVersion(originalNodeVersion);
