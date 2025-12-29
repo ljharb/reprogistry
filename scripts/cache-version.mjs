@@ -123,9 +123,10 @@ async function performComparison(result) {
 		// Clone the repo (shallow clone of the specific commit)
 		execSync(`git clone --depth 1 "${cloneUrl}" "${sourceDir}" 2>/dev/null || git clone "${cloneUrl}" "${sourceDir}"`, { stdio: 'pipe' });
 
-		// Fetch and checkout the specific commit
-		execSync(`cd "${sourceDir}" && git fetch --depth 1 origin "${gitRef}" 2>/dev/null || git fetch origin "${gitRef}" 2>/dev/null || git fetch --unshallow origin 2>/dev/null || true`, { stdio: 'pipe' });
-		execSync(`cd "${sourceDir}" && git checkout "${gitRef}"`, { stdio: 'pipe' });
+		// Fetch and checkout the specific commit or tag
+		// For tags, we need to fetch them explicitly since shallow clones don't include tags
+		execSync(`cd "${sourceDir}" && git fetch --depth 1 origin tag "${gitRef}" 2>/dev/null || git fetch --depth 1 origin "${gitRef}" 2>/dev/null || git fetch origin "${gitRef}" 2>/dev/null || git fetch --tags --unshallow origin 2>/dev/null || true`, { stdio: 'pipe' });
+		execSync(`cd "${sourceDir}" && git checkout "${gitRef}" 2>/dev/null || git checkout "tags/${gitRef}" 2>/dev/null || git checkout FETCH_HEAD`, { stdio: 'pipe' });
 
 		/*
 		 * Install dependencies and run npm pack with node_modules/.bin in PATH
