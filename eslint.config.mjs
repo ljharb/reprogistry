@@ -1,6 +1,9 @@
 import baseConfig from '@ljharb/eslint-config/flat/node/latest';
 
 export default [
+	{
+		ignores: ['dashboard/**'],
+	},
 	...baseConfig,
 	{
 		rules: {
