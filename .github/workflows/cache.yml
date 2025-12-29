@@ -16,25 +16,14 @@ on:
 permissions:
   contents: read
 
-concurrency:
-  group: data-submodule-push
-  cancel-in-progress: false
-
 jobs:
-  cache:
-    permissions:
-      contents: write
-
+  setup:
     runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+      package: ${{ steps.set-matrix.outputs.package }}
     steps:
       - uses: actions/checkout@v6
-        with:
-          fetch-depth: 0
-          persist-credentials: true
-          submodules: true
-
-      #- run: git submodule init && git submodule update --recursive
-      - run: cd data && git merge origin/data && cd ..
 
       - uses: ljharb/actions/node/install@main
         with:
@@ -45,14 +34,105 @@ jobs:
         env:
           PACKAGE: ${{ github.event.client_payload.package || inputs.package }}
 
+      - name: generate version matrix
+        id: set-matrix
+        run: |
+          PACKAGE="${{ github.event.client_payload.package || inputs.package }}"
+          VERSIONS="${{ github.event.client_payload.versions || inputs.versions }}"
+
+          # Get matching versions using node
+          MATRIX=$(node -e "
+            const pacote = require('pacote');
+            const { Range } = require('semver');
+
+            (async () => {
+              const packument = await pacote.packument('${PACKAGE}');
+              const allVersions = Object.keys(packument.versions);
+              const range = new Range('${VERSIONS}');
+              const matching = allVersions.filter(v => range.test(v));
+              console.log(JSON.stringify(matching));
+            })();
+          ")
+
+          echo "matrix=${MATRIX}" >> $GITHUB_OUTPUT
+          echo "package=${PACKAGE}" >> $GITHUB_OUTPUT
+          echo "Found versions: ${MATRIX}"
+
+  process:
+    needs: setup
+    if: ${{ needs.setup.outputs.matrix != '[]' }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      max-parallel: 10
+      matrix:
+        version: ${{ fromJson(needs.setup.outputs.matrix) }}
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          persist-credentials: true
+          submodules: true
+
+      - run: cd data && git merge origin/data && cd ..
+
+      - uses: ljharb/actions/node/install@main
+        with:
+          node-version: node
+
       - run: mkdir -p "data/results/${PACKAGE}"
         env:
-          PACKAGE: ${{ github.event.client_payload.package || inputs.package }}
+          PACKAGE: ${{ needs.setup.outputs.package }}
 
-      - run: node scripts/cache.mjs
+      - name: sanitize version
+        id: sanitize
+        run: |
+          # Create sanitized version for artifact name (replace + with __)
+          echo "safe_version=$(echo '${{ matrix.version }}' | sed 's/+/__/g')" >> $GITHUB_OUTPUT
+
+      - name: process version
+        run: node scripts/cache-version.mjs
         env:
-          PACKAGE: ${{ github.event.client_payload.package || inputs.package }}
-          VERSIONS: ${{ github.event.client_payload.versions || inputs.versions }}
+          PACKAGE: ${{ needs.setup.outputs.package }}
+          VERSION: ${{ matrix.version }}
+
+      - name: upload result
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: result-${{ steps.sanitize.outputs.safe_version }}
+          path: data/results/${{ needs.setup.outputs.package }}/
+          retention-days: 1
+          if-no-files-found: ignore
+
+  commit:
+    needs: [setup, process]
+    if: ${{ always() && needs.setup.result == 'success' }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    concurrency:
+      group: data-submodule-push
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          persist-credentials: true
+          submodules: true
+
+      - run: cd data && git merge origin/data && cd ..
+
+      - run: mkdir -p "data/results/${PACKAGE}"
+        env:
+          PACKAGE: ${{ needs.setup.outputs.package }}
+
+      - name: download all results
+        uses: actions/download-artifact@v4
+        with:
+          path: data/results/${{ needs.setup.outputs.package }}/
+          pattern: result-*
+          merge-multiple: true
 
       - run: (cd data && git diff && git status && git checkout -b data)
 
@@ -72,7 +152,7 @@ jobs:
             exit 0
           fi
 
-          git commit -m '`${{ github.event.client_payload.package || inputs.package }}`: update results'
+          git commit -m '`${{ needs.setup.outputs.package }}`: update results'
           git fetch origin data
           git rebase origin/data
           git push
