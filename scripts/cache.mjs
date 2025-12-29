@@ -6,18 +6,18 @@ import path from 'node:path';
 import { pipeline } from 'node:stream/promises';
 
 import pacote from 'pacote';
-import { reproduce } from 'reproduce';
 import { compare as semverCompare, Range } from 'semver';
 
 import { compareDirectories, filterNonMatching } from './compare.mjs';
 import COMPARISON_HASH from './comparison-hash.mjs';
+import reproduce from './reproduce.js';
 
 const { PACKAGE: pkg, VERSIONS } = process.env;
 
 const pkgDir = path.join(process.cwd(), 'data', 'results', /** @type {string} */ (pkg));
 
 /** @typedef {`${number}.${number}.${number}${'' | '-${string}'}`} Version */
-/** @typedef {import('reproduce').ReproduceResult} ReproduceResult */
+/** @typedef {{ reproduceVersion: string, timestamp: string, os: string, arch: string, strategy: string, reproduced: boolean, attested: boolean, package: object, source: object }} ReproduceResult */
 /** @typedef {import('./compare.mjs').ComparisonResult} ComparisonResult */
 
 /**
