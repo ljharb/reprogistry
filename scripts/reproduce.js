@@ -235,7 +235,38 @@ module.exports = async function reproduce(spec, opts) {
 
 		var location = parsed.pathname.replace('.git', '').replace(/^\//, '');
 		var repoPath = repo.directory ? '::path:' + repo.directory : '';
-		var ref = manifest.gitHead || 'HEAD';
+
+		// Determine git ref: prefer gitHead, then try version tags, finally fallback to HEAD
+		var ref = manifest.gitHead;
+		if (!ref) {
+			// Try to find a matching tag (v1.2.3 or 1.2.3)
+			var tagRef = 'v' + manifest.version;
+			try {
+				var tagCheck = exec('git ls-remote --tags "https://github.com/' + location + '.git" "' + tagRef + '" "' + manifest.version + '" 2>/dev/null || true');
+				if (tagCheck) {
+					var lines = tagCheck.split('\n').filter(Boolean);
+					if (lines.length > 0) {
+						// Prefer exact version tag over v-prefixed
+						var exactMatch = lines.find(function (l) { return l.endsWith('refs/tags/' + manifest.version); });
+						var vMatch = lines.find(function (l) { return l.endsWith('refs/tags/v' + manifest.version); });
+						if (exactMatch) {
+							ref = manifest.version;
+							console.log('  -> Using git tag: ' + ref);
+						} else if (vMatch) {
+							ref = 'v' + manifest.version;
+							console.log('  -> Using git tag: ' + ref);
+						}
+					}
+				}
+			} catch (e) {
+				// Ignore tag lookup failures
+			}
+		}
+		if (!ref) {
+			ref = 'HEAD';
+			console.log('  -> Warning: No gitHead or version tag found, using HEAD');
+		}
+
 		var source = 'github:' + location + '#' + ref + repoPath;
 
 		var packed = {};
