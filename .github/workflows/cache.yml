@@ -22,6 +22,7 @@ jobs:
     outputs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
       package: ${{ steps.set-matrix.outputs.package }}
+      remaining: ${{ steps.set-matrix.outputs.remaining }}
     steps:
       - uses: actions/checkout@v6
 
@@ -40,23 +41,38 @@ jobs:
           PACKAGE="${{ github.event.client_payload.package || inputs.package }}"
           VERSIONS="${{ github.event.client_payload.versions || inputs.versions }}"
 
-          # Get matching versions using node
-          MATRIX=$(node -e "
+          # Get matching versions using node (limited to 256 for GitHub Actions matrix limit)
+          node -e "
             const pacote = require('pacote');
             const { Range } = require('semver');
+            const fs = require('fs');
+
+            const MAX_MATRIX_SIZE = 256;
 
             (async () => {
               const packument = await pacote.packument('${PACKAGE}');
               const allVersions = Object.keys(packument.versions);
               const range = new Range('${VERSIONS}');
               const matching = allVersions.filter(v => range.test(v));
-              console.log(JSON.stringify(matching));
-            })();
-          ")
 
-          echo "matrix=${MATRIX}" >> $GITHUB_OUTPUT
-          echo "package=${PACKAGE}" >> $GITHUB_OUTPUT
-          echo "Found versions: ${MATRIX}"
+              const toProcess = matching.slice(0, MAX_MATRIX_SIZE);
+              const remaining = matching.slice(MAX_MATRIX_SIZE);
+
+              if (remaining.length > 0) {
+                console.error('Warning: ' + matching.length + ' versions exceed matrix limit, processing first ' + MAX_MATRIX_SIZE + ', requeueing ' + remaining.length);
+              }
+
+              // Write outputs
+              const output = [
+                'matrix=' + JSON.stringify(toProcess),
+                'package=${PACKAGE}',
+                'remaining=' + (remaining.length > 0 ? remaining.join('||') : '')
+              ].join('\n');
+              fs.appendFileSync(process.env.GITHUB_OUTPUT, output + '\n');
+
+              console.log('Processing ' + toProcess.length + ' versions');
+            })();
+          "
 
   process:
     needs: setup
@@ -155,4 +171,38 @@ jobs:
           git commit -m '`${{ needs.setup.outputs.package }}`: update results'
           git fetch origin data
           git rebase origin/data
+          git push
+
+  requeue-remaining:
+    needs: [setup, commit]
+    if: ${{ always() && needs.setup.result == 'success' && needs.setup.outputs.remaining != '' }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    concurrency:
+      group: cache-queue-requeue
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: queue
+          persist-credentials: true
+
+      - name: Append remaining versions to queue
+        run: |
+          PACKAGE="${{ needs.setup.outputs.package }}"
+          REMAINING="${{ needs.setup.outputs.remaining }}"
+
+          echo "${PACKAGE}||${REMAINING}" >> cache-queue.txt
+          QUEUE_SIZE=$(wc -l < cache-queue.txt)
+          echo "::notice::Requeued remaining versions for ${PACKAGE}, queue now has ${QUEUE_SIZE} entries"
+
+      - name: Commit and push queue
+        run: |
+          git config --global user.email "${GITHUB_ACTOR}@users.noreply.github.com"
+          git config --global user.name "${GITHUB_ACTOR}"
+          git add cache-queue.txt
+          git commit -m 'queue: requeue overflow versions for `${{ needs.setup.outputs.package }}`'
+          git fetch origin queue
+          git rebase origin/queue
           git push
