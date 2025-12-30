@@ -1,0 +1,55 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2025-12-30T11:05:34.280Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:11.7.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "babel-plugin-external-helpers@1.0.0",
+			"name": "babel-plugin-external-helpers",
+			"version": "1.0.0",
+			"location": "https://registry.npmjs.org/babel-plugin-external-helpers/-/babel-plugin-external-helpers-1.0.0.tgz",
+			"integrity": "sha512-01HKccs6FSt+p5LXlq5K5owWOvPDVd9l+ql0m6jIny2sN4bPOc8C8Ci9ZtHwBYqZ2c55s/FWrtARjx7Ba3MRog==",
+			"publishedAt": "2015-08-16T17:15:28.525Z",
+			"publishedWith": {
+				"node": "0.12.3",
+				"npm": "2.13.3"
+			}
+		},
+		"source": {
+			"integrity": "sha512-outoNyi55FMl/3WYj24YdttohoeBqTz0yF3BZ3X2KMCBl7aYO64uWs4kc3/0BJ/wf9zs/ZChVZwZsI1lBy4l8g==",
+			"location": "git+https://github.com/jquense/babel-plugin-external-helpers.git",
+			"spec": "github:jquense/babel-plugin-external-helpers#2f42ea8ed141eb923fa9892fa5f368527c42a6f9"
+		},
+		"comparisonHash": "8a2a8dcbb729bf3ee9216e490c955701f0ddebe1",
+		"diff": {
+			"files": {
+				".npmignore": {
+					"match": false,
+					"packageHash": "8e17410e71106c68f91539cca8a1b98b0eaea86b19298a9a5d96b7965216bc44",
+					"size": 1276,
+					"status": "missing-in-source"
+				},
+				"index.js": {
+					"diff": "--- published/index.js\n+++ rebuilt/index.js\n@@ -1,44 +1,39 @@\n-\r\n-module.exports = function plugin(babel) {\r\n-  var Plugin = babel.Plugin || babel.Transformer\r\n-    , t = babel.types;\r\n-\r\n-  return new Plugin('insert-helper-require', {\r\n-    visitor: {\r\n-\r\n-      Program: function(node, parent, scope, file) {\r\n-        var extra = file.opts.extra;\r\n-\r\n-        if (!extra || !extra.externalHelperPath)\r\n-          throw new Error('must provide a resolvable module path in babel config: `extra.externalHelperPath`')\r\n-\r\n-        var filepath = path.normalize(file.opts.filename)\r\n-          , cwd = filepath.substr(0, filepath.indexOf(path.normalize(file.opts.filenameRelative)))\r\n-          , importPath = getPath(filepath, cwd, extra.externalHelperPath)\r\n-\r\n-        var modulePath = file.resolveModuleSource(importPath)\r\n-          , name = 'babelHelpers'\r\n-          , id = file.dynamicImportIds[name] = t.identifier(name);\r\n-\r\n-        if (!Object.keys(file.usedHelpers || {}).length)\r\n-          return node\r\n-\r\n-        var first = node.body[0]\r\n-          , declar = t.variableDeclaration(\"var\", [\r\n-            t.variableDeclarator(id,\r\n-              t.callExpression(\r\n-                t.identifier(\"require\"), [ t.literal(modulePath) ]\r\n-              )\r\n-            )\r\n-          ])\r\n-\r\n-        if (t.isExpressionStatement(first) && t.isLiteral(first.expression, { value: \"use strict\" }))\r\n-          node.body.splice(1, 0, declar)\r\n-        else\r\n-          node.body.unshift(declar)\r\n-\r\n-        return node\r\n-      }\r\n-    }\r\n-  })\r\n-}\r\n+\n+module.exports = function plugin(babel) {\n+  var Plugin = babel.Plugin || babel.Transformer\n+    , t = babel.types;\n+\n+  return new Plugin('insert-helper-require', {\n+    visitor: {\n+\n+      Program: function(node, parent, scope, file) {\n+        var filepath = path.normalize(file.opts.filename)\n+          , cwd = filepath.substr(0, filepath.indexOf(path.normalize(file.opts.filenameRelative)))\n+          , importPath = getPath(filepath, cwd, file.opts.extra.externalHelperPath)\n+\n+        var modulePath = file.resolveModuleSource(importPath)\n+          , name = 'babelHelpers'\n+          , id = file.dynamicImportIds[name] = t.identifier(name);\n+\n+        if (!Object.keys(file.usedHelpers || {}).length)\n+          return node\n+\n+        var first = node.body[0]\n+          , declar = t.variableDeclaration(\"var\", [\n+            t.variableDeclarator(id,\n+              t.callExpression(\n+                t.identifier(\"require\"), [ t.literal(modulePath) ]\n+              )\n+            )\n+          ])\n+\n+        if (t.isExpressionStatement(first) && t.isLiteral(first.expression, { value: \"use strict\" }))\n+          node.body.splice(1, 0, declar)\n+        else\n+          node.body.unshift(declar)\n+\n+        return node\n+      }\n+    }\n+  })\n+}\n",
+					"match": false,
+					"packageHash": "ac50c7dd13c2f843abea4001b6924152a68a1a376fb91a69f39c4330eafd03eb",
+					"size": 1450,
+					"sourceHash": "1de2029b601d6795c2e99c01ded303683c587c93e10e93eef92782fa532d0900",
+					"status": "content"
+				}
+			},
+			"summary": {
+				"differentFiles": 1,
+				"matchingFiles": 2,
+				"missingInPackage": 0,
+				"missingInSource": 1,
+				"score": 0.5,
+				"totalFiles": 4
+			}
+		}
+	}
+]
