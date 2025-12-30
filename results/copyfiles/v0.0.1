@@ -1,0 +1,103 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2025-12-30T15:00:52.983Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:11.7.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "copyfiles@0.0.1",
+			"name": "copyfiles",
+			"version": "0.0.1",
+			"location": "https://registry.npmjs.org/copyfiles/-/copyfiles-0.0.1.tgz",
+			"integrity": "sha512-hrEA60qVm141yL6QXcgvGS0gybQOZSZ+WXqZd3rSd3qzLpkGb4Ia62oafNr76oxJEN3JzDpATO6d+PyLSS/cCg==",
+			"publishedAt": "2014-03-19T19:19:54.345Z",
+			"publishedWith": {
+				"node": null,
+				"npm": "1.4.3"
+			}
+		},
+		"source": {
+			"integrity": "sha512-f5M1EXPrLxNEtNukl6lUrLOvAkdcmYqrxUJS9/gvsoQXqkwACWd5rz9zcBEIw7bOPHmby2Av/RFiTzfz3aHJbg==",
+			"location": "git://github.com/calvinmetcalf/copyfiles.git",
+			"spec": "github:calvinmetcalf/copyfiles#HEAD"
+		},
+		"comparisonHash": "8a2a8dcbb729bf3ee9216e490c955701f0ddebe1",
+		"diff": {
+			"files": {
+				".npmignore": {
+					"match": false,
+					"packageHash": "901d5b18ce92002c4e1ab4e6c64195367b214b0eea36372fa7220dc4402d8b53",
+					"size": 54,
+					"status": "missing-in-source"
+				},
+				".travis.yml": {
+					"diff": "--- published/.travis.yml\n+++ rebuilt/.travis.yml\n@@ -1,3 +1,6 @@\n language: node_js\n node_js:\n-  - 0.10\n\\ No newline at end of file\n+  - 10\n+  - 12\n+  - \"14\"\n+  - lts/*\n",
+					"match": false,
+					"packageHash": "6ba6cef507bf4b17a736ff84afa9dddd8dd802a6c75f16a9c28c13cf096ba93e",
+					"size": 35,
+					"sourceHash": "9296517eb047358c164a8b79ed6977de5e2f381c0799501d458a2a338e5f9d52",
+					"status": "content"
+				},
+				"copyfiles": {
+					"diff": "--- published/copyfiles\n+++ rebuilt/copyfiles\n@@ -1,18 +1,47 @@\n #!/usr/bin/env node\n 'use strict';\n var copyfiles = require('./index');\n-var pkg = require('./package.json');\n-var program = require('ltcdr');\n-program.version(pkg.version)\n-  .option('-u, --up [levels]', 'slice a path off the bottom of the paths', parseInt)\n-  .usage('[options] inFile [more files ...] outDirectory')\n-  .parse(process.argv);\n-\n-copyfiles(process.argv.slice(2), program.up, function (err) {\n+var args = require('yargs');\n+var path = require('path');\n+args.alias('u', 'up')\n+  .describe('u', 'slice a path off the bottom of the paths')\n+  .number('u')\n+if (path.basename(args.argv.$0) === 'copyup') {\n+  args.default('u', '1');\n+}\n+args.alias('a', 'all')\n+  .describe('a', 'include files & directories begining with a dot (.)')\n+  .boolean('a')\n+  .alias('f','flat')\n+  .describe('f', 'flatten the output')\n+  .boolean('f')\n+  .alias('e', 'exclude')\n+  .describe('e', 'pattern or glob to exclude (may be passed multiple times)')\n+  .alias('E', 'error')\n+  .boolean('E')\n+  .describe('E', 'throw error if nothing is copied')\n+  .alias('V', 'verbose')\n+  .boolean('V')\n+  .describe('V', 'print more information to console')\n+  .alias('s','soft')\n+  .boolean('s')\n+  .describe('s', 'do not overwrite destination files if they exist')\n+  .alias('F', 'follow')\n+  .boolean('F')\n+  .describe('F', 'follow symbolink links')\n+  .usage('$0 [options] inFile [more files ...] outDirectory')\n+  .help()\n+  .alias('v', 'version')\n+  .alias('h', 'help');\n+var argv = args.argv;\n+if (argv.flat) {\n+  argv.up = true;\n+}\n+copyfiles(argv._, argv, function (err) {\n   if (err) {\n     console.error(err);\n     process.exit(1);\n   } else {\n     process.exit(0);\n   }\n-});\n\\ No newline at end of file\n+});\n",
+					"match": false,
+					"packageHash": "b7c90f6d23d74759550d0df2b71a4e20fce1d20e43a202eed2e3fb78be3bac67",
+					"size": 496,
+					"sourceHash": "15ac1877cb4c6114ea85b293879bd42a18b300ff325b17aa5aa71874bc2b1d45",
+					"status": "content"
+				},
+				"index.js": {
+					"diff": "--- published/index.js\n+++ rebuilt/index.js\n@@ -3,8 +3,21 @@\n var fs = require('fs');\n var glob = require('glob');\n var mkdirp = require('mkdirp');\n+var untildify = require('untildify');\n var through = require('through2').obj;\n-var toStream = require('stream-array');\n+var noms = require('noms').obj;\n+function toStream(_array) {\n+  var array = _array.filter(item=>item!==null)\n+  var length = array.length;\n+  var i = 0;\n+  return noms(function (done) {\n+    if (i >= length) {\n+      this.push(null);\n+    }\n+    this.push(array[i++]);\n+    done();\n+  });\n+}\n function depth(string) {\n   return path.normalize(string).split(path.sep).length - 1;\n }\n@@ -12,52 +25,144 @@\n   if (!up) {\n     return inPath;\n   }\n+  if (up === true) {\n+    return path.basename(inPath);\n+  }\n   if (depth(inPath) < up) {\n     throw new Error('cant go up that far');\n   }\n-  return path.join.apply(path, inPath.split(path.sep).slice(1));\n+  return path.join.apply(path, path.normalize(inPath).split(path.sep).slice(up));\n+}\n+var copyFile = _copyFile;\n+function _copyFile (src, dst, opts, callback) {\n+  fs.createReadStream(src)\n+    .pipe(fs.createWriteStream(dst, {\n+      mode: opts.mode\n+    }))\n+    .once('error', callback)\n+    .once('finish', function () {\n+      fs.chmod(dst, opts.mode, function (err) {\n+        callback(err);\n+      })\n+    })\n+}\n+if (fs.copyFile) {\n+  copyFile = function (src, dst, opts, callback) {\n+    fs.copyFile(src, dst, callback);\n+  }\n+}\n+function makeDebug(config) {\n+  if (config.verbose) {\n+    return function (thing) {\n+      console.log(thing);\n+    }\n+  }\n+  return function () {}\n }\n module.exports = copyFiles;\n-function copyFiles(args, opts, callback) {\n-  if (typeof opts === 'function') {\n-    callback = opts;\n-    opts = 0;\n+function copyFiles(args, config, callback) {\n+  if (typeof config === 'function') {\n+    callback = config;\n+    config = {\n+      up:0\n+    };\n+  }\n+  if (typeof config !== 'object' && config) {\n+    config = {\n+      up: config\n+    };\n   }\n-  opts = opts || 0;\n+  var debug = makeDebug(config);\n+  var copied = false;\n+  var opts = config.up || 0;\n+  var soft = config.soft;\n   if (typeof callback !== 'function') {\n     throw new Error('callback is not optional');\n   }\n   var input = args.slice();\n   var outDir = input.pop();\n-  toStream(input)\n+  var globOpts = {};\n+  if (config.exclude) {\n+    globOpts.ignore = config.exclude;\n+  }\n+  if (config.all) {\n+    globOpts.dot = true;\n+  }\n+  if (config.follow) {\n",
+					"match": false,
+					"packageHash": "6c2c54c5db44022500e0e30ec11dfaf968d9918fbd6ca715004dc946ec8b33be",
+					"size": 1608,
+					"sourceHash": "b960c5bf95e5cb406be1572f63c031fe9559621f8d5b201778e52665fac42d6e",
+					"status": "content"
+				},
+				"license.md": {
+					"diff": "--- published/license.md\n+++ rebuilt/license.md\n@@ -1,4 +1,4 @@\n-# Copyright (c) 2014 Calvin Metcalf\n+# Copyright (c) 2014-2018 Calvin Metcalf\n \n Permission is hereby granted, free of charge, to any person obtaining a copy\n of this software and associated documentation files (the \"Software\"), to deal\n@@ -16,4 +16,4 @@\n AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER\n LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,\n OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN\n-THE SOFTWARE.**\n\\ No newline at end of file\n+THE SOFTWARE.**\n",
+					"match": false,
+					"packageHash": "2a8e97a9eaf0d57ff2021b8f97edb62b88550ab935a2abb5ed7f0eff99a1e713",
+					"size": 1063,
+					"sourceHash": "160a5f5568b57f33089966f2cf72816efd299820a685cffe7282dffede8263b7",
+					"status": "content"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -1,20 +1,25 @@\n {\n   \"name\": \"copyfiles\",\n-  \"version\": \"0.0.1\",\n+  \"version\": \"2.4.1\",\n   \"description\": \"copy some files\",\n   \"main\": \"index.js\",\n-  \"bin\": \"./copyfiles\",\n+  \"bin\": {\n+    \"copyfiles\": \"./copyfiles\",\n+    \"copyup\": \"./copyfiles\"\n+  },\n   \"scripts\": {\n     \"test\": \"tape test/test.*.js | tspec\"\n   },\n   \"author\": \"\",\n-  \"license\": \"ISC\",\n+  \"license\": \"MIT\",\n   \"dependencies\": {\n-    \"mkdirp\": \"^0.3.5\",\n-    \"glob\": \"^3.2.9\",\n-    \"through2\": \"^0.4.1\",\n-    \"stream-array\": \"^0.1.3\",\n-    \"ltcdr\": \"^2.2.1\"\n+    \"glob\": \"^7.0.5\",\n+    \"minimatch\": \"^3.0.3\",\n+    \"mkdirp\": \"^1.0.4\",\n+    \"noms\": \"0.0.0\",\n+    \"through2\": \"^2.0.1\",\n+    \"untildify\": \"^4.0.0\",\n+    \"yargs\": \"^16.1.0\"\n   },\n   \"repository\": {\n     \"type\": \"git\",\n@@ -22,7 +27,7 @@\n   },\n   \"devDependencies\": {\n     \"rimraf\": \"^2.2.6\",\n-    \"tape\": \"^2.10.2\",\n-    \"tap-spec\": \"^0.1.5\"\n+    \"tap-spec\": \"^5.0.0\",\n+    \"tape\": \"^4.6.0\"\n   }\n }\n",
+					"match": false,
+					"packageHash": "b90e64fcecb02e94ba62e46af207b5748d50f6f222f2f090baf183a61787b93a",
+					"size": 577,
+					"sourceHash": "b05ca5c364ce2d6ed61159d4bd0c89e13680ce52f16cedd1774ec4ea4682bc16",
+					"status": "content"
+				},
+				"readme.md": {
+					"diff": "--- published/readme.md\n+++ rebuilt/readme.md\n@@ -1,4 +1,4 @@\n-copyfiles [![Build Status](https://travis-ci.org/calvinmetcalf/copyfiles.png)](https://travis-ci.org/calvinmetcalf/copyfiles)\n+copyfiles [![Build Status](https://travis-ci.org/calvinmetcalf/copyfiles.svg)](https://travis-ci.org/calvinmetcalf/copyfiles)\n ===\n \n copy files easily\n@@ -10,8 +10,24 @@\n ```\n ### Command Line\n \n-copy some files, give it a bunch of arguments, (which can include globs), the last one \n-is the out directory (which it will create if necessary).\n+```bash\n+  Usage: copyfiles [options] inFile [more files ...] outDirectory\n+\n+  Options:\n+    -u, --up       slice a path off the bottom of the paths               [number]\n+    -a, --all      include files & directories begining with a dot (.)   [boolean]\n+    -f, --flat     flatten the output                                    [boolean]\n+    -e, --exclude  pattern or glob to exclude (may be passed multiple times)\n+    -E, --error    throw error if nothing is copied                      [boolean]\n+    -V, --verbose  print more information to console                     [boolean]\n+    -s, --soft     do not overwrite destination files if they exist      [boolean]\n+    -F, --follow   follow symbolink links                                [boolean]\n+    -v, --version  Show version number                                   [boolean]\n+    -h, --help     Show help                                             [boolean]\n+```\n+\n+copy some files, give it a bunch of arguments, (which can include globs), the last one\n+is the out directory (which it will create if necessary).  Note: on windows globs must be **double quoted**, everybody else can quote however they please.\n \n ```bash\n copyfiles foo foobar foo/bar/*.js out\n@@ -34,12 +50,59 @@\n \n which would put all the js files in `out`\n \n+you can also just do -f which will flatten all the output into one directory, so with files ./foo/a.txt and ./foo/bar/b.txt\n+\n+```bash\n+copyfiles -f ./foo/*.txt ./foo/bar/*.txt out\n+```\n+\n+will put a.txt and b.txt into out\n+\n+if your terminal doesn't support globstars then you can quote them\n+\n+```bash\n+copyfiles -f ./foo/**/*.txt out\n+```\n+\n+does not work by default on a mac\n+\n+but\n+\n+```bash\n+copyfiles -f \"./foo/**/*.txt\" out\n+```\n+\n+does.\n+\n+You could quote globstars as a part of input:\n+```bash\n+copyfiles some.json \"./some_folder/*.json\" ./dist/ && echo 'JSON files copied.'\n+```\n+\n+You can use the -e option to exclude some files from the pattern, so to exclude all files ending in .test.js you could do\n+\n+```bash\n+copyfiles -e \"**/*.test.js\" -f ./foo/**/*.js out\n+```\n+\n+Other options include\n+\n+- `-a` or `--all` which includes files that start with a dot.\n+- `-s` or `--soft` to soft copy, which will not overwrite existing files.\n+- `-F` or `--follow` which follows symbolinks\n+\n+## copyup\n+\n+also creates a `copyup` command which is identical to `copyfiles` but `-up` defaults to 1\n+\n ### Programic API\n \n ```js\n var copyfiles = require('copyfiles');\n \n-copyfiles([paths], up, callback);\n+copyfiles([paths], opt, callback);\n ```\n-takes an array of paths, last one is the destination path, also takes an optional up argument which is the same as the\n-command line option.\n\\ No newline at end of file\n+takes an array of paths, last one is the destination path, also takes an optional argument which the -u option if a number, otherwise if it's `true` it's the flat option or if it is an object it is a hash of the various options (the long version e.g. up, all, flat, exclude, error, verbose, follow, and soft)  \n+\n+### Tilde support for home directory\n+when the src/dest path start with tilde for home directory under windows, please make sure -u or -f is added in options or use copyup command. if not you will get `Error: Illegal characters in path.`\n",
+					"match": false,
+					"packageHash": "3245212aa000df99bea320d64df7438dcefc8d9325ff420511efa829e6d55c4d",
+					"size": 1162,
+					"sourceHash": "5fc651d513c7f65e5c88a7b5b1d620301e32d9e644b7f537ec490bed6ae61ce5",
+					"status": "content"
+				},
+				"test/test.fromNode.js": {
+					"diff": "--- published/test/test.fromNode.js\n+++ rebuilt/test/test.fromNode.js\n@@ -3,8 +3,14 @@\n var copyfiles = require('../');\n var rimraf = require('rimraf');\n var fs = require('fs');\n-var mkdirp = require('mkdirp');\n-\n+var _mkdirp = require('mkdirp');\n+var cp = require('child_process');\n+var glob = require('glob');\n+const mkdirp = (path, cb) => {\n+  _mkdirp(path).then(()=>{\n+    cb();\n+  }, cb);\n+}\n function after(t) {\n   rimraf('output', function (err) {\n     t.error(err, 'rm out');\n@@ -15,10 +21,10 @@\n   });\n }\n function before(t) {\n-  mkdirp('input', function (err) {\n-      t.error(err, 'rm input');\n-      t.end();\n-    });\n+  mkdirp('input/other', function (err) {\n+    t.error(err, 'rm input');\n+    t.end();\n+  });\n }\n \n test('normal', function (t) {\n@@ -38,7 +44,197 @@\n   });\n   t.test('teardown', after);\n });\n+test('modes', function (t) {\n+  t.test('setup', before);\n+  t.test('copy stuff', function (t) {\n+    fs.writeFileSync('input/a.txt', 'a', {\n+      mode: 33261\n+    });\n+    fs.writeFileSync('input/b.txt', 'b');\n+    fs.writeFileSync('input/c.js', 'c');\n+    copyfiles(['input/*.txt', 'output'], function (err) {\n+      t.error(err, 'copyfiles');\n+      fs.readdir('output/input', function (err, files) {\n+        t.error(err, 'readdir');\n+        t.deepEquals(files, ['a.txt', 'b.txt'], 'correct number of things');\n+        t.equals(fs.statSync('output/input/a.txt').mode, 33261, 'correct mode')\n+        t.end();\n+      });\n+    });\n+  });\n+  t.test('teardown', after);\n+});\n+test('exclude', function (t) {\n+  t.test('setup', before);\n+  t.test('copy stuff', function (t) {\n+    fs.writeFileSync('input/a.txt', 'a');\n+    fs.writeFileSync('input/b.txt', 'b');\n+    fs.writeFileSync('input/c.js.txt', 'c');\n+    fs.writeFileSync('input/d.ps.txt', 'd');\n+    copyfiles( ['input/*.txt', 'output'], {\n+      exclude: ['**/*.js.txt', '**/*.ps.txt']\n+    }, function (err) {\n+      t.error(err, 'copyfiles');\n+      fs.readdir('output/input', function (err, files) {\n+        t.error(err, 'readdir');\n+        t.deepEquals(files, ['a.txt', 'b.txt'], 'correct number of things');\n+        t.end();\n+      });\n+    });\n+  });\n+  t.test('teardown', after);\n+});\n+test('exclude cl', function (t) {\n+  t.test('setup', before);\n+  t.test('copy stuff', function (t) {\n+    fs.writeFileSync('input/a.txt', 'a');\n+    fs.writeFileSync('input/b.txt', 'b');\n+    fs.writeFileSync('input/c.js.txt', 'c');\n+    fs.writeFileSync('input/d.ps.txt', 'd');\n+    cp.spawnSync('./copyfiles', ['-e', '**/*.js.txt', '-e', '**/*.ps.txt', 'input/*.txt', 'output']);\n+    fs.readdir('output/input', function (err, files) {\n+      t.error(err, 'readdir');\n+      t.deepEquals(files, ['a.txt', 'b.txt'], 'correct number of things');\n+      t.end();\n+    });\n+  });\n+  t.test('teardown', after);\n+});\n+test('all', function (t) {\n+  t.test('setup', before);\n+  t.test('copy stuff', function (t) {\n+    fs.writeFileSync('input/a.txt', 'a');\n+    fs.writeFileSync('input/b.txt', 'b');\n+    fs.writeFileSync('input/.c.txt', 'c');\n",
+					"match": false,
+					"packageHash": "6d6982416fa1ad11851fe6e4a1070ca246a2c655ffa8a4c0141eed08c05053db",
+					"size": 1564,
+					"sourceHash": "2b270cc273546b4b2eea9081263c70833e6a2617d0d51305cd6699dd33ccb205",
+					"status": "content"
+				}
+			},
+			"summary": {
+				"differentFiles": 7,
+				"matchingFiles": 1,
+				"missingInPackage": 0,
+				"missingInSource": 1,
+				"score": 0.1111111111111111,
+				"totalFiles": 9
+			}
+		}
+	}
+]
