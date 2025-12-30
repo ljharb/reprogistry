@@ -1,0 +1,215 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2025-12-30T17:14:05.936Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:11.7.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "es6-promise@0.1.0",
+			"name": "es6-promise",
+			"version": "0.1.0",
+			"location": "https://registry.npmjs.org/es6-promise/-/es6-promise-0.1.0.tgz",
+			"integrity": "sha512-Je46cOXKbyJwpiNTNpM6f3m5S02sQT3Jr9D5qIZLfUl1WPO2BsUfgCYPUXjzzoJRCkjaFZrJzyQAitlyw7KfOg==",
+			"publishedAt": "2013-12-16T09:58:06.703Z",
+			"publishedWith": {
+				"node": null,
+				"npm": "1.3.14"
+			}
+		},
+		"source": {
+			"integrity": null,
+			"location": "git://github.com/jakearchibald/ES6-Promises.git",
+			"spec": "github:jakearchibald/ES6-Promises#HEAD"
+		},
+		"comparisonHash": "8a2a8dcbb729bf3ee9216e490c955701f0ddebe1",
+		"diff": {
+			"files": {
+				"CHANGELOG.md": {
+					"match": false,
+					"packageHash": "b755b3d49cf3faa6e145f8afb5ab8da6f5a2f188b0a0b2691d02311dbb28d6c3",
+					"size": 1086,
+					"status": "missing-in-source"
+				},
+				"LICENSE": {
+					"diff": "--- published/LICENSE\n+++ rebuilt/LICENSE\n@@ -1,4 +1,4 @@\n-Copyright (c) 2013 Yehuda Katz, Tom Dale, and contributors\n+Copyright (c) 2014 Yehuda Katz, Tom Dale, Stefan Penner and contributors\n \n Permission is hereby granted, free of charge, to any person obtaining a copy of\n this software and associated documentation files (the \"Software\"), to deal in\n",
+					"match": false,
+					"packageHash": "382d2e1972a51cfc8c92137e2d0177c06f540a2ec416108a9ae073eade1c0cd0",
+					"size": 1083,
+					"sourceHash": "da852e222c72bc04a0a9046aac35f2e5d33775a8ea9f1d8f59b1cfd195ef9bb0",
+					"status": "content"
+				},
+				"README.md": {
+					"diff": "--- published/README.md\n+++ rebuilt/README.md\n@@ -1,22 +1,97 @@\n-# ES6-Promises\n+# ES6-Promise (subset of [rsvp.js](https://github.com/tildeio/rsvp.js)) [![Build Status](https://travis-ci.org/stefanpenner/es6-promise.svg?branch=master)](https://travis-ci.org/stefanpenner/es6-promise)\n \n-This is a polyfill of [ES6 Promises](https://github.com/domenic/promises-unwrapping), which is basically a remapping of [rsvp.js](https://github.com/tildeio/rsvp.js).\n+This is a polyfill of the [ES6 Promise](http://www.ecma-international.org/ecma-262/6.0/#sec-promise-constructor). The implementation is a subset of [rsvp.js](https://github.com/tildeio/rsvp.js) extracted by @jakearchibald, if you're wanting extra features and more debugging options, check out the [full library](https://github.com/tildeio/rsvp.js).\n \n-TODO: point to html5rocks article\n+For API details and how to use promises, see the <a href=\"http://www.html5rocks.com/en/tutorials/es6/promises/\">JavaScript Promises HTML5Rocks article</a>.\n \n ## Downloads\n \n-* [promise](http://s3.amazonaws.com/es6-promises/promise-2.0.4.js)\n-* [promise-min](http://s3.amazonaws.com/es6-promises/promise-2.0.4.min.js) (~2k gzipped)\n+* [es6-promise 27.86 KB (7.33 KB gzipped)](https://cdn.jsdelivr.net/npm/es6-promise/dist/es6-promise.js)\n+* [es6-promise-auto 27.78 KB (7.3 KB gzipped)](https://cdn.jsdelivr.net/npm/es6-promise/dist/es6-promise.auto.js) - Automatically provides/replaces `Promise` if missing or broken.\n+* [es6-promise-min 6.17 KB (2.4 KB gzipped)](https://cdn.jsdelivr.net/npm/es6-promise/dist/es6-promise.min.js)\n+* [es6-promise-auto-min 6.19 KB (2.4 KB gzipped)](https://cdn.jsdelivr.net/npm/es6-promise/dist/es6-promise.auto.min.js) - Minified version of `es6-promise-auto` above.\n+\n+## CDN \n+\n+To use via a CDN include this in your html:\n+\n+```html\n+<!-- Automatically provides/replaces `Promise` if missing or broken. -->\n+<script src=\"https://cdn.jsdelivr.net/npm/es6-promise@4/dist/es6-promise.js\"></script>\n+<script src=\"https://cdn.jsdelivr.net/npm/es6-promise@4/dist/es6-promise.auto.js\"></script> \n+\n+<!-- Minified version of `es6-promise-auto` below. -->\n+<script src=\"https://cdn.jsdelivr.net/npm/es6-promise@4/dist/es6-promise.min.js\"></script>\n+<script src=\"https://cdn.jsdelivr.net/npm/es6-promise@4/dist/es6-promise.auto.min.js\"></script> \n+\n+```\n+\n+## Node.js\n+\n+To install:\n+\n+```sh\n+yarn add es6-promise\n+```\n+\n+or\n+\n+```sh\n+npm install es6-promise\n+```\n+\n+To use:\n+\n+```js\n+var Promise = require('es6-promise').Promise;\n+```\n \n-## Building & Testing\n \n-This package uses the [grunt-microlib](https://github.com/thomasboyt/grunt-microlib) package for building.\n+## Usage in IE<9\n+\n+`catch` and `finally` are reserved keywords in IE<9, meaning\n+`promise.catch(func)` or `promise.finally(func)` throw a syntax error. To work\n+around this, you can use a string to access the property as shown in the\n+following example.\n+\n+However most minifiers will automatically fix this for you, making the\n+resulting code safe for old browsers and production:\n+\n+```js\n+promise['catch'](function(err) {\n+  // ...\n+});\n+```\n+\n+```js\n+promise['finally'](function() {\n+  // ...\n+});\n+```\n+\n+## Auto-polyfill\n+\n+To polyfill the global environment (either in Node or in the browser via CommonJS) use the following code snippet:\n+\n+```js\n+require('es6-promise').polyfill();\n+```\n+\n+Alternatively\n+\n+```js\n+require('es6-promise/auto');\n+```\n+\n+Notice that we don't assign the result of `polyfill()` to any variable. The `polyfill()` method will patch the global environment (in this case to the `Promise` name) when called.\n+\n+## Building & Testing\n \n-Custom tasks:\n",
+					"match": false,
+					"packageHash": "c7b69a657cf386bd573325fefb34ebca3c69e10407a17ed85de878ce86d2dcf6",
+					"size": 772,
+					"sourceHash": "96a3dd60632d93fdf8e75beb902f05e67e7538a56cd7204a0bd59736141d0648",
+					"status": "content"
+				},
+				"dist/commonjs/main.js": {
+					"match": false,
+					"packageHash": "c25c11f6a4dfb721997360d65c3f8f2db97c80b427bda653d60de7ac0a9a94c0",
+					"size": 176,
+					"status": "missing-in-source"
+				},
+				"dist/commonjs/promise/all.js": {
+					"match": false,
+					"packageHash": "1476871c23889d7b7eb79df29faa1043fc69e81823dec72dee1664131b104e6e",
+					"size": 2316,
+					"status": "missing-in-source"
+				},
+				"dist/commonjs/promise/asap.js": {
+					"match": false,
+					"packageHash": "d3335a4de0792085bee0106f86591e320895ad19d10e3be6b1f61256697ac745",
+					"size": 1774,
+					"status": "missing-in-source"
+				},
+				"dist/commonjs/promise/cast.js": {
+					"match": false,
+					"packageHash": "3ef3a61bcfb6bdbed48187675846879c2459e70cc93aa3dcb987305397bf3465",
+					"size": 1992,
+					"status": "missing-in-source"
+				},
+				"dist/commonjs/promise/config.js": {
+					"match": false,
+					"packageHash": "8b7f47749e1c2007dfca01a367720b70d66b55f4e578ccee5c735a202682a3a9",
+					"size": 243,
+					"status": "missing-in-source"
+				},
+				"dist/commonjs/promise/polyfill.js": {
+					"match": false,
+					"packageHash": "b1cb13b392df75d36a8ca1140f35bfb9e918eee09b51c100056526a0c9648001",
+					"size": 779,
+					"status": "missing-in-source"
+				},
+				"dist/commonjs/promise/promise.js": {
+					"match": false,
+					"packageHash": "23d95fcb3ceca8c2bdf76f339d3da30fbdbd216764883e831120feedc87987ee",
+					"size": 4983,
+					"status": "missing-in-source"
+				},
+				"dist/commonjs/promise/race.js": {
+					"match": false,
+					"packageHash": "73fa4b4ac5700eabf98c0564ec69e1375344356c8f9308a8403fda642700b6c1",
+					"size": 2533,
+					"status": "missing-in-source"
+				},
+				"dist/commonjs/promise/reject.js": {
+					"match": false,
+					"packageHash": "e7bc597bd9478d4168e85c673235e730f8d5e12ae1f184c767f45d0e11d2e0b1",
+					"size": 1228,
+					"status": "missing-in-source"
+				},
+				"dist/commonjs/promise/resolve.js": {
+					"match": false,
+					"packageHash": "69d503eb0e6299a1e3053595dfbd2c4e66ad6f6dfea20776c2868f24961766d1",
+					"size": 992,
+					"status": "missing-in-source"
+				},
+				"dist/commonjs/promise/utils.js": {
+					"match": false,
+					"packageHash": "d115cf85ab094658a6359095e8011de6eb5de4018c0279068ca4967d7e6aae59",
+					"size": 611,
+					"status": "missing-in-source"
+				},
+				"dist/promise-0.1.0.amd.js": {
+					"match": false,
+					"packageHash": "a1a49b28c52daeec7dee7c64bc4a38c0e8c8dec906186a01f4e4451aab5a2ecd",
+					"size": 20777,
+					"status": "missing-in-source"
+				},
+				"dist/promise-0.1.0.js": {
+					"match": false,
+					"packageHash": "a9463a93461f78af1f5838b6a07fbd6cc556b5459733bf9b715e5911eee926e4",
+					"size": 22120,
+					"status": "missing-in-source"
+				},
+				"dist/promise-0.1.0.min.js": {
+					"match": false,
+					"packageHash": "8df5c085e7278459a1077f86dd1a05332cf5012edb5385b0cdebb5bf088aa0ae",
+					"size": 5377,
+					"status": "missing-in-source"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -1,52 +1,78 @@\n {\n   \"name\": \"es6-promise\",\n-  \"namespace\": \"Promise\",\n-  \"version\": \"0.1.0\",\n-  \"description\": \"A polyfill for ES6-style Promises, tracking rsvp\",\n-  \"main\": \"dist/commonjs/main.js\",\n-  \"directories\": {\n-    \"lib\": \"lib\"\n+  \"description\": \"A lightweight library that provides tools for organizing asynchronous code\",\n+  \"version\": \"4.2.8\",\n+  \"author\": \"Yehuda Katz, Tom Dale, Stefan Penner and contributors (Conversion to ES6 API by Jake Archibald)\",\n+  \"browser\": {\n+    \"vertx\": false\n   },\n+  \"bugs\": {\n+    \"url\": \"https://github.com/stefanpenner/es6-promise/issues\"\n+  },\n+  \"dependencies\": {},\n   \"devDependencies\": {\n-    \"brfs\": \"0.0.8\",\n-    \"grunt\": \"~0.4.2\",\n-    \"grunt-browserify\": \"~1.2.11\",\n-    \"grunt-cli\": \"~0.1.11\",\n-    \"grunt-contrib-clean\": \"~0.5.0\",\n-    \"grunt-contrib-concat\": \"~0.3.0\",\n-    \"grunt-contrib-connect\": \"~0.5.0\",\n-    \"grunt-contrib-jshint\": \"~0.7.0\",\n-    \"grunt-contrib-uglify\": \"~0.2.4\",\n-    \"grunt-contrib-watch\": \"~0.5.3\",\n-    \"grunt-es6-module-transpiler\": \"~0.5.0\",\n-    \"grunt-mocha-phantomjs\": \"~0.3.1\",\n-    \"grunt-mocha-test\": \"~0.5.0\",\n-    \"grunt-s3\": \"~0.2.0-alpha.2\",\n-    \"jshint\": \"~0.9\",\n-    \"load-grunt-config\": \"~0.5.0\",\n-    \"load-grunt-tasks\": \"~0.2.0\",\n-    \"mocha-phantomjs\": \"~3.1.6\",\n-    \"promises-aplus-tests\": \"git://github.com/stefanpenner/promises-tests.git\",\n-    \"connect-redirection\": \"0.0.1\",\n-    \"grunt-contrib-yuidoc\": \"~0.5.0\"\n+    \"babel-plugin-transform-es2015-arrow-functions\": \"^6.22.0\",\n+    \"babel-plugin-transform-es2015-block-scoping\": \"^6.24.1\",\n+    \"babel-plugin-transform-es2015-classes\": \"^6.24.1\",\n+    \"babel-plugin-transform-es2015-computed-properties\": \"^6.24.1\",\n+    \"babel-plugin-transform-es2015-constants\": \"^6.1.4\",\n+    \"babel-plugin-transform-es2015-destructuring\": \"^6.23.0\",\n+    \"babel-plugin-transform-es2015-parameters\": \"^6.24.1\",\n+    \"babel-plugin-transform-es2015-shorthand-properties\": \"^6.24.1\",\n+    \"babel-plugin-transform-es2015-spread\": \"^6.22.0\",\n+    \"babel-plugin-transform-es2015-template-literals\": \"^6.22.0\",\n+    \"babel6-plugin-strip-class-callcheck\": \"^6.0.0\",\n+    \"broccoli-babel-transpiler\": \"^6.0.0\",\n+    \"broccoli-concat\": \"^3.1.0\",\n+    \"broccoli-merge-trees\": \"^2.0.0\",\n+    \"broccoli-rollup\": \"^2.0.0\",\n+    \"broccoli-stew\": \"^1.5.0\",\n+    \"broccoli-uglify-js\": \"^0.2.0\",\n+    \"broccoli-watchify\": \"^1.0.1\",\n+    \"ember-cli\": \"2.18.0-beta.2\",\n+    \"ember-cli-dependency-checker\": \"^2.1.0\",\n+    \"git-repo-version\": \"1.0.1\",\n+    \"json3\": \"^3.3.2\",\n+    \"mocha\": \"^4.0.1\",\n+    \"promises-aplus-tests-phantom\": \"^2.1.0-revise\"\n   },\n-  \"scripts\": {\n-    \"test\": \"grunt test\",\n-    \"lint\": \"jshint lib\",\n-    \"prepublish\": \"grunt build\"\n+  \"directories\": {\n+    \"lib\": \"lib\"\n   },\n+  \"files\": [\n+    \"dist\",\n+    \"lib\",\n+    \"es6-promise.d.ts\",\n+    \"auto.js\",\n+    \"!dist/test\"\n+  ],\n+  \"homepage\": \"https://github.com/stefanpenner/es6-promise\",\n+  \"jsdelivr\": \"dist/es6-promise.auto.min.js\",\n+  \"keywords\": [\n+    \"futures\",\n+    \"polyfill\",\n+    \"promise\",\n+    \"promises\"\n+  ],\n+  \"license\": \"MIT\",\n+  \"main\": \"dist/es6-promise.js\",\n+  \"namespace\": \"es6-promise\",\n   \"repository\": {\n     \"type\": \"git\",\n-    \"url\": \"git://github.com/jakearchibald/ES6-Promises.git\"\n+    \"url\": \"git://github.com/stefanpenner/es6-promise.git\"\n   },\n-  \"bugs\": {\n-    \"url\": \"https://github.com/jakearchibald/ES6-Promises/issues\"\n",
+					"match": false,
+					"packageHash": "4d33e592a95cd73326788f7ffd4be1b4f9efb6d2272687243c392be53ebd7102",
+					"size": 1456,
+					"sourceHash": "826b8a2e3aae373dfacdb92d4aa0669db71a2b853826c0bea2e0f479fccea72d",
+					"status": "content"
+				},
+				"auto.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"es6-promise.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/es6-promise/-internal.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/es6-promise/asap.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/es6-promise/enumerator.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/es6-promise/polyfill.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/es6-promise/promise/all.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/es6-promise/promise/race.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/es6-promise/promise/reject.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/es6-promise/promise/resolve.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/es6-promise/promise.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/es6-promise/then.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/es6-promise/utils.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/es6-promise.auto.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/es6-promise.js": {
+					"match": false,
+					"status": "missing-in-package"
+				}
+			},
+			"summary": {
+				"differentFiles": 3,
+				"matchingFiles": 0,
+				"missingInPackage": 15,
+				"missingInSource": 15,
+				"score": 0,
+				"totalFiles": 33
+			}
+		}
+	}
+]
