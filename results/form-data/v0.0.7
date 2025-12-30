@@ -1,0 +1,161 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2025-12-30T22:00:18.165Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:11.7.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "form-data@0.0.7",
+			"name": "form-data",
+			"version": "0.0.7",
+			"location": "https://registry.npmjs.org/form-data/-/form-data-0.0.7.tgz",
+			"integrity": "sha512-Y9kJwAs/7CCx1nGC5nBTHiLACbNxlKIx/YUHprIqiDCo/i2eD3qtumFy4x/DbKINCLsBbwcGLEsFGrfGU9tvCg==",
+			"publishedAt": "2013-02-10T02:53:05.643Z",
+			"publishedWith": {
+				"node": null,
+				"npm": "1.2.10"
+			}
+		},
+		"source": {
+			"integrity": null,
+			"location": "git://github.com/felixge/node-form-data.git",
+			"spec": "github:felixge/node-form-data#HEAD"
+		},
+		"comparisonHash": "8a2a8dcbb729bf3ee9216e490c955701f0ddebe1",
+		"diff": {
+			"files": {
+				".npmignore": {
+					"match": false,
+					"packageHash": "d407357f1e15950d93265314ca9012318baf376a1c3fc7c47a0a9466ee61c657",
+					"size": 45,
+					"status": "missing-in-source"
+				},
+				"Makefile": {
+					"match": false,
+					"packageHash": "90e1ae0474085186499fe5a5c1d6ae31726175fa4e1a2158c9914be4bfc5bae6",
+					"size": 57,
+					"status": "missing-in-source"
+				},
+				"Readme.md": {
+					"match": false,
+					"packageHash": "5396c326e0c86ca1588458ef9dc2751c894d7f2ad21b6700263ce5a17f2f0e10",
+					"size": 2774,
+					"status": "missing-in-source"
+				},
+				"lib/form_data.js": {
+					"diff": "--- published/lib/form_data.js\n+++ rebuilt/lib/form_data.js\n@@ -1,3 +1,5 @@\n+'use strict';\n+\n var CombinedStream = require('combined-stream');\n var util = require('util');\n var path = require('path');\n@@ -5,31 +7,72 @@\n var https = require('https');\n var parseUrl = require('url').parse;\n var fs = require('fs');\n-var mime = require('mime');\n-var async = require('async');\n+var Stream = require('stream').Stream;\n+var crypto = require('crypto');\n+var mime = require('mime-types');\n+var asynckit = require('asynckit');\n+var setToStringTag = require('es-set-tostringtag');\n+var hasOwn = require('hasown');\n+var populate = require('./populate.js');\n+\n+/**\n+ * Create readable \"multipart/form-data\" streams.\n+ * Can be used to submit forms\n+ * and file uploads to other web applications.\n+ *\n+ * @constructor\n+ * @param {object} options - Properties to be added/overriden for FormData and CombinedStream\n+ */\n+function FormData(options) {\n+  if (!(this instanceof FormData)) {\n+    return new FormData(options);\n+  }\n \n-module.exports = FormData;\n-function FormData() {\n   this._overheadLength = 0;\n   this._valueLength = 0;\n-  this._lengthRetrievers = [];\n+  this._valuesToMeasure = [];\n \n   CombinedStream.call(this);\n+\n+  options = options || {}; // eslint-disable-line no-param-reassign\n+  for (var option in options) { // eslint-disable-line no-restricted-syntax\n+    this[option] = options[option];\n+  }\n }\n+\n+// make it a Stream\n util.inherits(FormData, CombinedStream);\n \n FormData.LINE_BREAK = '\\r\\n';\n+FormData.DEFAULT_CONTENT_TYPE = 'application/octet-stream';\n \n-FormData.prototype.append = function(field, value, options) {\n-  options = options || {};\n+FormData.prototype.append = function (field, value, options) {\n+  options = options || {}; // eslint-disable-line no-param-reassign\n+\n+  // allow filename as single option\n+  if (typeof options === 'string') {\n+    options = { filename: options }; // eslint-disable-line no-param-reassign\n+  }\n \n   var append = CombinedStream.prototype.append.bind(this);\n \n   // all that streamy business can't handle numbers\n-  if (typeof value == 'number') value = ''+value;\n+  if (typeof value === 'number' || value == null) {\n+    value = String(value); // eslint-disable-line no-param-reassign\n+  }\n+\n+  // https://github.com/felixge/node-form-data/issues/38\n+  if (Array.isArray(value)) {\n+    /*\n+     * Please convert your array into string\n+     * the way web server expects it\n+     */\n+    this._error(new Error('Arrays are not supported.'));\n+    return;\n+  }\n \n   var header = this._multiPartHeader(field, value, options);\n-  var footer = this._multiPartFooter(field, value, options);\n+  var footer = this._multiPartFooter();\n \n   append(header);\n   append(value);\n@@ -39,15 +82,17 @@\n   this._trackLength(header, value, options);\n };\n \n-FormData.prototype._trackLength = function(header, value, options) {\n+FormData.prototype._trackLength = function (header, value, options) {\n   var valueLength = 0;\n \n-  // used w/ trackLengthSync(), when length is known.\n-  // e.g. for streaming directly from a remote server,\n",
+					"match": false,
+					"packageHash": "c3d57bbd7dae522277037ca2616fe54d85810a07b0b892193d06669f107f628f",
+					"size": 7510,
+					"sourceHash": "ccf1c1077340212f58e39d6054c9822aaaef2ed6220c3a502bee446fa3fa6fb6",
+					"status": "content"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -1,25 +1,82 @@\n {\n   \"author\": \"Felix Geisendörfer <felix@debuggable.com> (http://debuggable.com/)\",\n   \"name\": \"form-data\",\n-  \"description\": \"A module to create readable `\\\"multipart/form-data\\\"` streams.  Can be used to submit forms and file uploads to other web applications.\",\n-  \"version\": \"0.0.7\",\n+  \"description\": \"A library to create readable \\\"multipart/form-data\\\" streams. Can be used to submit forms and file uploads to other web applications.\",\n+  \"version\": \"4.0.5\",\n   \"repository\": {\n     \"type\": \"git\",\n-    \"url\": \"git://github.com/felixge/node-form-data.git\"\n+    \"url\": \"git://github.com/form-data/form-data.git\"\n   },\n   \"main\": \"./lib/form_data\",\n+  \"browser\": \"./lib/browser\",\n+  \"typings\": \"./index.d.ts\",\n+  \"scripts\": {\n+    \"pretest\": \"npm run lint\",\n+    \"pretests-only\": \"rimraf coverage test/tmp\",\n+    \"tests-only\": \"istanbul cover test/run.js\",\n+    \"posttests-only\": \"istanbul report lcov text\",\n+    \"test\": \"npm run tests-only\",\n+    \"posttest\": \"npx npm@'>=10.2' audit --production\",\n+    \"lint\": \"eslint --ext=js,mjs .\",\n+    \"report\": \"istanbul report lcov text\",\n+    \"ci-lint\": \"is-node-modern 8 && npm run lint || is-node-not-modern 8\",\n+    \"ci-test\": \"npm run tests-only && npm run browser && npm run report\",\n+    \"predebug\": \"rimraf coverage test/tmp\",\n+    \"debug\": \"verbose=1 ./test/run.js\",\n+    \"browser\": \"browserify -t browserify-istanbul test/run-browser.js | obake --coverage\",\n+    \"check\": \"istanbul check-coverage coverage/coverage*.json\",\n+    \"files\": \"pkgfiles --sort=name\",\n+    \"get-version\": \"node -e \\\"console.log(require('./package.json').version)\\\"\",\n+    \"update-readme\": \"sed -i.bak 's/\\\\/master\\\\.svg/\\\\/v'$(npm --silent run get-version)'.svg/g' README.md\",\n+    \"postupdate-readme\": \"mv README.md.bak READ.ME.md.bak\",\n+    \"restore-readme\": \"mv READ.ME.md.bak README.md\",\n+    \"prepublish\": \"not-in-publish || npm run prepublishOnly\",\n+    \"prepack\": \"npm run update-readme\",\n+    \"postpack\": \"npm run restore-readme\",\n+    \"version\": \"auto-changelog && git add CHANGELOG.md\",\n+    \"postversion\": \"auto-changelog && git add CHANGELOG.md && git commit --no-edit --amend && git tag -f \\\"v$(node -e \\\"console.log(require('./package.json').version)\\\")\\\"\"\n+  },\n   \"engines\": {\n-    \"node\": \"*\"\n+    \"node\": \">= 6\"\n   },\n   \"dependencies\": {\n-    \"combined-stream\": \"~0.0.4\",\n-    \"mime\": \"~1.2.2\",\n-    \"async\": \"~0.1.9\"\n+    \"asynckit\": \"^0.4.0\",\n+    \"combined-stream\": \"^1.0.8\",\n+    \"es-set-tostringtag\": \"^2.1.0\",\n+    \"hasown\": \"^2.0.2\",\n+    \"mime-types\": \"^2.1.12\"\n   },\n   \"devDependencies\": {\n-    \"fake\": \"0.2.1\",\n-    \"far\": \"0.0.1\",\n-    \"formidable\": \"1.0.2\",\n-    \"request\": \"~2.9.203\"\n+    \"@ljharb/eslint-config\": \"^21.4.0\",\n+    \"auto-changelog\": \"^2.5.0\",\n+    \"browserify\": \"^13.3.0\",\n+    \"browserify-istanbul\": \"^2.0.0\",\n+    \"coveralls\": \"^3.1.1\",\n+    \"cross-spawn\": \"^6.0.6\",\n+    \"eslint\": \"^8.57.1\",\n+    \"fake\": \"^0.2.2\",\n+    \"far\": \"^0.0.7\",\n+    \"formidable\": \"^1.2.6\",\n+    \"in-publish\": \"^2.0.1\",\n+    \"is-node-modern\": \"^1.0.0\",\n+    \"istanbul\": \"^0.4.5\",\n+    \"js-randomness-predictor\": \"^1.5.5\",\n+    \"obake\": \"^0.1.2\",\n+    \"pkgfiles\": \"^2.3.2\",\n+    \"pre-commit\": \"^1.2.2\",\n+    \"puppeteer\": \"^1.20.0\",\n+    \"request\": \"~2.87.0\",\n+    \"rimraf\": \"^2.7.1\",\n+    \"semver\": \"^6.3.1\",\n+    \"tape\": \"^5.9.0\"\n+  },\n+  \"license\": \"MIT\",\n+  \"auto-changelog\": {\n+    \"output\": \"CHANGELOG.md\",\n+    \"template\": \"keepachangelog\",\n+    \"unreleased\": false,\n+    \"commitLimit\": false,\n+    \"backfillLimit\": false,\n+    \"hideCredit\": true\n   }\n }\n",
+					"match": false,
+					"packageHash": "775c530fdb9e64bcfe4abc75ae10322cc7fc4e250b4194d4c4b8c19760533f79",
+					"size": 675,
+					"sourceHash": "5aa0a49ad333a05776c6c236fed575c73ec2290dd4204d3d79e749281baa8787",
+					"status": "content"
+				},
+				"test/common.js": {
+					"match": false,
+					"packageHash": "57a888a7390149f34d1117940be0f0660445384f13ed83ff9a76ff5da7c53ed1",
+					"size": 299,
+					"status": "missing-in-source"
+				},
+				"test/fixture/bacon.txt": {
+					"match": false,
+					"packageHash": "8a04d232066d2bbaa6bde59d84a2cad66d1c31b077b1b05ed74e27206e8836f2",
+					"size": 20,
+					"status": "missing-in-source"
+				},
+				"test/fixture/unicycle.jpg": {
+					"match": false,
+					"packageHash": "573d2133181fb31c4c31d8d0a9ca408018742ab17d8e76628775ea42cace7b2d",
+					"size": 19806,
+					"status": "missing-in-source"
+				},
+				"test/integration/test-custom-headers.js": {
+					"match": false,
+					"packageHash": "8b5b8608c59685b2398fcfb5f883ba077e9bf346dc7c483d753460d2c42116e7",
+					"size": 1633,
+					"status": "missing-in-source"
+				},
+				"test/integration/test-form-get-length.js": {
+					"match": false,
+					"packageHash": "211bf01d42fe29d79825e0403b9ee62d970ea970bb23aebeca8f38889bdf6c83",
+					"size": 2275,
+					"status": "missing-in-source"
+				},
+				"test/integration/test-get-boundary.js": {
+					"match": false,
+					"packageHash": "c05d8360c54d218cc472f85694842f63d2394452689d247a7643200c395bf0e4",
+					"size": 481,
+					"status": "missing-in-source"
+				},
+				"test/integration/test-http-response.js": {
+					"match": false,
+					"packageHash": "e1b15b09a89f80e866edb3d9890c9e045732c8d64a37cd4df662162fa205c914",
+					"size": 3109,
+					"status": "missing-in-source"
+				},
+				"test/integration/test-pipe.js": {
+					"match": false,
+					"packageHash": "4947323573395216e4ab398f27a5aad98c63fe0c50c9a07898e363c49dbca61d",
+					"size": 3625,
+					"status": "missing-in-source"
+				},
+				"test/integration/test-submit-custom.js": {
+					"match": false,
+					"packageHash": "dc3f5867d3ff90f5517f9b784ec5da8971295af12236d0fbccfa71216e41ec54",
+					"size": 3684,
+					"status": "missing-in-source"
+				},
+				"test/integration/test-submit.js": {
+					"match": false,
+					"packageHash": "57d6dd57ddfb0ecc3ef56b37ac8555e0a4f943ba13a9ccfec0bfe357746fadce",
+					"size": 3638,
+					"status": "missing-in-source"
+				},
+				"test/run.js": {
+					"match": false,
+					"packageHash": "7a647d05b5ee6067e275b8921820c60503cae93b46700a9c8923bec5c4b7ffd6",
+					"size": 121,
+					"status": "missing-in-source"
+				},
+				"CHANGELOG.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"README.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"index.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/browser.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/populate.js": {
+					"match": false,
+					"status": "missing-in-package"
+				}
+			},
+			"summary": {
+				"differentFiles": 2,
+				"matchingFiles": 1,
+				"missingInPackage": 5,
+				"missingInSource": 14,
+				"score": 0.045454545454545456,
+				"totalFiles": 22
+			}
+		}
+	}
+]
