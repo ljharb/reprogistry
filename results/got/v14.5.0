@@ -1,0 +1,57 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2025-12-30T23:00:23.400Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:11.7.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "got@14.5.0",
+			"name": "got",
+			"version": "14.5.0",
+			"location": "https://registry.npmjs.org/got/-/got-14.5.0.tgz",
+			"integrity": "sha512-rZ8+ZMYz9yeTFmFtOiwf/Trcli8gdqgqAz0kmkEOWcT7C3BFG3Z+dLQu0y8je7RogG7Wp1obnu5GerwCaccftw==",
+			"publishedAt": "2025-10-10T08:19:50.264Z",
+			"publishedWith": {
+				"node": "20.19.5",
+				"npm": "11.6.1"
+			}
+		},
+		"source": {
+			"integrity": "sha512-0mCyUcvzrVQIqWCe/9WXLxRI52Yr7qDXBR/zH4l5ebQ3kAbgOwbJGnTF7450AaDvN7Wk2Cw2moNrIo7CmzKBLA==",
+			"location": "git+https://github.com/sindresorhus/got.git",
+			"spec": "github:sindresorhus/got#f238e571547148f536570fde246c793df1d1d5a8"
+		},
+		"comparisonHash": "8a2a8dcbb729bf3ee9216e490c955701f0ddebe1",
+		"diff": {
+			"files": {
+				"dist/source/core/index.js": {
+					"diff": "--- published/dist/source/core/index.js\n+++ rebuilt/dist/source/core/index.js\n@@ -1,8 +1,6 @@\n import process from 'node:process';\n import { Buffer } from 'node:buffer';\n import { Duplex } from 'node:stream';\n-import { gunzip, inflate, brotliDecompress } from 'node:zlib';\n-import { promisify } from 'node:util';\n import http, { ServerResponse } from 'node:http';\n import timer from '@szmarczak/http-timer';\n import CacheableRequest, { CacheError as CacheableCacheError, } from 'cacheable-request';\n@@ -473,84 +471,9 @@\n             || statusCode === 204\n             || statusCode === 205\n             || statusCode === 304;\n-        const nativeResponse = response;\n         if (options.decompress && !hasNoBody) {\n             response = decompressResponse(response);\n         }\n-        // For revalidated cached responses (304 Not Modified), cacheable-request may return\n-        // a ResponseLike object with the body stored in a .body property but not pushed into\n-        // the stream. The stream is created and may be ended without data, and the 'end' event is\n-        // never emitted, causing Got to hang waiting for it. Detect and fix this.\n-        const nativeAsAny = nativeResponse;\n-        if (nativeAsAny.body) {\n-            // Mark the response as complete immediately (ResponseLike doesn't have req.res.complete)\n-            nativeResponse.complete = true;\n-            response.complete = true;\n-            // Use setImmediate to check if this is a stuck revalidated response\n-            setImmediate(() => {\n-                // Check if the stream ended with no data (revalidated response)\n-                if (nativeResponse.readableEnded && !nativeResponse.readableLength) {\n-                    // The body is in nativeAsAny.body but was never pushed to the stream.\n-                    // We need to push it to the native response so it flows through decompression if needed.\n-                    try {\n-                        // Push the body to the native stream\n-                        nativeResponse.push(nativeAsAny.body);\n-                        // eslint-disable-next-line unicorn/no-array-push-push\n-                        nativeResponse.push(null);\n-                        // Update download size with the cached body length\n-                        let bodyLength = 0;\n-                        if (Buffer.isBuffer(nativeAsAny.body)) {\n-                            bodyLength = nativeAsAny.body.length;\n-                        }\n-                        else if (typeof nativeAsAny.body === 'string') {\n-                            bodyLength = Buffer.byteLength(nativeAsAny.body);\n-                        }\n-                        this._downloadedSize += bodyLength;\n-                    }\n-                    catch {\n-                        // If push fails (stream already ended), we need to decompress manually for compressed responses\n-                        const encoding = nativeResponse.headers['content-encoding'];\n-                        if (encoding && Buffer.isBuffer(nativeAsAny.body)) {\n-                            // Decompress the body based on the encoding\n-                            let decompressAsync;\n-                            switch (encoding) {\n-                                case 'gzip': {\n-                                    decompressAsync = promisify(gunzip);\n-                                    break;\n-                                }\n-                                case 'deflate': {\n-                                    decompressAsync = promisify(inflate);\n-                                    break;\n-                                }\n-                                case 'br': {\n-                                    decompressAsync = promisify(brotliDecompress);\n-                                    break;\n-                                }\n-                                default: {\n-                                    break;\n-                                }\n-                            }\n-                            if (decompressAsync) {\n-                                // Decompress asynchronously and set rawBody\n-                                void decompressAsync(nativeAsAny.body).then((decompressed) => {\n-                                    response.rawBody = decompressed;\n-                                    this._downloadedSize += nativeAsAny.body.length;\n-                                    response.emit('end');\n-                                }).catch(() => {\n-                                    // Decompression failed, use compressed body as-is\n-                                    response.rawBody = nativeAsAny.body;\n-                                    response.emit('end');\n-                                });\n-                                return;\n-                            }\n-                        }\n-                        // Not compressed or decompression not needed, set rawBody directly\n-                        response.rawBody = nativeAsAny.body;\n-                        response.emit('end');\n-                    }\n-                }\n-            });\n-        }\n         const typedResponse = response;\n         typedResponse.statusMessage = typedResponse.statusMessage ?? http.STATUS_CODES[statusCode];\n         typedResponse.url = options.url.toString();\n@@ -685,12 +608,11 @@\n             return;\n         }\n         // Set up end listener AFTER redirect check to avoid emitting progress for redirect responses\n",
+					"match": false,
+					"packageHash": "bcfa554cde26381162a0855261abe86e90d278c72b8ba91065c3da0437dfe195",
+					"size": 47894,
+					"sourceHash": "b2223f7707a15cad66bcbb8542535f754c4c644a51a8797fc04abd1fc75c1541",
+					"status": "content"
+				},
+				"dist/source/core/options.d.ts": {
+					"diff": "--- published/dist/source/core/options.d.ts\n+++ rebuilt/dist/source/core/options.d.ts\n@@ -1293,7 +1293,6 @@\n         _defaultAgent?: http.Agent | undefined;\n         auth?: string | null | undefined;\n         defaultPort?: number | string | undefined;\n-        hints?: import(\"dns\").LookupOptions[\"hints\"];\n         host?: string | null | undefined;\n         hostname?: string | null | undefined;\n         insecureHTTPParser?: boolean | undefined;\n@@ -1305,7 +1304,8 @@\n         signal?: AbortSignal | undefined;\n         socketPath?: string | undefined;\n         uniqueHeaders?: Array<string | string[]> | undefined;\n-        joinDuplicateHeaders?: boolean;\n+        joinDuplicateHeaders?: boolean | undefined;\n+        hints?: number | undefined;\n         ALPNCallback?: ((arg: {\n             servername: string;\n             protocols: string[];\n",
+					"match": false,
+					"packageHash": "0ea4517aaae06429fa8768ef18a5acca86e7c72b861616d1488aa5c8dbe62aca",
+					"size": 53271,
+					"sourceHash": "428cc59e85a0d9a9df9334989aa687001a44e6b7bf4c43a7e06d0addb79911e9",
+					"status": "content"
+				}
+			},
+			"summary": {
+				"differentFiles": 2,
+				"matchingFiles": 43,
+				"missingInPackage": 0,
+				"missingInSource": 0,
+				"score": 0.9555555555555556,
+				"totalFiles": 45
+			}
+		}
+	}
+]

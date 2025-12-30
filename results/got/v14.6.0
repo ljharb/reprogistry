@@ -1,0 +1,169 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2025-12-30T23:00:34.408Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:11.7.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "got@14.6.0",
+			"name": "got",
+			"version": "14.6.0",
+			"location": "https://registry.npmjs.org/got/-/got-14.6.0.tgz",
+			"integrity": "sha512-K30JHMsHcwhy+JYet3IxRFw+L9rb77y5LE3OkoAD4qzMR9/g30bWYBfkHYVJL2BBPgfU4lJsRwhy4HUkLPQc3g==",
+			"publishedAt": "2025-10-16T16:26:22.954Z",
+			"publishedWith": {
+				"node": "24.9.0",
+				"npm": "11.6.1"
+			}
+		},
+		"source": {
+			"integrity": "sha512-jXvkCDKsC6hyjBhnJQo3D9Isei05JieMVoB0aIl0Uzx/dxWfoECdeyxR0pVGhpcZB+dXSALyZtb8XGUpxV42mw==",
+			"location": "git+https://github.com/sindresorhus/got.git",
+			"spec": "github:sindresorhus/got#753d32ee7390540fcbb61fb4aad77dadcbbb3b3f"
+		},
+		"comparisonHash": "8a2a8dcbb729bf3ee9216e490c955701f0ddebe1",
+		"diff": {
+			"files": {
+				"dist/source/as-promise/index.js": {
+					"diff": "--- published/dist/source/as-promise/index.js\n+++ rebuilt/dist/source/as-promise/index.js\n@@ -40,7 +40,7 @@\n             request.once('response', async (response) => {\n                 // Parse body\n                 const contentEncoding = (response.headers['content-encoding'] ?? '').toLowerCase();\n-                const isCompressed = contentEncoding === 'gzip' || contentEncoding === 'deflate' || contentEncoding === 'br';\n+                const isCompressed = contentEncoding === 'gzip' || contentEncoding === 'deflate' || contentEncoding === 'br' || contentEncoding === 'zstd';\n                 const { options } = request;\n                 if (isCompressed && !options.decompress) {\n                     response.body = response.rawBody;\n@@ -170,27 +170,35 @@\n         emitter.off(event, function_);\n         return promise;\n     };\n-    const shortcut = (responseType) => {\n+    const shortcut = (promiseToAwait, responseType) => {\n         const newPromise = (async () => {\n             // Wait until downloading has ended\n-            await promise;\n+            await promiseToAwait;\n             const { options } = globalResponse.request;\n             return parseBody(globalResponse, responseType, options.parseJson, options.encoding);\n         })();\n         // eslint-disable-next-line @typescript-eslint/no-floating-promises\n-        Object.defineProperties(newPromise, Object.getOwnPropertyDescriptors(promise));\n+        Object.defineProperties(newPromise, Object.getOwnPropertyDescriptors(promiseToAwait));\n         return newPromise;\n     };\n-    promise.json = () => {\n+    // Note: These use `function` syntax (not arrows) to access `this` context.\n+    // When custom handlers wrap the promise to transform errors, these methods\n+    // are copied to the handler's promise. Using `this` ensures we await the\n+    // handler's wrapped promise, not the original, so errors propagate correctly.\n+    promise.json = function () {\n         if (globalRequest.options) {\n             const { headers } = globalRequest.options;\n             if (!globalRequest.writableFinished && !('accept' in headers)) {\n                 headers.accept = 'application/json';\n             }\n         }\n-        return shortcut('json');\n+        return shortcut(this, 'json');\n+    };\n+    promise.buffer = function () {\n+        return shortcut(this, 'buffer');\n+    };\n+    promise.text = function () {\n+        return shortcut(this, 'text');\n     };\n-    promise.buffer = () => shortcut('buffer');\n-    promise.text = () => shortcut('text');\n     return promise;\n }\n",
+					"match": false,
+					"packageHash": "ff103c7e335f5a25baf691c23ab5b8218e7b1e9bf358a0c9b0ccc296bfb7b020",
+					"size": 8971,
+					"sourceHash": "a7402ac2b4823162a709b2cf5ecd37bab21cc737eda5d81b98a02793bf01f98c",
+					"status": "content"
+				},
+				"dist/source/core/errors.d.ts": {
+					"diff": "--- published/dist/source/core/errors.d.ts\n+++ rebuilt/dist/source/core/errors.d.ts\n@@ -9,8 +9,9 @@\n Contains a `code` property with error class code, like `ECONNREFUSED`.\n */\n export declare class RequestError<T = unknown> extends Error {\n-    input?: string;\n+    name: string;\n     code: string;\n+    input?: string;\n     stack: string;\n     readonly options: Options;\n     readonly response?: Response<T>;\n@@ -25,6 +26,8 @@\n Includes a `response` property.\n */\n export declare class MaxRedirectsError extends RequestError {\n+    name: string;\n+    code: string;\n     readonly response: Response;\n     readonly request: Request;\n     readonly timings: Timings;\n@@ -35,6 +38,8 @@\n Includes a `response` property.\n */\n export declare class HTTPError<T = any> extends RequestError<T> {\n+    name: string;\n+    code: string;\n     readonly response: Response<T>;\n     readonly request: Request;\n     readonly timings: Timings;\n@@ -45,6 +50,7 @@\n For example, if the database goes down or there's a filesystem error.\n */\n export declare class CacheError extends RequestError {\n+    name: string;\n     readonly request: Request;\n     constructor(error: Error, request: Request);\n }\n@@ -52,6 +58,7 @@\n An error to be thrown when the request body is a stream and an error occurs while reading from that stream.\n */\n export declare class UploadError extends RequestError {\n+    name: string;\n     readonly request: Request;\n     constructor(error: Error, request: Request);\n }\n@@ -60,6 +67,7 @@\n Includes an `event` and `timings` property.\n */\n export declare class TimeoutError extends RequestError {\n+    name: string;\n     readonly request: Request;\n     readonly timings: Timings;\n     readonly event: string;\n@@ -69,6 +77,7 @@\n An error to be thrown when reading from response stream fails.\n */\n export declare class ReadError extends RequestError {\n+    name: string;\n     readonly request: Request;\n     readonly response: Response;\n     readonly timings: Timings;\n@@ -78,12 +87,16 @@\n An error which always triggers a new retry when thrown.\n */\n export declare class RetryError extends RequestError {\n+    name: string;\n+    code: string;\n     constructor(request: Request);\n }\n /**\n An error to be thrown when the request is aborted by AbortController.\n */\n export declare class AbortError extends RequestError {\n+    name: string;\n+    code: string;\n     constructor(request: Request);\n }\n export {};\n",
+					"match": false,
+					"packageHash": "bca0786d47b7f35c2c48e27798076b396b743be45702c711896063d5388ddf3c",
+					"size": 2960,
+					"sourceHash": "d5e801d10e4206d73ba444ef692f36b0dbbd36910fa0a7a085aa84f474d35fa5",
+					"status": "content"
+				},
+				"dist/source/core/errors.js": {
+					"diff": "--- published/dist/source/core/errors.js\n+++ rebuilt/dist/source/core/errors.js\n@@ -8,8 +8,9 @@\n Contains a `code` property with error class code, like `ECONNREFUSED`.\n */\n export class RequestError extends Error {\n+    name = 'RequestError';\n+    code = 'ERR_GOT_REQUEST_ERROR';\n     input;\n-    code;\n     stack;\n     response;\n     request;\n@@ -17,8 +18,9 @@\n     constructor(message, error, self) {\n         super(message, { cause: error });\n         Error.captureStackTrace(this, this.constructor);\n-        this.name = 'RequestError';\n-        this.code = error.code ?? 'ERR_GOT_REQUEST_ERROR';\n+        if (error.code) {\n+            this.code = error.code;\n+        }\n         this.input = error.input;\n         if (isRequest(self)) {\n             Object.defineProperty(this, 'request', {\n@@ -53,10 +55,10 @@\n Includes a `response` property.\n */\n export class MaxRedirectsError extends RequestError {\n+    name = 'MaxRedirectsError';\n+    code = 'ERR_TOO_MANY_REDIRECTS';\n     constructor(request) {\n         super(`Redirected ${request.options.maxRedirects} times. Aborting.`, {}, request);\n-        this.name = 'MaxRedirectsError';\n-        this.code = 'ERR_TOO_MANY_REDIRECTS';\n     }\n }\n /**\n@@ -66,10 +68,10 @@\n // TODO: Change `HTTPError<T = any>` to `HTTPError<T = unknown>` in the next major version to enforce type usage.\n // eslint-disable-next-line @typescript-eslint/naming-convention\n export class HTTPError extends RequestError {\n+    name = 'HTTPError';\n+    code = 'ERR_NON_2XX_3XX_RESPONSE';\n     constructor(response) {\n-        super(`Response code ${response.statusCode} (${response.statusMessage})`, {}, response.request);\n-        this.name = 'HTTPError';\n-        this.code = 'ERR_NON_2XX_3XX_RESPONSE';\n+        super(`Request failed with status code ${response.statusCode} (${response.statusMessage}): ${response.request.options.method} ${response.request.options.url.toString()}`, {}, response.request);\n     }\n }\n /**\n@@ -77,20 +79,24 @@\n For example, if the database goes down or there's a filesystem error.\n */\n export class CacheError extends RequestError {\n+    name = 'CacheError';\n     constructor(error, request) {\n         super(error.message, error, request);\n-        this.name = 'CacheError';\n-        this.code = this.code === 'ERR_GOT_REQUEST_ERROR' ? 'ERR_CACHE_ACCESS' : this.code;\n+        if (this.code === 'ERR_GOT_REQUEST_ERROR') {\n+            this.code = 'ERR_CACHE_ACCESS';\n+        }\n     }\n }\n /**\n An error to be thrown when the request body is a stream and an error occurs while reading from that stream.\n */\n export class UploadError extends RequestError {\n+    name = 'UploadError';\n     constructor(error, request) {\n         super(error.message, error, request);\n-        this.name = 'UploadError';\n-        this.code = this.code === 'ERR_GOT_REQUEST_ERROR' ? 'ERR_UPLOAD' : this.code;\n+        if (this.code === 'ERR_GOT_REQUEST_ERROR') {\n+            this.code = 'ERR_UPLOAD';\n+        }\n     }\n }\n /**\n@@ -98,11 +104,11 @@\n Includes an `event` and `timings` property.\n */\n export class TimeoutError extends RequestError {\n+    name = 'TimeoutError';\n     timings;\n     event;\n     constructor(error, timings, request) {\n         super(error.message, error, request);\n-        this.name = 'TimeoutError';\n         this.event = error.event;\n         this.timings = timings;\n     }\n@@ -111,29 +117,31 @@\n An error to be thrown when reading from response stream fails.\n */\n export class ReadError extends RequestError {\n+    name = 'ReadError';\n     constructor(error, request) {\n",
+					"match": false,
+					"packageHash": "292b99976089de3e2c54ae5ca48adc531672438e99533a806b63cea70250072f",
+					"size": 4930,
+					"sourceHash": "99937c7a84d11a7038c05b5511d5a4e65a7498c8d0291c1f45691de30aecf566",
+					"status": "content"
+				},
+				"dist/source/core/index.d.ts": {
+					"diff": "--- published/dist/source/core/index.d.ts\n+++ rebuilt/dist/source/core/index.d.ts\n@@ -108,6 +108,7 @@\n     private _aborted;\n     private _expectedContentLength?;\n     private _byteCounter?;\n+    private readonly _requestId;\n     private _requestInitialized;\n     constructor(url: UrlType, options?: OptionsType, defaults?: DefaultsType);\n     flush(): Promise<void>;\n@@ -183,5 +184,9 @@\n     */\n     get isFromCache(): boolean | undefined;\n     get reusedSocket(): boolean | undefined;\n+    /**\n+    Whether the stream is read-only. Returns `true` when `body`, `json`, or `form` options are provided.\n+    */\n+    get isReadonly(): boolean;\n }\n export {};\n",
+					"match": false,
+					"packageHash": "40082b0cc4ba4b2ffaaf943e560cedd13be5efc51ee290408065b2f4b3362650",
+					"size": 6441,
+					"sourceHash": "42f28931fcfba687150fa6900b503126e204baec8e0f1e74e1b248682e3f64f4",
+					"status": "content"
+				},
+				"dist/source/core/index.js": {
+					"diff": "--- published/dist/source/core/index.js\n+++ rebuilt/dist/source/core/index.js\n@@ -19,12 +19,16 @@\n import isClientRequest from './utils/is-client-request.js';\n import isUnixSocketURL, { getUnixSocketPath } from './utils/is-unix-socket-url.js';\n import { RequestError, ReadError, MaxRedirectsError, HTTPError, TimeoutError, UploadError, CacheError, AbortError, } from './errors.js';\n+import { generateRequestId, publishRequestCreate, publishRequestStart, publishResponseStart, publishResponseEnd, publishRetry, publishError, publishRedirect, } from './diagnostics-channel.js';\n const supportsBrotli = is.string(process.versions.brotli);\n+const supportsZstd = is.string(process.versions.zstd);\n const methodsWithoutBody = new Set(['GET', 'HEAD']);\n // Methods that should auto-end streams when no body is provided\n const methodsWithoutBodyStream = new Set(['OPTIONS', 'DELETE', 'PATCH']);\n const cacheableStore = new WeakableMap();\n const redirectCodes = new Set([300, 301, 302, 303, 304, 307, 308]);\n+// Track errors that have been processed by beforeError hooks to preserve custom error types\n+const errorsProcessedByHooks = new WeakSet();\n const proxiedRequestEvents = [\n     'socket',\n     'connect',\n@@ -52,28 +56,30 @@\n     options;\n     response;\n     requestUrl;\n-    redirectUrls;\n-    retryCount;\n-    _stopReading;\n-    _stopRetry;\n-    _downloadedSize;\n-    _uploadedSize;\n-    _pipedServerResponses;\n+    redirectUrls = [];\n+    retryCount = 0;\n+    _stopReading = false;\n+    _stopRetry = noop;\n+    _downloadedSize = 0;\n+    _uploadedSize = 0;\n+    _pipedServerResponses = new Set();\n     _request;\n     _responseSize;\n     _bodySize;\n-    _unproxyEvents;\n+    _unproxyEvents = noop;\n     _isFromCache;\n-    _triggerRead;\n-    _cancelTimeouts;\n-    _removeListeners;\n+    _triggerRead = false;\n+    _jobs = [];\n+    _cancelTimeouts = noop;\n+    _removeListeners = noop;\n     _nativeResponse;\n-    _flushed;\n-    _aborted;\n+    _flushed = false;\n+    _aborted = false;\n     _expectedContentLength;\n     _byteCounter;\n+    _requestId = generateRequestId();\n     // We need this because `this._request` if `undefined` when using cache\n-    _requestInitialized;\n+    _requestInitialized = false;\n     constructor(url, options, defaults) {\n         super({\n             // Don't destroy immediately, as the error may be emitted on unsuccessful retry\n@@ -81,23 +87,8 @@\n             // It needs to be zero because we're just proxying the data to another stream\n             highWaterMark: 0,\n         });\n-        this._downloadedSize = 0;\n-        this._uploadedSize = 0;\n-        this._stopReading = false;\n-        this._pipedServerResponses = new Set();\n-        this._unproxyEvents = noop;\n-        this._triggerRead = false;\n-        this._cancelTimeouts = noop;\n-        this._removeListeners = noop;\n-        this._jobs = [];\n-        this._flushed = false;\n-        this._requestInitialized = false;\n-        this._aborted = false;\n-        this.redirectUrls = [];\n-        this.retryCount = 0;\n-        this._stopRetry = noop;\n         this.on('pipe', (source) => {\n-            if (source?.headers) {\n+            if (this.options.copyPipedHeaders && source?.headers) {\n                 Object.assign(this.options.headers, source.headers);\n             }\n         });\n@@ -115,6 +106,12 @@\n                 this.options.url = '';\n             }\n             this.requestUrl = this.options.url;\n+            // Publish request creation event\n+            publishRequestCreate({\n+                requestId: this._requestId,\n+                url: this.options.url?.toString() ?? '',\n+                method: this.options.method,\n+            });\n         }\n",
+					"match": false,
+					"packageHash": "d0b412a97d5e06ff27f2cd9943d9256257646310fe3b7e0a901b6658d6164c6a",
+					"size": 51758,
+					"sourceHash": "91aced2a42fc86675138a0a8871411e0fac62706ee38a46a63c6a478669f5594",
+					"status": "content"
+				},
+				"dist/source/core/options.d.ts": {
+					"diff": "--- published/dist/source/core/options.d.ts\n+++ rebuilt/dist/source/core/options.d.ts\n@@ -67,8 +67,9 @@\n };\n export type BeforeRequestHook = (options: NormalizedOptions, context: BeforeRequestHookContext) => Promisable<void | Response | ResponseLike>;\n export type BeforeRedirectHook = (updatedOptions: NormalizedOptions, plainResponse: PlainResponse) => Promisable<void>;\n-export type BeforeErrorHook = (error: RequestError) => Promisable<RequestError>;\n+export type BeforeErrorHook = (error: RequestError) => Promisable<Error>;\n export type BeforeRetryHook = (error: RequestError, retryCount: number) => Promisable<void>;\n+export type BeforeCacheHook = (response: PlainResponse) => false | void;\n export type AfterResponseHook<ResponseType = unknown> = (response: Response<ResponseType>, retryWithMergedOptions: (options: OptionsInit) => never) => Promisable<Response | CancelableRequest<Response>>;\n /**\n All available hooks of Got.\n@@ -255,13 +256,20 @@\n     /**\n     Called with a `RequestError` instance. The error is passed to the hook right before it's thrown.\n \n-    This is especially useful when you want to have more detailed errors.\n+    This hook can return any `Error` instance, allowing you to:\n+    - Return custom error classes for better error handling in your application\n+    - Extend `RequestError` with additional properties\n+    - Return plain `Error` instances when you don't need Got-specific error information\n+\n+    This is especially useful when you want to have more detailed errors or maintain backward compatibility with existing error handling code.\n \n     @default []\n \n+    @example\n     ```\n     import got from 'got';\n \n+    // Modify and return the error\n     await got('https://api.github.com/repos/sindresorhus/got/commits', {\n         responseType: 'json',\n         hooks: {\n@@ -278,6 +286,29 @@\n             ]\n         }\n     });\n+\n+    // Return a custom error class\n+    class CustomAPIError extends Error {\n+        constructor(message, statusCode) {\n+            super(message);\n+            this.name = 'CustomAPIError';\n+            this.statusCode = statusCode;\n+        }\n+    }\n+\n+    await got('https://api.example.com/endpoint', {\n+        hooks: {\n+            beforeError: [\n+                error => {\n+                    // Return a custom error for backward compatibility with your application\n+                    return new CustomAPIError(\n+                        error.message,\n+                        error.response?.statusCode\n+                    );\n+                }\n+            ]\n+        }\n+    });\n     ```\n     */\n     beforeError: BeforeErrorHook[];\n@@ -315,6 +346,72 @@\n     */\n     beforeRetry: BeforeRetryHook[];\n     /**\n+    Called right before the response is cached. Allows you to control caching behavior by directly modifying the response or preventing caching.\n+\n+    This is especially useful when you want to prevent caching of specific responses or modify cache headers.\n+\n+    @default []\n+\n+    **Return value:**\n+    > - `false` - Prevent caching (remaining hooks are skipped)\n+    > - `void`/`undefined` - Use default caching behavior (mutations take effect)\n+\n+    **Modifying the response:**\n+    > - Hooks can directly mutate response properties like `headers`, `statusCode`, and `statusMessage`\n+    > - Mutations to `response.headers` affect how the caching layer decides whether to cache the response and for how long\n+    > - Changes are applied to what gets cached\n+\n+    **Note:**\n+    > - This hook is only called when the `cache` option is enabled.\n+\n+    **Note:**\n+    > - This hook must be synchronous. It cannot return a Promise. If you need async logic to determine caching behavior, use a `beforeRequest` hook instead.\n+\n+    **Note:**\n+    > - When returning `false`, remaining hooks are skipped and the response will not be cached.\n+\n+    **Note:**\n+    > - Returning anything other than `false` or `undefined` will throw a TypeError.\n+\n+    **Note:**\n+    > - If a hook throws an error, it will be propagated and the request will fail. This is consistent with how other hooks in Got handle errors.\n+\n+    **Note:**\n",
+					"match": false,
+					"packageHash": "1edb954315916ad1c31b4ab93c518e10965a15c7382f619336477ff2d6a49f7f",
+					"size": 56695,
+					"sourceHash": "9bf4f08d25abde402f4a1d733f35ecfec8026007acd8884f65d1785d6371411c",
+					"status": "content"
+				},
+				"dist/source/core/options.js": {
+					"diff": "--- published/dist/source/core/options.js\n+++ rebuilt/dist/source/core/options.js\n@@ -127,6 +127,7 @@\n         beforeError: [],\n         beforeRedirect: [],\n         beforeRetry: [],\n+        beforeCache: [],\n         afterResponse: [],\n     },\n     followRedirect: true,\n@@ -137,6 +138,7 @@\n     password: '',\n     http2: false,\n     allowGetBody: false,\n+    copyPipedHeaders: true,\n     headers: {\n         'user-agent': 'got (https://github.com/sindresorhus/got)',\n     },\n@@ -274,14 +276,12 @@\n             beforeError: [...hooks.beforeError],\n             beforeRedirect: [...hooks.beforeRedirect],\n             beforeRetry: [...hooks.beforeRetry],\n+            beforeCache: [...hooks.beforeCache],\n             afterResponse: [...hooks.afterResponse],\n         },\n         searchParams: internals.searchParams ? new URLSearchParams(internals.searchParams) : undefined,\n         pagination: { ...internals.pagination },\n     };\n-    if (result.url !== undefined) {\n-        result.prefixUrl = '';\n-    }\n     return result;\n };\n const cloneRaw = (raw) => {\n@@ -339,6 +339,9 @@\n         if (is.array(hooks.beforeRetry)) {\n             result.hooks.beforeRetry = [...hooks.beforeRetry];\n         }\n+        if (is.array(hooks.beforeCache)) {\n+            result.hooks.beforeCache = [...hooks.beforeCache];\n+        }\n         if (is.array(hooks.afterResponse)) {\n             result.hooks.afterResponse = [...hooks.afterResponse];\n         }\n@@ -367,7 +370,7 @@\n export default class Options {\n     _unixOptions;\n     _internals;\n-    _merging;\n+    _merging = false;\n     _init;\n     constructor(input, options, defaults) {\n         assertAny('input', [is.string, is.urlInstance, is.object, is.undefined], input);\n@@ -378,8 +381,6 @@\n         }\n         this._internals = cloneInternals(defaults?._internals ?? defaults ?? defaultInternals);\n         this._init = [...(defaults?._init ?? [])];\n-        this._merging = false;\n-        this._unixOptions = undefined;\n         // This rule allows `finally` to be considered more important.\n         // Meaning no matter the error thrown in the `try` block,\n         // if `finally` throws then the `finally` error will be thrown.\n@@ -768,7 +769,11 @@\n         if (is.string(value) && value.startsWith('/')) {\n             throw new Error('`url` must not start with a slash');\n         }\n-        const urlString = `${this.prefixUrl}${value.toString()}`;\n+        // Detect if URL is already absolute (has a protocol/scheme)\n+        const valueString = value.toString();\n+        const isAbsolute = is.urlInstance(value) || /^[a-z][a-z\\d+.-]*:/i.test(valueString);\n+        // Only concatenate prefixUrl if the URL is relative\n+        const urlString = isAbsolute ? valueString : `${this.prefixUrl}${valueString}`;\n         const url = new URL(urlString);\n         this._internals.url = url;\n         if (url.protocol === 'unix:') {\n@@ -1222,6 +1227,62 @@\n         this._internals.allowGetBody = value;\n     }\n     /**\n+    Automatically copy headers from piped streams.\n+\n+    When piping a request into a Got stream (e.g., `request.pipe(got.stream(url))`), this controls whether headers from the source stream are automatically merged into the Got request headers.\n+\n+    Note: Piped headers overwrite any explicitly set headers with the same name. To override this, either set `copyPipedHeaders` to `false` and manually copy safe headers, or use a `beforeRequest` hook to force specific header values after piping.\n+\n+    Useful for proxy scenarios, but you may want to disable this to filter out headers like `Host`, `Connection`, `Authorization`, etc.\n+\n+    @default true\n+\n+    @example\n+    ```\n+    import got from 'got';\n+    import {pipeline} from 'node:stream/promises';\n+\n+    // Disable automatic header copying and manually copy only safe headers\n+    server.get('/proxy', async (request, response) => {\n+        const gotStream = got.stream('https://example.com', {\n+            copyPipedHeaders: false,\n+            headers: {\n+                'user-agent': request.headers['user-agent'],\n",
+					"match": false,
+					"packageHash": "a5b2d93a3cb01c359a6fe69b4f758b299bc72caac68abb2229f0fb53d7c158c5",
+					"size": 63315,
+					"sourceHash": "87be01165d8c29b5a2662fda8c08f16679f00cb883b320344e50c98be345cecb",
+					"status": "content"
+				},
+				"dist/source/core/response.d.ts": {
+					"diff": "--- published/dist/source/core/response.d.ts\n+++ rebuilt/dist/source/core/response.d.ts\n@@ -101,6 +101,8 @@\n Includes a `response` property.\n */\n export declare class ParseError extends RequestError {\n+    name: string;\n+    code: string;\n     readonly response: Response;\n     constructor(error: Error, response: Response);\n }\n",
+					"match": false,
+					"packageHash": "a6d0096ffc95d52d04b1590e3b0f5342c3008ed6cc4309d0a8b37206f0eb952c",
+					"size": 3682,
+					"sourceHash": "920d4d56c73d06112a0b04bcb6b0a557bdaba93c727801a135d55d92b48cab10",
+					"status": "content"
+				},
+				"dist/source/core/response.js": {
+					"diff": "--- published/dist/source/core/response.js\n+++ rebuilt/dist/source/core/response.js\n@@ -11,11 +11,11 @@\n Includes a `response` property.\n */\n export class ParseError extends RequestError {\n+    name = 'ParseError';\n+    code = 'ERR_BODY_PARSE_FAILURE';\n     constructor(error, response) {\n         const { options } = response.request;\n         super(`${error.message} in \"${options.url.toString()}\"`, error, response.request);\n-        this.name = 'ParseError';\n-        this.code = 'ERR_BODY_PARSE_FAILURE';\n     }\n }\n export const parseBody = (response, responseType, parseJson, encoding) => {\n",
+					"match": false,
+					"packageHash": "3b17461cd0b776ede36d867c017eaa414381682ab6db58f2b54d71472a7e1c97",
+					"size": 1495,
+					"sourceHash": "78278c89ef1bcb637c0a8a98c16bce3df4215a8c9056fcb88bf3915fa81a543f",
+					"status": "content"
+				},
+				"dist/source/core/timed-out.d.ts": {
+					"diff": "--- published/dist/source/core/timed-out.d.ts\n+++ rebuilt/dist/source/core/timed-out.d.ts\n@@ -18,6 +18,7 @@\n export type ErrorCode = 'ETIMEDOUT' | 'ECONNRESET' | 'EADDRINUSE' | 'ECONNREFUSED' | 'EPIPE' | 'ENOTFOUND' | 'ENETUNREACH' | 'EAI_AGAIN';\n export declare class TimeoutError extends Error {\n     event: string;\n+    name: string;\n     code: ErrorCode;\n     constructor(threshold: number, event: string);\n }\n",
+					"match": false,
+					"packageHash": "e8c1f41aeaca02f97f93626d289dcdb89b4de617b070dc0652aa9682ffd2b216",
+					"size": 875,
+					"sourceHash": "9d3c852dea1316124722e739557f5d25e46ccf771d905e0dc97d11ecce9d92d8",
+					"status": "content"
+				},
+				"dist/source/core/timed-out.js": {
+					"diff": "--- published/dist/source/core/timed-out.js\n+++ rebuilt/dist/source/core/timed-out.js\n@@ -4,12 +4,11 @@\n const noop = () => { };\n export class TimeoutError extends Error {\n     event;\n-    code;\n+    name = 'TimeoutError';\n+    code = 'ETIMEDOUT';\n     constructor(threshold, event) {\n         super(`Timeout awaiting '${event}' for ${threshold}ms`);\n         this.event = event;\n-        this.name = 'TimeoutError';\n-        this.code = 'ETIMEDOUT';\n     }\n }\n export default function timedOut(request, delays, options) {\n",
+					"match": false,
+					"packageHash": "40cf46ac15493a263514438c3d0db3a36dfacf7308b158c74ef1bcff3200e6ef",
+					"size": 5360,
+					"sourceHash": "6daff4f616e96bd75cca40fc3e6d7a6ad7f57a1613eeb715f9962f216bc48756",
+					"status": "content"
+				},
+				"dist/source/core/utils/weakable-map.d.ts": {
+					"diff": "--- published/dist/source/core/utils/weakable-map.d.ts\n+++ rebuilt/dist/source/core/utils/weakable-map.d.ts\n@@ -1,7 +1,6 @@\n export default class WeakableMap<K, V> {\n     weakMap: WeakMap<Record<string, unknown>, V>;\n     map: Map<K, V>;\n-    constructor();\n     set(key: K, value: V): void;\n     get(key: K): V | undefined;\n     has(key: K): boolean;\n",
+					"match": false,
+					"packageHash": "8a25f1e1aede48b5b0dcd8178a6f95ac04be97809ce0b2920bb42254435b2fbf",
+					"size": 223,
+					"sourceHash": "03935ef43166e23fd4ce60a05513f200d7a54ce7852c858615f6e2869a5835ce",
+					"status": "content"
+				},
+				"dist/source/core/utils/weakable-map.js": {
+					"diff": "--- published/dist/source/core/utils/weakable-map.js\n+++ rebuilt/dist/source/core/utils/weakable-map.js\n@@ -1,10 +1,6 @@\n export default class WeakableMap {\n-    weakMap;\n-    map;\n-    constructor() {\n-        this.weakMap = new WeakMap();\n-        this.map = new Map();\n-    }\n+    weakMap = new WeakMap();\n+    map = new Map();\n     set(key, value) {\n         if (typeof key === 'object') {\n             this.weakMap.set(key, value);\n",
+					"match": false,
+					"packageHash": "6d1e8b65544eb3cf9766c39e50d8dd392dec08e6c330891647fee83b22d2b585",
+					"size": 627,
+					"sourceHash": "9e84101a3747913b54de72119e6b1a92874bd7a39495a0860d8b3d2c0b868e32",
+					"status": "content"
+				},
+				"dist/source/index.d.ts": {
+					"diff": "--- published/dist/source/index.d.ts\n+++ rebuilt/dist/source/index.d.ts\n@@ -7,6 +7,7 @@\n export type { default as Request } from './core/index.js';\n export * from './core/index.js';\n export * from './core/errors.js';\n+export * from './core/diagnostics-channel.js';\n export type { Delays } from './core/timed-out.js';\n export { default as calculateRetryDelay } from './core/calculate-retry-delay.js';\n export * from './as-promise/types.js';\n",
+					"match": false,
+					"packageHash": "f88fb23d72ea1139f3322f887d4978b698cc63f1e1aaf6b0804ece0331f40281",
+					"size": 657,
+					"sourceHash": "34f3fbef594a0729ffd7e8f9f0f85d4072cb59e76874a37af9d72c6dec84bedd",
+					"status": "content"
+				},
+				"dist/source/index.js": {
+					"diff": "--- published/dist/source/index.js\n+++ rebuilt/dist/source/index.js\n@@ -14,6 +14,7 @@\n export * from './core/response.js';\n export * from './core/index.js';\n export * from './core/errors.js';\n+export * from './core/diagnostics-channel.js';\n export { default as calculateRetryDelay } from './core/calculate-retry-delay.js';\n export * from './as-promise/types.js';\n export * from './types.js';\n",
+					"match": false,
+					"packageHash": "aaf755ee2c7a8aa4c91264e667633cfe71d56e563daf1c722456b479b1c7c71d",
+					"size": 751,
+					"sourceHash": "24db8d7e435bc9a17abe419ff043de69831b5fbc0661b6ade8aad8b36fdd6112",
+					"status": "content"
+				},
+				"dist/source/core/diagnostics-channel.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"dist/source/core/diagnostics-channel.js": {
+					"match": false,
+					"status": "missing-in-package"
+				}
+			},
+			"summary": {
+				"differentFiles": 15,
+				"matchingFiles": 30,
+				"missingInPackage": 2,
+				"missingInSource": 0,
+				"score": 0.6382978723404256,
+				"totalFiles": 47
+			}
+		}
+	}
+]
