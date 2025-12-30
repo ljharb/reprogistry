@@ -1,0 +1,109 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2025-12-30T16:10:46.797Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:11.7.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "deepmerge@0.2.7",
+			"name": "deepmerge",
+			"version": "0.2.7",
+			"location": "https://registry.npmjs.org/deepmerge/-/deepmerge-0.2.7.tgz",
+			"integrity": "sha512-LA8OX9LCCryJvvxKC86te1GLoUcJVsL3qiFo0rSzXeRx/h9ge0WjhtasAXX1DPgzXOkZG1K3utuRomNVAr4B2g==",
+			"publishedAt": "2013-06-03T01:51:01.732Z",
+			"publishedWith": {
+				"node": null,
+				"npm": "1.2.18"
+			}
+		},
+		"source": {
+			"integrity": "sha512-MuAlwNl1r3Amnj3wso4OjWN2/DYE+Vc3rMFynKzJd7AKV5nX0l88Ss5xsBg7X3wq2aVlE7Jgea/AtGtLZle91Q==",
+			"location": "git://github.com/nrf110/deepmerge.git",
+			"spec": "github:nrf110/deepmerge#HEAD"
+		},
+		"comparisonHash": "8a2a8dcbb729bf3ee9216e490c955701f0ddebe1",
+		"diff": {
+			"files": {
+				".npmignore": {
+					"match": false,
+					"packageHash": "9ed338fbe8375578a1177d09e644244eb1a4a76fd1eec87d9a6267cfaaca735f",
+					"size": 31,
+					"status": "missing-in-source"
+				},
+				"README.markdown": {
+					"match": false,
+					"packageHash": "8d3f912d9dbcc3e24ad437f578a83c282807221c7d0edb9d60682d80df4eba8c",
+					"size": 1097,
+					"status": "missing-in-source"
+				},
+				"example/merge.js": {
+					"match": false,
+					"packageHash": "d32edc8994f612ee4c54891a3dd7f65a1460c1ae9e140ef9fc13b8a499cc3ef3",
+					"size": 146,
+					"status": "missing-in-source"
+				},
+				"index.js": {
+					"diff": "--- published/index.js\n+++ rebuilt/index.js\n@@ -1,40 +1,106 @@\n-module.exports = function merge (target, src) {\n-    var array = Array.isArray(src)\n-    var dst = array && [] || {}\n-\n-    if (array) {\n-        target = target || []\n-        dst = dst.concat(target)\n-        src.forEach(function(e, i) {\n-            if (typeof target[i] === 'undefined') {\n-                dst[i] = e\n-            } else if (typeof e === 'object') {\n-                dst[i] = merge(target[i], e)\n-            } else {\n-                if (target.indexOf(e) === -1) {\n-                    dst.push(e)\n-                }\n-            }\n-        })\n-    } else {\n-        if (target && typeof target === 'object') {\n-            Object.keys(target).forEach(function (key) {\n-                dst[key] = target[key]\n-            })\n-        }\n-        Object.keys(src).forEach(function (key) {\n-            if (typeof src[key] !== 'object' || !src[key]) {\n-                dst[key] = src[key]\n-            }\n-            else {\n-                if (!target[key]) {\n-                    dst[key] = src[key]\n-                } else {\n-                    dst[key] = merge(target[key], src[key])\n-                }\n-            }\n-        })\n-    }\n+var defaultIsMergeableObject = require('is-mergeable-object')\n \n-    return dst\n+function emptyTarget(val) {\n+\treturn Array.isArray(val) ? [] : {}\n }\n+\n+function cloneUnlessOtherwiseSpecified(value, options) {\n+\treturn (options.clone !== false && options.isMergeableObject(value))\n+\t\t? deepmerge(emptyTarget(value), value, options)\n+\t\t: value\n+}\n+\n+function defaultArrayMerge(target, source, options) {\n+\treturn target.concat(source).map(function(element) {\n+\t\treturn cloneUnlessOtherwiseSpecified(element, options)\n+\t})\n+}\n+\n+function getMergeFunction(key, options) {\n+\tif (!options.customMerge) {\n+\t\treturn deepmerge\n+\t}\n+\tvar customMerge = options.customMerge(key)\n+\treturn typeof customMerge === 'function' ? customMerge : deepmerge\n+}\n+\n+function getEnumerableOwnPropertySymbols(target) {\n+\treturn Object.getOwnPropertySymbols\n+\t\t? Object.getOwnPropertySymbols(target).filter(function(symbol) {\n+\t\t\treturn Object.propertyIsEnumerable.call(target, symbol)\n+\t\t})\n+\t\t: []\n+}\n+\n+function getKeys(target) {\n+\treturn Object.keys(target).concat(getEnumerableOwnPropertySymbols(target))\n+}\n+\n+function propertyIsOnObject(object, property) {\n+\ttry {\n+\t\treturn property in object\n+\t} catch(_) {\n+\t\treturn false\n+\t}\n+}\n+\n+// Protects from prototype poisoning and unexpected merging up the prototype chain.\n+function propertyIsUnsafe(target, key) {\n+\treturn propertyIsOnObject(target, key) // Properties are safe to merge if they don't exist in the target yet,\n+\t\t&& !(Object.hasOwnProperty.call(target, key) // unsafe if they exist up the prototype chain,\n+\t\t\t&& Object.propertyIsEnumerable.call(target, key)) // and also unsafe if they're nonenumerable.\n+}\n+\n+function mergeObject(target, source, options) {\n+\tvar destination = {}\n+\tif (options.isMergeableObject(target)) {\n+\t\tgetKeys(target).forEach(function(key) {\n+\t\t\tdestination[key] = cloneUnlessOtherwiseSpecified(target[key], options)\n+\t\t})\n",
+					"match": false,
+					"packageHash": "6a65ffcad9ea740efb9d6847d0ee3c37933231c278f56d8c9c67253d83a43124",
+					"size": 1143,
+					"sourceHash": "12440c84957c1990ea2d5e33dc0091722dc1dc1585c6d20e0c780e568ffa9d30",
+					"status": "content"
+				},
+				"license.txt": {
+					"diff": "--- published/license.txt\n+++ rebuilt/license.txt\n@@ -1,6 +1,6 @@\n The MIT License (MIT)\n \n-Copyright (c) <year> <copyright holders>\n+Copyright (c) 2012 James Halliday, Josh Duff, and other contributors\n \n Permission is hereby granted, free of charge, to any person obtaining a copy\n of this software and associated documentation files (the \"Software\"), to deal\n@@ -18,4 +18,4 @@\n AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER\n LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,\n OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN\n-THE SOFTWARE.\n\\ No newline at end of file\n+THE SOFTWARE.\n",
+					"match": false,
+					"packageHash": "9448df54ff69cafec4f52ea4440638bd86dcdf8f39804f6235c4b05fef01bba6",
+					"size": 1087,
+					"sourceHash": "6cfc4687cb2f2d86f4a77e6b526290d3878e5e512f3fec2f4cb36a9cb36f798b",
+					"status": "content"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -1,22 +1,42 @@\n {\n-  \"author\": \"Nick Fisher\",\n   \"name\": \"deepmerge\",\n   \"description\": \"A library for deep (recursive) merging of Javascript objects\",\n-  \"version\": \"0.2.7\",\n-  \"homepage\": \"https://github.com/nrf110/deepmerge\",\n+  \"keywords\": [\n+    \"merge\",\n+    \"deep\",\n+    \"extend\",\n+    \"copy\",\n+    \"clone\",\n+    \"recursive\"\n+  ],\n+  \"version\": \"4.3.1\",\n+  \"homepage\": \"https://github.com/TehShrike/deepmerge\",\n   \"repository\": {\n     \"type\": \"git\",\n-    \"url\": \"git://github.com/nrf110/deepmerge.git\"\n+    \"url\": \"git://github.com/TehShrike/deepmerge.git\"\n   },\n-  \"main\": \"index\",\n+  \"main\": \"dist/cjs.js\",\n   \"engines\": {\n-    \"node\": \">=0.4.0\"\n+    \"node\": \">=0.10.0\"\n   },\n   \"scripts\": {\n-    \"test\" : \"tap test/*.js\"\n+    \"build\": \"rollup -c\",\n+    \"test\": \"npm run build && tape test/*.js && jsmd readme.md && npm run test:typescript\",\n+    \"test:typescript\": \"tsc --noEmit test/typescript.ts && ts-node test/typescript.ts\",\n+    \"size\": \"npm run build && uglifyjs --compress --mangle -- ./dist/umd.js | gzip -c | wc -c\"\n   },\n-  \"dependencies\": {},\n   \"devDependencies\": {\n-    \"tap\" : \"~0.2.4\"\n-  }\n+    \"@types/node\": \"^8.10.54\",\n+    \"is-mergeable-object\": \"1.1.0\",\n+    \"is-plain-object\": \"^5.0.0\",\n+    \"jsmd\": \"^1.0.2\",\n+    \"rollup\": \"^1.23.1\",\n+    \"rollup-plugin-commonjs\": \"^10.1.0\",\n+    \"rollup-plugin-node-resolve\": \"^5.2.0\",\n+    \"tape\": \"^4.11.0\",\n+    \"ts-node\": \"7.0.1\",\n+    \"typescript\": \"=2.2.2\",\n+    \"uglify-js\": \"^3.6.1\"\n+  },\n+  \"license\": \"MIT\"\n }\n",
+					"match": false,
+					"packageHash": "4a9ec7b936c33dad0c92cf96c46c22dd39edbe81b97ade5129dac5069a6f4063",
+					"size": 483,
+					"sourceHash": "f56978e7a6da1a3c6edee41abb54f98584a2fa2680458c48db820ae772fef0c9",
+					"status": "content"
+				},
+				"test/merge.js": {
+					"match": false,
+					"packageHash": "4ca785656bc38d4a5f68d45f7878f0183deab5b14b0dfec6035cac13b07b684f",
+					"size": 4557,
+					"status": "missing-in-source"
+				},
+				".editorconfig": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"changelog.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"index.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"readme.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"rollup.config.js": {
+					"match": false,
+					"status": "missing-in-package"
+				}
+			},
+			"summary": {
+				"differentFiles": 3,
+				"matchingFiles": 0,
+				"missingInPackage": 5,
+				"missingInSource": 4,
+				"score": 0,
+				"totalFiles": 12
+			}
+		}
+	}
+]
