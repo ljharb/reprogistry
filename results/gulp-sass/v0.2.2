@@ -1,0 +1,129 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2025-12-30T23:40:01.626Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:11.7.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "gulp-sass@0.2.2",
+			"name": "gulp-sass",
+			"version": "0.2.2",
+			"location": "https://registry.npmjs.org/gulp-sass/-/gulp-sass-0.2.2.tgz",
+			"integrity": "sha512-Sqg102NfgILLNzeLpU/JNjh4937XWXghNEQYAi2ec3DbARhd3uz6QVA2uvXmGWBSlK/ewgyRtIgysEhNJOmM/g==",
+			"publishedAt": "2013-12-15T02:33:24.085Z",
+			"publishedWith": {
+				"node": null,
+				"npm": "1.3.14"
+			}
+		},
+		"source": {
+			"integrity": "sha512-4wonidxB8lGPHvahelpGavUBJAuERSl+OIVxPCyQthK4lSJhZ/u3/qjFcyAtnMIXDl6fXTn34H4BXsN7gt54kQ==",
+			"location": "git://github.com/dlmanning/gulp-sass",
+			"spec": "github:dlmanning/gulp-sass#HEAD"
+		},
+		"comparisonHash": "8a2a8dcbb729bf3ee9216e490c955701f0ddebe1",
+		"diff": {
+			"files": {
+				".npmignore": {
+					"match": false,
+					"packageHash": "d11ca7319245e37c399ba3a881caf35ab073d95bf755351df4ec899077173ba3",
+					"size": 97,
+					"status": "missing-in-source"
+				},
+				"README.md": {
+					"diff": "--- published/README.md\n+++ rebuilt/README.md\n@@ -1,28 +1,240 @@\n-gulp-sass\n-=========\n+# gulp-sass ![npm package version](https://img.shields.io/npm/v/gulp-sass?label=npm%20version) [![Build Status](https://img.shields.io/github/workflow/status/dlmanning/gulp-sass/CI/master)](https://github.com/dlmanning/gulp-sass/actions?query=workflow%3ACI+branch%3Amaster) [![Join the chat at https://gitter.im/dlmanning/gulp-sass](https://img.shields.io/gitter/room/dlmanning/gulp-sass?color=%2346b091&label=chat&logo=gitter)](https://gitter.im/dlmanning/gulp-sass) ![Node.js support](https://img.shields.io/node/v/gulp-sass)\n \n-SASS plugin for [gulp](https://github.com/wearefractal/gulp).\n+Sass plugin for [Gulp](https://github.com/gulpjs/gulp).\n \n-#Install\n+**_Before filing an issue, please make sure you have [updated to the latest version of `gulp-sass`](https://github.com/dlmanning/gulp-sass/wiki/Update-to-the-latest-Gulp-Sass) and have gone through our [Common Issues and Their Fixes](https://github.com/dlmanning/gulp-sass/wiki/Common-Issues-and-Their-Fixes) section._**\n \n+**Migrating your existing project to version 5 or 6? Please read our (short!) [migration guides](#migrating-to-version-6).**\n+\n+## Support\n+\n+Only [Active LTS and Current releases](https://github.com/nodejs/Release#release-schedule) are supported.\n+\n+## Installation\n+\n+To use `gulp-sass`, you must install both `gulp-sass` itself *and* a Sass compiler. `gulp-sass` supports both [Embedded Sass][], [Dart Sass][] and [Node Sass][], although Node Sass is [deprecated](https://sass-lang.com/blog/libsass-is-deprecated). We recommend that you use Dart Sass for new projects, and migrate Node Sass projects to Dart Sass or Embedded Sass when possible.\n+\n+Whichever compiler you choose, it's best to install these as dev dependencies:\n+\n+```sh\n+npm install sass gulp-sass --save-dev\n+```\n+\n+### Importing it into your project\n+\n+`gulp-sass` must be imported into your gulpfile, where you provide it the compiler of your choice. To use `gulp-sass` in a CommonJS module (which is most Node.js environments), do something like this:\n+\n+```js\n+const sass = require('gulp-sass')(require('sass'));\n+```\n+\n+To use `gulp-sass` in an ECMAScript module (which is supported in newer Node.js 14 and later), do something like this:\n+\n+```js\n+import dartSass from 'sass';\n+import gulpSass from 'gulp-sass';\n+const sass = gulpSass(dartSass);\n+```\n+\n+## Usage\n+\n+**Note:** These examples are written for CommonJS modules and assume you're using Gulp 4. For examples that work with Gulp 3, [check the docs for an earlier version of `gulp-sass`](https://github.com/dlmanning/gulp-sass/tree/v4.1.1).\n+\n+`gulp-sass` must be used in a Gulp task. Your task can call `sass()` (to asynchronously render your CSS), or `sass.sync()` (to synchronously render your CSS). Then, export your task with the `export` keyword. We'll show some examples of how to do that.\n+\n+**⚠️ Note:** When using Dart Sass, **synchronous rendering is twice as fast as asynchronous rendering**. The Sass team is exploring ways to improve asynchronous rendering with Dart Sass, but for now, you will get the best performance from `sass.sync()`. If performance is critical, you can use `sass-embedded` instead.\n+\n+### Render your CSS\n+\n+To render your CSS with a build task, then watch your files for changes, you might write something like this:\n+\n+```js\n+'use strict';\n+\n+const gulp = require('gulp');\n+const sass = require('gulp-sass')(require('sass'));\n+\n+function buildStyles() {\n+  return gulp.src('./sass/**/*.scss')\n+    .pipe(sass().on('error', sass.logError))\n+    .pipe(gulp.dest('./css'));\n+};\n+\n+exports.buildStyles = buildStyles;\n+exports.watch = function () {\n+  gulp.watch('./sass/**/*.scss', buildStyles);\n+};\n+```\n+\n+With synchronous rendering, that Gulp task looks like this:\n+\n+```js\n+function buildStyles() {\n+  return gulp.src('./sass/**/*.scss')\n+    .pipe(sass.sync().on('error', sass.logError))\n+    .pipe(gulp.dest('./css'));\n+};\n+```\n+\n+### Render with options\n+\n+To change the final output of your CSS, you can pass an options object to your renderer. `gulp-sass` supports [Sass's JS API compile options](https://sass-lang.com/documentation/js-api/modules#compileString), with a few usage notes:\n+\n+- The `syntax` option is set to `indented` automatically for files with the `.sass` extension\n+- The `sourceMap` and `sourceMapIncludeSources` options are set for you when using `gulp-sourcemaps`\n+\n+For example, to compress your CSS, you can call `sass({style: 'compressed'}`. In the context of a Gulp task, that looks like this:\n+\n+```js\n+function buildStyles() {\n+  return gulp.src('./sass/**/*.scss')\n+    .pipe(sass({style: 'compressed'}).on('error', sass.logError))\n+    .pipe(gulp.dest('./css'));\n+};\n",
+					"match": false,
+					"packageHash": "30a61e442094ab920c0b02b3b7876349633787ff68fbe149b11c8801f5478ac3",
+					"size": 466,
+					"sourceHash": "5db228710065cff4b4fd8007341b1bbbfa762c09e8060fdeac3426cc413bdd75",
+					"status": "content"
+				},
+				"index.js": {
+					"diff": "--- published/index.js\n+++ rebuilt/index.js\n@@ -1,32 +1,206 @@\n-var es    = require('event-stream')\n-  , clone = require('clone')\n-  , sass  = require('node-sass')\n-  , ext   = require('gulp-util').replaceExtension\n-  ;\n+'use strict';\n \n-module.exports = function (options) {\n-  var opts = options ? clone(options) : {};\n+const path = require('path');\n+const { Transform } = require('stream');\n+const picocolors = require('picocolors');\n+const PluginError = require('plugin-error');\n+const replaceExtension = require('replace-ext');\n+const stripAnsi = require('strip-ansi');\n+const clonedeep = require('lodash.clonedeep');\n+const applySourceMap = require('vinyl-sourcemaps-apply');\n+\n+const PLUGIN_NAME = 'gulp-sass';\n+\n+const MISSING_COMPILER_MESSAGE = `\n+gulp-sass no longer has a default Sass compiler; please set one yourself.\n+Both the \"sass\" and \"node-sass\" packages are permitted.\n+For example, in your gulpfile:\n+\n+  const sass = require('gulp-sass')(require('sass'));\n+`;\n+\n+const transfob = (transform) => new Transform({ transform, objectMode: true });\n+\n+/**\n+ * Handles returning the file to the stream\n+ */\n+const filePush = (file, compileResult, callback) => {\n+  file.contents = Buffer.from(compileResult.css);\n+  file.path = replaceExtension(file.path, '.css');\n+\n+  // Build Source Maps!\n+  if (compileResult.sourceMap) {\n+    const proto = /^file:\\/\\/?/;\n+    const leadingSlash = /^\\//;\n+    const sassMap = compileResult.sourceMap;\n+    const base = path.resolve(file.cwd, file.base);\n+\n+    if (!sassMap.file) {\n+      // Convert from absolute path to relative as in gulp-sass 5.0.0\n+      sassMap.file = file.history[0]\n+        .replace(base + path.sep, '')\n+        .replace(proto, '');\n+    }\n+\n+    // Transform to relative file paths as in gulp-sass 5.0.0\n+    sassMap.sources = sassMap.sources.map((src) => {\n+      // file uses Windows-style path separators, source is a URL.\n+      const baseUri = base.replace(/\\\\/g, '/');\n+      // The current file and its content is included\n+      // as data:<encoded file contents> in the new Sass JS API.\n+      // Map it to the original file name (first history entry).\n+      if (src.startsWith('data:')) {\n+        return file.history[0]\n+          .replace(/\\\\/g, '/')\n+          .replace(`${baseUri}/`, '')\n+          .replace(proto, '')\n+          .replace(leadingSlash, '');\n+      }\n+      return src\n+        .replace(proto, '')\n+        .replace(`${baseUri}/`, '')\n+        .replace(leadingSlash, '');\n+    });\n+\n+    // Grab the base filename that's being worked on\n+    const sassFileSrc = file.relative;\n+    // Replace the map file with the original filename (but new extension)\n+    sassMap.file = replaceExtension(sassFileSrc, '.css');\n+\n+    if (file.sourceMap.sourcesContent && !sassMap.sourcesContent) {\n+      sassMap.sourcesContent = file.sourceMap.sourcesContent;\n+    }\n+\n+    // Apply the map\n+    applySourceMap(file, sassMap);\n+  }\n+\n+  if (file.stat) {\n+    file.stat.atime = file.stat.mtime = file.stat.ctime = new Date();\n+  }\n+\n+  callback(null, file);\n+};\n+\n+/**\n+ * Handles error message\n+ */\n+const handleError = (error, file, callback) => {\n+  const filePath = (error.file === 'stdin' ? file.path : error.file) || file.path;\n+  const relativePath = path.relative(process.cwd(), filePath);\n",
+					"match": false,
+					"packageHash": "1e1fe879bd5e3b9f4917e7d0d8985dcbb21aa55967b0b68f54083613a6752e18",
+					"size": 732,
+					"sourceHash": "5bacf6e9630608d26b34948aed810e30bbafcdfa7f34a245554108b273604250",
+					"status": "content"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -1,31 +1,64 @@\n {\n   \"name\": \"gulp-sass\",\n-  \"version\": \"0.2.2\",\n+  \"version\": \"6.0.1\",\n   \"description\": \"Gulp plugin for sass\",\n   \"main\": \"index.js\",\n+  \"engines\": {\n+    \"node\": \">=12\"\n+  },\n   \"scripts\": {\n-    \"test\": \"echo \\\"Error: no test specified\\\" && exit 1\"\n+    \"lint\": \"eslint --report-unused-disable-directives --ignore-path .gitignore .\",\n+    \"fix\": \"npm run lint -- --fix\",\n+    \"mocha\": \"mocha\",\n+    \"test\": \"npm run test:node-sass && npm run test:dart-sass && npm run test:legacy-dart-sass && npm run test:sass-embedded\",\n+    \"test:node-sass\": \"mocha\",\n+    \"test:dart-sass\": \"mocha -- --sass\",\n+    \"test:legacy-dart-sass\": \"mocha -- --sass --legacy\",\n+    \"test:sass-embedded\": \"mocha -- --embedded\"\n   },\n   \"repository\": {\n     \"type\": \"git\",\n-    \"url\": \"git://github.com/dlmanning/gulp-sass\"\n+    \"url\": \"git+https://github.com/dlmanning/gulp-sass.git\"\n   },\n   \"keywords\": [\n-    \"gulpplugin\"\n+    \"gulpplugin\",\n+    \"sass\",\n+    \"gulp\"\n   ],\n   \"author\": \"David Manning\",\n   \"license\": \"MIT\",\n   \"bugs\": {\n     \"url\": \"https://github.com/dlmanning/gulp-sass/issues\"\n   },\n+  \"homepage\": \"https://github.com/dlmanning/gulp-sass#readme\",\n+  \"files\": [\n+    \"index.js\",\n+    \"legacy.js\"\n+  ],\n   \"dependencies\": {\n-    \"event-stream\": \"~3.0.16\",\n-    \"clone\": \"~0.1.10\",\n-    \"node-sass\": \"~0.7.0\",\n-    \"gulp-util\": \"~2.1.3\"\n-\n+    \"lodash.clonedeep\": \"^4.5.0\",\n+    \"picocolors\": \"^1.0.0\",\n+    \"plugin-error\": \"^1.0.1\",\n+    \"replace-ext\": \"^2.0.0\",\n+    \"strip-ansi\": \"^6.0.1\",\n+    \"vinyl-sourcemaps-apply\": \"^0.2.1\"\n   },\n   \"devDependencies\": {\n-    \"gulp\": \"~3.1.4\"\n+    \"autoprefixer\": \"^10.4.0\",\n+    \"eslint\": \"^8.5.0\",\n+    \"eslint-config-airbnb-base\": \"^15.0.0\",\n+    \"eslint-plugin-import\": \"^2.25.3\",\n+    \"globule\": \"^1.3.3\",\n+    \"gulp\": \"^4.0.2\",\n+    \"gulp-postcss\": \"^9.0.1\",\n+    \"gulp-sourcemaps\": \"^3.0.0\",\n+    \"gulp-tap\": \"^2.0.0\",\n+    \"mocha\": \"^9.1.3\",\n+    \"node-sass\": \"^7.0.1\",\n+    \"postcss\": \"^8.4.5\",\n+    \"rimraf\": \"^5.0.10\",\n+    \"sass\": \"^1.45.1\",\n+    \"sass-embedded\": \"^1.49.9\",\n+    \"vinyl\": \"^2.2.1\"\n   }\n }\n",
+					"match": false,
+					"packageHash": "659d492f2e770feedce8afab6f5eeb67712d333c86335f3e8d426218a637db4a",
+					"size": 627,
+					"sourceHash": "4fa39392bf27f23f7567812888970bb94e474fea08ddc662d1ea16826bc02073",
+					"status": "content"
+				},
+				"test/css/inheritance.css": {
+					"match": false,
+					"packageHash": "1c913cc4ec239809c090839d95f370f51c8adbcd4b47e9e2a553c1ebe30f8900",
+					"size": 163,
+					"status": "missing-in-source"
+				},
+				"test/css/mixins.css": {
+					"match": false,
+					"packageHash": "446fd0ccebb2c2634561d1496b0d652166a5318f002eef473ddbf411c865f4b1",
+					"size": 151,
+					"status": "missing-in-source"
+				},
+				"test/css/nesting.css": {
+					"match": false,
+					"packageHash": "0586fa07681949c29d68dd0a1ccf684756ff5873d817aad4857a28f48a53e382",
+					"size": 145,
+					"status": "missing-in-source"
+				},
+				"test/css/variables.css": {
+					"match": false,
+					"packageHash": "fc068a1b28a9c0767912d3c608350917326fa80c2e2138d64c0e182ca0a9b416",
+					"size": 136,
+					"status": "missing-in-source"
+				},
+				"test/scss/inheritance.scss": {
+					"match": false,
+					"packageHash": "9234efccdbec770fa1ed54221375f47126c0abab5a537014d4c977f167634b7e",
+					"size": 166,
+					"status": "missing-in-source"
+				},
+				"test/scss/mixins.scss": {
+					"match": false,
+					"packageHash": "4087290c67ca2997681f3e1fb2c223a5c425ab2ccea9023d681ef70dd6975c16",
+					"size": 221,
+					"status": "missing-in-source"
+				},
+				"test/scss/nesting.scss": {
+					"match": false,
+					"packageHash": "8f38e8396d5c3a1734beca89f4c520da715c1cf82f282a3252a9c12261a21ecb",
+					"size": 143,
+					"status": "missing-in-source"
+				},
+				"test/scss/variables.scss": {
+					"match": false,
+					"packageHash": "e8e7232621ee670baaccf47e0dca60d2065947231fab3b55e806ca5726471061",
+					"size": 193,
+					"status": "missing-in-source"
+				},
+				"test/test.js": {
+					"match": false,
+					"packageHash": "2be786d900556099f2de41d77ad41b548765fa6b296af7cdd1ee283d34682ce8",
+					"size": 129,
+					"status": "missing-in-source"
+				},
+				"legacy.js": {
+					"match": false,
+					"status": "missing-in-package"
+				}
+			},
+			"summary": {
+				"differentFiles": 3,
+				"matchingFiles": 1,
+				"missingInPackage": 1,
+				"missingInSource": 10,
+				"score": 0.06666666666666667,
+				"totalFiles": 15
+			}
+		}
+	}
+]
