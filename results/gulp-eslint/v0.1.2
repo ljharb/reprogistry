@@ -1,0 +1,77 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2025-12-30T23:11:44.969Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:11.7.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "gulp-eslint@0.1.2",
+			"name": "gulp-eslint",
+			"version": "0.1.2",
+			"location": "https://registry.npmjs.org/gulp-eslint/-/gulp-eslint-0.1.2.tgz",
+			"integrity": "sha512-RvF46h60jnCHhaYtWvS/U/VPFLeCOtKtNBgwHXPnLdqTPNSoizFUMQIU+Dkq58Fc9Qe4nzGHRBfBWn6p6XrrPA==",
+			"publishedAt": "2014-01-23T19:16:18.414Z",
+			"publishedWith": {
+				"node": null,
+				"npm": "1.3.21"
+			}
+		},
+		"source": {
+			"integrity": "sha512-muX0j8lv94lVRWuX73WPajAC2iG589LqUc4P7dlRqvmDZYHeshkZWX8YIfBjEr5A5az4Q/cH2zlbMBcy8b6BJQ==",
+			"location": "https://github.com/adametry/gulp-eslint",
+			"spec": "github:adametry/gulp-eslint#HEAD"
+		},
+		"comparisonHash": "8a2a8dcbb729bf3ee9216e490c955701f0ddebe1",
+		"diff": {
+			"files": {
+				"README.md": {
+					"diff": "--- published/README.md\n+++ rebuilt/README.md\n@@ -1,131 +1,238 @@\n-# gulp-eslint [![Build Status](https://travis-ci.org/adametry/gulp-eslint.png)](https://travis-ci.org/adametry/gulp-eslint)\n-> A [Gulp](https://github.com/wearefractal/gulp) plugin for identifying and reporting on patterns found in ECMAScript/JavaScript code.\n+# gulp-eslint [![Build Status](https://travis-ci.org/adametry/gulp-eslint.svg)](https://travis-ci.org/adametry/gulp-eslint) [![Coverage Status](https://img.shields.io/coveralls/adametry/gulp-eslint.svg)](https://coveralls.io/github/adametry/gulp-eslint)\n \n-## Usage\n+> A [gulp](https://gulpjs.com/) plugin for [ESLint](https://eslint.org/)\n+\n+## Installation\n \n-First, install `gulp-eslint` as a development dependency:\n+[Use](https://docs.npmjs.com/cli/install) [npm](https://docs.npmjs.com/getting-started/what-is-npm).\n \n-```shell\n-npm install --save-dev gulp-eslint\n+```\n+npm install gulp-eslint\n ```\n \n-Then, add it to your `gulpfile.js`:\n+## Usage\n \n ```javascript\n-var eslint = require('gulp-eslint');\n+const {src, task} = require('gulp');\n+const eslint = require('gulp-eslint');\n \n-gulp.task('lint', function () {\n-  gulp.src(['js/**/*.js'])\n-    .pipe(eslint())\n-    .pipe(eslint.format());\n+task('default', () => {\n+    return src(['scripts/*.js'])\n+        // eslint() attaches the lint output to the \"eslint\" property\n+        // of the file object so it can be used by other modules.\n+        .pipe(eslint())\n+        // eslint.format() outputs the lint results to the console.\n+        // Alternatively use eslint.formatEach() (see Docs).\n+        .pipe(eslint.format())\n+        // To have the process exit with an error code (1) on\n+        // lint error, return the stream and pipe to failAfterError last.\n+        .pipe(eslint.failAfterError());\n });\n ```\n \n Or use the plugin API to do things like:\n \n ```javascript\n-\n-gulp.src('js/**/*.js')\n+gulp.src(['**/*.js','!node_modules/**'])\n \t.pipe(eslint({\n-\t\trulesdir:'custom-rules/',\n-\t\trules:{\n+\t\trules: {\n \t\t\t'my-custom-rule': 1,\n \t\t\t'strict': 2\n \t\t},\n-\t\tglobals: {\n-\t\t\t'jQuery':false,\n-\t\t\t'$':true\n-\t\t},\n-\t\tenv:{\n-\t\t\tbrowser:true\n-\t\t}\n+\t\tglobals: [\n+\t\t\t'jQuery',\n+\t\t\t'$'\n+\t\t],\n+\t\tenvs: [\n+\t\t\t'browser'\n+\t\t]\n \t}))\n \t.pipe(eslint.formatEach('compact', process.stderr));\n-\n ```\n \n+For additional examples, look through the [example directory](https://github.com/adametry/gulp-eslint/tree/master/example).\n+\n ## API\n \n ### eslint()\n \n-*No explicit configuration.* A `.eslintrc` file my be resolved relative to each linted file.\n+*No explicit configuration.* A `.eslintrc` file may be resolved relative to each linted file.\n \n ### eslint(options)\n-\n-#### options.rulesdir\n-Type: `String`  \n-\n-Load additional rules from this directory. For more information, see the eslint CLI [readdir option](https://github.com/nzakas/eslint/wiki/Command-line-interface#--rulesdir).\n-\n-#### options.config\n-Type: `String`  \n-\n-Path to the eslint rules configuration file. For more information, see the eslint CLI [config option](https://github.com/nzakas/eslint/wiki/Command-line-interface#-c---config) and [config file info](https://github.com/nzakas/eslint/wiki/Command-line-interface#configuration-files). *Note:* This file must have a “.json” file extension.\n+See [ESlint CLIEngine options](https://eslint.org/docs/developer-guide/nodejs-api#cliengine).\n",
+					"match": false,
+					"packageHash": "c7e7676cae1fb0615246bd4d93f3c110c1c103565801ae10f577267a96968c70",
+					"size": 5165,
+					"sourceHash": "017a3e3081fed8f7278d649a567997dc3660683dca39fee1ddfa3563487ab754",
+					"status": "content"
+				},
+				"index.js": {
+					"diff": "--- published/index.js\n+++ rebuilt/index.js\n@@ -1,90 +1,208 @@\n 'use strict';\n \n-var estream = require('event-stream'),\n-\teslint = require('eslint').linter,\n-\tutil = require('./util');\n+const PluginError = require('plugin-error');\n+const {CLIEngine} = require('eslint');\n+const {\n+\tcreateIgnoreResult,\n+\tfilterResult,\n+\tfirstResultMessage,\n+\thandleCallback,\n+\tisErrorMessage,\n+\tmigrateOptions,\n+\tresolveFormatter,\n+\tresolveWritable,\n+\ttransform,\n+\ttryResultAction,\n+\twriteResults\n+} = require('./util');\n+const {relative} = require('path');\n \n /**\n- * Append eslint result to each file\n+ * Append ESLint result to each file\n+ *\n+ * @param {(Object|String)} [options] - Configure rules, env, global, and other options for running ESLint\n+ * @returns {stream} gulp file stream\n  */\n function gulpEslint(options) {\n-\tvar configHelper = util.readOptions(options);\n+\toptions = migrateOptions(options) || {};\n+\tconst linter = new CLIEngine(options);\n \n-\tfunction verify(filePath, contents) {\n-\t\tvar config = configHelper.getConfig(filePath);\n+\treturn transform((file, enc, cb) => {\n+\t\tconst filePath = relative(process.cwd(), file.path);\n \n-\t\t// eslint.cli result structure (+config)\n-\t\treturn {\n-\t\t\tconfig: config,\n-\t\t\tfilePath: filePath,\n-\t\t\tmessages: eslint.verify(contents, config, false)\n-\t\t};\n-\t}\n-\n-\treturn estream.map(function (file, output) {\n+\t\tif (file.isNull()) {\n+\t\t\tcb(null, file);\n+\t\t\treturn;\n+\t\t}\n \n \t\tif (file.isStream()) {\n-\t\t\t// eslint is synchronous, so wait for the complete contents\n-\t\t\t// replace content stream with new readable content stream\n-\t\t\tfile.contents = file.contents.pipe(util.wait(function (contents) {\n-\t\t\t\tfile.eslint = verify(file.path, contents);\n-\t\t\t\toutput(null, file);\n-\t\t\t}));\n-\n-\t\t} else {\n+\t\t\tcb(new PluginError('gulp-eslint', 'gulp-eslint doesn\\'t support vinyl files with Stream contents.'));\n+\t\t\treturn;\n+\t\t}\n \n-\t\t\tif (file.isBuffer()) {\n-\t\t\t\tfile.eslint = verify(file.path, String(file.contents));\n+\t\tif (linter.isPathIgnored(filePath)) {\n+\t\t\t// Note:\n+\t\t\t// Vinyl files can have an independently defined cwd, but ESLint works relative to `process.cwd()`.\n+\t\t\t// (https://github.com/gulpjs/gulp/blob/master/docs/recipes/specifying-a-cwd.md)\n+\t\t\t// Also, ESLint doesn't adjust file paths relative to an ancestory .eslintignore path.\n+\t\t\t// E.g., If ../.eslintignore has \"foo/*.js\", ESLint will ignore ./foo/*.js, instead of ../foo/*.js.\n+\t\t\t// Eslint rolls this into `CLIEngine.executeOnText`. So, gulp-eslint must account for this limitation.\n+\n+\t\t\tif (linter.isPathIgnored(filePath) && options.warnFileIgnored) {\n+\t\t\t\t// Warn that gulp.src is needlessly reading files that ESLint ignores\n+\t\t\t\tfile.eslint = createIgnoreResult(file);\n \t\t\t}\n-\t\t\toutput(null, file);\n+\t\t\tcb(null, file);\n+\t\t\treturn;\n+\t\t}\n \n+\t\tlet result;\n+\n+\t\ttry {\n+\t\t\tresult = linter.executeOnText(file.contents.toString(), filePath).results[0];\n+\t\t} catch (e) {\n+\t\t\tcb(new PluginError('gulp-eslint', e));\n+\t\t\treturn;\n+\t\t}\n+\t\t// Note: Fixes are applied as part of \"executeOnText\".\n+\t\t// Any applied fix messages have been removed from the result.\n+\n+\t\tif (options.quiet) {\n",
+					"match": false,
+					"packageHash": "5eca6e3deefcb0d10251581c40c47268569d90607e34ceaf7abb7a5785491953",
+					"size": 2023,
+					"sourceHash": "dc6539b73ed312edb40876b550724c67e6ec3dc7219bc9b1e433034747505a48",
+					"status": "content"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -1,57 +1,57 @@\n {\n-  \"name\": \"gulp-eslint\",\n-  \"version\": \"0.1.2\",\n-  \"description\": \"A gulp plugin for processing files with eslint\",\n-  \"main\": \"index.js\",\n-  \"repository\":{\n-    \"type\": \"git\",\n-    \"url\": \"https://github.com/adametry/gulp-eslint\"\n-  },\n-  \"homepage\":\"http://github.com/adametry/gulp-eslint\",\n-  \"bugs\":\"https://github.com/adametry/gulp-eslint/issues\",\n-  \"directories\": {\n-    \"example\": \"example\",\n-    \"test\": \"test\"\n-  },\n-  \"scripts\": {\n-    \"test\": \"mocha\",\n-    \"gulp\":\"gulp\"\n-  },\n-  \"keywords\": [\n-    \"gulpplugin\",\n-    \"eslint\",\n-    \"gulp\",\n-    \"errors\",\n-    \"warnings\",\n-    \"check\",\n-    \"source\",\n-    \"code\",\n-    \"formatter\",\n-    \"js\",\n-    \"javascript\",\n-    \"task\",\n-    \"lint\",\n-    \"plugin\"\n-  ],\n-  \"engines\": {\n-    \"node\": \">=0.8.19\"\n-  },\n-  \"files\": [\n-    \"index.js\",\n-    \"util.js\"\n-  ],\n-  \"author\": \"Adametry\",\n-  \"license\": \"MIT\",\n-  \"dependencies\": {\n-    \"event-stream\": \"~3.1.0\",\n-    \"eslint\": \"~0.3.0\",\n-    \"gulp-util\": \"~2.2.12\"\n-  },\n-  \"devDependencies\": {\n-    \"mocha\": \"*\",\n-    \"should\": \"~2.1.1\"\n-  },\n-  \"peerDependencies\": {\n-    \"gulp\": \"*\"\n-  }\n+\t\"name\": \"gulp-eslint\",\n+\t\"version\": \"6.0.0\",\n+\t\"description\": \"A gulp plugin for processing files with ESLint\",\n+\t\"repository\": \"adametry/gulp-eslint\",\n+\t\"files\": [\n+\t\t\"index.js\",\n+\t\t\"util.js\"\n+\t],\n+\t\"directories\": {\n+\t\t\"example\": \"example\",\n+\t\t\"test\": \"test\"\n+\t},\n+\t\"scripts\": {\n+\t\t\"pretest\": \"gulp\",\n+\t\t\"test\": \"mocha\",\n+\t\t\"gulp\": \"gulp\",\n+\t\t\"gulp-example\": \"gulp --gulpfile=example/config.js\",\n+\t\t\"coverage\": \"istanbul cover _mocha\"\n+\t},\n+\t\"keywords\": [\n+\t\t\"gulpplugin\",\n+\t\t\"eslint\",\n+\t\t\"gulp\",\n+\t\t\"errors\",\n+\t\t\"warnings\",\n+\t\t\"check\",\n+\t\t\"source\",\n+\t\t\"code\",\n+\t\t\"formatter\",\n+\t\t\"js\",\n+\t\t\"javascript\",\n+\t\t\"task\",\n+\t\t\"lint\",\n+\t\t\"plugin\"\n+\t],\n+\t\"author\": \"Adametry\",\n+\t\"contributors\": [\n+\t\t\"Shinnosuke Watanabe <snnskwtnb@gmail.com> (https://github.com/shinnn)\"\n+\t],\n+\t\"license\": \"MIT\",\n+\t\"dependencies\": {\n",
+					"match": false,
+					"packageHash": "0795ff08ba2704a66cdc01ebec0878cb3c26cf537169b77686a24f1c8616222a",
+					"size": 1046,
+					"sourceHash": "4980ab4c2a0a151a9d0c9abe7a7aa3f0d72ea7e08d97c6db29ee3b1fb5c57347",
+					"status": "content"
+				},
+				"util.js": {
+					"diff": "--- published/util.js\n+++ rebuilt/util.js\n@@ -1,93 +1,230 @@\n 'use strict';\n \n-var esutil  = require('eslint/lib/util'),\n-\testream = require('event-stream'),\n-\tConfig  = require('eslint/lib/config');\n+const {Transform} = require('stream');\n+const PluginError = require('plugin-error');\n+const fancyLog = require('fancy-log');\n+const {CLIEngine} = require('eslint');\n \n /**\n- * Optional import, if not found, returns null.\n+ * Convenience method for creating a transform stream in object mode\n+ *\n+ * @param {Function} transform - An async function that is called for each stream chunk\n+ * @param {Function} [flush] - An async function that is called before closing the stream\n+ * @returns {stream} A transform stream\n  */\n-function optional(path) {\n-\ttry {\n-\t\treturn require(path);\n-\t} catch (error) {\n-\t\treturn null;\n+exports.transform = function(transform, flush) {\n+\tif (typeof flush === 'function') {\n+\t\treturn new Transform({\n+\t\t\tobjectMode: true,\n+\t\t\ttransform,\n+\t\t\tflush\n+\t\t});\n \t}\n-}\n+\n+\treturn new Transform({\n+\t\tobjectMode: true,\n+\t\ttransform\n+\t});\n+};\n \n /**\n- * Variation on event-stream's \"wait\" method that returns a \"reset\" stream.\n+ * Mimic the CLIEngine's createIgnoreResult function,\n+ * only without the ESLint CLI reference.\n+ *\n+ * @param {Object} file - file with a \"path\" property\n+ * @returns {Object} An ESLint report with an ignore warning\n  */\n-exports.wait = function (cb) {\n-\tvar content = '';\n-\treturn estream.through(function (data) {\n-\t\tcontent += data;\n-\t\tthis.queue(data);\n-\t}, function () {\n-\t\tprocess.nextTick(this.resume);\n-\t\tthis.queue(null);\n-\t\tcb.call(this, content);\n-\t}).pause();\n+exports.createIgnoreResult = file => {\n+\treturn {\n+\t\tfilePath: file.path,\n+\t\tmessages: [{\n+\t\t\tfatal: false,\n+\t\t\tseverity: 1,\n+\t\t\tmessage: file.path.includes('node_modules/') ?\n+\t\t\t\t'File ignored because it has a node_modules/** path' :\n+\t\t\t\t'File ignored because of .eslintignore file'\n+\t\t}],\n+\t\terrorCount: 0,\n+\t\twarningCount: 1\n+\t};\n };\n \n /**\n  * Create config helper to merge various config sources\n+ *\n+ * @param {Object} options - options to migrate\n+ * @returns {Object} migrated options\n  */\n-exports.readOptions = function (options) {\n-\n-\tif (!options || typeof options === 'string') {\n-\t\t// load external config data (if a string)\n+exports.migrateOptions = function migrateOptions(options) {\n+\tif (typeof options === 'string') {\n+\t\t// basic config path overload: gulpEslint('path/to/config.json')\n \t\toptions = {\n-\t\t\tconfig: options\n+\t\t\tconfigFile: options\n \t\t};\n \t}\n \n-\tvar helper = new Config(options);\n+\treturn options;\n+};\n \n-\tif (options.rules || options.globals || options.env) {\n-\t\t// inline definitions\n",
+					"match": false,
+					"packageHash": "b66d45eed8d8edb10f15d7744f7459d82623731511462a9369adb17a0e27b39f",
+					"size": 2870,
+					"sourceHash": "aa8b1614d177d3058de4f8585c807fee8280ac56e5a4c057e217b78c3b7940f1",
+					"status": "content"
+				},
+				"LICENSE": {
+					"match": false,
+					"status": "missing-in-package"
+				}
+			},
+			"summary": {
+				"differentFiles": 4,
+				"matchingFiles": 0,
+				"missingInPackage": 1,
+				"missingInSource": 0,
+				"score": 0,
+				"totalFiles": 5
+			}
+		}
+	}
+]
