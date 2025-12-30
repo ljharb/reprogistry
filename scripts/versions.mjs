@@ -46,6 +46,15 @@ if (!packumentResult || !packumentResult.versions) {
 
 const versions = /** @type {Version[]} */ (Object.keys(packumentResult.versions));
 
+// Handle packages that exist but have no published versions (all unpublished)
+if (versions.length === 0) {
+	console.log(`Package ${pkg} has no published versions, marking for removal`);
+	setOutput('missingRepros', '');
+	setOutput('removed', 'true');
+	setOutput('removedReason', 'package has no published versions');
+	process.exit(0);
+}
+
 const existingEntries = await Promise.all(versions.map(async (v) => /** @type {const} */ ([
 	v,
 	/** @type {EnhancedResult[]} */ (JSON.parse(await readFile(path.join(pkgDir, v.replace(/^v?/, 'v')), 'utf8').catch(() => '[]'))),
