@@ -1,0 +1,139 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2025-12-30T22:00:01.186Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:11.7.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "express-validator@0.5.0",
+			"name": "express-validator",
+			"version": "0.5.0",
+			"location": "https://registry.npmjs.org/express-validator/-/express-validator-0.5.0.tgz",
+			"integrity": "sha512-LrINunn7CiwQVbwFjL8wHgvRks4OLgUu2bFLXnQgKFexIlowfb4lsj26qJuBa21hinY+SXtzsSwnbLBpCNxi5w==",
+			"publishedAt": "2013-06-14T14:42:29.653Z",
+			"publishedWith": {
+				"node": null,
+				"npm": "1.2.0"
+			}
+		},
+		"source": {
+			"integrity": "sha512-0nFAK7QwJYHMGihJDNJ9O6PagCvd2VvOaHwYO0uyktCHao1XG5A6Qxq44HiGRWl/oAkTz8V/ttu8zEQ4SJx3ew==",
+			"location": "git://github.com/ctavan/express-validator.git",
+			"spec": "github:ctavan/express-validator#HEAD"
+		},
+		"comparisonHash": "8a2a8dcbb729bf3ee9216e490c955701f0ddebe1",
+		"diff": {
+			"files": {
+				".npmignore": {
+					"match": false,
+					"packageHash": "dba27c31aad935787bb275c3e5e4e957708f15386de599eff1db476022cd7e4c",
+					"size": 12,
+					"status": "missing-in-source"
+				},
+				".travis.yml": {
+					"match": false,
+					"packageHash": "070dffc7dc13bf0be3cefbef8f39ce015537ad397abb812e2cad8f1df9f459e1",
+					"size": 43,
+					"status": "missing-in-source"
+				},
+				"Makefile": {
+					"match": false,
+					"packageHash": "afbfedf2c27f55be633b6a1ad76b809854bb2f63605beca687a748b6580e4a09",
+					"size": 74,
+					"status": "missing-in-source"
+				},
+				"README.md": {
+					"diff": "--- published/README.md\n+++ rebuilt/README.md\n@@ -1,12 +1,16 @@\n # express-validator\n \n-[![Build Status](https://secure.travis-ci.org/ctavan/express-validator.png)](http://travis-ci.org/ctavan/express-validator)\n-\n-An [express.js]( https://github.com/visionmedia/express ) middleware for\n-[node-validator]( https://github.com/chriso/node-validator ).\n-\n-This is basically a copy of a [gist]( https://gist.github.com/752126 ) by\n-node-validator author [chriso]( https://github.com/chriso ).\n+[![npm version](https://img.shields.io/npm/v/express-validator.svg)](https://www.npmjs.com/package/express-validator)\n+[![Build status](https://github.com/express-validator/express-validator/actions/workflows/ci.yml/badge.svg)](https://github.com/express-validator/express-validator/actions/workflows/ci.yml)\n+[![Coverage Status](https://img.shields.io/coveralls/express-validator/express-validator.svg)](https://coveralls.io/github/express-validator/express-validator?branch=master)\n+\n+An [express.js](https://github.com/visionmedia/express) middleware for\n+[validator](https://github.com/validatorjs/validator.js).\n+\n+- [Installation](#installation)\n+- [Documentation](#documentation)\n+- [Changelog](#changelog)\n+- [License](#license)\n \n ## Installation\n \n@@ -14,254 +18,16 @@\n npm install express-validator\n ```\n \n-## Usage\n+Also make sure that you have Node.js 14 or newer in order to use it.\n \n-```javascript\n-var util = require('util'),\n-    express = require('express'),\n-    expressValidator = require('express-validator'),\n-    app = express.createServer();\n-\n-app.use(express.bodyParser());\n-app.use(expressValidator([options]));\n-\n-app.post('/:urlparam', function(req, res) {\n-\n-  // checkBody only checks req.body; none of the other req parameters\n-  req.checkBody('postparam', 'Invalid postparam').notEmpty().isInt();\n-  req.assert('getparam', 'Invalid getparam').isInt();\n-  req.assert('urlparam', 'Invalid urlparam').isAlpha();\n-\n-  req.sanitize('postparam').toBoolean();\n-\n-  var errors = req.validationErrors();\n-  if (errors) {\n-    res.send('There have been validation errors: ' + util.inspect(errors), 500);\n-    return;\n-  }\n-  res.json({\n-    urlparam: req.param('urlparam'),\n-    getparam: req.param('getparam'),\n-    postparam: req.param('postparam')\n-  });\n-});\n+## Documentation\n \n-app.listen(8888);\n-```\n-\n-Which will result in:\n-\n-```\n-$ curl -d 'postparam=1' http://localhost:8888/test?getparam=1\n-{\"urlparam\":\"test\",\"getparam\":\"1\",\"postparam\":true}\n-\n-$ curl -d 'postparam=1' http://localhost:8888/t1est?getparam=1\n-There have been validation errors: [\n-  { param: 'urlparam', msg: 'Invalid urlparam', value: 't1est' } ]\n-\n-$ curl -d 'postparam=1' http://localhost:8888/t1est?getparam=1ab\n-There have been validation errors: [\n-  { param: 'getparam', msg: 'Invalid getparam', value: '1ab' },\n-  { param: 'urlparam', msg: 'Invalid urlparam', value: 't1est' } ]\n-\n-$ curl http://localhost:8888/test?getparam=1&postparam=1\n-There have been validation errors: [\n-  { param: 'postparam', msg: 'Invalid postparam', value: undefined} ]\n-```\n-\n-### Middleware Options\n-####`errorFormatter`\n-_function(param,msg,value)_\n-\n-The `errorFormatter` option can be used to specify a function that can be used to formate the objects that populate the error arrow that is returned in `req.validationErrors()`. It should return an `Object` that has `param`, `msg`, and `value` keys defined.\n-\n-```javascript\n-// In this example, the formParam value is going to get morphed into form body format useful for printing.\n-app.use(expressValidator({\n-  errorFormatter: function(param, msg, value) {\n-      var namespace = param.split('.')\n-      , root    = namespace.shift()\n-      , formParam = root;\n",
+					"match": false,
+					"packageHash": "5d4129e5a6a0da36cbf5dd11f8e8b81847facfdd24707a95f2cb7c16317daf6b",
+					"size": 6431,
+					"sourceHash": "98f63158fee475b263485ae07ac44d64a4cc8f5f2f346f8730f3119199d4eed3",
+					"status": "content"
+				},
+				"index.js": {
+					"match": false,
+					"packageHash": "eb5b18aa3a2f8f30d75a431d14f71f7732eeead6557ae59387c52d152f0a09d9",
+					"size": 56,
+					"status": "missing-in-source"
+				},
+				"lib/express_validator.js": {
+					"match": false,
+					"packageHash": "dbb2cba8bc569370fc9eebca8e1bdeaa0537ee9705b28fc4046747804793d0a1",
+					"size": 4651,
+					"status": "missing-in-source"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -3,30 +3,63 @@\n   \"description\": \"Express middleware for the validator module.\",\n   \"author\": \"Christoph Tavan <dev@tavan.de>\",\n   \"contributors\": [\n-    \"Chris O'Hara <cohara87@gmail.com>\",\n-    \"@orfaust\",\n-    \"@zero21xxx\"\n+    \"Rusty Bailey <rustylbailey@gmail.com>\",\n+    \"Gustavo Henke <guhenke@gmail.com>\",\n+    \"Federico Ciardi <fed.ciardi@gmail.com>\"\n   ],\n-  \"version\": \"0.5.0\",\n-  \"homepage\": \"https://github.com/ctavan/express-validator\",\n+  \"version\": \"7.3.1\",\n+  \"homepage\": \"https://express-validator.github.io\",\n+  \"license\": \"MIT\",\n   \"repository\": {\n     \"type\": \"git\",\n-    \"url\": \"git://github.com/ctavan/express-validator.git\"\n+    \"url\": \"git://github.com/express-validator/express-validator.git\"\n   },\n-  \"main\": \"./index.js\",\n+  \"main\": \"./lib/index.js\",\n+  \"types\": \"./lib/index.d.ts\",\n+  \"files\": [\n+    \"lib\",\n+    \"!*.spec.{d.ts,js}\",\n+    \"!src\",\n+    \"!website\",\n+    \"!docs\"\n+  ],\n   \"scripts\": {\n-    \"test\": \"make test\"\n+    \"build\": \"tsc\",\n+    \"clean\": \"git clean -Xf lib\",\n+    \"docs:build\": \"npm --prefix ./website run build\",\n+    \"docs:publish\": \"USE_SSH=true DEPLOYMENT_BRANCH=master npm --prefix ./website run publish-gh-pages\",\n+    \"docs:regenerate-api\": \"npm --prefix ./website run regenerate-api\",\n+    \"docs:serve\": \"npm --prefix ./website run serve\",\n+    \"docs:start\": \"npm --prefix ./website start\",\n+    \"docs:version\": \"npm --prefix ./website run version\",\n+    \"prepublishOnly\": \"tsc\",\n+    \"postpublish\": \"npm run docs:publish\",\n+    \"test\": \"jest\",\n+    \"lint\": \"eslint --ignore-path .gitignore 'src/**/*.ts' && prettier -c .\"\n   },\n   \"engines\": {\n-    \"node\": \"*\"\n+    \"node\": \">= 8.0.0\"\n   },\n   \"dependencies\": {\n-    \"validator\": \"1.1.3\"\n+    \"lodash\": \"^4.17.21\",\n+    \"validator\": \"~13.15.23\"\n   },\n   \"devDependencies\": {\n-    \"async\": \"~0.1.22\",\n-    \"express\": \"~2.5.11\",\n-    \"request\": \"~2.10.0\"\n+    \"@docusaurus/core\": \"^3.1.0\",\n+    \"@docusaurus/plugin-client-redirects\": \"^3.1.0\",\n+    \"@docusaurus/preset-classic\": \"^3.1.0\",\n+    \"@types/jest\": \"^26.0.20\",\n+    \"@types/lodash\": \"^4.14.168\",\n+    \"@typescript-eslint/eslint-plugin\": \"^7.18.0\",\n+    \"@typescript-eslint/parser\": \"^7.18.0\",\n+    \"eslint\": \"^8.30.0\",\n+    \"eslint-config-prettier\": \"^8.5.0\",\n+    \"eslint-plugin-import\": \"^2.26.0\",\n+    \"eslint-plugin-prettier\": \"^4.2.1\",\n+    \"jest\": \"^29.7.0\",\n+    \"prettier\": \"^2.8.1\",\n+    \"ts-jest\": \"^29.1.5\",\n+    \"typescript\": \"^5.7.2\"\n   },\n   \"keywords\": [\n     \"express\",\n",
+					"match": false,
+					"packageHash": "4c997f92ac8bc4426ef6f96418a344beede0d6b624bfaeee593b2adfc898ecd1",
+					"size": 818,
+					"sourceHash": "f20b0678b826c4e67425cd9ab753d3c3430a437f840ef345c4e29777388c9a15",
+					"status": "content"
+				},
+				"test/basic.js": {
+					"match": false,
+					"packageHash": "94ef2fabb8e549141451bc5a10f7ac4a5e419f926832316c470b1d6506627b4b",
+					"size": 2385,
+					"status": "missing-in-source"
+				},
+				"test/bodyOnly.js": {
+					"match": false,
+					"packageHash": "256631989efa1914b840ae0a3d04dd99c30d622c0b53215817cebc5df4f3bc68",
+					"size": 2105,
+					"status": "missing-in-source"
+				},
+				"test/helpers/app.js": {
+					"match": false,
+					"packageHash": "995ac20c271e3a031d4a10f489f4b1119f7c793336e122fe8b3f7daa6bc64746",
+					"size": 631,
+					"status": "missing-in-source"
+				},
+				"test/helpers/example.js": {
+					"match": false,
+					"packageHash": "723aa09d90a6083057d01d8c57e29d140276046ef9c9ad6a1908a256508b37c5",
+					"size": 774,
+					"status": "missing-in-source"
+				},
+				"test/helpers/req.js": {
+					"match": false,
+					"packageHash": "a55277f9e2dd7055719323c427cc5ac25f538a54527405d662613d6edcd4db4a",
+					"size": 530,
+					"status": "missing-in-source"
+				},
+				"test/mapped.js": {
+					"match": false,
+					"packageHash": "23d564fe6149537a8c6d646e70707d627dd74dada3f73c9e29d41988c690c0f5",
+					"size": 1112,
+					"status": "missing-in-source"
+				},
+				"test/nested.js": {
+					"match": false,
+					"packageHash": "90693451bc916262ba1035525daac5eac116284ff73e9832df53ef2f6c05df19",
+					"size": 1426,
+					"status": "missing-in-source"
+				},
+				"test/regex.js": {
+					"match": false,
+					"packageHash": "fa1292579a8803d9d844badd7df316873d171f79af1f90b99df6ecd21bcf833e",
+					"size": 1058,
+					"status": "missing-in-source"
+				},
+				"LICENSE": {
+					"match": false,
+					"status": "missing-in-package"
+				}
+			},
+			"summary": {
+				"differentFiles": 2,
+				"matchingFiles": 0,
+				"missingInPackage": 1,
+				"missingInSource": 13,
+				"score": 0,
+				"totalFiles": 16
+			}
+		}
+	}
+]
