@@ -1,0 +1,71 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2025-12-30T23:33:54.267Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:11.7.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "gulp-plumber@1.0.1",
+			"name": "gulp-plumber",
+			"version": "1.0.1",
+			"location": "https://registry.npmjs.org/gulp-plumber/-/gulp-plumber-1.0.1.tgz",
+			"integrity": "sha512-QhX61xYk4o5y/WkSj1BU+rMqSeWv+cQBVk5ef3JYFNOui1kEiR45nnKzuO5JWFdIII2j47EOl36ybiRtcjdFBg==",
+			"publishedAt": "2015-05-19T10:36:58.612Z",
+			"publishedWith": {
+				"node": null,
+				"npm": "1.4.28"
+			}
+		},
+		"source": {
+			"integrity": null,
+			"location": "git://github.com/floatdrop/gulp-plumber.git",
+			"spec": "github:floatdrop/gulp-plumber#7ae8cfdc135193eb7f5c1a9d17d66da7ad9054ba"
+		},
+		"comparisonHash": "8a2a8dcbb729bf3ee9216e490c955701f0ddebe1",
+		"diff": {
+			"files": {
+				".npmignore": {
+					"match": false,
+					"packageHash": "ddbf3f1f7b49b2c6586b1fa1977338504d5b46d895e2ad56d6ed511117b87ba4",
+					"size": 84,
+					"status": "missing-in-source"
+				},
+				"README.md": {
+					"diff": "--- published/README.md\n+++ rebuilt/README.md\n@@ -1,5 +1,5 @@\n # :monkey: gulp-plumber\n-[![NPM version][npm-image]][npm-url] [![Build Status][travis-image]][travis-url] [![Coveralls Status][coveralls-image]][coveralls-url] [![Dependency Status][depstat-image]][depstat-url]\n+[![NPM version][npm-image]][npm-url] [![Build Status][travis-image]][travis-url] [![Dependency Status][depstat-image]][depstat-url]\n \n > Prevent pipe breaking caused by errors from [gulp](https://github.com/wearefractal/gulp) plugins\n \n@@ -15,7 +15,7 @@\n npm install --save-dev gulp-plumber\n ```\n \n-Then, add it to you `gulpfile.js`:\n+Then, add it to your `gulpfile.js`:\n \n ```javascript\n var plumber = require('gulp-plumber');\n@@ -46,13 +46,13 @@\n Monkeypatch `pipe` functions in underlying streams in pipeline.\n \n #### options.errorHandler\n-Type: `Boolean` / `Function`\n+Type: `Boolean` / `Function` <br/>\n Default: `true`\n \n Handle errors in underlying streams and output them to console.\n- * `function` passed - it will be attached to stream `on('error')`.\n- * `false` passed - error handler will not be attached.\n- * `undefined` - default error handler will be attached.\n+ * `function` - it will be attached to stream `on('error')`.\n+ * `false` - error handler will not be attached.\n+ * `true` - default error handler will be attached.\n \n ### plumber.stop()\n \n@@ -79,8 +79,5 @@\n [travis-url]: https://travis-ci.org/floatdrop/gulp-plumber\n [travis-image]: http://img.shields.io/travis/floatdrop/gulp-plumber.svg?style=flat\n \n-[coveralls-url]: https://coveralls.io/r/floatdrop/gulp-plumber\n-[coveralls-image]: http://img.shields.io/coveralls/floatdrop/gulp-plumber.svg?style=flat\n-\n [depstat-url]: https://david-dm.org/floatdrop/gulp-plumber\n [depstat-image]: http://img.shields.io/david/floatdrop/gulp-plumber.svg?style=flat\n",
+					"match": false,
+					"packageHash": "bf044be6374731e21bd96fdb81fda8f6f2b1617536d731aefbbca6c9ce2dc590",
+					"size": 2661,
+					"sourceHash": "066446a12e408fe6c8eed1b2a069ccce712ed7a5aedfe8d9465372684b8f8c84",
+					"status": "content"
+				},
+				"index.js": {
+					"diff": "--- published/index.js\n+++ rebuilt/index.js\n@@ -2,106 +2,112 @@\n \n var through2 = require('through2');\n var EE = require('events').EventEmitter;\n-var gutil = require('gulp-util');\n+var fancyLog = require('fancy-log');\n+var chalk = require('chalk');\n+var PluginError = require('plugin-error');\n \n function removeDefaultHandler(stream, event) {\n-    var found = false;\n-    stream.listeners(event).forEach(function (item) {\n-        if (item.name === 'on' + event) {\n-            found = item;\n-            this.removeListener(event, item);\n-        }\n-    }, stream);\n-    return found;\n+\tvar found = false;\n+\tstream.listeners(event).forEach(function (item) {\n+\t\tif (item.name === 'on' + event) {\n+\t\t\tfound = item;\n+\t\t\tthis.removeListener(event, item);\n+\t\t}\n+\t}, stream);\n+\treturn found;\n }\n \n function wrapPanicOnErrorHandler(stream) {\n-    var oldHandler = removeDefaultHandler(stream, 'error');\n-    if (oldHandler) {\n-        stream.on('error', function onerror2(er) {\n-            if (EE.listenerCount(stream, 'error') === 1) {\n-                this.removeListener('error', onerror2);\n-                oldHandler.call(stream, er);\n-            }\n-        });\n-    }\n+\tvar oldHandler = removeDefaultHandler(stream, 'error');\n+\tif (oldHandler) {\n+\t\tstream.on('error', function onerror2(er) {\n+\t\t\tif (EE.listenerCount(stream, 'error') === 1) {\n+\t\t\t\tthis.removeListener('error', onerror2);\n+\t\t\t\toldHandler.call(stream, er);\n+\t\t\t}\n+\t\t});\n+\t}\n }\n \n function defaultErrorHandler(error) {\n-    // onerror2 and this handler\n-    if (EE.listenerCount(this, 'error') < 3) {\n-        gutil.log(\n-            gutil.colors.cyan('Plumber') + gutil.colors.red(' found unhandled error:\\n'),\n-            error.toString()\n-        );\n-    }\n+\t// onerror2 and this handler\n+\tif (EE.listenerCount(this, 'error') < 3) {\n+\t\tfancyLog(\n+\t\t\tchalk.cyan('Plumber') + chalk.red(' found unhandled error:\\n'),\n+\t\t\terror.toString()\n+\t\t);\n+\t}\n }\n \n function plumber(opts) {\n-    opts = opts || {};\n+\topts = opts || {};\n \n-    if (typeof opts === 'function') {\n-        opts = { errorHandler: opts };\n-    }\n+\tif (typeof opts === 'function') {\n+\t\topts = {errorHandler: opts};\n+\t}\n \n-    var through = through2.obj();\n-    through._plumber = true;\n+\tvar through = through2.obj();\n+\tthrough._plumber = true;\n \n-    if (opts.errorHandler !== false) {\n-        through.errorHandler = (typeof opts.errorHandler === 'function') ?\n-            opts.errorHandler :\n-            defaultErrorHandler;\n-    }\n+\tif (opts.errorHandler !== false) {\n+\t\tthrough.errorHandler = (typeof opts.errorHandler === 'function') ?\n+\t\t\topts.errorHandler :\n+\t\t\tdefaultErrorHandler;\n+\t}\n \n-    function patchPipe(stream) {\n-        if (stream.pipe2) {\n-            wrapPanicOnErrorHandler(stream);\n-            stream._pipe = stream._pipe || stream.pipe;\n-            stream.pipe = stream.pipe2;\n",
+					"match": false,
+					"packageHash": "f53dd20a4765e9a21e5acefb62f0efbb1c9f46982cd738ffbf8c31ee8010947e",
+					"size": 2678,
+					"sourceHash": "c00f3f3610b3a0944c612011edf1b1bde5afe444fc19028bf3c4098b5cf80ab9",
+					"status": "content"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -1,6 +1,6 @@\n {\n   \"name\": \"gulp-plumber\",\n-  \"version\": \"1.0.1\",\n+  \"version\": \"1.2.1\",\n   \"description\": \"Prevent pipe breaking caused by errors from gulp plugins\",\n   \"keywords\": [\n     \"gulpplugin\"\n@@ -18,29 +18,33 @@\n     \"url\": \"git://github.com/floatdrop/gulp-plumber.git\"\n   },\n   \"scripts\": {\n-    \"test\": \"istanbul test _mocha --report html -- test/*.js --reporter spec\",\n-    \"coveralls\": \"istanbul cover ./node_modules/mocha/bin/_mocha --report lcovonly -- -R spec && cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js && rm -rf ./coverage\"\n+    \"test\": \"xo && mocha -R spec\"\n   },\n   \"dependencies\": {\n-    \"gulp-util\": \"~3\",\n-    \"through2\": \"~0.6\"\n+    \"chalk\": \"^1.1.3\",\n+    \"fancy-log\": \"^1.3.2\",\n+    \"plugin-error\": \"^0.1.2\",\n+    \"through2\": \"^2.0.3\"\n   },\n   \"devDependencies\": {\n-    \"mocha\": \"~1.21.4\",\n-    \"coveralls\": \"~2.11.1\",\n-    \"mocha-lcov-reporter\": \"0.0.1\",\n-    \"istanbul\": \"~0.3.0\",\n-    \"should\": \"~4.0.4\",\n-    \"event-stream\": \"~3.1.7\",\n-    \"gulp-mocha\": \"~1.0.0\",\n-    \"gulp-watch\": \"~0.6.9\",\n-    \"gulp\": \"~3\",\n-    \"gulp-grep-stream\": \"0.0.2\",\n-    \"through\": \"~2.3.4\"\n+    \"coveralls\": \"^2.11.6\",\n+    \"event-stream\": \"3.3.4\",\n+    \"gulp\": \"^3.9.1\",\n+    \"istanbul\": \"^0.4.2\",\n+    \"mocha\": \"^2.4.5\",\n+    \"mocha-lcov-reporter\": \"^1.0.0\",\n+    \"should\": \"^8.2.2\",\n+    \"through\": \"^2.3.8\",\n+    \"xo\": \"^0.12.1\"\n   },\n   \"engines\": {\n     \"node\": \">=0.10\",\n     \"npm\": \">=1.2.10\"\n   },\n+  \"xo\": {\n+    \"ignore\": [\n+      \"test/**\"\n+    ]\n+  },\n   \"license\": \"MIT\"\n }\n",
+					"match": false,
+					"packageHash": "58102f1b35a26357d9c104d585167c02b76082405be0bd6af2c905568f100e71",
+					"size": 1313,
+					"sourceHash": "8cea3e26244c67478d86396bf3761df3b3cc997b094a9c910baf83d5ca3d0f15",
+					"status": "content"
+				}
+			},
+			"summary": {
+				"differentFiles": 3,
+				"matchingFiles": 1,
+				"missingInPackage": 0,
+				"missingInSource": 1,
+				"score": 0.2,
+				"totalFiles": 5
+			}
+		}
+	}
+]
