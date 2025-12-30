@@ -1,0 +1,365 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2025-12-30T22:04:18.101Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:11.7.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "fast-glob@3.2.1-beta.0",
+			"name": "fast-glob",
+			"version": "3.2.1-beta.0",
+			"location": "https://registry.npmjs.org/fast-glob/-/fast-glob-3.2.1-beta.0.tgz",
+			"integrity": "sha512-Omzt5IBNdpIKRsEbTBm10jDIvqJaAP7+K5I1hA1SPTSW3Y+BpZXPphkOmIaFFSy7hDKW/aEgHU1H4XlioFAEEA==",
+			"publishedAt": "2020-02-20T18:13:04.219Z",
+			"publishedWith": {
+				"node": "13.7.0",
+				"npm": "6.13.6"
+			}
+		},
+		"source": {
+			"integrity": null,
+			"location": "git+https://github.com/mrmlnc/fast-glob.git",
+			"spec": "github:mrmlnc/fast-glob#174c557c930ce941666157aed3208d8af966a3f5"
+		},
+		"comparisonHash": "8a2a8dcbb729bf3ee9216e490c955701f0ddebe1",
+		"diff": {
+			"files": {
+				"LICENSE": {
+					"diff": "--- published/LICENSE\n+++ rebuilt/LICENSE\n@@ -1,21 +1,9 @@\n-The MIT License (MIT)\n+MIT License\n \n Copyright (c) Denis Malinochkin\n \n-Permission is hereby granted, free of charge, to any person obtaining a copy\n-of this software and associated documentation files (the \"Software\"), to deal\n-in the Software without restriction, including without limitation the rights\n-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell\n-copies of the Software, and to permit persons to whom the Software is\n-furnished to do so, subject to the following conditions:\n+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the \"Software\"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:\n \n-The above copyright notice and this permission notice shall be included in all\n-copies or substantial portions of the Software.\n+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.\n \n-THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR\n-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,\n-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE\n-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER\n-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,\n-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE\n-SOFTWARE.\n+THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.\n",
+					"match": false,
+					"packageHash": "9363d160bf41d46d83901a5d24fc3fe2094c2afc17b4a2378914b273977ee2de",
+					"size": 1079,
+					"sourceHash": "f735badf5add8c6d340f0b63884abb5c4f73b496839a0af2c9957fd69ad554e6",
+					"status": "content"
+				},
+				"README.md": {
+					"diff": "--- published/README.md\n+++ rebuilt/README.md\n@@ -10,8 +10,6 @@\n <summary><strong>Details</strong></summary>\n \n * [Highlights](#highlights)\n-* [Donation](#donation)\n-* [Old and modern mode](#old-and-modern-mode)\n * [Pattern syntax](#pattern-syntax)\n   * [Basic syntax](#basic-syntax)\n   * [Advanced syntax](#advanced-syntax)\n@@ -25,10 +23,10 @@\n   * [Helpers](#helpers)\n     * [generateTasks](#generatetaskspatterns-options)\n     * [isDynamicPattern](#isdynamicpatternpattern-options)\n-    * [escapePath](#escapepathpattern)\n+    * [escapePath](#escapepathpath)\n+\t* [convertPathToPattern](#convertpathtopatternpath)\n * [Options](#options-3)\n   * [Common](#common)\n-    * [concurrency](#concurrency)\n     * [cwd](#cwd)\n     * [deep](#deep)\n     * [followSymbolicLinks](#followsymboliclinks)\n@@ -36,6 +34,7 @@\n     * [ignore](#ignore)\n     * [suppressErrors](#suppresserrors)\n     * [throwErrorOnBrokenSymbolicLink](#throwerroronbrokensymboliclink)\n+    * [signal](#signal)\n   * [Output control](#output-control)\n     * [absolute](#absolute)\n     * [markDirectories](#markdirectories)\n@@ -74,28 +73,13 @@\n * Object mode. Can return more than just strings.\n * Error-tolerant.\n \n-## Donation\n-\n-Do you like this project? Support it by donating, creating an issue or pull request.\n-\n-[![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)][paypal_mrmlnc]\n-\n-## Old and modern mode\n-\n-This package works in two modes, depending on the environment in which it is used.\n-\n-* **Old mode**. Node.js below 10.10 or when the [`stats`](#stats) option is *enabled*.\n-* **Modern mode**. Node.js 10.10+ and the [`stats`](#stats) option is *disabled*.\n-\n-The modern mode is faster. Learn more about the [internal mechanism][nodelib_fs_scandir_old_and_modern_modern].\n-\n ## Pattern syntax\n \n > :warning: Always use forward-slashes in glob expressions (patterns and [`ignore`](#ignore) option). Use backslashes for escaping characters.\n \n There is more than one form of syntax: basic and advanced. Below is a brief overview of the supported features. Also pay attention to our [FAQ](#faq).\n \n-> :book: This package uses a [`micromatch`][micromatch] as a library for pattern matching.\n+> :book: This package uses [`micromatch`][micromatch] as a library for pattern matching.\n \n ### Basic syntax\n \n@@ -141,7 +125,8 @@\n ### Asynchronous\n \n ```js\n-fg(patterns, [options])\n+fg.glob(patterns, [options])\n+fg.async(patterns, [options])\n ```\n \n Returns a `Promise` with an array of matching entries.\n@@ -149,7 +134,7 @@\n ```js\n const fg = require('fast-glob');\n \n-const entries = await fg(['.editorconfig', '**/index.js'], { dot: true });\n+const entries = await fg.glob(['.editorconfig', '**/index.js'], { dot: true });\n \n // ['.editorconfig', 'services/index.js']\n ```\n@@ -157,7 +142,7 @@\n ### Synchronous\n \n ```js\n-fg.sync(patterns, [options])\n+fg.globSync(patterns, [options])\n ```\n \n Returns an array of matching entries.\n@@ -165,7 +150,7 @@\n ```js\n const fg = require('fast-glob');\n \n-const entries = fg.sync(['.editorconfig', '**/index.js'], { dot: true });\n+const entries = fg.globSync(['.editorconfig', '**/index.js'], { dot: true });\n \n // ['.editorconfig', 'services/index.js']\n ```\n@@ -173,6 +158,7 @@\n",
+					"match": false,
+					"packageHash": "d50e495f487c83f5176443c2eed6ef2ef6c7d7c016a1090a9e878fbb682d0420",
+					"size": 23389,
+					"sourceHash": "1b8941cc09f0d281133fdc9bde02115bc160bf83bc618af6e765779373723470",
+					"status": "content"
+				},
+				"out/index.d.ts": {
+					"match": false,
+					"packageHash": "6dfff2e65f10158f5a868e642a2e74d2d1bd76f15291552f389f2b8c829a9a86",
+					"size": 1707,
+					"status": "missing-in-source"
+				},
+				"out/index.js": {
+					"match": false,
+					"packageHash": "07362cacc046673d343a416dbb538482c05374be5b9b76f8b1f9a1a6fd346900",
+					"size": 2824,
+					"status": "missing-in-source"
+				},
+				"out/managers/tasks.d.ts": {
+					"match": false,
+					"packageHash": "085bd2fbb9aa5c974f394ef457ca1051c68b790b294446b31a207c72de5025f9",
+					"size": 978,
+					"status": "missing-in-source"
+				},
+				"out/managers/tasks.js": {
+					"match": false,
+					"packageHash": "f9f1fe3d7e02601c21bded1afc5cffd16d1d9b3c0876fdb4d03a9ce7e5134e4b",
+					"size": 2974,
+					"status": "missing-in-source"
+				},
+				"out/providers/async.d.ts": {
+					"match": false,
+					"packageHash": "e73f3d813e95fac34af0800a26dbe3691a8d98e06995c664f8c3cf270bae804d",
+					"size": 481,
+					"status": "missing-in-source"
+				},
+				"out/providers/async.js": {
+					"match": false,
+					"packageHash": "35113d383f17df13cb829948d3d56ee9f8b81af970faf59625bdc739115122dc",
+					"size": 1041,
+					"status": "missing-in-source"
+				},
+				"out/providers/filters/deep.d.ts": {
+					"match": false,
+					"packageHash": "cef67332f5012a7630d3dd0162637e6a6ea37f58cec3d0c5201aefef734f097a",
+					"size": 676,
+					"status": "missing-in-source"
+				},
+				"out/providers/filters/deep.js": {
+					"match": false,
+					"packageHash": "a5d782e2d7d093ebaab021c01f6d73bc5e5a54add0ce9b98425c61485fc1125f",
+					"size": 2213,
+					"status": "missing-in-source"
+				},
+				"out/providers/filters/entry.d.ts": {
+					"match": false,
+					"packageHash": "8363eb43fe70b780ed4795dbc38f7dbe367ff793a74c866620f44988d339f364",
+					"size": 672,
+					"status": "missing-in-source"
+				},
+				"out/providers/filters/entry.js": {
+					"match": false,
+					"packageHash": "99cdcdf943b29e1616c6dcd8ba3e7dbce83d967a9be3cf21306b59b316cb0674",
+					"size": 2150,
+					"status": "missing-in-source"
+				},
+				"out/providers/filters/error.d.ts": {
+					"match": false,
+					"packageHash": "2dc60ac32aafe57e3f075690256a8919833dc3e0a24fa4f2e1ac4bcbd1a43d68",
+					"size": 273,
+					"status": "missing-in-source"
+				},
+				"out/providers/filters/error.js": {
+					"match": false,
+					"packageHash": "3cef3a07527bd8ee61655eac1463b5a9af89aa69133e7a3b40c82b401953562e",
+					"size": 456,
+					"status": "missing-in-source"
+				},
+				"out/providers/matchers/matcher.d.ts": {
+					"match": false,
+					"packageHash": "bc70bf9d606e1eb5bdca10ed5ffe85dd4dfc5bca1d2937d6912be26156d810da",
+					"size": 1118,
+					"status": "missing-in-source"
+				},
+				"out/providers/matchers/matcher.js": {
+					"match": false,
+					"packageHash": "d4a9959fd1a8c911c4e1e2de39cc254cf9ed22750fadbf4f8e22b2f8a1ec9f78",
+					"size": 1930,
+					"status": "missing-in-source"
+				},
+				"out/providers/matchers/partial.d.ts": {
+					"match": false,
+					"packageHash": "41af538808cecf5387918fc2d287050548a7ab1b85e7bf45fe855a461af45a3d",
+					"size": 131,
+					"status": "missing-in-source"
+				},
+				"out/providers/matchers/partial.js": {
+					"match": false,
+					"packageHash": "5ce00745b96a769556407a282c1fbf303e18421084ee6adac88c4a2715dc50b4",
+					"size": 1459,
+					"status": "missing-in-source"
+				},
+				"out/providers/provider.d.ts": {
+					"match": false,
+					"packageHash": "8bbc85f2d43d0d40f99c45097c6eaa004cc867faa77038a1dc8796fc08f774fc",
+					"size": 836,
+					"status": "missing-in-source"
+				},
+				"out/providers/provider.js": {
+					"match": false,
+					"packageHash": "205c99df95c8c2756d54b5d447e758cba1106b43aa2435dda13c7949ce17c62c",
+					"size": 2048,
+					"status": "missing-in-source"
+				},
+				"out/providers/stream.d.ts": {
+					"match": false,
+					"packageHash": "1650996bdc7bd6942926f6d6a13a28a8122e0be131299db9118d16c06f6be789",
+					"size": 447,
+					"status": "missing-in-source"
+				},
+				"out/providers/stream.js": {
+					"match": false,
+					"packageHash": "1483b0b5867ec5abdd0ad5bb70c0fa1045014a75be25249a9f2d3d4a19d3e030",
+					"size": 1229,
+					"status": "missing-in-source"
+				},
+				"out/providers/sync.d.ts": {
+					"match": false,
+					"packageHash": "e1df1fefa0ce5c53bad8e6159b2c863f9111892735ddd77b3e83d924ffa79f82",
+					"size": 394,
+					"status": "missing-in-source"
+				},
+				"out/providers/sync.js": {
+					"match": false,
+					"packageHash": "8bfa1b27aeb4810937d921b7ee26b4a434315efbbbffcebde2540947de0885c2",
+					"size": 802,
+					"status": "missing-in-source"
+				},
+				"out/providers/transformers/entry.d.ts": {
+					"match": false,
+					"packageHash": "aba9988a67b9a9cf26b3c924e2119715a26db99e4ab63d60af1072a4091e832f",
+					"size": 287,
+					"status": "missing-in-source"
+				},
+				"out/providers/transformers/entry.js": {
+					"match": false,
+					"packageHash": "0d7cd318379269c3ed6c6aaaf84cdc461bd9fc1ed4a4554f4454de8ab291cf03",
+					"size": 871,
+					"status": "missing-in-source"
+				},
+				"out/readers/reader.d.ts": {
+					"match": false,
+					"packageHash": "2275fbe635e34808639e5814cf97afaa00f053c4b6f287443e8c237ca74c1b0a",
+					"size": 729,
+					"status": "missing-in-source"
+				},
+				"out/readers/reader.js": {
+					"match": false,
+					"packageHash": "a7bdcaf433b5ab696cdc4750ac7916894405c41f3a51ca5f9fac8fb17a00bbec",
+					"size": 1096,
+					"status": "missing-in-source"
+				},
+				"out/readers/stream.d.ts": {
+					"match": false,
+					"packageHash": "7580123eab1b79b925371383ba3df5791aea7c43750bc0b0d7a2f6183311603b",
+					"size": 580,
+					"status": "missing-in-source"
+				},
+				"out/readers/stream.js": {
+					"match": false,
+					"packageHash": "193806523a3889f3faa6e311aeed3044e0fdeab939bb208a3213fe3bff037360",
+					"size": 1925,
+					"status": "missing-in-source"
+				},
+				"out/readers/sync.d.ts": {
+					"match": false,
+					"packageHash": "6fa69e77238d26f1e55daf22d768f3c889a7a416d5b1efa768609fb1a4713bef",
+					"size": 518,
+					"status": "missing-in-source"
+				},
+				"out/readers/sync.js": {
+					"match": false,
+					"packageHash": "9538670791926ec8f7f22e87d13e68cd56d7e35cef0b6f51a9016b9295d01aa3",
+					"size": 1373,
+					"status": "missing-in-source"
+				},
+				"out/settings.d.ts": {
+					"match": false,
+					"packageHash": "ea68c312e1eb9b48f7064a8dda348594769ba8f9c8596315827c559734a60205",
+					"size": 4299,
+					"status": "missing-in-source"
+				},
+				"out/settings.js": {
+					"match": false,
+					"packageHash": "536f5ab44ec8b42a3a62311b24ee41a80738cb7333b1481b142e6b6b5e874aa7",
+					"size": 2526,
+					"status": "missing-in-source"
+				},
+				"out/types/index.d.ts": {
+					"match": false,
+					"packageHash": "e175549fe57dbff5cd68c1a5ccf33717584d7db9afb8ec216fd2c0daa3b06931",
+					"size": 1235,
+					"status": "missing-in-source"
+				},
+				"out/types/index.js": {
+					"match": false,
+					"packageHash": "d43aa81f5bc89faa359e0f97c814ba25155591ff078fbb9bfd40f8c7c9683230",
+					"size": 79,
+					"status": "missing-in-source"
+				},
+				"out/utils/array.d.ts": {
+					"match": false,
+					"packageHash": "9e89f85405149aab0596e982048b54678b33f364519802c031f232ee537d5355",
+					"size": 147,
+					"status": "missing-in-source"
+				},
+				"out/utils/array.js": {
+					"match": false,
+					"packageHash": "09c6d43042a467dcd4cfb064e2310ab99352b4e646520abcdc79f1fa3458b9e9",
+					"size": 583,
+					"status": "missing-in-source"
+				},
+				"out/utils/errno.d.ts": {
+					"match": false,
+					"packageHash": "ff46f5b898d232ec6b704c02adc73a8f9f1624e8138304d36e95ec90b92f11ec",
+					"size": 120,
+					"status": "missing-in-source"
+				},
+				"out/utils/errno.js": {
+					"match": false,
+					"packageHash": "fdc3d459f14fddd425bb3992696e704183d04b73506235a1cfe6d7f7a0ed47b5",
+					"size": 204,
+					"status": "missing-in-source"
+				},
+				"out/utils/fs.d.ts": {
+					"match": false,
+					"packageHash": "5ab36109d46a944ede167ec6c96473c9415906d24521c61e182c33c7efa01623",
+					"size": 190,
+					"status": "missing-in-source"
+				},
+				"out/utils/fs.js": {
+					"match": false,
+					"packageHash": "eb8eaabbb44ca100ee0c1b1509283aa50d6cdfb9c9274a5e8015548daba400fe",
+					"size": 734,
+					"status": "missing-in-source"
+				},
+				"out/utils/index.d.ts": {
+					"match": false,
+					"packageHash": "e97adedf3db0eedaf38b36c0483af531d8244e12a16e07c8ce5c1f893bce2153",
+					"size": 306,
+					"status": "missing-in-source"
+				},
+				"out/utils/index.js": {
+					"match": false,
+					"packageHash": "42dedc2e0c0dd2688f5f175fdb77c530d085e79840f9caebd6af9ac4affc1837",
+					"size": 492,
+					"status": "missing-in-source"
+				},
+				"out/utils/path.d.ts": {
+					"match": false,
+					"packageHash": "481460b8562d401672b26f846e533bebbe8997c7200a2480c7271f6d94f47884",
+					"size": 303,
+					"status": "missing-in-source"
+				},
+				"out/utils/path.js": {
+					"match": false,
+					"packageHash": "c85a53e66649483ff84525c69f5b96ae0f935febcd2520a037ac01212fb8c90d",
+					"size": 598,
+					"status": "missing-in-source"
+				},
+				"out/utils/pattern.d.ts": {
+					"match": false,
+					"packageHash": "f5a97abe83a6722221432502ecde0461c6c0f350c98369a74bddb3f5c9ab3d75",
+					"size": 1703,
+					"status": "missing-in-source"
+				},
+				"out/utils/pattern.js": {
+					"match": false,
+					"packageHash": "939e17fef4f992d1f8c35dab32bfd5843d5226b3de249be72b8f01074e64dbc2",
+					"size": 4314,
+					"status": "missing-in-source"
+				},
+				"out/utils/stream.d.ts": {
+					"match": false,
+					"packageHash": "fc6d56256bda8117d4c6ad7fe854f0371a1098de67ece08473126096adf7370d",
+					"size": 144,
+					"status": "missing-in-source"
+				},
+				"out/utils/stream.js": {
+					"match": false,
+					"packageHash": "de5b155eb7d43a0d21b02d1d7f1f4274539b353456a142b0b4c7bebe228502ee",
+					"size": 621,
+					"status": "missing-in-source"
+				},
+				"out/utils/string.d.ts": {
+					"match": false,
+					"packageHash": "8195000054b52d4551f5c5e9c0da5707f2a87094ce6db2f05b7c7af2693d98cd",
+					"size": 126,
+					"status": "missing-in-source"
+				},
+				"out/utils/string.js": {
+					"match": false,
+					"packageHash": "029d3793c2f1a6c824997fe33f84cad9a2ea9e77dddee80e9370d74a1c5f653b",
+					"size": 263,
+					"status": "missing-in-source"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -1,6 +1,6 @@\n {\n   \"name\": \"fast-glob\",\n-  \"version\": \"3.2.1-beta.0\",\n+  \"version\": \"4.0.0\",\n   \"description\": \"It's a very fast and efficient glob library for Node.js\",\n   \"license\": \"MIT\",\n   \"repository\": \"mrmlnc/fast-glob\",\n@@ -9,10 +9,16 @@\n     \"url\": \"https://mrmlnc.com\"\n   },\n   \"engines\": {\n-    \"node\": \">=8\"\n+    \"node\": \">=18.18.0\"\n   },\n   \"main\": \"out/index.js\",\n   \"typings\": \"out/index.d.ts\",\n+  \"files\": [\n+    \"out\",\n+    \"!out/{benchmark,tests}\",\n+    \"!out/**/*.map\",\n+    \"!out/**/*.spec.*\"\n+  ],\n   \"keywords\": [\n     \"glob\",\n     \"patterns\",\n@@ -20,66 +26,62 @@\n     \"implementation\"\n   ],\n   \"devDependencies\": {\n-    \"@nodelib/fs.macchiato\": \"^1.0.1\",\n-    \"@types/compute-stdev\": \"^1.0.0\",\n-    \"@types/easy-table\": \"^0.0.32\",\n-    \"@types/glob\": \"^7.1.1\",\n-    \"@types/glob-parent\": \"^5.1.0\",\n-    \"@types/merge2\": \"^1.1.4\",\n-    \"@types/micromatch\": \"^4.0.0\",\n-    \"@types/minimist\": \"^1.2.0\",\n-    \"@types/mocha\": \"^5.2.7\",\n-    \"@types/node\": \"^12.7.8\",\n-    \"@types/rimraf\": \"^2.0.2\",\n-    \"@types/sinon\": \"^7.5.0\",\n-    \"compute-stdev\": \"^1.0.0\",\n-    \"easy-table\": \"^1.1.1\",\n-    \"eslint\": \"^6.5.1\",\n-    \"eslint-config-mrmlnc\": \"^1.1.0\",\n-    \"execa\": \"^2.0.4\",\n-    \"fast-glob\": \"^3.0.4\",\n-    \"glob\": \"^7.1.4\",\n-    \"minimist\": \"^1.2.0\",\n-    \"mocha\": \"^6.2.1\",\n-    \"rimraf\": \"^3.0.0\",\n-    \"sinon\": \"^7.5.0\",\n-    \"tiny-glob\": \"^0.2.6\",\n-    \"typescript\": \"^3.6.3\"\n+    \"@nodelib/fs.macchiato\": \"^3.0.0\",\n+    \"@types/glob-parent\": \"^5.1.3\",\n+    \"@types/merge2\": \"^1.4.4\",\n+    \"@types/micromatch\": \"^4.0.9\",\n+    \"@types/mocha\": \"^10.0.10\",\n+    \"@types/node\": \"^18.19.67\",\n+    \"@types/picomatch\": \"^3.0.1\",\n+    \"@types/sinon\": \"^17.0.3\",\n+    \"bencho\": \"^0.1.1\",\n+    \"eslint\": \"9.14.0\",\n+    \"eslint-config-mrmlnc\": \"^5.0.0\",\n+    \"execa\": \"^7.2.0\",\n+    \"fast-glob\": \"^3.3.2\",\n+    \"glob\": \"^11.0.0\",\n+    \"hereby\": \"^1.10.0\",\n+    \"mocha\": \"^10.8.2\",\n+    \"rimraf\": \"^6.0.1\",\n+    \"sinon\": \"^19.0.2\",\n+    \"snap-shot-it\": \"^7.9.10\",\n+    \"tinyglobby\": \"^0.2.10\",\n+    \"typescript\": \"^5.7.2\"\n   },\n   \"dependencies\": {\n-    \"@nodelib/fs.stat\": \"^2.0.2\",\n-    \"@nodelib/fs.walk\": \"^1.2.3\",\n-    \"glob-parent\": \"^5.1.0\",\n-    \"merge2\": \"^1.3.0\",\n-    \"micromatch\": \"^4.0.2\",\n-    \"picomatch\": \"^2.2.1\"\n+    \"@nodelib/fs.stat\": \"^4.0.0\",\n+    \"@nodelib/fs.walk\": \"^3.0.0\",\n+    \"glob-parent\": \"^6.0.2\",\n+    \"merge2\": \"^1.4.1\",\n+    \"micromatch\": \"^4.0.8\"\n   },\n   \"scripts\": {\n     \"clean\": \"rimraf out\",\n     \"lint\": \"eslint \\\"src/**/*.ts\\\" --cache\",\n     \"compile\": \"tsc\",\n     \"test\": \"mocha \\\"out/**/*.spec.js\\\" -s 0\",\n-    \"smoke\": \"mocha \\\"out/**/*.smoke.js\\\" -s 0\",\n-    \"smoke:sync\": \"mocha \\\"out/**/*.smoke.js\\\" -s 0 --grep \\\"\\\\(sync\\\\)\\\"\",\n-    \"smoke:async\": \"mocha \\\"out/**/*.smoke.js\\\" -s 0 --grep \\\"\\\\(async\\\\)\\\"\",\n",
+					"match": false,
+					"packageHash": "242fdb2e20563eb71c7cb5bf4f83799aaa1938b99bc7f3963835f4cc54b822fa",
+					"size": 3682,
+					"sourceHash": "ccc766ad19db5cc6d39d890edaa3c60b5ba7b7370efba933b9821e8a2a426a07",
+					"status": "content"
+				}
+			},
+			"summary": {
+				"differentFiles": 3,
+				"matchingFiles": 0,
+				"missingInPackage": 0,
+				"missingInSource": 50,
+				"score": 0,
+				"totalFiles": 53
+			}
+		}
+	}
+]
