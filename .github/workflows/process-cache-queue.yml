@@ -34,8 +34,11 @@ jobs:
             exit 0
           fi
 
-          # Get the first line
-          TASK=$(head -n 1 "${QUEUE_FILE}")
+          # Remove any leading empty lines first
+          sed -i '/./,$!d' "${QUEUE_FILE}"
+
+          # Get the first non-empty line
+          TASK=$(grep -m 1 '.' "${QUEUE_FILE}" || true)
 
           if [ -z "${TASK}" ]; then
             echo "::notice::Cache queue is empty"
