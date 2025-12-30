@@ -1,0 +1,57 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2025-12-30T10:59:19.820Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:11.7.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "babel-helper-vue-jsx-merge-props@1.0.0",
+			"name": "babel-helper-vue-jsx-merge-props",
+			"version": "1.0.0",
+			"location": "https://registry.npmjs.org/babel-helper-vue-jsx-merge-props/-/babel-helper-vue-jsx-merge-props-1.0.0.tgz",
+			"integrity": "sha512-JXJGJO8I3E96ezjpJwB4/yEzGrkLq2SNS+KBVfDtgpqJkyflF8iSQSB3657ttYrzYP2Ui9Z1Hk7Wl5Mr5c6XLg==",
+			"publishedAt": "2016-07-11T18:49:23.850Z",
+			"publishedWith": {
+				"node": "6.2.2",
+				"npm": "3.9.5"
+			}
+		},
+		"source": {
+			"integrity": "sha512-Que27BpJCO6HyO5Kw50nF3Bhg2sKPdrW6AIId8BzmH3cClWLTPvNrG9Ifvyg+1/03PNm/WIo5ttoH8M5TlnAWA==",
+			"location": "git+https://github.com/vuejs/babel-helper-vue-jsx-merge-props.git",
+			"spec": "github:vuejs/babel-helper-vue-jsx-merge-props#HEAD"
+		},
+		"comparisonHash": "8a2a8dcbb729bf3ee9216e490c955701f0ddebe1",
+		"diff": {
+			"files": {
+				"index.js": {
+					"diff": "--- published/index.js\n+++ rebuilt/index.js\n@@ -1,25 +1,50 @@\n-module.exports = require('babel-template')(`\n-  function _mergeJSXProps (objs) {\n-    var nestRE = /^(attrs|props|on|class|style|staticAttrs)$/\n-    return objs.reduce(function (a, b) {\n-      for (var key in b) {\n-        if (a[key] && nestRE.test(key)) {\n-          var aa = a[key]\n-          var bb = b[key]\n-          if (Array.isArray(aa)) {\n-            a[key] = aa.concat(bb)\n-          } else if (Array.isArray(bb)) {\n-            a[key] = [aa].concat(bb)\n-          } else {\n-            for (var nestedKey in bb) {\n-              aa[nestedKey] = bb[nestedKey]\n-            }\n+var nestRE = /^(attrs|props|on|nativeOn|class|style|hook)$/\n+\n+module.exports = function mergeJSXProps (objs) {\n+  return objs.reduce(function (a, b) {\n+    var aa, bb, key, nestedKey, temp\n+    for (key in b) {\n+      aa = a[key]\n+      bb = b[key]\n+      if (aa && nestRE.test(key)) {\n+        // normalize class\n+        if (key === 'class') {\n+          if (typeof aa === 'string') {\n+            temp = aa\n+            a[key] = aa = {}\n+            aa[temp] = true\n           }\n+          if (typeof bb === 'string') {\n+            temp = bb\n+            b[key] = bb = {}\n+            bb[temp] = true\n+          }\n+        }\n+        if (key === 'on' || key === 'nativeOn' || key === 'hook') {\n+          // merge functions\n+          for (nestedKey in bb) {\n+            aa[nestedKey] = mergeFn(aa[nestedKey], bb[nestedKey])\n+          }\n+        } else if (Array.isArray(aa)) {\n+          a[key] = aa.concat(bb)\n+        } else if (Array.isArray(bb)) {\n+          a[key] = [aa].concat(bb)\n         } else {\n-          a[key] = b[key]\n+          for (nestedKey in bb) {\n+            aa[nestedKey] = bb[nestedKey]\n+          }\n         }\n+      } else {\n+        a[key] = b[key]\n       }\n-      return a\n-    }, {})\n+    }\n+    return a\n+  }, {})\n+}\n+\n+function mergeFn (a, b) {\n+  return function () {\n+    a && a.apply(this, arguments)\n+    b && b.apply(this, arguments)\n   }\n-`)()\n+}\n",
+					"match": false,
+					"packageHash": "7d03afc76abeb5b5f251d81d63cead9e4b3901f18f16ece5ecfa0f54558810a7",
+					"size": 678,
+					"sourceHash": "c6179ff8585be12c6a6e398cd2d31660cf0c27e499fb77e56ea5fd526a334cc4",
+					"status": "content"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -1,6 +1,6 @@\n {\n   \"name\": \"babel-helper-vue-jsx-merge-props\",\n-  \"version\": \"1.0.0\",\n+  \"version\": \"2.0.3\",\n   \"description\": \"babel helper for vue jsx spread.\",\n   \"main\": \"index.js\",\n   \"repository\": {\n",
+					"match": false,
+					"packageHash": "6f546a9d6c9a1f2b8900a3e8dfd0da1287c11a7fe92a2b5479f6810a8ebdacd6",
+					"size": 543,
+					"sourceHash": "a1e8b40a874ea6f470a37ad34d79603d896274aa9e1e211553e614b716719a99",
+					"status": "content"
+				}
+			},
+			"summary": {
+				"differentFiles": 2,
+				"matchingFiles": 0,
+				"missingInPackage": 0,
+				"missingInSource": 0,
+				"score": 0,
+				"totalFiles": 2
+			}
+		}
+	}
+]
