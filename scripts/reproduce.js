@@ -77,13 +77,7 @@ function execWithNodeVersion(nodeVersion, command, options) {
 	return execSync(nvmCmd, merge(EXEC_OPTIONS, options, { shell: '/bin/bash' })).toString().trim();
 }
 
-function ensureNodeVersion(nodeVersion) {
-	if (!isNvmAvailable()) {
-		return false;
-	}
-
-	var version = nodeVersion.replace(/^v/, '');
-
+function tryInstallNodeVersion(version) {
 	try {
 		var installed = execSync(
 			'source "' + NVM_SCRIPT + '" && nvm ls ' + version + ' 2>/dev/null',
@@ -91,7 +85,7 @@ function ensureNodeVersion(nodeVersion) {
 		).toString();
 
 		if (installed.indexOf(version) !== -1 && installed.indexOf('N/A') === -1) {
-			return true;
+			return version;
 		}
 
 		console.log('  -> Installing node ' + version + ' via nvm...');
@@ -99,11 +93,47 @@ function ensureNodeVersion(nodeVersion) {
 			'source "' + NVM_SCRIPT + '" && nvm install ' + version,
 			merge(EXEC_OPTIONS, { shell: '/bin/bash' }),
 		);
-		return true;
+		return version;
 	} catch (err) {
-		console.error('  -> Failed to ensure node ' + version + ': ' + err.message);
-		return false;
+		console.error('  -> Failed to install node ' + version + ': ' + err.message);
+		return null;
 	}
+}
+
+function ensureNodeVersion(nodeVersion) {
+	if (!isNvmAvailable()) {
+		return null;
+	}
+
+	var version = nodeVersion.replace(/^v/, '');
+	var coerced = semver.coerce(version);
+	var major = coerced ? coerced.major : null;
+
+	// Try exact version first
+	var installed = tryInstallNodeVersion(version);
+	if (installed) {
+		return installed;
+	}
+
+	// If exact version failed, try major.x (latest in that major line)
+	if (major !== null) {
+		console.log('  -> Exact version ' + version + ' unavailable, trying node ' + major + ' (latest)...');
+		installed = tryInstallNodeVersion(String(major));
+		if (installed) {
+			return installed;
+		}
+
+		// If that failed too, try next major version
+		var nextMajor = major + 1;
+		console.log('  -> Node ' + major + ' unavailable, trying node ' + nextMajor + '...');
+		installed = tryInstallNodeVersion(String(nextMajor));
+		if (installed) {
+			return installed;
+		}
+	}
+
+	console.error('  -> Could not install any compatible node version for ' + version);
+	return null;
 }
 
 function getNpmVersion(nodeVersion) {
@@ -276,7 +306,7 @@ module.exports = async function reproduce(spec, opts) {
 		var repoCacheDir = path.join(opts.cacheDir, manifest.name.replace('/', '__'));
 
 		var originalNodeVersion = manifest._nodeVersion || null;
-		var useOriginalNode = false;
+		var installedNodeVersion = null;
 
 		// Clamp node version to minimum installable version
 		if (originalNodeVersion && semver.lt(semver.coerce(originalNodeVersion), MIN_NODE_VERSION)) {
@@ -285,13 +315,13 @@ module.exports = async function reproduce(spec, opts) {
 		}
 
 		if (originalNodeVersion && isNvmAvailable()) {
-			useOriginalNode = ensureNodeVersion(originalNodeVersion);
-			if (useOriginalNode) {
-				console.log('  -> Using original node version: ' + originalNodeVersion);
+			installedNodeVersion = ensureNodeVersion(originalNodeVersion);
+			if (installedNodeVersion) {
+				console.log('  -> Using node version: ' + installedNodeVersion + (installedNodeVersion !== originalNodeVersion ? ' (requested ' + originalNodeVersion + ')' : ''));
 			}
 		}
 
-		var npmVersion = getNpmVersion(useOriginalNode ? originalNodeVersion : null);
+		var npmVersion = getNpmVersion(installedNodeVersion);
 
 		var publishTime = null;
 		try {
@@ -319,12 +349,12 @@ module.exports = async function reproduce(spec, opts) {
 
 			npmInstall(packageDir, {
 				before: publishTime,
-				nodeVersion: useOriginalNode ? originalNodeVersion : null,
+				nodeVersion: installedNodeVersion,
 				npmVersion: npmVersion,
 			});
 
 			packed = npmPack(packageDir, {
-				nodeVersion: useOriginalNode ? originalNodeVersion : null,
+				nodeVersion: installedNodeVersion,
 				before: publishTime,
 			});
 		} catch (e) {
