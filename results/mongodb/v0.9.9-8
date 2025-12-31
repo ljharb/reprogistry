@@ -1,0 +1,93 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2025-12-31T08:03:19.909Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:11.7.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "mongodb@0.9.9-8",
+			"name": "mongodb",
+			"version": "0.9.9-8",
+			"location": "https://registry.npmjs.org/mongodb/-/mongodb-0.9.9-8.tgz",
+			"integrity": "sha512-VKo2ijz/48xsiaaqWKpnxqIXfQf3tlU1ejQaLhxP5/VyOXTvMLD59NXNlQK4B/WoPTxrnjoUvfsrvx9XJPAaiA==",
+			"publishedAt": "2012-04-12T08:11:07.868Z",
+			"publishedWith": {
+				"node": "v0.6.14",
+				"npm": "1.1.12"
+			}
+		},
+		"source": {
+			"integrity": null,
+			"location": "git://github.com/christkv/node-mongodb-native.git",
+			"spec": "github:christkv/node-mongodb-native#HEAD"
+		},
+		"comparisonHash": "8a2a8dcbb729bf3ee9216e490c955701f0ddebe1",
+		"diff": {
+			"files": {
+				"external-libs/bson/test/test_bson.js": {
+					"match": false,
+					"packageHash": "b9f086bbcb2830dbe1ec73ac5928b0c80b73c52381271d23e7af573d36dbe149",
+					"size": 17433,
+					"status": "missing-in-source"
+				},
+				"external-libs/bson/test/test_full_bson.js": {
+					"match": false,
+					"packageHash": "99c01d1e6ae8e9e5fbf4d2a73067896404d694f04de009bd5915ca331b6971a8",
+					"size": 8150,
+					"status": "missing-in-source"
+				},
+				"external-libs/bson/test/test_stackless_bson.js": {
+					"match": false,
+					"packageHash": "bedadf13781b0e8ed37b3afc039b97885d90b4dc9e407a7e4f52d06d9920ad7a",
+					"size": 5101,
+					"status": "missing-in-source"
+				},
+				"lib/mongodb/connection/repl_set.js": {
+					"diff": "--- published/lib/mongodb/connection/repl_set.js\n+++ rebuilt/lib/mongodb/connection/repl_set.js\n@@ -31,7 +31,7 @@\n  *  - **rs_name** {String}, the name of the replicaset to connect to. \n  *  - **readPreference** {String}, the prefered read preference (Server.READ_PRIMARY, Server.READ_SECONDARY, Server.READ_SECONDARY_ONLY).\n  *  - **read_secondary** {Boolean, deprecated}, allow reads from secondary.\n- *  - **strategy** {String}, selection strategy for reads choose between (ping and statistical)\n+ *  - **strategy** {String, default:null}, selection strategy for reads choose between (ping and statistical, default is round-robin)\n  *\n  * @class Represents a Replicaset Configuration\n  * @param {Array} list of server objects participating in the replicaset. \n@@ -242,8 +242,14 @@\n   this._replicasetTimeoutId = null;\n };\n \n+/**\n+ * @ignore\n+ */\n inherits(ReplSet, EventEmitter);\n \n+/**\n+ * @ignore\n+ */\n // Allow setting the read preference at the replicaset level\n ReplSet.prototype.setReadPreference = function(preference) {\n   // Set read preference\n@@ -255,30 +261,51 @@\n   }\n }\n \n+/**\n+ * @ignore\n+ */\n // Return the used state\n ReplSet.prototype._isUsed = function() {  \n   return this._used;\n }\n \n+/**\n+ * @ignore\n+ */\n ReplSet.prototype.setTarget = function(target) {\n   this.target = target;\n };\n \n+/**\n+ * @ignore\n+ */\n ReplSet.prototype.isConnected = function() {\n   // Return the state of the replicaset server\n   return this.primary != null && this._state.master != null && this._state.master.isConnected();\n }\n \n+/**\n+ * @ignore\n+ */\n Server.prototype.isSetMember = function() {\n   return false;\n }\n \n+/**\n+ * @ignore\n+ */\n ReplSet.prototype.isPrimary = function(config) {\n   return this.readSecondary && this.secondaries.length > 0 ? false : true;\n }\n \n+/**\n+ * @ignore\n+ */\n ReplSet.prototype.isReadPrimary = ReplSet.prototype.isPrimary;\n \n+/**\n+ * @ignore\n+ */\n // Clean up dead connections\n var cleanupConnections = ReplSet.cleanupConnections = function(connections, addresses, byTags) {\n   // Ensure we don't have entries in our set with dead connections\n@@ -298,6 +325,9 @@\n   }  \n }\n \n+/**\n+ * @ignore\n+ */\n var cleanupTags = ReplSet._cleanupTags = function(server, byTags) {\n   var serverTagKeys = Object.keys(server.tags);\n   // Iterate over all server tags and remove any instances for that tag that matches the current\n@@ -328,6 +358,9 @@\n   }\n }\n \n+/**\n+ * @ignore\n+ */\n ReplSet.prototype.allServerInstances = function() {\n   var self = this;\n   // Close all the servers (concatenate entire list of servers first for ease)\n@@ -358,6 +391,9 @@\n   return allServers;\n",
+					"match": false,
+					"packageHash": "af7dfdbe0fa81910141103f445a0909cf86bebd6812a6b3f14436bdfd354724d",
+					"size": 49219,
+					"sourceHash": "e8f561ec887e698ba4c149bceb442d2a20a250006e60388b49c57b873fcc5e03",
+					"status": "content"
+				},
+				"lib/mongodb/connection/server.js": {
+					"diff": "--- published/lib/mongodb/connection/server.js\n+++ rebuilt/lib/mongodb/connection/server.js\n@@ -3,10 +3,26 @@\n   MongoReply = require('../responses/mongo_reply').MongoReply,\n   ConnectionPool = require('./connection_pool').ConnectionPool,\n   EventEmitter = require('events').EventEmitter,\n-  MongoReply = require(\"../responses/mongo_reply\").MongoReply,\n   inherits = require('util').inherits;\n \n-var Server = exports.Server = function(host, port, options) {\n+/**\n+ * Class representing a single MongoDB Server connection\n+ *\n+ * Options\n+ *  - **readPreference** {String, default:null}, set's the read preference (Server.READ_PRIMAR, Server.READ_SECONDARY_ONLY, Server.READ_SECONDARY)\n+ *  - **ssl** {Boolean, default:false}, use ssl connection (needs to have a mongod server with ssl support)\n+ *  - **slaveOk** {Boolean, default:false}, legacy option allowing reads from secondary, use **readPrefrence** instead.\n+ *  - **poolSize** {Number, default:1}, number of connections in the connection pool, set to 1 as default for legacy reasons.\n+ *  - **socketOptions** {Object, default:null}, an object containing socket options to use (noDelay:(boolean), keepAlive:(number), timeout:(number))\n+ *  - **logger** {Object, default:null}, an object representing a logger that you want to use, needs to support functions debug, log, error **({error:function(message, object) {}, log:function(message, object) {}, debug:function(message, object) {}})**.\n+ *  - **auto_reconnect** {Boolean, default:false}, reconnect on error.\n+ *\n+ * @class Represents a Server connection.\n+ * @param {String} host the server host\n+ * @param {Number} port the server port\n+ * @param {Object} [options] optional options for insert command\n+ */\n+function Server(host, port, options) {\n   // Set up event emitter\n   EventEmitter.call(this);  \n   // Set up Server instance\n@@ -53,7 +69,7 @@\n   this.logger = this.options.logger != null \n     && (typeof this.options.logger.debug == 'function') \n     && (typeof this.options.logger.error == 'function') \n-    && (typeof this.options.logger.debug == 'function') \n+    && (typeof this.options.logger.log == 'function') \n       ? this.options.logger : {error:function(message, object) {}, log:function(message, object) {}, debug:function(message, object) {}};\n \n   // Just keeps list of events we allow\n@@ -124,22 +140,28 @@\n   });    \n };\n \n+/**\n+ * @ignore\n+ */\n // Inherit simple event emitter\n inherits(Server, EventEmitter);\n // Read Preferences\n Server.READ_PRIMARY = 'primary';\n Server.READ_SECONDARY = 'secondary';\n Server.READ_SECONDARY_ONLY = 'secondaryOnly';\n-\n // Always ourselves\n Server.prototype.setReadPreference = function() {}\n \n-// Return the used state\n+/**\n+ * @ignore\n+ */\n Server.prototype._isUsed = function() {  \n   return this._used;\n }\n \n-// Server close function\n+/**\n+ * @ignore\n+ */\n Server.prototype.close = function(callback) {  \n   // Remove all local listeners\n   this.removeAllListeners();\n@@ -157,18 +179,30 @@\n   if(typeof callback === 'function') callback();\n };\n \n+/**\n+ * @ignore\n+ */\n Server.prototype.isConnected = function() {\n   return this.connectionPool != null && this.connectionPool.isConnected();\n }\n \n+/**\n+ * @ignore\n+ */\n Server.prototype.allServerInstances = function() {\n   return [this];\n }\n \n+/**\n+ * @ignore\n+ */\n Server.prototype.isSetMember = function() {\n   return this['replicasetInstance'] != null;\n }\n \n+/**\n+ * @ignore\n+ */\n",
+					"match": false,
+					"packageHash": "738c8b3ad7f8c3b50e9f3461a3559556acd79e27fa989183eb03316070b6b12f",
+					"size": 24333,
+					"sourceHash": "2509622ad0acf9deda2227f721c9bc9a58e2ac9d418b1c75fe584cc42bcac5b3",
+					"status": "content"
+				},
+				"lib/mongodb/db.js": {
+					"diff": "--- published/lib/mongodb/db.js\n+++ rebuilt/lib/mongodb/db.js\n@@ -1693,8 +1693,11 @@\n  *\n  *  www.mongodb.org/display/DOCS/Connections\n  *\n+ * Options\n+ *  - **uri_decode_auth** {Boolean, default:false} uri decode the user name and password for authentication\n+ *\n  * @param {String} url connection url for MongoDB.\n- * @param {Object} options additional options not covered by the url.\n+ * @param {Object} [options] optional options for insert command\n  * @param {Function} callback callback returns the initialized db.\n  * @return {null}\n  * @api public\n@@ -1715,6 +1718,12 @@\n \n   var authPart = match[1] || '';\n   var auth = authPart.split(':', 2);\n+  if(options['uri_decode_auth']){\n+    auth[0] = decodeURIComponent(auth[0]);\n+    if(auth[1]){\n+      auth[1] = decodeURIComponent(auth[1]);\n+    }\n+  }\n   var hostPart = match[2];\n   var dbname = match[3] || 'default';\n   var urlOptions = (match[4] || '').split(/[&;]/);\n",
+					"match": false,
+					"packageHash": "e509e3d3becf01042e44f78402d22ff3a2e21b99f697e081bebb90577b2b6d62",
+					"size": 66261,
+					"sourceHash": "8975ea6eee925ca6f0b33ba4cb074d8de4c712ad9540ccd346aeb97e626a7e93",
+					"status": "content"
+				},
+				"test_gs_working_field_read.tmp": {
+					"match": false,
+					"packageHash": "202f3d896f13618d34ef33db619e25036fb15f0731cca47c99d8af1417129f28",
+					"size": 1786770,
+					"status": "missing-in-source"
+				},
+				"Readme.md": {
+					"match": false,
+					"status": "missing-in-package"
+				}
+			},
+			"summary": {
+				"differentFiles": 3,
+				"matchingFiles": 34,
+				"missingInPackage": 1,
+				"missingInSource": 4,
+				"score": 0.8095238095238095,
+				"totalFiles": 42
+			}
+		}
+	}
+]

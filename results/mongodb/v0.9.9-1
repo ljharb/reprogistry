@@ -1,0 +1,411 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2025-12-31T08:03:07.886Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:11.7.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "mongodb@0.9.9-1",
+			"name": "mongodb",
+			"version": "0.9.9-1",
+			"location": "https://registry.npmjs.org/mongodb/-/mongodb-0.9.9-1.tgz",
+			"integrity": "sha512-CLIYCGYUjs10CEdBXH4LMxv4d79m17cjA3n2ZUMpVaUU3l4zU9DAhYNgTQ4UMld0oKFkt2xSdxBAoJZfkYsHtg==",
+			"publishedAt": "2012-02-15T17:54:45.010Z",
+			"publishedWith": {
+				"node": "v0.6.10",
+				"npm": "1.1.0-3"
+			}
+		},
+		"source": {
+			"integrity": null,
+			"location": "git://github.com/christkv/node-mongodb-native.git",
+			"spec": "github:christkv/node-mongodb-native#HEAD"
+		},
+		"comparisonHash": "8a2a8dcbb729bf3ee9216e490c955701f0ddebe1",
+		"diff": {
+			"files": {
+				".npmignore": {
+					"match": false,
+					"packageHash": "5fe7eb17b3adad13633aecd17436877419eb12512968cb1834a8e4d637de538e",
+					"size": 88,
+					"status": "missing-in-source"
+				},
+				"HISTORY": {
+					"match": false,
+					"packageHash": "c9ddd13cd4627bc4780762ff3f40aeb72780f9dc9ee6e0a31a10b44bc11beee7",
+					"size": 20031,
+					"status": "missing-in-source"
+				},
+				"Makefile": {
+					"diff": "--- published/Makefile\n+++ rebuilt/Makefile\n@@ -1,13 +1,13 @@\n NODE = node\n NPM = npm\n-NODEUNIT = deps/nodeunit/bin/nodeunit\n+NODEUNIT = node_modules/nodeunit/bin/nodeunit\n DOX = node_modules/dox/bin/dox\n name = all\n \n total: build_native\n \n build_native:\n-\t$(MAKE) -C ./external-libs/bson all\n+\t# $(MAKE) -C ./external-libs/bson all\n \n build_native_debug:\n \t$(MAKE) -C ./external-libs/bson all_debug\n@@ -25,6 +25,10 @@\n \t@echo \"\\n == Run All tests minus replicaset tests==\"\n \t$(NODE) dev/tools/test_all.js --noreplicaset --boot\n \n+test_pure: build_native\n+\t@echo \"\\n == Run All tests minus replicaset tests==\"\n+\t$(NODE) dev/tools/test_all.js --noreplicaset --boot --noactive\n+\n test_junit: build_native\n \t@echo \"\\n == Run All tests minus replicaset tests==\"\n \t$(NODE) dev/tools/test_all.js --junit --noreplicaset\n",
+					"match": false,
+					"packageHash": "6684624343669632daf9ef366544737c84b1193abfa7853a316b79aca098121e",
+					"size": 1669,
+					"sourceHash": "9a40c06659b42802352fedb651c7e3ac1993e441b74345c4f4015c7835dbd375",
+					"status": "content"
+				},
+				"Readme.md": {
+					"diff": "--- published/Readme.md\n+++ rebuilt/Readme.md\n@@ -1,3 +1,8 @@\n+Main Documentation site\n+=======================\n+\n+[Documentation](http://christkv.github.com/node-mongodb-native/)\n+\n Install\n ========\n \n@@ -7,7 +12,7 @@\n     \n That may give you a warning telling you that bugs['web'] should be bugs['url'], it would be safe to ignore it (this has been fixed in the development version) \n \n-To install from the latest from the repository, run::\n+To install the latest from the repository, run::\n \n     npm install path/to/node-mongodb-native\n \n@@ -33,7 +38,7 @@\n             // Locate all the entries using find\n             collection.find().toArray(function(err, results) {\n               test.assertEquals(1, results.length);\n-              test.assertTrue(results.a === 2);\n+              test.assertTrue(results[0].a === 2);\n \n               // Let's close the db\n               client.close();\n",
+					"match": false,
+					"packageHash": "803937a3f19ed29abfddb639d58f02ad1c5cea84ae7be4e730e15c63bc969426",
+					"size": 16402,
+					"sourceHash": "eec96097c0795dae69c2266acd746c7b1ee7a3bec8afe76b1dc19d24418f5075",
+					"status": "content"
+				},
+				"TODO": {
+					"match": false,
+					"packageHash": "54e5f2728996690550283c95a44134fc3267c308d9be15ccf01e898b56b2f012",
+					"size": 1410,
+					"status": "missing-in-source"
+				},
+				"external-libs/bson/bson.cc": {
+					"diff": "--- published/external-libs/bson/bson.cc\n+++ rebuilt/external-libs/bson/bson.cc\n@@ -1,7 +1,18 @@\n #include <assert.h>\n #include <string.h>\n #include <stdlib.h>\n+\n+#ifdef __clang__\n+#pragma clang diagnostic push\n+#pragma clang diagnostic ignored \"-Wunused-parameter\"\n+#endif\n+\n #include <v8.h>\n+\n+#ifdef __clang__\n+#pragma clang diagnostic pop\n+#endif\n+\n #include <node.h>\n #include <node_version.h>\n #include <node_buffer.h>\n@@ -201,7 +212,7 @@\n   char *error_str = (char *)malloc(256 * sizeof(char));\n   // Decode the key\n   ssize_t len = DecodeBytes(key, BINARY);\n-  ssize_t written = DecodeWrite(key_str, len, key, BINARY);\n+  DecodeWrite(key_str, len, key, BINARY);\n   *(key_str + key->Utf8Length()) = '\\0';\n   // Check if we have a valid key\n   if(key->Utf8Length() > 0 && *(key_str) == '$') {\n@@ -364,14 +375,7 @@\n   // Controls the flow\n   bool done = false;\n   bool finished = false;\n-  bool isObject = false;\n \n-  // Define a local vector that keeps the stack\n-  // vector<vector<Local<Value> > > stack;// = new vector<vector<Local<Value> > >(0);\n-  \n-  // My own stack max of 1024 objects deep\n-  Local<Object> *stack[64];\n-  \n   // Current object we are processing\n   Local<Object> currentObject = value->ToObject();\n \n@@ -503,185 +507,6 @@\n   return object_size;\n }\n \n-Handle<Value> BSON::BSONSerialize2(const Arguments &args) {\n-  HandleScope scope;\n-\n-  if(args.Length() == 1 && !args[0]->IsObject()) return VException(\"One, two or tree arguments required - [object] or [object, boolean] or [object, boolean, boolean]\");\n-  if(args.Length() == 2 && !args[0]->IsObject() && !args[1]->IsBoolean()) return VException(\"One, two or tree arguments required - [object] or [object, boolean] or [object, boolean, boolean]\");\n-  if(args.Length() == 3 && !args[0]->IsObject() && !args[1]->IsBoolean() && !args[2]->IsBoolean()) return VException(\"One, two or tree arguments required - [object] or [object, boolean] or [object, boolean, boolean]\");\n-  if(args.Length() > 3) return VException(\"One, two or tree arguments required - [object] or [object, boolean] or [object, boolean, boolean]\");\n-\n-  // Calculate the total size of the document in binary form to ensure we only allocate memory once\n-  uint32_t object_size = BSON::calculate_object_size2(args[0]);\n-  // Allocate the memory needed for the serializtion\n-  char *serialized_object = (char *)malloc(object_size * sizeof(char));  \n-  // Catch any errors\n-  try {\n-    // Check if we have a boolean value\n-    bool check_key = false;\n-    if(args.Length() == 3 && args[1]->IsBoolean()) {\n-      check_key = args[1]->BooleanValue();\n-    }\n-    \n-    // Serialize the object\n-    BSON::serialize2(serialized_object, 0, Null(), args[0], object_size, check_key);      \n-  } catch(char *err_msg) {\n-    // Free up serialized object space\n-    free(serialized_object);\n-    V8::AdjustAmountOfExternalAllocatedMemory(-object_size);\n-    // Throw exception with the string\n-    Handle<Value> error = VException(err_msg);\n-    // free error message\n-    free(err_msg);\n-    // Return error\n-    return error;\n-  }\n-\n-  // Write the object size\n-  BSON::write_int32((serialized_object), object_size);  \n-\n-  // If we have 3 arguments\n-  if(args.Length() == 3) {\n-    // Local<Boolean> asBuffer = args[2]->ToBoolean();    \n-    Buffer *buffer = Buffer::New(serialized_object, object_size);\n-    // Release the serialized string\n-    free(serialized_object);\n-    return scope.Close(buffer->handle_);\n-  } else {\n-    // Encode the string (string - null termiating character)\n-    Local<Value> bin_value = Encode(serialized_object, object_size, BINARY)->ToString();\n-    // Return the serialized content\n-    return bin_value;    \n-  }  \n-}\n",
+					"match": false,
+					"packageHash": "75ca7686741d9819578606c97f631e20bad2121af6b3966d8b6e0dc03e17a7b4",
+					"size": 93311,
+					"sourceHash": "3bbf33024abd0bbd372cf8d602e8323759fdd165640ea5b8822dd862932a142e",
+					"status": "content"
+				},
+				"external-libs/bson/build/.wafpickle-7": {
+					"match": false,
+					"packageHash": "a91308a524e47c8079aa5497e816dbd038433033c26fec1722efd6416931b9ec",
+					"size": 975,
+					"status": "missing-in-source"
+				},
+				"external-libs/bson/test/test_bson.js": {
+					"match": false,
+					"packageHash": "bcd6e36821d635eb4ab27c30f73f1673a7354d36634dbe30798bf69a3cd3be27",
+					"size": 17358,
+					"status": "missing-in-source"
+				},
+				"external-libs/bson/test/test_full_bson.js": {
+					"match": false,
+					"packageHash": "8b2c12b54a99aaf7f18b58f52084f9a3f27f3dde4c195fb70261ee4f69773ae4",
+					"size": 8088,
+					"status": "missing-in-source"
+				},
+				"external-libs/bson/test/test_stackless_bson.js": {
+					"match": false,
+					"packageHash": "4735bedcb17acec2df8f375f780a90a4ec24226866cb750919b847e0066be75d",
+					"size": 5033,
+					"status": "missing-in-source"
+				},
+				"install.js": {
+					"diff": "--- published/install.js\n+++ rebuilt/install.js\n@@ -10,7 +10,6 @@\n // Check if we want to build the native code\n var build_native = process.env['npm_package_config_native'] != null ? process.env['npm_package_config_native'] : 'false';\n build_native = build_native == 'true' ? true : false;\n-\n // If we are building the native bson extension ensure we use gmake if available\n if(build_native) {\n   // Check if we need to use gmake\n",
+					"match": false,
+					"packageHash": "955347cbab86146af5f817e5d6c514338c51e8cb1bc5c48de2b7df001ce98910",
+					"size": 1565,
+					"sourceHash": "773466260a06c5ce4dfabbe8530bccd1def293efcda3c09ad1dea99915efb931",
+					"status": "content"
+				},
+				"lib/mongodb/admin.js": {
+					"diff": "--- published/lib/mongodb/admin.js\n+++ rebuilt/lib/mongodb/admin.js\n@@ -13,6 +13,8 @@\n  * @return {Function} Constructor for Admin type.\n  */\n function Admin(db) {  \n+  if(!(this instanceof Admin)) return new Admin(db);\n+  \n   this.db = db;\n };\n \n@@ -46,6 +48,29 @@\n }\n \n /**\n+ * Retrieve this db's server status.\n+ *\n+ * @param {Function} callback returns the server status.\n+ * @return {null}\n+ * @api public\n+ */\n+Admin.prototype.serverStatus = function(callback) {\n+  var self = this;\n+\n+  this.command({serverStatus: 1}, function(err, result) {\n+    if (err == null && result.documents[0].ok == 1) {\n+      callback(null, result.documents[0]);\n+    } else {\n+      if (err) {\n+        callback(err, false);\n+      } else {\n+        callback(self.wrap(result.documents[0]), false);\n+      }\n+    }\n+  });\n+};\n+\n+/**\n  * Retrieve the current profiling Level for MongoDB\n  * \n  * @param {Function} callback Callback function of format `function(err, result) {}`.\n@@ -337,6 +362,29 @@\n }\n \n /**\n+ * Get ReplicaSet status\n+ *\n+ * @param {Function} callback returns the replica set status (if available).\n+ * @return {null}\n+ * @api public\n+ */\n+Admin.prototype.replSetGetStatus = function(callback) {\n+  var self = this;\n+\n+  this.command({replSetGetStatus:1}, function(err, result) {\n+    if (err == null && result.documents[0].ok == 1) {\n+      callback(null, result.documents[0]);\n+    } else {\n+      if (err) {\n+        callback(err, false);\n+      } else {\n+        callback(self.db.wrap(result.documents[0]), false);\n+      }\n+    }\n+  });\n+};\n+\n+/**\n  * @ignore\n  */\n exports.Admin = Admin;\n",
+					"match": false,
+					"packageHash": "3232360f6850d372407b260413b03df8e902353c5979ee951964bf65e123ca43",
+					"size": 10612,
+					"sourceHash": "a037f0b049bc29d04bfc3ee04e7483bbe7b8750c68b95e6c0b45b94b67897af1",
+					"status": "content"
+				},
+				"lib/mongodb/bson/binary.js": {
+					"match": false,
+					"packageHash": "7818c39749ea6296d188c681fc731088c2ca21b251d5fa5b54542a73c86ace78",
+					"size": 4576,
+					"status": "missing-in-source"
+				},
+				"lib/mongodb/bson/binary_parser.js": {
+					"match": false,
+					"packageHash": "ef9e3cac450d49f4d2f5879017e6bff297710d096dbeb8a47d5082db39f38b38",
+					"size": 12297,
+					"status": "missing-in-source"
+				},
+				"lib/mongodb/bson/binary_utils.js": {
+					"match": false,
+					"packageHash": "f9837d9b2dd787c6e452579657fb60e59d0831cf8a0b5d9cf03ab20c92d242d5",
+					"size": 812,
+					"status": "missing-in-source"
+				},
+				"lib/mongodb/bson/bson.js": {
+					"match": false,
+					"packageHash": "f61f2c92cc8ba0d697fa3e0d9d1957b45e936b843908cfda69b1db487701a7e1",
+					"size": 54746,
+					"status": "missing-in-source"
+				},
+				"lib/mongodb/bson/code.js": {
+					"match": false,
+					"packageHash": "70d048505f75daec9b808d37a89a08ee04b3f3acd974bfc31e925de36b2da156",
+					"size": 500,
+					"status": "missing-in-source"
+				},
+				"lib/mongodb/bson/db_ref.js": {
+					"match": false,
+					"packageHash": "ac392fd7facba12665adc47ab312951a45a8c7623d83064d67e8ba36053c8de7",
+					"size": 651,
+					"status": "missing-in-source"
+				},
+				"lib/mongodb/bson/double.js": {
+					"match": false,
+					"packageHash": "04f7f65c8bf87a6945b2400311c753f2470f5ae4dadeac7afae15eb36257018e",
+					"size": 570,
+					"status": "missing-in-source"
+				},
+				"lib/mongodb/bson/float_parser.js": {
+					"match": false,
+					"packageHash": "5b6b4382617418d5310f2a0565db42b33b957eb2c5c478fc428fdd82ee1d882d",
+					"size": 3844,
+					"status": "missing-in-source"
+				},
+				"lib/mongodb/bson/long.js": {
+					"match": false,
+					"packageHash": "ff0fb4b4e6b51c92009135cba0b5ae0b534f6eadea96e83e3925c5fd8e3214eb",
+					"size": 23021,
+					"status": "missing-in-source"
+				},
+				"lib/mongodb/bson/max_key.js": {
+					"match": false,
+					"packageHash": "168918bf5dcb8347430e080ce81fd20e800943a825ab18884ec7bbb6b77f944b",
+					"size": 203,
+					"status": "missing-in-source"
+				},
+				"lib/mongodb/bson/min_key.js": {
+					"match": false,
+					"packageHash": "200ff31a92036dac1070053ff5cce971720eb30c3825b5723d2c33e2b0179489",
+					"size": 201,
+					"status": "missing-in-source"
+				},
+				"lib/mongodb/bson/objectid.js": {
+					"match": false,
+					"packageHash": "9bbc9dd9805a035ba847f1a17aac36bae682e83eb2bef530e5c844f336197dfb",
+					"size": 7124,
+					"status": "missing-in-source"
+				},
+				"lib/mongodb/bson/symbol.js": {
+					"match": false,
+					"packageHash": "2bfc540ad1fe70e8611a0597b422f7f0ca7c2fd126e2739cf47416e98de49506",
+					"size": 761,
+					"status": "missing-in-source"
+				},
+				"lib/mongodb/bson/timestamp.js": {
+					"match": false,
+					"packageHash": "614f364ef74c5ca7bd040dbecdbf6a56ac839738cb82167090cae74eac897f65",
+					"size": 24231,
+					"status": "missing-in-source"
+				},
+				"lib/mongodb/collection.js": {
+					"diff": "--- published/lib/mongodb/collection.js\n+++ rebuilt/lib/mongodb/collection.js\n@@ -7,12 +7,9 @@\n   , DeleteCommand = require('./commands/delete_command').DeleteCommand\n   , UpdateCommand = require('./commands/update_command').UpdateCommand\n   , DbCommand = require('./commands/db_command').DbCommand\n-  , BinaryParser = require('./bson/binary_parser').BinaryParser\n-  , ObjectID = require('./bson/objectid').ObjectID\n-  , Code = require('./bson/code').Code\n+  , ObjectID = require('bson').ObjectID\n+  , Code = require('bson').Code\n   , Cursor = require('./cursor').Cursor\n-  , debug = require('util').debug\n-  , inspect = require('util').inspect\n   , utils = require('./utils');\n \n /**\n@@ -44,11 +41,13 @@\n  * @return {Object} a collection instance.\n  */\n function Collection (db, collectionName, pkFactory, options) {\n+  if(!(this instanceof Collection)) return new Collection(db, collectionName, pkFactory, options);\n+  \n   checkCollectionName(collectionName);\n \n   this.db = db;\n   this.collectionName = collectionName;\n-  this.internalHint;\n+  this.internalHint = null;\n   this.opts = options != null && ('object' === typeof options) ? options : {};\n   this.slaveOk = options == null || options.slaveOk == null ? db.slaveOk : options.slaveOk;\n   this.serializeFunctions = options == null || options.serializeFunctions == null ? db.serializeFunctions : options.serializeFunctions;\n@@ -57,7 +56,7 @@\n     ? ObjectID\n     : pkFactory;\n     \n-  var self = this\n+  var self = this;\n   Object.defineProperty(this, \"hint\", {\n       enumerable: true\n     , get: function () {\n@@ -67,7 +66,7 @@\n         this.internalHint = normalizeHintField(v);\n       }\n   });\n-};\n+}\n \n /**\n  * Inserts a single document or a an array of documents into MongoDB.\n@@ -151,6 +150,8 @@\n   errorOptions = errorOptions == null && this.opts.safe != null ? this.opts.safe : errorOptions;\n   errorOptions = errorOptions == null && this.db.strict != null ? this.db.strict : errorOptions;\n \n+  // If we have a write concern set and no callback throw error\n+  if(errorOptions && errorOptions['safe'] != false && typeof callback !== 'function') throw new Error(\"safe cannot be used without a callback\");\n   // Execute the command, do not add a callback as it's async\n   if (options && options.safe || this.opts.safe != null || this.db.strict) {\n     // Insert options\n@@ -172,9 +173,9 @@\n       error = error && error.documents;\n       if(!callback) return;      \n \n-      if (err) {\n+      if(err) {\n         callback(err);\n-      } else if (error[0].err) {\n+      } else if(error[0].err || error[0].errmsg) {\n         callback(self.db.wrap(error[0]));\n       } else {\n         callback(null, error[0].n);\n@@ -255,7 +256,7 @@\n     var doc = docs[index];\n     \n     // Add id to each document if it's not already defined\n-    if (!(doc instanceof Buffer) && !doc['_id'] && self.db.forceServerObjectId != true) {\n+    if (!(Buffer.isBuffer(doc)) && doc['_id'] == null && self.db.forceServerObjectId != true) {\n       doc['_id'] = self.pkFactory.createPk();\n     }\n \n@@ -266,11 +267,13 @@\n   var errorOptions = options.safe != null ? options.safe : null;\n   errorOptions = errorOptions == null && self.opts.safe != null ? self.opts.safe : errorOptions;\n   errorOptions = errorOptions == null && self.db.strict != null ? self.db.strict : errorOptions;\n+\n+  // If we have a write concern set and no callback throw error\n+  if(errorOptions && errorOptions['safe'] != false && typeof callback !== 'function') throw new Error(\"safe cannot be used without a callback\");\n   \n   // Default command options\n   var commandOptions = {};    \n   // If safe is defined check for error message\n-  // if(options != null && (options.safe == true || this.db.strict == true || this.opts.safe == true)) {\n   if(errorOptions && errorOptions != false) {\n     // Insert options\n     commandOptions['read'] = false;\n@@ -294,7 +297,7 @@\n \n       if (err) {\n         callback(err);\n-      } else if (error[0].err) {\n",
+					"match": false,
+					"packageHash": "9a07b297602dfb1e0c628b8e0abf12c56e48018ee26019b3ba4a75b302c99afe",
+					"size": 50615,
+					"sourceHash": "a3563efa6644f7f9f404b47e0386f1ca647574fd634b04b427ee5ef9c05c8b56",
+					"status": "content"
+				},
+				"lib/mongodb/commands/base_command.js": {
+					"diff": "--- published/lib/mongodb/commands/base_command.js\n+++ rebuilt/lib/mongodb/commands/base_command.js\n@@ -1,7 +1,3 @@\n-var BinaryParser = require('../bson/binary_parser').BinaryParser,\n-  debug = require('util').debug,\n-  inspect = require('util').inspect;\n-\n /**\n   Base object used for common functionality\n **/\n",
+					"match": false,
+					"packageHash": "4da764d9a6b2c9ef7ffb01aa2018388739e12237d0974f8f5b6a1632085caad1",
+					"size": 774,
+					"sourceHash": "3b9d5bf8d0033df72262cdd5c60feb91a4052597696bb1123bae0beeda3f9aa9",
+					"status": "content"
+				},
+				"lib/mongodb/commands/db_command.js": {
+					"diff": "--- published/lib/mongodb/commands/db_command.js\n+++ rebuilt/lib/mongodb/commands/db_command.js\n@@ -1,9 +1,7 @@\n var QueryCommand = require('./query_command').QueryCommand,\n   InsertCommand = require('./insert_command').InsertCommand,\n   inherits = require('util').inherits,\n-  debug = require('util').debug,\n-  crypto = require('crypto'),\n-  inspect = require('util').inspect;\n+  crypto = require('crypto');\n \n /**\n   Db Command\n@@ -94,9 +92,11 @@\n };\n \n DbCommand.createGetLastErrorCommand = function(options, db) {\n-  var args = Array.prototype.slice.call(arguments, 0);\n-  db = args.pop();\n-  options = args.length ? args.shift() : {};\n+\n+  if (typeof db === 'undefined') {\n+    db =  options;\n+    options = {};\n+  }\n   // Final command \n   var command = {'getlasterror':1};\n   // If we have an options Object let's merge in the fields (fsync/wtimeout/w)\n@@ -124,7 +124,7 @@\n   var fieldHash = {};\n   var indexes = [];\n   var keys;\n-\n+  \n   // Get all the fields accordingly\n   if (fieldOrSpec.constructor === String) {             // 'type'\n     indexes.push(fieldOrSpec + '_' + 1);\n@@ -204,4 +204,4 @@\n \n DbCommand.createDbSlaveOkCommand = function(db, command_hash, options) {\n   return new DbCommand(db, db.databaseName + \".\" + DbCommand.SYSTEM_COMMAND_COLLECTION, QueryCommand.OPTS_NO_CURSOR_TIMEOUT | QueryCommand.OPTS_SLAVE, 0, -1, command_hash, null, options);\n-};\n+};\n\\ No newline at end of file\n",
+					"match": false,
+					"packageHash": "b6b74915b62abb6734cea88dd9560bd2cf65bcf044ccaa2bb09bb2bce5a34dc0",
+					"size": 9256,
+					"sourceHash": "6f41be547a863b0b0169eba3b2ecc8d56a3ca07357817dae0fd22c2063b2d8ed",
+					"status": "content"
+				},
+				"lib/mongodb/commands/delete_command.js": {
+					"diff": "--- published/lib/mongodb/commands/delete_command.js\n+++ rebuilt/lib/mongodb/commands/delete_command.js\n@@ -1,7 +1,5 @@\n var BaseCommand = require('./base_command').BaseCommand,\n-  inherits = require('util').inherits,\n-  debug = require('util').debug, \n-  inspect = require('util').inspect;\n+  inherits = require('util').inherits;\n \n /**\n   Insert Document Command\n@@ -11,7 +9,7 @@\n \n   // Validate correctness off the selector\n   var object = selector;\n-  if(object instanceof Buffer) {\n+  if(Buffer.isBuffer(object)) {\n     var object_size = object[0] | object[1] << 8 | object[2] << 16 | object[3] << 24;        \n     if(object_size != object.length)  {\n       var error = new Error(\"delete raw message size does not match message header size [\" + object.length + \"] != [\" + object_size + \"]\");\n@@ -40,7 +38,7 @@\n */\n DeleteCommand.prototype.toBinary = function() {\n   // Calculate total length of the document\n-  var totalLengthOfCommand = 4 + Buffer.byteLength(this.collectionName) + 1 + 4 + this.db.bson.calculateObjectSize(this.selector) + (4 * 4);\n+  var totalLengthOfCommand = 4 + Buffer.byteLength(this.collectionName) + 1 + 4 + this.db.bson.calculateObjectSize(this.selector, false, true) + (4 * 4);\n   // Let's build the single pass buffer command\n   var _index = 0;\n   var _command = new Buffer(totalLengthOfCommand);\n@@ -92,7 +90,7 @@\n \n   // Serialize the selector\n   // If we are passing a raw buffer, do minimal validation\n-  if(this.selector instanceof Buffer) {\n+  if(Buffer.isBuffer(this.selector)) {\n     documentLength = this.selector.length;\n     // Copy the data into the current buffer\n     this.selector.copy(_command, _index);\n",
+					"match": false,
+					"packageHash": "d734996eca9347a8f9564ec48c0acecbd117b655a3b67ff2a016e5d45cb46479",
+					"size": 3962,
+					"sourceHash": "4e4d0f12685765c7a6eb62947f5f73432a07453a99925a1a0e1a63d53d4d218a",
+					"status": "content"
+				},
+				"lib/mongodb/commands/get_more_command.js": {
+					"diff": "--- published/lib/mongodb/commands/get_more_command.js\n+++ rebuilt/lib/mongodb/commands/get_more_command.js\n@@ -1,8 +1,6 @@\n var BaseCommand = require('./base_command').BaseCommand,\n   inherits = require('util').inherits,\n-  debug = require('util').debug,\n-  inspect = require('util').inspect,\n-  binaryutils = require('../bson/binary_utils');\n+  binaryutils = require('../utils');\n \n /**\n   Get More Document Command\n",
+					"match": false,
+					"packageHash": "a63794a32835772baa22edb81e8af920c4bff657c27444ad8ea62d8635f62181",
+					"size": 2968,
+					"sourceHash": "9c9ec06d4ad6306c6823afb357aa2f5a41fffc9ac401894f0ba240e13b72a592",
+					"status": "content"
+				},
+				"lib/mongodb/commands/insert_command.js": {
+					"diff": "--- published/lib/mongodb/commands/insert_command.js\n+++ rebuilt/lib/mongodb/commands/insert_command.js\n@@ -1,7 +1,5 @@\n var BaseCommand = require('./base_command').BaseCommand,\n-  inherits = require('util').inherits,\n-  debug = require('util').debug,\n-  inspect = require('util').inspect;\n+  inherits = require('util').inherits;\n \n /**\n   Insert Document Command\n@@ -37,7 +35,7 @@\n InsertCommand.OP_INSERT =\t2002;\n \n InsertCommand.prototype.add = function(document) {\n-  if(document instanceof Buffer) {\n+  if(Buffer.isBuffer(document)) {\n     var object_size = document[0] | document[1] << 8 | document[2] << 16 | document[3] << 24;    \n     if(object_size != document.length)  {\n       var error = new Error(\"insert raw message size does not match message header size [\" + document.length + \"] != [\" + object_size + \"]\");\n@@ -63,14 +61,14 @@\n   var totalLengthOfCommand = 4 + Buffer.byteLength(this.collectionName) + 1 + (4 * 4);\n   // var docLength = 0\n   for(var i = 0; i < this.documents.length; i++) {\n-    if(this.documents[i] instanceof Buffer) {\n+    if(Buffer.isBuffer(this.documents[i])) {\n       totalLengthOfCommand += this.documents[i].length;\n     } else {\n       // Calculate size of document\n-      totalLengthOfCommand += this.db.bson.calculateObjectSize(this.documents[i], this.serializeFunctions);      \n+      totalLengthOfCommand += this.db.bson.calculateObjectSize(this.documents[i], this.serializeFunctions, true);\n     }\n   }\n-    \n+  \n   // Let's build the single pass buffer command\n   var _index = 0;\n   var _command = new Buffer(totalLengthOfCommand);\n@@ -119,7 +117,7 @@\n \n     // Serialize the selector\n     // If we are passing a raw buffer, do minimal validation\n-    if(object instanceof Buffer) {      \n+    if(Buffer.isBuffer(object)) {\n       documentLength = object.length;\n       // Copy the data into the current buffer\n       object.copy(_command, _index);\n",
+					"match": false,
+					"packageHash": "9e3ae657a998cec0267b72854841cfb0d284f8b5288f00b50e35e8177b529aa8",
+					"size": 5161,
+					"sourceHash": "90970dad921cc155b641d84092b4cee8d1b9f7486e4199685a856dc4fb4ed19d",
+					"status": "content"
+				},
+				"lib/mongodb/commands/kill_cursor_command.js": {
+					"diff": "--- published/lib/mongodb/commands/kill_cursor_command.js\n+++ rebuilt/lib/mongodb/commands/kill_cursor_command.js\n@@ -1,8 +1,6 @@\n var BaseCommand = require('./base_command').BaseCommand,\n   inherits = require('util').inherits,\n-  binaryutils = require('../bson/binary_utils'),\n-  debug = require('util').debug,\n-  inspect = require('util').inspect;\n+  binaryutils = require('../utils');\n \n /**\n   Insert Document Command\n",
+					"match": false,
+					"packageHash": "9936ea981ab114f879b79fd0debb73194ffe4315f27e356a60cbe02c403e0ab8",
+					"size": 3427,
+					"sourceHash": "d01af72568b490f4e88bb07da854ed5b050494e55e90b60b8b3d11561f8ffa5e",
+					"status": "content"
+				},
+				"lib/mongodb/commands/query_command.js": {
+					"diff": "--- published/lib/mongodb/commands/query_command.js\n+++ rebuilt/lib/mongodb/commands/query_command.js\n@@ -1,8 +1,5 @@\n var BaseCommand = require('./base_command').BaseCommand,\n-  BinaryParser = require('../bson/binary_parser').BinaryParser,\n-  inherits = require('util').inherits,\n-  debug = require('util').debug,\n-  inspect = require('util').inspect;\n+  inherits = require('util').inherits;\n \n /**\n   Insert Document Command\n@@ -11,20 +8,21 @@\n   BaseCommand.call(this);\n \n   // Validate correctness off the selector\n-  var object = query;\n-  if(object instanceof Buffer) {\n-    var object_size = object[0] | object[1] << 8 | object[2] << 16 | object[3] << 24;    \n-    if(object_size != object.length)  {\n+  var object = query,\n+    object_size;\n+  if(Buffer.isBuffer(object)) {\n+    object_size = object[0] | object[1] << 8 | object[2] << 16 | object[3] << 24;\n+    if(object_size != object.length) {\n       var error = new Error(\"query selector raw message size does not match message header size [\" + object.length + \"] != [\" + object_size + \"]\");\n       error.name = 'MongoError';\n       throw error;\n     }\n   }\n \n-  var object = returnFieldSelector;\n-  if(object instanceof Buffer) {\n-    var object_size = object[0] | object[1] << 8 | object[2] << 16 | object[3] << 24;    \n-    if(object_size != object.length)  {\n+  object = returnFieldSelector;\n+  if(Buffer.isBuffer(object)) {\n+    object_size = object[0] | object[1] << 8 | object[2] << 16 | object[3] << 24;\n+    if(object_size != object.length) {\n       var error = new Error(\"query fields raw message size does not match message header size [\" + object.length + \"] != [\" + object_size + \"]\");\n       error.name = 'MongoError';\n       throw error;\n@@ -45,7 +43,7 @@\n   // Let us defined on a command basis if we want functions to be serialized or not\n   if(options['serializeFunctions'] != null && options['serializeFunctions']) {\n     this.serializeFunctions = true;\n-  }  \n+  }\n };\n \n inherits(QueryCommand, BaseCommand);\n@@ -66,18 +64,18 @@\n QueryCommand.prototype.toBinary = function() {\n   var totalLengthOfCommand = 0;\n   // Calculate total length of the document\n-  if(this.query instanceof Buffer) {\n+  if(Buffer.isBuffer(this.query)) {\n     totalLengthOfCommand = 4 + Buffer.byteLength(this.collectionName) + 1 + 4 + 4 + this.query.length + (4 * 4);    \n   } else {\n-    totalLengthOfCommand = 4 + Buffer.byteLength(this.collectionName) + 1 + 4 + 4 + this.db.bson.calculateObjectSize(this.query, this.serializeFunctions) + (4 * 4);    \n+    totalLengthOfCommand = 4 + Buffer.byteLength(this.collectionName) + 1 + 4 + 4 + this.db.bson.calculateObjectSize(this.query, this.serializeFunctions, true) + (4 * 4);    \n   }\n   \n   // Calculate extra fields size\n-  if(this.returnFieldSelector != null && !(this.returnFieldSelector instanceof Buffer))  {\n+  if(this.returnFieldSelector != null && !(Buffer.isBuffer(this.returnFieldSelector)))  {\n     if(Object.keys(this.returnFieldSelector).length > 0) {\n-      totalLengthOfCommand += this.db.bson.calculateObjectSize(this.returnFieldSelector, this.serializeFunctions);\n+      totalLengthOfCommand += this.db.bson.calculateObjectSize(this.returnFieldSelector, this.serializeFunctions, true);\n     }\n-  } else if(this.returnFieldSelector instanceof Buffer) {\n+  } else if(Buffer.isBuffer(this.returnFieldSelector)) {\n     totalLengthOfCommand += this.returnFieldSelector.length;\n   }\n \n@@ -144,7 +142,7 @@\n   var object = this.query;\n \n   // Serialize the selector\n-  if(object instanceof Buffer) {\n+  if(Buffer.isBuffer(object)) {\n     documentLength = object.length;\n     // Copy the data into the current buffer\n     object.copy(_command, _index);\n@@ -164,7 +162,7 @@\n   _command[_index - 1] = 0;    \n \n   // Push field selector if available\n-  if(this.returnFieldSelector != null && !(this.returnFieldSelector instanceof Buffer))  {\n+  if(this.returnFieldSelector != null && !(Buffer.isBuffer(this.returnFieldSelector)))  {\n     if(Object.keys(this.returnFieldSelector).length > 0) {\n       var documentLength = this.db.bson.serializeWithBufferAndIndex(this.returnFieldSelector, this.checkKeys, _command, _index, this.serializeFunctions) - _index + 1;\n       // Write the length to the document\n@@ -177,7 +175,7 @@\n       // Add terminating 0 for the object\n       _command[_index - 1] = 0;    \n     }\n-  } if(this.returnFieldSelector != null && this.returnFieldSelector instanceof Buffer)  {\n+  } if(this.returnFieldSelector != null && Buffer.isBuffer(this.returnFieldSelector))  {\n     // Document binary length\n",
+					"match": false,
+					"packageHash": "bfad2d55959c16c44eb8abd889e94b20967016be777de3a858fdad393d4772a3",
+					"size": 8396,
+					"sourceHash": "42e8d9b5c0118fe3e93e96f00a9998faafbc79b058168904ec3341353c71240b",
+					"status": "content"
+				},
+				"lib/mongodb/commands/update_command.js": {
+					"diff": "--- published/lib/mongodb/commands/update_command.js\n+++ rebuilt/lib/mongodb/commands/update_command.js\n@@ -1,7 +1,5 @@\n var BaseCommand = require('./base_command').BaseCommand,\n-  inherits = require('util').inherits,\n-  debug = require('util').debug,\n-  inspect = require('util').inspect;\n+  inherits = require('util').inherits;\n \n /**\n   Update Document Command\n@@ -10,7 +8,7 @@\n   BaseCommand.call(this);\n \n   var object = spec;\n-  if(object instanceof Buffer) {\n+  if(Buffer.isBuffer(object)) {\n     var object_size = object[0] | object[1] << 8 | object[2] << 16 | object[3] << 24;    \n     if(object_size != object.length)  {\n       var error = new Error(\"update spec raw message size does not match message header size [\" + object.length + \"] != [\" + object_size + \"]\");\n@@ -20,7 +18,7 @@\n   }\n \n   var object = document;\n-  if(object instanceof Buffer) {\n+  if(Buffer.isBuffer(object)) {\n     var object_size = object[0] | object[1] << 8 | object[2] << 16 | object[3] << 24;    \n     if(object_size != object.length)  {\n       var error = new Error(\"update document raw message size does not match message header size [\" + object.length + \"] != [\" + object_size + \"]\");\n@@ -65,8 +63,8 @@\n */\n UpdateCommand.prototype.toBinary = function() {\n   // Calculate total length of the document\n-  var totalLengthOfCommand = 4 + Buffer.byteLength(this.collectionName) + 1 + 4 + this.db.bson.calculateObjectSize(this.spec, false) +\n-      this.db.bson.calculateObjectSize(this.document, this.serializeFunctions) + (4 * 4);\n+  var totalLengthOfCommand = 4 + Buffer.byteLength(this.collectionName) + 1 + 4 + this.db.bson.calculateObjectSize(this.spec, false, true) +\n+      this.db.bson.calculateObjectSize(this.document, this.serializeFunctions, true) + (4 * 4);\n \n   // Let's build the single pass buffer command\n   var _index = 0;\n@@ -122,7 +120,7 @@\n \n   // Serialize the selector\n   // If we are passing a raw buffer, do minimal validation\n-  if(object instanceof Buffer) {\n+  if(Buffer.isBuffer(object)) {\n     var object_size = object[0] | object[1] << 8 | object[2] << 16 | object[3] << 24;\n     if(object_size != object.length) throw new Error(\"raw message size does not match message header size [\" + object.length + \"] != [\" + object_size + \"]\");\n     documentLength = object.length;\n@@ -148,7 +146,7 @@\n \n   // Serialize the document\n   // If we are passing a raw buffer, do minimal validation\n-  if(object instanceof Buffer) {\n+  if(Buffer.isBuffer(object)) {\n     var object_size = object[0] | object[1] << 8 | object[2] << 16 | object[3] << 24;\n     if(object_size != object.length) throw new Error(\"raw message size does not match message header size [\" + object.length + \"] != [\" + object_size + \"]\");\n     documentLength = object.length;\n",
+					"match": false,
+					"packageHash": "89212ccae8e11b6660e27fc21c12158aee8108ff880f7b81128b344fea747977",
+					"size": 6701,
+					"sourceHash": "1e9efcade1290911d79395a36a74e0f4bdfc7608c739482547738ac544d537d3",
+					"status": "content"
+				},
+				"lib/mongodb/connection/connection.js": {
+					"diff": "--- published/lib/mongodb/connection/connection.js\n+++ rebuilt/lib/mongodb/connection/connection.js\n@@ -1,11 +1,9 @@\n var utils = require('./connection_utils'),\n   inherits = require('util').inherits,\n   net = require('net'),\n-  debug = require('util').debug,\n-  inspect = require('util').inspect,\n   EventEmitter = require('events').EventEmitter,\n   inherits = require('util').inherits,\n-  binaryutils = require('../bson/binary_utils'),\n+  binaryutils = require('../utils'),\n   tls = require('tls');\n \n var Connection = exports.Connection = function(id, socketOptions) {\n@@ -39,10 +37,9 @@\n }\n \n // Set max bson size\n-Connection.DEFAULT_MAX_BSON_SIZE = 4 * 1024 * 1024 * 4 * 3;\n+Connection.DEFAULT_MAX_BSON_SIZE = 1024 * 1024 * 4;\n \n // Inherit event emitter so we can emit stuff wohoo\n-// inherits(Connection, SimpleEmitter);\n inherits(Connection, EventEmitter);\n \n Connection.prototype.start = function() {\n@@ -84,10 +81,7 @@\n     // Start socket\n     this.connection.connect(this.socketOptions.port, this.socketOptions.host);\n   } else {\n-    // // Create a new stream\n-    // this.connection = new net.Stream();\n-    // // Create new connection instance\n-    // this.connection = new net.Socket();\n+    // Create new connection instance\n     this.connection = net.createConnection(this.socketOptions.port, this.socketOptions.host);\n     // Set options on the socket\n     this.connection.setTimeout(this.socketOptions.timeout);\n@@ -113,8 +107,6 @@\n     this.connection.on(\"timeout\", timeoutHandler(this));\n     this.connection.on(\"drain\", drainHandler(this));\n     this.connection.on(\"close\", closeHandler(this));\n-    // // Start socket\n-    // this.connection.connect(this.socketOptions.port, this.socketOptions.host);\n   }  \n }\n \n@@ -130,11 +122,13 @@\n     if(Array.isArray(command)) {\n       for(var i = 0; i < command.length; i++) {\n         var binaryCommand = command[i].toBinary()\n+        if(binaryCommand.length > this.maxBsonSize) return callback(new Error(\"Document exceeds maximal allowed bson size of \" + this.maxBsonSize + \" bytes\"));\n         if(this.logger != null && this.logger.doDebug) this.logger.debug(\"writing command to mongodb\", binaryCommand);\n         var r = this.writeSteam.write(binaryCommand);\n       }\n     } else {\n       var binaryCommand = command.toBinary()\n+      if(binaryCommand.length > this.maxBsonSize) return callback(new Error(\"Document exceeds maximal allowed bson size of \" + this.maxBsonSize + \" bytes\"));\n       if(this.logger != null && this.logger.doDebug) this.logger.debug(\"writing command to mongodb\", binaryCommand);\n       var r = this.writeSteam.write(binaryCommand);\n     }    \n",
+					"match": false,
+					"packageHash": "5d94178f73781195d86ba0c4bdfc26ed513311502804cc7e0c5686fb8e68a170",
+					"size": 16147,
+					"sourceHash": "a05c2fb8cfdcc1099cb7e68c0b153a5789d48a77dbfe1a1d3b78f940f008ee46",
+					"status": "content"
+				},
+				"lib/mongodb/connection/connection_pool.js": {
+					"diff": "--- published/lib/mongodb/connection/connection_pool.js\n+++ rebuilt/lib/mongodb/connection/connection_pool.js\n@@ -18,6 +18,7 @@\n   this.bson = bson;\n   // PoolSize is always + 1 for special reserved \"measurment\" socket (like ping, stats etc)\n   this.poolSize = poolSize;\n+  this.minPoolSize = Math.floor(this.poolSize / 2) + 1;\n   \n   // Set default settings for the socket options\n   utils.setIntegerParameter(this.socketOptions, 'timeout', 0);\n@@ -31,9 +32,7 @@\n   utils.setIntegerParameter(this.socketOptions, 'bufferSize', 0);  \n   \n   // Internal structures\n-  this.openConnections = [];\n-  this.connections = [];\n-  \n+  this.openConnections = [];  \n   // Assign connection id's\n   this.connectionId = 0;\n   \n@@ -69,15 +68,13 @@\n     connection.on(\"connect\", function(err, connection) {\n       // Add connection to list of open connections\n       _self.openConnections.push(connection);\n-      _self.connections.push(connection)\n-\n       // If the number of open connections is equal to the poolSize signal ready pool\n-      if(_self.connections.length === _self.poolSize && _self._poolState !== 'disconnected') {\n+      if(_self.openConnections.length === _self.poolSize && _self._poolState !== 'disconnected') {\n         // Set connected\n         _self._poolState = 'connected';\n         // Emit pool ready\n         _self.emit(\"poolReady\");\n-      } else if(_self.connections.length < _self.poolSize) {\n+      } else if(_self.openConnections.length < _self.poolSize) {\n         // We need to open another connection, make sure it's in the next\n         // tick so we don't get a cascade of errors\n         process.nextTick(function() {\n@@ -100,9 +97,8 @@\n       connectionStatus = 'disconnected';\n       // Set disconnected\n       _self._poolState = 'disconnected'; \n-      // Clean up\n-      _self.openConnections = [];    \n-      _self.connections = [];\n+      // Stop\n+      _self.stop();\n     });\n \n     // Close handler\n@@ -116,9 +112,8 @@\n       connectionStatus = 'disconnected';\n       // Set disconnected\n       _self._poolState = 'disconnected'; \n-      // Clean up\n-      _self.openConnections = [];    \n-      _self.connections = [];\n+      // Stop\n+      _self.stop();\n     });\n \n     // Timeout handler\n@@ -132,16 +127,14 @@\n       connectionStatus = 'disconnected';\n       // Set disconnected\n       _self._poolState = 'disconnected'; \n-      // Clean up\n-      _self.openConnections = [];    \n-      _self.connections = [];\n+      // Stop\n+      _self.stop();\n     });\n \n     // Parse error, needs a complete shutdown of the pool\n     connection.on(\"parseError\", function() {\n       // If we are already disconnected ignore the event\n       if(connectionStatus !== 'disconnected' && _self.listeners(\"parseError\").length > 0) {\n-      // if(connectionStatus == 'connected') {\n         _self.emit(\"parseError\", new Error(\"parseError occured\"));        \n       }\n       \n@@ -198,14 +191,12 @@\n   }\n \n   // Close all connections\n-  for(var i = 0; i < this.connections.length; i++) {\n-    this.connections[i].close();\n+  for(var i = 0; i < this.openConnections.length; i++) {\n+    this.openConnections[i].close();\n   }\n   \n   // Clean up\n-  // this.connectionsWithErrors = [];\n   this.openConnections = [];    \n-  this.connections = []; \n }\n \n // Check the status of the connection\n@@ -221,7 +212,7 @@\n",
+					"match": false,
+					"packageHash": "eba78165d6b22ce9e6372abd2f6735a5ab9d1bdf7f7dd4f51246997331dd42b8",
+					"size": 7907,
+					"sourceHash": "ccd192af58ec6c8b8d2fe094bf77ce695fca8f47f7e69c869489fadb0e9f00ab",
+					"status": "content"
+				},
+				"lib/mongodb/connection/repl_set_servers.js": {
+					"match": false,
+					"packageHash": "14a3b42000799a832bd2bbb44dee9e15dcd64fa518413714e8b659c8dac8fd90",
+					"size": 40445,
+					"status": "missing-in-source"
+				},
+				"lib/mongodb/connection/server.js": {
+					"diff": "--- published/lib/mongodb/connection/server.js\n+++ rebuilt/lib/mongodb/connection/server.js\n@@ -2,11 +2,32 @@\n   DbCommand = require('../commands/db_command').DbCommand,\n   MongoReply = require('../responses/mongo_reply').MongoReply,\n   ConnectionPool = require('./connection_pool').ConnectionPool,\n-  SimpleEmitter = require('./simple_emitter').SimpleEmitter,\n-  MongoReply = require(\"../responses/mongo_reply\").MongoReply,\n+  EventEmitter = require('events').EventEmitter,\n   inherits = require('util').inherits;\n \n-var Server = exports.Server = function(host, port, options) {\n+/**\n+ * Class representing a single MongoDB Server connection\n+ *\n+ * Options\n+ *  - **readPreference** {String, default:null}, set's the read preference (Server.READ_PRIMAR, Server.READ_SECONDARY_ONLY, Server.READ_SECONDARY)\n+ *  - **ssl** {Boolean, default:false}, use ssl connection (needs to have a mongod server with ssl support)\n+ *  - **slaveOk** {Boolean, default:false}, legacy option allowing reads from secondary, use **readPrefrence** instead.\n+ *  - **poolSize** {Number, default:1}, number of connections in the connection pool, set to 1 as default for legacy reasons.\n+ *  - **socketOptions** {Object, default:null}, an object containing socket options to use (noDelay:(boolean), keepAlive:(number), timeout:(number))\n+ *  - **logger** {Object, default:null}, an object representing a logger that you want to use, needs to support functions debug, log, error **({error:function(message, object) {}, log:function(message, object) {}, debug:function(message, object) {}})**.\n+ *  - **auto_reconnect** {Boolean, default:false}, reconnect on error.\n+ *\n+ * @class Represents a Server connection.\n+ * @param {String} host the server host\n+ * @param {Number} port the server port\n+ * @param {Object} [options] optional options for insert command\n+ */\n+function Server(host, port, options) {\n+  // Set up event emitter\n+  EventEmitter.call(this);  \n+  // Set up Server instance\n+  if(!(this instanceof Server)) return new Server(host, port, options);\n+  \n   var self = this;\n   this.host = host;\n   this.port = port;\n@@ -48,7 +69,7 @@\n   this.logger = this.options.logger != null \n     && (typeof this.options.logger.debug == 'function') \n     && (typeof this.options.logger.error == 'function') \n-    && (typeof this.options.logger.debug == 'function') \n+    && (typeof this.options.logger.log == 'function') \n       ? this.options.logger : {error:function(message, object) {}, log:function(message, object) {}, debug:function(message, object) {}};\n \n   // Just keeps list of events we allow\n@@ -119,22 +140,28 @@\n   });    \n };\n \n+/**\n+ * @ignore\n+ */\n // Inherit simple event emitter\n-inherits(Server, SimpleEmitter);\n+inherits(Server, EventEmitter);\n // Read Preferences\n Server.READ_PRIMARY = 'primary';\n Server.READ_SECONDARY = 'secondary';\n Server.READ_SECONDARY_ONLY = 'secondaryOnly';\n-\n // Always ourselves\n Server.prototype.setReadPreference = function() {}\n \n-// Return the used state\n+/**\n+ * @ignore\n+ */\n Server.prototype._isUsed = function() {  \n   return this._used;\n }\n \n-// Server close function\n+/**\n+ * @ignore\n+ */\n Server.prototype.close = function(callback) {  \n   // Remove all local listeners\n   this.removeAllListeners();\n@@ -143,7 +170,7 @@\n     // Remove all the listeners on the pool so it does not fire messages all over the place\n     this.connectionPool.removeAllEventListeners();\n     // Close the connection if it's open\n-    this.connectionPool.stop();\n+    this.connectionPool.stop(true);\n   }\n \n   // Set server status as disconnected\n@@ -152,18 +179,30 @@\n   if(typeof callback === 'function') callback();\n };\n \n+/**\n+ * @ignore\n+ */\n Server.prototype.isConnected = function() {\n   return this.connectionPool != null && this.connectionPool.isConnected();\n }\n \n",
+					"match": false,
+					"packageHash": "de46c27ee5cb592efbed5ca032bf2c2fdb2ebd9e742d9d6ae4f82797e004a86e",
+					"size": 23561,
+					"sourceHash": "2509622ad0acf9deda2227f721c9bc9a58e2ac9d418b1c75fe584cc42bcac5b3",
+					"status": "content"
+				},
+				"lib/mongodb/connection/simple_emitter.js": {
+					"match": false,
+					"packageHash": "06f23ea1be542085b58435016ba2d0bd7ead99822d13837161357e0110f777cc",
+					"size": 1760,
+					"status": "missing-in-source"
+				},
+				"lib/mongodb/cursor.js": {
+					"diff": "--- published/lib/mongodb/cursor.js\n+++ rebuilt/lib/mongodb/cursor.js\n@@ -1,10 +1,8 @@\n var QueryCommand = require('./commands/query_command').QueryCommand,\n   GetMoreCommand = require('./commands/get_more_command').GetMoreCommand,\n   KillCursorCommand = require('./commands/kill_cursor_command').KillCursorCommand,\n-  Long = require('./bson/long').Long,\n+  Long = require('bson').Long,\n   CursorStream = require('./cursorstream'),\n-  debug = require('util').debug,\n-  inspect = require('util').inspect,\n   utils = require('./utils');\n \n /**\n@@ -230,23 +228,33 @@\n  * Sets the limit parameter of this cursor to the given value.\n  *\n  * @param {Number} limit the new limit.\n- * @param {Function} callback this will be called after executing this method. The first parameter will contain an error object when the limit given is not a valid number or when the cursor is already closed while the second parameter will contain a reference to this object upon successful execution.\n+ * @param {Function} [callback] this optional callback will be called after executing this method. The first parameter will contain an error object when the limit given is not a valid number or when the cursor is already closed while the second parameter will contain a reference to this object upon successful execution.\n  * @return {Cursor} an instance of this object.\n  * @api public\n  */\n Cursor.prototype.limit = function(limit, callback) {\n-  callback = callback || function(){};\n-\n   if(this.tailable) {\n-    callback(new Error(\"Tailable cursor doesn't support limit\"), null);\n+    if(callback) {\n+      callback(new Error(\"Tailable cursor doesn't support limit\"), null);\n+    } else {\n+      throw new Error(\"Tailable cursor doesn't support limit\");\n+    }    \n   } else if(this.queryRun == true || this.state == Cursor.CLOSED) {\n-    callback(new Error(\"Cursor is closed\"), null);\n+    if(callback) {\n+      callback(new Error(\"Cursor is closed\"), null);      \n+    } else {\n+      throw new Error(\"Cursor is closed\");\n+    }\n   } else {\n     if(limit != null && limit.constructor != Number) {\n-      callback(new Error(\"limit requires an integer\"), null);\n+      if(callback) {\n+        callback(new Error(\"limit requires an integer\"), null);        \n+      } else {        \n+        throw new Error(\"limit requires an integer\");\n+      }\n     } else {\n       this.limitValue = limit;\n-      callback(null, this);\n+      if(callback) return callback(null, this);\n     }\n   }\n \n@@ -257,7 +265,7 @@\n  * Sets the skip parameter of this cursor to the given value.\n  *\n  * @param {Number} skip the new skip value.\n- * @param {Function} callback this will be called after executing this method. The first parameter will contain an error object when the skip value given is not a valid number or when the cursor is already closed while the second parameter will contain a reference to this object upon successful execution.\n+ * @param {Function} [callback] this optional callback will be called after executing this method. The first parameter will contain an error object when the skip value given is not a valid number or when the cursor is already closed while the second parameter will contain a reference to this object upon successful execution.\n  * @return {Cursor} an instance of this object.\n  * @api public\n  */\n@@ -284,7 +292,7 @@\n  * Sets the batch size parameter of this cursor to the given value.\n  *\n  * @param {Number} batchSize the new batch size.\n- * @param {Function} callback this will be called after executing this method. The first parameter will contain an error object when the batchSize given is not a valid number or when the cursor is already closed while the second parameter will contain a reference to this object upon successful execution.\n+ * @param {Function} [callback] this optional callback will be called after executing this method. The first parameter will contain an error object when the batchSize given is not a valid number or when the cursor is already closed while the second parameter will contain a reference to this object upon successful execution.\n  * @return {Cursor} an instance of this object.\n  * @api public\n  */\n@@ -318,11 +326,12 @@\n  */\n var limitRequest = function(self) {\n   var requestedLimit = self.limitValue;\n-\n-  if(self.limitValue > 0) {\n-    if (self.batchSizeValue > 0) {\n-      requestedLimit = self.limitValue < self.batchSizeValue ?\n-        self.limitValue : self.batchSizeValue;\n+  var absLimitValue = Math.abs(self.limitValue);\n+  var absBatchValue = Math.abs(self.batchSizeValue);\n+  \n+  if(absLimitValue > 0) {\n+    if (absBatchValue > 0) {\n+      requestedLimit = Math.min(absLimitValue, absBatchValue);\n     }\n   } else {\n     requestedLimit = self.batchSizeValue;\n@@ -473,14 +482,25 @@\n     }\n   }\n   try {\n-    var getMoreCommand = new GetMoreCommand(self.db, self.collectionName, limitRequest(self), self.cursorId);\n+    var getMoreCommand = new GetMoreCommand(\n+        self.db\n+      , self.collectionName\n+      , limitRequest(self)\n",
+					"match": false,
+					"packageHash": "0a56ecc04ee513942e0611538beabb8de7a26385f8b1ffd5a55fddb1cee25b37",
+					"size": 24730,
+					"sourceHash": "c4a6fb5b596bb88a2e03a3d00859e3cb8ae2ac573e12fa196743abfbf01737ea",
+					"status": "content"
+				},
+				"lib/mongodb/cursorstream.js": {
+					"diff": "--- published/lib/mongodb/cursorstream.js\n+++ rebuilt/lib/mongodb/cursorstream.js\n@@ -18,6 +18,8 @@\n  * @return {Stream}\n  */\n function CursorStream(cursor) {\n+  if(!(this instanceof CursorStream)) return new CursorStream(cursor);\n+  \n   Stream.call(this);\n \n   this.readable = true;\n",
+					"match": false,
+					"packageHash": "3d53b3cbda7277e2c76923fea1afe47c4a8792a760b954c361057ab39de3240d",
+					"size": 2775,
+					"sourceHash": "0e80e052fb49e079d8b9a5c5f957370f0780cd5e677ec1b8638aafa7e7ea4b2e",
+					"status": "content"
+				},
+				"lib/mongodb/db.js": {
+					"diff": "--- published/lib/mongodb/db.js\n+++ rebuilt/lib/mongodb/db.js\n@@ -4,19 +4,15 @@\n  */\n var QueryCommand = require('./commands/query_command').QueryCommand,\n   DbCommand = require('./commands/db_command').DbCommand,\n-  BinaryParser = require('./bson/binary_parser').BinaryParser,\n   MongoReply = require('./responses/mongo_reply').MongoReply,\n   Admin = require('./admin').Admin,\n   Collection = require('./collection').Collection,\n   Server = require('./connection/server').Server,\n-  ReplSetServers = require('./connection/repl_set_servers').ReplSetServers,\n+  ReplSet = require('./connection/repl_set').ReplSet,\n   Cursor = require('./cursor').Cursor,\n   EventEmitter = require('events').EventEmitter,\n   inherits = require('util').inherits,\n-  crypto = require('crypto'),\n-  debug = require('util').debug,\n-  inspect = require('util').inspect,\n-  b = require('./bson/bson');\n+  crypto = require('crypto');\n \n /**\n  * Internal class for callback storage \n@@ -58,6 +54,9 @@\n  * @param {Object} [options] additional options for the collection.\n  */\n function Db(databaseName, serverConfig, options) {\n+\n+  if(!(this instanceof Db)) return new Db(databaseName, serverConfig, options);\n+  \n   EventEmitter.call(this);\n   this.databaseName = databaseName;\n   this.serverConfig = serverConfig;  \n@@ -68,7 +67,7 @@\n   var overrideUsedFlag = this.options['override_used_flag'] == null ? false : this.options['override_used_flag'];  \n   // Verify that nobody is using this config\n   if(!overrideUsedFlag && typeof this.serverConfig == 'object' && this.serverConfig._isUsed()) {\n-    throw new Error(\"A Server or ReplSetServers instance cannot be shared across multiple Db instances\");\n+    throw new Error(\"A Server or ReplSet instance cannot be shared across multiple Db instances\");\n   } else if(!overrideUsedFlag && typeof this.serverConfig == 'object'){\n     // Set being used\n     this.serverConfig._used = true;    \n@@ -81,29 +80,32 @@\n   try {\n     this.native_parser = this.options.native_parser;\n     // The bson lib\n-    var bsonLib = this.options.native_parser ? require('../../external-libs/bson') : new require('./bson/bson');\n+    var bsonLib = this.bsonLib = this.options.native_parser ? require('bson').BSONNative : new require('bson').BSONPure;\n     // Fetch the serializer object\n     var BSON = bsonLib.BSON;\n     // Create a new instance\n-    this.bson = new BSON([b.Long, b.ObjectID, b.Binary, b.Code, b.DBRef, b.Symbol, b.Double, b.Timestamp, b.MaxKey, b.MinKey]);\n+    this.bson = new BSON([bsonLib.Long, bsonLib.ObjectID, bsonLib.Binary, bsonLib.Code, bsonLib.DBRef, bsonLib.Symbol, bsonLib.Double, bsonLib.Timestamp, bsonLib.MaxKey, bsonLib.MinKey]);\n     // Backward compatibility to access types\n     this.bson_deserializer = bsonLib;\n     this.bson_serializer = bsonLib;\n   } catch (err) {\n     // If we tried to instantiate the native driver\n-    throw \"Native bson parser not compiled, please compile or avoid using native_parser=true\";\n+    var msg = \"Native bson parser not compiled, please compile \"\n+            + \"or avoid using native_parser=true\";\n+    throw Error(err);\n   }\n-  \n+\n   // Internal state of the server\n   this._state = 'disconnected';\n   \n-  this.pkFactory = this.options.pk == null ? b.ObjectID : this.options.pk;  \n+  this.pkFactory = this.options.pk == null ? bsonLib.ObjectID : this.options.pk;  \n   this.forceServerObjectId = this.options.forceServerObjectId != null ? this.options.forceServerObjectId : false;\n   // Added strict\n   this.strict = this.options.strict == null ? false : this.options.strict;\n   this.notReplied ={};\n   this.isInitializing = true;\n   this.auths = [];\n+  this.openCalled = false;\n   \n   // Command queue, keeps a list of incoming commands that need to be executed once the connection is up\n   this.commands = [];  \n@@ -229,11 +231,22 @@\n  */\n Db.prototype.open = function(callback) {\n   var self = this; \n+  \n+  // Check that the user has not called this twice\n+  if(this.openCalled) {\n+    // Close db\n+    this.close();\n+    // Throw error\n+    throw new Error(\"db object already connecting, open cannot be called multiple times\");\n+  }\n+  \n+  // Set that db has been opened\n+  this.openCalled = true;\n        \n   // Set the status of the server\n   self._state = 'connecting';\n   // Set up connections\n",
+					"match": false,
+					"packageHash": "6c816d1aa91c4bf2f8d192e6cb88f6c4bd19a2a65f97067644baad36ba07d1c2",
+					"size": 62932,
+					"sourceHash": "8975ea6eee925ca6f0b33ba4cb074d8de4c712ad9540ccd346aeb97e626a7e93",
+					"status": "content"
+				},
+				"lib/mongodb/gridfs/chunk.js": {
+					"diff": "--- published/lib/mongodb/gridfs/chunk.js\n+++ rebuilt/lib/mongodb/gridfs/chunk.js\n@@ -1,9 +1,5 @@\n-var BinaryParser = require('../bson/binary_parser').BinaryParser,\n-  Binary = require('../bson/binary').Binary,\n-  ObjectID = require('../bson/objectid').ObjectID,\n-  sys = require('util'),\n-  debug = require('util').debug,\n-  inspect = require('util').inspect;\n+var Binary = require('bson').Binary,\n+  ObjectID = require('bson').ObjectID;\n \n /**\n  * Class for representing a single chunk in GridFS.\n@@ -21,6 +17,8 @@\n  * @see Chunk#buildMongoObject\n  */\n var Chunk = exports.Chunk = function(file, mongoObject) {\n+  if(!(this instanceof Chunk)) return new Chunk(file, mongoObject);\n+  \n   this.file = file;\n   var self = this;\n   var mongoObjectFinal = mongoObject == null ? {} : mongoObject;\n@@ -30,17 +28,17 @@\n   this.data = new Binary();\n \n   if(mongoObjectFinal.data == null) {\n-  } else if(mongoObjectFinal.data.constructor == String) {\n+  } else if(typeof mongoObjectFinal.data == \"string\") {\n     var buffer = new Buffer(mongoObjectFinal.data.length);\n     buffer.write(mongoObjectFinal.data, 'binary', 0);\n     this.data = new Binary(buffer);\n-  } else if(mongoObjectFinal.data.constructor == Array) {\n+  } else if(Array.isArray(mongoObjectFinal.data)) {\n     var buffer = new Buffer(mongoObjectFinal.data.length);\n     buffer.write(mongoObjectFinal.data.join(''), 'binary', 0);\n     this.data = new Binary(buffer);\n   } else if(mongoObjectFinal.data instanceof Binary || Object.prototype.toString.call(mongoObjectFinal.data) == \"[object Binary]\") {    \n     this.data = mongoObjectFinal.data;\n-  } else if(mongoObjectFinal.data instanceof Buffer) {\n+  } else if(Buffer.isBuffer(mongoObjectFinal.data)) {\n   } else {\n     throw Error(\"Illegal chunk format\");\n   }\n@@ -74,7 +72,8 @@\n Chunk.prototype.write = function(data, callback) {\n   this.data.write(data, this.internalPosition);\n   this.internalPosition = this.data.length();\n-  callback(null, this);\n+  if(callback != null) return callback(null, this);\n+  return this;\n };\n \n /**\n",
+					"match": false,
+					"packageHash": "845bddafb34c43a317ec8ab1a9f6bb0cc248476fad763669b6c4839e4be499b3",
+					"size": 6661,
+					"sourceHash": "ebb1d349b3e79a84bc1a2f0a2d8bb5679a6f63325d9d48d0665c1296119ff3a5",
+					"status": "content"
+				},
+				"lib/mongodb/gridfs/grid.js": {
+					"diff": "--- published/lib/mongodb/gridfs/grid.js\n+++ rebuilt/lib/mongodb/gridfs/grid.js\n@@ -1,5 +1,5 @@\n var GridStore = require('./gridstore').GridStore,\n-  ObjectID = require('../bson/objectid').ObjectID;\n+  ObjectID = require('bson').ObjectID;\n \n /**\n  * A class representation of a simple Grid interface.\n@@ -10,6 +10,9 @@\n  * @return {Grid}\n  */\n function Grid(db, fsName) {\n+\n+  if(!(this instanceof Grid)) return new Grid(db, fsName);\n+  \n   this.db = db;\n   this.fsName = fsName == null ? GridStore.DEFAULT_ROOT_COLLECTION : fsName;\n } \n@@ -32,7 +35,7 @@\n   options['root'] = options['root'] == null ? this.fsName : options['root'];\n     \n   // Return if we don't have a buffer object as data\n-  if(!(data instanceof Buffer)) return callback(new Error(\"Data object must be a buffer object\"), null);    \n+  if(!(Buffer.isBuffer(data))) return callback(new Error(\"Data object must be a buffer object\"), null);    \n   // Get filename if we are using it\n   var filename = options['filename'];\n   // Create gridstore\n",
+					"match": false,
+					"packageHash": "325e314daa31e7b261f5c469eee7fc72ab8f92534024b01e0f44a935178debec",
+					"size": 3416,
+					"sourceHash": "2b8f34d347f7cff63ec859c8eb5e7f43212b384cd72adfcfb7c997e2caf6eae8",
+					"status": "content"
+				},
+				"lib/mongodb/gridfs/gridstore.js": {
+					"diff": "--- published/lib/mongodb/gridfs/gridstore.js\n+++ rebuilt/lib/mongodb/gridfs/gridstore.js\n@@ -6,15 +6,12 @@\n  * chunks of split files behind the scenes. More information about GridFS can be\n  * found <a href=\"http://www.mongodb.org/display/DOCS/GridFS\">here</a>.\n  */\n-var BinaryParser = require('../bson/binary_parser').BinaryParser,\n-  Chunk = require('./chunk').Chunk,\n+var Chunk = require('./chunk').Chunk,\n   DbCommand = require('../commands/db_command').DbCommand,\n-  ObjectID = require('../bson/objectid').ObjectID,\n+  ObjectID = require('bson').ObjectID,\n   Buffer = require('buffer').Buffer,\n   fs = require('fs'),\n   util = require('util'),\n-  debug = require('util').debug,\n-  inspect = require('util').inspect,\n   ReadStream = require('./readstream').ReadStream;\n \n var REFERENCE_BY_FILENAME = 0,\n@@ -36,19 +33,35 @@\n  *\n  * @class Represents the GridStore.\n  * @param {Db} db A database instance to interact with.\n- * @param {String|ObjectID} fileIdObject ObjectID or the name for the file.\n+ * @param {ObjectID} id an unique ObjectID for this file\n+ * @param {String} [filename] optional a filename for this file, no unique constrain on the field\n  * @param {String} mode set the mode for this file.\n  * @param {Object} options optional properties to specify. Recognized keys:\n  * @return {GridStore}\n  */\n-function GridStore(db, fileIdObject, mode, options) {\n+function GridStore(db, id, filename, mode, options) {\n+  if(!(this instanceof GridStore)) return new GridStore(db, id, filename, mode, options);\n+\n   var self = this;\n   this.db = db;  \n+  var _filename = filename;\n+\n+  if(typeof filename == 'string' && typeof mode == 'string') {\n+    _filename = filename;  \n+  } else if(typeof filename == 'string' && typeof mode == 'object' && mode != null) {\n+    var _mode = mode;\n+    mode = filename;\n+    options = _mode;    \n+    _filename = id;\n+  } else if(typeof filename == 'string' && mode == null) {\n+    mode = filename;\n+    _filename = id;\n+  }\n   \n   // set grid referencetype\n-  this.referenceBy = typeof fileIdObject == 'string' ? 0 : 1;\n-  this.filename = fileIdObject;\n-  this.fileId = fileIdObject;\n+  this.referenceBy = typeof id == 'string' ? 0 : 1;\n+  this.filename = _filename;\n+  this.fileId = typeof id == 'string' ? new ObjectID() : id;\n   \n   // Set up the rest\n   this.mode = mode == null ? \"r\" : mode;\n@@ -57,6 +70,8 @@\n   this.position = 0;\n   // Set default chunk size\n   this.internalChunkSize = this.options['chunkSize'] == null ? Chunk.DEFAULT_CHUNK_SIZE : this.options['chunkSize'];  \n+  // Previous chunk size\n+  this.previousChunkSize = 0;\n \n   /**\n    * Returns the current chunksize of the file.\n@@ -78,7 +93,7 @@\n          this.internalChunkSize = value;\n        }\n      }\n-  });  \n+  });\n \n   /**\n    * The md5 checksum for this file.\n@@ -93,8 +108,8 @@\n    , get: function () {\n        return this.internalMd5;\n      }\n-  });  \n-};\n+  });\n+}\n \n /**\n  * Opens the file from the database and initialize this object. Also creates a\n@@ -115,25 +130,21 @@\n   if((self.mode == \"w\" || self.mode == \"w+\") && self.db.serverConfig.primary != null) {\n     // Get files collection\n     self.collection(function(err, collection) {\n-      // Ensure index on files Collection\n-      collection.ensureIndex([['filename', 1], ['uploadDate', -1]], function(err, index) {\n-\n-        // Get chunk collection\n-        self.chunkCollection(function(err, chunkCollection) {\n-          // Ensure index on chunk collection\n",
+					"match": false,
+					"packageHash": "4c5331e3a343d352ebcdd99e0c5b89b794f412ebbc094bcbc6691a859e2eee08",
+					"size": 39904,
+					"sourceHash": "3431d98442b60a3a8125b38249d63dfe6a81338d3bf41d9b86b2e8e71c0c3aac",
+					"status": "content"
+				},
+				"lib/mongodb/gridfs/readstream.js": {
+					"diff": "--- published/lib/mongodb/gridfs/readstream.js\n+++ rebuilt/lib/mongodb/gridfs/readstream.js\n@@ -30,7 +30,8 @@\n   this.paused = false;\n   this.readable = true;\n   this.pendingChunk = null;\n-\n+  this.executing = false;  \n+  \n   var self = this;\n   process.nextTick(function() {\n     self._execute();\n@@ -65,12 +66,15 @@\n \n   var gstore = this.gstore;\n   var self = this;\n+  // Set that we are executing\n+  this.executing = true;\n \n   var last = false;\n   var toRead = 0;\n \n   if ((gstore.currentChunk.length() - gstore.currentChunk.position + 1 + self.completedLength) >= self.finalLength) {\n     toRead = self.finalLength - self.completedLength;\n+    self.executing = false;\n     last = true;\n   } else {\n     toRead = gstore.currentChunk.length();\n@@ -78,23 +82,24 @@\n \n   var data = gstore.currentChunk.readSlice(toRead);\n   \n-  if (data != null) {\n+  if(data != null) {\n     self.completedLength += data.length;\n     self.pendingChunk = null;\n     self.emit(\"data\", data);\n   }\n \n-  if (last === true) {\n+  if(last === true) {\n     self.readable = false;\n     self.emit(\"end\");\n-    if (self.autoclose === true) {\n-      if (gstore.mode[0] == \"w\") {\n+    \n+    if(self.autoclose === true) {\n+      if(gstore.mode[0] == \"w\") {\n         gstore.close(function(err, doc) {\n           if (err) {\n             self.emit(\"error\", err);\n             return;\n           }\n-          self.readable = false;\n+          self.readable = false;          \n           self.emit(\"close\", doc);\n         });\n       } else {\n@@ -104,15 +109,19 @@\n     }\n   } else {\n     gstore._nthChunk(gstore.currentChunk.chunkNumber + 1, function(err, chunk) {\n-      if (err) {\n+      if(err) {\n         self.readable = false;\n         self.emit(\"error\", err);\n+        self.executing = false;\n         return;\n       }\n+\n       self.pendingChunk = chunk;\n-      if (self.paused === true) {\n+      if(self.paused === true) {\n+        self.executing = false;\n         return;\n       }\n+\n       gstore.currentChunk = self.pendingChunk;\n       self._execute();\n     });\n@@ -126,7 +135,9 @@\n  * @api public\n  */\n ReadStream.prototype.pause = function() {\n-  this.paused = true;\n+  if(!this.executing) {\n+    this.paused = true;    \n+  }\n };\n \n /**\n@@ -148,9 +159,10 @@\n  * @api public\n  */\n ReadStream.prototype.resume = function() {\n-  if (this.paused === false) {\n+  if(this.paused === false || !this.readable) {\n     return;\n   }\n+  \n",
+					"match": false,
+					"packageHash": "cb5962897e77f7ba497384a49aab349d4784b077db6b12fb05c565c7b07da907",
+					"size": 3772,
+					"sourceHash": "298c9a5f2fa37071875ed26c5cf044cc1a719b8adbc9482ef9f4dbc56dd7444a",
+					"status": "content"
+				},
+				"lib/mongodb/index.js": {
+					"diff": "--- published/lib/mongodb/index.js\n+++ rebuilt/lib/mongodb/index.js\n@@ -1,23 +1,11 @@\n-\n try {\n-  exports.BSONPure = require('./bson/bson');\n-  exports.BSONNative = require('../../external-libs/bson');\n+  exports.BSONPure = require('bson').BSONPure;\n+  exports.BSONNative = require('bson').BSONNative;\n } catch(err) {\n   // do nothing\n }\n \n-[ 'bson/binary_parser'\n-  , 'bson/binary'\n-  , 'bson/code'\n-  , 'bson/db_ref'\n-  , 'bson/double'\n-  , 'bson/max_key'\n-  , 'bson/min_key'\n-  , 'bson/objectid'\n-  , 'bson/symbol'\n-  , 'bson/timestamp'\n-  , 'bson/long'\n-  , 'commands/base_command'\n+[ 'commands/base_command'\n   , 'commands/db_command'\n   , 'commands/delete_command'\n   , 'commands/get_more_command'\n@@ -30,7 +18,7 @@\n   , 'collection'\n   , 'connection/connection'\n   , 'connection/server'\n-  , 'connection/repl_set_servers'\n+  , 'connection/repl_set'\n   , 'cursor'\n   , 'db'\n   , 'gridfs/grid'\n@@ -40,25 +28,31 @@\n   \tfor (var i in module) {\n   \t\texports[i] = module[i];\n     }\n+\n+    // backwards compat\n+    exports.ReplSetServers = exports.ReplSet;\n+    \n+    // Add BSON Classes\n+    exports.Binary = require('bson').Binary;\n+    exports.Code = require('bson').Code;\n+    exports.DBRef = require('bson').DBRef;\n+    exports.Double = require('bson').Double;\n+    exports.Long = require('bson').Long;\n+    exports.MinKey = require('bson').MinKey;\n+    exports.MaxKey = require('bson').MaxKey;\n+    exports.ObjectID = require('bson').ObjectID;\n+    exports.Symbol = require('bson').Symbol;\n+    exports.Timestamp = require('bson').Timestamp;  \n+    \n+    // Add BSON Parser\n+    exports.BSON = require('bson').BSONPure.BSON;\n });\n \n-// Exports all the classes for the NATIVE JS BSON Parser\n-exports.native = function() {\n+// Exports all the classes for the PURE JS BSON Parser\n+exports.pure = function() {\n   var classes = {};\n   // Map all the classes\n-  [ 'bson/binary_parser'\n-    , 'bson/binary'\n-    , 'bson/code'\n-    , 'bson/db_ref'\n-    , 'bson/double'\n-    , 'bson/max_key'\n-    , 'bson/min_key'\n-    , 'bson/objectid'\n-    , 'bson/symbol'\n-    , 'bson/timestamp'\n-    , 'bson/long'\n-    , '../../external-libs/bson/bson'\n-    , 'commands/base_command'\n+  [ 'commands/base_command'\n     , 'commands/db_command'\n     , 'commands/delete_command'\n     , 'commands/get_more_command'\n@@ -71,7 +65,7 @@\n     , 'collection'\n     , 'connection/connection'\n     , 'connection/server'\n-    , 'connection/repl_set_servers'\n+    , 'connection/repl_set'\n     , 'cursor'\n     , 'db'\n     , 'gridfs/grid'\n@@ -82,27 +76,34 @@\n     \t\tclasses[i] = module[i];\n       }\n   });\n+\n+  // backwards compat\n",
+					"match": false,
+					"packageHash": "6c42e731633b890fae1ed4fe17f5c889dd224fad70a8eba3e83aafa8fc5544ff",
+					"size": 3099,
+					"sourceHash": "f177a8277bbee6a3ec1c3e002bda2026d47cad3da7c164edb7f615a0b9c7b360",
+					"status": "content"
+				},
+				"lib/mongodb/responses/mongo_reply.js": {
+					"diff": "--- published/lib/mongodb/responses/mongo_reply.js\n+++ rebuilt/lib/mongodb/responses/mongo_reply.js\n@@ -1,6 +1,4 @@\n-var Long = require('../bson/long').Long,\n-  debug = require('util').debug,\n-  inspect = require('util').inspect;\n+var Long = require('bson').Long;\n \n /**\n   Reply message from mongo db\n",
+					"match": false,
+					"packageHash": "b56592bc4c043f07a4f590daa776252548e4ef2ea5bd8d2c4bd984272e51100b",
+					"size": 6200,
+					"sourceHash": "2a7cc4f286e5792d1ac34e4e92fc1586b483f6f974fb93afbf63d6d80d64e842",
+					"status": "content"
+				},
+				"lib/mongodb/utils.js": {
+					"diff": "--- published/lib/mongodb/utils.js\n+++ rebuilt/lib/mongodb/utils.js\n@@ -41,4 +41,34 @@\n   }\n \n   return orderBy;\n-};\n\\ No newline at end of file\n+};\n+\n+exports.encodeInt = function(value) {\n+  var buffer = new Buffer(4);\n+  buffer[3] = (value >> 24) & 0xff;      \n+  buffer[2] = (value >> 16) & 0xff;\n+  buffer[1] = (value >> 8) & 0xff;\n+  buffer[0] = value & 0xff;\n+  return buffer;\n+}\n+\n+exports.encodeIntInPlace = function(value, buffer, index) {\n+  buffer[index + 3] = (value >> 24) & 0xff;\t\t\t\n+\tbuffer[index + 2] = (value >> 16) & 0xff;\n+\tbuffer[index + 1] = (value >> 8) & 0xff;\n+\tbuffer[index] = value & 0xff;\n+}\n+\n+exports.encodeCString = function(string) {\n+  var buf = new Buffer(string, 'utf8');\n+  return [buf, new Buffer([0])];\n+}\n+\n+exports.decodeUInt32 = function(array, index) {\n+  return array[index] | array[index + 1] << 8 | array[index + 2] << 16 | array[index + 3] << 24;\n+}\n+\n+// Decode the int\n+exports.decodeUInt8 = function(array, index) {\n+  return array[index];\n+}\n",
+					"match": false,
+					"packageHash": "939bbfe2c9defd39ab258fb2fb76b8aa6e43f11e066a44e119eb97dc12808d50",
+					"size": 1302,
+					"sourceHash": "ff5f09bdbf592d3edda38f3f4f29fa7da9fab88c3ef340077b86c9ecce38cd94",
+					"status": "content"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -1,7 +1,7 @@\n { \"name\" :            \"mongodb\"\n , \"description\" :     \"A node.js driver for MongoDB\"\n , \"keywords\" :        [\"mongodb\", \"mongo\", \"driver\", \"db\"]\n-, \"version\" :         \"0.9.9-1\"\n+, \"version\" :         \"0.9.9-8\"\n , \"author\" :          \"Christian Amor Kvalheim <christkv@gmail.com>\"\n , \"contributors\" :  [ \"Aaron Heckmann\",\n                       \"Christoph Pojer\",\n@@ -57,11 +57,11 @@\n                     , \"url\" :   \"http://github.com/christkv/node-mongodb-native.git\" }\n , \"bugs\" :          { \"mail\" :  \"node-mongodb-native@googlegroups.com\"\n                     , \"url\" :   \"http://github.com/christkv/node-mongodb-native/issues\" }\n-, \"os\" :            [ \"linux\"\n-                    , \"darwin\"\n-                    , \"freebsd\" ]\n+, \"dependencies\" : {\n+  \"bson\": \"0.0.4\"\n+}                    \n , \"devDependencies\": {\n-      \"dox\": \"0.1.3\"\n+      \"dox\": \"0.2.0\"\n     , \"uglify-js\": \"1.2.5\"\n     , \"ejs\": \"0.6.1\"\n     , \"nodeunit\": \"0.7.3\"\n@@ -74,7 +74,7 @@\n , \"main\":             \"./lib/mongodb/index\"\n , \"directories\" :   { \"lib\" : \"./lib/mongodb\" }\n , \"engines\" :       { \"node\" : \">=0.4.0\" }\n-, \"scripts\": { \"install\" : \"node install.js\" }\n+, \"scripts\": { \"test\" : \"make test_pure\" }\n , \"licenses\" :    [ { \"type\" :  \"Apache License, Version 2.0\"\n                     , \"url\" :   \"http://www.apache.org/licenses/LICENSE-2.0\" } ]\n }\n",
+					"match": false,
+					"packageHash": "0eb965de32b9e56a91787c8fa65c4ec7ec34b2cf3d09ab3ff9117be2a45e5de6",
+					"size": 3112,
+					"sourceHash": "3e819dd4d5c4f71977047355855ffb75eb246f9cfed7b07d12c2abb32fdb8bc5",
+					"status": "content"
+				},
+				".travis.yml": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/mongodb/connection/repl_set.js": {
+					"match": false,
+					"status": "missing-in-package"
+				}
+			},
+			"summary": {
+				"differentFiles": 28,
+				"matchingFiles": 8,
+				"missingInPackage": 2,
+				"missingInSource": 23,
+				"score": 0.13114754098360656,
+				"totalFiles": 61
+			}
+		}
+	}
+]

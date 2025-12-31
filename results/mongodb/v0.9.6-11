@@ -1,0 +1,1231 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2025-12-31T07:58:39.040Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:11.7.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "mongodb@0.9.6-11",
+			"name": "mongodb",
+			"version": "0.9.6-11",
+			"location": "https://registry.npmjs.org/mongodb/-/mongodb-0.9.6-11.tgz",
+			"integrity": "sha512-k850+czqmus8dSlEIm4X24dVKr2mBsPgtZ/R4Y4UXAiJNpiN3RkkCcpeTwwSjuh5d3DLrOLkrrRVE/9TsktWJA==",
+			"publishedAt": "2011-08-23T09:32:58.191Z",
+			"publishedWith": {
+				"node": "v0.5.4",
+				"npm": "1.0.22"
+			}
+		},
+		"source": {
+			"integrity": null,
+			"location": "git://github.com/christkv/node-mongodb-native.git",
+			"spec": "github:christkv/node-mongodb-native#HEAD"
+		},
+		"comparisonHash": "8a2a8dcbb729bf3ee9216e490c955701f0ddebe1",
+		"diff": {
+			"files": {
+				".npmignore": {
+					"match": false,
+					"packageHash": "2ac216020eec6dc966e708bde381cb1f645096ee302a5a385b05ffe87f477fec",
+					"size": 22,
+					"status": "missing-in-source"
+				},
+				"HISTORY": {
+					"match": false,
+					"packageHash": "f2cd7e5461bf64121e08af590e58460a5e12afdefea013e73b2556994a7377de",
+					"size": 4425,
+					"status": "missing-in-source"
+				},
+				"Makefile": {
+					"diff": "--- published/Makefile\n+++ rebuilt/Makefile\n@@ -1,28 +1,45 @@\n-\n NODE = node\n-NODEUNIT = deps/nodeunit/bin/nodeunit\n+NPM = npm\n+NODEUNIT = node_modules/nodeunit/bin/nodeunit\n+DOX = node_modules/dox/bin/dox\n name = all\n \n total: build_native\n \n build_native:\n-\t$(MAKE) -C ./external-libs/bson\n+\t# $(MAKE) -C ./external-libs/bson all\n+\n+build_native_debug:\n+\t$(MAKE) -C ./external-libs/bson all_debug\n+\n+build_native_clang:\n+\t$(MAKE) -C ./external-libs/bson clang\n+\n+build_native_clang_debug:\n+\t$(MAKE) -C ./external-libs/bson clang_debug\n \n clean_native:\n \t$(MAKE) -C ./external-libs/bson clean\n \n test: build_native\n \t@echo \"\\n == Run All tests minus replicaset tests==\"\n-\t$(NODE) tools/test_all.js --noreplicaset\n+\t$(NODE) dev/tools/test_all.js --noreplicaset --boot\n+\n+test_pure: build_native\n+\t@echo \"\\n == Run All tests minus replicaset tests==\"\n+\t$(NODE) dev/tools/test_all.js --noreplicaset --boot --noactive\n \n test_junit: build_native\n \t@echo \"\\n == Run All tests minus replicaset tests==\"\n-\t$(NODE) tools/test_all.js --junit --noreplicaset\n+\t$(NODE) dev/tools/test_all.js --junit --noreplicaset\n \n test_nodeunit_pure:\n \t@echo \"\\n == Execute Test Suite using Pure JS BSON Parser == \"\n \t@$(NODEUNIT) test/ test/gridstore test/bson\n \n+test_js:\n+\t@$(NODEUNIT) $(TESTS)\n+\n test_nodeunit_replicaset_pure:\n \t@echo \"\\n == Execute Test Suite using Pure JS BSON Parser == \"\n \t@$(NODEUNIT) test/replicaset\n@@ -37,14 +54,18 @@\n \n test_all: build_native\n \t@echo \"\\n == Run All tests ==\"\n-\t$(NODE) tools/test_all.js\n+\t$(NODE) dev/tools/test_all.js --boot\n \n test_all_junit: build_native\n \t@echo \"\\n == Run All tests ==\"\n-\t$(NODE) tools/test_all.js --junit\n+\t$(NODE) dev/tools/test_all.js --junit --boot\n \n clean:\n \trm ./external-libs/bson/bson.node\n \trm -r ./external-libs/bson/build\n \n-.PHONY: total\n\\ No newline at end of file\n+generate_docs:\n+\t$(NODE) dev/tools/build-docs.js\n+\tmake --directory=./docs/sphinx-docs --file=Makefile html\n+\n+.PHONY: total\n",
+					"match": false,
+					"packageHash": "727962375235d4a75ed2755391ba853cf8d8570215adf7b359251e21d8036424",
+					"size": 1251,
+					"sourceHash": "9a40c06659b42802352fedb651c7e3ac1993e441b74345c4f4015c7835dbd375",
+					"status": "content"
+				},
+				"Readme.md": {
+					"diff": "--- published/Readme.md\n+++ rebuilt/Readme.md\n@@ -1,11 +1,18 @@\n+Main Documentation site\n+=======================\n+\n+[Documentation](http://christkv.github.com/node-mongodb-native/)\n+\n Install\n ========\n \n To install the most recent release from npm, run:\n \n     npm install mongodb\n+    \n+That may give you a warning telling you that bugs['web'] should be bugs['url'], it would be safe to ignore it (this has been fixed in the development version) \n \n-To install from the latest from the repository, run::\n+To install the latest from the repository, run::\n \n     npm install path/to/node-mongodb-native\n \n@@ -16,7 +23,7 @@\n Introduction\n ========\n \n-This is a node.js driver for MongoDB. It's a port (or close to a port) of the libary for ruby at http://github.com/mongodb/mongo-ruby-driver/.\n+This is a node.js driver for MongoDB. It's a port (or close to a port) of the library for ruby at http://github.com/mongodb/mongo-ruby-driver/.\n \n A simple example of inserting a document.\n \n@@ -31,7 +38,7 @@\n             // Locate all the entries using find\n             collection.find().toArray(function(err, results) {\n               test.assertEquals(1, results.length);\n-              test.assertTrue(results.a === 2);\n+              test.assertTrue(results[0].a === 2);\n \n               // Let's close the db\n               client.close();\n@@ -46,28 +53,37 @@\n Data types\n ========\n \n-To store and retrieve the non-JSON MongoDb primitives ([ObjectID](http://www.mongodb.org/display/DOCS/Object+IDs), Long, Binary, [Timestamp](http://www.mongodb.org/display/DOCS/Timestamp+data+type), [DBRef](http://www.mongodb.org/display/DOCS/Database+References#DatabaseReferences-DBRef), Code), you have to use one of the types from the bson_serializer.\n+To store and retrieve the non-JSON MongoDb primitives ([ObjectID](http://www.mongodb.org/display/DOCS/Object+IDs), Long, Binary, [Timestamp](http://www.mongodb.org/display/DOCS/Timestamp+data+type), [DBRef](http://www.mongodb.org/display/DOCS/Database+References#DatabaseReferences-DBRef), Code).\n \n-In particular, every document has a unique `_id` which can be almost any type, and by default a 12-byte ObjectID is created. ObjectIDs can be represented as 24-digit hexadecimal strings, but you must convert the string back into an ObjectID before you can use it in the database. For example:\n+In particular, every document has a unique `_id` which can be almost any type, and by default a 12-byte ObjectID is created. ObjectIDs can be represented as 24-digit hexadecimal strings, but you must convert the string back into an ObjectID before you can use it in the database. For example: \n \n+    // Get the objectID type\n+    var ObjectID = require('mongodb').ObjectID;\n+    \n     var idString = '4e4e1638c85e808431000003';\n-    collection.findOne({_id: new client.bson_serializer.ObjectId(idString)}, console.log)  // ok\n+    collection.findOne({_id: new ObjectID(idString)}, console.log)  // ok\n     collection.findOne({_id: idString}, console.log)  // wrong! callback gets undefined\n \n Here are the constructors the non-Javascript BSON primitive types:\n \n-    var client = new Db(...);\n-    new client.bson_serializer.Long(numberString)\n-    new client.bson_serializer.ObjectID(hexString)\n-    new client.bson_serializer.Timestamp()  // the actual unique number is generated on insert.\n-    new client.bson_serializer.DBRef(collectionName, id, dbName)\n-    new client.bson_serializer.Binary(buffer)  // takes a string or Buffer\n-    new client.bson_serializer.Code(code, [context])\n+    // Fetch the library\n+    var mongo = require('mongodb');\n+    // Create new instances of BSON types\n+    new mongo.Long(numberString)\n+    new mongo.ObjectID(hexString)\n+    new mongo.Timestamp()  // the actual unique number is generated on insert.\n+    new mongo.DBRef(collectionName, id, dbName)\n+    new mongo.Binary(buffer)  // takes a string or Buffer\n+    new mongo.Code(code, [context])\n+    new mongo.Symbol(string)\n+    new mongo.MinKey()\n+    new mongo.MaxKey()\n+    new mongo.Double(number)\t// Force double storage\n \n The C/C++ bson parser/serializer\n --------\n \n-From V0.8.0 to V0.9.6.9, the Javascript bson parser was slower than an optional C/C++ bson parser. As of V0.9.6.9+, due to performance improvements in the Javascript parser, the C/C++ perser is deprecated and is not installed by default anymore.\n+From V0.8.0 to V0.9.6.9, the Javascript bson parser was slower than an optional C/C++ bson parser. As of V0.9.6.9+, due to performance improvements in the Javascript parser, the C/C++ parser is deprecated and is not installed by default anymore.\n \n If you are running a version of this library has the C/C++ parser compiled, to enable the driver to use the C/C++ bson parser pass it the option native_parser:true like below\n \n@@ -76,7 +92,7 @@\n                         new Server(\"127.0.0.1\", 27017),\n                         {native_parser:true});\n \n-Since objects created using the C/C++ bson parser are incompatible with a client configured to use the Javascript bson parser and vice versa, you should call constructors using `client.bson_serializer` as described above (don't use `mongodb.BSONNative` and `mongodb.BSONPure` directly).\n+The C++ parser uses the js objects both for serialization and deserialization.\n \n GitHub information\n ========\n@@ -109,12 +125,6 @@\n ===========\n",
+					"match": false,
+					"packageHash": "61022d54f3c7225c8b62cfb6670e8786096468c040aac476d123d0bfe809dcea",
+					"size": 16546,
+					"sourceHash": "eec96097c0795dae69c2266acd746c7b1ee7a3bec8afe76b1dc19d24418f5075",
+					"status": "content"
+				},
+				"TODO.": {
+					"match": false,
+					"packageHash": "9f39cc17b329ae021ceca0e828c361e58bfd441a597f216ce4edad40af99d2b7",
+					"size": 228,
+					"status": "missing-in-source"
+				},
+				"deps/nodeunit/.npmignore": {
+					"match": false,
+					"packageHash": "c22365d4b129983208d56dfa095d9af9e674c734939c8a7c62489c082db31480",
+					"size": 36,
+					"status": "missing-in-source"
+				},
+				"deps/nodeunit/CONTRIBUTORS.md": {
+					"match": false,
+					"packageHash": "dc1a5a144eaa2fdbb9b153779d58af125a5b65f3576d29dba2b5b8e8f3d8f079",
+					"size": 1548,
+					"status": "missing-in-source"
+				},
+				"deps/nodeunit/LICENSE": {
+					"match": false,
+					"packageHash": "b04b9e208e566fa898c7429e4dd5b45ba3ba2f7391e5c009cf63c53d580fa9b4",
+					"size": 1058,
+					"status": "missing-in-source"
+				},
+				"deps/nodeunit/Makefile": {
+					"match": false,
+					"packageHash": "5dbc2ad6b4398c2ecc6f5139795025770f7d29a1875ab3f3998753c42e4f3e81",
+					"size": 5154,
+					"status": "missing-in-source"
+				},
+				"deps/nodeunit/README.md": {
+					"match": false,
+					"packageHash": "751b4e9acf46b4e53769a8504f275b25e671ffd0a412b6d1c90d65955ddfee55",
+					"size": 14941,
+					"status": "missing-in-source"
+				},
+				"deps/nodeunit/bin/nodeunit": {
+					"match": false,
+					"packageHash": "9c73d7f489949be284d1071b6d1cedabd42e6e34d8743f944e94e4864ad8cba7",
+					"size": 3568,
+					"status": "missing-in-source"
+				},
+				"deps/nodeunit/bin/nodeunit.json": {
+					"match": false,
+					"packageHash": "1751ba7b7ad826d3162da359fccef5d1352d1d9a8b710e6753139aa142b1d255",
+					"size": 274,
+					"status": "missing-in-source"
+				},
+				"deps/nodeunit/deps/async.js": {
+					"match": false,
+					"packageHash": "6e67d1380c0ea1c5e876cdeb9b9f39ea8dba07d426d1377f3a1be62d57e0125c",
+					"size": 18641,
+					"status": "missing-in-source"
+				},
+				"deps/nodeunit/deps/ejs.js": {
+					"match": false,
+					"packageHash": "0bf20b8aa0f451bf912d24aa509a9f2469e94d378a8b455da983ad72cb0d3240",
+					"size": 2596,
+					"status": "missing-in-source"
+				},
+				"deps/nodeunit/deps/json2.js": {
+					"match": false,
+					"packageHash": "e6774f41a11016c803c602fa7e03bf03afb8e67217e2b1827cceb2fe5e1ddb52",
+					"size": 17415,
+					"status": "missing-in-source"
+				},
+				"deps/nodeunit/doc/nodeunit.md": {
+					"match": false,
+					"packageHash": "c57518a39297ef6ba91ee72ceeaba7ad5d9807f1cdb02d6449a266904a8305cf",
+					"size": 1637,
+					"status": "missing-in-source"
+				},
+				"deps/nodeunit/examples/browser/nodeunit.js": {
+					"match": false,
+					"packageHash": "4e716bf47c9c35a79dbe0714f1f650d96d0b4def80a6659a1f5fadfdf4fa7c4a",
+					"size": 54817,
+					"status": "missing-in-source"
+				},
+				"deps/nodeunit/examples/browser/suite1.js": {
+					"match": false,
+					"packageHash": "a0cf930d2666256e73299191618d5a58f005cc1bbf7733a7fdeb2aa169bd11d3",
+					"size": 319,
+					"status": "missing-in-source"
+				},
+				"deps/nodeunit/examples/browser/suite2.js": {
+					"match": false,
+					"packageHash": "cca3850beb4e4ea16bffbd6769191e384acf9e88de80a44e49a6266f89bc50ce",
+					"size": 396,
+					"status": "missing-in-source"
+				},
+				"deps/nodeunit/examples/browser/test.html": {
+					"match": false,
+					"packageHash": "921d98372885e8bf4d2918e6ebc1ecf236a3d981eddde4bb820ef46194db9723",
+					"size": 311,
+					"status": "missing-in-source"
+				},
+				"deps/nodeunit/img/example_fail.png": {
+					"match": false,
+					"packageHash": "5205647e4ddd31179fe5e1e4ddba8c496a76c2e821b2629b74772b62287381ab",
+					"size": 38642,
+					"status": "missing-in-source"
+				},
+				"deps/nodeunit/img/example_pass.png": {
+					"match": false,
+					"packageHash": "cd2164286b1c9fcb94cc71856dcdd258d285df39579e1445a1c16dd5d2d3f1c4",
+					"size": 14133,
+					"status": "missing-in-source"
+				},
+				"deps/nodeunit/index.js": {
+					"match": false,
+					"packageHash": "4a2146a5e00131523679c7d60430d41c67ae0a4ddacd52e51b2f0ce0ae517a5c",
+					"size": 166,
+					"status": "missing-in-source"
+				},
+				"deps/nodeunit/lib/assert.js": {
+					"match": false,
+					"packageHash": "6d4a71e840792d8bb9f55bed413b454c20286936a06216e1e7372b1e6c175656",
+					"size": 10207,
+					"status": "missing-in-source"
+				},
+				"deps/nodeunit/lib/core.js": {
+					"match": false,
+					"packageHash": "3122e6f06a3a1402e35fd451e137fea641bd8b99769de57494a79ccc3d977bd1",
+					"size": 5928,
+					"status": "missing-in-source"
+				},
+				"deps/nodeunit/lib/nodeunit.js": {
+					"match": false,
+					"packageHash": "bc65aebee89e3dcbb23afea3f4d96b92171c0a1b1300e34e554b31daa0602554",
+					"size": 1836,
+					"status": "missing-in-source"
+				},
+				"deps/nodeunit/lib/reporters/browser.js": {
+					"match": false,
+					"packageHash": "2f128c6ebaf7346c9c0f18f934bdc7e001ccc07972ee5733dc194e20202ed78c",
+					"size": 3891,
+					"status": "missing-in-source"
+				},
+				"deps/nodeunit/lib/reporters/default.js": {
+					"match": false,
+					"packageHash": "5ae751497ba9f4c5421b6a82bf42422e3860aa79b3e139af6fcf137ac974444b",
+					"size": 4194,
+					"status": "missing-in-source"
+				},
+				"deps/nodeunit/lib/reporters/html.js": {
+					"match": false,
+					"packageHash": "39442b894b5d314e19f45c1a1fb2ec8f7082f40f0344367cda402e10d09ba697",
+					"size": 3511,
+					"status": "missing-in-source"
+				},
+				"deps/nodeunit/lib/reporters/index.js": {
+					"match": false,
+					"packageHash": "156ab9a0ba9aa7cc595e31c0604c6c97a8d8fddcfe984264d61c93804f9c37aa",
+					"size": 331,
+					"status": "missing-in-source"
+				},
+				"deps/nodeunit/lib/reporters/junit.js": {
+					"match": false,
+					"packageHash": "9aba5ae9fb5d849ded37bbcfa265e8ea32e58e86a90db76ca8260cd3dd703dae",
+					"size": 5908,
+					"status": "missing-in-source"
+				},
+				"deps/nodeunit/lib/reporters/minimal.js": {
+					"match": false,
+					"packageHash": "542cfb84da89893ad1d5cd521179e59d5dbbaefeeab30226f438601759c2d77e",
+					"size": 3434,
+					"status": "missing-in-source"
+				},
+				"deps/nodeunit/lib/reporters/skip_passed.js": {
+					"match": false,
+					"packageHash": "1ffdf5f47d712048de1b56a701c2a57d1525d98f74ab7161e18da5afa3da37b9",
+					"size": 3296,
+					"status": "missing-in-source"
+				},
+				"deps/nodeunit/lib/track.js": {
+					"match": false,
+					"packageHash": "e02fba7af50d190aaa45678abf04213e3c90b23ffd1633b367233d8abd2cea84",
+					"size": 1222,
+					"status": "missing-in-source"
+				},
+				"deps/nodeunit/lib/types.js": {
+					"match": false,
+					"packageHash": "3adae1cf4af93b67cbe70604f63822fe0b12e41cacde8765e19f8c22d2f2ca94",
+					"size": 5084,
+					"status": "missing-in-source"
+				},
+				"deps/nodeunit/lib/utils.js": {
+					"match": false,
+					"packageHash": "bc4418a67c3057e5990c8bb2920b60abe45b41a066f19cb2771668b8fdd9f640",
+					"size": 6056,
+					"status": "missing-in-source"
+				},
+				"deps/nodeunit/man1/nodeunit.1": {
+					"match": false,
+					"packageHash": "cd9bac2075ba9fda7b0c26d96f64a1af629eb438a897c40d23f303a43224cf8c",
+					"size": 1957,
+					"status": "missing-in-source"
+				},
+				"deps/nodeunit/nodelint.cfg": {
+					"match": false,
+					"packageHash": "2d97676148773c16d39eb5997004dc88e2746e648dc1023d3080cdbabca5a328",
+					"size": 52,
+					"status": "missing-in-source"
+				},
+				"deps/nodeunit/package.json": {
+					"match": false,
+					"packageHash": "a44a63a8dc5171bfcbebc3da4faff0a78b7cfce0d21064e127638db9e326d8d7",
+					"size": 1418,
+					"status": "missing-in-source"
+				},
+				"deps/nodeunit/share/junit.xml.ejs": {
+					"match": false,
+					"packageHash": "84500bc9c9138c39faa25d81744c17dc9f2f7c081027a025e21fc988d9bef71f",
+					"size": 725,
+					"status": "missing-in-source"
+				},
+				"deps/nodeunit/share/license.js": {
+					"match": false,
+					"packageHash": "c2d81ff8586c4f0e55b222efbdad15072f0960409d49144c39f55d99f96e19c4",
+					"size": 235,
+					"status": "missing-in-source"
+				},
+				"deps/nodeunit/share/nodeunit.css": {
+					"match": false,
+					"packageHash": "e1cff7d7b6903ac5358471ad8a04e400402a20dcf7efd4a9b7a71ca19ebba2fd",
+					"size": 1358,
+					"status": "missing-in-source"
+				},
+				"deps/nodeunit/test/fixtures/coffee/mock_coffee_module.coffee": {
+					"match": false,
+					"packageHash": "a8ba7102b30806f8323e4658688507287363b6972f8a04bd344672b995becdd4",
+					"size": 64,
+					"status": "missing-in-source"
+				},
+				"deps/nodeunit/test/fixtures/dir/mock_module3.js": {
+					"match": false,
+					"packageHash": "59f360a9d2bf7964fa63ce58e013da089e565c87202c35a3492cd9cc330418af",
+					"size": 31,
+					"status": "missing-in-source"
+				},
+				"deps/nodeunit/test/fixtures/dir/mock_module4.js": {
+					"match": false,
+					"packageHash": "8d96c8ee9c1881d9fced4856817ec92a74c5e7f891057d9bae43a97439cede16",
+					"size": 31,
+					"status": "missing-in-source"
+				},
+				"deps/nodeunit/test/fixtures/mock_module1.js": {
+					"match": false,
+					"packageHash": "d0e39b00e441f76ba906a4df1311edcf7ac2063845c34d949b185c073babdb53",
+					"size": 31,
+					"status": "missing-in-source"
+				},
+				"deps/nodeunit/test/fixtures/mock_module2.js": {
+					"match": false,
+					"packageHash": "f79ae9762607ab929a7cef72f47f8f85fd176e0b03479a95a0b64093c5aff5db",
+					"size": 31,
+					"status": "missing-in-source"
+				},
+				"deps/nodeunit/test/fixtures/raw_jscode1.js": {
+					"match": false,
+					"packageHash": "59e98924953900c233df9fd658fa5eb81587bd00ff0a461faf0b5c432ccc89f4",
+					"size": 55,
+					"status": "missing-in-source"
+				},
+				"deps/nodeunit/test/fixtures/raw_jscode2.js": {
+					"match": false,
+					"packageHash": "58f4d19c89bf584aa58f59205156e28b0ec8da8f40e7208169c7140cf2189e79",
+					"size": 57,
+					"status": "missing-in-source"
+				},
+				"deps/nodeunit/test/fixtures/raw_jscode3.js": {
+					"match": false,
+					"packageHash": "f2897e8d4ecbea9793fc07bf4e417c2675aa4e96e544ebdc5c80385dc06111c3",
+					"size": 15,
+					"status": "missing-in-source"
+				},
+				"deps/nodeunit/test/test-base.js": {
+					"match": false,
+					"packageHash": "37c7ea3406de4c5a3b965e72f2bb92226f402cafb0b7226eb53f424a2190762d",
+					"size": 6250,
+					"status": "missing-in-source"
+				},
+				"deps/nodeunit/test/test-failing-callbacks.js": {
+					"match": false,
+					"packageHash": "15bd6b031fa69025b97695793801d59448f048a5615ff8b3330f6b173715cc5e",
+					"size": 3614,
+					"status": "missing-in-source"
+				},
+				"deps/nodeunit/test/test-httputil.js": {
+					"match": false,
+					"packageHash": "cd3cc667209dd77721a210e1588fc33ccf754229eb27c3f5ba4c6e1fcbcb9b08",
+					"size": 1751,
+					"status": "missing-in-source"
+				},
+				"deps/nodeunit/test/test-runfiles.js": {
+					"match": false,
+					"packageHash": "a2397734764aefb45243e4b07a9ccaf1fdf7bc2e526845e397eabb7763c085bf",
+					"size": 6505,
+					"status": "missing-in-source"
+				},
+				"deps/nodeunit/test/test-runmodule.js": {
+					"match": false,
+					"packageHash": "c3a0373d1b92fa3fb886be2f79c38dac80632bde6f7053bcba38a4818c6edd86",
+					"size": 4107,
+					"status": "missing-in-source"
+				},
+				"deps/nodeunit/test/test-runtest.js": {
+					"match": false,
+					"packageHash": "7377ea3e92c86979a5b1ee08c1cfa1cbae1b60a9cfbfca55904875e66570d631",
+					"size": 1570,
+					"status": "missing-in-source"
+				},
+				"deps/nodeunit/test/test-sandbox.js": {
+					"match": false,
+					"packageHash": "1d20ecc18dff9c49b1f2554b7705bd15edd6743f8f8d0ab8bd0848d321df1fad",
+					"size": 1015,
+					"status": "missing-in-source"
+				},
+				"deps/nodeunit/test/test-testcase.js": {
+					"match": false,
+					"packageHash": "3776d1b1636a89c29233276a402b05df3026c70c9c3aefbc64b24f472039bafe",
+					"size": 6404,
+					"status": "missing-in-source"
+				},
+				"deps/nodeunit/test/test.html": {
+					"match": false,
+					"packageHash": "3e8cdfb33c5a73ceeeb9b4ed08829b89924711982be48eed40ed2818166e0007",
+					"size": 808,
+					"status": "missing-in-source"
+				},
+				"deps/step/README.markdown": {
+					"match": false,
+					"packageHash": "b023a8cd9a4a6ac09d3f20c6092f89e72f8c76e528bf45f0d8ac7a15f788f03e",
+					"size": 3042,
+					"status": "missing-in-source"
+				},
+				"deps/step/lib/step.js": {
+					"match": false,
+					"packageHash": "3dfd25f5bc117cc3acda7859ab4ddbd02251fdae55db565050b24d3260f7e198",
+					"size": 4542,
+					"status": "missing-in-source"
+				},
+				"deps/step/package.json": {
+					"match": false,
+					"packageHash": "d9400fc4eb190667a8d9f466e2986590b1badd1f2b22b6a35c28067daee4d8a7",
+					"size": 376,
+					"status": "missing-in-source"
+				},
+				"deps/step/test/callbackTest.js": {
+					"match": false,
+					"packageHash": "bd04258a35b05d769e7b5973ee1e161cf2ebf2102e2be460267e076e6d8389cf",
+					"size": 621,
+					"status": "missing-in-source"
+				},
+				"deps/step/test/errorTest.js": {
+					"match": false,
+					"packageHash": "eb689f8efdfcdec28f2e349fb4e0cbe5fc178ca178f5ec07a13075a812ead2a5",
+					"size": 532,
+					"status": "missing-in-source"
+				},
+				"deps/step/test/fnTest.js": {
+					"match": false,
+					"packageHash": "02d50088fc420a1bc2010dff0ae93d76593a7820748339cf707dd9d5e9334772",
+					"size": 429,
+					"status": "missing-in-source"
+				},
+				"deps/step/test/groupTest.js": {
+					"match": false,
+					"packageHash": "6c624cb9a4e7f11b187bba73bd87c91f1105e69d0943ddfa8313f2b4734a4bbf",
+					"size": 2527,
+					"status": "missing-in-source"
+				},
+				"deps/step/test/helper.js": {
+					"match": false,
+					"packageHash": "0746c0b3441c3c18e8579dd4fbca2f54384340348fe36885e0a9e5590f2f5097",
+					"size": 533,
+					"status": "missing-in-source"
+				},
+				"deps/step/test/parallelTest.js": {
+					"match": false,
+					"packageHash": "96362563d20b138a981099bf69c488502a5196c7657f7a9b83ae18bcc93d031c",
+					"size": 1375,
+					"status": "missing-in-source"
+				},
+				"docs/README.md": {
+					"match": false,
+					"packageHash": "f1c30be7bf94446e980d97f9afbf16a938f751c51bfbae9a1461a8b8f19fc7ad",
+					"size": 1035,
+					"status": "missing-in-source"
+				},
+				"docs/collections.md": {
+					"match": false,
+					"packageHash": "badffac5e65907dbf0c8a11787d4189a0eab90dd806e0b08c70b9dcdaace5a28",
+					"size": 3584,
+					"status": "missing-in-source"
+				},
+				"docs/database.md": {
+					"match": false,
+					"packageHash": "a99d8898a6fd9750a86343aa4f315a36e22eed22fa4497e926f18eb454d3780a",
+					"size": 3975,
+					"status": "missing-in-source"
+				},
+				"docs/gridfs.md": {
+					"match": false,
+					"packageHash": "6d84126338b3bbbe78ea8e3597f2ed975ca477c0f874efe5fcb78d0f2a885e94",
+					"size": 3508,
+					"status": "missing-in-source"
+				},
+				"docs/indexes.md": {
+					"match": false,
+					"packageHash": "c1ed053f25e5f25b352d117dba0e5858e6df819db67d78318181ef00d4530378",
+					"size": 3122,
+					"status": "missing-in-source"
+				},
+				"docs/insert.md": {
+					"match": false,
+					"packageHash": "d93c4ead2df3a21c6e0cf0f8e1cd4272a6f62e8d4992988cea2b6254ca2eb7bd",
+					"size": 5288,
+					"status": "missing-in-source"
+				},
+				"docs/queries.md": {
+					"match": false,
+					"packageHash": "673c7228d590292e679e55d27486713806177cb4a7968f359131a38228182370",
+					"size": 8209,
+					"status": "missing-in-source"
+				},
+				"docs/replicaset.md": {
+					"match": false,
+					"packageHash": "7a3fc49c97b1b225925e5c9faca3fb9042e80439d4d9f568b2eb2257a28d758a",
+					"size": 1589,
+					"status": "missing-in-source"
+				},
+				"examples/admin.js": {
+					"match": false,
+					"packageHash": "f3510996aad5155e519bf1ca7ba896db0d34aa5a0914fd58fbc6928a24a89be0",
+					"size": 2282,
+					"status": "missing-in-source"
+				},
+				"examples/blog.js": {
+					"match": false,
+					"packageHash": "3d876bd6aef5421d69032c1fb6bc0960a7ee1c60c89e121d49614efc374ef0c8",
+					"size": 5923,
+					"status": "missing-in-source"
+				},
+				"examples/capped.js": {
+					"match": false,
+					"packageHash": "50944d1350831092a73b050478a76d6455d6f3c6c0a425525d1564c68ee9fbdb",
+					"size": 1287,
+					"status": "missing-in-source"
+				},
+				"examples/cursor.js": {
+					"match": false,
+					"packageHash": "b99a9a33720ed3b05c60499cca9189972b5637ee36c238f3aad8ebedc6efb95a",
+					"size": 2622,
+					"status": "missing-in-source"
+				},
+				"examples/gridfs.js": {
+					"match": false,
+					"packageHash": "40092fb6cd8f3ad4346cb950dfebb68282cb9d410c74ddeefbdc9699996a157a",
+					"size": 5871,
+					"status": "missing-in-source"
+				},
+				"examples/index.js": {
+					"match": false,
+					"packageHash": "ee5f48022d0bc81a0a44e33a1f62bfbff9c498460144232beb76f0d62540d2e1",
+					"size": 2347,
+					"status": "missing-in-source"
+				},
+				"examples/info.js": {
+					"match": false,
+					"packageHash": "d0871da502c347ac6ef06f302521bc0ae7095c3252ec1df895ce886cf900a9e1",
+					"size": 1714,
+					"status": "missing-in-source"
+				},
+				"examples/oplog.js": {
+					"match": false,
+					"packageHash": "f87622670f2560ee3dcf249c429881a9d64d8da9c49d21a2f7f83a8a510f0cd9",
+					"size": 3277,
+					"status": "missing-in-source"
+				},
+				"examples/queries.js": {
+					"match": false,
+					"packageHash": "2df7f2f58cf70072654827fa9cc9205ed071614f691dd7d36f8f817ee3950dc3",
+					"size": 5268,
+					"status": "missing-in-source"
+				},
+				"examples/replSetServersQueries.js": {
+					"match": false,
+					"packageHash": "d17863f422593b42398b3d8faa41dc6ffcfc4d5e0ec49d394162a86d7f58d97f",
+					"size": 5714,
+					"status": "missing-in-source"
+				},
+				"examples/replSetServersSimple.js": {
+					"match": false,
+					"packageHash": "bfeece3ad731493b2b1bfce2bd1a822d01fd59ebaa291691512f1e238be496a1",
+					"size": 2272,
+					"status": "missing-in-source"
+				},
+				"examples/simple.js": {
+					"match": false,
+					"packageHash": "1085c0204f2cb96a5c2ce95a9d8845d3436b4ca69ac7c5d0e80a24e82d1ff9a6",
+					"size": 1775,
+					"status": "missing-in-source"
+				},
+				"examples/strict.js": {
+					"match": false,
+					"packageHash": "47fa86c87444ebc94c2c42ad5a8525c5c6bbfd0ee85d7b5d5b78b6a224f87d25",
+					"size": 1458,
+					"status": "missing-in-source"
+				},
+				"examples/types.js": {
+					"match": false,
+					"packageHash": "443b751f51dc28cf43b6e787a42ac5e5a1c9f2ff670b26e52fd4732ce1c662b8",
+					"size": 1719,
+					"status": "missing-in-source"
+				},
+				"examples/url.js": {
+					"match": false,
+					"packageHash": "f1a6af085cc620e22e31b76ae6da2d8f13f231c40834e4a0591dcfd331a7253a",
+					"size": 413,
+					"status": "missing-in-source"
+				},
+				"external-libs/bson/.gitignore": {
+					"match": false,
+					"packageHash": "9c1cf3205322777097ff8e8d431a18d2cae134686837ee4906f93779ddce2f47",
+					"size": 30,
+					"status": "missing-in-source"
+				},
+				"external-libs/bson/Makefile": {
+					"diff": "--- published/external-libs/bson/Makefile\n+++ rebuilt/external-libs/bson/Makefile\n@@ -1,4 +1,3 @@\n-\n NODE = node\n name = all\n JOBS = 1\n@@ -6,14 +5,41 @@\n all:\n \trm -rf build .lock-wscript bson.node\n \tnode-waf configure build\n-\t@$(NODE) --expose-gc test_bson.js\n-\t@$(NODE) --expose-gc test_full_bson.js\n+\tcp -R ./build/Release/bson.node . || true\n+\t@$(NODE) --expose-gc test/test_bson.js\n+\t@$(NODE) --expose-gc test/test_full_bson.js\n+\t# @$(NODE) --expose-gc test/test_stackless_bson.js\n+\n+all_debug:\n+\trm -rf build .lock-wscript bson.node\n+\tnode-waf --debug configure build\n+\tcp -R ./build/Release/bson.node . || true\n+\t@$(NODE) --expose-gc test/test_bson.js\n+\t@$(NODE) --expose-gc test/test_full_bson.js\n+\t# @$(NODE) --expose-gc test/test_stackless_bson.js\n \n test:\n-\t@$(NODE) --expose-gc test_bson.js\n-\t@$(NODE) --expose-gc test_full_bson.js\n+\t@$(NODE) --expose-gc test/test_bson.js\n+\t@$(NODE) --expose-gc test/test_full_bson.js\n+\t# @$(NODE) --expose-gc test/test_stackless_bson.js\n+\n+clang:\n+\trm -rf build .lock-wscript bson.node\n+\tCXX=clang node-waf configure build\n+\tcp -R ./build/Release/bson.node . || true\n+\t@$(NODE) --expose-gc test/test_bson.js\n+\t@$(NODE) --expose-gc test/test_full_bson.js\n+\t# @$(NODE) --expose-gc test/test_stackless_bson.js\n+\n+clang_debug:\n+\trm -rf build .lock-wscript bson.node\n+\tCXX=clang node-waf --debug configure build\n+\tcp -R ./build/Release/bson.node . || true\n+\t@$(NODE) --expose-gc test/test_bson.js\n+\t@$(NODE) --expose-gc test/test_full_bson.js\n+\t# @$(NODE) --expose-gc test/test_stackless_bson.js\n \n clean:\n \trm -rf build .lock-wscript bson.node\n-\t\n+\n .PHONY: all\n\\ No newline at end of file\n",
+					"match": false,
+					"packageHash": "6c08252796f6ce46df424ebbe134cf6638efc69d446f97836a6b7d4f48fd57d9",
+					"size": 319,
+					"sourceHash": "739cf490555ff92e959059d59f3ab3116a6159879968a0b0b57c5ac838e62163",
+					"status": "content"
+				},
+				"external-libs/bson/binary.cc": {
+					"match": false,
+					"packageHash": "8a59f14b542de0339cfa80e43e62c680994d5b38e55e00525d426e14fc63d24c",
+					"size": 11397,
+					"status": "missing-in-source"
+				},
+				"external-libs/bson/binary.h": {
+					"match": false,
+					"packageHash": "a6998f2b2688c931cda5651e6d330496226df5a0eb02390a0fa0f694ebf25ee0",
+					"size": 1932,
+					"status": "missing-in-source"
+				},
+				"external-libs/bson/bson.cc": {
+					"diff": "--- published/external-libs/bson/bson.cc\n+++ rebuilt/external-libs/bson/bson.cc\n@@ -1,7 +1,18 @@\n #include <assert.h>\n #include <string.h>\n #include <stdlib.h>\n+\n+#ifdef __clang__\n+#pragma clang diagnostic push\n+#pragma clang diagnostic ignored \"-Wunused-parameter\"\n+#endif\n+\n #include <v8.h>\n+\n+#ifdef __clang__\n+#pragma clang diagnostic pop\n+#endif\n+\n #include <node.h>\n #include <node_version.h>\n #include <node_buffer.h>\n@@ -10,17 +21,13 @@\n #include <cstdlib>\n #include <iostream>\n #include <limits>\n+#include <vector>\n \n #include \"bson.h\"\n-#include \"long.h\"\n-#include \"timestamp.h\"\n-#include \"objectid.h\"\n-#include \"binary.h\"\n-#include \"code.h\"\n-#include \"dbref.h\"\n \n using namespace v8;\n using namespace node;\n+using namespace std;\n \n // BSON DATA TYPES\n const uint32_t BSON_DATA_NUMBER = 1;\n@@ -33,20 +40,23 @@\n const uint32_t BSON_DATA_DATE = 9;\n const uint32_t BSON_DATA_NULL = 10;\n const uint32_t BSON_DATA_REGEXP = 11;\n+const uint32_t BSON_DATA_CODE = 13;\n+const uint32_t BSON_DATA_SYMBOL = 14;\n const uint32_t BSON_DATA_CODE_W_SCOPE = 15;\n const uint32_t BSON_DATA_INT = 16;\n const uint32_t BSON_DATA_TIMESTAMP = 17;\n const uint32_t BSON_DATA_LONG = 18;\n+const uint32_t BSON_DATA_MIN_KEY = 0xff;\n+const uint32_t BSON_DATA_MAX_KEY = 0x7f;\n \n const int32_t BSON_INT32_MAX = (int32_t)2147483647L;\n const int32_t BSON_INT32_MIN = (int32_t)(-1) * 2147483648L;\n \n-// BSON BINARY DATA SUBTYPES\n-const uint32_t BSON_BINARY_SUBTYPE_FUNCTION = 1;\n-const uint32_t BSON_BINARY_SUBTYPE_BYTE_ARRAY = 2;\n-const uint32_t BSON_BINARY_SUBTYPE_UUID = 3;\n-const uint32_t BSON_BINARY_SUBTYPE_MD5 = 4;\n-const uint32_t BSON_BINARY_SUBTYPE_USER_DEFINED = 128;\n+const int64_t BSON_INT64_MAX = ((int64_t)1 << 63) - 1;\n+const int64_t BSON_INT64_MIN = (int64_t)-1 << 63;\n+\n+const int64_t JS_INT_MAX = (int64_t)1 << 53;\n+const int64_t JS_INT_MIN = (int64_t)-1 << 53;\n \n static Handle<Value> VException(const char *msg) {\n     HandleScope scope;\n@@ -64,217 +74,122 @@\n   constructor_template->InstanceTemplate()->SetInternalFieldCount(1);\n   constructor_template->SetClassName(String::NewSymbol(\"BSON\"));\n   \n-  // Class methods\n-  NODE_SET_METHOD(constructor_template->GetFunction(), \"serialize\", BSONSerialize);  \n-  NODE_SET_METHOD(constructor_template->GetFunction(), \"serializeWithBufferAndIndex\", SerializeWithBufferAndIndex);\n-  NODE_SET_METHOD(constructor_template->GetFunction(), \"deserialize\", BSONDeserialize);  \n-  NODE_SET_METHOD(constructor_template->GetFunction(), \"encodeLong\", EncodeLong);  \n-  NODE_SET_METHOD(constructor_template->GetFunction(), \"toLong\", ToLong);\n-  NODE_SET_METHOD(constructor_template->GetFunction(), \"toInt\", ToInt);\n-  NODE_SET_METHOD(constructor_template->GetFunction(), \"calculateObjectSize\", CalculateObjectSize);\n+  // Instance methods\n+  NODE_SET_PROTOTYPE_METHOD(constructor_template, \"calculateObjectSize\", CalculateObjectSize);\n+  NODE_SET_PROTOTYPE_METHOD(constructor_template, \"serialize\", BSONSerialize);\n+  NODE_SET_PROTOTYPE_METHOD(constructor_template, \"serializeWithBufferAndIndex\", SerializeWithBufferAndIndex);\n+  NODE_SET_PROTOTYPE_METHOD(constructor_template, \"deserialize\", BSONDeserialize);\n+  NODE_SET_PROTOTYPE_METHOD(constructor_template, \"deserializeStream\", BSONDeserializeStream);\n+\n+  // Experimental\n+  // NODE_SET_PROTOTYPE_METHOD(constructor_template, \"calculateObjectSize2\", CalculateObjectSize2);\n+  // NODE_SET_PROTOTYPE_METHOD(constructor_template, \"serialize2\", BSONSerialize2);\n+  // NODE_SET_METHOD(constructor_template->GetFunction(), \"serialize2\", BSONSerialize2);  \n \n-  target->Set(String::NewSymbol(\"BSON\"), constructor_template->GetFunction());\n+  target->ForceSet(String::NewSymbol(\"BSON\"), constructor_template->GetFunction());\n }\n \n // Create a new instance of BSON and assing it the existing context\n",
+					"match": false,
+					"packageHash": "b14dcbc61cfb6dc0168f0ae1aa5f5aec8eb759437fe5573573ca2f3728c46d25",
+					"size": 67392,
+					"sourceHash": "3bbf33024abd0bbd372cf8d602e8323759fdd165640ea5b8822dd862932a142e",
+					"status": "content"
+				},
+				"external-libs/bson/bson.h": {
+					"diff": "--- published/external-libs/bson/bson.h\n+++ rebuilt/external-libs/bson/bson.h\n@@ -14,48 +14,92 @@\n     ~BSON() {}\n     \n     static void Initialize(Handle<Object> target);\n+    static Handle<Value> BSONDeserializeStream(const Arguments &args);\n+\n+    // JS based objects\n     static Handle<Value> BSONSerialize(const Arguments &args);\n     static Handle<Value> BSONDeserialize(const Arguments &args);\n \n-    // Encode functions\n-    static Handle<Value> EncodeLong(const Arguments &args);\n-    static Handle<Value> ToLong(const Arguments &args);\n-    static Handle<Value> ToInt(const Arguments &args);\n-  \n     // Calculate size of function\n     static Handle<Value> CalculateObjectSize(const Arguments &args);\n     static Handle<Value> SerializeWithBufferAndIndex(const Arguments &args);\n-  \n+\n+  \t// Experimental\n+    static Handle<Value> CalculateObjectSize2(const Arguments &args);\n+    static Handle<Value> BSONSerialize2(const Arguments &args);\n+\n     // Constructor used for creating new BSON objects from C++\n     static Persistent<FunctionTemplate> constructor_template;\n \n   private:\n     static Handle<Value> New(const Arguments &args);\n-    static Handle<Value> deserialize(char *data, bool is_array_item);\n-    static uint32_t serialize(char *serialized_object, uint32_t index, Handle<Value> name, Handle<Value> value, bool check_key);\n+    static Handle<Value> deserialize(BSON *bson, char *data, uint32_t dataLength, uint32_t startIndex, bool is_array_item);\n+    static uint32_t serialize(BSON *bson, char *serialized_object, uint32_t index, Handle<Value> name, Handle<Value> value, bool check_key, bool serializeFunctions);\n \n     static char* extract_string(char *data, uint32_t offset);\n     static const char* ToCString(const v8::String::Utf8Value& value);\n-    static uint32_t calculate_object_size(Handle<Value> object);\n+    static uint32_t calculate_object_size(BSON *bson, Handle<Value> object, bool serializeFunctions);\n \n     static void write_int32(char *data, uint32_t value);\n     static void write_int64(char *data, int64_t value);\n     static void write_double(char *data, double value);\n-    static int deserialize_sint8(char *data, uint32_t offset);\n-    static int deserialize_sint16(char *data, uint32_t offset);\n-    static long deserialize_sint32(char *data, uint32_t offset);\n     static uint16_t deserialize_int8(char *data, uint32_t offset);\n     static uint32_t deserialize_int32(char* data, uint32_t offset);\n     static char *check_key(Local<String> key);\n-    static char *decode_utf8(char * string, uint32_t length);\n+     \n+    // BSON type instantiate functions\n+    Persistent<Function> longConstructor;\n+    Persistent<Function> objectIDConstructor;\n+    Persistent<Function> binaryConstructor;\n+    Persistent<Function> codeConstructor;\n+    Persistent<Function> dbrefConstructor;\n+    Persistent<Function> symbolConstructor;\n+    Persistent<Function> doubleConstructor;\n+    Persistent<Function> timestampConstructor;\n+    Persistent<Function> minKeyConstructor;\n+    Persistent<Function> maxKeyConstructor;\n+    \n+    // Equality Objects\n+    Persistent<String> longString;\n+    Persistent<String> objectIDString;\n+    Persistent<String> binaryString;\n+    Persistent<String> codeString;\n+    Persistent<String> dbrefString;\n+    Persistent<String> symbolString;\n+    Persistent<String> doubleString;\n+    Persistent<String> timestampString;\n+    Persistent<String> minKeyString;\n+    Persistent<String> maxKeyString;\n+    \n+    // Equality speed up comparision objects\n+    Persistent<String> _bsontypeString;\n+    Persistent<String> _longLowString;\n+    Persistent<String> _longHighString;\n+    Persistent<String> _objectIDidString;\n+    Persistent<String> _binaryPositionString;\n+    Persistent<String> _binarySubTypeString;\n+    Persistent<String> _binaryBufferString;\n+    Persistent<String> _doubleValueString;\n+    Persistent<String> _symbolValueString;\n+\n+    Persistent<String> _dbRefRefString;\n+    Persistent<String> _dbRefIdRefString;\n+    Persistent<String> _dbRefDbRefString;\n+    Persistent<String> _dbRefNamespaceString;\n+    Persistent<String> _dbRefDbString;\n+    Persistent<String> _dbRefOidString;\n         \n-    // Decode function\n-    static Handle<Value> decodeLong(int64_t value);\n-    static Handle<Value> decodeTimestamp(int64_t value);\n-    static Handle<Value> decodeOid(char *oid);\n-    static Handle<Value> decodeBinary(uint32_t sub_type, uint32_t number_of_bytes, char *data);\n-    static Handle<Value> decodeCode(char *code, Handle<Value> scope);\n",
+					"match": false,
+					"packageHash": "ba133c085ad76f322e23dc54acadd8dd0712c2c4c0d68020209bb142f3e9da09",
+					"size": 2459,
+					"sourceHash": "3ac7c29a803a949feb401a361cff6d5b953f45756933d3d0815dc4833beed2ae",
+					"status": "content"
+				},
+				"external-libs/bson/code.cc": {
+					"match": false,
+					"packageHash": "a8719986e790d4385fe2261385547490e5c186e97820ae0a94e749ff4cbaf618",
+					"size": 5813,
+					"status": "missing-in-source"
+				},
+				"external-libs/bson/code.h": {
+					"match": false,
+					"packageHash": "56853f4dd68cd1dcc5e8612eb74e827b5b66d17ece160c1a5076a4c0f30a53a3",
+					"size": 1402,
+					"status": "missing-in-source"
+				},
+				"external-libs/bson/dbref.cc": {
+					"match": false,
+					"packageHash": "1a33e1b805265484f705c20db8dc11ed6269fb8d8770583b425025cf7ae2d197",
+					"size": 5793,
+					"status": "missing-in-source"
+				},
+				"external-libs/bson/dbref.h": {
+					"match": false,
+					"packageHash": "9b78991199e9ce741f9b8ea94e900be912c2bd49686464f6d88abd3a57712384",
+					"size": 1784,
+					"status": "missing-in-source"
+				},
+				"external-libs/bson/index.js": {
+					"diff": "--- published/external-libs/bson/index.js\n+++ rebuilt/external-libs/bson/index.js\n@@ -1,11 +1,15 @@\n var bson = require('./bson');\n exports.BSON = bson.BSON;\n-exports.Long = bson.Long;\n-exports.ObjectID = bson.ObjectID;\n-exports.DBRef = bson.DBRef;\n-exports.Code = bson.Code;\n-exports.Timestamp = bson.Timestamp;\n-exports.Binary = bson.Binary;\n+exports.Long = require('../../lib/mongodb/bson/long').Long;\n+exports.ObjectID = require('../../lib/mongodb/bson/objectid').ObjectID;\n+exports.DBRef = require('../../lib/mongodb/bson/db_ref').DBRef;\n+exports.Code = require('../../lib/mongodb/bson/code').Code;\n+exports.Timestamp = require('../../lib/mongodb/bson/timestamp').Timestamp;\n+exports.Binary = require('../../lib/mongodb/bson/binary').Binary;\n+exports.Double = require('../../lib/mongodb/bson/double').Double;\n+exports.MaxKey = require('../../lib/mongodb/bson/max_key').MaxKey;\n+exports.MinKey = require('../../lib/mongodb/bson/min_key').MinKey;\n+exports.Symbol = require('../../lib/mongodb/bson/symbol').Symbol;\n \n // Just add constants tot he Native BSON parser\n exports.BSON.BSON_BINARY_SUBTYPE_DEFAULT = 0;\n",
+					"match": false,
+					"packageHash": "def43fd9a41d09483510e72d1591e13cb267a032504ae9ac31909968699659f9",
+					"size": 575,
+					"sourceHash": "a2d8bb3379e3d4c0c8a825b410e0b924f98b62470fbdfbfb1a13b49e7fff5897",
+					"status": "content"
+				},
+				"external-libs/bson/local.cc": {
+					"match": false,
+					"packageHash": "05c0c129e97ca07fc2e829ddb2cf416463d533cd4d3ab195c6d6c69afa31eab0",
+					"size": 504,
+					"status": "missing-in-source"
+				},
+				"external-libs/bson/local.h": {
+					"match": false,
+					"packageHash": "8be6e556982f4cd8cc62d9ae0357cd9f3db763fafab4fdc12e9507dbeb986350",
+					"size": 276,
+					"status": "missing-in-source"
+				},
+				"external-libs/bson/long.cc": {
+					"match": false,
+					"packageHash": "dcf9a97b29215b4db880b1acfff995a8532f51e9277d5b0da222b32e02d47c19",
+					"size": 18693,
+					"status": "missing-in-source"
+				},
+				"external-libs/bson/long.h": {
+					"match": false,
+					"packageHash": "94ababd99adc2dd2d4910f56eff09b9c010fd62da2a264ce89bdf15e4a77496b",
+					"size": 2647,
+					"status": "missing-in-source"
+				},
+				"external-libs/bson/objectid.cc": {
+					"match": false,
+					"packageHash": "611720b451d12482a38ed15a7c0bf27afcf69b30817cbe74731259303cac1fe5",
+					"size": 9037,
+					"status": "missing-in-source"
+				},
+				"external-libs/bson/objectid.h": {
+					"match": false,
+					"packageHash": "8c439bf9448265a6565d75ec13bd164e093c842c9992a961c34f472ef96f1fd3",
+					"size": 1726,
+					"status": "missing-in-source"
+				},
+				"external-libs/bson/test_bson.js": {
+					"match": false,
+					"packageHash": "7485c0e9406cc8bd0968668084263d8d039bbf00aca7f9efd8b84569b889e244",
+					"size": 14948,
+					"status": "missing-in-source"
+				},
+				"external-libs/bson/test_full_bson.js": {
+					"match": false,
+					"packageHash": "e846111e6b2990ab47ea7231ffdcac6654e272cf6cf2932d05a8a020e3f728e9",
+					"size": 7399,
+					"status": "missing-in-source"
+				},
+				"external-libs/bson/timestamp.cc": {
+					"match": false,
+					"packageHash": "8ff607799902218c4d42a0445191b36ed0c69ad7830de2a2ee36416156c7cea1",
+					"size": 19546,
+					"status": "missing-in-source"
+				},
+				"external-libs/bson/timestamp.h": {
+					"match": false,
+					"packageHash": "06465df1a98afb3feedbc19d9439530dbd1e55c89e40f72f9c3a6b300753423e",
+					"size": 2869,
+					"status": "missing-in-source"
+				},
+				"external-libs/bson/wscript": {
+					"diff": "--- published/external-libs/bson/wscript\n+++ rebuilt/external-libs/bson/wscript\n@@ -19,14 +19,14 @@\n   conf.check_tool(\"compiler_cxx\")\n   conf.check_tool(\"node_addon\")\n   conf.env.append_value('CXXFLAGS', ['-O3', '-funroll-loops'])\n-  # conf.env.append_value('CXXFLAGS', ['-DDEBUG', '-g', '-O0', '-Wall', '-Wextra'])\n \n+  # conf.env.append_value('CXXFLAGS', ['-DDEBUG', '-g', '-O0', '-Wall', '-Wextra'])\n   # conf.check(lib='node', libpath=['/usr/lib', '/usr/local/lib'], uselib_store='NODE')\n \n def build(bld):\n   obj = bld.new_task_gen(\"cxx\", \"shlib\", \"node_addon\")\n   obj.target = \"bson\"\n-  obj.source = [\"bson.cc\", \"long.cc\", \"objectid.cc\", \"binary.cc\", \"code.cc\", \"dbref.cc\", \"timestamp.cc\", \"local.cc\"]\n+  obj.source = [\"bson.cc\"]\n   # obj.uselib = \"NODE\"\n \n def shutdown():\n",
+					"match": false,
+					"packageHash": "73c032f5ceb3b83a77242f2999bfbef9b906b0a87ad5ad375abd7dc90c0405a7",
+					"size": 1268,
+					"sourceHash": "561b73e306e26f9f160255232a6fd86da2141e466b1d5ebff8e0cbc6423972ea",
+					"status": "content"
+				},
+				"install.sh": {
+					"match": false,
+					"packageHash": "699bf5a9c35c6004dd44484b17346a5065893ad688b87947207a339a9935a66f",
+					"size": 805,
+					"status": "missing-in-source"
+				},
+				"lib/mongodb/admin.js": {
+					"diff": "--- published/lib/mongodb/admin.js\n+++ rebuilt/lib/mongodb/admin.js\n@@ -1,13 +1,43 @@\n+/*!\n+ * Module dependencies.\n+ */\n var Collection = require('./collection').Collection,\n     Cursor = require('./cursor').Cursor,\n-    DbCommand = require('./commands/db_command').DbCommand,\n-    debug = require('util').debug, \n-    inspect = require('util').inspect;\n+    DbCommand = require('./commands/db_command').DbCommand;\n \n-var Admin = exports.Admin = function(db) {  \n+/**\n+ * Allows the user to access the admin functionality of MongoDB\n+ *\n+ * @class Represents the Admin methods of MongoDB.\n+ * @param {Object} db Current db instance we wish to perform Admin operations on.\n+ * @return {Function} Constructor for Admin type.\n+ */\n+function Admin(db) {  \n+  if(!(this instanceof Admin)) return new Admin(db);\n+  \n   this.db = db;\n };\n \n+/**\n+ * Retrieve the server information for the current\n+ * instance of the db client\n+ * \n+ * @param {Function} callback Callback function of format `function(err, result) {}`.\n+ * @return {null} Returns no result\n+ * @api public\n+ */\n+Admin.prototype.buildInfo = function(callback) {\n+  this.serverInfo(callback);\n+}\n+\n+/**\n+ * Retrieve the server information for the current\n+ * instance of the db client\n+ * \n+ * @param {Function} callback Callback function of format `function(err, result) {}`.\n+ * @return {null} Returns no result\n+ * @api private\n+ */\n Admin.prototype.serverInfo = function(callback) {\n   var self = this;\n   var command = {buildinfo:1};\n@@ -17,14 +47,44 @@\n   });\n }\n \n+/**\n+ * Retrieve this db's server status.\n+ *\n+ * @param {Function} callback returns the server status.\n+ * @return {null}\n+ * @api public\n+ */\n+Admin.prototype.serverStatus = function(callback) {\n+  var self = this;\n+\n+  this.command({serverStatus: 1}, function(err, result) {\n+    if (err == null && result.documents[0].ok == 1) {\n+      callback(null, result.documents[0]);\n+    } else {\n+      if (err) {\n+        callback(err, false);\n+      } else {\n+        callback(self.wrap(result.documents[0]), false);\n+      }\n+    }\n+  });\n+};\n+\n+/**\n+ * Retrieve the current profiling Level for MongoDB\n+ * \n+ * @param {Function} callback Callback function of format `function(err, result) {}`.\n+ * @return {null} Returns no result\n+ * @api public\n+ */\n Admin.prototype.profilingLevel = function(callback) {\n   var self = this;\n   var command = {profile:-1};\n \n   this.command(command, function(err, doc) {\n     doc = doc.documents[0];\n-\n-    if(err == null && (doc.ok == 1 || doc.was.constructor == Numeric)) {\n+    \n+    if(err == null && (doc.ok == 1 || typeof doc.was === 'number')) {\n       var was = doc.was;\n       if(was == 0) {\n         callback(null, \"off\");\n@@ -41,37 +101,131 @@\n   });\n };\n",
+					"match": false,
+					"packageHash": "125f46fa6939bfc8a5e6f7adc43468133b217e117e1a2379efe7b4f2181f197a",
+					"size": 4782,
+					"sourceHash": "a037f0b049bc29d04bfc3ee04e7483bbe7b8750c68b95e6c0b45b94b67897af1",
+					"status": "content"
+				},
+				"lib/mongodb/bson/binary.js": {
+					"match": false,
+					"packageHash": "778e0d2d18376d605117e7af01acfcd75ec25f10e10add62895b54a45e45c426",
+					"size": 2764,
+					"status": "missing-in-source"
+				},
+				"lib/mongodb/bson/binary_parser.js": {
+					"match": false,
+					"packageHash": "e4b3266000ebf8b88b9f1a8b92842e6052fe3e0828c0ada42ab80b093e989f6d",
+					"size": 12243,
+					"status": "missing-in-source"
+				},
+				"lib/mongodb/bson/binary_utils.js": {
+					"match": false,
+					"packageHash": "f9837d9b2dd787c6e452579657fb60e59d0831cf8a0b5d9cf03ab20c92d242d5",
+					"size": 812,
+					"status": "missing-in-source"
+				},
+				"lib/mongodb/bson/bson.js": {
+					"match": false,
+					"packageHash": "b0177507c81a014634423968bc9b3ba9ea52f87619a626aace26b0f549086753",
+					"size": 42507,
+					"status": "missing-in-source"
+				},
+				"lib/mongodb/bson/double.js": {
+					"match": false,
+					"packageHash": "7d9846aed5331641cfea3f5e79b6176efa063311b80be5a21812c34b47694af0",
+					"size": 140,
+					"status": "missing-in-source"
+				},
+				"lib/mongodb/bson/float_parser.js": {
+					"match": false,
+					"packageHash": "5b6b4382617418d5310f2a0565db42b33b957eb2c5c478fc428fdd82ee1d882d",
+					"size": 3844,
+					"status": "missing-in-source"
+				},
+				"lib/mongodb/bson/objectid.js": {
+					"match": false,
+					"packageHash": "8801aae44c9ee893ed9e176defef839395a52ee0c738cfbc86649c1ded777fd3",
+					"size": 3734,
+					"status": "missing-in-source"
+				},
+				"lib/mongodb/bson/timestamp.js": {
+					"match": false,
+					"packageHash": "21d62838cc4b3788bcc7af9e4c9de5f1b7cea794d9b712d673e5c253f0930504",
+					"size": 24509,
+					"status": "missing-in-source"
+				},
+				"lib/mongodb/collection.js": {
+					"diff": "--- published/lib/mongodb/collection.js\n+++ rebuilt/lib/mongodb/collection.js\n@@ -1,123 +1,100 @@\n /**\n  * Module dependencies.\n+ * @ignore\n  */\n var InsertCommand = require('./commands/insert_command').InsertCommand\n   , QueryCommand = require('./commands/query_command').QueryCommand\n   , DeleteCommand = require('./commands/delete_command').DeleteCommand\n   , UpdateCommand = require('./commands/update_command').UpdateCommand\n   , DbCommand = require('./commands/db_command').DbCommand\n-  , BinaryParser = require('./bson/binary_parser').BinaryParser\n+  , ObjectID = require('bson').ObjectID\n+  , Code = require('bson').Code\n   , Cursor = require('./cursor').Cursor\n-  , debug = require('util').debug\n-  , inspect = require('util').inspect;\n+  , utils = require('./utils');\n \n /**\n- * Sort functions, Normalize and prepare sort parameters\n- */\n-\n-function formatSortValue (sortDirection) {\n-  var value = (\"\" + sortDirection).toLowerCase();\n-\n-  switch (value) {\n-    case 'ascending':\n-    case 'asc':\n-    case '1':\n-      return 1;\n-    case 'descending':\n-    case 'desc':\n-    case '-1':\n-      return -1;\n-    default:\n-      throw new Error(\"Illegal sort clause, must be of the form \"\n-                    + \"[['field1', '(ascending|descending)'], \"\n-                    + \"['field2', '(ascending|descending)']]\");\n-  }\n-};\n-\n-function formattedOrderClause (sortValue) {\n-  var orderBy = {};\n-\n-  if (Array.isArray(sortValue)) {\n-    sortValue.forEach(function (sortElement) {\n-      if (sortElement.constructor == String) {\n-        orderBy[sortElement] = 1;\n-      } else {\n-        orderBy[sortElement[0]] = formatSortValue(sortElement[1]);\n-      }\n-    });\n-  } else if (sortValue.constructor == String) {\n-    orderBy[sortValue] = 1;\n-  } else {\n-    throw new Error(\"Illegal sort clause, must be of the form \" +\n-      \"[['field1', '(ascending|descending)'], ['field2', '(ascending|descending)']]\");\n-  }\n-\n-  return orderBy;\n-};\n+ * Precompiled regexes\n+ * @ignore\n+**/\n+const eErrorMessages = /No matching object found/;\n \n /**\n  * toString helper.\n+ * @ignore\n  */\n-\n var toString = Object.prototype.toString;\n \n /**\n- * Collection constructor.\n+ * Create a new Collection instance\n  *\n- * @param {Database} db\n- * @param {String} collectionName\n- * @param {Function} pkFactory\n+ * Options\n+ *  - **slaveOk** {Boolean, default:false}, Allow reads from secondaries.\n+ *  - **serializeFunctions** {Boolean, default:false}, serialize functions on the document.\n+ *  - **raw** {Boolean, default:false}, perform all operations using raw bson objects.\n+ *  - **pkFactory** {Object}, object overriding the basic ObjectID primary key generation.\n+ *\n+ * @class Represents a Collection\n+ * @param {Object} db db instance.\n+ * @param {String} collectionName collection name.\n+ * @param {Object} [pkFactory] alternative primary key factory.\n+ * @param {Object} [options] additional options for the collection.\n+ * @return {Object} a collection instance.\n  */\n-\n function Collection (db, collectionName, pkFactory, options) {\n-  this.checkCollectionName(collectionName);\n+  if(!(this instanceof Collection)) return new Collection(db, collectionName, pkFactory, options);\n+  \n",
+					"match": false,
+					"packageHash": "912eac1e00cf7340124b5b8dea7ed9eac77f4dc7b0ba2fb3fbb6a2d5b3e3b2a8",
+					"size": 29028,
+					"sourceHash": "a3563efa6644f7f9f404b47e0386f1ca647574fd634b04b427ee5ef9c05c8b56",
+					"status": "content"
+				},
+				"lib/mongodb/commands/base_command.js": {
+					"diff": "--- published/lib/mongodb/commands/base_command.js\n+++ rebuilt/lib/mongodb/commands/base_command.js\n@@ -1,7 +1,3 @@\n-var BinaryParser = require('../bson/binary_parser').BinaryParser,\n-  debug = require('util').debug,\n-  inspect = require('util').inspect;\n-\n /**\n   Base object used for common functionality\n **/\n@@ -14,6 +10,11 @@\n   return this.requestId;\n };\n \n+BaseCommand.prototype.updateRequestId = function() {\n+  this.requestId = id++;\n+  return this.requestId;\n+};\n+\n // OpCodes\n BaseCommand.OP_REPLY = 1;\n BaseCommand.OP_MSG = 1000;\n",
+					"match": false,
+					"packageHash": "7f0346c2fe0ca1e768c057e0695dc35c05e24594f72989f4a863026059a75bb2",
+					"size": 667,
+					"sourceHash": "3b9d5bf8d0033df72262cdd5c60feb91a4052597696bb1123bae0beeda3f9aa9",
+					"status": "content"
+				},
+				"lib/mongodb/commands/db_command.js": {
+					"diff": "--- published/lib/mongodb/commands/db_command.js\n+++ rebuilt/lib/mongodb/commands/db_command.js\n@@ -1,23 +1,27 @@\n var QueryCommand = require('./query_command').QueryCommand,\n   InsertCommand = require('./insert_command').InsertCommand,\n   inherits = require('util').inherits,\n-  debug = require('util').debug,\n-  crypto = require('crypto'),\n-  inspect = require('util').inspect;\n+  crypto = require('crypto');\n \n /**\n   Db Command\n **/\n-var DbCommand = exports.DbCommand = function(db, collectionName, queryOptions, numberToSkip, numberToReturn, query, returnFieldSelector) {\n-  QueryCommand.call(db, this);\n-\n+var DbCommand = exports.DbCommand = function(dbInstance, collectionName, queryOptions, numberToSkip, numberToReturn, query, returnFieldSelector, options) {\n+  QueryCommand.call(this);\n   this.collectionName = collectionName;\n   this.queryOptions = queryOptions;\n   this.numberToSkip = numberToSkip;\n   this.numberToReturn = numberToReturn;\n   this.query = query;\n   this.returnFieldSelector = returnFieldSelector;\n-  this.db = db;\n+  this.db = dbInstance;\n+\n+  // Make sure we don't get a null exception\n+  options = options == null ? {} : options;\n+  // Let us defined on a command basis if we want functions to be serialized or not\n+  if(options['serializeFunctions'] != null && options['serializeFunctions']) {\n+    this.serializeFunctions = true;\n+  }\n };\n \n inherits(DbCommand, QueryCommand);\n@@ -29,6 +33,11 @@\n DbCommand.SYSTEM_USER_COLLECTION = \"system.users\";\n DbCommand.SYSTEM_COMMAND_COLLECTION = \"$cmd\";\n \n+// New commands\n+DbCommand.NcreateIsMasterCommand = function(db, databaseName) {\n+  return new DbCommand(db, databaseName + \".\" + DbCommand.SYSTEM_COMMAND_COLLECTION, QueryCommand.OPTS_NO_CURSOR_TIMEOUT, 0, -1, {'ismaster':1}, null);\n+};\n+\n // Provide constructors for different db commands\n DbCommand.createIsMasterCommand = function(db) {\n   return new DbCommand(db, db.databaseName + \".\" + DbCommand.SYSTEM_COMMAND_COLLECTION, QueryCommand.OPTS_NO_CURSOR_TIMEOUT, 0, -1, {'ismaster':1}, null);\n@@ -83,9 +92,11 @@\n };\n \n DbCommand.createGetLastErrorCommand = function(options, db) {\n-  var args = Array.prototype.slice.call(arguments, 0);\n-  db = args.pop();\n-  options = args.length ? args.shift() : {};\n+\n+  if (typeof db === 'undefined') {\n+    db =  options;\n+    options = {};\n+  }\n   // Final command \n   var command = {'getlasterror':1};\n   // If we have an options Object let's merge in the fields (fsync/wtimeout/w)\n@@ -110,20 +121,10 @@\n };\n \n DbCommand.createCreateIndexCommand = function(db, collectionName, fieldOrSpec, options) {\n-  var finalUnique = options == null || 'object' === typeof options ? false : options;\n   var fieldHash = {};\n   var indexes = [];\n   var keys;\n-  var sparse;\n-  var background;\n   \n-  // If the options is a hash\n-  if(options != null && 'object' === typeof options) {\n-    finalUnique = options['unique'] != null ? options['unique'] : false;\n-    sparse = options['sparse'] != null ? options['sparse'] : false;\n-    background = options['background'] != null ? options['background'] : false;\n-  }\n-\n   // Get all the fields accordingly\n   if (fieldOrSpec.constructor === String) {             // 'type'\n     indexes.push(fieldOrSpec + '_' + 1);\n@@ -152,17 +153,27 @@\n       indexes.push(key + '_' + fieldOrSpec[key]);\n       fieldHash[key] = fieldOrSpec[key];\n     });\n-  } else {\n-    // undefined\n   }\n   \n   // Generate the index name\n   var indexName = indexes.join(\"_\");\n   // Build the selector\n   var selector = {'ns':(db.databaseName + \".\" + collectionName), 'key':fieldHash, 'name':indexName};\n-  selector['unique'] = finalUnique;\n-  selector['sparse'] = sparse;\n-  selector['background'] = background;\n",
+					"match": false,
+					"packageHash": "d9d1fd4fa011cf67c28654ccc089d192aae00aa8a73446b8c9b9ae0dbe02f4f8",
+					"size": 8208,
+					"sourceHash": "6f41be547a863b0b0169eba3b2ecc8d56a3ca07357817dae0fd22c2063b2d8ed",
+					"status": "content"
+				},
+				"lib/mongodb/commands/delete_command.js": {
+					"diff": "--- published/lib/mongodb/commands/delete_command.js\n+++ rebuilt/lib/mongodb/commands/delete_command.js\n@@ -1,13 +1,22 @@\n var BaseCommand = require('./base_command').BaseCommand,\n-  inherits = require('util').inherits,\n-  debug = require('util').debug, \n-  inspect = require('util').inspect;\n+  inherits = require('util').inherits;\n \n /**\n   Insert Document Command\n **/\n var DeleteCommand = exports.DeleteCommand = function(db, collectionName, selector) {\n   BaseCommand.call(this);\n+\n+  // Validate correctness off the selector\n+  var object = selector;\n+  if(Buffer.isBuffer(object)) {\n+    var object_size = object[0] | object[1] << 8 | object[2] << 16 | object[3] << 24;        \n+    if(object_size != object.length)  {\n+      var error = new Error(\"delete raw message size does not match message header size [\" + object.length + \"] != [\" + object_size + \"]\");\n+      error.name = 'MongoError';\n+      throw error;\n+    }\n+  }\n   \n   this.collectionName = collectionName;\n   this.selector = selector;\n@@ -29,7 +38,7 @@\n */\n DeleteCommand.prototype.toBinary = function() {\n   // Calculate total length of the document\n-  var totalLengthOfCommand = 4 + Buffer.byteLength(this.collectionName) + 1 + 4 + this.db.bson_serializer.BSON.calculateObjectSize(this.selector) + (4 * 4);\n+  var totalLengthOfCommand = 4 + Buffer.byteLength(this.collectionName) + 1 + 4 + this.db.bson.calculateObjectSize(this.selector, false, true) + (4 * 4);\n   // Let's build the single pass buffer command\n   var _index = 0;\n   var _command = new Buffer(totalLengthOfCommand);\n@@ -75,9 +84,20 @@\n   _command[_index++] = 0;\n   _command[_index++] = 0;\n   _command[_index++] = 0;\n-  \n+\n+  // Document binary length\n+  var documentLength = 0\n+\n   // Serialize the selector\n-  var documentLength = this.db.bson_serializer.BSON.serializeWithBufferAndIndex(this.selector, this.checkKeys, _command, _index) - _index + 1;\n+  // If we are passing a raw buffer, do minimal validation\n+  if(Buffer.isBuffer(this.selector)) {\n+    documentLength = this.selector.length;\n+    // Copy the data into the current buffer\n+    this.selector.copy(_command, _index);\n+  } else {\n+    documentLength = this.db.bson.serializeWithBufferAndIndex(this.selector, this.checkKeys, _command, _index) - _index + 1;\n+  }\n+  \n   // Write the length to the document\n   _command[_index + 3] = (documentLength >> 24) & 0xff;     \n   _command[_index + 2] = (documentLength >> 16) & 0xff;\n",
+					"match": false,
+					"packageHash": "49251e984dec66e6f239e33f6fea8694cddf4dfb80124e85b531425b1a9424b4",
+					"size": 3259,
+					"sourceHash": "4e4d0f12685765c7a6eb62947f5f73432a07453a99925a1a0e1a63d53d4d218a",
+					"status": "content"
+				},
+				"lib/mongodb/commands/get_more_command.js": {
+					"diff": "--- published/lib/mongodb/commands/get_more_command.js\n+++ rebuilt/lib/mongodb/commands/get_more_command.js\n@@ -1,8 +1,6 @@\n var BaseCommand = require('./base_command').BaseCommand,\n   inherits = require('util').inherits,\n-  debug = require('util').debug,\n-  inspect = require('util').inspect,\n-  binaryutils = require('../bson/binary_utils');\n+  binaryutils = require('../utils');\n \n /**\n   Get More Document Command\n@@ -21,39 +19,34 @@\n GetMoreCommand.OP_GET_MORE = 2005;\n \n GetMoreCommand.prototype.toBinary = function() {\n-  // debug(\"======================================================= GETMORE\")\n-  // debug(\"================ \" + this.db.bson_serializer.BSON.calculateObjectSize(this.query))\n   // Calculate total length of the document\n   var totalLengthOfCommand = 4 + Buffer.byteLength(this.collectionName) + 1 + 4 + 8 + (4 * 4);\n   // Let's build the single pass buffer command\n   var _index = 0;\n   var _command = new Buffer(totalLengthOfCommand);\n   // Write the header information to the buffer\n-  _command[_index + 3] = (totalLengthOfCommand >> 24) & 0xff;     \n-  _command[_index + 2] = (totalLengthOfCommand >> 16) & 0xff;\n-  _command[_index + 1] = (totalLengthOfCommand >> 8) & 0xff;\n-  _command[_index] = totalLengthOfCommand & 0xff;\n-  // Adjust index\n-  _index = _index + 4;\n+  _command[_index++] = totalLengthOfCommand & 0xff;\n+  _command[_index++] = (totalLengthOfCommand >> 8) & 0xff;\n+  _command[_index++] = (totalLengthOfCommand >> 16) & 0xff;\n+  _command[_index++] = (totalLengthOfCommand >> 24) & 0xff;     \n+\n   // Write the request ID\n-  _command[_index + 3] = (this.requestId >> 24) & 0xff;     \n-  _command[_index + 2] = (this.requestId >> 16) & 0xff;\n-  _command[_index + 1] = (this.requestId >> 8) & 0xff;\n-  _command[_index] = this.requestId & 0xff;\n-  // Adjust index\n-  _index = _index + 4;\n+  _command[_index++] = this.requestId & 0xff;\n+  _command[_index++] = (this.requestId >> 8) & 0xff;\n+  _command[_index++] = (this.requestId >> 16) & 0xff;\n+  _command[_index++] = (this.requestId >> 24) & 0xff;     \n+\n   // Write zero\n   _command[_index++] = 0;\n   _command[_index++] = 0;\n   _command[_index++] = 0;\n   _command[_index++] = 0;\n+\n   // Write the op_code for the command\n-  _command[_index + 3] = (GetMoreCommand.OP_GET_MORE >> 24) & 0xff;     \n-  _command[_index + 2] = (GetMoreCommand.OP_GET_MORE >> 16) & 0xff;\n-  _command[_index + 1] = (GetMoreCommand.OP_GET_MORE >> 8) & 0xff;\n-  _command[_index] = GetMoreCommand.OP_GET_MORE & 0xff;\n-  // Adjust index\n-  _index = _index + 4;\n+  _command[_index++] = GetMoreCommand.OP_GET_MORE & 0xff;\n+  _command[_index++] = (GetMoreCommand.OP_GET_MORE >> 8) & 0xff;\n+  _command[_index++] = (GetMoreCommand.OP_GET_MORE >> 16) & 0xff;\n+  _command[_index++] = (GetMoreCommand.OP_GET_MORE >> 24) & 0xff;     \n \n   // Write zero\n   _command[_index++] = 0;\n@@ -66,31 +59,25 @@\n   _command[_index - 1] = 0;    \n \n   // Number of documents to return\n-  _command[_index + 3] = (this.numberToReturn >> 24) & 0xff;     \n-  _command[_index + 2] = (this.numberToReturn >> 16) & 0xff;\n-  _command[_index + 1] = (this.numberToReturn >> 8) & 0xff;\n-  _command[_index] = this.numberToReturn & 0xff;\n-  // Adjust index\n-  _index = _index + 4;\n+  _command[_index++] = this.numberToReturn & 0xff;\n+  _command[_index++] = (this.numberToReturn >> 8) & 0xff;\n+  _command[_index++] = (this.numberToReturn >> 16) & 0xff;\n+  _command[_index++] = (this.numberToReturn >> 24) & 0xff;     \n   \n   // Encode the cursor id\n   var low_bits = this.cursorId.getLowBits();\n   // Encode low bits\n-  _command[_index + 3] = (low_bits >> 24) & 0xff;     \n-  _command[_index + 2] = (low_bits >> 16) & 0xff;\n-  _command[_index + 1] = (low_bits >> 8) & 0xff;\n-  _command[_index] = low_bits & 0xff;\n-  // Adjust index\n-  _index = _index + 4;\n+  _command[_index++] = low_bits & 0xff;\n+  _command[_index++] = (low_bits >> 8) & 0xff;\n+  _command[_index++] = (low_bits >> 16) & 0xff;\n+  _command[_index++] = (low_bits >> 24) & 0xff;     \n   \n   var high_bits = this.cursorId.getHighBits();\n   // Encode high bits\n-  _command[_index + 3] = (high_bits >> 24) & 0xff;     \n-  _command[_index + 2] = (high_bits >> 16) & 0xff;\n",
+					"match": false,
+					"packageHash": "59efb138ba825a9eb2236d4644c3cd3552b45d9c121ab762bdbf296f5e368136",
+					"size": 3391,
+					"sourceHash": "9c9ec06d4ad6306c6823afb357aa2f5a41fffc9ac401894f0ba240e13b72a592",
+					"status": "content"
+				},
+				"lib/mongodb/commands/insert_command.js": {
+					"diff": "--- published/lib/mongodb/commands/insert_command.js\n+++ rebuilt/lib/mongodb/commands/insert_command.js\n@@ -1,7 +1,5 @@\n var BaseCommand = require('./base_command').BaseCommand,\n-  inherits = require('util').inherits,\n-  debug = require('util').debug,\n-  inspect = require('util').inspect;\n+  inherits = require('util').inherits;\n \n /**\n   Insert Document Command\n@@ -14,6 +12,7 @@\n   this.checkKeys = checkKeys == null ? true : checkKeys;\n   this.db = db;\n   this.flags = 0;\n+  this.serializeFunctions = false;\n   \n   // Ensure valid options hash\n   options = options == null ? {} : options;\n@@ -23,6 +22,11 @@\n     // This will finish inserting all non-index violating documents even if it returns an error\n     this.flags = 1;\n   }\n+  \n+  // Let us defined on a command basis if we want functions to be serialized or not\n+  if(options['serializeFunctions'] != null && options['serializeFunctions']) {\n+    this.serializeFunctions = true;\n+  }\n };\n \n inherits(InsertCommand, BaseCommand);\n@@ -31,6 +35,15 @@\n InsertCommand.OP_INSERT =\t2002;\n \n InsertCommand.prototype.add = function(document) {\n+  if(Buffer.isBuffer(document)) {\n+    var object_size = document[0] | document[1] << 8 | document[2] << 16 | document[3] << 24;    \n+    if(object_size != document.length)  {\n+      var error = new Error(\"insert raw message size does not match message header size [\" + document.length + \"] != [\" + object_size + \"]\");\n+      error.name = 'MongoError';\n+      throw error;\n+    }\n+  }\n+  \n   this.documents.push(document);\n   return this;\n };\n@@ -48,10 +61,14 @@\n   var totalLengthOfCommand = 4 + Buffer.byteLength(this.collectionName) + 1 + (4 * 4);\n   // var docLength = 0\n   for(var i = 0; i < this.documents.length; i++) {\n-    // Calculate size of document\n-    totalLengthOfCommand += this.db.bson_serializer.BSON.calculateObjectSize(this.documents[i]);\n+    if(Buffer.isBuffer(this.documents[i])) {\n+      totalLengthOfCommand += this.documents[i].length;\n+    } else {\n+      // Calculate size of document\n+      totalLengthOfCommand += this.db.bson.calculateObjectSize(this.documents[i], this.serializeFunctions, true);\n+    }\n   }\n-    \n+  \n   // Let's build the single pass buffer command\n   var _index = 0;\n   var _command = new Buffer(totalLengthOfCommand);\n@@ -91,11 +108,24 @@\n   // Write the collection name to the command\n   _index = _index + _command.write(this.collectionName, _index, 'utf8') + 1;\n   _command[_index - 1] = 0;\n-  \n+\n   // Write all the bson documents to the buffer at the index offset\n   for(var i = 0; i < this.documents.length; i++) {\n-    // Serialize the document straight to the buffer\n-    var documentLength = this.db.bson_serializer.BSON.serializeWithBufferAndIndex(this.documents[i], this.checkKeys, _command, _index) - _index + 1;\n+    // Document binary length\n+    var documentLength = 0\n+    var object = this.documents[i];\n+\n+    // Serialize the selector\n+    // If we are passing a raw buffer, do minimal validation\n+    if(Buffer.isBuffer(object)) {\n+      documentLength = object.length;\n+      // Copy the data into the current buffer\n+      object.copy(_command, _index);\n+    } else {\n+      // Serialize the document straight to the buffer\n+      documentLength = this.db.bson.serializeWithBufferAndIndex(object, this.checkKeys, _command, _index, this.serializeFunctions) - _index + 1;\n+    }\n+\n     // Write the length to the document\n     _command[_index + 3] = (documentLength >> 24) & 0xff;     \n     _command[_index + 2] = (documentLength >> 16) & 0xff;\n",
+					"match": false,
+					"packageHash": "5509a08d29756c24591bd6a725105c183a79ac0c87d5301249f951aafe48df18",
+					"size": 4034,
+					"sourceHash": "90970dad921cc155b641d84092b4cee8d1b9f7486e4199685a856dc4fb4ed19d",
+					"status": "content"
+				},
+				"lib/mongodb/commands/kill_cursor_command.js": {
+					"diff": "--- published/lib/mongodb/commands/kill_cursor_command.js\n+++ rebuilt/lib/mongodb/commands/kill_cursor_command.js\n@@ -1,8 +1,6 @@\n var BaseCommand = require('./base_command').BaseCommand,\n   inherits = require('util').inherits,\n-  binaryutils = require('../bson/binary_utils'),\n-  debug = require('util').debug,\n-  inspect = require('util').inspect;\n+  binaryutils = require('../utils');\n \n /**\n   Insert Document Command\n",
+					"match": false,
+					"packageHash": "9936ea981ab114f879b79fd0debb73194ffe4315f27e356a60cbe02c403e0ab8",
+					"size": 3427,
+					"sourceHash": "d01af72568b490f4e88bb07da854ed5b050494e55e90b60b8b3d11561f8ffa5e",
+					"status": "content"
+				},
+				"lib/mongodb/commands/query_command.js": {
+					"diff": "--- published/lib/mongodb/commands/query_command.js\n+++ rebuilt/lib/mongodb/commands/query_command.js\n@@ -1,15 +1,37 @@\n var BaseCommand = require('./base_command').BaseCommand,\n-  BinaryParser = require('../bson/binary_parser').BinaryParser,\n-  inherits = require('util').inherits,\n-  debug = require('util').debug,\n-  inspect = require('util').inspect;\n+  inherits = require('util').inherits;\n \n /**\n   Insert Document Command\n **/\n-var QueryCommand = exports.QueryCommand = function(db, collectionName, queryOptions, numberToSkip, numberToReturn, query, returnFieldSelector) {\n+var QueryCommand = exports.QueryCommand = function(db, collectionName, queryOptions, numberToSkip, numberToReturn, query, returnFieldSelector, options) {\n   BaseCommand.call(this);\n \n+  // Validate correctness off the selector\n+  var object = query,\n+    object_size;\n+  if(Buffer.isBuffer(object)) {\n+    object_size = object[0] | object[1] << 8 | object[2] << 16 | object[3] << 24;\n+    if(object_size != object.length) {\n+      var error = new Error(\"query selector raw message size does not match message header size [\" + object.length + \"] != [\" + object_size + \"]\");\n+      error.name = 'MongoError';\n+      throw error;\n+    }\n+  }\n+\n+  object = returnFieldSelector;\n+  if(Buffer.isBuffer(object)) {\n+    object_size = object[0] | object[1] << 8 | object[2] << 16 | object[3] << 24;\n+    if(object_size != object.length) {\n+      var error = new Error(\"query fields raw message size does not match message header size [\" + object.length + \"] != [\" + object_size + \"]\");\n+      error.name = 'MongoError';\n+      throw error;\n+    }\n+  }\n+  \n+  // Make sure we don't get a null exception\n+  options = options == null ? {} : options;\n+  // Set up options\n   this.collectionName = collectionName;\n   this.queryOptions = queryOptions;\n   this.numberToSkip = numberToSkip;\n@@ -17,6 +39,11 @@\n   this.query = query;\n   this.returnFieldSelector = returnFieldSelector;\n   this.db = db;\n+  \n+  // Let us defined on a command basis if we want functions to be serialized or not\n+  if(options['serializeFunctions'] != null && options['serializeFunctions']) {\n+    this.serializeFunctions = true;\n+  }\n };\n \n inherits(QueryCommand, BaseCommand);\n@@ -35,16 +62,21 @@\n }\n */\n QueryCommand.prototype.toBinary = function() {\n-  // debug(\"======================================================= QUERY\")\n-  // debug(\"================ \" + this.db.bson_serializer.BSON.calculateObjectSize(this.query))\n-  \n+  var totalLengthOfCommand = 0;\n   // Calculate total length of the document\n-  var totalLengthOfCommand = 4 + Buffer.byteLength(this.collectionName) + 1 + 4 + 4 + this.db.bson_serializer.BSON.calculateObjectSize(this.query) + (4 * 4);\n+  if(Buffer.isBuffer(this.query)) {\n+    totalLengthOfCommand = 4 + Buffer.byteLength(this.collectionName) + 1 + 4 + 4 + this.query.length + (4 * 4);    \n+  } else {\n+    totalLengthOfCommand = 4 + Buffer.byteLength(this.collectionName) + 1 + 4 + 4 + this.db.bson.calculateObjectSize(this.query, this.serializeFunctions, true) + (4 * 4);    \n+  }\n+  \n   // Calculate extra fields size\n-  if(this.returnFieldSelector != null)  {\n+  if(this.returnFieldSelector != null && !(Buffer.isBuffer(this.returnFieldSelector)))  {\n     if(Object.keys(this.returnFieldSelector).length > 0) {\n-      totalLengthOfCommand += this.db.bson_serializer.BSON.calculateObjectSize(this.returnFieldSelector);\n+      totalLengthOfCommand += this.db.bson.calculateObjectSize(this.returnFieldSelector, this.serializeFunctions, true);\n     }\n+  } else if(Buffer.isBuffer(this.returnFieldSelector)) {\n+    totalLengthOfCommand += this.returnFieldSelector.length;\n   }\n \n   // Let's build the single pass buffer command\n@@ -104,11 +136,21 @@\n   _command[_index] = this.numberToReturn & 0xff;\n   // Adjust index\n   _index = _index + 4;\n-    \n-  // Serialize the query document straight to the buffer\n-  var documentLength = this.db.bson_serializer.BSON.serializeWithBufferAndIndex(this.query, this.checkKeys, _command, _index) - _index + 1;\n-  // debug(inspect(\"===================== documentLength :: \" + documentLength))\n-  \n+\n+  // Document binary length\n+  var documentLength = 0\n+  var object = this.query;\n+\n+  // Serialize the selector\n",
+					"match": false,
+					"packageHash": "4bf6bfb89ff1ba8caa1f97f4b021cc7851a7356e5a02b535b14ac266a41215c0",
+					"size": 6103,
+					"sourceHash": "42e8d9b5c0118fe3e93e96f00a9998faafbc79b058168904ec3341353c71240b",
+					"status": "content"
+				},
+				"lib/mongodb/commands/update_command.js": {
+					"diff": "--- published/lib/mongodb/commands/update_command.js\n+++ rebuilt/lib/mongodb/commands/update_command.js\n@@ -1,7 +1,5 @@\n var BaseCommand = require('./base_command').BaseCommand,\n-  inherits = require('util').inherits,\n-  debug = require('util').debug,\n-  inspect = require('util').inspect;\n+  inherits = require('util').inherits;\n \n /**\n   Update Document Command\n@@ -9,10 +7,31 @@\n var UpdateCommand = exports.UpdateCommand = function(db, collectionName, spec, document, options) {\n   BaseCommand.call(this);\n \n+  var object = spec;\n+  if(Buffer.isBuffer(object)) {\n+    var object_size = object[0] | object[1] << 8 | object[2] << 16 | object[3] << 24;    \n+    if(object_size != object.length)  {\n+      var error = new Error(\"update spec raw message size does not match message header size [\" + object.length + \"] != [\" + object_size + \"]\");\n+      error.name = 'MongoError';\n+      throw error;\n+    }\n+  }\n+\n+  var object = document;\n+  if(Buffer.isBuffer(object)) {\n+    var object_size = object[0] | object[1] << 8 | object[2] << 16 | object[3] << 24;    \n+    if(object_size != object.length)  {\n+      var error = new Error(\"update document raw message size does not match message header size [\" + object.length + \"] != [\" + object_size + \"]\");\n+      error.name = 'MongoError';\n+      throw error;\n+    }\n+  }\n+\n   this.collectionName = collectionName;\n   this.spec = spec;\n   this.document = document;\n   this.db = db;\n+  this.serializeFunctions = false;\n \n   // Generate correct flags\n   var db_upsert = 0;\n@@ -22,6 +41,10 @@\n \n   // Flags\n   this.flags = parseInt(db_multi_update.toString() + db_upsert.toString(), 2);\n+  // Let us defined on a command basis if we want functions to be serialized or not\n+  if(options['serializeFunctions'] != null && options['serializeFunctions']) {\n+    this.serializeFunctions = true;\n+  }\n };\n \n inherits(UpdateCommand, BaseCommand);\n@@ -40,8 +63,8 @@\n */\n UpdateCommand.prototype.toBinary = function() {\n   // Calculate total length of the document\n-  var totalLengthOfCommand = 4 + Buffer.byteLength(this.collectionName) + 1 + 4 + this.db.bson_serializer.BSON.calculateObjectSize(this.spec) +\n-      this.db.bson_serializer.BSON.calculateObjectSize(this.document) + (4 * 4);\n+  var totalLengthOfCommand = 4 + Buffer.byteLength(this.collectionName) + 1 + 4 + this.db.bson.calculateObjectSize(this.spec, false, true) +\n+      this.db.bson.calculateObjectSize(this.document, this.serializeFunctions, true) + (4 * 4);\n \n   // Let's build the single pass buffer command\n   var _index = 0;\n@@ -91,8 +114,22 @@\n   // Adjust index\n   _index = _index + 4;\n \n-  // Serialize the spec document\n-  var documentLength = this.db.bson_serializer.BSON.serializeWithBufferAndIndex(this.spec, this.checkKeys, _command, _index) - _index + 1;\n+  // Document binary length\n+  var documentLength = 0\n+  var object = this.spec;\n+\n+  // Serialize the selector\n+  // If we are passing a raw buffer, do minimal validation\n+  if(Buffer.isBuffer(object)) {\n+    var object_size = object[0] | object[1] << 8 | object[2] << 16 | object[3] << 24;\n+    if(object_size != object.length) throw new Error(\"raw message size does not match message header size [\" + object.length + \"] != [\" + object_size + \"]\");\n+    documentLength = object.length;\n+    // Copy the data into the current buffer\n+    object.copy(_command, _index);\n+  } else {\n+    documentLength = this.db.bson.serializeWithBufferAndIndex(object, this.checkKeys, _command, _index, false) - _index + 1;\n+  }\n+\n   // Write the length to the document\n   _command[_index + 3] = (documentLength >> 24) & 0xff;     \n   _command[_index + 2] = (documentLength >> 16) & 0xff;\n@@ -103,8 +140,22 @@\n   // Add terminating 0 for the object\n   _command[_index - 1] = 0;    \n \n+  // Document binary length\n+  var documentLength = 0\n+  var object = this.document;\n+\n   // Serialize the document\n-  var documentLength = this.db.bson_serializer.BSON.serializeWithBufferAndIndex(this.document, this.checkKeys, _command, _index) - _index + 1;\n",
+					"match": false,
+					"packageHash": "b1f9093478eb92b5d8264d851f29f84e514c51cfe075b275c25b354b692de068",
+					"size": 4586,
+					"sourceHash": "1e9efcade1290911d79395a36a74e0f4bdfc7608c739482547738ac544d537d3",
+					"status": "content"
+				},
+				"lib/mongodb/connection.js": {
+					"match": false,
+					"packageHash": "a292f26533905a4caacdae0ae4fb69530d8f29ebb2c9f5ac847338c11ad09691",
+					"size": 10831,
+					"status": "missing-in-source"
+				},
+				"lib/mongodb/connections/repl_set_servers.js": {
+					"match": false,
+					"packageHash": "24e41dd8446d4bf3a4b84d644896896ad2586ddc3d691ef1222f694ad8e9faf7",
+					"size": 13495,
+					"status": "missing-in-source"
+				},
+				"lib/mongodb/connections/server.js": {
+					"match": false,
+					"packageHash": "c061cc52ec9c3922b27e1ae9d9b259cbf23bee4bcee2a0952119b64efbb7f0bc",
+					"size": 5195,
+					"status": "missing-in-source"
+				},
+				"lib/mongodb/cursor.js": {
+					"diff": "--- published/lib/mongodb/cursor.js\n+++ rebuilt/lib/mongodb/cursor.js\n@@ -1,46 +1,41 @@\n var QueryCommand = require('./commands/query_command').QueryCommand,\n   GetMoreCommand = require('./commands/get_more_command').GetMoreCommand,\n   KillCursorCommand = require('./commands/kill_cursor_command').KillCursorCommand,\n-  Long = require('./goog/math/long').Long,\n-  debug = require('util').debug,\n-  inspect = require('util').inspect;\n+  Long = require('bson').Long,\n+  CursorStream = require('./cursorstream'),\n+  utils = require('./utils');\n \n /**\n  * Constructor for a cursor object that handles all the operations on query result\n- * using find. This cursor object is unidirectional and cannot traverse backwards.\n- * As an alternative, {@link Cursor#toArray} can be used to obtain all the results.\n- * Clients should not be creating a cursor directly, but use {@link Collection#find}\n- * to acquire a cursor.\n- *\n- * @constructor\n- *\n- * @param db {Db} The database object to work with\n- * @param collection {Colleciton} The collection to query\n- * @param selector\n- * @param fields\n- * @param skip {number}\n- * @param limit {number} The number of results to return. -1 has a special meaning and\n- *     is used by {@link Db#eval}. A value of 1 will also be treated as if it were -1.\n- * @param sort {string|Array<Array<string|object> >} Please refer to {@link Cursor#sort}\n- * @param hint\n- * @param explain\n- * @param snapshot\n- * @param timeout\n- * @param tailable {?boolean}\n- * @param batchSize {?number} The number of the subset of results to request the database\n- *     to return for every request. This should initially be greater than 1 otherwise\n- *     the database will automatically close the cursor. The batch size can be set to 1\n- *     with {@link Cursor#batchSize} after performing the initial query to the database.\n- *\n- * @see Cursor#toArray\n- * @see Cursor#skip\n- * @see Cursor#sort\n- * @see Cursor#limit\n- * @see Cursor#batchSize\n- * @see Collection#find\n- * @see Db#eval\n- */\n-var Cursor = exports.Cursor = function(db, collection, selector, fields, skip, limit, sort, hint, explain, snapshot, timeout, tailable, batchSize, slaveOk) {\n+ * using find. This cursor object is unidirectional and cannot traverse backwards. Clients should not be creating a cursor directly, \n+ * but use find to acquire a cursor.\n+ *\n+ * @class Represents a Cursor.\n+ * @param {Db} db the database object to work with.\n+ * @param {Collection} collection the collection to query.\n+ * @param {Object} selector the query selector.\n+ * @param {Object} fields an object containing what fields to include or exclude from objects returned.\n+ * @param {Number} skip number of documents to skip.\n+ * @param {Number} limit the number of results to return. -1 has a special meaning and is used by Db.eval. A value of 1 will also be treated as if it were -1.\n+ * @param {String|Array|Object} sort the required sorting for the query.\n+ * @param {Object} hint force the query to use a specific index.\n+ * @param {Boolean} explain return the explaination of the query.\n+ * @param {Boolean} snapshot Snapshot mode assures no duplicates are returned.\n+ * @param {Boolean} timeout allow the query to timeout.\n+ * @param {Boolean} tailable allow the cursor to be tailable.\n+ * @param {Number} batchSize the number of the subset of results to request the database to return for every request. This should initially be greater than 1 otherwise the database will automatically close the cursor. The batch size can be set to 1 with cursorInstance.batchSize after performing the initial query to the database.\n+ * @param {Boolean} raw return all query documents as raw buffers (default false).\n+ * @param {Boolean} read specify override of read from source (primary/secondary).\n+ * @param {Boolean} returnKey only return the index key.\n+ * @param {Number} maxScan limit the number of items to scan.\n+ * @param {Number} min set index bounds.\n+ * @param {Number} max set index bounds.\n+ * @param {Boolean} showDiskLoc show disk location of results.\n+ * @param {String} comment you can put a $comment field on a query to make looking in the profiler logs simpler.\n+ */\n+function Cursor(db, collection, selector, fields, skip, limit\n+\t, sort, hint, explain, snapshot, timeout, tailable, batchSize, slaveOk, raw, read\n+\t, returnKey, maxScan, min, max, showDiskLoc, comment) {\n   this.db = db;\n   this.collection = collection;\n   this.selector = selector;\n@@ -55,10 +50,18 @@\n   this.tailable = tailable;\n   this.batchSizeValue = batchSize == null ? 0 : batchSize;\n   this.slaveOk = slaveOk == null ? collection.slaveOk : slaveOk;\n-\n+  this.raw = raw == null ? false : raw;\n+  this.read = read == null ? true : read;\n+  this.returnKey = returnKey;\n+  this.maxScan = maxScan;\n+  this.min = min;\n+  this.max = max;\n+  this.showDiskLoc = showDiskLoc;\n+  this.comment = comment;\n+  \n   this.totalNumberOfRecords = 0;\n   this.items = [];\n-  this.cursorId = this.db.bson_serializer.Long.fromInt(0);\n+  this.cursorId = Long.fromInt(0);\n \n",
+					"match": false,
+					"packageHash": "83ff8384675b29c0e80a7fd304516ecd1c9b8c189eedcd12a7251dadd63088bb",
+					"size": 23073,
+					"sourceHash": "c4a6fb5b596bb88a2e03a3d00859e3cb8ae2ac573e12fa196743abfbf01737ea",
+					"status": "content"
+				},
+				"lib/mongodb/db.js": {
+					"diff": "--- published/lib/mongodb/db.js\n+++ rebuilt/lib/mongodb/db.js\n@@ -1,118 +1,367 @@\n+/**\n+ * Module dependencies.\n+ * @ignore\n+ */\n var QueryCommand = require('./commands/query_command').QueryCommand,\n   DbCommand = require('./commands/db_command').DbCommand,\n-  BinaryParser = require('./bson/binary_parser').BinaryParser,\n   MongoReply = require('./responses/mongo_reply').MongoReply,\n   Admin = require('./admin').Admin,\n-  Connection = require('./connection').Connection,\n   Collection = require('./collection').Collection,\n-  Server = require('./connections/server').Server,\n-  ReplSetServers = require('./connections/repl_set_servers').ReplSetServers,\n+  Server = require('./connection/server').Server,\n+  ReplSet = require('./connection/repl_set').ReplSet,\n   Cursor = require('./cursor').Cursor,\n   EventEmitter = require('events').EventEmitter,\n   inherits = require('util').inherits,\n-  crypto = require('crypto'),\n-  debug = require('util').debug,\n-  inspect = require('util').inspect;\n+  crypto = require('crypto');\n+\n+/**\n+ * Internal class for callback storage \n+ * @ignore\n+ */\n+var CallbackStore = function() {\n+  // Make class an event emitter\n+  EventEmitter.call(this);\n+  // Add a info about call variable\n+  this._notReplied = {};\n+}\n+\n+/**\n+ * @ignore\n+ */\n+inherits(CallbackStore, EventEmitter);\n+\n+/**\n+ * Create a new Db instance.\n+ *\n+ * Options\n+ *  - **strict** {true | {w:n, wtimeout:n} | {fsync:true}, default:false}, execute insert with a getLastError command returning the result of the insert command.\n+ *  - **native_parser** {Boolean, default:false}, use c++ bson parser.\n+ *  - **forceServerObjectId** {Boolean, default:false}, force server to create _id fields instead of client.\n+ *  - **pkFactory** {Object}, object overriding the basic ObjectID primary key generation.\n+ *  - **slaveOk** {Boolean, default:false}, allow reads from secondaries.\n+ *  - **serializeFunctions** {Boolean, default:false}, serialize functions.\n+ *  - **raw** {Boolean, default:false}, peform operations using raw bson buffers.\n+ *  - **recordQueryStats** {Boolean, default:false}, record query statistics during execution.\n+ *  - **reaper** {Boolean, default:false}, enables the reaper, timing out calls that never return.\n+ *  - **reaperInterval** {Number, default:10000}, number of miliseconds between reaper wakups.\n+ *  - **reaperTimeout** {Number, default:30000}, the amount of time before a callback times out.\n+ *  - **retryMiliSeconds** {Number, default:5000}, number of miliseconds between retries.\n+ *  - **numberOfRetries** {Number, default:5}, number of retries off connection.\n+ *\n+ * @class Represents a Collection\n+ * @param {String} databaseName name of the database.\n+ * @param {Object} serverConfig server config object.\n+ * @param {Object} [options] additional options for the collection.\n+ */\n+function Db(databaseName, serverConfig, options) {\n \n-var Db = exports.Db = function(databaseName, serverConfig, options) {\n+  if(!(this instanceof Db)) return new Db(databaseName, serverConfig, options);\n+  \n   EventEmitter.call(this);\n   this.databaseName = databaseName;\n-  this.serverConfig = serverConfig;\n+  this.serverConfig = serverConfig;  \n   this.options = options == null ? {} : options;  \n+  // State to check against if the user force closed db\n+  this._applicationClosed = false;\n+  // Fetch the override flag if any\n+  var overrideUsedFlag = this.options['override_used_flag'] == null ? false : this.options['override_used_flag'];  \n+  // Verify that nobody is using this config\n+  if(!overrideUsedFlag && typeof this.serverConfig == 'object' && this.serverConfig._isUsed()) {\n+    throw new Error(\"A Server or ReplSet instance cannot be shared across multiple Db instances\");\n+  } else if(!overrideUsedFlag && typeof this.serverConfig == 'object'){\n+    // Set being used\n+    this.serverConfig._used = true;    \n+  }\n+  \n+  // Ensure we have a valid db name\n+  validateDatabaseName(databaseName);\n   \n   // Contains all the connections for the db\n   try {\n     this.native_parser = this.options.native_parser;\n-    var serializer = this.options.native_parser ? require('../../external-libs/bson') : require('./bson/bson');\n-    this.bson_serializer = serializer;\n-    this.bson_deserializer = serializer;\n+    // The bson lib\n+    var bsonLib = this.bsonLib = this.options.native_parser ? require('bson').BSONNative : new require('bson').BSONPure;\n+    // Fetch the serializer object\n+    var BSON = bsonLib.BSON;\n",
+					"match": false,
+					"packageHash": "129e8d745786d7807a99d3d4f88bc0defcf3b6f94284e1d12a32407993479556",
+					"size": 28711,
+					"sourceHash": "8975ea6eee925ca6f0b33ba4cb074d8de4c712ad9540ccd346aeb97e626a7e93",
+					"status": "content"
+				},
+				"lib/mongodb/goog/math/long.js": {
+					"match": false,
+					"packageHash": "fb03f43098c1f6f90e7e614f3e282071e2ab27f6f40e087fa2cb6aab8a805301",
+					"size": 23354,
+					"status": "missing-in-source"
+				},
+				"lib/mongodb/gridfs/chunk.js": {
+					"diff": "--- published/lib/mongodb/gridfs/chunk.js\n+++ rebuilt/lib/mongodb/gridfs/chunk.js\n@@ -1,10 +1,8 @@\n-var BinaryParser = require('../bson/binary_parser').BinaryParser,\n-  sys = require('util'),\n-  debug = require('util').debug,\n-  inspect = require('util').inspect;\n+var Binary = require('bson').Binary,\n+  ObjectID = require('bson').ObjectID;\n \n /**\n- * Class for representing a signle chunk in GridFS.\n+ * Class for representing a single chunk in GridFS.\n  *\n  * @class\n  *\n@@ -19,38 +17,48 @@\n  * @see Chunk#buildMongoObject\n  */\n var Chunk = exports.Chunk = function(file, mongoObject) {\n+  if(!(this instanceof Chunk)) return new Chunk(file, mongoObject);\n+  \n   this.file = file;\n+  var self = this;\n   var mongoObjectFinal = mongoObject == null ? {} : mongoObject;\n \n-  this.objectId = mongoObjectFinal._id == null ? new file.db.bson_serializer.ObjectID() : mongoObjectFinal._id;\n+  this.objectId = mongoObjectFinal._id == null ? new ObjectID() : mongoObjectFinal._id;\n   this.chunkNumber = mongoObjectFinal.n == null ? 0 : mongoObjectFinal.n;\n-  this.data = new file.db.bson_serializer.Binary();\n+  this.data = new Binary();\n \n   if(mongoObjectFinal.data == null) {\n-  } else if(mongoObjectFinal.data.constructor == String) {\n+  } else if(typeof mongoObjectFinal.data == \"string\") {\n     var buffer = new Buffer(mongoObjectFinal.data.length);\n     buffer.write(mongoObjectFinal.data, 'binary', 0);\n-    this.data = new file.db.bson_serializer.Binary(buffer);\n-  } else if(mongoObjectFinal.data.constructor == Array) {\n+    this.data = new Binary(buffer);\n+  } else if(Array.isArray(mongoObjectFinal.data)) {\n     var buffer = new Buffer(mongoObjectFinal.data.length);\n     buffer.write(mongoObjectFinal.data.join(''), 'binary', 0);\n-    this.data = new file.db.bson_serializer.Binary(buffer);\n-  } else if(mongoObjectFinal.data instanceof file.db.bson_serializer.Binary || Object.prototype.toString.call(mongoObjectFinal.data) == \"[object Binary]\") {    \n+    this.data = new Binary(buffer);\n+  } else if(mongoObjectFinal.data instanceof Binary || Object.prototype.toString.call(mongoObjectFinal.data) == \"[object Binary]\") {    \n     this.data = mongoObjectFinal.data;\n-  } else if(mongoObjectFinal.data instanceof Buffer) {\n+  } else if(Buffer.isBuffer(mongoObjectFinal.data)) {\n   } else {\n     throw Error(\"Illegal chunk format\");\n   }\n   // Update position\n   this.internalPosition = 0;\n-\t/**\n-\t * The position of the read/write head\n-\t * @name position\n-\t * @lends Chunk#\n-\t * @field\n-\t */\n-  this.__defineGetter__(\"position\", function() { return this.internalPosition; });\n-  this.__defineSetter__(\"position\", function(value) { this.internalPosition = value; });\n+\n+  /**\n+   * The position of the read/write head\n+   * @name position\n+   * @lends Chunk#\n+   * @field\n+   */\n+  Object.defineProperty(this, \"position\", { enumerable: true\n+    , get: function () {\n+        return this.internalPosition;\n+      }\n+    , set: function(value) {\n+        this.internalPosition = value;\n+      }\n+  });  \n };\n \n /**\n@@ -64,7 +72,8 @@\n Chunk.prototype.write = function(data, callback) {\n   this.data.write(data, this.internalPosition);\n   this.internalPosition = this.data.length();\n-  callback(null, this);\n+  if(callback != null) return callback(null, this);\n+  return this;\n };\n \n /**\n@@ -95,7 +104,6 @@\n       data = this.data.buffer.slice(this.internalPosition, this.internalPosition + length);\n     } else { //Native BSON\n       data = new Buffer(length);\n-      //length = data.write(this.data.read(this.internalPosition, length), 'binary', 0);\n       length = this.data.readInto(data, this.internalPosition);\n     }\n     this.internalPosition = this.internalPosition + length;\n@@ -132,7 +140,7 @@\n",
+					"match": false,
+					"packageHash": "da35c34559506a7016a9041368c851b3e25bbfb73c3681f75eb560f51ff7fcce",
+					"size": 6734,
+					"sourceHash": "ebb1d349b3e79a84bc1a2f0a2d8bb5679a6f63325d9d48d0665c1296119ff3a5",
+					"status": "content"
+				},
+				"lib/mongodb/gridfs/grid.js": {
+					"diff": "--- published/lib/mongodb/gridfs/grid.js\n+++ rebuilt/lib/mongodb/gridfs/grid.js\n@@ -1,12 +1,18 @@\n var GridStore = require('./gridstore').GridStore,\n-  debug = require('util').debug,\n-  inspect = require('util').inspect;\n+  ObjectID = require('bson').ObjectID;\n \n /**\n- * Simple Grid interface\n+ * A class representation of a simple Grid interface.\n  *\n+ * @class Represents the Grid.\n+ * @param {Db} db A database instance to interact with.\n+ * @param {String} [fsName] optional different root collection for GridFS.\n+ * @return {Grid}\n  */\n-var Grid = exports.Grid = function(db, fsName) {\n+function Grid(db, fsName) {\n+\n+  if(!(this instanceof Grid)) return new Grid(db, fsName);\n+  \n   this.db = db;\n   this.fsName = fsName == null ? GridStore.DEFAULT_ROOT_COLLECTION : fsName;\n } \n@@ -14,13 +20,11 @@\n /**\n  * Puts binary data to the grid\n  *\n- * @param data Buffer with Binary Data\n- * @param options {object=} opt_argument The options for the files.\n- * @callback {function(?Error, GridStore)} This will be called after this method\n- *     is executed. The first parameter will contain an Error object if an error\n- *     occured or null otherwise. The second parameter will contain a reference\n- *     to this object.\n- *\n+ * @param {Buffer} data buffer with Binary Data.\n+ * @param {Object} [options] the options for the files.\n+ * @callback {Function} this will be called after this method is executed. The first parameter will contain an Error object if an error occured or null otherwise. The second parameter will contain a reference to this object.\n+ * @return {null}\n+ * @api public\n  */\n Grid.prototype.put = function(data, options, callback) {\n   var self = this;\n@@ -31,7 +35,7 @@\n   options['root'] = options['root'] == null ? this.fsName : options['root'];\n     \n   // Return if we don't have a buffer object as data\n-  if(!(data instanceof Buffer)) return callback(new Error(\"Data object must be a buffer object\"), null);    \n+  if(!(Buffer.isBuffer(data))) return callback(new Error(\"Data object must be a buffer object\"), null);    \n   // Get filename if we are using it\n   var filename = options['filename'];\n   // Create gridstore\n@@ -39,7 +43,7 @@\n   gridStore.open(function(err, gridStore) {\n     if(err) return callback(err, null);\n \n-    gridStore.writeBuffer(data, function(err, result) {\n+    gridStore.write(data, function(err, result) {\n       if(err) return callback(err, null);\n \n       gridStore.close(function(err, result) {\n@@ -53,23 +57,21 @@\n /**\n  * Get binary data to the grid\n  *\n- * @param id ObjectID for file\n- * @callback {function(?Error, GridStore)} This will be called after this method\n- *     is executed. The first parameter will contain an Error object if an error\n- *     occured or null otherwise. The second parameter will contain a reference\n- *     to this object.\n- *\n+ * @param {ObjectID} id ObjectID for file.\n+ * @callback {Function} this will be called after this method is executed. The first parameter will contain an Error object if an error occured or null otherwise. The second parameter will contain a reference to this object.\n+ * @return {null}\n+ * @api public\n  */\n Grid.prototype.get = function(id, callback) {\n   // Validate that we have a valid ObjectId\n-  if(!(id instanceof this.db.bson_serializer.ObjectID)) return callback(new Error(\"Not a valid ObjectID\", null));  \n+  if(!(id instanceof ObjectID)) return callback(new Error(\"Not a valid ObjectID\", null));  \n   // Create gridstore\n   var gridStore = new GridStore(this.db, id, \"r\", {root:this.fsName});\n   gridStore.open(function(err, gridStore) {\n     if(err) return callback(err, null);\n     \n     // Return the data\n-    gridStore.readBuffer(function(err, data) {\n+    gridStore.read(function(err, data) {\n       return callback(err, data)\n     });  \n   })\n@@ -78,19 +80,19 @@\n /**\n  * Delete file from grid\n  *\n- * @param id ObjectID for file\n- * @callback {function(?Error, GridStore)} This will be called after this method\n- *     is executed. The first parameter will contain an Error object if an error\n- *     occured or null otherwise. The second parameter will contain a reference\n",
+					"match": false,
+					"packageHash": "59d6093424ddaf33fca2e951343aba1d4a62196274c6e7b42086049ee483ce07",
+					"size": 3293,
+					"sourceHash": "2b8f34d347f7cff63ec859c8eb5e7f43212b384cd72adfcfb7c997e2caf6eae8",
+					"status": "content"
+				},
+				"lib/mongodb/gridfs/gridstore.js": {
+					"diff": "--- published/lib/mongodb/gridfs/gridstore.js\n+++ rebuilt/lib/mongodb/gridfs/gridstore.js\n@@ -6,16 +6,13 @@\n  * chunks of split files behind the scenes. More information about GridFS can be\n  * found <a href=\"http://www.mongodb.org/display/DOCS/GridFS\">here</a>.\n  */\n-\n-var BinaryParser = require('../bson/binary_parser').BinaryParser,\n-  Chunk = require('./chunk').Chunk,\n+var Chunk = require('./chunk').Chunk,\n   DbCommand = require('../commands/db_command').DbCommand,\n+  ObjectID = require('bson').ObjectID,\n   Buffer = require('buffer').Buffer,\n   fs = require('fs'),\n   util = require('util'),\n-  debug = require('util').debug,\n-  inspect = require('util').inspect,\n-  Stream = require('stream').Stream;\n+  ReadStream = require('./readstream').ReadStream;\n \n var REFERENCE_BY_FILENAME = 0,\n   REFERENCE_BY_ID = 1;\n@@ -23,37 +20,48 @@\n /**\n  * A class representation of a file stored in GridFS.\n  *\n- * @class\n- *\n- * @param db {Db} A database instance to interact with.\n- * @param filename {string} The name for the file.\n- * @param mode {?string} Set the mode for this file. Available modes:\n- *     <ul>\n- *       <li>\"r\" - read only. This is the default mode.</li>\n- *       <li>\"w\" - write in truncate mode. Existing data will be overwriten</li>\n- *       <li>\"w+\" - write in edit mode.</li>\n- *     </ul>\n-\n- * @param options {?object} Optional properties to specify. Recognized keys:\n- *\n- *     <pre><code>\n- *     {\n- *       'root' : , // {string} root collection to use. Defaults to GridStore#DEFAULT_ROOT_COLLECTION\n- *       'chunk_type' : , // {string} mime type of the file. Defaults to GridStore#DEFAULT_CONTENT_TYPE\n- *       'chunk_size' : , // {number} size for the chunk. Defaults to Chunk#DEFAULT_CHUNK_SIZE.\n- *       'metadata' : , // {object} arbitrary data the user wants to store\n- *     }\n- *     </code></pre>\n- *\n- * @see <a href=\"http://www.mongodb.org/display/DOCS/GridFS+Specification\">MongoDB GridFS Specification</a>\n+ * Modes\n+ *  - **\"r\"** - read only. This is the default mode.\n+ *  - **\"w\"** - write in truncate mode. Existing data will be overwriten.\n+ *  - **w+\"** - write in edit mode.\n+ *\n+ * Options\n+ *  - **root** {String}, root collection to use. Defaults to **{GridStore.DEFAULT_ROOT_COLLECTION}**.\n+ *  - **chunk_type** {String}, mime type of the file. Defaults to **{GridStore.DEFAULT_CONTENT_TYPE}**.\n+ *  - **chunk_size** {Number}, size for the chunk. Defaults to **{Chunk.DEFAULT_CHUNK_SIZE}**.\n+ *  - **metadata** {Object}, arbitrary data the user wants to store.\n+ *\n+ * @class Represents the GridStore.\n+ * @param {Db} db A database instance to interact with.\n+ * @param {ObjectID} id an unique ObjectID for this file\n+ * @param {String} [filename] optional a filename for this file, no unique constrain on the field\n+ * @param {String} mode set the mode for this file.\n+ * @param {Object} options optional properties to specify. Recognized keys:\n+ * @return {GridStore}\n  */\n-var GridStore = exports.GridStore = function(db, fileIdObject, mode, options) {\n+function GridStore(db, id, filename, mode, options) {\n+  if(!(this instanceof GridStore)) return new GridStore(db, id, filename, mode, options);\n+\n+  var self = this;\n   this.db = db;  \n+  var _filename = filename;\n+\n+  if(typeof filename == 'string' && typeof mode == 'string') {\n+    _filename = filename;  \n+  } else if(typeof filename == 'string' && typeof mode == 'object' && mode != null) {\n+    var _mode = mode;\n+    mode = filename;\n+    options = _mode;    \n+    _filename = id;\n+  } else if(typeof filename == 'string' && mode == null) {\n+    mode = filename;\n+    _filename = id;\n+  }\n   \n   // set grid referencetype\n-  this.referenceBy = typeof fileIdObject == 'string' ? 0 : 1;\n-  this.filename = fileIdObject;\n-  this.fileId = fileIdObject;\n+  this.referenceBy = typeof id == 'string' ? 0 : 1;\n+  this.filename = _filename;\n+  this.fileId = typeof id == 'string' ? new ObjectID() : id;\n   \n   // Set up the rest\n   this.mode = mode == null ? \"r\" : mode;\n@@ -61,72 +69,86 @@\n   this.root = this.options['root'] == null ? exports.GridStore.DEFAULT_ROOT_COLLECTION : this.options['root'];\n",
+					"match": false,
+					"packageHash": "ae2393bbcb65326cc14ac81abdff9dcd493f7924f5a9634bd37f73aab07df50a",
+					"size": 43088,
+					"sourceHash": "3431d98442b60a3a8125b38249d63dfe6a81338d3bf41d9b86b2e8e71c0c3aac",
+					"status": "content"
+				},
+				"lib/mongodb/index.js": {
+					"diff": "--- published/lib/mongodb/index.js\n+++ rebuilt/lib/mongodb/index.js\n@@ -1,13 +1,11 @@\n-\n try {\n-  exports.BSONPure = require('./bson/bson');\n-  exports.BSONNative = require('../../external-libs/bson/bson');\n+  exports.BSONPure = require('bson').BSONPure;\n+  exports.BSONNative = require('bson').BSONNative;\n } catch(err) {\n   // do nothing\n }\n \n-[ 'bson/binary_parser'\n-  , 'commands/base_command'\n+[ 'commands/base_command'\n   , 'commands/db_command'\n   , 'commands/delete_command'\n   , 'commands/get_more_command'\n@@ -18,12 +16,11 @@\n   , 'responses/mongo_reply'\n   , 'admin'\n   , 'collection'\n-  , 'connections/server'\n-  , 'connections/repl_set_servers'\n-  , 'connection'\n+  , 'connection/connection'\n+  , 'connection/server'\n+  , 'connection/repl_set'\n   , 'cursor'\n   , 'db'\n-  , 'goog/math/long'\n   , 'gridfs/grid'\n   ,\t'gridfs/chunk'\n   , 'gridfs/gridstore'].forEach(function (path) {\n@@ -31,15 +28,31 @@\n   \tfor (var i in module) {\n   \t\texports[i] = module[i];\n     }\n+\n+    // backwards compat\n+    exports.ReplSetServers = exports.ReplSet;\n+    \n+    // Add BSON Classes\n+    exports.Binary = require('bson').Binary;\n+    exports.Code = require('bson').Code;\n+    exports.DBRef = require('bson').DBRef;\n+    exports.Double = require('bson').Double;\n+    exports.Long = require('bson').Long;\n+    exports.MinKey = require('bson').MinKey;\n+    exports.MaxKey = require('bson').MaxKey;\n+    exports.ObjectID = require('bson').ObjectID;\n+    exports.Symbol = require('bson').Symbol;\n+    exports.Timestamp = require('bson').Timestamp;  \n+    \n+    // Add BSON Parser\n+    exports.BSON = require('bson').BSONPure.BSON;\n });\n \n-// Exports all the classes for the NATIVE JS BSON Parser\n-exports.native = function() {\n+// Exports all the classes for the PURE JS BSON Parser\n+exports.pure = function() {\n   var classes = {};\n   // Map all the classes\n-  [ 'bson/binary_parser'\n-    , '../../external-libs/bson/bson'\n-    , 'commands/base_command'\n+  [ 'commands/base_command'\n     , 'commands/db_command'\n     , 'commands/delete_command'\n     , 'commands/get_more_command'\n@@ -50,9 +63,9 @@\n     , 'responses/mongo_reply'\n     , 'admin'\n     , 'collection'\n-    , 'connections/server'\n-    , 'connections/repl_set_servers'\n-    , 'connection'\n+    , 'connection/connection'\n+    , 'connection/server'\n+    , 'connection/repl_set'\n     , 'cursor'\n     , 'db'\n     , 'gridfs/grid'\n@@ -63,17 +76,34 @@\n     \t\tclasses[i] = module[i];\n       }\n   });\n+\n+  // backwards compat\n+  classes.ReplSetServers = exports.ReplSet;\n+\n+  // Add BSON Classes\n+  classes.Binary = require('bson').Binary;\n+  classes.Code = require('bson').Code;\n+  classes.DBRef = require('bson').DBRef;\n+  classes.Double = require('bson').Double;\n+  classes.Long = require('bson').Long;\n+  classes.MinKey = require('bson').MinKey;\n",
+					"match": false,
+					"packageHash": "8b85e445d0ac338428ffef4e07e6fdd22596452de80cd8bafbbc11a0cab43a87",
+					"size": 2509,
+					"sourceHash": "f177a8277bbee6a3ec1c3e002bda2026d47cad3da7c164edb7f615a0b9c7b360",
+					"status": "content"
+				},
+				"lib/mongodb/responses/mongo_reply.js": {
+					"diff": "--- published/lib/mongodb/responses/mongo_reply.js\n+++ rebuilt/lib/mongodb/responses/mongo_reply.js\n@@ -1,49 +1,123 @@\n-var Long = require('../goog/math/long').Long,\n-  debug = require('util').debug,\n-  inspect = require('util').inspect;\n+var Long = require('bson').Long;\n \n /**\n   Reply message from mongo db\n **/\n-var MongoReply = exports.MongoReply = function(db, binary_reply) {\n+var MongoReply = exports.MongoReply = function() {\n   this.documents = [];\n-  var index = 0;\n+  this.index = 0;\n+};\n+\n+MongoReply.prototype.parseHeader = function(binary_reply, bson) {\n   // Unpack the standard header first\n-  var messageLength = binary_reply[index] | binary_reply[index + 1] << 8 | binary_reply[index + 2] << 16 | binary_reply[index + 3] << 24;\n-  index = index + 4;\n+  this.messageLength = binary_reply[this.index] | binary_reply[this.index + 1] << 8 | binary_reply[this.index + 2] << 16 | binary_reply[this.index + 3] << 24;\n+  this.index = this.index + 4;\n   // Fetch the request id for this reply\n-  this.requestId = binary_reply[index] | binary_reply[index + 1] << 8 | binary_reply[index + 2] << 16 | binary_reply[index + 3] << 24;\n-  index = index + 4;\n+  this.requestId = binary_reply[this.index] | binary_reply[this.index + 1] << 8 | binary_reply[this.index + 2] << 16 | binary_reply[this.index + 3] << 24;\n+  this.index = this.index + 4;\n   // Fetch the id of the request that triggered the response\n-  this.responseTo = binary_reply[index] | binary_reply[index + 1] << 8 | binary_reply[index + 2] << 16 | binary_reply[index + 3] << 24;\n+  this.responseTo = binary_reply[this.index] | binary_reply[this.index + 1] << 8 | binary_reply[this.index + 2] << 16 | binary_reply[this.index + 3] << 24;\n   // Skip op-code field\n-  index = index + 4 + 4;\n+  this.index = this.index + 4 + 4;\n   // Unpack the reply message\n-  this.responseFlag = binary_reply[index] | binary_reply[index + 1] << 8 | binary_reply[index + 2] << 16 | binary_reply[index + 3] << 24;\n-  index = index + 4;\n+  this.responseFlag = binary_reply[this.index] | binary_reply[this.index + 1] << 8 | binary_reply[this.index + 2] << 16 | binary_reply[this.index + 3] << 24;\n+  this.index = this.index + 4;\n   // Unpack the cursor id (a 64 bit long integer)\n-  var low_bits = binary_reply[index] | binary_reply[index + 1] << 8 | binary_reply[index + 2] << 16 | binary_reply[index + 3] << 24;\n-  index = index + 4;\n-  var high_bits = binary_reply[index] | binary_reply[index + 1] << 8 | binary_reply[index + 2] << 16 | binary_reply[index + 3] << 24;\n-  index = index + 4;\n-  this.cursorId = new db.bson_deserializer.Long(low_bits, high_bits);\n+  var low_bits = binary_reply[this.index] | binary_reply[this.index + 1] << 8 | binary_reply[this.index + 2] << 16 | binary_reply[this.index + 3] << 24;\n+  this.index = this.index + 4;\n+  var high_bits = binary_reply[this.index] | binary_reply[this.index + 1] << 8 | binary_reply[this.index + 2] << 16 | binary_reply[this.index + 3] << 24;\n+  this.index = this.index + 4;\n+  this.cursorId = new Long(low_bits, high_bits);\n   // Unpack the starting from\n-  this.startingFrom = binary_reply[index] | binary_reply[index + 1] << 8 | binary_reply[index + 2] << 16 | binary_reply[index + 3] << 24;\n-  index = index + 4;\n+  this.startingFrom = binary_reply[this.index] | binary_reply[this.index + 1] << 8 | binary_reply[this.index + 2] << 16 | binary_reply[this.index + 3] << 24;\n+  this.index = this.index + 4;\n   // Unpack the number of objects returned\n-  this.numberReturned = binary_reply[index] | binary_reply[index + 1] << 8 | binary_reply[index + 2] << 16 | binary_reply[index + 3] << 24;\n-  index = index + 4;\n+  this.numberReturned = binary_reply[this.index] | binary_reply[this.index + 1] << 8 | binary_reply[this.index + 2] << 16 | binary_reply[this.index + 3] << 24;\n+  this.index = this.index + 4;  \n+}\n+\n+MongoReply.prototype.parseBody = function(binary_reply, bson, raw, callback) {\n+  raw = raw == null ? false : raw;\n+  // Just set a doc limit for deserializing\n+  var docLimitSize = 1024*20;  \n   \n-  // Let's unpack all the bson document, deserialize them and store them\n-  for(var object_index = 0; object_index < this.numberReturned; object_index++) {\n-    // Read the size of the bson object    \n-    var bsonObjectSize = binary_reply[index] | binary_reply[index + 1] << 8 | binary_reply[index + 2] << 16 | binary_reply[index + 3] << 24;\n-    // Deserialize the object and add to the documents array\n-    this.documents.push(db.bson_deserializer.BSON.deserialize(binary_reply.slice(index, index + bsonObjectSize)));\n-    // Adjust binary index to point to next block of binary bson data\n-    index = index + bsonObjectSize;\n-  }    \n-};\n+  // If our message length is very long, let's switch to process.nextTick for messages\n+  if(this.messageLength > docLimitSize) {\n+    var batchSize = this.numberReturned;\n+    this.documents = new Array(this.numberReturned);\n+    \n+    // Just walk down until we get a positive number >= 1\n+    for(var i = 50; i > 0; i--) {\n+      if((this.numberReturned/i) >= 1) {\n+        batchSize = i;\n+        break;\n+      }      \n+    }  \n+\n+    // Actual main creator of the processFunction setting internal state to control the flow\n+    var parseFunction = function(_self, _binary_reply, _batchSize, _numberReturned) {\n+      var object_index = 0;      \n+      // Internal loop process that will use nextTick to ensure we yield some time\n+      var processFunction = function() {\n+        // Adjust batchSize if we have less results left than batchsize\n+        if((_numberReturned - object_index) < _batchSize) {\n+          _batchSize = _numberReturned - object_index;\n+        }\n",
+					"match": false,
+					"packageHash": "028c0b1e08ef9153b31a10ed1fb219a05399d773751428957e8ac09700a20242",
+					"size": 2856,
+					"sourceHash": "2a7cc4f286e5792d1ac34e4e92fc1586b483f6f974fb93afbf63d6d80d64e842",
+					"status": "content"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -1,7 +1,7 @@\n { \"name\" :            \"mongodb\"\n , \"description\" :     \"A node.js driver for MongoDB\"\n , \"keywords\" :        [\"mongodb\", \"mongo\", \"driver\", \"db\"]\n-, \"version\" :         \"0.9.6-11\"\n+, \"version\" :         \"0.9.9-8\"\n , \"author\" :          \"Christian Amor Kvalheim <christkv@gmail.com>\"\n , \"contributors\" :  [ \"Aaron Heckmann\",\n                       \"Christoph Pojer\",\n@@ -49,20 +49,32 @@\n                       \"Rob Holland\",\n                       \"Senmiao Liu\",\n                       \"heroic\",\n-                      \"gitfy\"]\n+                      \"gitfy\",\n+                      \"Andrew Stone\",\n+\t\t\t\t\t\t\t\t\t\t\t\"John Le Drew\"]\n \n , \"repository\" :    { \"type\" :  \"git\"\n                     , \"url\" :   \"http://github.com/christkv/node-mongodb-native.git\" }\n , \"bugs\" :          { \"mail\" :  \"node-mongodb-native@googlegroups.com\"\n-                    , \"web\" :   \"http://github.com/christkv/node-mongodb-native/issues\" }\n-, \"os\" :            [ \"linux\"\n-                    , \"darwin\"\n-                    , \"freebsd\" ]\n+                    , \"url\" :   \"http://github.com/christkv/node-mongodb-native/issues\" }\n+, \"dependencies\" : {\n+  \"bson\": \"0.0.4\"\n+}                    \n+, \"devDependencies\": {\n+      \"dox\": \"0.2.0\"\n+    , \"uglify-js\": \"1.2.5\"\n+    , \"ejs\": \"0.6.1\"\n+    , \"nodeunit\": \"0.7.3\"\n+    , \"github3\": \">=0.3.0\"\n+\t  , \"markdown\": \"0.3.1\"\n+\t  , \"gleak\": \"0.2.3\"\n+\t  , \"step\": \"0.0.5\"\n+  }\n , \"config\":         { \"native\" : false }                    \n , \"main\":             \"./lib/mongodb/index\"\n , \"directories\" :   { \"lib\" : \"./lib/mongodb\" }\n , \"engines\" :       { \"node\" : \">=0.4.0\" }\n-, \"scripts\": { \"install\" : \"bash ./install.sh\" }\n+, \"scripts\": { \"test\" : \"make test_pure\" }\n , \"licenses\" :    [ { \"type\" :  \"Apache License, Version 2.0\"\n                     , \"url\" :   \"http://www.apache.org/licenses/LICENSE-2.0\" } ]\n }\n",
+					"match": false,
+					"packageHash": "dd7e1526f0f45e6b950457515f226199b86b666783cf06823e0c062a5ea354d7",
+					"size": 2833,
+					"sourceHash": "3e819dd4d5c4f71977047355855ffb75eb246f9cfed7b07d12c2abb32fdb8bc5",
+					"status": "content"
+				},
+				"test/admin_test.js": {
+					"match": false,
+					"packageHash": "524197691b718726ea0fc3e761b596dca51190e267779f384def6bc95fffa007",
+					"size": 13866,
+					"status": "missing-in-source"
+				},
+				"test/authentication_test.js": {
+					"match": false,
+					"packageHash": "ba6fb6b1e525a8c75a2d8f7f92bf546a7baeab0ac8c9ea946fc5f6c7c1e9b6d1",
+					"size": 5161,
+					"status": "missing-in-source"
+				},
+				"test/auxilliary/authentication_test.js": {
+					"match": false,
+					"packageHash": "e7a10da60c31e2d789ebc8236cd8f8d1b8bdbb97d077639219bb3ea763c9e3bd",
+					"size": 6591,
+					"status": "missing-in-source"
+				},
+				"test/auxilliary/replicaset_auth_test.js": {
+					"match": false,
+					"packageHash": "faef9dc335336884d955c25284225a58e397bb471b8e9e9abcd333c5175eb113",
+					"size": 4826,
+					"status": "missing-in-source"
+				},
+				"test/bson/bson_test.js": {
+					"match": false,
+					"packageHash": "1e23c63e43254c1542fa4698b43faedc31f63832b815daa32545769e10554c19",
+					"size": 47306,
+					"status": "missing-in-source"
+				},
+				"test/bson/commands_test.js": {
+					"match": false,
+					"packageHash": "cde3b6f07cc7ab552678164255873338a5f88074627f1d601891b7ffe9f67a31",
+					"size": 5238,
+					"status": "missing-in-source"
+				},
+				"test/collection_test.js": {
+					"match": false,
+					"packageHash": "30b8014e76e7a63a99b914b5ada3689fbf1ddfbb4ac45503891d9f213d87468b",
+					"size": 23765,
+					"status": "missing-in-source"
+				},
+				"test/connect_test.js": {
+					"match": false,
+					"packageHash": "3f5df7a84ff44aa83fdb845dc8468690c99c421fa3bce5c4c5a4aaae69c040d8",
+					"size": 2790,
+					"status": "missing-in-source"
+				},
+				"test/connection_test.js": {
+					"match": false,
+					"packageHash": "05a0f0807891375acf9e98144ed70dc69f4ccd49b8b28674d5d51dcbe861c4bd",
+					"size": 3019,
+					"status": "missing-in-source"
+				},
+				"test/cursor_test.js": {
+					"match": false,
+					"packageHash": "91a32d8680d01c849978eb22b217c54c7bed29b832ecddd8383d6bf8d9659f7e",
+					"size": 30827,
+					"status": "missing-in-source"
+				},
+				"test/custom_pk_test.js": {
+					"match": false,
+					"packageHash": "b97b30f4bdcc38829f8e537b10fba9a9e7471c52a1c37b5da976965f77372ab6",
+					"size": 2784,
+					"status": "missing-in-source"
+				},
+				"test/db_test.js": {
+					"match": false,
+					"packageHash": "3c0379c06fd2643a4e7229249496bd3b7c3e91ad19595db6af57838566eb9f95",
+					"size": 12956,
+					"status": "missing-in-source"
+				},
+				"test/error_test.js": {
+					"match": false,
+					"packageHash": "0e3cd695bd960e97f03b6d29815880ecbc7851e3949e5d5cf8210e11e97858ae",
+					"size": 11254,
+					"status": "missing-in-source"
+				},
+				"test/exception_handling_test.js": {
+					"match": false,
+					"packageHash": "c8e6a63c825a94d9a330ad47c934eb202fb544ab70f7ad31a4504b9a48be1200",
+					"size": 2626,
+					"status": "missing-in-source"
+				},
+				"test/find_test.js": {
+					"match": false,
+					"packageHash": "240f1e3dd5d7481f1e2bd410f6f2e3c652269328763608073c964336f41a4444",
+					"size": 30885,
+					"status": "missing-in-source"
+				},
+				"test/gridstore/grid_store_file_test.js": {
+					"match": false,
+					"packageHash": "7dfe25c0d6808608c3e54d562d096a188b96b324979e63454137e1b289d0e6e3",
+					"size": 26763,
+					"status": "missing-in-source"
+				},
+				"test/gridstore/grid_store_stream_test.js": {
+					"match": false,
+					"packageHash": "d76811efaad0c374db7602b30f45223cec015d36fa712afea9155e84af5f125b",
+					"size": 2621,
+					"status": "missing-in-source"
+				},
+				"test/gridstore/grid_store_test.js": {
+					"match": false,
+					"packageHash": "9cba477beca53132b5db320926ab09c5d0d4337e102d57b9a10b0f5081f87ef1",
+					"size": 24547,
+					"status": "missing-in-source"
+				},
+				"test/gridstore/grid_test.js": {
+					"match": false,
+					"packageHash": "e2b6dafad1e7ed5c048de758a51d07076f93c3ed534424acaf763b75f0b548d8",
+					"size": 3191,
+					"status": "missing-in-source"
+				},
+				"test/gridstore/iya_logo_final_bw.jpg": {
+					"match": false,
+					"packageHash": "fee907eb6666fc164dd837943ef9317b17ef74d8fc7580ef9d8d450a4998a4ce",
+					"size": 74008,
+					"status": "missing-in-source"
+				},
+				"test/gridstore/test_gs_weird_bug.png": {
+					"match": false,
+					"packageHash": "357ae8923961baeaf8eb1d434f5a3f8d9ac51ae0dbb2ed412e2687615f757ebc",
+					"size": 52184,
+					"status": "missing-in-source"
+				},
+				"test/gridstore/test_gs_working_field_read.pdf": {
+					"match": false,
+					"packageHash": "c866f44c43c7554e4b25394fa52901ee8c8c176649d4cd7f4dd4e92e8d4bd4f8",
+					"size": 130253,
+					"status": "missing-in-source"
+				},
+				"test/index_test.js": {
+					"match": false,
+					"packageHash": "a5d8c44bda90f2da0eab4584e9d0c2138cc7c472cf986e923c93da604b388e44",
+					"size": 11155,
+					"status": "missing-in-source"
+				},
+				"test/insert_test.js": {
+					"match": false,
+					"packageHash": "72e9f737c4210132655ea71467314e6e5519ec3934dd28f3eb34b4c07b05914c",
+					"size": 26268,
+					"status": "missing-in-source"
+				},
+				"test/map_reduce_test.js": {
+					"match": false,
+					"packageHash": "a04c9ef582d4c6c728196366077bff6ddb14e3001888a677bd74094a75cb8508",
+					"size": 12175,
+					"status": "missing-in-source"
+				},
+				"test/objectid_test.js": {
+					"match": false,
+					"packageHash": "f5f85cbbd5c94da002a891670878fd8924a5fe062459a88b517a756ad827cc2d",
+					"size": 4852,
+					"status": "missing-in-source"
+				},
+				"test/regexp_test.js": {
+					"match": false,
+					"packageHash": "c507c7bd8f2dfa8c571b1f5ad1f8e71c82ae6b923e63b690724927c0acb77171",
+					"size": 3784,
+					"status": "missing-in-source"
+				},
+				"test/remove_test.js": {
+					"match": false,
+					"packageHash": "e4d61717ec051345c8bd7ade01776ff16aad97d3ac33e21fd92a09e8c628d3e9",
+					"size": 2473,
+					"status": "missing-in-source"
+				},
+				"test/replicaset/connect_test.js": {
+					"match": false,
+					"packageHash": "a553ea1cdfd2b6e64e24ded0777262acd157aa367e0c233831fda2fe7430cdf1",
+					"size": 11636,
+					"status": "missing-in-source"
+				},
+				"test/replicaset/count_test.js": {
+					"match": false,
+					"packageHash": "495dea0e688d8350bab67dd1ced0f04e5f2a47eabe7f30533e2731be49de4526",
+					"size": 6521,
+					"status": "missing-in-source"
+				},
+				"test/replicaset/insert_test.js": {
+					"match": false,
+					"packageHash": "04d34a40cc6f42499c5e0c723ffbe3a5e23509b70e80230a6afa9196c1ca3b23",
+					"size": 13751,
+					"status": "missing-in-source"
+				},
+				"test/replicaset/query_secondaries_test.js": {
+					"match": false,
+					"packageHash": "91e4b2c2659bd2e1324061edc7b1dc73b6aecd76535f66a845d2ca89529fed39",
+					"size": 8102,
+					"status": "missing-in-source"
+				},
+				"test/streaming_test.js": {
+					"match": false,
+					"packageHash": "f9c5104d553a9e825db825fd3a517859ab04fb539641bf857342f70b38f2205e",
+					"size": 4039,
+					"status": "missing-in-source"
+				},
+				"test/tools/keyfile.txt": {
+					"match": false,
+					"packageHash": "58800aef534e5a1004302db4a5caa14a1e2310829f363d4d210a93dabe2e214c",
+					"size": 53,
+					"status": "missing-in-source"
+				},
+				"test/tools/replica_set_manager.js": {
+					"match": false,
+					"packageHash": "f23a8550a6bf7cb9eca3845f23ebf1abf470fc9b54528f2ae17f2495d8fa23b1",
+					"size": 16916,
+					"status": "missing-in-source"
+				},
+				"test/tools/server_manager.js": {
+					"match": false,
+					"packageHash": "e607dc29f942531ed91dbbfbf0daf8be65a5bfeb7654c1f7c8e68ab1e1ff9d3b",
+					"size": 4420,
+					"status": "missing-in-source"
+				},
+				"test/unicode_test.js": {
+					"match": false,
+					"packageHash": "62e8a90ed2debe17b668773ecb59f2c8a835a40623e92f5d28e0c5d1d47a7bee",
+					"size": 5770,
+					"status": "missing-in-source"
+				},
+				"tools/test_all.js": {
+					"match": false,
+					"packageHash": "b22be95a57cb6ff02bb463bde244443c6daa7ec489c114db7e4505d25df7f089",
+					"size": 3782,
+					"status": "missing-in-source"
+				},
+				".travis.yml": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"install.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/mongodb/connection/connection.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/mongodb/connection/connection_pool.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/mongodb/connection/connection_utils.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/mongodb/connection/repl_set.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/mongodb/connection/server.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/mongodb/connection/strategies/ping_strategy.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/mongodb/connection/strategies/statistics_strategy.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/mongodb/cursorstream.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/mongodb/gridfs/readstream.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/mongodb/utils.js": {
+					"match": false,
+					"status": "missing-in-package"
+				}
+			},
+			"summary": {
+				"differentFiles": 25,
+				"matchingFiles": 1,
+				"missingInPackage": 12,
+				"missingInSource": 157,
+				"score": 0.005128205128205128,
+				"totalFiles": 195
+			}
+		}
+	}
+]
