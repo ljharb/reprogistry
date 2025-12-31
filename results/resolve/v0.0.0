@@ -1,0 +1,493 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2025-12-31T13:59:06.453Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:11.7.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "resolve@0.0.0",
+			"name": "resolve",
+			"version": "0.0.0",
+			"location": "https://registry.npmjs.org/resolve/-/resolve-0.0.0.tgz",
+			"integrity": "sha512-cbxF5Lxdn/q3pxxiGz4wo4Ch7RE+Ns1jDJLF37AKvxVwHk2/STAYh4mwHF/9SKZucqcP7L+NJafqd1zje19xCQ==",
+			"publishedAt": "2011-06-18T10:12:44.853Z",
+			"publishedWith": {
+				"node": "v0.5.0-pre",
+				"npm": "1.0.10"
+			}
+		},
+		"source": {
+			"integrity": null,
+			"location": "git://github.com/substack/node-resolve.git",
+			"spec": "github:substack/node-resolve#HEAD"
+		},
+		"comparisonHash": "8a2a8dcbb729bf3ee9216e490c955701f0ddebe1",
+		"diff": {
+			"files": {
+				"README.markdown": {
+					"match": false,
+					"packageHash": "99adc8c310b175dd24ee0bf174243707ce5700f40e9f4826d21dd3c28a5e01bf",
+					"size": 741,
+					"status": "missing-in-source"
+				},
+				"index.js": {
+					"diff": "--- published/index.js\n+++ rebuilt/index.js\n@@ -1,80 +1,4 @@\n-var fs = require('fs');\n-var path = require('path');\n+var async = require('./lib/async');\n+async.sync = require('./lib/sync');\n \n-// http://nodejs.org/docs/v0.4.8/api/all.html#all_Together...\n-\n-var core = [ 'assert', 'buffer', 'child_process', 'crypto', 'dgram', 'dns',\n-    'events', 'fs', 'http', 'https', 'net', 'os', 'path', 'querystring', 'repl',\n-    'stream', 'sys', 'tls', 'tty', 'url', 'util', 'vm'\n-].reduce(function (acc, x) { acc[x] = true; return acc }, {});\n-\n-exports.sync = function (x, opts) {\n-    if (core[x]) return x;\n-    \n-    if (!opts) opts = {};\n-    var y = opts.basedir\n-        || path.dirname(require.cache[__filename].parent.filename)\n-    ;\n-    \n-    if (x.match(/^(?:\\.\\.?\\/|\\/)/)) {\n-        var m = loadAsFileSync(path.resolve(y, x))\n-            || loadAsDirectorySync(path.resolve(y, x));\n-        if (m) return m;\n-    }\n-    \n-    var n = loadNodeModulesSync(x, y);\n-    if (n) return n;\n-    \n-    throw new Error(\"Cannot find module '\" + x + \"'\");\n-}\n-\n-function loadAsFileSync (x) {\n-    if (path.existsSync(x) && fs.statSync(x).isFile()) {\n-        return x;\n-    }\n-    else if (path.existsSync(x + '.js') && fs.statSync(x + '.js').isFile()) {\n-        return x + '.js';\n-    }\n-}\n-\n-function loadAsDirectorySync (x) {\n-    var pkgfile = x + '/package.json';\n-    if (path.existsSync(pkgfile) && fs.statSync(pkgfile).isFile()) {\n-        var body = fs.readFileSync(pkgfile, 'utf8');\n-        try {\n-            var pkg = JSON.parse(body);\n-            if (pkg.main) {\n-                var m = loadAsFileSync(path.resolve(x, pkg.main));\n-                if (m) return m;\n-            }\n-        }\n-        catch (err) {}\n-    }\n-    \n-    return loadAsFileSync(x + '/index');\n-}\n-\n-function loadNodeModulesSync (x, start) {\n-    var dirs = nodeModulesPathsSync(start);\n-    for (var i = 0; i < dirs.length; i++) {\n-        var dir = dirs[i];\n-        var m = loadAsFileSync(dir + '/' + x);\n-        if (m) return m;\n-        var n = loadAsDirectorySync(dir + '/' + x);\n-        if (n) return n;\n-    }\n-}\n-\n-function nodeModulesPathsSync (start) {\n-    var parts = start.split(/\\/+/);\n-    var root = parts.indexOf('node_modules');\n-    if (root < 0) root = 0;\n-    \n-    var dirs = [];\n-    for (var i = parts.length - 1; i >= root; i--) {\n-        if (parts[i] === 'node_modules') continue;\n-        var dir = parts.slice(0, i + 1).join('/') + '/node_modules';\n-        dirs.push(dir);\n-    }\n-    return dirs;\n-}\n+module.exports = async;\n",
+					"match": false,
+					"packageHash": "3ea2710c8ce21f86aa9fcc79f270fdd1c62b73dde7ce9aed04630a43a0bfdc28",
+					"size": 2308,
+					"sourceHash": "51ca7a0cd502712ed62a8d00f0b2ac9956ae78c6e69bdaf2f75f75e591741c22",
+					"status": "content"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -1,37 +1,89 @@\n {\n-    \"name\" : \"resolve\",\n-    \"description\" : \"A more hookable require.resolve() implementation\",\n-    \"version\" : \"0.0.0\",\n-    \"repository\" : {\n-        \"type\" : \"git\",\n-        \"url\" : \"git://github.com/substack/node-resolve.git\"\n-    },\n-    \"main\" : \"index.js\",\n-    \"keywords\" : [\n-        \"resolve\",\n-        \"require\",\n-        \"node\",\n-        \"module\"\n-    ],\n-    \"directories\" : {\n-        \"lib\" : \".\",\n-        \"example\" : \"example\",\n-        \"test\" : \"test\"\n-    },\n-    \"scripts\" : {\n-        \"test\" : \"expresso\"\n-    },\n-    \"dependencies\" : {},\n-    \"devDependencies\" : {\n-        \"expresso\" : \"=0.7.x\"\n-    },\n-    \"engines\" : {\n-        \"node\" : \">=0.4.0\"\n-    },\n-    \"license\" : \"MIT\",\n-    \"author\" : {\n-        \"name\" : \"James Halliday\",\n-        \"email\" : \"mail@substack.net\",\n-        \"url\" : \"http://substack.net\"\n-    }\n+\t\"name\": \"resolve\",\n+\t\"description\": \"resolve like require.resolve() on behalf of files asynchronously and synchronously\",\n+\t\"version\": \"2.0.0-next.5\",\n+\t\"repository\": {\n+\t\t\"type\": \"git\",\n+\t\t\"url\": \"ssh://github.com/browserify/resolve.git\"\n+\t},\n+\t\"bin\": {\n+\t\t\"resolve\": \"./bin/resolve\"\n+\t},\n+\t\"main\": \"index.js\",\n+\t\"exports\": {\n+\t\t\".\": [\n+\t\t\t{\n+\t\t\t\t\"import\": \"./index.mjs\",\n+\t\t\t\t\"default\": \"./index.js\"\n+\t\t\t},\n+\t\t\t\"./index.js\"\n+\t\t],\n+\t\t\"./sync\": \"./lib/sync.js\",\n+\t\t\"./async\": \"./lib/async.js\",\n+\t\t\"./package.json\": \"./package.json\"\n+\t},\n+\t\"keywords\": [\n+\t\t\"resolve\",\n+\t\t\"require\",\n+\t\t\"node\",\n+\t\t\"module\"\n+\t],\n+\t\"scripts\": {\n+\t\t\"prepack\": \"npmignore --auto --commentLines=autogenerated\",\n+\t\t\"prepublishOnly\": \"safe-publish-latest\",\n+\t\t\"prepublish\": \"not-in-publish || npm run prepublishOnly\",\n+\t\t\"prelint\": \"eclint check $(git ls-files | grep -Ev test\\\\/list-exports$ | xargs find 2> /dev/null | grep -vE 'node_modules|\\\\.git')\",\n+\t\t\"lint\": \"eslint .\",\n+\t\t\"pretests-only\": \"cd ./test/resolver/nested_symlinks && node mylib/sync && node mylib/async\",\n+\t\t\"tests-only\": \"tape test/*.js\",\n+\t\t\"pretest\": \"npm run lint\",\n+\t\t\"test\": \"npm run --silent tests-only\",\n+\t\t\"posttest\": \"npm run test:multirepo && npx npm@\\\">= 10.2\\\" audit --production\",\n+\t\t\"test:multirepo\": \"cd ./test/resolver/multirepo && npm install && npm test\"\n+\t},\n+\t\"license\": \"MIT\",\n+\t\"author\": {\n+\t\t\"name\": \"James Halliday\",\n+\t\t\"email\": \"mail@substack.net\",\n+\t\t\"url\": \"http://substack.net\"\n+\t},\n+\t\"funding\": {\n+\t\t\"url\": \"https://github.com/sponsors/ljharb\"\n+\t},\n+\t\"dependencies\": {\n+\t\t\"is-core-module\": \"^2.16.1\",\n+\t\t\"path-parse\": \"^1.0.7\",\n+\t\t\"supports-preserve-symlinks-flag\": \"^1.0.0\"\n+\t},\n+\t\"devDependencies\": {\n+\t\t\"@ljharb/eslint-config\": \"^22.0.2\",\n+\t\t\"array.prototype.map\": \"^1.0.8\",\n+\t\t\"copy-dir\": \"^1.3.0\",\n+\t\t\"eclint\": \"^2.8.1\",\n",
+					"match": false,
+					"packageHash": "c8ba37c10ead6cef3dcc49a116624e1baf7d6ea52b6a77873abfc04d089dca7b",
+					"size": 816,
+					"sourceHash": "ab7a4e4408d9df080becfdd91cacc59375e1f9f2e5f057e76fad2de79c50b749",
+					"status": "content"
+				},
+				"test/resolver/bar/node_modules/foo/index.js": {
+					"match": false,
+					"packageHash": "6e66e366f0aefb84ad8110afcd9b2245702c643c831edf8316ff048fec739d2e",
+					"size": 20,
+					"status": "missing-in-source"
+				},
+				"test/resolver/baz/package.json": {
+					"diff": "--- published/test/resolver/baz/package.json\n+++ rebuilt/test/resolver/baz/package.json\n@@ -1,3 +1,4 @@\n {\n-    \"main\" : \"quux.js\"\n+    \"name\": \"baz\",\n+    \"main\": \"quux.js\"\n }\n",
+					"match": false,
+					"packageHash": "e1c6ec2bf63832ff08cb4629681edcc3538515410a3a8cc6c424e0e9703c219f",
+					"size": 27,
+					"sourceHash": "cd33f816f635bcf9cdbe5a13d877bc8901a1a90819b1d73c16b35b6cdbebecaf",
+					"status": "content"
+				},
+				"test/resolver/baz/quux.js": {
+					"diff": "--- published/test/resolver/baz/quux.js\n+++ rebuilt/test/resolver/baz/quux.js\n@@ -1 +0,0 @@\n-module.exports = 1;\n",
+					"match": false,
+					"packageHash": "6e66e366f0aefb84ad8110afcd9b2245702c643c831edf8316ff048fec739d2e",
+					"size": 20,
+					"sourceHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+					"status": "content"
+				},
+				"test/resolver/foo.js": {
+					"diff": "--- published/test/resolver/foo.js\n+++ rebuilt/test/resolver/foo.js\n@@ -1 +0,0 @@\n-module.exports = 1;\n",
+					"match": false,
+					"packageHash": "6e66e366f0aefb84ad8110afcd9b2245702c643c831edf8316ff048fec739d2e",
+					"size": 20,
+					"sourceHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+					"status": "content"
+				},
+				"test/resolver.js": {
+					"diff": "--- published/test/resolver.js\n+++ rebuilt/test/resolver.js\n@@ -1,38 +1,613 @@\n-var assert = require('assert');\n+var path = require('path');\n+var fs = require('fs');\n+var test = require('tape');\n var resolve = require('../');\n+var async = require('../async');\n \n-exports.foo = function () {\n-    var dir = __dirname + '/resolver';\n-    \n-    assert.equal(\n-        resolve.sync('./foo', { basedir : dir }),\n-        dir + '/foo.js'\n+test('`./async` entry point', function (t) {\n+    t.equal(resolve, async, '`./async` entry point is the same as `main`');\n+    t.end();\n+});\n+\n+test('async foo', function (t) {\n+    t.plan(12);\n+    var dir = path.join(__dirname, 'resolver');\n+\n+    resolve('./foo', { basedir: dir }, function (err, res, pkg) {\n+        if (err) t.fail(err);\n+        t.equal(res, path.join(dir, 'foo.js'));\n+        t.equal(pkg && pkg.name, 'resolve');\n+    });\n+\n+    resolve('./foo.js', { basedir: dir }, function (err, res, pkg) {\n+        if (err) t.fail(err);\n+        t.equal(res, path.join(dir, 'foo.js'));\n+        t.equal(pkg && pkg.name, 'resolve');\n+    });\n+\n+    resolve('./foo', { basedir: dir, 'package': { main: 'resolver' } }, function (err, res, pkg) {\n+        if (err) t.fail(err);\n+        t.equal(res, path.join(dir, 'foo.js'));\n+        t.equal(pkg && pkg.main, 'resolver');\n+    });\n+\n+    resolve('./foo.js', { basedir: dir, 'package': { main: 'resolver' } }, function (err, res, pkg) {\n+        if (err) t.fail(err);\n+        t.equal(res, path.join(dir, 'foo.js'));\n+        t.equal(pkg.main, 'resolver');\n+    });\n+\n+    resolve('./foo', { basedir: dir, filename: path.join(dir, 'baz.js') }, function (err, res) {\n+        if (err) t.fail(err);\n+        t.equal(res, path.join(dir, 'foo.js'));\n+    });\n+\n+    resolve('foo', { basedir: dir }, function (err) {\n+        t.equal(err.message, \"Cannot find module 'foo' from '\" + path.resolve(dir) + \"'\");\n+        t.equal(err.code, 'MODULE_NOT_FOUND');\n+    });\n+\n+    // Test that filename is reported as the \"from\" value when passed.\n+    resolve('foo', { basedir: dir, filename: path.join(dir, 'baz.js') }, function (err) {\n+        t.equal(err.message, \"Cannot find module 'foo' from '\" + path.join(dir, 'baz.js') + \"'\");\n+    });\n+});\n+\n+test('bar', function (t) {\n+    t.plan(6);\n+    var dir = path.join(__dirname, 'resolver');\n+\n+    resolve('foo', { basedir: dir + '/bar' }, function (err, res, pkg) {\n+        if (err) t.fail(err);\n+        t.equal(res, path.join(dir, 'bar/node_modules/foo/index.js'));\n+        t.equal(pkg, undefined);\n+    });\n+\n+    resolve('foo', { basedir: dir + '/bar' }, function (err, res, pkg) {\n+        if (err) t.fail(err);\n+        t.equal(res, path.join(dir, 'bar/node_modules/foo/index.js'));\n+        t.equal(pkg, undefined);\n+    });\n+\n+    resolve('foo', { basedir: dir + '/bar', 'package': { main: 'bar' } }, function (err, res, pkg) {\n+        if (err) t.fail(err);\n+        t.equal(res, path.join(dir, 'bar/node_modules/foo/index.js'));\n+        t.equal(pkg.main, 'bar');\n+    });\n+});\n+\n+test('baz', function (t) {\n+    t.plan(4);\n+    var dir = path.join(__dirname, 'resolver');\n+\n+    resolve('./baz', { basedir: dir }, function (err, res, pkg) {\n+        if (err) t.fail(err);\n+        t.equal(res, path.join(dir, 'baz/quux.js'));\n+        t.equal(pkg.main, 'quux.js');\n+    });\n+\n+    resolve('./baz', { basedir: dir, 'package': { main: 'resolver' } }, function (err, res, pkg) {\n+        if (err) t.fail(err);\n",
+					"match": false,
+					"packageHash": "fcf64612d6ea2130cdfb977536f9b71f1ac32908830b6090ee8f487a08381ee3",
+					"size": 822,
+					"sourceHash": "9700028bbd04dc76d456bdc798340d1d02901bb357f8a1501e93958574518fbc",
+					"status": "content"
+				},
+				".editorconfig": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				".github/FUNDING.yml": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				".github/INCIDENT_RESPONSE_PROCESS.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				".github/THREAT_MODEL.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"LICENSE": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"SECURITY.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"async.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"bin/resolve": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"eslint.config.mjs": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"example/async.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"example/sync.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"index.mjs": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/async.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/caller.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/homedir.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/node-modules-paths.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/normalize-options.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/sync.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"readme.markdown": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"sync.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/dotdot/abc/index.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/dotdot/index.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/dotdot.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/faulty_basedir.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/filter.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/filter_sync.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/home_paths.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/home_paths_sync.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/mock.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/mock_sync.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/module_dir/xmodules/aaa/index.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/module_dir/ymodules/aaa/index.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/module_dir/zmodules/bbb/main.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/module_dir/zmodules/bbb/package.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/module_dir.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/node-modules-paths.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/node_path/x/aaa/index.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/node_path/x/ccc/index.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/node_path/y/bbb/index.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/node_path/y/ccc/index.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/node_path.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/nonstring.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/pathfilter/deep_ref/main.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/pathfilter.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/pathfilter_sync.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/precedence/aaa/index.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/precedence/aaa/main.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/precedence/aaa.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/precedence/bbb/main.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/precedence/bbb.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/precedence.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/resolver/baz/doom.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/resolver/browser_field/a.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/resolver/browser_field/b.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/resolver/browser_field/package.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/resolver/cup.coffee": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/resolver/dot_main/index.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/resolver/dot_main/package.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/resolver/dot_slash_main/index.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/resolver/dot_slash_main/package.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/resolver/empty_main/index.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/resolver/empty_main/package.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/resolver/false_main/index.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/resolver/false_main/package.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/resolver/incorrect_main/index.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/resolver/incorrect_main/package.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/resolver/invalid_main/package.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/resolver/missing_index/package.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/resolver/missing_main/index.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/resolver/missing_main/package.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/resolver/mug.coffee": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/resolver/mug.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/resolver/multirepo/lerna.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/resolver/multirepo/package.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/resolver/multirepo/packages/package-a/index.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/resolver/multirepo/packages/package-a/package.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/resolver/multirepo/packages/package-b/index.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/resolver/multirepo/packages/package-b/package.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/resolver/nested_symlinks/mylib/async.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/resolver/nested_symlinks/mylib/package.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/resolver/nested_symlinks/mylib/sync.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/resolver/null_main/index.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/resolver/null_main/package.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/resolver/other_path/lib/other-lib.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/resolver/other_path/root.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/resolver/quux/foo/index.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/resolver/same_names/foo/index.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/resolver/same_names/foo.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/resolver/symlinked/_/node_modules/foo.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/resolver/symlinked/_/symlink_target/.gitkeep": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/resolver/symlinked/package/bar.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/resolver/symlinked/package/package.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/resolver/without_basedir/main.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/resolver_sync.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/shadowed_core/node_modules/util/index.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/shadowed_core.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/subdirs.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/symlinks.js": {
+					"match": false,
+					"status": "missing-in-package"
+				}
+			},
+			"summary": {
+				"differentFiles": 6,
+				"matchingFiles": 0,
+				"missingInPackage": 98,
+				"missingInSource": 2,
+				"score": 0,
+				"totalFiles": 106
+			}
+		}
+	}
+]
