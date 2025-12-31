@@ -256,7 +256,12 @@ module.exports = async function reproduce(spec, opts) {
 
 		var parsed;
 		try {
-			parsed = new URL(url.replace(/^git\+/, '').replace(/^git:\/\//, 'https://'));
+			var normalizedUrl = url
+				.replace(/^git\+/, '')
+				.replace(/^git:\/\//, 'https://')
+				.replace(/^ssh:\/\/git@github\.com\//, 'https://github.com/')
+				.replace(/^git@github\.com:/, 'https://github.com/');
+			parsed = new URL(normalizedUrl);
 		} catch (e) { // eslint-disable-line no-unused-vars
 			return false;
 		}
