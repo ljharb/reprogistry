@@ -1,0 +1,57 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2025-12-31T13:43:43.632Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:11.7.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "regenerator-runtime@0.13.9",
+			"name": "regenerator-runtime",
+			"version": "0.13.9",
+			"location": "https://registry.npmjs.org/regenerator-runtime/-/regenerator-runtime-0.13.9.tgz",
+			"integrity": "sha512-p3VT+cOEgxFsRRA9X4lkI1E+k2/CtnKtU4gcxyaCUreilL/vqI6CdZ3wxVUx3UOUg+gnUOQQcRI7BmSI656MYA==",
+			"publishedAt": "2021-07-22T22:21:44.111Z",
+			"publishedWith": {
+				"node": "14.17.3",
+				"npm": "6.14.13"
+			}
+		},
+		"source": {
+			"integrity": null,
+			"location": "https://github.com/facebook/regenerator/tree/master/packages/runtime",
+			"spec": "github:facebook/regenerator/tree/master/packages/runtime#HEAD"
+		},
+		"comparisonHash": "8a2a8dcbb729bf3ee9216e490c955701f0ddebe1",
+		"diff": {
+			"files": {
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -2,7 +2,7 @@\n   \"name\": \"regenerator-runtime\",\n   \"author\": \"Ben Newman <bn@cs.stanford.edu>\",\n   \"description\": \"Runtime for Regenerator-compiled generator and async functions.\",\n-  \"version\": \"0.13.9\",\n+  \"version\": \"0.14.1\",\n   \"main\": \"runtime.js\",\n   \"keywords\": [\n     \"regenerator\",\n@@ -13,7 +13,7 @@\n   \"sideEffects\": true,\n   \"repository\": {\n     \"type\": \"git\",\n-    \"url\": \"https://github.com/facebook/regenerator/tree/master/packages/runtime\"\n+    \"url\": \"https://github.com/facebook/regenerator/tree/main/packages/runtime\"\n   },\n   \"license\": \"MIT\"\n }\n",
+					"match": false,
+					"packageHash": "f6215c69ab046764a9d364c20cb514cd2e9c50da73ad50b32abe68cbfb5a9eaa",
+					"size": 465,
+					"sourceHash": "d13f44ec83bbfd6f6fdc15d1367a24b01ca24deb044840723281e6346beb497c",
+					"status": "content"
+				},
+				"runtime.js": {
+					"diff": "--- published/runtime.js\n+++ rebuilt/runtime.js\n@@ -10,6 +10,7 @@\n \n   var Op = Object.prototype;\n   var hasOwn = Op.hasOwnProperty;\n+  var defineProperty = Object.defineProperty || function (obj, key, desc) { obj[key] = desc.value; };\n   var undefined; // More compressible than void 0.\n   var $Symbol = typeof Symbol === \"function\" ? Symbol : {};\n   var iteratorSymbol = $Symbol.iterator || \"@@iterator\";\n@@ -42,7 +43,7 @@\n \n     // The ._invoke method unifies the implementations of the .next,\n     // .throw, and .return methods.\n-    generator._invoke = makeInvokeMethod(innerFn, self, context);\n+    defineProperty(generator, \"_invoke\", { value: makeInvokeMethod(innerFn, self, context) });\n \n     return generator;\n   }\n@@ -103,8 +104,12 @@\n   var Gp = GeneratorFunctionPrototype.prototype =\n     Generator.prototype = Object.create(IteratorPrototype);\n   GeneratorFunction.prototype = GeneratorFunctionPrototype;\n-  define(Gp, \"constructor\", GeneratorFunctionPrototype);\n-  define(GeneratorFunctionPrototype, \"constructor\", GeneratorFunction);\n+  defineProperty(Gp, \"constructor\", { value: GeneratorFunctionPrototype, configurable: true });\n+  defineProperty(\n+    GeneratorFunctionPrototype,\n+    \"constructor\",\n+    { value: GeneratorFunction, configurable: true }\n+  );\n   GeneratorFunction.displayName = define(\n     GeneratorFunctionPrototype,\n     toStringTagSymbol,\n@@ -214,7 +219,7 @@\n \n     // Define the unified helper method that is used to implement .next,\n     // .throw, and .return (see defineIteratorMethods).\n-    this._invoke = enqueue;\n+    defineProperty(this, \"_invoke\", { value: enqueue });\n   }\n \n   defineIteratorMethods(AsyncIterator.prototype);\n@@ -254,8 +259,9 @@\n           throw arg;\n         }\n \n-        // Be forgiving, per 25.3.3.3.3 of the spec:\n-        // https://people.mozilla.org/~jorendorff/es6-draft.html#sec-generatorresume\n+        // Be forgiving, per GeneratorResume behavior specified since ES2015:\n+        // ES2015 spec, step 3: https://262.ecma-international.org/6.0/#sec-generatorresume\n+        // Latest spec, step 2: https://tc39.es/ecma262/#sec-generatorresume\n         return doneResult();\n       }\n \n@@ -324,31 +330,32 @@\n   // delegate iterator, or by modifying context.method and context.arg,\n   // setting context.delegate to null, and returning the ContinueSentinel.\n   function maybeInvokeDelegate(delegate, context) {\n-    var method = delegate.iterator[context.method];\n+    var methodName = context.method;\n+    var method = delegate.iterator[methodName];\n     if (method === undefined) {\n       // A .throw or .return when the delegate iterator has no .throw\n-      // method always terminates the yield* loop.\n+      // method, or a missing .next method, always terminate the\n+      // yield* loop.\n       context.delegate = null;\n \n-      if (context.method === \"throw\") {\n-        // Note: [\"return\"] must be used for ES3 parsing compatibility.\n-        if (delegate.iterator[\"return\"]) {\n-          // If the delegate iterator has a return method, give it a\n-          // chance to clean up.\n-          context.method = \"return\";\n-          context.arg = undefined;\n-          maybeInvokeDelegate(delegate, context);\n-\n-          if (context.method === \"throw\") {\n-            // If maybeInvokeDelegate(context) changed context.method from\n-            // \"return\" to \"throw\", let that override the TypeError below.\n-            return ContinueSentinel;\n-          }\n-        }\n+      // Note: [\"return\"] must be used for ES3 parsing compatibility.\n+      if (methodName === \"throw\" && delegate.iterator[\"return\"]) {\n+        // If the delegate iterator has a return method, give it a\n+        // chance to clean up.\n+        context.method = \"return\";\n+        context.arg = undefined;\n+        maybeInvokeDelegate(delegate, context);\n \n+        if (context.method === \"throw\") {\n+          // If maybeInvokeDelegate(context) changed context.method from\n+          // \"return\" to \"throw\", let that override the TypeError below.\n+          return ContinueSentinel;\n+        }\n+      }\n+      if (methodName !== \"return\") {\n         context.method = \"throw\";\n",
+					"match": false,
+					"packageHash": "7206cf318a71ac0cd59d710fd6318de5bb647e95a1d6dada870eded122b1f0e7",
+					"size": 24843,
+					"sourceHash": "7beda998b3fd277f3548e12b277bafc3037d243421f007032d38dffee412224c",
+					"status": "content"
+				}
+			},
+			"summary": {
+				"differentFiles": 2,
+				"matchingFiles": 3,
+				"missingInPackage": 0,
+				"missingInSource": 0,
+				"score": 0.6,
+				"totalFiles": 5
+			}
+		}
+	}
+]
