@@ -1,0 +1,87 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2025-12-31T11:18:52.835Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:11.7.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "pre-commit@0.0.2",
+			"name": "pre-commit",
+			"version": "0.0.2",
+			"location": "https://registry.npmjs.org/pre-commit/-/pre-commit-0.0.2.tgz",
+			"integrity": "sha512-dOrBGL85tpNtx6M2YMJqkbmDEasucWmNaJ4tdTBqZq+4p9GZAtkuxtYLMaXKVq/B0iD7bf1wfaijRAKOSaEbyA==",
+			"publishedAt": "2013-04-10T17:32:27.175Z",
+			"publishedWith": {
+				"node": null,
+				"npm": "1.1.71"
+			}
+		},
+		"source": {
+			"integrity": null,
+			"location": "git://github.com/nlf/precommit-hook.git",
+			"spec": "github:nlf/precommit-hook#HEAD"
+		},
+		"comparisonHash": "8a2a8dcbb729bf3ee9216e490c955701f0ddebe1",
+		"diff": {
+			"files": {
+				"CHANGELOG.md": {
+					"match": false,
+					"packageHash": "c1df0cbb0bad623e8000495a0e602a378aab10ed52f05add02961436833cd041",
+					"size": 221,
+					"status": "missing-in-source"
+				},
+				"README.md": {
+					"diff": "--- published/README.md\n+++ rebuilt/README.md\n@@ -1,68 +1,132 @@\n-# pre-commit\n+What is it?\n+-----------\n \n-A simple `pre-commit` hook installer for `git`. This will make sure that your\n-test suite passes before you can commit your changes. In addition to running\n-your `npm test` it also has the option to run custom scripts that you have\n-specified in your `package.json`.\n+### Note: This module is simply a wrapper around [git-validate](https://github.com/nlf/git-validate). If you wish to use a linter other than jshint, I highly recommend you look there instead as this module will always bundle jshint for historical reasons.\n \n-### Installation\n+[![Join the chat at https://gitter.im/nlf/precommit-hook](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/nlf/precommit-hook?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)\n \n-It's adviced to install this module as `devDependency` in your `package.json`\n-file so it doesn't get installed on production servers. Run:\n+This module is a handy little tool that I wrote to help enforce code quality in Node.js projects. It allows you to run any scripts defined in your package.json before a commit is made.\n \n-```\n-npm install pre-commit --save-dev\n+### WARNING: If you already have a `.git/hooks/pre-commit` file, this package will overwrite it.\n+\n+Breaking changes\n+----------------\n+\n+Version 2.0.0 of this module (and the current master branch in this repository) has been updated to use [git-validate](https://github.com/nlf/git-validate), as such the configuration key in package.json will be changed to \"pre-commit\" with a dash, instead of the old \"precommit\". All other functionality should work the same.\n+\n+Why should I use it?\n+--------------------\n+\n+No one likes a messy code base. When working on a team, it becomes more and more difficult to make sure that your project's code stays consistent and error free. Since the hook can lint all of the project's code, based on your configuration, you can be sure that at the very least standards are being followed. It can also run build steps, unit tests, or any other script you like.\n+\n+Having a tool that automates this process has been priceless for us, and has very much improved the quality of our code.\n+\n+Usage\n+-----\n+\n+When you install this project, by default it will create sane `.jshintignore` and `.jshintrc` files for you if they do not already exist. That means it's safe to upgrade the hook after customizing these files, as they will never be overwritten. If you have your jshint configuration in your package.json, then the `.jshintrc` file will not be created ever.\n+\n+A `.validate.json` file will also be created to provide *defaults* to [git-validate](https://github.com/nlf/git-validate) in order to run your scripts. This configuration is only used if you have not specified your own configuration in `package.json`.\n+\n+If you need to make changes to the hook's configuration, you should *always* make them in your `package.json` as the `.validate.json` file *will* be overwritten every time the install script is run.\n+\n+If you do not configure the hook with an array of scripts to run, it will default to `[\"lint\", \"validate\", \"test\"]` to maintain backwards compatibility with the old version of this hook. In addition, if a `lint` script is not specified, it will default to `\"jshint .\"`. If a `lint` script is configured, it will not be overridden. If an array of scripts is configured, it will be used and there will be no default `lint` script.\n+\n+Package.json\n+------------\n+\n+```javascript\n+{\n+  \"name\": \"your_project\",\n+  \"description\": \"just an example\",\n+  \"scripts\": {\n+    \"validate\": \"./command/to/run\",\n+    \"test\": \"./other/command\"\n+  }\n+}\n ```\n \n-To install it as `devDependency`.\n+The contents of the validate and test properties are the shell commands to perform those functions. Having these specified in your package.json also\n+lends you the ability to be able to run them manually like so:\n \n-### Configuration\n+```\n+npm run-script validate\n+npm test\n+```\n \n-`pre-commit` will try to run your `npm test` command by default. It does this by\n-running `npm run test` in the root of your git repository. It will only run that\n-command if it's not the default values that are entered when you issue an `npm\n-init`.\n+These scripts can be any shell executable commands, but must exit with a status code of 0 for success and 1 or greater for failure. The `PATH` environment variable used when executing these scripts will be similar to how npm configures it. That means if you `npm install jshint` locally to your project, you can put simply `\"jshint .\"` for your script rather than `\"./node_modules/.bin/jshint .\"`.\n \n-But `pre-commit` is not limited to just running your `npm test`'s during the\n-commit hook. It's also capable of running every other script that you've\n-specified in your `package.json` \"scripts\" field. The only thing you need to do\n-is add a `pre-commit` array to your `package.json` that specifies which scripts\n-you want to have ran and in which order:\n+You may configure what scripts will be run by the hook, by passing an array of script names to the `\"pre-commit\"` key in your package.json.\n \n-```js\n+```javascript\n {\n-  \"name\": \"437464d0899504fb6b7b\",\n-  \"version\": \"0.0.0\",\n-  \"description\": \"ERROR: No README.md file found!\",\n-  \"main\": \"index.js\",\n+  \"name\": \"your_project\",\n+  \"description\": \"just an example\",\n   \"scripts\": {\n-    \"test\": \"echo \\\"Error: no test specified\\\" && exit 1\",\n-    \"foo\": \"echo \\\"fooo\\\" && exit 0\",\n-    \"bar\": \"echo \\\"bar\\\" && exit 0\"\n+    \"lint\": \"jshint --with --different-options\",\n+    \"validate\": \"./command/to/run\",\n+    \"test\": \"./other/command\"\n",
+					"match": false,
+					"packageHash": "c609fdc01933d0ce3964f024cc280ffcfdf8e92e8fe5f30222f056093cf4c773",
+					"size": 1985,
+					"sourceHash": "36411f183fae9a4ac9772d949e3d4a1b03e95595ed260cfb62f83b2eb1e51f16",
+					"status": "content"
+				},
+				"hook": {
+					"match": false,
+					"packageHash": "1d0cd6651fa41d44e5b273d89a2e5d12980855cccaa5b541943bbc67c46c741d",
+					"size": 3159,
+					"status": "missing-in-source"
+				},
+				"install.js": {
+					"match": false,
+					"packageHash": "e47c2c7946545bf7dc43800369fc3e088730f59a0b21e30443dbd9c04b8b61da",
+					"size": 1218,
+					"status": "missing-in-source"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -1,22 +1,18 @@\n {\n-  \"name\": \"pre-commit\",\n-  \"version\": \"0.0.2\",\n-  \"description\": \"Automatically install pre-commit hooks for your npm modules.\",\n-  \"main\": \"index.js\",\n-  \"scripts\": {\n-    \"install\": \"node install\"\n-  },\n+  \"author\": \"Nathan LaFreniere <quitlahok@gmail.com> (https://github.com/nlf)\",\n+  \"name\": \"precommit-hook\",\n+  \"description\": \"A useful pre-commit hook for git based projects that lints and runs npm test\",\n+  \"version\": \"3.0.0\",\n+  \"license\": \"MIT\",\n+  \"homepage\": \"https://github.com/nlf/precommit-hook\",\n   \"repository\": {\n-    \"type\": \"git\",\n-    \"url\": \"git://github.com/nlf/precommit-hook.git\"\n+    \"url\": \"https://github.com/nlf/precommit-hook.git\"\n   },\n-  \"keywords\": [\n-    \"pre-commit\",\n-    \"precommit\",\n-    \"test\",\n-    \"npm\",\n-    \"run\"\n-  ],\n-  \"author\": \"Arnout Kazemier <opensource@observe.it>\",\n-  \"license\": \"MIT\"\n+  \"dependencies\": {\n+    \"git-validate\": \"^2.0.0\",\n+    \"jshint\": \"*\"\n+  },\n+  \"scripts\": {\n+    \"install\": \"node bin/install\"\n+  }\n }\n",
+					"match": false,
+					"packageHash": "887418cebc4b139df9552a015f9496b306907c680e2292f300dfa1ff3602e54e",
+					"size": 461,
+					"sourceHash": "93364e4aa92b1e111b50f35fec2559d5e28ab889e137522f945b5e5cdaa5bffa",
+					"status": "content"
+				},
+				"bin/install": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"jshintignore": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"jshintrc": {
+					"match": false,
+					"status": "missing-in-package"
+				}
+			},
+			"summary": {
+				"differentFiles": 2,
+				"matchingFiles": 0,
+				"missingInPackage": 3,
+				"missingInSource": 3,
+				"score": 0,
+				"totalFiles": 8
+			}
+		}
+	}
+]

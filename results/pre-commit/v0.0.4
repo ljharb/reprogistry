@@ -1,0 +1,111 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2025-12-31T11:18:50.825Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:11.7.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "pre-commit@0.0.4",
+			"name": "pre-commit",
+			"version": "0.0.4",
+			"location": "https://registry.npmjs.org/pre-commit/-/pre-commit-0.0.4.tgz",
+			"integrity": "sha512-sEM6xxVwusXsw77WuiPGwxcCTSvIp9gykbgmprayJ7pbKTcqrFsVMDRITlSmU+Svd3qrj9j+c5HiuzE72MrzbQ==",
+			"publishedAt": "2013-06-27T13:01:50.207Z",
+			"publishedWith": {
+				"node": null,
+				"npm": "1.1.71"
+			}
+		},
+		"source": {
+			"integrity": null,
+			"location": "git://github.com/observing/pre-commit.git",
+			"spec": "github:observing/pre-commit#HEAD"
+		},
+		"comparisonHash": "8a2a8dcbb729bf3ee9216e490c955701f0ddebe1",
+		"diff": {
+			"files": {
+				".npmignore": {
+					"match": false,
+					"packageHash": "16d30e4462189fb14dd611bdb708c510630c576a1f35b9383e89a4352da36c97",
+					"size": 13,
+					"status": "missing-in-source"
+				},
+				"CHANGELOG.md": {
+					"diff": "--- published/CHANGELOG.md\n+++ rebuilt/CHANGELOG.md\n@@ -1,10 +1,45 @@\n+## 1.0.2\n+- Check `/usr/local/bin/node` if we cannot find the binaries in the PATH.\n+\n+## 1.0.1\n+- Corrected the `hook` file so it doesn't attempt to run **your** index.js but\n+  **ours** instead.\n+\n+## 1.0\n+- Create symlinks instead of a copying the hook file so we can depend on\n+  modules.\n+- More readable output messages.\n+- Lookup git and npm using `which`.\n+- Allow nodejs, node and iojs to call the the hook.\n+- Refactored the way options can be passed in to pre-commit, we're now allowing\n+  objects.\n+- The refactor made it possible to test most of the internals so we now have\n+  90%+ coverage.\n+- And the list goes on. \n+\n+## 0.0.9\n+- Added missing uninstall hook to remove and restore old scripts.\n+\n+## 0.0.8\n+- Added support for installing custom commit templates using `pre-commit.commit-template`\n+\n+## 0.0.7\n+- Fixes regression introduced in 0.0.6\n+\n+## 0.0.6\n+- Also silence `npm` output when the silent flag has been given.\n+\n+## 0.0.5\n+- Allow silencing of the pre-commit output by setting a `precommit.silent: true`\n+  in your `package.json`\n+\n ## 0.0.4\n - Added a better error message when you fucked up your `package.json`.\n - Only run tests if there are changes.\n - Improved output formatting.\n \n ## 0.0.3\n-- Added compatiblity for Node.js 0.6 by falling back to path.existsSync.\n+- Added compatibility for Node.js 0.6 by falling back to path.existsSync.\n \n ## 0.0.2\n - Fixed a typo in the output, see #1.\n",
+					"match": false,
+					"packageHash": "9ea9e77cc26d2ef7ce1801ecbda34f049ba83cd266a0b7da28c68df87fcf7fe2",
+					"size": 456,
+					"sourceHash": "bd3064c75d39bd3efd25f1f331f9664ad65d0cb7d4e9ca069b517545bb9c3d0c",
+					"status": "content"
+				},
+				"README.md": {
+					"diff": "--- published/README.md\n+++ rebuilt/README.md\n@@ -1,33 +1,51 @@\n # pre-commit\n \n-A simple `pre-commit` hook installer for `git`. This will make sure that your\n-test suite passes before you can commit your changes. In addition to running\n-your `npm test` it also has the option to run custom scripts that you have\n-specified in your `package.json`.\n+[![Version npm][version]](http://browsenpm.org/package/pre-commit)[![Build Status][build]](https://travis-ci.org/observing/pre-commit)[![Dependencies][david]](https://david-dm.org/observing/pre-commit)[![Coverage Status][cover]](https://coveralls.io/r/observing/pre-commit?branch=master)\n+\n+[version]: http://img.shields.io/npm/v/pre-commit.svg?style=flat-square\n+[build]: http://img.shields.io/travis/observing/pre-commit/master.svg?style=flat-square\n+[david]: https://img.shields.io/david/observing/pre-commit.svg?style=flat-square\n+[cover]: http://img.shields.io/coveralls/observing/pre-commit/master.svg?style=flat-square\n+\n+**pre-commit** is a pre-commit hook installer for `git`. It will ensure that\n+your `npm test` (or other specified scripts) passes before you can commit your\n+changes. This all conveniently configured in your `package.json`.\n+\n+But don't worry, you can still force a commit by telling `git` to skip the\n+`pre-commit` hooks by simply committing using `--no-verify`.\n \n ### Installation\n \n-It's adviced to install this module as `devDependency` in your `package.json`\n-file so it doesn't get installed on production servers. Run:\n+It's advised to install the **pre-commit** module as a `devDependencies` in your\n+`package.json` as you only need this for development purposes. To install the\n+module simply run:\n \n ```\n-npm install pre-commit --save-dev\n+npm install --save-dev pre-commit\n ```\n \n-To install it as `devDependency`.\n+To install it as `devDependency`. When this module is installed it will override\n+the existing `pre-commit` file in your `.git/hooks` folder. Existing\n+`pre-commit` hooks will be backed up as `pre-commit.old` in the same repository.\n \n ### Configuration\n \n-`pre-commit` will try to run your `npm test` command by default. It does this by\n-running `npm run test` in the root of your git repository. It will only run that\n-command if it's not the default values that are entered when you issue an `npm\n-init`.\n+`pre-commit` will try to run your `npm test` command in the root of the git\n+repository by default unless it's the default value that is set by the `npm\n+init` script.\n \n But `pre-commit` is not limited to just running your `npm test`'s during the\n commit hook. It's also capable of running every other script that you've\n-specified in your `package.json` \"scripts\" field. The only thing you need to do\n-is add a `pre-commit` array to your `package.json` that specifies which scripts\n-you want to have ran and in which order:\n+specified in your `package.json` \"scripts\" field. So before people commit you\n+could ensure that:\n+\n+- You have 100% coverage\n+- All styling passes.\n+- JSHint passes.\n+- Contribution licenses signed etc.\n+\n+The only thing you need to do is add a `pre-commit` array to your `package.json`\n+that specifies which scripts you want to have ran and in which order:\n \n ```js\n {\n@@ -36,32 +54,73 @@\n   \"description\": \"ERROR: No README.md file found!\",\n   \"main\": \"index.js\",\n   \"scripts\": {\n-    \"test\": \"echo \\\"Error: no test specified\\\" && exit 1\",\n+    \"test\": \"echo \\\"Error: I SHOULD FAIL LOLOLOLOLOL \\\" && exit 1\",\n     \"foo\": \"echo \\\"fooo\\\" && exit 0\",\n     \"bar\": \"echo \\\"bar\\\" && exit 0\"\n   },\n-  \"repository\": {\n-    \"type\": \"git\",\n-    \"url\": \"https://gist.github.com/437464d0899504fb6b7b.git\"\n-  },\n   \"pre-commit\": [\n     \"foo\",\n     \"bar\",\n     \"test\"\n-  ],\n-  \"author\": \"\",\n-  \"license\": \"BSD\",\n-  \"gitHead\": \"6637d0771c3a89c4a60be087859dee5130f7a104\"\n+  ]\n }\n ```\n \n In the example above, it will first run: `npm run foo` then `npm run bar` and\n finally `npm run test` which will make the commit fail as it returns the error\n-code `1`.\n+code `1`.  If you prefer strings over arrays or `precommit` without a middle\n+dash, that also works:\n+\n",
+					"match": false,
+					"packageHash": "c609fdc01933d0ce3964f024cc280ffcfdf8e92e8fe5f30222f056093cf4c773",
+					"size": 1985,
+					"sourceHash": "1658f5be73d353bdfe8850094d9f61a93999d0ae7a99cc81c3c419832afbb1e7",
+					"status": "content"
+				},
+				"hook": {
+					"diff": "--- published/hook\n+++ rebuilt/hook\n@@ -1,164 +1,50 @@\n-#!/usr/bin/env node\n+#!/usr/bin/env bash\n \n-'use strict';\n+HAS_NODE=`which node 2> /dev/null || which nodejs 2> /dev/null || which iojs 2> /dev/null`\n \n-var child = require('child_process');\n-\n-//\n-// Get the root of the repository.\n-//\n-child.exec('git status --porcelain', function chagnes(err, status) {\n-  if (err) {\n-    console.error('pre-commit: Failed to find git root. Cannot run the tests.');\n-    return process.exit(1);\n-  }\n-\n-  if (!status.trim().length) {\n-    console.log('');\n-    console.log('pre-commit: No changes detected, bailing out.');\n-    console.log('');\n-    return;\n-  }\n-\n-  child.exec('git rev-parse --show-toplevel', run);\n-});\n-\n-/**\n- * You've failed on some of the scripts, output how much you've sucked today.\n- *\n- * @param {Error} err The actual error.\n- * @api private\n- */\n-function failure(err) {\n-  console.error('');\n-  console.error('pre-commit: You\\'ve failed to pass all the hooks.');\n-  console.error('pre-commit:');\n-\n-  if (err.ran) {\n-    console.error('pre-commit: The \"npm run '+ err.ran +'\" script failed.');\n-  } else {\n-    var stack = err.stack.split('\\n')\n-    console.error('pre-commit: An Error was thrown: '+ stack.shift());\n-    console.error('pre-commit:');\n-    stack.forEach(function trace(line) {\n-      console.error('pre-commit:   '+ line.trim());\n-    });\n-  }\n-  console.error('pre-commit:');\n-  console.error('pre-commit: You can skip the git pre-commit hook by running:');\n-  console.error('pre-commit:');\n-  console.error('pre-commit:   git commit -n (--no-verify)');\n-  console.error('pre-commit:');\n-  console.error('pre-commit: But this is not adviced as your tests are obviously failing.');\n-  console.error('');\n-  process.exit(1);\n+#\n+# There are some issues with Source Tree because paths are not set correctly for\n+# the given environment. Sourcing the bash_profile seems to resolve this for bash users,\n+# sourcing the zshrc for zshell users.\n+#\n+# https://answers.atlassian.com/questions/140339/sourcetree-hook-failing-because-paths-don-t-seem-to-be-set-correctly\n+#\n+function source_home_file {\n+  file=\"$HOME/$1\"\n+  [[ -f \"${file}\" ]] && source \"${file}\"\n }\n \n-/**\n- * Run the set pre-commit hooks.\n- *\n- * @param {Error} err The error that happend while executing the command.\n- * @param {Error} output The output of rev-parse.\n- * @api private\n- */\n-function run(err, output) {\n-  if (err) {\n-    console.error('');\n-    console.error('pre-commit: Failed to find git root. Cannot run the tests.');\n-    console.error('');\n-    return process.exit(1);\n-  }\n-\n-  //\n-  // Check if there are scripts specified that we need to run.\n-  //\n-  var root = output.trim()\n-    , run = []\n-    , pkg;\n-\n-  //\n-  // Bail-out when we failed to parse the package.json, there is probably a some\n-  // funcky chars in there.\n-  //\n-  try { pkg = require(root +'/package.json'); }\n-  catch (e) { return failure(e); }\n-\n",
+					"match": false,
+					"packageHash": "80ef0fa3950a4a29728e36ab043251e218339c6716bf73adba3ad0975c15dfa4",
+					"size": 4396,
+					"sourceHash": "3a326c4ca351839ea37d695e5986d6248e63db69ef0a9cc00ff076e225731cc8",
+					"status": "content"
+				},
+				"install.js": {
+					"diff": "--- published/install.js\n+++ rebuilt/install.js\n@@ -1,56 +1,130 @@\n 'use strict';\n \n-var path = require('path')\n-  , fs = require('fs');\n-\n //\n-// Compatiblity with older node.js.\n+// Compatibility with older node.js as path.exists got moved to `fs`.\n //\n-var existsSync = fs.existsSync || path.existsSync;\n+var fs = require('fs')\n+  , path = require('path')\n+  , os = require('os')\n+  , hook = path.join(__dirname, 'hook')\n+  , root = path.resolve(__dirname, '..', '..')\n+  , exists = fs.existsSync || path.existsSync;\n \n //\n-// Our own pre-commit hook runner.\n+// Gather the location of the possible hidden .git directory, the hooks\n+// directory which contains all git hooks and the absolute location of the\n+// `pre-commit` file. The path needs to be absolute in order for the symlinking\n+// to work correctly.\n //\n-var hook = fs.readFileSync('./hook');\n \n-//\n-// The root of repository.\n-//\n-var root = path.resolve(__dirname, '../..');\n+var git = getGitFolderPath(root);\n \n-//\n-// The location .git and it's hooks\n-//\n-var git = path.resolve(root, '.git')\n-  , hooks = path.resolve(git, 'hooks')\n-  , precommit = path.resolve(hooks, 'pre-commit');\n+// Function to recursively finding .git folder\n+function getGitFolderPath(currentPath) {\n+  var git = path.resolve(currentPath, '.git')\n+\n+  if (!exists(git) || !fs.lstatSync(git).isDirectory()) {\n+    console.log('pre-commit:');\n+    console.log('pre-commit: Not found .git folder in', git);\n+    \n+    var newPath = path.resolve(currentPath, '..');\n+\n+    // Stop if we on top folder\n+    if (currentPath === newPath) {\n+      return null;\n+    }\n+\n+    return getGitFolderPath(newPath);\n+  }\n+\n+  console.log('pre-commit:');\n+  console.log('pre-commit: Found .git folder in', git);\n+  return git;\n+}\n \n //\n-// Check if we are in a git repository so we can bail out early when this is not\n-// the case.\n+// Resolve git directory for submodules\n //\n-if (!existsSync(git) || !fs.lstatSync(git).isDirectory()) return;\n+if (exists(git) && fs.lstatSync(git).isFile()) {\n+  var gitinfo = fs.readFileSync(git).toString()\n+    , gitdirmatch = /gitdir: (.+)/.exec(gitinfo)\n+    , gitdir = gitdirmatch.length == 2 ? gitdirmatch[1] : null;\n+\n+  if (gitdir !== null) {\n+    git = path.resolve(root, gitdir);\n+    hooks = path.resolve(git, 'hooks');\n+    precommit = path.resolve(hooks, 'pre-commit');\n+  }\n+}\n \n //\n-// Create a hooks directory if it's missing.\n+// Bail out if we don't have an `.git` directory as the hooks will not get\n+// triggered. If we do have directory create a hooks folder if it doesn't exist.\n //\n-if (!existsSync(hooks)) fs.mkdirSync(hooks);\n+if (!git) {\n+  console.log('pre-commit:');\n+  console.log('pre-commit: Not found any .git folder for installing pre-commit hook');\n+  return;\n+}\n+\n+var hooks = path.resolve(git, 'hooks')\n+  , precommit = path.resolve(hooks, 'pre-commit');\n+\n+if (!exists(hooks)) fs.mkdirSync(hooks);\n \n //\n",
+					"match": false,
+					"packageHash": "351f8e8115fd56c62c3d884c79bda375171350bb2e692e9bf13b14d65ab22564",
+					"size": 1341,
+					"sourceHash": "c2c0964a6ad912a5e49ba2e5506870ad9efb6396a4b9168ae86133c2d44b72f8",
+					"status": "content"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -1,25 +1,43 @@\n {\n   \"name\": \"pre-commit\",\n-  \"version\": \"0.0.4\",\n+  \"version\": \"1.2.2\",\n   \"description\": \"Automatically install pre-commit hooks for your npm modules.\",\n   \"main\": \"index.js\",\n   \"scripts\": {\n-    \"install\": \"node install\"\n+    \"coverage\": \"istanbul cover ./node_modules/.bin/_mocha -- test.js\",\n+    \"example-fail\": \"echo \\\"This is the example hook, I exit with 1\\\" && exit 1\",\n+    \"example-pass\": \"echo \\\"This is the example hook, I exit with 0\\\" && exit 0\",\n+    \"install\": \"node install.js\",\n+    \"test\": \"mocha test.js\",\n+    \"test-travis\": \"istanbul cover node_modules/.bin/_mocha --report lcovonly -- test.js\",\n+    \"uninstall\": \"node uninstall.js\"\n   },\n   \"repository\": {\n     \"type\": \"git\",\n     \"url\": \"git://github.com/observing/pre-commit.git\"\n   },\n   \"keywords\": [\n+    \"git\",\n+    \"hooks\",\n+    \"npm\",\n     \"pre-commit\",\n     \"precommit\",\n+    \"run\",\n     \"test\",\n-    \"npm\",\n-    \"run\"\n+    \"development\"\n   ],\n   \"author\": \"Arnout Kazemier <opensource@observe.it>\",\n+  \"homepage\": \"https://github.com/observing/pre-commit\",\n   \"license\": \"MIT\",\n+  \"dependencies\": {\n+    \"cross-spawn\": \"^5.0.1\",\n+    \"spawn-sync\": \"^1.0.15\",\n+    \"which\": \"1.2.x\"\n+  },\n   \"devDependencies\": {\n+    \"assume\": \"~1.5.0\",\n+    \"istanbul\": \"0.4.x\",\n+    \"mocha\": \"~3.3.0\",\n     \"pre-commit\": \"git://github.com/observing/pre-commit.git\"\n   }\n }\n",
+					"match": false,
+					"packageHash": "e188a7720d612ea2508ea6a62cc6a3ab7ba7aea415e2ffb72434358b0876b00c",
+					"size": 553,
+					"sourceHash": "272283d655f4527bc6e4b94c7de55e2181d6789e4e65278535c35f3db10f6f8c",
+					"status": "content"
+				},
+				".travis.yml": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"LICENSE": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"appveyor.yml": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"index.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"uninstall.js": {
+					"match": false,
+					"status": "missing-in-package"
+				}
+			},
+			"summary": {
+				"differentFiles": 5,
+				"matchingFiles": 0,
+				"missingInPackage": 6,
+				"missingInSource": 1,
+				"score": 0,
+				"totalFiles": 12
+			}
+		}
+	}
+]
