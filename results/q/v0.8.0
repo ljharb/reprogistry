@@ -1,0 +1,87 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2025-12-31T11:53:51.166Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:11.7.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "q@0.8.0",
+			"name": "q",
+			"version": "0.8.0",
+			"location": "https://registry.npmjs.org/q/-/q-0.8.0.tgz",
+			"integrity": "sha512-w+r3Fo/LvKdflzpU0SH9KzYrkEAy2q2cSaqOVeoH57KOrfzdzIZS9I0f5sOMSCv0mF7yT2IPDeX0TiIlDeQMag==",
+			"publishedAt": "2011-12-27T01:36:27.834Z",
+			"publishedWith": {
+				"node": "v0.4.12",
+				"npm": "1.0.103"
+			}
+		},
+		"source": {
+			"integrity": "sha512-bipxyKvN1Sw8asiwd/4JViQkTZObkCXZ51muHsj4jIfiwpKHzj/ueCzL7JoInVYqkbYFapuU5uQ9gQk9GMQp1Q==",
+			"location": "git://github.com/kriskowal/q.git",
+			"spec": "github:kriskowal/q#v0.8.0"
+		},
+		"comparisonHash": "8a2a8dcbb729bf3ee9216e490c955701f0ddebe1",
+		"diff": {
+			"files": {
+				".gitignore": {
+					"match": false,
+					"packageHash": "5d9b7fec5a28c1d412ba317c016d7cec22b3119b9dbe4c1d8d21b5fe554366ef",
+					"size": 38,
+					"status": "missing-in-source"
+				},
+				"README.md": {
+					"diff": "--- published/README.md\n+++ rebuilt/README.md\n@@ -449,7 +449,6 @@\n -   ``promise`` property\n -   ``resolve(value)`` function\n -   ``reject(reason)`` function\n--   ``node()`` function\n \n The promise is suitable for passing as a value to the\n ``when`` function, among others.\n@@ -478,9 +477,6 @@\n safe to call ``when`` on a promise regardless of whether it\n has been or will be resolved.\n \n-Calling ``node()`` returns a callback suitable for passing\n-to a Node function.\n-\n \n THIS IS COOL\n \n@@ -703,13 +699,22 @@\n rejected.\n \n \n-## ``fail(promise, callback())``\n+## ``wait(...objects)``\n \n-Accepts a promise and captures rejection with the callback,\n-giving the callback an opportunity to recover from the\n-failure.  If the promise gets rejected, the return value of\n-the callback resolves the returned promise.  Otherwise, the\n-fulfillment gets forwarded.\n+Returns a promise for the fulfilled value of the first\n+object when all of the objects have been fulfilled, or the\n+rejection of the first object to be rejected from left to\n+right.\n+\n+\n+## ``join(...objects, callback(...objects))``\n+\n+Returns a promise for the value eventually fulfilled by the\n+return value of the callback, or the rejection of the first\n+object to be rejected from left to right.  If and when all\n+of the variadic object arguments have been fulfilled, the\n+callback is called with the respective fulfillment values\n+variadically.\n \n \n ## ``fin(promise, callback())``\n@@ -751,50 +756,6 @@\n further information.\n \n \n-## ``node(nodeFunction)``\n-\n-Wraps a Node function so that it returns a promise instead\n-of accepting a callback.\n-\n-```javascript\n-var readFile = FS.node(FS.readFile);\n-readFile(\"foo.txt\")\n-.then(function (text) {\n-});\n-```\n-\n-The ``this`` of the call gets forwarded.\n-\n-```javascript\n-var readFile = FS.node(FS.readFile);\n-FS.readFile.call(FS, \"foo.txt\")\n-.then(function (text) {\n-});\n-```\n-\n-The ``node`` call can also be used to bind and partially\n-apply.\n-\n-```javascript\n-var readFoo = FS.node(FS.readFile, FS, \"foo.txt\");\n-readFoo()\n-.then(function (text) {\n-});\n-```\n-\n-\n-## ``ncall(nodeFunction, thisp, ...args)``\n-\n-Calls a Node function, returning a promise so you don’t have\n-to pass a callback.\n-\n-```javascript\n-Q.ncall(FS.readFile, FS, \"foo.txt\")\n-.then(function (text) {\n-});\n-```\n-\n-\n Chaining\n --------\n \n",
+					"match": false,
+					"packageHash": "09d19f5d9275aab86808a484561efd280dfe0ec0602cf4edf151ee35108a38ad",
+					"size": 24881,
+					"sourceHash": "9fc68f445a07aa7ebd24549ba6b13128fb671bb585d6daa3187381648f7ee671",
+					"status": "content"
+				},
+				"TODO": {
+					"match": false,
+					"packageHash": "12c580ebd46d6dfcc4a31abf7c8dddc6848d4cc8142667e602fab3355d9b2c02",
+					"size": 699,
+					"status": "missing-in-source"
+				},
+				"markm-mzero.js": {
+					"match": false,
+					"packageHash": "751a731caa6a3929b1c9ffa6c4dd893f76aac2c6c59edaa34a53f57d1a7468e6",
+					"size": 7123,
+					"status": "missing-in-source"
+				},
+				"q.js": {
+					"diff": "--- published/q.js\n+++ rebuilt/q.js\n@@ -426,7 +426,7 @@\n  * additionally responds to the 'isDef' message\n  * without a rejection.\n  */\n-exports.master = master;\n+exports.master =\n function master(object) {\n     return Promise({\n         \"isDef\": function () {}\n@@ -457,8 +457,7 @@\n     }\n }\n \n-exports.view = view;\n-function view(object) {\n+exports.view = function (object) {\n     return viewInfo(object).when(function (info) {\n         var view;\n         if (info.type === \"function\") {\n@@ -478,7 +477,7 @@\n         });\n         return ref(view);\n     });\n-}\n+};\n \n /**\n  * Registers an observer on a promise.\n",
+					"match": false,
+					"packageHash": "e6878cbb236be612d3960b115961e0f77b4a5eb015074e781a54c3e3acd73744",
+					"size": 26586,
+					"sourceHash": "d72324f37b5dae25a94496e208e4b9f479d31eb2a2e4a2271e6a02d54725ccf3",
+					"status": "content"
+				},
+				"test/map.js": {
+					"match": false,
+					"packageHash": "18ed62a2880bf0d760589f4e871008878fd70e2cc3b86eccf686e55142eaca1a",
+					"size": 411,
+					"status": "missing-in-source"
+				},
+				"test/stream.js": {
+					"match": false,
+					"packageHash": "b77a384fa9db574de757b3c35bd3071e92a9a813ec7b694a8c405ff95e1e8542",
+					"size": 4118,
+					"status": "missing-in-source"
+				}
+			},
+			"summary": {
+				"differentFiles": 2,
+				"matchingFiles": 44,
+				"missingInPackage": 0,
+				"missingInSource": 5,
+				"score": 0.8627450980392157,
+				"totalFiles": 51
+			}
+		}
+	}
+]

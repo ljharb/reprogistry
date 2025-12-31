@@ -1,0 +1,165 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2025-12-31T11:56:35.784Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:11.7.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "q@2.0.1",
+			"name": "q",
+			"version": "2.0.1",
+			"location": "https://registry.npmjs.org/q/-/q-2.0.1.tgz",
+			"integrity": "sha512-mducABHkPccH7jtrs6n+UHtVBnNrc2GMh8iNt4HdsP70rL+9eg8Ek4JeLWrusmOffgo8TTN7RiU1aWs4evOpYQ==",
+			"publishedAt": "2014-03-20T19:47:25.188Z",
+			"publishedWith": {
+				"node": null,
+				"npm": "1.4.4"
+			}
+		},
+		"source": {
+			"integrity": null,
+			"location": "git://github.com/kriskowal/q.git",
+			"spec": "github:kriskowal/q#HEAD"
+		},
+		"comparisonHash": "8a2a8dcbb729bf3ee9216e490c955701f0ddebe1",
+		"diff": {
+			"files": {
+				"CONTRIBUTING.md": {
+					"match": false,
+					"packageHash": "f6034348067657b33ade895b7295a84de36cd3a9b139704bdb5d19022828f494",
+					"size": 1729,
+					"status": "missing-in-source"
+				},
+				"LICENSE": {
+					"diff": "--- published/LICENSE\n+++ rebuilt/LICENSE\n@@ -1,4 +1,4 @@\n-Copyright 2009–2014 Kristopher Michael Kowal. All rights reserved.\n+Copyright 2009–2018 Kristopher Michael Kowal. All rights reserved.\n Permission is hereby granted, free of charge, to any person obtaining a copy\n of this software and associated documentation files (the \"Software\"), to\n deal in the Software without restriction, including without limitation the\n",
+					"match": false,
+					"packageHash": "904877456859b3c702a0d46d9b29c190bbd60eef23eabe480bc93a9b98ac763a",
+					"size": 1092,
+					"sourceHash": "ae6158a7752e8b79d182a300476160091d63484bb8b44a8ac941de563f63d6d5",
+					"status": "content"
+				},
+				"README.md": {
+					"diff": "--- published/README.md\n+++ rebuilt/README.md\n@@ -1,23 +1,21 @@\n-[![Build Status](https://secure.travis-ci.org/kriskowal/q.png?branch=master)](http://travis-ci.org/kriskowal/q)\n+\n+## Note\n+\n+Please consider using [JavaScript promises](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise) instead of Q. Native promises are faster, have better tooling support and are the future.\n+\n+When work on Q began, promises were an academic novelty in JavaScript, unlikely to be adopted much less popular, though obviously full of…promise. Callbacks dominated the landscape. Q aimed to introduce a technology to JavaScript that had been proven and vetted in languages like E and C♯. With four years of incubation, evangelism, education, and feedback, promises became part of the language. Every modern browser contains a built-in `Promise` implementation. Being able to influence the internet and working on a library used by millions of codebases was an exciting and humbling experience.\n+\n+Q isn't going anywhere. The code is still here and bugs will be fixed but further development has been unnecessary for many years. We encourage you to read the code and the explainers to glimpse into the history of the internet.\n+\n+# Q\n+\n+[![Build Status](https://secure.travis-ci.org/kriskowal/q.svg?branch=master)](http://travis-ci.org/kriskowal/q)\n+[![CDNJS](https://img.shields.io/cdnjs/v/q.js.svg)](https://cdnjs.com/libraries/q.js)\n \n <a href=\"http://promises-aplus.github.com/promises-spec\">\n-    <img src=\"http://promises-aplus.github.com/promises-spec/assets/logo-small.png\"\n-         align=\"right\" alt=\"Promises/A+ logo\" />\n+    <img src=\"http://kriskowal.github.io/q/q.png\" align=\"right\" alt=\"Q logo\" />\n </a>\n \n-*:warning: This is Q version 2 and is experimental at this time. If you install\n-the latest Q from `npm`, you will get the latest from the [version 1][v1]\n-release train. You will get the lastet of version 2 if you use `npm install\n-q@~2`. Consult [CHANGES.md][] for details on what has changed*\n-\n-*Among the significant differences in version 2, the source is CommonJS only and\n-versions suitable for use with AMD and plain `<script>` tags are built and\n-published for [download][] with each release.*\n-\n-[v1]: https://github.com/kriskowal/q/tree/v1\n-[download]: http://q-releases.s3-website-us-west-1.amazonaws.com/\n-[CHANGES.md]: https://github.com/kriskowal/q/blob/v2/CHANGES.md\n-\n If a function cannot return a value or throw an exception without\n blocking, it can return a promise instead.  A promise is an object\n that represents the return value or the thrown exception that the\n@@ -26,20 +24,67 @@\n \n [Q-Connection]: https://github.com/kriskowal/q-connection\n \n+On the first pass, promises can mitigate the “[Pyramid of\n+Doom][POD]”: the situation where code marches to the right faster\n+than it marches forward.\n+\n+[POD]: http://calculist.org/blog/2011/12/14/why-coroutines-wont-work-on-the-web/\n+\n+```javascript\n+step1(function (value1) {\n+    step2(value1, function(value2) {\n+        step3(value2, function(value3) {\n+            step4(value3, function(value4) {\n+                // Do something with value4\n+            });\n+        });\n+    });\n+});\n+```\n+\n+With a promise library, you can flatten the pyramid.\n+\n+```javascript\n+Q.fcall(promisedStep1)\n+.then(promisedStep2)\n+.then(promisedStep3)\n+.then(promisedStep4)\n+.then(function (value4) {\n+    // Do something with value4\n+})\n+.catch(function (error) {\n+    // Handle any error from all above steps\n+})\n+.done();\n+```\n+\n+With this approach, you also get implicit error propagation, just like `try`,\n+`catch`, and `finally`.  An error in `promisedStep1` will flow all the way to\n+the `catch` function, where it’s caught and handled.  (Here `promisedStepN` is\n+a version of `stepN` that returns a promise.)\n+\n+The callback approach is called an “inversion of control”.\n+A function that accepts a callback instead of a return value\n+is saying, “Don’t call me, I’ll call you.”.  Promises\n+[un-invert][IOC] the inversion, cleanly separating the input\n+arguments from control flow arguments.  This simplifies the\n+use and creation of API’s, particularly variadic,\n+rest and spread arguments.\n+\n+[IOC]: http://www.slideshare.net/domenicdenicola/callbacks-promises-and-coroutines-oh-my-the-evolution-of-asynchronicity-in-javascript\n+\n \n ## Getting Started\n \n The Q module can be loaded as:\n \n -   A ``<script>`` tag (creating a ``Q`` global variable): ~2.5 KB minified and\n-    gzipped.  Download the latest of [version\n",
+					"match": false,
+					"packageHash": "339c3411a0e000122d48a402e2a01ffd4275269b2d8a77f743e0e604bb175928",
+					"size": 28317,
+					"sourceHash": "98ba56dd20f6a5065de6e963364af3a9ace22a009f50ecbf8efcaa1d88d17953",
+					"status": "content"
+				},
+				"benchmark/compare-with-callbacks.js": {
+					"match": false,
+					"packageHash": "6216b5c1f21f0d0bedcd30194d84668ff920cec19bfddc4d16275e211e6f9597",
+					"size": 1902,
+					"status": "missing-in-source"
+				},
+				"benchmark/scenarios.js": {
+					"match": false,
+					"packageHash": "d71c740bfe66d29fd6293e9eeb0e93c3225abdb3b81e350afa4d7bc637c7fcc0",
+					"size": 950,
+					"status": "missing-in-source"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -1,6 +1,6 @@\n {\n   \"name\": \"q\",\n-  \"version\": \"2.0.1\",\n+  \"version\": \"1.5.1\",\n   \"description\": \"A library for promises (CommonJS/Promises/A,B,D)\",\n   \"homepage\": \"https://github.com/kriskowal/q\",\n   \"author\": \"Kris Kowal <kris@cixar.com> (https://github.com/kriskowal)\",\n@@ -23,45 +23,45 @@\n     \"Irakli Gozalishvili <rfobic@gmail.com> (http://jeditoolkit.com)\",\n     \"Domenic Denicola <domenic@domenicdenicola.com> (http://domenicdenicola.com)\"\n   ],\n-  \"credits\": [\n-    \"Mark Miller <erights@google.com>\",\n-    \"Tyler Close\"\n-  ],\n-  \"license\": {\n-    \"type\": \"MIT\",\n-    \"url\": \"http://github.com/kriskowal/q/raw/master/LICENSE\"\n+  \"bugs\": {\n+    \"mail\": \"kris@cixar.com\",\n+    \"url\": \"http://github.com/kriskowal/q/issues\"\n   },\n+  \"license\": \"MIT\",\n+  \"main\": \"q.js\",\n+  \"files\": [\n+    \"LICENSE\",\n+    \"q.js\",\n+    \"queue.js\"\n+  ],\n   \"repository\": {\n     \"type\": \"git\",\n     \"url\": \"git://github.com/kriskowal/q.git\"\n   },\n-  \"main\": \"q.js\",\n-  \"dependencies\": {\n-    \"asap\": \"^1.0.0\",\n-    \"collections\": \"^2.0.0\"\n+  \"engines\": {\n+    \"node\": \">=0.6.0\",\n+    \"teleport\": \">=0.2.0\"\n   },\n+  \"dependencies\": {},\n   \"devDependencies\": {\n-    \"jshint\": \"^2.4.4\",\n-    \"jasminum\": \"^2.0.1\",\n-    \"opener\": \"^1.3.0\",\n-    \"promises-aplus-tests\": \"^1.0.2\",\n-    \"istanbul\": \"^0.2.4\",\n-    \"matcha\": \"^0.2.0\",\n-    \"grunt\": \"^0.4.1\",\n-    \"grunt-cli\": \"^0.1.9\",\n-    \"grunt-contrib-uglify\": \"^0.2.2\",\n-    \"grunt-contrib-clean\": \"^0.5.0\",\n-    \"grunt-global-wrap\": \"^1.1.0\",\n-    \"grunt-amd-wrap\": \"^1.0.0\",\n-    \"grunt-s3\": \"^0.2.0-alpha.2\"\n+    \"cover\": \"*\",\n+    \"grunt\": \"~0.4.1\",\n+    \"grunt-cli\": \"~0.1.9\",\n+    \"grunt-contrib-uglify\": \"~0.9.1\",\n+    \"jasmine-node\": \"1.11.0\",\n+    \"jshint\": \"~2.1.9\",\n+    \"matcha\": \"~0.2.0\",\n+    \"opener\": \"*\",\n+    \"promises-aplus-tests\": \"1.x\"\n   },\n   \"scripts\": {\n+    \"test\": \"npm ls -s && jasmine-node spec && promises-aplus-tests spec/aplus-adapter && npm run -s lint\",\n+    \"test-browser\": \"opener spec/q-spec.html\",\n+    \"benchmark\": \"matcha\",\n     \"lint\": \"jshint q.js\",\n-    \"test\": \"npm run lint && jasminum test && promises-aplus-tests test/aplus-adapter\",\n-    \"test:phantom\": \"jasminum-phantom test\",\n-    \"cover\": \"istanbul cover test/index.js && istanbul report html && opener coverage/index.html\",\n-    \"release\": \"grunt release\",\n-    \"benchmark\": \"matcha\"\n+    \"cover\": \"cover run jasmine-node spec && cover report html && opener cover_html/index.html\",\n+    \"minify\": \"grunt\",\n+    \"prepublish\": \"grunt\"\n   },\n   \"overlay\": {\n     \"teleport\": {\n@@ -70,7 +70,7 @@\n       }\n     }\n   },\n-  \"volo\": {\n-    \"url\": \"http://q-releases.s3-website-us-west-1.amazonaws.com/{version}/amd/q.js\"\n+  \"directories\": {\n+    \"test\": \"./spec\"\n   }\n }\n",
+					"match": false,
+					"packageHash": "e5638f21093c54fe9ed1601c7faff880739a85328156f3be25ef5ce7d6daa2a7",
+					"size": 1997,
+					"sourceHash": "b6488e00b593d5ef2e1aeccbeda3b93247327e60fc97e3e0c0ac374ff09395eb",
+					"status": "content"
+				},
+				"q.js": {
+					"diff": "--- published/q.js\n+++ rebuilt/q.js\n@@ -1,8 +1,8 @@\n // vim:ts=4:sts=4:sw=4:\n /*!\n  *\n- * Copyright 2009-2013 Kris Kowal under the terms of the MIT\n- * license found at http://github.com/kriskowal/q/raw/master/LICENSE\n+ * Copyright 2009-2017 Kris Kowal under the terms of the MIT\n+ * license found at https://github.com/kriskowal/q/blob/v1/LICENSE\n  *\n  * With parts by Tyler Close\n  * Copyright 2007-2009 Tyler Close under the terms of the MIT X license found\n@@ -25,7 +25,58 @@\n  * limitations under the License.\n  *\n  */\n-/*global -WeakMap */\n+\n+(function (definition) {\n+    \"use strict\";\n+\n+    // This file will function properly as a <script> tag, or a module\n+    // using CommonJS and NodeJS or RequireJS module formats.  In\n+    // Common/Node/RequireJS, the module exports the Q API and when\n+    // executed as a simple <script>, it creates a Q global instead.\n+\n+    // Montage Require\n+    if (typeof bootstrap === \"function\") {\n+        bootstrap(\"promise\", definition);\n+\n+    // CommonJS\n+    } else if (typeof exports === \"object\" && typeof module === \"object\") {\n+        module.exports = definition();\n+\n+    // RequireJS\n+    } else if (typeof define === \"function\" && define.amd) {\n+        define(definition);\n+\n+    // SES (Secure EcmaScript)\n+    } else if (typeof ses !== \"undefined\") {\n+        if (!ses.ok()) {\n+            return;\n+        } else {\n+            ses.makeQ = definition;\n+        }\n+\n+    // <script>\n+    } else if (typeof window !== \"undefined\" || typeof self !== \"undefined\") {\n+        // Prefer window over self for add-on scripts. Use self for\n+        // non-windowed contexts.\n+        var global = typeof window !== \"undefined\" ? window : self;\n+\n+        // Get the `window` object, save the previous Q global\n+        // and initialize Q as a global.\n+        var previousQ = global.Q;\n+        global.Q = definition();\n+\n+        // Add a noConflict function so Q can be removed from the\n+        // global namespace.\n+        global.Q.noConflict = function () {\n+            global.Q = previousQ;\n+            return this;\n+        };\n+\n+    } else {\n+        throw new Error(\"This environment was not anticipated by Q. Please file a bug.\");\n+    }\n+\n+})(function () {\n \"use strict\";\n \n var hasStacks = false;\n@@ -40,15 +91,286 @@\n var qStartingLine = captureLine();\n var qFileName;\n \n-require(\"collections/shim\");\n-var WeakMap = require(\"collections/weak-map\");\n-var Iterator = require(\"collections/iterator\");\n-var asap = require(\"asap\");\n+// shims\n+\n+// used for fallback in \"allResolved\"\n+var noop = function () {};\n+\n+// Use the fastest possible means to execute a task in a future turn\n+// of the event loop.\n+var nextTick =(function () {\n+    // linked list of tasks (single, with head node)\n+    var head = {task: void 0, next: null};\n+    var tail = head;\n+    var flushing = false;\n+    var requestTick = void 0;\n+    var isNodeJS = false;\n+    // queue for late tasks, used by unhandled rejection tracking\n+    var laterQueue = [];\n+\n+    function flush() {\n+        /* jshint loopfunc: true */\n",
+					"match": false,
+					"packageHash": "c57ca9c2276f254008bc8837332a352ef932c08b4c1079ba70f14a16e94cc378",
+					"size": 52871,
+					"sourceHash": "25a5551262a6f03b47ae8aa9416551874b0c9de7c2bfd2a9f762612d987a50ad",
+					"status": "content"
+				},
+				"queue.js": {
+					"diff": "--- published/queue.js\n+++ rebuilt/queue.js\n@@ -1,25 +1,35 @@\n-\"use strict\";\n \n var Q = require(\"./q\");\n \n module.exports = Queue;\n function Queue() {\n-    if (!(this instanceof Queue)) {\n-        return new Queue();\n-    }\n     var ends = Q.defer();\n-    this.put = function (value) {\n-        var next = Q.defer();\n-        ends.resolve({\n-            head: value,\n-            tail: next.promise\n-        });\n-        ends.resolve = next.resolve;\n-    };\n-    this.get = function () {\n-        var result = ends.promise.get(\"head\");\n-        ends.promise = ends.promise.get(\"tail\");\n-        return result;\n+    var closed = Q.defer();\n+    return {\n+        put: function (value) {\n+            var next = Q.defer();\n+            ends.resolve({\n+                head: value,\n+                tail: next.promise\n+            });\n+            ends.resolve = next.resolve;\n+        },\n+        get: function () {\n+            var result = ends.promise.get(\"head\");\n+            ends.promise = ends.promise.get(\"tail\");\n+            return result.fail(function (error) {\n+                closed.resolve(error);\n+                throw error;\n+            });\n+        },\n+        closed: closed.promise,\n+        close: function (error) {\n+            error = error || new Error(\"Can't get value from closed queue\");\n+            var end = {head: Q.reject(error)};\n+            end.tail = end;\n+            ends.resolve(end);\n+            return closed.promise;\n+        }\n     };\n }\n \n",
+					"match": false,
+					"packageHash": "73a01d347cc53ebc54066ee95ea83d28621ec0a305ff9a152979b13c8312b4a4",
+					"size": 536,
+					"sourceHash": "fe4f9a6fd833631e7398c65e54067d166b752d5cbb2ca46dc1aa4394ea53a99b",
+					"status": "content"
+				},
+				"test/aplus-adapter.js": {
+					"match": false,
+					"packageHash": "e6294fccbd9b754dc7e96f2bc66f09be8da660fc27bdd1742cfcd04160d4b936",
+					"size": 281,
+					"status": "missing-in-source"
+				},
+				"test/domain-test.js": {
+					"match": false,
+					"packageHash": "12dbc09a26c4bc8bb90c2d0f5dd034e2945c28d44597a4a75bd6e0bc23515896",
+					"size": 2592,
+					"status": "missing-in-source"
+				},
+				"test/eta-test.js": {
+					"match": false,
+					"packageHash": "234a7d4bb287306db22514df97199cbb7a6727fbb35678dde135d827043595e8",
+					"size": 12616,
+					"status": "missing-in-source"
+				},
+				"test/index.css": {
+					"match": false,
+					"packageHash": "d74bd72210f618f842faa6a02e5d93e2c905005230b38a190cbfc6e44bd10670",
+					"size": 175,
+					"status": "missing-in-source"
+				},
+				"test/index.html": {
+					"match": false,
+					"packageHash": "7ca0af7b318404d81ed3c93ce96551276bfd9eb97900d4d6e7095abc2fdff31d",
+					"size": 305,
+					"status": "missing-in-source"
+				},
+				"test/index.js": {
+					"match": false,
+					"packageHash": "ae2f0fcdf4fc6872af753bfce73d81f2476502d63829dfe3163390cffb3410e4",
+					"size": 727,
+					"status": "missing-in-source"
+				},
+				"test/never-again-test.js": {
+					"match": false,
+					"packageHash": "7a51be1993acbb77a52b977ab9f395112340bfe242b423a6d5ee977538f45d83",
+					"size": 2188,
+					"status": "missing-in-source"
+				},
+				"test/node-test.js": {
+					"match": false,
+					"packageHash": "1ce92d04a9c95f82f59cabadc5559506b688ba8393b0049907d9a10830754f67",
+					"size": 8016,
+					"status": "missing-in-source"
+				},
+				"test/q-test.js": {
+					"match": false,
+					"packageHash": "e82a80c6a12a24045cd28b75ac4f3dc0c7d8f7b42be887b4588502b0dcd6d4bf",
+					"size": 44244,
+					"status": "missing-in-source"
+				},
+				"test/queue-test.js": {
+					"match": false,
+					"packageHash": "e192c485ea33736c60ff3f687d5ba6897e8f3bd6f9b5cc45b36c97001b4fde96",
+					"size": 2444,
+					"status": "missing-in-source"
+				},
+				"test/traces-test.js": {
+					"match": false,
+					"packageHash": "3bacd5c93d8f72e539cef303ad9cc723763eb6e042bc18e5a04c2ae113bf1cc7",
+					"size": 825,
+					"status": "missing-in-source"
+				}
+			},
+			"summary": {
+				"differentFiles": 5,
+				"matchingFiles": 0,
+				"missingInPackage": 0,
+				"missingInSource": 14,
+				"score": 0,
+				"totalFiles": 19
+			}
+		}
+	}
+]

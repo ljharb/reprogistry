@@ -1,0 +1,299 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2025-12-31T11:53:38.572Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:11.7.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "q@0.5.2",
+			"name": "q",
+			"version": "0.5.2",
+			"location": "https://registry.npmjs.org/q/-/q-0.5.2.tgz",
+			"integrity": "sha512-8hO1mL5NU1geQFbh7wOqobzXtTZy7an8GrG1STF8W9+J2ExHmpAjQEhIOzRMoKBZorWEkFF6tO9cV2x1RF2Kmg==",
+			"publishedAt": "2011-06-17T21:20:13.186Z",
+			"publishedWith": {
+				"node": "v0.4.7",
+				"npm": "1.0.6"
+			}
+		},
+		"source": {
+			"integrity": null,
+			"location": "git://github.com/kriskowal/q.git",
+			"spec": "github:kriskowal/q#HEAD"
+		},
+		"comparisonHash": "8a2a8dcbb729bf3ee9216e490c955701f0ddebe1",
+		"diff": {
+			"files": {
+				".gitignore": {
+					"match": false,
+					"packageHash": "16d30e4462189fb14dd611bdb708c510630c576a1f35b9383e89a4352da36c97",
+					"size": 13,
+					"status": "missing-in-source"
+				},
+				"CHANGES": {
+					"match": false,
+					"packageHash": "40aee76c388d5a1b5eb3461cec83a6f5ac4db59109e6cdfe6e1937fb5c026177",
+					"size": 8365,
+					"status": "missing-in-source"
+				},
+				"LICENSE": {
+					"diff": "--- published/LICENSE\n+++ rebuilt/LICENSE\n@@ -1,5 +1,4 @@\n-\n-Copyright 2009, 2010 Kristopher Michael Kowal. All rights reserved.\n+Copyright 2009–2018 Kristopher Michael Kowal. All rights reserved.\n Permission is hereby granted, free of charge, to any person obtaining a copy\n of this software and associated documentation files (the \"Software\"), to\n deal in the Software without restriction, including without limitation the\n",
+					"match": false,
+					"packageHash": "b9db14ab1db6d769f184558b9f7e109c94f7b939ab5e5b766aa9f8e0261551a0",
+					"size": 1092,
+					"sourceHash": "ae6158a7752e8b79d182a300476160091d63484bb8b44a8ac941de563f63d6d5",
+					"status": "content"
+				},
+				"README.md": {
+					"diff": "--- published/README.md\n+++ rebuilt/README.md\n@@ -1,763 +1,885 @@\n \n-Q is a tool for making and composing asynchronous promises in\n-JavaScript.\n+## Note\n \n-An asynchronous promise is an object that represents the eventual\n-return value (fulfillment) or thrown exception of (rejection) of a\n-function that could not respond before returning without blocking,\n-like file system, inter-process, and network operations.  An eventual\n-\"resolution\" is either a fulfillment or a rejection.\n+Please consider using [JavaScript promises](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise) instead of Q. Native promises are faster, have better tooling support and are the future.\n \n-The Q module can be loaded as:\n-\n--   a ``<script>`` tag (creating a ``Q`` global variable)\n--   a NodeJS module, or generally a CommonJS module,\n-    available from NPM as the ``q`` package.\n--   a RequireJS module\n-\n-Q is designed to work well with jQuery, Dojo, and as part of an\n-ecosystem of NodeJS NPM packages, many of which also work in browsers,\n-including:\n-\n--   [qq](https://github.com/kriskowal/qq)\n-    infinite queues, deep and shallow object resolution,\n-    map/reduce helpers, lazy objects (/!\\ This was\n-    originally ``q/util`` in this package, but has moved\n-    into its own home due to changes in NPM 1.)\n--   [q-fs](https://github.com/kriskowal/q-fs)\n-    file system\n--   [q-http](https://github.com/kriskowal/q-http)\n-    http client and server\n--   [q-comm](https://github.com/kriskowal/q-comm)\n-    remote objects\n--   [jaque](https://github.com/kriskowal/jaque)\n-    promising HTTP server, JSGI middleware\n--   [teleport](https://github.com/gozala/teleport)\n-    browser-side module promises\n-\n-Q conforms to many proposed standards, mostly by Kris Zyp and myself,\n-with mentoring from Mark Miller: [UncommonJS/Promises][]\n-[CommonJS/Promises/A][], [CommonJS/Promises/B][], and\n-[CommonJS/Promises/D][].  Q is based on Tyler Close's ``ref_send``\n-API for [Waterken][].\n-\n-[UncommonJS/Promises]: https://github.com/kriskowal/uncommonjs/blob/master/promises/specification.md\n-[CommonJS/Promises/A]: http://wiki.commonjs.org/wiki/Promises/A\n-[CommonJS/Promises/B]: http://wiki.commonjs.org/wiki/Promises/B\n-[CommonJS/Promises/D]: http://wiki.commonjs.org/wiki/Promises/D\n-[Waterken]: http://waterken.sourceforge.net/\n-\n-\n-EXAMPLES\n---------\n-\n-## ``defer``\n-\n-This example provides a promise-oriented ``delay`` function\n-based on the callback-oriented ``setTimeout`` function.\n-\n-    function delay(ms) {\n-        var deferred = Q.defer();\n-        setTimeout(deferred.resolve, ms);\n-        return deferred.promise;\n-    }\n+When work on Q began, promises were an academic novelty in JavaScript, unlikely to be adopted much less popular, though obviously full of…promise. Callbacks dominated the landscape. Q aimed to introduce a technology to JavaScript that had been proven and vetted in languages like E and C♯. With four years of incubation, evangelism, education, and feedback, promises became part of the language. Every modern browser contains a built-in `Promise` implementation. Being able to influence the internet and working on a library used by millions of codebases was an exciting and humbling experience.\n \n+Q isn't going anywhere. The code is still here and bugs will be fixed but further development has been unnecessary for many years. We encourage you to read the code and the explainers to glimpse into the history of the internet.\n \n-This example takes a promise and returns a promise that will\n-be rejected if the given promise is not fulfilled in a\n-timely fashion.\n-\n-    function timeout(promise, ms) {\n-        var deferred = Q.defer();\n-        Q.when(promise, deferred.resolve);\n-        Q.when(delay(ms), function () {\n-            deferred.reject(\"Timed out\");\n-        });\n-        return deferred.promise;\n-    }\n-\n-\n-This example wraps Node's file listing function, returning a\n-promise instead of accepting a callback.\n-\n-    var FS = require(\"fs\"); // from Node\n-\n-    function list(path) {\n-        path = String(path);\n-        var result = Q.defer();\n-        FS.readdir(path, function (error, list) {\n-            if (error)\n-                return result.reject(error);\n-            else\n-                result.resolve(list);\n-        });\n",
+					"match": false,
+					"packageHash": "1b592601585bbf44cc60be817cbf854de1198632bec78f9d6b1e7277e8b732da",
+					"size": 23406,
+					"sourceHash": "98ba56dd20f6a5065de6e963364af3a9ace22a009f50ecbf8efcaa1d88d17953",
+					"status": "content"
+				},
+				"README2": {
+					"match": false,
+					"packageHash": "3954624cfd2589d78a4a09fba594def010b085d5d0d7742e6c6607df304ba9ef",
+					"size": 2709,
+					"status": "missing-in-source"
+				},
+				"design/README.js": {
+					"match": false,
+					"packageHash": "eb11e5bf16315facdf338dbe2b19ff60e99a48ed462185bcea8ebaa4e3109257",
+					"size": 32670,
+					"status": "missing-in-source"
+				},
+				"design/nano-q.js": {
+					"match": false,
+					"packageHash": "6b90e1e7c2c3edd112b1b959d52dda9c9392b65d88d15302d531355a4e51097b",
+					"size": 1059,
+					"status": "missing-in-source"
+				},
+				"design/nano-q.min.js": {
+					"match": false,
+					"packageHash": "5d05f8170d311a8635b9cd930aa6cf0c6951a5b5449553c57a606fae0f65eb1f",
+					"size": 125,
+					"status": "missing-in-source"
+				},
+				"design/nano-test.js": {
+					"match": false,
+					"packageHash": "a39b45e3500a73876abfdb46805be65c80f5c1bb40a84db87efb2089d555e83e",
+					"size": 288,
+					"status": "missing-in-source"
+				},
+				"design/q0.js": {
+					"match": false,
+					"packageHash": "82b2f8cec57f2824fdd579199bc2d2e47bf95d10a64f675d082dcb7313e1664b",
+					"size": 523,
+					"status": "missing-in-source"
+				},
+				"design/q1.js": {
+					"match": false,
+					"packageHash": "18f04f91cab85c6c55761c2861c7098031781274e6d7aa06b1462de647d047ad",
+					"size": 682,
+					"status": "missing-in-source"
+				},
+				"design/q2.js": {
+					"match": false,
+					"packageHash": "6ada5c22fb874e2ab5d81936f5f3c5075f0d19f638842f5d98e52b03c3b553db",
+					"size": 737,
+					"status": "missing-in-source"
+				},
+				"design/q3.js": {
+					"match": false,
+					"packageHash": "7312bb51f0338f165ecfbe9f7b084f50cce1b69700be6765ab8e5f6a797a83a9",
+					"size": 739,
+					"status": "missing-in-source"
+				},
+				"design/q4.js": {
+					"match": false,
+					"packageHash": "5e8020fb4fbc169830d3af83bd6cc4bfcf763e45c5da76719a62398c03cd7347",
+					"size": 1388,
+					"status": "missing-in-source"
+				},
+				"design/q5.js": {
+					"match": false,
+					"packageHash": "76b623f69f9b2dda5e36101e03cadc4728c0c73ce7b389490ad5bdba848e6b76",
+					"size": 1503,
+					"status": "missing-in-source"
+				},
+				"design/q6.js": {
+					"match": false,
+					"packageHash": "93d75ff47701719e63c3341e90809214ee7cadee0ddfacdca38c40709e622037",
+					"size": 1842,
+					"status": "missing-in-source"
+				},
+				"design/q7.js": {
+					"match": false,
+					"packageHash": "91d3c5cd9e1620dc6a9e054f8503ab876555e316076111506b512214929ade0b",
+					"size": 3286,
+					"status": "missing-in-source"
+				},
+				"examples/delay.js": {
+					"match": false,
+					"packageHash": "7f04765de576b0f58caaafc86b04836d81a20a4d1c379f6be1c60e60ebfb920d",
+					"size": 211,
+					"status": "missing-in-source"
+				},
+				"examples/join.js": {
+					"match": false,
+					"packageHash": "97f6362149096cb2af7a09a4925d63ef778932c592a6ac45b1b3948aa23f83cc",
+					"size": 330,
+					"status": "missing-in-source"
+				},
+				"examples/shallow-deep.js": {
+					"match": false,
+					"packageHash": "534735c8f8b5dfb3816c7a627e726ff26d9b08a99849ce61b5ecd81129dba5da",
+					"size": 668,
+					"status": "missing-in-source"
+				},
+				"examples/step1.js": {
+					"match": false,
+					"packageHash": "0ff9ec0df072094f6cd8a5895ffa9ab712fe4a45352186bd8fe2a88ca1990702",
+					"size": 247,
+					"status": "missing-in-source"
+				},
+				"examples/step2.js": {
+					"match": false,
+					"packageHash": "6fca149a67abb2e34a576c3dde368f55d66749c18d6fd01567ef2237e69f1c97",
+					"size": 328,
+					"status": "missing-in-source"
+				},
+				"examples/step3.js": {
+					"match": false,
+					"packageHash": "0728814bb45cdeb2dcfbfb6ecb47cd9d382932aa78a7a7bc0bd4cc07d0b7c519",
+					"size": 471,
+					"status": "missing-in-source"
+				},
+				"examples/then1.js": {
+					"match": false,
+					"packageHash": "74fa7fa0623ab583b37d05565f9c653c481d0490d550b1f29239c0503dc47022",
+					"size": 187,
+					"status": "missing-in-source"
+				},
+				"examples/then2.js": {
+					"match": false,
+					"packageHash": "1b9c4922a268e3223bf0994d09de405e872a534c481dc37c71788247296f8937",
+					"size": 284,
+					"status": "missing-in-source"
+				},
+				"examples/then3.js": {
+					"match": false,
+					"packageHash": "50dc4fa5804c1920e8e9a982f93ac28c4249be4fe8c206fe6b264cf015fcbf7d",
+					"size": 416,
+					"status": "missing-in-source"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -1,54 +1,76 @@\n {\n-    \"name\": \"q\",\n-    \"description\": \"A library for promises (CommonJS/Promises/A,B,D)\",\n-    \"version\": \"0.5.2\",\n-    \"homepage\": \"http://github.com/kriskowal/q/\",\n-    \"author\": \"Kris Kowal <kris@cixar.com> (http://github.com/kriskowal/)\",\n-    \"contributors\": [\n-        \"Kris Kowal <kris@cixar.com> (http://github.com/kriskowal/)\",\n-        \"Irakli Gozalishvili <rfobic@gmail.com> (http://jeditoolkit.com)\"\n-    ],\n-    \"bugs\": {\n-        \"mail\": \"kris@cixar.com\",\n-        \"web\": \"http://github.com/kriskowal/q/issues\"\n-    },\n-    \"licenses\": [\n-        {\n-            \"type\": \"MIT\",\n-            \"url\": \"http://github.com/kriskowal/q/raw/master/LICENSE\"\n-        }\n-    ],\n-    \"main\": \"q.js\",\n-    \"repository\": {\n-        \"type\": \"git\",\n-        \"url\": \"http://github.com/kriskowal/q.git\"\n-    },\n-    \"engines\": {\n-        \"node\": \">=0.2.0\",\n-        \"teleport\": \">=0.2.0\"\n-    },\n-    \"dependencies\": {\n-        \"test\": \">=0.0.7\",\n-        \"event-queue\": \">=0.0.1\"\n-    },\n-    \"devDependencies\": {\n-        \"uglify-js\": \">= 0.0.5\"\n-    },\n-    \"scripts\": {\n-        \"prepublish\": \"uglifyjs -o q.min.js -nc q.js\"\n-    },\n-    \"overlay\": {\n-        \"teleport\": {\n-            \"dependencies\": {\n-                \"event-queue\": \">=0.0.1\",\n-                \"system\": \">=0.0.4\"\n-            }\n-        }\n-    },\n-    \"directories\": {\n-        \"test\": \"./test\"\n-    },\n-    \"scripts\": {\n-        \"test\": \"node test/all.js\"\n+  \"name\": \"q\",\n+  \"version\": \"1.5.1\",\n+  \"description\": \"A library for promises (CommonJS/Promises/A,B,D)\",\n+  \"homepage\": \"https://github.com/kriskowal/q\",\n+  \"author\": \"Kris Kowal <kris@cixar.com> (https://github.com/kriskowal)\",\n+  \"keywords\": [\n+    \"q\",\n+    \"promise\",\n+    \"promises\",\n+    \"promises-a\",\n+    \"promises-aplus\",\n+    \"deferred\",\n+    \"future\",\n+    \"async\",\n+    \"flow control\",\n+    \"fluent\",\n+    \"browser\",\n+    \"node\"\n+  ],\n+  \"contributors\": [\n+    \"Kris Kowal <kris@cixar.com> (https://github.com/kriskowal)\",\n+    \"Irakli Gozalishvili <rfobic@gmail.com> (http://jeditoolkit.com)\",\n+    \"Domenic Denicola <domenic@domenicdenicola.com> (http://domenicdenicola.com)\"\n+  ],\n+  \"bugs\": {\n+    \"mail\": \"kris@cixar.com\",\n+    \"url\": \"http://github.com/kriskowal/q/issues\"\n+  },\n+  \"license\": \"MIT\",\n+  \"main\": \"q.js\",\n+  \"files\": [\n+    \"LICENSE\",\n+    \"q.js\",\n+    \"queue.js\"\n+  ],\n+  \"repository\": {\n+    \"type\": \"git\",\n+    \"url\": \"git://github.com/kriskowal/q.git\"\n+  },\n+  \"engines\": {\n+    \"node\": \">=0.6.0\",\n+    \"teleport\": \">=0.2.0\"\n+  },\n+  \"dependencies\": {},\n+  \"devDependencies\": {\n",
+					"match": false,
+					"packageHash": "e802bf7aa6fda5e417cbc271b5d353effa4cce3a766dd4ed57a26c00eb5f7a9d",
+					"size": 1388,
+					"sourceHash": "b6488e00b593d5ef2e1aeccbeda3b93247327e60fc97e3e0c0ac374ff09395eb",
+					"status": "content"
+				},
+				"q.js": {
+					"diff": "--- published/q.js\n+++ rebuilt/q.js\n@@ -1,489 +1,1394 @@\n // vim:ts=4:sts=4:sw=4:\n /*!\n  *\n+ * Copyright 2009-2017 Kris Kowal under the terms of the MIT\n+ * license found at https://github.com/kriskowal/q/blob/v1/LICENSE\n+ *\n+ * With parts by Tyler Close\n  * Copyright 2007-2009 Tyler Close under the terms of the MIT X license found\n  * at http://www.opensource.org/licenses/mit-license.html\n  * Forked at ref_send.js version: 2009-05-11\n  *\n- * Copyright 2009-2011 Kris Kowal under the terms of the MIT\n- * license found at http://github.com/kriskowal/q/raw/master/LICENSE\n+ * With parts by Mark Miller\n+ * Copyright (C) 2011 Google Inc.\n+ *\n+ * Licensed under the Apache License, Version 2.0 (the \"License\");\n+ * you may not use this file except in compliance with the License.\n+ * You may obtain a copy of the License at\n+ *\n+ * http://www.apache.org/licenses/LICENSE-2.0\n+ *\n+ * Unless required by applicable law or agreed to in writing, software\n+ * distributed under the License is distributed on an \"AS IS\" BASIS,\n+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n+ * See the License for the specific language governing permissions and\n+ * limitations under the License.\n  *\n  */\n \n-(function (definition, undefined) {\n+(function (definition) {\n+    \"use strict\";\n \n     // This file will function properly as a <script> tag, or a module\n     // using CommonJS and NodeJS or RequireJS module formats.  In\n     // Common/Node/RequireJS, the module exports the Q API and when\n     // executed as a simple <script>, it creates a Q global instead.\n \n-    // The use of \"undefined\" in the arguments is a\n-    // micro-optmization for compression systems, permitting\n-    // every occurrence of the \"undefined\" variable bo be\n-    // replaced with a single-character.\n+    // Montage Require\n+    if (typeof bootstrap === \"function\") {\n+        bootstrap(\"promise\", definition);\n \n-    // RequireJS\n-    if (typeof define === \"function\") {\n-        define(function (require, exports) {\n-            definition(require, exports);\n-        });\n     // CommonJS\n-    } else if (typeof exports === \"object\") {\n-        definition(require, exports);\n+    } else if (typeof exports === \"object\" && typeof module === \"object\") {\n+        module.exports = definition();\n+\n+    // RequireJS\n+    } else if (typeof define === \"function\" && define.amd) {\n+        define(definition);\n+\n+    // SES (Secure EcmaScript)\n+    } else if (typeof ses !== \"undefined\") {\n+        if (!ses.ok()) {\n+            return;\n+        } else {\n+            ses.makeQ = definition;\n+        }\n+\n     // <script>\n+    } else if (typeof window !== \"undefined\" || typeof self !== \"undefined\") {\n+        // Prefer window over self for add-on scripts. Use self for\n+        // non-windowed contexts.\n+        var global = typeof window !== \"undefined\" ? window : self;\n+\n+        // Get the `window` object, save the previous Q global\n+        // and initialize Q as a global.\n+        var previousQ = global.Q;\n+        global.Q = definition();\n+\n+        // Add a noConflict function so Q can be removed from the\n+        // global namespace.\n+        global.Q.noConflict = function () {\n+            global.Q = previousQ;\n+            return this;\n+        };\n+\n     } else {\n-        definition(undefined, Q = {});\n+        throw new Error(\"This environment was not anticipated by Q. Please file a bug.\");\n     }\n \n-})(function (serverSideRequire, exports, undefined) {\n+})(function () {\n \"use strict\";\n \n",
+					"match": false,
+					"packageHash": "b6635cae2e291a2687e102c83bde63bae8b9ac1584909bb6925f73269ef658e8",
+					"size": 20536,
+					"sourceHash": "25a5551262a6f03b47ae8aa9416551874b0c9de7c2bfd2a9f762612d987a50ad",
+					"status": "content"
+				},
+				"q.min.js": {
+					"match": false,
+					"packageHash": "a51c96d5272692a8e06d43c755762552550805bc49053b4b60535b05774d642b",
+					"size": 4964,
+					"status": "missing-in-source"
+				},
+				"ref_send.md": {
+					"match": false,
+					"packageHash": "611d562c4a55542798fc1dd45000bcb20d46cfb1e049818708976022941252b7",
+					"size": 1202,
+					"status": "missing-in-source"
+				},
+				"test/all.js": {
+					"match": false,
+					"packageHash": "19994d4fbd15d95143b09ce1d31605e1a7d3b69eaf65826a55de799c5c784be7",
+					"size": 531,
+					"status": "missing-in-source"
+				},
+				"test/asap.js": {
+					"match": false,
+					"packageHash": "6e66800de13a7e3c504f0f048345132437a636318c06d9e715ee9ff6e2f5ad1f",
+					"size": 2527,
+					"status": "missing-in-source"
+				},
+				"test/issue/9.js": {
+					"match": false,
+					"packageHash": "f10848c4d2ee4c1682da793d4059a81de415ba1123756da1b316438ad470a286",
+					"size": 424,
+					"status": "missing-in-source"
+				},
+				"test/join.js": {
+					"match": false,
+					"packageHash": "12de7c8d3dd24980e5d87b7e2f477f2eb446a27c063d676e834f3e02d0063c92",
+					"size": 135,
+					"status": "missing-in-source"
+				},
+				"test/methods.js": {
+					"match": false,
+					"packageHash": "a13956df4b7d227fc5490fce1f3dc562d6b21078dd0d1ec255e850b025529734",
+					"size": 3976,
+					"status": "missing-in-source"
+				},
+				"test/multiple-listeners.js": {
+					"match": false,
+					"packageHash": "ebf68db3ba4bfedd0788f425ffdc933989286de9703f849560d05e6413a510b5",
+					"size": 1397,
+					"status": "missing-in-source"
+				},
+				"test/promised-chains.js": {
+					"match": false,
+					"packageHash": "37d67b90cd1f43d1469b9402c92e419a495b90259ab15f3c62f39dfd73c47ca6",
+					"size": 2947,
+					"status": "missing-in-source"
+				},
+				"test/reject.js": {
+					"match": false,
+					"packageHash": "b4e157ea7c488cab5aa25979d981c85cdb509a63370c324b60722f076265ea63",
+					"size": 1781,
+					"status": "missing-in-source"
+				},
+				"test/resolve-reject.js": {
+					"match": false,
+					"packageHash": "b4bed08e5d625e8af547730486fbc67af4b2ef9af4f989cb630943a9a3215093",
+					"size": 2841,
+					"status": "missing-in-source"
+				},
+				"test/thenable.js": {
+					"match": false,
+					"packageHash": "8bd6dc333987e9e59e4c711b8d0589c1bee5051a1b6d1402dbcaed24c1fba389",
+					"size": 710,
+					"status": "missing-in-source"
+				},
+				"test/value-of.js": {
+					"match": false,
+					"packageHash": "682476a5de82b5fe9189c4c74a7a1f30fdbace1d1a1ba6825e65b32bca77e54a",
+					"size": 954,
+					"status": "missing-in-source"
+				},
+				"queue.js": {
+					"match": false,
+					"status": "missing-in-package"
+				}
+			},
+			"summary": {
+				"differentFiles": 4,
+				"matchingFiles": 0,
+				"missingInPackage": 1,
+				"missingInSource": 37,
+				"score": 0,
+				"totalFiles": 42
+			}
+		}
+	}
+]
