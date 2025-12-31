@@ -1,0 +1,89 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2025-12-31T10:24:06.590Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:11.7.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "pg@0.6.15",
+			"name": "pg",
+			"version": "0.6.15",
+			"location": "https://registry.npmjs.org/pg/-/pg-0.6.15.tgz",
+			"integrity": "sha512-ZCwfV4N2LOz9WXRrik4Cl7CMIuYQEru5dc/3Z5Lg+Kg2//y5zqpYbgu75cU9R4nAEDurtJB3UJY8/qBWokaWow==",
+			"publishedAt": "2012-03-21T03:55:39.019Z",
+			"publishedWith": {
+				"node": "v0.6.7",
+				"npm": "1.0.106"
+			}
+		},
+		"source": {
+			"integrity": "sha512-lcrQRfcccNjFmlaLaKqAoAdWXMDLC8npCo/dy8Vwrw3wdLqSVaEMtnMogvral/sSWcZA8E1AeET6hof4kbzQmA==",
+			"location": "git://github.com/brianc/node-postgres.git",
+			"spec": "github:brianc/node-postgres#v0.6.15"
+		},
+		"comparisonHash": "8a2a8dcbb729bf3ee9216e490c955701f0ddebe1",
+		"diff": {
+			"files": {
+				".gitignore": {
+					"match": false,
+					"packageHash": "2ebd8b1fc98b186a2f7af019191155d5aa89684ff237acd1b2cd52cd0d5fd1e4",
+					"size": 47,
+					"status": "missing-in-source"
+				},
+				".npmignore": {
+					"match": false,
+					"packageHash": "5db0e26988ee083f767e7cbfa33c70900c8d7957fc6907d5875b626200d7119e",
+					"size": 21,
+					"status": "missing-in-source"
+				},
+				"lib/textParsers.js": {
+					"diff": "--- published/lib/textParsers.js\n+++ rebuilt/lib/textParsers.js\n@@ -107,12 +107,19 @@\n   }).replace(/\\\\\\\\/g, \"\\\\\"), \"binary\");\n }\n \n+var maxLen = Number.MAX_VALUE.toString().length\n+\n var init = function(register) {\n     register(20, parseInt);\n     register(21, parseInt);\n     register(23, parseInt);\n     register(26, parseInt);\n-    register(1700, parseFloat);\n+    register(1700, function(val){\n+      if(val.length > maxLen) {\n+        console.warn('WARNING: value %s is longer than max supported numeric value in javascript. Possible data loss', val)\n+      }\n+      return parseFloat(val);\n+    });\n     register(700, parseFloat);\n     register(701, parseFloat);\n     register(16, parseBool);\n",
+					"match": false,
+					"packageHash": "05b0d04f850ffdfaa68201dd72b4ada1428c6a83ffd99c8fee95427989d52e77",
+					"size": 3583,
+					"sourceHash": "8dbafe5566691935c62215085970c81f2118eab6b272c1c3ef1176fcebc81728",
+					"status": "content"
+				},
+				"lib/types.js": {
+					"diff": "--- published/lib/types.js\n+++ rebuilt/lib/types.js\n@@ -20,6 +20,14 @@\n   return typeParsers[format][oid] || noParse;\n };\n \n+var setTypeParser = function(oid, format, parseFn) {\n+  if(typeof format == 'function') {\n+    parseFn = format;\n+    format = 'text';\n+  }\n+  typeParsers[format][oid] = parseFn;\n+}\n+\n textParsers.init(function(oid, converter) {\n   typeParsers.text[oid] = function(value) {\n     return converter(String(value));\n@@ -32,4 +40,5 @@\n \n module.exports = {\n   getTypeParser: getTypeParser,\n+  setTypeParser: setTypeParser\n }\n",
+					"match": false,
+					"packageHash": "28927af4bca9130e7747523fbc6f19b7f6a9e08a1c3e8202f4d47d5db8813c6f",
+					"size": 767,
+					"sourceHash": "c0b8c612b154d09cb77726055d25fd08274600cd3f576dca6dbe37becbe3ae64",
+					"status": "content"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -1,5 +1,5 @@\n { \"name\": \"pg\",\n-  \"version\": \"0.6.15\",\n+  \"version\": \"0.6.16\",\n   \"description\": \"PostgreSQL client - pure javascript & libpq with the same API\",\n   \"keywords\" : [\"postgres\", \"pg\", \"libpq\", \"postgre\", \"database\", \"rdbms\"],\n   \"homepage\": \"http://github.com/brianc/node-postgres\",\n",
+					"match": false,
+					"packageHash": "68b8e7f1deffc2d7fc634fda18e25299f420c62dd80331d2db704bd12337e814",
+					"size": 628,
+					"sourceHash": "6baa183c0e2063a6cbd4709cb3f5d555ea411bd7b589233a4ce35d323bbe0faf",
+					"status": "content"
+				},
+				"script/list-db-types.js": {
+					"diff": "--- published/script/list-db-types.js\n+++ rebuilt/script/list-db-types.js\n@@ -1,6 +1,6 @@\n var helper = require(__dirname + \"/../test/integration/test-helper\");\n var pg = helper.pg;\n-pg.connect(helper.connectionString(), assert.success(function(client) {\n+pg.connect(helper.config, assert.success(function(client) {\n   var query = client.query('select oid, typname from pg_type where typtype = \\'b\\' order by oid');\n   query.on('row', console.log);\n }))\n",
+					"match": false,
+					"packageHash": "35121facc2e69edc4ea3aa0ce76660d9c44bde7a0d749b852d9fd337e2972894",
+					"size": 297,
+					"sourceHash": "f807f73919b658924437ca09d354926162a97ce608979b1b0c610b86b8811a37",
+					"status": "content"
+				},
+				"test/integration/client/huge-numeric-tests.js": {
+					"match": false,
+					"status": "missing-in-package"
+				}
+			},
+			"summary": {
+				"differentFiles": 4,
+				"matchingFiles": 82,
+				"missingInPackage": 1,
+				"missingInSource": 2,
+				"score": 0.9213483146067416,
+				"totalFiles": 89
+			}
+		}
+	}
+]
