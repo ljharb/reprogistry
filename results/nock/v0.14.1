@@ -1,0 +1,179 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2025-12-31T09:31:33.431Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:11.7.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "nock@0.14.1",
+			"name": "nock",
+			"version": "0.14.1",
+			"location": "https://registry.npmjs.org/nock/-/nock-0.14.1.tgz",
+			"integrity": "sha512-zI3IRdZwemmIzabHP2nKh1kDgXfay1bProZq+uDg8EqpSMEoXDgzTTAbSRK/fjCXCGZWbqYSqH5Q7SFGLU+cUg==",
+			"publishedAt": "2012-12-03T16:03:52.116Z",
+			"publishedWith": {
+				"node": null,
+				"npm": "1.1.65"
+			}
+		},
+		"source": {
+			"integrity": "sha512-5NHPj7O3xUKa2XPyojACD/eQ4tClzXgZJLHEHJMrYlTPb2dOdOnjaF6XnkjO/2vmOC+ja39+B2Xucl9hLB2ZBA==",
+			"location": "http://github.com/flatiron/nock.git",
+			"spec": "github:flatiron/nock#HEAD"
+		},
+		"comparisonHash": "8a2a8dcbb729bf3ee9216e490c955701f0ddebe1",
+		"diff": {
+			"files": {
+				".npmignore": {
+					"match": false,
+					"packageHash": "02826e9dd87a3a8499fd5a13db5fef08737972a0f2ab880928c7611f8897abad",
+					"size": 24,
+					"status": "missing-in-source"
+				},
+				".travis.yml": {
+					"match": false,
+					"packageHash": "070dffc7dc13bf0be3cefbef8f39ce015537ad397abb812e2cad8f1df9f459e1",
+					"size": 43,
+					"status": "missing-in-source"
+				},
+				"README.md": {
+					"diff": "--- published/README.md\n+++ rebuilt/README.md\n@@ -1,164 +1,768 @@\n-# Nock [![Build Status](https://secure.travis-ci.org/flatiron/nock.png)](http://travis-ci.org/flatiron/nock)\n+# Nock\n \n-Nock is an HTTP mocking and expectations library for Node.js\n+[![npm](https://img.shields.io/npm/v/nock.svg)][npmjs]\n+![Coverage Status](http://img.shields.io/badge/coverage-100%25-brightgreen.svg)\n+[![Backers on Open Collective](https://opencollective.com/nock/backers/badge.svg)](#backers)\n+[![Sponsors on Open Collective](https://opencollective.com/nock/sponsors/badge.svg)](#sponsors)\n+\n+[npmjs]: https://www.npmjs.com/package/nock\n+\n+HTTP server mocking and expectations library for Node.js\n \n Nock can be used to test modules that perform HTTP requests in isolation.\n \n For instance, if a module performs HTTP requests to a CouchDB server or makes HTTP requests to the Amazon API, you can test that module in isolation.\n \n-# Install\n+**Table of Contents**\n+\n+<!-- toc -->\n+\n+- [How does it work?](#how-does-it-work)\n+- [Install](#install)\n+  - [Node version support](#node-version-support)\n+- [Usage](#usage)\n+  - [READ THIS! - About interceptors](#read-this---about-interceptors)\n+  - [Specifying hostname](#specifying-hostname)\n+  - [Specifying path](#specifying-path)\n+  - [Specifying request body](#specifying-request-body)\n+  - [Specifying request query string](#specifying-request-query-string)\n+  - [Specifying replies](#specifying-replies)\n+    - [Access original request and headers](#access-original-request-and-headers)\n+    - [Replying with errors](#replying-with-errors)\n+  - [Specifying headers](#specifying-headers)\n+    - [Header field names are case-insensitive](#header-field-names-are-case-insensitive)\n+    - [Specifying Request Headers](#specifying-request-headers)\n+    - [Specifying Reply Headers](#specifying-reply-headers)\n+    - [Default Reply Headers](#default-reply-headers)\n+    - [Including Content-Length Header Automatically](#including-content-length-header-automatically)\n+    - [Including Date Header Automatically](#including-date-header-automatically)\n+  - [HTTP Verbs](#http-verbs)\n+  - [Support for HTTP and HTTPS](#support-for-http-and-https)\n+  - [Non-standard ports](#non-standard-ports)\n+  - [Repeat response n times](#repeat-response-n-times)\n+  - [Delay the response](#delay-the-response)\n+    - [Delay the connection](#delay-the-connection)\n+      - [Technical Details](#technical-details)\n+    - [Delay the response body](#delay-the-response-body)\n+      - [Technical Details](#technical-details-1)\n+  - [Chaining](#chaining)\n+  - [Scope filtering](#scope-filtering)\n+  - [Conditional scope filtering](#conditional-scope-filtering)\n+  - [Path filtering](#path-filtering)\n+  - [Request Body filtering](#request-body-filtering)\n+  - [Request Headers Matching](#request-headers-matching)\n+  - [Optional Requests](#optional-requests)\n+  - [Allow **unmocked** requests on a mocked hostname](#allow-unmocked-requests-on-a-mocked-hostname)\n+- [Expectations](#expectations)\n+  - [.isDone()](#isdone)\n+  - [.cleanAll()](#cleanall)\n+  - [.abortPendingRequests()](#abortpendingrequests)\n+  - [.persist()](#persist)\n+  - [.pendingMocks()](#pendingmocks)\n+  - [.activeMocks()](#activemocks)\n+  - [.isActive()](#isactive)\n+  - [.clone()](#clone)\n+- [Restoring](#restoring)\n+- [Activating](#activating)\n+- [Turning Nock Off (experimental!)](#turning-nock-off-experimental)\n+- [Enable/Disable real HTTP requests](#enabledisable-real-http-requests)\n+  - [Disabling requests](#disabling-requests)\n+  - [Enabling requests](#enabling-requests)\n+  - [Resetting NetConnect](#resetting-netconnect)\n+- [Recording](#recording)\n+  - [`dont_print` option](#dont_print-option)\n+  - [`output_objects` option](#output_objects-option)\n+  - [`enable_reqheaders_recording` option](#enable_reqheaders_recording-option)\n+  - [`logging` option](#logging-option)\n+  - [`use_separator` option](#use_separator-option)\n+  - [.removeInterceptor()](#removeinterceptor)\n+- [Events](#events)\n+  - [Global no match event](#global-no-match-event)\n+- [Nock Back](#nock-back)\n+  - [Setup](#setup)\n+    - [Options](#options)\n+  - [Usage](#usage-1)\n+    - [Options](#options-1)\n+      - [Example](#example)\n+  - [Modes](#modes)\n+  - [Verifying recorded fixtures](#verifying-recorded-fixtures)\n+    - [Example](#example-1)\n+- [Common issues](#common-issues)\n+  - [Requests made by ES Modules are not intercepted](#requests-made-by-es-modules-are-not-intercepted)\n+  - [Axios](#axios)\n+  - [Memory issues with Jest](#memory-issues-with-jest)\n+- [Debugging](#debugging)\n",
+					"match": false,
+					"packageHash": "8d81406d0737faf851755e02da2192108790875d30bf842529f9dee8db89aed7",
+					"size": 10970,
+					"sourceHash": "a1ee06a32e7357567a86c9eb1bd6e183e59fc11d7561fcbcb96d23539fe200bf",
+					"status": "content"
+				},
+				"assets/reply_file_1.txt": {
+					"match": false,
+					"packageHash": "0e9b59c2f30ee034ed2b367c9c39a8d8a258353ce0ea4030d26522d747595bc9",
+					"size": 20,
+					"status": "missing-in-source"
+				},
+				"index.js": {
+					"diff": "--- published/index.js\n+++ rebuilt/index.js\n@@ -1,9 +1,53 @@\n-var recorder = require('./lib/recorder')\n-module.exports = require('./lib/scope');\n+'use strict'\n \n-module.exports.recorder = {\n-    rec  : recorder.record\n-  , clear   : recorder.clear\n-  , play : recorder.outputs\n-};\n-module.exports.restore = recorder.restore;\n\\ No newline at end of file\n+const back = require('./lib/back')\n+const emitter = require('./lib/global_emitter')\n+const {\n+  activate,\n+  isActive,\n+  isDone,\n+  isOn,\n+  pendingMocks,\n+  activeMocks,\n+  removeInterceptor,\n+  disableNetConnect,\n+  enableNetConnect,\n+  removeAll,\n+  abortPendingRequests,\n+} = require('./lib/intercept')\n+const recorder = require('./lib/recorder')\n+const { Scope, load, loadDefs, define } = require('./lib/scope')\n+\n+module.exports = (basePath, options) => new Scope(basePath, options)\n+\n+Object.assign(module.exports, {\n+  activate,\n+  isActive,\n+  isDone,\n+  pendingMocks,\n+  activeMocks,\n+  removeInterceptor,\n+  disableNetConnect,\n+  enableNetConnect,\n+  cleanAll: removeAll,\n+  abortPendingRequests,\n+  load,\n+  loadDefs,\n+  define,\n+  emitter,\n+  recorder: {\n+    rec: recorder.record,\n+    clear: recorder.clear,\n+    play: recorder.outputs,\n+  },\n+  restore: recorder.restore,\n+  back,\n+})\n+\n+// We always activate Nock on import, overriding the globals.\n+// Setting the Back mode \"activates\" Nock by overriding the global entries in the `http/s` modules.\n+// If Nock Back is configured, we need to honor that setting for backward compatibility,\n+// otherwise we rely on Nock Back's default initializing side effect.\n+if (isOn()) {\n+  back.setMode(process.env.NOCK_BACK_MODE || 'dryrun')\n+}\n",
+					"match": false,
+					"packageHash": "35e17658b6ec75963759c8fd3eef157220cf9071fa9c378c5d3165d7386a8181",
+					"size": 240,
+					"sourceHash": "182040fb815ffdd5e1c7477047d2e7248e26c9edb9fa945fd42c5ca7134bbeb8",
+					"status": "content"
+				},
+				"lib/intercept.js": {
+					"diff": "--- published/lib/intercept.js\n+++ rebuilt/lib/intercept.js\n@@ -1,133 +1,454 @@\n-var RequestOverrider = require('./request_overrider'),\n-    path             = require('path'),\n-    url              = require('url'),\n-    inherits         = require('util').inherits,\n-    EventEmitter     = require('events').EventEmitter,\n-    http             = require('http'),\n-    parse            = require('url').parse,\n-    ClientRequest    = http.ClientRequest;\n+'use strict'\n \n+/**\n+ * @module nock/intercept\n+ */\n+\n+const { InterceptedRequestRouter } = require('./intercepted_request_router')\n+const common = require('./common')\n+const { inherits } = require('util')\n+const http = require('http')\n+const { intercept: debug } = require('./debug')\n+const globalEmitter = require('./global_emitter')\n+const { BatchInterceptor, getRawRequest } = require('@mswjs/interceptors')\n+const {\n+  default: nodeInterceptors,\n+} = require('@mswjs/interceptors/presets/node')\n+const { createResponse } = require('./create_response')\n+const { once } = require('events')\n+const { arrayBuffer } = require('stream/consumers')\n+\n+const interceptor = new BatchInterceptor({\n+  name: 'nock-interceptor',\n+  interceptors: nodeInterceptors,\n+})\n+let isNockActive = false\n+\n+/**\n+ * @name NetConnectNotAllowedError\n+ * @private\n+ * @desc Error trying to make a connection when disabled external access.\n+ * @class\n+ * @example\n+ * nock.disableNetConnect();\n+ * http.get('http://zombo.com');\n+ * // throw NetConnectNotAllowedError\n+ */\n+function NetConnectNotAllowedError(host, path) {\n+  Error.call(this)\n+\n+  this.name = 'NetConnectNotAllowedError'\n+  this.code = 'ENETUNREACH'\n+  this.message = `Nock: Disallowed net connect for \"${host}${path}\"`\n \n-var allInterceptors = {};\n+  Error.captureStackTrace(this, this.constructor)\n+}\n+\n+inherits(NetConnectNotAllowedError, Error)\n+\n+let allInterceptors = {}\n+let allowNetConnect\n+\n+/**\n+ * Enabled real request.\n+ * @public\n+ * @param {String|RegExp} matcher=RegExp.new('.*') Expression to match\n+ * @example\n+ * // Enables all real requests\n+ * nock.enableNetConnect();\n+ * @example\n+ * // Enables real requests for url that matches google\n+ * nock.enableNetConnect('google');\n+ * @example\n+ * // Enables real requests for url that matches google and amazon\n+ * nock.enableNetConnect(/(google|amazon)/);\n+ * @example\n+ * // Enables real requests for url that includes google\n+ * nock.enableNetConnect(host => host.includes('google'));\n+ */\n+function enableNetConnect(matcher) {\n+  if (typeof matcher === 'string') {\n+    allowNetConnect = new RegExp(matcher)\n+  } else if (matcher instanceof RegExp) {\n+    allowNetConnect = matcher\n+  } else if (typeof matcher === 'function') {\n+    allowNetConnect = { test: matcher }\n+  } else {\n+    allowNetConnect = /.*/\n+  }\n+}\n+\n+function isEnabledForNetConnect(options) {\n+  common.normalizeRequestOptions(options)\n+\n+  const enabled = allowNetConnect && allowNetConnect.test(options.host)\n+  debug('Net connect', enabled ? '' : 'not', 'enabled for', options.host)\n+  return enabled\n+}\n+\n",
+					"match": false,
+					"packageHash": "ddb12a745c1ddab029b9f1e4590ee07e26d1f7559e37a50ac9b203149b4a7969",
+					"size": 3495,
+					"sourceHash": "77885579aaf5c8d48eb342a22f3360822faae76b6646c12e11df4da52b611ceb",
+					"status": "content"
+				},
+				"lib/mixin.js": {
+					"match": false,
+					"packageHash": "0888627e497608457bd0566c23a2f93c6ec352b9b3269009e5c9780b3f05bb1f",
+					"size": 226,
+					"status": "missing-in-source"
+				},
+				"lib/recorder.js": {
+					"diff": "--- published/lib/recorder.js\n+++ rebuilt/lib/recorder.js\n@@ -1,104 +1,352 @@\n-var http = require('http');\n-var https = require('https');\n-var oldRequest = http.request;\n-var oldHttpsRequest = https.request;\n-var inspect = require('util').inspect;\n-\n-var SEPARATOR = '\\n<<<<<<-- cut here -->>>>>>\\n';\n-\n-var outputs = [];\n-\n-function generateRequestAndResponse(body, options, res, datas) {\n-  var requestBody = body.map(function(buffer) {\n-    return buffer.toString('utf8');\n-  }).join('');\n-  \n-  var responseBody = datas.map(function(buffer) {\n-    return buffer.toString('utf8');\n-  }).join('');\n-  \n-  var ret = [];\n-  ret.push('\\nnock(\\'');\n-  if (options._https_) { ret.push('https://'); }\n-  ret.push(options.host);\n-  ret.push('\\')\\n');\n-  ret.push('  .');\n-  ret.push((options.method || 'GET').toLowerCase());\n-  ret.push('(\\'');\n-  ret.push(options.path);\n-  ret.push(\"'\");\n+'use strict'\n+\n+const { recorder: debug } = require('./debug')\n+const querystring = require('querystring')\n+const { inspect } = require('util')\n+\n+const common = require('./common')\n+const { restoreOverriddenClientRequest } = require('./intercept')\n+const { gzipSync, brotliCompressSync, deflateSync } = require('zlib')\n+const {\n+  default: nodeInterceptors,\n+} = require('@mswjs/interceptors/presets/node')\n+const SEPARATOR = '\\n<<<<<<-- cut here -->>>>>>\\n'\n+let recordingInProgress = false\n+let outputs = []\n+\n+// TODO: don't reuse the nodeInterceptors, create new ones.\n+const clientRequestInterceptor = nodeInterceptors[0]\n+const fetchRequestInterceptor = nodeInterceptors[2]\n+\n+function getScope(options) {\n+  const { proto, host, port } = common.normalizeRequestOptions(options)\n+  return common.normalizeOrigin(proto, host, port)\n+}\n+\n+function getMethod(options) {\n+  return options.method || 'GET'\n+}\n+\n+function getBodyFromChunks(chunks, headers) {\n+  // If we have headers and there is content-encoding it means that the body\n+  // shouldn't be merged but instead persisted as an array of hex strings so\n+  // that the response chunks can be mocked one by one.\n+  if (headers && common.isContentEncoded(headers)) {\n+    return {\n+      body: chunks.map(chunk => chunk.toString('hex')),\n+    }\n+  }\n+\n+  const mergedBuffer = Buffer.concat(chunks)\n+\n+  // The merged buffer can be one of three things:\n+  // 1. A UTF-8-representable string buffer which represents a JSON object.\n+  // 2. A UTF-8-representable buffer which doesn't represent a JSON object.\n+  // 3. A non-UTF-8-representable buffer which then has to be recorded as a hex string.\n+  const isUtf8Representable = common.isUtf8Representable(mergedBuffer)\n+  if (isUtf8Representable) {\n+    const maybeStringifiedJson = mergedBuffer.toString('utf8')\n+    try {\n+      return {\n+        isUtf8Representable,\n+        body: JSON.parse(maybeStringifiedJson),\n+      }\n+    } catch (err) {\n+      return {\n+        isUtf8Representable,\n+        body: maybeStringifiedJson,\n+      }\n+    }\n+  } else {\n+    return {\n+      isUtf8Representable,\n+      body: mergedBuffer.toString('hex'),\n+    }\n+  }\n+}\n+\n+function generateRequestAndResponseObject({\n",
+					"match": false,
+					"packageHash": "4c342d66d40336adac0bde4ca0c8c9520480f5e7d50a531c982998bdfe77ad36",
+					"size": 2342,
+					"sourceHash": "b165dda117f58110a56c0749f7db6ec1a757c19283052b641d0a80a37e03e18f",
+					"status": "content"
+				},
+				"lib/request_overrider.js": {
+					"match": false,
+					"packageHash": "08ce1f30824a5274ef13a6375eb03e7a632038dde79eb47b5bafb1622b08f177",
+					"size": 5512,
+					"status": "missing-in-source"
+				},
+				"lib/scope.js": {
+					"diff": "--- published/lib/scope.js\n+++ rebuilt/lib/scope.js\n@@ -1,334 +1,416 @@\n-var path            = require('path')\n-  , fs              = require('fs')\n-  , globalIntercept = require('./intercept')\n-  , mixin           = require('./mixin')\n-  , assert          = require('assert')\n-  , url\t\t\t\t      = require('url');\n+'use strict'\n \n-var noop = function() {};\n+/**\n+ * @module nock/scope\n+ */\n+const { scopeDebuglog } = require('./debug')\n+const { addInterceptor, isOn } = require('./intercept')\n+const common = require('./common')\n+const assert = require('assert')\n+const url = require('url')\n+const { EventEmitter } = require('events')\n+const Interceptor = require('./interceptor')\n+\n+const { URL, Url: LegacyUrl } = url\n+let fs\n+\n+try {\n+  fs = require('fs')\n+} catch (err) {\n+  // do nothing, we're in the browser\n+}\n \n-function isStream(obj) {\n-  return (typeof obj !== 'undefined') && (typeof a !== 'string') && (! Buffer.isBuffer(obj)) && (typeof obj.setEncoding == 'function');\n+/**\n+ * Normalizes the passed url for consistent internal processing\n+ * @param {string|LegacyUrl|URL} u\n+ */\n+function normalizeUrl(u) {\n+  if (!(u instanceof URL)) {\n+    if (u instanceof LegacyUrl) {\n+      return normalizeUrl(new URL(url.format(u)))\n+    }\n+    // If the url is invalid, let the URL library report it\n+    return normalizeUrl(new URL(u))\n+  }\n+\n+  if (!/https?:/.test(u.protocol)) {\n+    throw new TypeError(\n+      `Protocol '${u.protocol}' not recognized. This commonly occurs when a hostname and port are included without a protocol, producing a URL that is valid but confusing, and probably not what you want.`,\n+    )\n+  }\n+\n+  return {\n+    href: u.href,\n+    origin: u.origin,\n+    protocol: u.protocol,\n+    username: u.username,\n+    password: u.password,\n+    host: u.host,\n+    hostname:\n+      // strip brackets from IPv6\n+      typeof u.hostname === 'string' && u.hostname.startsWith('[')\n+        ? u.hostname.slice(1, -1)\n+        : u.hostname,\n+    port: u.port || (u.protocol === 'http:' ? 80 : 443),\n+    pathname: u.pathname,\n+    search: u.search,\n+    searchParams: u.searchParams,\n+    hash: u.hash,\n+  }\n }\n \n-function startScope(basePath, options) {\n-  var interceptors = {},\n-      scope,\n-      transformPathFunction,\n-      transformRequestBodyFunction,\n-      matchHeaders = [],\n-      logger = noop,\n-      scopeOptions = options || {},\n-      urlParts = url.parse(basePath),\n-      port = urlParts.port || ((urlParts.protocol === 'http:') ? 80 : 443),\n-      persist = false;\n-      \n-  basePath = urlParts.protocol + '//' + urlParts.hostname + ':' + port;\n-  \n-  function add(key, interceptor) {\n-    if (! interceptors.hasOwnProperty(key)) {\n-      interceptors[key] = [];\n-    }\n-    interceptors[key].push(interceptor);\n-    globalIntercept(basePath, interceptor);\n-  }\n-  \n-  function remove(key, interceptor) {\n-    if (persist) return;\n-    var arr = interceptors[key];\n-    if (arr) {\n-      arr.splice(arr.indexOf(interceptor), 1);\n",
+					"match": false,
+					"packageHash": "6a5c7be269f39c0f5c33a152a5abd54529e1d39ed7fe8afcd6868d550b889252",
+					"size": 9231,
+					"sourceHash": "58051fff215367cf80eec0844d239d82b21c7e980a92f481bdd493da4df2524b",
+					"status": "content"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -1,38 +1,89 @@\n-{ \"name\" : \"nock\"\n-, \"description\" : \"HTTP Server mocking for Node.js\"\n-, \"tags\" : [\"Mock\", \"HTTP\", \"testing\", \"isolation\"]\n-, \"version\" : \"0.14.1\"\n-, \"author\" : \"Pedro Teixeira <pedro.teixeira@gmail.com>\"\n-, \"contributors\" :\n-  [ {\"name\": \"Roly Fentanes\" }\n-  , {\"name\": \"Alexander Simmerl\"}\n-  , {\"name\": \"Pedro Teixeira\"}\n-  , {\"name\": \"Nuno Job\"}\n-  , {\"name\": \"Ian Young\"}\n-  , {\"name\": \"nilsbunger\"}\n-  , {\"name\": \"bacchusrx\", \"email\": \"bacchusrx@eightstar.ca\"}\n-  , {\"name\": \"Fabiano França\"}\n-  , {\"name\": \"Sascha Drews\"}\n-  , {\"name\": \"Mike Swift\"}\n-  , {\"name\": \"James Herdman\"}\n-  , {\"name\": \"David Björklund\"}\n-  , {\"name\": \"Andrew Kramolisch\"}\n-  , {\"name\": \"Balazs Nagy\"}\n-  , {\"name\": \"Brian J Brennan\"}\n-  , {\"name\": \"Attila Incze\"}\n-  , {\"name\": \"Mac Angell\"}\n-  ]\n-, \"repository\" :\n-  { \"type\" : \"git\"\n-  , \"url\" : \"http://github.com/flatiron/nock.git\"\n+{\n+  \"name\": \"nock\",\n+  \"description\": \"HTTP server mocking and expectations library for Node.js\",\n+  \"tags\": [\n+    \"Mock\",\n+    \"HTTP\",\n+    \"testing\",\n+    \"isolation\"\n+  ],\n+  \"version\": \"0.0.0-development\",\n+  \"author\": \"Pedro Teixeira <pedro.teixeira@gmail.com>\",\n+  \"repository\": {\n+    \"type\": \"git\",\n+    \"url\": \"https://github.com/nock/nock.git\"\n+  },\n+  \"bugs\": {\n+    \"url\": \"https://github.com/nock/nock/issues\"\n+  },\n+  \"engines\": {\n+    \"node\": \">=18.20.0 <20 || >=20.12.1\"\n+  },\n+  \"main\": \"./index.js\",\n+  \"types\": \"types\",\n+  \"dependencies\": {\n+    \"@mswjs/interceptors\": \"^0.40.0\",\n+    \"json-stringify-safe\": \"^5.0.1\",\n+    \"propagate\": \"^2.0.0\"\n+  },\n+  \"devDependencies\": {\n+    \"@definitelytyped/dtslint\": \"^0.0.163\",\n+    \"@sinonjs/fake-timers\": \"^11.2.2\",\n+    \"assert-rejects\": \"^1.0.0\",\n+    \"chai\": \"^4.1.2\",\n+    \"dirty-chai\": \"^2.0.1\",\n+    \"eslint\": \"^8.8.0\",\n+    \"eslint-config-prettier\": \"^9.0.0\",\n+    \"eslint-config-standard\": \"^17.0.0-0\",\n+    \"eslint-plugin-import\": \"^2.16.0\",\n+    \"eslint-plugin-mocha\": \"^10.0.3\",\n+    \"eslint-plugin-node\": \"^11.0.0\",\n+    \"eslint-plugin-promise\": \"^6.0.0\",\n+    \"form-data\": \"^4.0.0\",\n+    \"got\": \"^11.3.0\",\n+    \"jest\": \"^29.7.0\",\n+    \"mocha\": \"^11.7.2\",\n+    \"npm-run-all\": \"^4.1.5\",\n+    \"nyc\": \"^15.0.0\",\n+    \"prettier\": \"3.6.2\",\n+    \"proxyquire\": \"^2.1.0\",\n+    \"rimraf\": \"^3.0.0\",\n+    \"semantic-release\": \"^24.1.0\",\n+    \"sinon\": \"^17.0.1\",\n+    \"sinon-chai\": \"^3.7.0\",\n+    \"typescript\": \"^5.0.4\"\n+  },\n+  \"scripts\": {\n+    \"format:fix\": \"prettier --write '**/*.{js,json,md,ts,yml,yaml}'\",\n+    \"format\": \"prettier --check '**/*.{js,json,md,ts,yml,yaml}'\",\n+    \"lint\": \"run-p lint:js lint:ts\",\n+    \"lint:js\": \"eslint --cache --cache-location './.cache/eslint' '**/*.js'\",\n+    \"lint:js:fix\": \"eslint --cache --cache-location './.cache/eslint' --fix '**/*.js'\",\n+    \"lint:ts\": \"dtslint --expectOnly types\",\n+    \"test\": \"nyc --reporter=lcov --reporter=text mocha --recursive tests\",\n+    \"test:coverage\": \"open coverage/lcov-report/index.html\",\n+    \"test:jest\": \"jest tests_jest --detectLeaks\"\n+  },\n+  \"license\": \"MIT\",\n+  \"files\": [\n+    \"index.js\",\n+    \"lib\",\n",
+					"match": false,
+					"packageHash": "a4dba418b172d9875561002ba4bb0ec960eb82dae24f85aa15d2e26340c5f4f7",
+					"size": 1103,
+					"sourceHash": "bf94886cefe6834d880e0db03335f3c9e0f8aa2f02d83dca1307717396b33d54",
+					"status": "content"
+				},
+				"tests/test_intercept.js": {
+					"match": false,
+					"packageHash": "70f111ac0d4b9a53218a755a7961e25e463db2e50843ff80ec7303ebae848f57",
+					"size": 34957,
+					"status": "missing-in-source"
+				},
+				"tests/test_recorder.js": {
+					"match": false,
+					"packageHash": "6d3eb26da46358176a7560a14ce0c817c9c880a4753166e437e2e9f52b3d0688",
+					"size": 957,
+					"status": "missing-in-source"
+				},
+				"LICENSE": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/back.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/common.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/create_response.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/debug.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/global_emitter.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/intercepted_request_router.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/interceptor.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/match_body.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/playback_interceptor.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/socket.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"types/index.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				}
+			},
+			"summary": {
+				"differentFiles": 6,
+				"matchingFiles": 0,
+				"missingInPackage": 12,
+				"missingInSource": 7,
+				"score": 0,
+				"totalFiles": 25
+			}
+		}
+	}
+]

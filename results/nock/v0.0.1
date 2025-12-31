@@ -1,0 +1,133 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2025-12-31T09:25:04.786Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:11.7.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "nock@0.0.1",
+			"name": "nock",
+			"version": "0.0.1",
+			"location": "https://registry.npmjs.org/nock/-/nock-0.0.1.tgz",
+			"integrity": "sha512-VSoJ5yz0sTCDsJCWtMwf5sdiHOuEyQqLDLZKUbUw3kFFiejT7vnW07YbIWwAafxIQr5QHlHy1o5BApU3YtvkOw==",
+			"publishedAt": "2011-09-22T10:38:31.847Z",
+			"publishedWith": {
+				"node": "v0.4.11",
+				"npm": "1.0.27"
+			}
+		},
+		"source": {
+			"integrity": "sha512-5NHPj7O3xUKa2XPyojACD/eQ4tClzXgZJLHEHJMrYlTPb2dOdOnjaF6XnkjO/2vmOC+ja39+B2Xucl9hLB2ZBA==",
+			"location": "git://github.com/pgte/nock.git",
+			"spec": "github:pgte/nock#HEAD"
+		},
+		"comparisonHash": "8a2a8dcbb729bf3ee9216e490c955701f0ddebe1",
+		"diff": {
+			"files": {
+				".gitignore": {
+					"match": false,
+					"packageHash": "dba27c31aad935787bb275c3e5e4e957708f15386de599eff1db476022cd7e4c",
+					"size": 12,
+					"status": "missing-in-source"
+				},
+				".npmignore": {
+					"match": false,
+					"packageHash": "dba27c31aad935787bb275c3e5e4e957708f15386de599eff1db476022cd7e4c",
+					"size": 12,
+					"status": "missing-in-source"
+				},
+				"README.md": {
+					"diff": "--- published/README.md\n+++ rebuilt/README.md\n@@ -1,21 +1,1710 @@\n # Nock\n \n-HTTP Server mocking for Node.js\n+[![npm](https://img.shields.io/npm/v/nock.svg)][npmjs]\n+![Coverage Status](http://img.shields.io/badge/coverage-100%25-brightgreen.svg)\n+[![Backers on Open Collective](https://opencollective.com/nock/backers/badge.svg)](#backers)\n+[![Sponsors on Open Collective](https://opencollective.com/nock/sponsors/badge.svg)](#sponsors)\n+\n+[npmjs]: https://www.npmjs.com/package/nock\n+\n+HTTP server mocking and expectations library for Node.js\n \n Nock can be used to test modules that perform HTTP requests in isolation.\n \n For instance, if a module performs HTTP requests to a CouchDB server or makes HTTP requests to the Amazon API, you can test that module in isolation.\n \n+**Table of Contents**\n+\n+<!-- toc -->\n+\n+- [How does it work?](#how-does-it-work)\n+- [Install](#install)\n+  - [Node version support](#node-version-support)\n+- [Usage](#usage)\n+  - [READ THIS! - About interceptors](#read-this---about-interceptors)\n+  - [Specifying hostname](#specifying-hostname)\n+  - [Specifying path](#specifying-path)\n+  - [Specifying request body](#specifying-request-body)\n+  - [Specifying request query string](#specifying-request-query-string)\n+  - [Specifying replies](#specifying-replies)\n+    - [Access original request and headers](#access-original-request-and-headers)\n+    - [Replying with errors](#replying-with-errors)\n+  - [Specifying headers](#specifying-headers)\n+    - [Header field names are case-insensitive](#header-field-names-are-case-insensitive)\n+    - [Specifying Request Headers](#specifying-request-headers)\n+    - [Specifying Reply Headers](#specifying-reply-headers)\n+    - [Default Reply Headers](#default-reply-headers)\n+    - [Including Content-Length Header Automatically](#including-content-length-header-automatically)\n+    - [Including Date Header Automatically](#including-date-header-automatically)\n+  - [HTTP Verbs](#http-verbs)\n+  - [Support for HTTP and HTTPS](#support-for-http-and-https)\n+  - [Non-standard ports](#non-standard-ports)\n+  - [Repeat response n times](#repeat-response-n-times)\n+  - [Delay the response](#delay-the-response)\n+    - [Delay the connection](#delay-the-connection)\n+      - [Technical Details](#technical-details)\n+    - [Delay the response body](#delay-the-response-body)\n+      - [Technical Details](#technical-details-1)\n+  - [Chaining](#chaining)\n+  - [Scope filtering](#scope-filtering)\n+  - [Conditional scope filtering](#conditional-scope-filtering)\n+  - [Path filtering](#path-filtering)\n+  - [Request Body filtering](#request-body-filtering)\n+  - [Request Headers Matching](#request-headers-matching)\n+  - [Optional Requests](#optional-requests)\n+  - [Allow **unmocked** requests on a mocked hostname](#allow-unmocked-requests-on-a-mocked-hostname)\n+- [Expectations](#expectations)\n+  - [.isDone()](#isdone)\n+  - [.cleanAll()](#cleanall)\n+  - [.abortPendingRequests()](#abortpendingrequests)\n+  - [.persist()](#persist)\n+  - [.pendingMocks()](#pendingmocks)\n+  - [.activeMocks()](#activemocks)\n+  - [.isActive()](#isactive)\n+  - [.clone()](#clone)\n+- [Restoring](#restoring)\n+- [Activating](#activating)\n+- [Turning Nock Off (experimental!)](#turning-nock-off-experimental)\n+- [Enable/Disable real HTTP requests](#enabledisable-real-http-requests)\n+  - [Disabling requests](#disabling-requests)\n+  - [Enabling requests](#enabling-requests)\n+  - [Resetting NetConnect](#resetting-netconnect)\n+- [Recording](#recording)\n+  - [`dont_print` option](#dont_print-option)\n+  - [`output_objects` option](#output_objects-option)\n+  - [`enable_reqheaders_recording` option](#enable_reqheaders_recording-option)\n+  - [`logging` option](#logging-option)\n+  - [`use_separator` option](#use_separator-option)\n+  - [.removeInterceptor()](#removeinterceptor)\n+- [Events](#events)\n+  - [Global no match event](#global-no-match-event)\n+- [Nock Back](#nock-back)\n+  - [Setup](#setup)\n+    - [Options](#options)\n+  - [Usage](#usage-1)\n+    - [Options](#options-1)\n+      - [Example](#example)\n+  - [Modes](#modes)\n+  - [Verifying recorded fixtures](#verifying-recorded-fixtures)\n+    - [Example](#example-1)\n+- [Common issues](#common-issues)\n+  - [Requests made by ES Modules are not intercepted](#requests-made-by-es-modules-are-not-intercepted)\n+  - [Axios](#axios)\n+  - [Memory issues with Jest](#memory-issues-with-jest)\n+- [Debugging](#debugging)\n+- [Contributing](#contributing)\n+- [Contributors](#contributors)\n",
+					"match": false,
+					"packageHash": "217bf4d1e8964f56077cf08c6b2869e19ec0e6e7ba04cf58e688f7cb21f2496d",
+					"size": 480,
+					"sourceHash": "a1ee06a32e7357567a86c9eb1bd6e183e59fc11d7561fcbcb96d23539fe200bf",
+					"status": "content"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -1,18 +1,89 @@\n-{ \"name\" : \"nock\"\n-, \"description\" : \"HTTP Server mocking for Node.js\"\n-, \"tags\" : [\"Mock\", \"HTTP\", \"testing\", \"isolation\"]\n-, \"version\" : \"0.0.1\"\n-, \"author\" : \"Pedro Teixeira <pedro.teixeira@gmail.com>\"\n-, \"repository\" :\n-  { \"type\" : \"git\"\n-  , \"url\" : \"http://github.com/pgte/nock.git\"\n+{\n+  \"name\": \"nock\",\n+  \"description\": \"HTTP server mocking and expectations library for Node.js\",\n+  \"tags\": [\n+    \"Mock\",\n+    \"HTTP\",\n+    \"testing\",\n+    \"isolation\"\n+  ],\n+  \"version\": \"0.0.0-development\",\n+  \"author\": \"Pedro Teixeira <pedro.teixeira@gmail.com>\",\n+  \"repository\": {\n+    \"type\": \"git\",\n+    \"url\": \"https://github.com/nock/nock.git\"\n+  },\n+  \"bugs\": {\n+    \"url\": \"https://github.com/nock/nock/issues\"\n+  },\n+  \"engines\": {\n+    \"node\": \">=18.20.0 <20 || >=20.12.1\"\n+  },\n+  \"main\": \"./index.js\",\n+  \"types\": \"types\",\n+  \"dependencies\": {\n+    \"@mswjs/interceptors\": \"^0.40.0\",\n+    \"json-stringify-safe\": \"^5.0.1\",\n+    \"propagate\": \"^2.0.0\"\n+  },\n+  \"devDependencies\": {\n+    \"@definitelytyped/dtslint\": \"^0.0.163\",\n+    \"@sinonjs/fake-timers\": \"^11.2.2\",\n+    \"assert-rejects\": \"^1.0.0\",\n+    \"chai\": \"^4.1.2\",\n+    \"dirty-chai\": \"^2.0.1\",\n+    \"eslint\": \"^8.8.0\",\n+    \"eslint-config-prettier\": \"^9.0.0\",\n+    \"eslint-config-standard\": \"^17.0.0-0\",\n+    \"eslint-plugin-import\": \"^2.16.0\",\n+    \"eslint-plugin-mocha\": \"^10.0.3\",\n+    \"eslint-plugin-node\": \"^11.0.0\",\n+    \"eslint-plugin-promise\": \"^6.0.0\",\n+    \"form-data\": \"^4.0.0\",\n+    \"got\": \"^11.3.0\",\n+    \"jest\": \"^29.7.0\",\n+    \"mocha\": \"^11.7.2\",\n+    \"npm-run-all\": \"^4.1.5\",\n+    \"nyc\": \"^15.0.0\",\n+    \"prettier\": \"3.6.2\",\n+    \"proxyquire\": \"^2.1.0\",\n+    \"rimraf\": \"^3.0.0\",\n+    \"semantic-release\": \"^24.1.0\",\n+    \"sinon\": \"^17.0.1\",\n+    \"sinon-chai\": \"^3.7.0\",\n+    \"typescript\": \"^5.0.4\"\n+  },\n+  \"scripts\": {\n+    \"format:fix\": \"prettier --write '**/*.{js,json,md,ts,yml,yaml}'\",\n+    \"format\": \"prettier --check '**/*.{js,json,md,ts,yml,yaml}'\",\n+    \"lint\": \"run-p lint:js lint:ts\",\n+    \"lint:js\": \"eslint --cache --cache-location './.cache/eslint' '**/*.js'\",\n+    \"lint:js:fix\": \"eslint --cache --cache-location './.cache/eslint' --fix '**/*.js'\",\n+    \"lint:ts\": \"dtslint --expectOnly types\",\n+    \"test\": \"nyc --reporter=lcov --reporter=text mocha --recursive tests\",\n+    \"test:coverage\": \"open coverage/lcov-report/index.html\",\n+    \"test:jest\": \"jest tests_jest --detectLeaks\"\n+  },\n+  \"license\": \"MIT\",\n+  \"files\": [\n+    \"index.js\",\n+    \"lib\",\n+    \"types/index.d.ts\"\n+  ],\n+  \"release\": {\n+    \"branches\": [\n+      \"+([0-9])?(.{+([0-9]),x}).x\",\n+      \"main\",\n+      \"next\",\n+      \"next-major\",\n+      {\n+        \"name\": \"beta\",\n+        \"prerelease\": true\n+      },\n+      {\n+        \"name\": \"alpha\",\n+        \"prerelease\": true\n+      }\n+    ]\n   }\n-, \"bugs\" :\n",
+					"match": false,
+					"packageHash": "194b5b86057cc9d3255286e5c3411c8697ec3eb1894bfbc143dbd9acd3d002f8",
+					"size": 503,
+					"sourceHash": "bf94886cefe6834d880e0db03335f3c9e0f8aa2f02d83dca1307717396b33d54",
+					"status": "content"
+				},
+				"LICENSE": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"index.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/back.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/common.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/create_response.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/debug.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/global_emitter.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/intercept.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/intercepted_request_router.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/interceptor.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/match_body.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/playback_interceptor.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/recorder.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/scope.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/socket.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"types/index.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				}
+			},
+			"summary": {
+				"differentFiles": 2,
+				"matchingFiles": 0,
+				"missingInPackage": 16,
+				"missingInSource": 2,
+				"score": 0,
+				"totalFiles": 20
+			}
+		}
+	}
+]
