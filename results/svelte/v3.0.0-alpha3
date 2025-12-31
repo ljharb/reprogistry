@@ -1,0 +1,63 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2025-12-31T17:08:38.151Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:6.2.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "svelte@3.0.0-alpha3",
+			"name": "svelte",
+			"version": "3.0.0-alpha3",
+			"location": "https://registry.npmjs.org/svelte/-/svelte-3.0.0-alpha3.tgz",
+			"integrity": "sha512-ZXFG5Y+Zi3zv/dANypA22MG/XxngtqAl2oRZeAhCrq08Dp2f7Ktlj630v+slARJ9LeioCkrPBANI2Wu9jSe/AQ==",
+			"publishedAt": "2018-12-16T01:58:03.140Z",
+			"publishedWith": {
+				"node": "10.9.0",
+				"npm": "6.2.0"
+			}
+		},
+		"source": {
+			"integrity": null,
+			"location": "git+https://github.com/sveltejs/svelte.git",
+			"spec": "github:sveltejs/svelte#ea567f1492142be79370226292653b581a50a9f0"
+		},
+		"comparisonHash": "8a2a8dcbb729bf3ee9216e490c955701f0ddebe1",
+		"diff": {
+			"files": {
+				"CHANGELOG.md": {
+					"match": false,
+					"packageHash": "e9b58cf73546a6d67e3b140b6016464c704317db6fc2b4d7d0993ab29ff2718d",
+					"size": 71036,
+					"status": "missing-in-source"
+				},
+				"cli/compile.js": {
+					"diff": "--- published/cli/compile.js\n+++ rebuilt/cli/compile.js\n@@ -6,79 +6,111 @@\n var fs = require('fs');\n var svelte = require('../compiler.js');\n \n-const $ = { enabled:true };\n+const { FORCE_COLOR, NODE_DISABLE_COLORS, TERM } = process.env;\n+\n+const $ = {\n+\tenabled: !NODE_DISABLE_COLORS && TERM !== 'dumb' && FORCE_COLOR !== '0'\n+};\n \n const CODES = {\n-  // modifiers\n-  reset: fmt(0, 0),\n-  bold: fmt(1, 22),\n-  dim: fmt(2, 22),\n-  italic: fmt(3, 23),\n-  underline: fmt(4, 24),\n-  inverse: fmt(7, 27),\n-  hidden: fmt(8, 28),\n-  strikethrough: fmt(9, 29),\n-  // colors\n-  black: fmt(30, 39),\n-  red: fmt(31, 39),\n-  green: fmt(32, 39),\n-  yellow: fmt(33, 39),\n-  blue: fmt(34, 39),\n-  magenta: fmt(35, 39),\n-  cyan: fmt(36, 39),\n-  white: fmt(37, 39),\n-  gray: fmt(90, 39),\n-  // background colors\n-  bgBlack: fmt(40, 49),\n-  bgRed: fmt(41, 49),\n-  bgGreen: fmt(42, 49),\n-  bgYellow: fmt(43, 49),\n-  bgBlue: fmt(44, 49),\n-  bgMagenta: fmt(45, 49),\n-  bgCyan: fmt(46, 49),\n-  bgWhite: fmt(47, 49)\n+\t// modifiers\n+\treset: code(0, 0),\n+\tbold: code(1, 22),\n+\tdim: code(2, 22),\n+\titalic: code(3, 23),\n+\tunderline: code(4, 24),\n+\tinverse: code(7, 27),\n+\thidden: code(8, 28),\n+\tstrikethrough: code(9, 29),\n+\n+\t// colors\n+\tblack: code(30, 39),\n+\tred: code(31, 39),\n+\tgreen: code(32, 39),\n+\tyellow: code(33, 39),\n+\tblue: code(34, 39),\n+\tmagenta: code(35, 39),\n+\tcyan: code(36, 39),\n+\twhite: code(37, 39),\n+\tgray: code(90, 39),\n+\n+\t// background colors\n+\tbgBlack: code(40, 49),\n+\tbgRed: code(41, 49),\n+\tbgGreen: code(42, 49),\n+\tbgYellow: code(43, 49),\n+\tbgBlue: code(44, 49),\n+\tbgMagenta: code(45, 49),\n+\tbgCyan: code(46, 49),\n+\tbgWhite: code(47, 49)\n };\n \n-function fmt(x, y) {\n+function code(open, close) {\n \treturn {\n-\t\topen: `\\x1b[${x}m`,\n-\t\tclose: `\\x1b[${y}m`,\n-\t\trgx: new RegExp(`\\\\x1b\\\\[${y}m`, 'g')\n-\t}\n-}\n-\n-function run(key, str) {\n-\tlet tmp = CODES[key];\n-\treturn tmp.open + str.replace(tmp.rgx, tmp.open) + tmp.close;\n+\t\topen: `\\x1b[${open}m`,\n+\t\tclose: `\\x1b[${close}m`,\n+\t\trgx: new RegExp(`\\\\x1b\\\\[${close}m`, 'g')\n+\t};\n }\n \n-function exec(key, str) {\n-\tstr += '';\n-\tif (!$.enabled) return str;\n-\tlet arr = this.keys;\n-\twhile (arr.length > 0) {\n-\t\tstr = run(arr.shift(), str);\n+function run(arr, str) {\n+\tlet i=0, tmp={};\n",
+					"match": false,
+					"packageHash": "baf2b600d26fe9629abd3214a019bca7a8177eff931aac3958831c35a9e88e38",
+					"size": 5604,
+					"sourceHash": "b1d21985afe1e6fec87544f7a9c21a8b14c12ca0c15436c6d1523c14badd8dc3",
+					"status": "content"
+				},
+				"compiler.js": {
+					"diff": "--- published/compiler.js\n+++ rebuilt/compiler.js\n@@ -2364,7 +2364,7 @@\n \n \tpp$1.parseForStatement = function(node) {\n \t  this.next();\n-\t  var awaitAt = (this.options.ecmaVersion >= 9 && this.inAsync && this.eatContextual(\"await\")) ? this.lastTokStart : -1;\n+\t  var awaitAt = (this.options.ecmaVersion >= 9 && (this.inAsync || (!this.inFunction && this.options.allowAwaitOutsideFunction)) && this.eatContextual(\"await\")) ? this.lastTokStart : -1;\n \t  this.labels.push(loopLabel);\n \t  this.enterLexicalScope();\n \t  this.expect(types.parenL);\n@@ -2570,7 +2570,7 @@\n \t  node.body = this.parseStatement(true);\n \t  if (node.body.type === \"ClassDeclaration\" ||\n \t      node.body.type === \"VariableDeclaration\" && node.body.kind !== \"var\" ||\n-\t      node.body.type === \"FunctionDeclaration\" && (this.strict || node.body.generator))\n+\t      node.body.type === \"FunctionDeclaration\" && (this.strict || node.body.generator || node.body.async))\n \t    { this.raiseRecoverable(node.body.start, \"Invalid labeled declaration\"); }\n \t  this.labels.pop();\n \t  node.label = expr;\n@@ -2688,7 +2688,7 @@\n \t  if (isStatement) {\n \t    node.id = isStatement === \"nullableID\" && this.type !== types.name ? null : this.parseIdent();\n \t    if (node.id) {\n-\t      this.checkLVal(node.id, \"var\");\n+\t      this.checkLVal(node.id, this.inModule && !this.inFunction ? \"let\" : \"var\");\n \t    }\n \t  }\n \n@@ -3836,6 +3836,7 @@\n \t  var curElt = this.parseTemplateElement({isTagged: isTagged});\n \t  node.quasis = [curElt];\n \t  while (!curElt.tail) {\n+\t    if (this$1.type === types.eof) { this$1.raise(this$1.pos, \"Unterminated template literal\"); }\n \t    this$1.expect(types.dollarBraceL);\n \t    node.expressions.push(this$1.parseExpression());\n \t    this$1.expect(types.braceR);\n@@ -4515,7 +4516,7 @@\n \n \ttypes.name.updateContext = function(prevType) {\n \t  var allowed = false;\n-\t  if (this.options.ecmaVersion >= 6) {\n+\t  if (this.options.ecmaVersion >= 6 && prevType !== types.dot) {\n \t    if (this.value === \"of\" && !this.exprAllowed ||\n \t        this.value === \"yield\" && this.inGeneratorContext())\n \t      { allowed = true; }\n@@ -6763,7 +6764,7 @@\n \t// [dammit]: acorn_loose.js\n \t// [walk]: util/walk.js\n \n-\tvar version = \"5.7.1\";\n+\tvar version = \"5.7.3\";\n \n \t// The main exported interface (under `self.acorn` when in the\n \t// browser) is a `parse` function that takes a code string and\n@@ -11562,58 +11563,55 @@\n \n \tvar parser$1 = create(parser);\n \n-\tfunction walk ( ast, ref) {\n-\t\tvar enter = ref.enter;\n-\t\tvar leave = ref.leave;\n-\n-\t\tvisit( ast, null, enter, leave );\n+\tfunction walk(ast, { enter, leave }) {\n+\t\tvisit(ast, null, enter, leave);\n \t}\n \n-\tvar shouldSkip = false;\n-\tvar context = { skip: function () { return shouldSkip = true; } };\n+\tlet shouldSkip = false;\n+\tconst context = { skip: () => shouldSkip = true };\n \n-\tvar childKeys = {};\n+\tconst childKeys = {};\n \n-\tvar toString$1 = Object.prototype.toString;\n+\tconst toString$1 = Object.prototype.toString;\n \n-\tfunction isArray$1 ( thing ) {\n-\t\treturn toString$1.call( thing ) === '[object Array]';\n+\tfunction isArray$1(thing) {\n+\t\treturn toString$1.call(thing) === '[object Array]';\n \t}\n \n-\tfunction visit ( node, parent, enter, leave, prop, index ) {\n-\t\tif ( !node ) { return; }\n+\tfunction visit(node, parent, enter, leave, prop, index) {\n+\t\tif (!node) return;\n \n-\t\tif ( enter ) {\n-\t\t\tvar _shouldSkip = shouldSkip;\n+\t\tif (enter) {\n+\t\t\tconst _shouldSkip = shouldSkip;\n \t\t\tshouldSkip = false;\n-\t\t\tenter.call( context, node, parent, prop, index );\n-\t\t\tvar skipped = shouldSkip;\n+\t\t\tenter.call(context, node, parent, prop, index);\n+\t\t\tconst skipped = shouldSkip;\n \t\t\tshouldSkip = _shouldSkip;\n",
+					"match": false,
+					"packageHash": "ba5dcf5cb29a425eb2a6746ed6736b67f04a06bcd930e1616bfc893a5f8e195a",
+					"size": 814710,
+					"sourceHash": "e6e3b0d7e08593c0e80d303d3f57a66fd471de8d25d1ba99854f3ffe6ba6b29b",
+					"status": "content"
+				}
+			},
+			"summary": {
+				"differentFiles": 2,
+				"matchingFiles": 8,
+				"missingInPackage": 0,
+				"missingInSource": 1,
+				"score": 0.7272727272727273,
+				"totalFiles": 11
+			}
+		}
+	}
+]
