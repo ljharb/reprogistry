@@ -1,0 +1,379 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2025-12-31T00:38:21.135Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:11.7.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "http-proxy-middleware@0.22.0-alpha",
+			"name": "http-proxy-middleware",
+			"version": "0.22.0-alpha",
+			"location": "https://registry.npmjs.org/http-proxy-middleware/-/http-proxy-middleware-0.22.0-alpha.tgz",
+			"integrity": "sha512-8Pv0BDLHxYR28wxIkFzV8bO6B1N1YvdWSRrs49iHWLTYwzKPhXp8TyFaK036+eoqAgm03BkmO1HV+11oADhX2A==",
+			"publishedAt": "2020-02-17T21:08:55.856Z",
+			"publishedWith": {
+				"node": "12.15.0",
+				"npm": "6.13.4"
+			}
+		},
+		"source": {
+			"integrity": null,
+			"location": "git+https://github.com/chimurai/http-proxy-middleware.git",
+			"spec": "github:chimurai/http-proxy-middleware#d2740d77c1232935733490f17a3ea36246d30a43"
+		},
+		"comparisonHash": "8a2a8dcbb729bf3ee9216e490c955701f0ddebe1",
+		"diff": {
+			"files": {
+				"CHANGELOG.md": {
+					"match": false,
+					"packageHash": "4d1a477547b6992899bc69fe48746a099cb402e36e5eec6e45df9d24702ed287",
+					"size": 7432,
+					"status": "missing-in-source"
+				},
+				"README.md": {
+					"diff": "--- published/README.md\n+++ rebuilt/README.md\n@@ -1,54 +1,78 @@\n # http-proxy-middleware\n \n-[![Build Status](https://img.shields.io/travis/chimurai/http-proxy-middleware/master.svg?style=flat-square)](https://travis-ci.org/chimurai/http-proxy-middleware)\n-[![Coveralls](https://img.shields.io/coveralls/chimurai/http-proxy-middleware.svg?style=flat-square)](https://coveralls.io/r/chimurai/http-proxy-middleware)\n-[![dependency Status](https://img.shields.io/david/chimurai/http-proxy-middleware.svg?style=flat-square)](https://david-dm.org/chimurai/http-proxy-middleware#info=dependencies)\n-[![dependency Status](https://snyk.io/test/npm/http-proxy-middleware/badge.svg?style=flat-square)](https://snyk.io/test/npm/http-proxy-middleware)\n-[![code style: prettier](https://img.shields.io/badge/code_style-prettier-ff69b4.svg?style=flat-square)](https://github.com/prettier/prettier)\n+[![GitHub Workflow Status (with branch)](https://img.shields.io/github/actions/workflow/status/chimurai/http-proxy-middleware/ci.yml?branch=master&logo=github-actions&logoColor=white&style=flat-square)](https://github.com/chimurai/http-proxy-middleware/actions/workflows/ci.yml?query=branch%3Amaster)\n+[![Coveralls](https://img.shields.io/coveralls/chimurai/http-proxy-middleware.svg?style=flat-square&logo=coveralls)](https://coveralls.io/r/chimurai/http-proxy-middleware)\n+[![Known Vulnerabilities](https://snyk.io/test/github/chimurai/http-proxy-middleware/badge.svg)](https://snyk.io/test/github/chimurai/http-proxy-middleware)\n+[![npm](https://img.shields.io/npm/v/http-proxy-middleware?color=%23CC3534&style=flat-square&logo=npm)](https://www.npmjs.com/package/http-proxy-middleware)\n \n-Node.js proxying made simple. Configure proxy middleware with ease for [connect](https://github.com/senchalabs/connect), [express](https://github.com/strongloop/express), [browser-sync](https://github.com/BrowserSync/browser-sync) and [many more](#compatible-servers).\n+Node.js proxying made simple. Configure proxy middleware with ease for [connect](https://github.com/senchalabs/connect), [express](https://github.com/expressjs/express), [next.js](https://github.com/vercel/next.js) and [many more](#compatible-servers).\n \n-Powered by the popular Nodejitsu [`http-proxy`](https://github.com/nodejitsu/node-http-proxy). [![GitHub stars](https://img.shields.io/github/stars/nodejitsu/node-http-proxy.svg?style=social&label=Star)](https://github.com/nodejitsu/node-http-proxy)\n+Powered by the popular Nodejitsu [`http-proxy`](https://github.com/http-party/node-http-proxy). [![GitHub stars](https://img.shields.io/github/stars/http-party/node-http-proxy.svg?style=social&label=Star)](https://github.com/http-party/node-http-proxy)\n \n-## TL;DR\n+## ⚠️ Note <!-- omit in toc -->\n+\n+This page is showing documentation for version v3.x.x ([release notes](https://github.com/chimurai/http-proxy-middleware/releases))\n+\n+See [MIGRATION.md](https://github.com/chimurai/http-proxy-middleware/blob/master/MIGRATION.md) for details on how to migrate from v2.x.x to v3.x.x\n+\n+If you're looking for older documentation. Go to:\n+\n+- <https://github.com/chimurai/http-proxy-middleware/tree/v2.0.4#readme>\n+- <https://github.com/chimurai/http-proxy-middleware/tree/v0.21.0#readme>\n+\n+## TL;DR <!-- omit in toc -->\n \n Proxy `/api` requests to `http://www.example.org`\n \n-```javascript\n-var express = require('express');\n-var proxy = require('http-proxy-middleware');\n+:bulb: **Tip:** Set the option `changeOrigin` to `true` for [name-based virtual hosted sites](http://en.wikipedia.org/wiki/Virtual_hosting#Name-based).\n \n-var app = express();\n+```typescript\n+// typescript\n+import * as express from 'express';\n+import type { NextFunction, Request, Response } from 'express';\n+import { createProxyMiddleware } from 'http-proxy-middleware';\n+import type { Filter, Options, RequestHandler } from 'http-proxy-middleware';\n+\n+const app = express();\n+\n+const proxyMiddleware = createProxyMiddleware<Request, Response>({\n+  target: 'http://www.example.org/api',\n+  changeOrigin: true,\n+});\n+\n+app.use('/api', proxyMiddleware);\n \n-app.use(\n-  '/api',\n-  proxy({ target: 'http://www.example.org', changeOrigin: true })\n-);\n app.listen(3000);\n \n-// http://localhost:3000/api/foo/bar -> http://www.example.org/api/foo/bar\n+// proxy and keep the same base path \"/api\"\n+// http://127.0.0.1:3000/api/foo/bar -> http://www.example.org/api/foo/bar\n ```\n \n _All_ `http-proxy` [options](https://github.com/nodejitsu/node-http-proxy#options) can be used, along with some extra `http-proxy-middleware` [options](#options).\n \n-:bulb: **Tip:** Set the option `changeOrigin` to `true` for [name-based virtual hosted sites](http://en.wikipedia.org/wiki/Virtual_hosting#Name-based).\n-\n-## Table of Contents\n+## Table of Contents <!-- omit in toc -->\n \n-<!-- MarkdownTOC autolink=true bracket=round depth=2 -->\n+<!-- // spell-checker:disable -->\n \n - [Install](#install)\n-- [Core concept](#core-concept)\n-- [Example](#example)\n-- [Context matching](#context-matching)\n+- [Basic usage](#basic-usage)\n+- [Express Server Example](#express-server-example)\n+  - [app.use(path, proxy)](#appusepath-proxy)\n - [Options](#options)\n-  - [http-proxy-middleware options](#http-proxy-middleware-options)\n-  - [http-proxy events](#http-proxy-events)\n-  - [http-proxy options](#http-proxy-options)\n-- [Shorthand](#shorthand)\n-  - [app.use\\(path, proxy\\)](#appusepath-proxy)\n+  - [`pathFilter` (string, \\[\\]string, glob, \\[\\]glob, function)](#pathfilter-string-string-glob-glob-function)\n+  - [`pathRewrite` (object/function)](#pathrewrite-objectfunction)\n+  - [`router` (object/function)](#router-objectfunction)\n+  - [`plugins` (Array)](#plugins-array)\n+  - [`ejectPlugins` (boolean) default: `false`](#ejectplugins-boolean-default-false)\n+  - [`logger` (Object)](#logger-object)\n+- [`http-proxy` events](#http-proxy-events)\n",
+					"match": false,
+					"packageHash": "01b0295a07ab490229fcbaa887602fb2fa3a154383d3d2680eabca2daf756e8b",
+					"size": 18840,
+					"sourceHash": "a616d6cec845cdecc720d357860fb55e97b40ce3570048973e3e6096d7567970",
+					"status": "content"
+				},
+				"dist/config-factory.d.ts": {
+					"match": false,
+					"packageHash": "37f80e24ae5dc2d8516bd81737c86469c894264035a43d381264c93cab57e6ca",
+					"size": 144,
+					"status": "missing-in-source"
+				},
+				"dist/config-factory.js": {
+					"match": false,
+					"packageHash": "a55340eba836ccd3ade67cc0e9fba51b911da65160187b492bd081ba09000093",
+					"size": 2588,
+					"status": "missing-in-source"
+				},
+				"dist/context-matcher.d.ts": {
+					"match": false,
+					"packageHash": "7a3415b1fb6f0509dfe54c82fcbc68408436a5d8cdaa3b5fef82c44b72faae81",
+					"size": 70,
+					"status": "missing-in-source"
+				},
+				"dist/context-matcher.js": {
+					"match": false,
+					"packageHash": "19ea253c098065b004c9d90a84b75c7d75f06391d75062b4f73eb4e0e7a03fcd",
+					"size": 2382,
+					"status": "missing-in-source"
+				},
+				"dist/errors.d.ts": {
+					"diff": "--- published/dist/errors.d.ts\n+++ rebuilt/dist/errors.d.ts\n@@ -1,6 +1,6 @@\n export declare enum ERRORS {\n     ERR_CONFIG_FACTORY_TARGET_MISSING = \"[HPM] Missing \\\"target\\\" option. Example: {target: \\\"http://www.example.org\\\"}\",\n-    ERR_CONTEXT_MATCHER_GENERIC = \"[HPM] Invalid context. Expecting something like: \\\"/api\\\" or [\\\"/api\\\", \\\"/ajax\\\"]\",\n-    ERR_CONTEXT_MATCHER_INVALID_ARRAY = \"[HPM] Invalid context. Expecting something like: [\\\"/api\\\", \\\"/ajax\\\"] or [\\\"/api/**\\\", \\\"!**.html\\\"]\",\n+    ERR_CONTEXT_MATCHER_GENERIC = \"[HPM] Invalid pathFilter. Expecting something like: \\\"/api\\\" or [\\\"/api\\\", \\\"/ajax\\\"]\",\n+    ERR_CONTEXT_MATCHER_INVALID_ARRAY = \"[HPM] Invalid pathFilter. Plain paths (e.g. \\\"/api\\\") can not be mixed with globs (e.g. \\\"/api/**\\\"). Expecting something like: [\\\"/api\\\", \\\"/ajax\\\"] or [\\\"/api/**\\\", \\\"!**.html\\\"].\",\n     ERR_PATH_REWRITER_CONFIG = \"[HPM] Invalid pathRewrite config. Expecting object with pathRewrite config or a rewrite function\"\n }\n",
+					"match": false,
+					"packageHash": "10f2fe54cd9d58613a316da911acb00af3f83abb7acb635e54812563f02d3882",
+					"size": 548,
+					"sourceHash": "ca57674ba3aef8231de9e9cb056dca42ac45388df5826d1d7974f62a8b4e6810",
+					"status": "content"
+				},
+				"dist/errors.js": {
+					"diff": "--- published/dist/errors.js\n+++ rebuilt/dist/errors.js\n@@ -1,9 +1,10 @@\n \"use strict\";\n Object.defineProperty(exports, \"__esModule\", { value: true });\n+exports.ERRORS = void 0;\n var ERRORS;\n (function (ERRORS) {\n     ERRORS[\"ERR_CONFIG_FACTORY_TARGET_MISSING\"] = \"[HPM] Missing \\\"target\\\" option. Example: {target: \\\"http://www.example.org\\\"}\";\n-    ERRORS[\"ERR_CONTEXT_MATCHER_GENERIC\"] = \"[HPM] Invalid context. Expecting something like: \\\"/api\\\" or [\\\"/api\\\", \\\"/ajax\\\"]\";\n-    ERRORS[\"ERR_CONTEXT_MATCHER_INVALID_ARRAY\"] = \"[HPM] Invalid context. Expecting something like: [\\\"/api\\\", \\\"/ajax\\\"] or [\\\"/api/**\\\", \\\"!**.html\\\"]\";\n+    ERRORS[\"ERR_CONTEXT_MATCHER_GENERIC\"] = \"[HPM] Invalid pathFilter. Expecting something like: \\\"/api\\\" or [\\\"/api\\\", \\\"/ajax\\\"]\";\n+    ERRORS[\"ERR_CONTEXT_MATCHER_INVALID_ARRAY\"] = \"[HPM] Invalid pathFilter. Plain paths (e.g. \\\"/api\\\") can not be mixed with globs (e.g. \\\"/api/**\\\"). Expecting something like: [\\\"/api\\\", \\\"/ajax\\\"] or [\\\"/api/**\\\", \\\"!**.html\\\"].\";\n     ERRORS[\"ERR_PATH_REWRITER_CONFIG\"] = \"[HPM] Invalid pathRewrite config. Expecting object with pathRewrite config or a rewrite function\";\n-})(ERRORS = exports.ERRORS || (exports.ERRORS = {}));\n+})(ERRORS || (exports.ERRORS = ERRORS = {}));\n",
+					"match": false,
+					"packageHash": "ec8ac06149e80a22883a52a24244db6c1646f7c65bb5418097e5f5d7e6ecf539",
+					"size": 722,
+					"sourceHash": "a56574e4d89a1a6d8ef6317d81d0aafbb892b968bcebed6ca57d39bed5e9cc7f",
+					"status": "content"
+				},
+				"dist/handlers.d.ts": {
+					"match": false,
+					"packageHash": "6ed54141a49b336543730f35eb6b7d897ad374a7ced76177527caa49ce6e08c0",
+					"size": 117,
+					"status": "missing-in-source"
+				},
+				"dist/handlers.js": {
+					"match": false,
+					"packageHash": "0af9e68a8cf7d4e251cf3d2ad49445d2ab0fa00e7bd98ac469e1aa891cc4b6f7",
+					"size": 2331,
+					"status": "missing-in-source"
+				},
+				"dist/http-proxy-middleware.d.ts": {
+					"diff": "--- published/dist/http-proxy-middleware.d.ts\n+++ rebuilt/dist/http-proxy-middleware.d.ts\n@@ -1,22 +1,18 @@\n-import { Filter, IRequestHandler, Options } from './types';\n-export declare class HttpProxyMiddleware {\n-    private logger;\n-    private config;\n+import type { Options, RequestHandler } from './types';\n+export declare class HttpProxyMiddleware<TReq, TRes> {\n     private wsInternalSubscribed;\n+    private serverOnCloseSubscribed;\n     private proxyOptions;\n     private proxy;\n     private pathRewriter;\n-    constructor(context: Filter | Options, opts?: Options);\n-    middleware: IRequestHandler;\n+    private logger;\n+    constructor(options: Options<TReq, TRes>);\n+    middleware: RequestHandler;\n+    private registerPlugins;\n     private catchUpgradeRequest;\n     private handleUpgrade;\n     /**\n      * Determine whether request should be proxied.\n-     *\n-     * @private\n-     * @param  {String} context [description]\n-     * @param  {Object} req     [description]\n-     * @return {Boolean}\n      */\n     private shouldProxy;\n     /**\n@@ -30,5 +26,4 @@\n     private prepareProxyRequest;\n     private applyRouter;\n     private applyPathRewrite;\n-    private logError;\n }\n",
+					"match": false,
+					"packageHash": "4db6680ad107ae20c6646a5487fc9b3fa2ee53ce9e951320c4ae75d013d91b60",
+					"size": 1024,
+					"sourceHash": "87ec4548c7bb326f92083d841704af02b784e66f47e1d8323fdb2048feae368c",
+					"status": "content"
+				},
+				"dist/http-proxy-middleware.js": {
+					"diff": "--- published/dist/http-proxy-middleware.js\n+++ rebuilt/dist/http-proxy-middleware.js\n@@ -1,66 +1,90 @@\n \"use strict\";\n-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {\n-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }\n-    return new (P || (P = Promise))(function (resolve, reject) {\n-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }\n-        function rejected(value) { try { step(generator[\"throw\"](value)); } catch (e) { reject(e); } }\n-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }\n-        step((generator = generator.apply(thisArg, _arguments || [])).next());\n-    });\n-};\n Object.defineProperty(exports, \"__esModule\", { value: true });\n+exports.HttpProxyMiddleware = void 0;\n const httpProxy = require(\"http-proxy\");\n-const _ = require(\"lodash\");\n-const config_factory_1 = require(\"./config-factory\");\n-const contextMatcher = require(\"./context-matcher\");\n-const handlers = require(\"./handlers\");\n+const configuration_1 = require(\"./configuration\");\n+const debug_1 = require(\"./debug\");\n+const get_plugins_1 = require(\"./get-plugins\");\n const logger_1 = require(\"./logger\");\n+const path_filter_1 = require(\"./path-filter\");\n const PathRewriter = require(\"./path-rewriter\");\n const Router = require(\"./router\");\n+const function_1 = require(\"./utils/function\");\n class HttpProxyMiddleware {\n-    constructor(context, opts) {\n-        this.logger = logger_1.getInstance();\n+    constructor(options) {\n         this.wsInternalSubscribed = false;\n+        this.serverOnCloseSubscribed = false;\n         // https://github.com/Microsoft/TypeScript/wiki/'this'-in-TypeScript#red-flags-for-this\n-        this.middleware = (req, res, next) => __awaiter(this, void 0, void 0, function* () {\n-            if (this.shouldProxy(this.config.context, req)) {\n-                const activeProxyOptions = yield this.prepareProxyRequest(req);\n-                this.proxy.web(req, res, activeProxyOptions);\n+        this.middleware = (async (req, res, next) => {\n+            if (this.shouldProxy(this.proxyOptions.pathFilter, req)) {\n+                try {\n+                    const activeProxyOptions = await this.prepareProxyRequest(req);\n+                    (0, debug_1.Debug)(`proxy request to target: %O`, activeProxyOptions.target);\n+                    this.proxy.web(req, res, activeProxyOptions);\n+                }\n+                catch (err) {\n+                    next?.(err);\n+                }\n             }\n             else {\n-                next();\n+                next?.();\n+            }\n+            /**\n+             * Get the server object to subscribe to server events;\n+             * 'upgrade' for websocket and 'close' for graceful shutdown\n+             *\n+             * NOTE:\n+             * req.socket: node >= 13\n+             * req.connection: node < 13 (Remove this when node 12/13 support is dropped)\n+             */\n+            const server = (req.socket ?? req.connection)?.server;\n+            if (server && !this.serverOnCloseSubscribed) {\n+                server.on('close', () => {\n+                    (0, debug_1.Debug)('server close signal received: closing proxy server');\n+                    this.proxy.close();\n+                });\n+                this.serverOnCloseSubscribed = true;\n             }\n             if (this.proxyOptions.ws === true) {\n                 // use initial request to access the server object to subscribe to http upgrade event\n-                this.catchUpgradeRequest(req.connection.server);\n+                this.catchUpgradeRequest(server);\n             }\n         });\n-        this.catchUpgradeRequest = server => {\n+        this.catchUpgradeRequest = (server) => {\n             if (!this.wsInternalSubscribed) {\n+                (0, debug_1.Debug)('subscribing to server upgrade event');\n                 server.on('upgrade', this.handleUpgrade);\n                 // prevent duplicate upgrade handling;\n                 // in case external upgrade is also configured\n                 this.wsInternalSubscribed = true;\n             }\n         };\n-        this.handleUpgrade = (req, socket, head) => __awaiter(this, void 0, void 0, function* () {\n-            if (this.shouldProxy(this.config.context, req)) {\n-                const activeProxyOptions = yield this.prepareProxyRequest(req);\n-                this.proxy.ws(req, socket, head, activeProxyOptions);\n-                this.logger.info('[HPM] Upgrading to WebSocket');\n+        this.handleUpgrade = async (req, socket, head) => {\n+            try {\n+                if (this.shouldProxy(this.proxyOptions.pathFilter, req)) {\n+                    const activeProxyOptions = await this.prepareProxyRequest(req);\n+                    this.proxy.ws(req, socket, head, activeProxyOptions);\n+                    (0, debug_1.Debug)('server upgrade event received. Proxying WebSocket');\n+                }\n             }\n-        });\n",
+					"match": false,
+					"packageHash": "7124e55ca0a7ba6af732bb24b57983ab05f9a06d0885481e583d81784aff8d2e",
+					"size": 7151,
+					"sourceHash": "b306826b5bc9674401b40e475077db8d2016834b98629420b44566a7756873e4",
+					"status": "content"
+				},
+				"dist/index.d.ts": {
+					"diff": "--- published/dist/index.d.ts\n+++ rebuilt/dist/index.d.ts\n@@ -1,3 +1,11 @@\n-import { Filter, Options } from './types';\n-export declare function createProxyMiddleware(context: Filter | Options, options?: Options): import(\"./types\").IRequestHandler;\n-export { Options } from './types';\n+export * from './factory';\n+export * from './handlers';\n+export type { Plugin, Filter, Options, RequestHandler } from './types';\n+/**\n+ * Default plugins\n+ */\n+export * from './plugins/default';\n+/**\n+ * Legacy exports\n+ */\n+export * from './legacy';\n",
+					"match": false,
+					"packageHash": "f2a6a1b60c7d8d4a56253b1c9c093d850d4b3ed9fb3bf3727925e177d87e5916",
+					"size": 206,
+					"sourceHash": "a710a056936098886b0b5eb6734034589d15dbd7fa29329dc936f3f4e7bce93b",
+					"status": "content"
+				},
+				"dist/index.js": {
+					"diff": "--- published/dist/index.js\n+++ rebuilt/dist/index.js\n@@ -1,8 +1,26 @@\n \"use strict\";\n+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {\n+    if (k2 === undefined) k2 = k;\n+    var desc = Object.getOwnPropertyDescriptor(m, k);\n+    if (!desc || (\"get\" in desc ? !m.__esModule : desc.writable || desc.configurable)) {\n+      desc = { enumerable: true, get: function() { return m[k]; } };\n+    }\n+    Object.defineProperty(o, k2, desc);\n+}) : (function(o, m, k, k2) {\n+    if (k2 === undefined) k2 = k;\n+    o[k2] = m[k];\n+}));\n+var __exportStar = (this && this.__exportStar) || function(m, exports) {\n+    for (var p in m) if (p !== \"default\" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);\n+};\n Object.defineProperty(exports, \"__esModule\", { value: true });\n-const http_proxy_middleware_1 = require(\"./http-proxy-middleware\");\n-function createProxyMiddleware(context, options) {\n-    const { middleware } = new http_proxy_middleware_1.HttpProxyMiddleware(context, options);\n-    return middleware;\n-}\n-exports.createProxyMiddleware = createProxyMiddleware;\n+__exportStar(require(\"./factory\"), exports);\n+__exportStar(require(\"./handlers\"), exports);\n+/**\n+ * Default plugins\n+ */\n+__exportStar(require(\"./plugins/default\"), exports);\n+/**\n+ * Legacy exports\n+ */\n+__exportStar(require(\"./legacy\"), exports);\n",
+					"match": false,
+					"packageHash": "ab7a337d5f6d39346be98de816c711074019edb1a280ec4591b2bf4f7e2162af",
+					"size": 370,
+					"sourceHash": "151d735f3fdd28b3bacfba3a755d16ecd374cbd97de1eb518fe9fdc32d7ccc91",
+					"status": "content"
+				},
+				"dist/logger.d.ts": {
+					"diff": "--- published/dist/logger.d.ts\n+++ rebuilt/dist/logger.d.ts\n@@ -1,14 +1,2 @@\n-export declare function getInstance(): any;\n-/**\n- * -> normal proxy\n- * => router\n- * ~> pathRewrite\n- * ≈> router + pathRewrite\n- *\n- * @param  {String} originalPath\n- * @param  {String} newPath\n- * @param  {String} originalTarget\n- * @param  {String} newTarget\n- * @return {String}\n- */\n-export declare function getArrow(originalPath: any, newPath: any, originalTarget: any, newTarget: any): string;\n+import { Logger, Options } from './types';\n+export declare function getLogger(options: Options): Logger;\n",
+					"match": false,
+					"packageHash": "cb3bfb937dc949ff694b9ac5c6a4a05186e8f3d30d9bccc74283e36114e4039e",
+					"size": 392,
+					"sourceHash": "1311ab0557d6c811dbe757bef3bb6c9af5ab6332c80e8effb1372dfc88b63043",
+					"status": "content"
+				},
+				"dist/logger.js": {
+					"diff": "--- published/dist/logger.js\n+++ rebuilt/dist/logger.js\n@@ -1,135 +1,24 @@\n \"use strict\";\n Object.defineProperty(exports, \"__esModule\", { value: true });\n-const _ = require(\"lodash\");\n-const util = require(\"util\");\n-let loggerInstance;\n-const defaultProvider = {\n-    // tslint:disable: no-console\n-    log: console.log,\n-    debug: console.log,\n-    info: console.info,\n-    warn: console.warn,\n-    error: console.error\n-};\n-// log level 'weight'\n-var LEVELS;\n-(function (LEVELS) {\n-    LEVELS[LEVELS[\"debug\"] = 10] = \"debug\";\n-    LEVELS[LEVELS[\"info\"] = 20] = \"info\";\n-    LEVELS[LEVELS[\"warn\"] = 30] = \"warn\";\n-    LEVELS[LEVELS[\"error\"] = 50] = \"error\";\n-    LEVELS[LEVELS[\"silent\"] = 80] = \"silent\";\n-})(LEVELS || (LEVELS = {}));\n-function getInstance() {\n-    if (!loggerInstance) {\n-        loggerInstance = new Logger();\n-    }\n-    return loggerInstance;\n-}\n-exports.getInstance = getInstance;\n-class Logger {\n-    constructor() {\n-        this.setLevel('info');\n-        this.setProvider(() => defaultProvider);\n-    }\n-    // log will log messages, regardless of logLevels\n-    log() {\n-        this.provider.log(this._interpolate.apply(null, arguments));\n-    }\n-    debug() {\n-        if (this._showLevel('debug')) {\n-            this.provider.debug(this._interpolate.apply(null, arguments));\n-        }\n-    }\n-    info() {\n-        if (this._showLevel('info')) {\n-            this.provider.info(this._interpolate.apply(null, arguments));\n-        }\n-    }\n-    warn() {\n-        if (this._showLevel('warn')) {\n-            this.provider.warn(this._interpolate.apply(null, arguments));\n-        }\n-    }\n-    error() {\n-        if (this._showLevel('error')) {\n-            this.provider.error(this._interpolate.apply(null, arguments));\n-        }\n-    }\n-    setLevel(v) {\n-        if (this.isValidLevel(v)) {\n-            this.logLevel = v;\n-        }\n-    }\n-    setProvider(fn) {\n-        if (fn && this.isValidProvider(fn)) {\n-            this.provider = fn(defaultProvider);\n-        }\n-    }\n-    isValidProvider(fnProvider) {\n-        const result = true;\n-        if (fnProvider && !_.isFunction(fnProvider)) {\n-            throw new Error('[HPM] Log provider config error. Expecting a function.');\n-        }\n-        return result;\n-    }\n-    isValidLevel(levelName) {\n-        const validLevels = Object.keys(LEVELS);\n-        const isValid = validLevels.includes(levelName);\n-        if (!isValid) {\n-            throw new Error('[HPM] Log level error. Invalid logLevel.');\n-        }\n-        return isValid;\n-    }\n-    /**\n-     * Decide to log or not to log, based on the log levels 'weight'\n-     * @param  {String}  showLevel [debug, info, warn, error, silent]\n-     * @return {Boolean}\n-     */\n-    _showLevel(showLevel) {\n-        let result = false;\n-        const currentLogLevel = LEVELS[this.logLevel];\n-        if (currentLogLevel && currentLogLevel <= LEVELS[showLevel]) {\n-            result = true;\n-        }\n-        return result;\n-    }\n-    // make sure logged messages and its data are return interpolated\n",
+					"match": false,
+					"packageHash": "945de2c4b859823427b86d3304e1a95965182d5e851aae6a2a40c07f020939d6",
+					"size": 3894,
+					"sourceHash": "00e07354529c043ecdd721ac4559399e35093114a047e1eb77005a8bec4c7d57",
+					"status": "content"
+				},
+				"dist/path-rewriter.d.ts": {
+					"diff": "--- published/dist/path-rewriter.d.ts\n+++ rebuilt/dist/path-rewriter.d.ts\n@@ -4,4 +4,4 @@\n  * @param {Object} rewriteConfig\n  * @return {Function} Function to rewrite paths; This function should accept `path` (request.url) as parameter\n  */\n-export declare function createPathRewriter(rewriteConfig: any): (...args: any[]) => any;\n+export declare function createPathRewriter(rewriteConfig: any): any;\n",
+					"match": false,
+					"packageHash": "3c33d044e414b93d9228988f12b0c63648851acb893e0e201855d9f22ffbc1c3",
+					"size": 303,
+					"sourceHash": "2e476829b6f51d913059e5318e242d20880b8462f95acf29e137fe07f210489d",
+					"status": "content"
+				},
+				"dist/path-rewriter.js": {
+					"diff": "--- published/dist/path-rewriter.js\n+++ rebuilt/dist/path-rewriter.js\n@@ -1,9 +1,10 @@\n \"use strict\";\n Object.defineProperty(exports, \"__esModule\", { value: true });\n-const _ = require(\"lodash\");\n+exports.createPathRewriter = createPathRewriter;\n+const is_plain_object_1 = require(\"is-plain-object\");\n+const debug_1 = require(\"./debug\");\n const errors_1 = require(\"./errors\");\n-const logger_1 = require(\"./logger\");\n-const logger = logger_1.getInstance();\n+const debug = debug_1.Debug.extend('path-rewriter');\n /**\n  * Create rewrite function, to cache parsed rewrite rules.\n  *\n@@ -15,7 +16,7 @@\n     if (!isValidRewriteConfig(rewriteConfig)) {\n         return;\n     }\n-    if (_.isFunction(rewriteConfig)) {\n+    if (typeof rewriteConfig === 'function') {\n         const customRewriteFn = rewriteConfig;\n         return customRewriteFn;\n     }\n@@ -25,27 +26,24 @@\n     }\n     function rewritePath(path) {\n         let result = path;\n-        _.forEach(rulesCache, rule => {\n+        for (const rule of rulesCache) {\n             if (rule.regex.test(path)) {\n                 result = result.replace(rule.regex, rule.value);\n-                logger.debug('[HPM] Rewriting path from \"%s\" to \"%s\"', path, result);\n-                return false;\n+                debug('rewriting path from \"%s\" to \"%s\"', path, result);\n+                break;\n             }\n-        });\n+        }\n         return result;\n     }\n }\n-exports.createPathRewriter = createPathRewriter;\n function isValidRewriteConfig(rewriteConfig) {\n-    if (_.isFunction(rewriteConfig)) {\n+    if (typeof rewriteConfig === 'function') {\n         return true;\n     }\n-    else if (!_.isEmpty(rewriteConfig) && _.isPlainObject(rewriteConfig)) {\n-        return true;\n+    else if ((0, is_plain_object_1.isPlainObject)(rewriteConfig)) {\n+        return Object.keys(rewriteConfig).length !== 0;\n     }\n-    else if (_.isUndefined(rewriteConfig) ||\n-        _.isNull(rewriteConfig) ||\n-        _.isEqual(rewriteConfig, {})) {\n+    else if (rewriteConfig === undefined || rewriteConfig === null) {\n         return false;\n     }\n     else {\n@@ -54,14 +52,14 @@\n }\n function parsePathRewriteRules(rewriteConfig) {\n     const rules = [];\n-    if (_.isPlainObject(rewriteConfig)) {\n-        _.forIn(rewriteConfig, (value, key) => {\n+    if ((0, is_plain_object_1.isPlainObject)(rewriteConfig)) {\n+        for (const [key, value] of Object.entries(rewriteConfig)) {\n             rules.push({\n                 regex: new RegExp(key),\n-                value: rewriteConfig[key]\n+                value: value,\n             });\n-            logger.info('[HPM] Proxy rewrite rule created: \"%s\" ~> \"%s\"', key, rewriteConfig[key]);\n-        });\n+            debug('rewrite rule created: \"%s\" ~> \"%s\"', key, value);\n+        }\n     }\n     return rules;\n }\n",
+					"match": false,
+					"packageHash": "999847ebd33ca7bd642c66671fb6732ee8cb0175407bc31f8296ad2d2a084036",
+					"size": 2098,
+					"sourceHash": "314da9e04192c9f58b6b5d2869591afc352bf0f2cff9ef9283ca02b7d418f69d",
+					"status": "content"
+				},
+				"dist/router.js": {
+					"diff": "--- published/dist/router.js\n+++ rebuilt/dist/router.js\n@@ -1,54 +1,43 @@\n \"use strict\";\n-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {\n-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }\n-    return new (P || (P = Promise))(function (resolve, reject) {\n-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }\n-        function rejected(value) { try { step(generator[\"throw\"](value)); } catch (e) { reject(e); } }\n-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }\n-        step((generator = generator.apply(thisArg, _arguments || [])).next());\n-    });\n-};\n Object.defineProperty(exports, \"__esModule\", { value: true });\n-const _ = require(\"lodash\");\n-const logger_1 = require(\"./logger\");\n-const logger = logger_1.getInstance();\n-function getTarget(req, config) {\n-    return __awaiter(this, void 0, void 0, function* () {\n-        let newTarget;\n-        const router = config.router;\n-        if (_.isPlainObject(router)) {\n-            newTarget = getTargetFromProxyTable(req, router);\n-        }\n-        else if (_.isFunction(router)) {\n-            newTarget = yield router(req);\n-        }\n-        return newTarget;\n-    });\n-}\n exports.getTarget = getTarget;\n+const is_plain_object_1 = require(\"is-plain-object\");\n+const debug_1 = require(\"./debug\");\n+const debug = debug_1.Debug.extend('router');\n+async function getTarget(req, config) {\n+    let newTarget;\n+    const router = config.router;\n+    if ((0, is_plain_object_1.isPlainObject)(router)) {\n+        newTarget = getTargetFromProxyTable(req, router);\n+    }\n+    else if (typeof router === 'function') {\n+        newTarget = await router(req);\n+    }\n+    return newTarget;\n+}\n function getTargetFromProxyTable(req, table) {\n     let result;\n     const host = req.headers.host;\n     const path = req.url;\n     const hostAndPath = host + path;\n-    _.forIn(table, (value, key) => {\n+    for (const [key, value] of Object.entries(table)) {\n         if (containsPath(key)) {\n             if (hostAndPath.indexOf(key) > -1) {\n                 // match 'localhost:3000/api'\n-                result = table[key];\n-                logger.debug('[HPM] Router table match: \"%s\"', key);\n-                return false;\n+                result = value;\n+                debug('match: \"%s\" -> \"%s\"', key, result);\n+                break;\n             }\n         }\n         else {\n             if (key === host) {\n                 // match 'localhost:3000'\n-                result = table[key];\n-                logger.debug('[HPM] Router table match: \"%s\"', host);\n-                return false;\n+                result = value;\n+                debug('match: \"%s\" -> \"%s\"', host, result);\n+                break;\n             }\n         }\n-    });\n+    }\n     return result;\n }\n function containsPath(v) {\n",
+					"match": false,
+					"packageHash": "172524a72f625b48395c045ed5ef829f7c000adfb51a105867908adb85d24eee",
+					"size": 2115,
+					"sourceHash": "db03c230fe9ad7e5e25f40fe415986e403b23c9fdc8b51c177c6a1f3e290ddcc",
+					"status": "content"
+				},
+				"dist/types.d.ts": {
+					"diff": "--- published/dist/types.d.ts\n+++ rebuilt/dist/types.d.ts\n@@ -1,38 +1,122 @@\n-/// <reference types=\"node\" />\n-import * as express from 'express';\n-import * as http from 'http';\n-import * as httpProxy from 'http-proxy';\n-import * as net from 'net';\n-export interface IRequest extends express.Request {\n+/**\n+ * Based on definition by DefinitelyTyped:\n+ * https://github.com/DefinitelyTyped/DefinitelyTyped/blob/6f529c6c67a447190f86bfbf894d1061e41e07b7/types/http-proxy-middleware/index.d.ts\n+ */\n+import type * as http from 'node:http';\n+import type * as net from 'node:net';\n+import type * as httpProxy from 'http-proxy';\n+export type NextFunction<T = (err?: any) => void> = T;\n+export interface RequestHandler<TReq = http.IncomingMessage, TRes = http.ServerResponse, TNext = NextFunction> {\n+    (req: TReq, res: TRes, next?: TNext): Promise<void>;\n+    upgrade: (req: http.IncomingMessage, socket: net.Socket, head: Buffer) => void;\n }\n-export interface IResponse extends express.Response {\n+export type Filter<TReq = http.IncomingMessage> = string | string[] | ((pathname: string, req: TReq) => boolean);\n+export interface Plugin<TReq = http.IncomingMessage, TRes = http.ServerResponse> {\n+    (proxyServer: httpProxy<TReq, TRes>, options: Options<TReq, TRes>): void;\n }\n-export interface IRequestHandler extends express.RequestHandler {\n-    upgrade?: (req: IRequest, socket: net.Socket, head: any) => void;\n+export interface OnProxyEvent<TReq = http.IncomingMessage, TRes = http.ServerResponse> {\n+    error?: httpProxy.ErrorCallback<Error, TReq, TRes>;\n+    proxyReq?: httpProxy.ProxyReqCallback<http.ClientRequest, TReq, TRes>;\n+    proxyReqWs?: httpProxy.ProxyReqWsCallback<http.ClientRequest, TReq>;\n+    proxyRes?: httpProxy.ProxyResCallback<TReq, TRes>;\n+    open?: httpProxy.OpenCallback;\n+    close?: httpProxy.CloseCallback<TReq>;\n+    start?: httpProxy.StartCallback<TReq, TRes>;\n+    end?: httpProxy.EndCallback<TReq, TRes>;\n+    econnreset?: httpProxy.EconnresetCallback<Error, TReq, TRes>;\n }\n-export declare type Filter = string | string[] | ((pathname: string, req: IRequest) => boolean);\n-export interface Options extends httpProxy.ServerOptions {\n+export type Logger = Pick<Console, 'info' | 'warn' | 'error'>;\n+export interface Options<TReq = http.IncomingMessage, TRes = http.ServerResponse> extends httpProxy.ServerOptions {\n+    /**\n+     * Narrow down requests to proxy or not.\n+     * Filter on {@link http.IncomingMessage.url `pathname`} which is relative to the proxy's \"mounting\" point in the server.\n+     * Or use the {@link http.IncomingMessage `req`}  object for more complex filtering.\n+     * @link https://github.com/chimurai/http-proxy-middleware/blob/master/recipes/pathFilter.md\n+     * @since v3.0.0\n+     */\n+    pathFilter?: Filter<TReq>;\n+    /**\n+     * Modify request paths before requests are send to the target.\n+     * @example\n+     * ```js\n+     * createProxyMiddleware({\n+     *   pathRewrite: {\n+     *     '^/api/old-path': '/api/new-path', // rewrite path\n+     *   }\n+     * });\n+     * ```\n+     * @link https://github.com/chimurai/http-proxy-middleware/blob/master/recipes/pathRewrite.md\n+     */\n     pathRewrite?: {\n         [regexp: string]: string;\n-    } | ((path: string, req: IRequest) => string) | ((path: string, req: IRequest) => Promise<string>);\n+    } | ((path: string, req: TReq) => string | undefined) | ((path: string, req: TReq) => Promise<string>);\n+    /**\n+     * Access the internal http-proxy server instance to customize behavior\n+     *\n+     * @example\n+     * ```js\n+     * createProxyMiddleware({\n+     *   plugins: [(proxyServer, options) => {\n+     *     proxyServer.on('error', (error, req, res) => {\n+     *       console.error(error);\n+     *     });\n+     *   }]\n+     * });\n+     * ```\n+     * @link https://github.com/chimurai/http-proxy-middleware#plugins-array\n+     * @since v3.0.0\n+     */\n+    plugins?: Plugin<TReq, TRes>[];\n+    /**\n+     * Eject pre-configured plugins.\n+     * NOTE: register your own error handlers to prevent server from crashing.\n+     *\n+     * @link https://github.com/chimurai/http-proxy-middleware#ejectplugins-boolean-default-false\n+     * @since v3.0.0\n+     */\n+    ejectPlugins?: boolean;\n+    /**\n+     * Listen to http-proxy events\n+     * @see {@link OnProxyEvent} for available events\n+     * @example\n+     * ```js\n+     * createProxyMiddleware({\n+     *   on: {\n+     *     error: (error, req, res, target) => {\n",
+					"match": false,
+					"packageHash": "c05ae02f4b970328f33104fcd5722db2ef50dd84b3615ba070b3ea72c054e0e4",
+					"size": 1634,
+					"sourceHash": "47bd5449f6c874f45d737a54e6aa4d9f723fa97067f46a05d8f7d7b69c5e8ebe",
+					"status": "content"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -1,31 +1,35 @@\n {\n   \"name\": \"http-proxy-middleware\",\n-  \"version\": \"0.22.0-alpha\",\n-  \"description\": \"The one-liner node.js proxy middleware for connect, express and browser-sync\",\n+  \"type\": \"commonjs\",\n+  \"version\": \"3.0.5\",\n+  \"description\": \"The one-liner node.js proxy middleware for connect, express, next.js and more\",\n   \"main\": \"dist/index.js\",\n   \"types\": \"dist/index.d.ts\",\n   \"files\": [\n     \"dist\"\n   ],\n   \"scripts\": {\n-    \"clean\": \"rm -rf dist && rm -rf coverage\",\n-    \"lint\": \"yarn lint:prettier && yarn lint:tslint\",\n-    \"lint:prettier\": \"prettier --check \\\"**/*.{js,ts,md}\\\"\",\n-    \"lint:tslint\": \"yarn tslint -c tslint.json '{lib,test}/**/*.ts'\",\n-    \"lint:fix\": \"prettier --write \\\"**/*.{js,ts,md}\\\"\",\n-    \"build\": \"tsc\",\n-    \"pretest\": \"yarn build\",\n-    \"test\": \"jest --runInBand\",\n-    \"precover\": \"yarn clean && yarn build\",\n-    \"cover\": \"jest --runInBand --coverage\",\n-    \"precoveralls\": \"yarn clean && yarn build\",\n-    \"coveralls\": \"jest --runInBand --coverage --coverageReporters=text-lcov | coveralls\",\n-    \"postcoveralls\": \"yarn clean\",\n-    \"prepare\": \"yarn clean && yarn build\"\n+    \"clean\": \"rm -rf dist coverage tsconfig.tsbuildinfo .eslintcache\",\n+    \"install:all\": \"yarn && (cd examples && yarn)\",\n+    \"lint\": \"yarn prettier && yarn eslint\",\n+    \"lint:fix\": \"yarn prettier:fix && yarn eslint:fix\",\n+    \"eslint\": \"eslint '{src,test,examples}/**/*.{js,ts}' --cache\",\n+    \"eslint:fix\": \"yarn eslint --fix\",\n+    \"prettier\": \"prettier --list-different \\\"**/*.{js,ts,md,yml,json,html}\\\"\",\n+    \"prettier:fix\": \"prettier --write \\\"**/*.{js,ts,md,yml,json,html}\\\"\",\n+    \"build\": \"tsc --build\",\n+    \"test\": \"jest\",\n+    \"coverage\": \"jest --coverage\",\n+    \"prepare\": \"husky && patch-package\",\n+    \"prepack\": \"yarn clean && yarn test && yarn build\",\n+    \"spellcheck\": \"npx --yes cspell --show-context --show-suggestions '**/*.*'\"\n+  },\n+  \"publishConfig\": {\n+    \"provenance\": true\n   },\n   \"repository\": {\n     \"type\": \"git\",\n-    \"url\": \"https://github.com/chimurai/http-proxy-middleware.git\"\n+    \"url\": \"git+https://github.com/chimurai/http-proxy-middleware.git\"\n   },\n   \"keywords\": [\n     \"reverse\",\n@@ -35,7 +39,9 @@\n     \"https\",\n     \"connect\",\n     \"express\",\n+    \"fastify\",\n     \"polka\",\n+    \"next.js\",\n     \"browser-sync\",\n     \"gulp\",\n     \"grunt-contrib-connect\",\n@@ -48,44 +54,53 @@\n   \"bugs\": {\n     \"url\": \"https://github.com/chimurai/http-proxy-middleware/issues\"\n   },\n-  \"homepage\": \"https://github.com/chimurai/http-proxy-middleware\",\n+  \"homepage\": \"https://github.com/chimurai/http-proxy-middleware#readme\",\n   \"devDependencies\": {\n-    \"@commitlint/cli\": \"^8.0.0\",\n-    \"@commitlint/config-conventional\": \"^8.0.0\",\n-    \"@types/express\": \"^4.17.0\",\n-    \"@types/is-glob\": \"^4.0.0\",\n-    \"@types/jest\": \"^25.1.2\",\n-    \"@types/lodash\": \"^4.14.149\",\n-    \"@types/micromatch\": \"^4.0.1\",\n-    \"@types/node\": \"^12.6.2\",\n-    \"browser-sync\": \"^2.26.7\",\n-    \"connect\": \"^3.6.6\",\n-    \"coveralls\": \"^3.0.5\",\n-    \"express\": \"^4.16.4\",\n-    \"husky\": \"^3.0.0\",\n-    \"jest\": \"^25.1.0\",\n-    \"open\": \"^7.0.2\",\n-    \"prettier\": \"^1.19.1\",\n-    \"ts-jest\": \"^25.2.0\",\n-    \"tslint\": \"^6.0.0\",\n-    \"tslint-config-prettier\": \"^1.18.0\",\n-    \"typescript\": \"^3.7.5\",\n-    \"ws\": \"^7.1.0\"\n+    \"@commitlint/cli\": \"20.2.0\",\n+    \"@commitlint/config-conventional\": \"20.2.0\",\n+    \"@eslint/js\": \"9.39.1\",\n+    \"@trivago/prettier-plugin-sort-imports\": \"6.0.0\",\n+    \"@types/debug\": \"4.1.12\",\n+    \"@types/eslint\": \"9.6.1\",\n+    \"@types/express\": \"5.0.6\",\n",
+					"match": false,
+					"packageHash": "a9806263141903ebfa2637f8a7d28014a207abaa0a7aa8ebb0898839de308557",
+					"size": 2520,
+					"sourceHash": "b719f4ffb7c0133d89210e070a544c7f1f60d9401d8fa8f63d50955ce252b4fb",
+					"status": "content"
+				},
+				"dist/configuration.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"dist/configuration.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"dist/debug.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"dist/debug.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"dist/factory.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"dist/factory.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"dist/get-plugins.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"dist/get-plugins.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"dist/handlers/fix-request-body.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"dist/handlers/fix-request-body.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"dist/handlers/index.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"dist/handlers/index.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"dist/handlers/public.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"dist/handlers/public.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"dist/handlers/response-interceptor.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"dist/handlers/response-interceptor.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"dist/legacy/create-proxy-middleware.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"dist/legacy/create-proxy-middleware.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"dist/legacy/index.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"dist/legacy/index.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"dist/legacy/options-adapter.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"dist/legacy/options-adapter.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"dist/legacy/public.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"dist/legacy/public.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"dist/legacy/types.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"dist/legacy/types.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"dist/path-filter.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"dist/path-filter.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"dist/plugins/default/debug-proxy-errors-plugin.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"dist/plugins/default/debug-proxy-errors-plugin.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"dist/plugins/default/error-response-plugin.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"dist/plugins/default/error-response-plugin.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"dist/plugins/default/index.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"dist/plugins/default/index.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"dist/plugins/default/logger-plugin.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"dist/plugins/default/logger-plugin.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"dist/plugins/default/proxy-events.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"dist/plugins/default/proxy-events.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"dist/status-code.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"dist/status-code.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"dist/utils/function.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"dist/utils/function.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"dist/utils/logger-plugin.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"dist/utils/logger-plugin.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"dist/utils/sanitize.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"dist/utils/sanitize.js": {
+					"match": false,
+					"status": "missing-in-package"
+				}
+			},
+			"summary": {
+				"differentFiles": 14,
+				"matchingFiles": 3,
+				"missingInPackage": 46,
+				"missingInSource": 7,
+				"score": 0.04285714285714286,
+				"totalFiles": 70
+			}
+		}
+	}
+]
