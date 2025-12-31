@@ -1,0 +1,265 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2025-12-31T08:49:51.969Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:11.7.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "nan@0.3.0-wip2",
+			"name": "nan",
+			"version": "0.3.0-wip2",
+			"location": "https://registry.npmjs.org/nan/-/nan-0.3.0-wip2.tgz",
+			"integrity": "sha512-2N9aT3PALI9MBr5bPQWsTa+wb5zwwfJrzwW/L4nCmifHkGgPsOEq7gEkSZerdtyPGcsRc1Zznpj2etgGYuGJ3Q==",
+			"publishedAt": "2013-08-16T11:38:17.241Z",
+			"publishedWith": {
+				"node": null,
+				"npm": "1.3.5"
+			}
+		},
+		"source": {
+			"integrity": null,
+			"location": "git://github.com/rvagg/nan.git",
+			"spec": "github:rvagg/nan#HEAD"
+		},
+		"comparisonHash": "8a2a8dcbb729bf3ee9216e490c955701f0ddebe1",
+		"diff": {
+			"files": {
+				".index.js": {
+					"match": false,
+					"packageHash": "9aeea378c2204a8769ac47ebdaf8553b88d8d0ae959433b45fa6428c4b58d983",
+					"size": 6,
+					"status": "missing-in-source"
+				},
+				"LICENSE": {
+					"match": false,
+					"packageHash": "f9131a5cd124930c0db774bbecfb0b6601248eeb00aa4257a4571e6514ca8fa3",
+					"size": 1959,
+					"status": "missing-in-source"
+				},
+				"README.md": {
+					"diff": "--- published/README.md\n+++ rebuilt/README.md\n@@ -1,614 +1,456 @@\n Native Abstractions for Node.js\n ===============================\n \n-**A header file filled with macro and utility goodness for making addon development for Node.js easier across versions 0.8, 0.10 and 0.11, and eventually 0.12.**\n+**A header file filled with macro and utility goodness for making add-on development for Node.js easier across versions 8, 10, 12, 14, 16, 17, 18, 19, 20, 21, 22, 23, 24 and 25.**\n \n-***Current version: 0.2.2*** *(See [nan.h](https://github.com/rvagg/nan/blob/master/nan.h) for changelog)*\n+***Current version: 2.24.0***\n \n-Thanks to the crazy changes in V8 (and some in Node core), keeping native addons compiling happily across versions, particularly 0.10 to 0.11/0.12, is a minor nightmare. The goal of this project is to store all logic necessary to develop native Node.js addons without having to inspect `NODE_MODULE_VERSION` and get yourself into a macro-tangle.\n+*(See [CHANGELOG.md](https://github.com/nodejs/nan/blob/master/CHANGELOG.md) for complete ChangeLog)*\n+\n+[![NPM](https://nodei.co/npm/nan.png?downloads=true&downloadRank=true)](https://nodei.co/npm/nan/) [![NPM](https://nodei.co/npm-dl/nan.png?months=6&height=3)](https://nodei.co/npm/nan/)\n+\n+[![Build status](https://ci.appveyor.com/api/projects/status/kh73pbm9dsju7fgh)](https://ci.appveyor.com/project/RodVagg/nan)\n+\n+Thanks to the crazy changes in V8 (and some in Node core), keeping native addons compiling happily across versions, particularly 0.10 to 0.12 to 4.0, is a minor nightmare. The goal of this project is to store all logic necessary to develop native Node.js addons without having to inspect `NODE_MODULE_VERSION` and get yourself into a macro-tangle.\n \n This project also contains some helper utilities that make addon development a bit more pleasant.\n \n+ * **[News & Updates](#news)**\n  * **[Usage](#usage)**\n  * **[Example](#example)**\n  * **[API](#api)**\n+ * **[Tests](#tests)**\n+ * **[Known issues](#issues)**\n+ * **[Governance & Contributing](#governance)**\n \n-<a name=\"usage\"></a>\n-## Usage\n-\n-Simply copy **[nan.h](https://github.com/rvagg/nan/blob/master/nan.h)** from this repository into your project and load it in your source files with `#include \"nan.h\"`. The version is listed at the top of the file so be sure to check back here regularly for updates.\n-\n-<a name=\"example\"></a>\n-## Example\n-\n-See **[LevelDOWN](https://github.com/rvagg/node-leveldown/pull/48)** for a full example of **NAN** in use.\n-\n-or a simpler example, see the **[async pi estimation example](https://github.com/rvagg/nan/tree/master/examples/async_pi_estimate)** in the examples directory for full code an explanation of what this Monte Carlo Pi estimation example does. Below are just some parts of the full example that illustrate the use of **NAN**.\n-\n-Compare to the current 0.10 version of this example, found in the [node-addon-examples](https://github.com/rvagg/node-addon-examples/tree/master/9_async_work) repository and also a 0.11 version of the same found [here](https://github.com/kkoopa/node-addon-examples/tree/5c01f58fc993377a567812597e54a83af69686d7/9_async_work).\n-\n-Note that there is no embedded version sniffing going on here and also the async work is made much simpler, see below for details on the `NanAsyncWorker` class.\n+<a name=\"news\"></a>\n \n-```c++\n-// addon.cc\n-#include <node.h>\n-#include \"nan.h\"\n-// ...\n+## News & Updates\n \n-using namespace v8;\n+<a name=\"usage\"></a>\n \n-void InitAll(Handle<Object> exports) {\n-  exports->Set(NanSymbol(\"calculateSync\"),\n-    FunctionTemplate::New(CalculateSync)->GetFunction());\n+## Usage\n \n-  exports->Set(NanSymbol(\"calculateAsync\"),\n-    FunctionTemplate::New(CalculateAsync)->GetFunction());\n-}\n+Simply add **NAN** as a dependency using a package manager like npm, yarn, or bun:\n \n-NODE_MODULE(addon, InitAll)\n+``` bash\n+$ npm install nan\n ```\n \n-```c++\n-// sync.h\n-#include <node.h>\n-#include \"nan.h\"\n+Pull in the path to **NAN** in your *binding.gyp* so that you can use `#include <nan.h>` in your *.cpp* files:\n \n-NAN_METHOD(CalculateSync);\n+``` python\n+\"include_dirs\" : [\n+    \"<!(node -e \\\"require('nan')\\\")\"\n+]\n ```\n \n-```c++\n-// sync.cc\n-#include <node.h>\n-#include \"nan.h\"\n-#include \"sync.h\"\n-// ...\n-\n-using namespace v8;\n-\n-// Simple synchronous access to the `Estimate()` function\n-NAN_METHOD(CalculateSync) {\n-  NanScope();\n-\n-  // expect a number as the first argument\n",
+					"match": false,
+					"packageHash": "a9963ddda3635d53cc694e2ec996c47ce0d94b9c8992f565ddd4469d360e0ff4",
+					"size": 23553,
+					"sourceHash": "622db29d5309b0543472552c19c2f46d9e5ca6012c12262b635fcd2a457b8482",
+					"status": "content"
+				},
+				"nan.h": {
+					"diff": "--- published/nan.h\n+++ rebuilt/nan.h\n@@ -1,493 +1,2021 @@\n-/**********************************************************************************\n+/*********************************************************************\n  * NAN - Native Abstractions for Node.js\n  *\n- * Copyright (c) 2013 NAN contributors:\n+ * Copyright (c) 2018 NAN contributors:\n  *   - Rod Vagg <https://github.com/rvagg>\n  *   - Benjamin Byholm <https://github.com/kkoopa>\n  *   - Trevor Norris <https://github.com/trevnorris>\n+ *   - Nathan Rajlich <https://github.com/TooTallNate>\n+ *   - Brett Lawson <https://github.com/brett19>\n+ *   - Ben Noordhuis <https://github.com/bnoordhuis>\n+ *   - David Siegel <https://github.com/agnat>\n+ *   - Michael Ira Krufky <https://github.com/mkrufky>\n  *\n- * MIT +no-false-attribs License <https://github.com/rvagg/nan/blob/master/LICENSE>\n+ * MIT License <https://github.com/nodejs/nan/blob/master/LICENSE.md>\n  *\n- * Version 0.3.0-wip (current Node unstable: 0.11.5)\n+ * Version 2.24.0: current Node 25.2.1, Node 0.12: 0.12.18, Node 0.10: 0.10.48, iojs: 3.3.1\n  *\n- * ChangeLog:\n- *  * 0.3.0-wip UNRELEASED\n- *    - Lots of fixes to NanFromV8String, pulling in features from new Node core\n- *    - Added Nan::Encoding for NanFromV8String to allow BUFFER type in Node 0.8 (instead of node::encoding)\n- *    - Added optional error number argument for NanThrowError()\n- *    - Added NanInitPersistent()\n- *    - Fixed minor leak in NanAsyncWorker when error message\n- *\n- *  * 0.2.2 Aug 5 2013\n- *    - Fixed usage of undefined variable with node::BASE64 in NanFromV8String()\n- *\n- *  * 0.2.1 Aug 5 2013\n- *    - Fixed 0.8 breakage, node::BUFFER encoding type not available in 0.8 for\n- *      NanFromV8String()\n- *\n- *  * 0.2.0 Aug 5 2013\n- *    - Added NAN_PROPERTY_GETTER, NAN_PROPERTY_SETTER, NAN_PROPERTY_ENUMERATOR,\n- *      NAN_PROPERTY_DELETER, NAN_PROPERTY_QUERY\n- *    - Extracted _NAN_METHOD_ARGS, _NAN_GETTER_ARGS, _NAN_SETTER_ARGS,\n- *      _NAN_PROPERTY_GETTER_ARGS, _NAN_PROPERTY_SETTER_ARGS,\n- *      _NAN_PROPERTY_ENUMERATOR_ARGS, _NAN_PROPERTY_DELETER_ARGS,\n- *      _NAN_PROPERTY_QUERY_ARGS\n- *    - Added NanGetInternalFieldPointer, NanSetInternalFieldPointer\n- *    - Added NAN_WEAK_CALLBACK, NAN_WEAK_CALLBACK_OBJECT,\n- *      NAN_WEAK_CALLBACK_DATA, NanMakeWeak\n- *    - Renamed THROW_ERROR to _NAN_THROW_ERROR\n- *    - Added NanNewBufferHandle(char*, size_t, node::smalloc::FreeCallback, void*)\n- *    - Added NanBufferUse(char*, uint32_t)\n- *    - Added NanNewContextHandle(v8::ExtensionConfiguration*,\n- *        v8::Handle<v8::ObjectTemplate>, v8::Handle<v8::Value>)\n- *    - Fixed broken NanCallback#GetFunction()\n- *    - Added optional encoding and size arguments to NanFromV8String()\n- *    - Added NanGetPointerSafe() and NanSetPointerSafe()\n- *    - Added initial test suite (to be expanded)\n- *    - Allow NanUInt32OptionValue to convert any Number object\n- *\n- *  * 0.1.0 Jul 21 2013\n- *    - Added `NAN_GETTER`, `NAN_SETTER`\n- *    - Added `NanThrowError` with single Local<Value> argument\n- *    - Added `NanNewBufferHandle` with single uint32_t argument\n- *    - Added `NanHasInstance(Persistent<FunctionTemplate>&, Handle<Value>)`\n- *    - Added `Local<Function> NanCallback#GetFunction()`\n- *    - Added `NanCallback#Call(int, Local<Value>[])`\n- *    - Deprecated `NanCallback#Run(int, Local<Value>[])` in favour of Call\n- *\n- * See https://github.com/rvagg/nan for the latest update to this file\n+ * See https://github.com/nodejs/nan for the latest update to this file\n  **********************************************************************************/\n \n-#ifndef NAN_H\n-#define NAN_H\n+#ifndef NAN_H_\n+#define NAN_H_\n+\n+#include <node_version.h>\n+\n+#define NODE_0_10_MODULE_VERSION 11\n+#define NODE_0_12_MODULE_VERSION 14\n+#define ATOM_0_21_MODULE_VERSION 41\n+#define IOJS_1_0_MODULE_VERSION  42\n+#define IOJS_1_1_MODULE_VERSION  43\n+#define IOJS_2_0_MODULE_VERSION  44\n+#define IOJS_3_0_MODULE_VERSION  45\n+#define NODE_4_0_MODULE_VERSION  46\n+#define NODE_5_0_MODULE_VERSION  47\n+#define NODE_6_0_MODULE_VERSION  48\n+#define NODE_7_0_MODULE_VERSION  51\n+#define NODE_8_0_MODULE_VERSION  57\n+#define NODE_9_0_MODULE_VERSION  59\n+#define NODE_10_0_MODULE_VERSION 64\n+#define NODE_11_0_MODULE_VERSION 67\n+#define NODE_12_0_MODULE_VERSION 72\n+#define NODE_13_0_MODULE_VERSION 79\n+#define NODE_14_0_MODULE_VERSION 83\n+#define NODE_15_0_MODULE_VERSION 88\n+#define NODE_16_0_MODULE_VERSION 93\n",
+					"match": false,
+					"packageHash": "c9890b90ac3defd581637b608371a81b0cf16640256ba74ada6475efff5b65df",
+					"size": 29394,
+					"sourceHash": "84ff37edb27db7e105e8ff1865124bf6991d7e126ef58b1455a1029b2c91dd35",
+					"status": "content"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -1,16 +1,38 @@\n {\n   \"name\": \"nan\",\n-  \"version\": \"0.3.0-wip2\",\n-  \"description\": \"Native Abstractions for Node.js: C++ header for Node 0.8->0.12 compatibility\",\n-  \"main\": \".index.js\",\n+  \"version\": \"2.24.0\",\n+  \"description\": \"Native Abstractions for Node.js: C++ header for Node 0.8 -> 25 compatibility\",\n+  \"main\": \"include_dirs.js\",\n   \"repository\": {\n     \"type\": \"git\",\n-    \"url\": \"git://github.com/rvagg/nan.git\"\n+    \"url\": \"git://github.com/nodejs/nan.git\"\n+  },\n+  \"scripts\": {\n+    \"test\": \"tap --gc --stderr test/js/*-test.js\",\n+    \"test:worker\": \"node --experimental-worker test/tap-as-worker.js --gc --stderr test/js/*-test.js\",\n+    \"rebuild-tests-2015\": \"node-gyp rebuild --msvs_version=2015 --directory test\",\n+    \"rebuild-tests\": \"node-gyp rebuild --directory test\",\n+    \"docs\": \"doc/.build.sh\"\n   },\n   \"contributors\": [\n     \"Rod Vagg <r@va.gg> (https://github.com/rvagg)\",\n     \"Benjamin Byholm <bbyholm@abo.fi> (https://github.com/kkoopa/)\",\n-    \"Trevor Norris <trev.norris@gmail.com> (https://github.com/trevnorris)\"\n+    \"Trevor Norris <trev.norris@gmail.com> (https://github.com/trevnorris)\",\n+    \"Nathan Rajlich <nathan@tootallnate.net> (https://github.com/TooTallNate)\",\n+    \"Brett Lawson <brett19@gmail.com> (https://github.com/brett19)\",\n+    \"Ben Noordhuis <info@bnoordhuis.nl> (https://github.com/bnoordhuis)\",\n+    \"David Siegel <david@artcom.de> (https://github.com/agnat)\",\n+    \"Michael Ira Krufky <mkrufky@gmail.com> (https://github.com/mkrufky)\"\n   ],\n+  \"devDependencies\": {\n+    \"bindings\": \"~1.2.1\",\n+    \"commander\": \"^2.8.1\",\n+    \"glob\": \"^5.0.14\",\n+    \"request\": \"=2.81.0\",\n+    \"node-gyp\": \"~v10.3.1\",\n+    \"readable-stream\": \"^2.1.4\",\n+    \"tap\": \"~0.7.1\",\n+    \"xtend\": \"~4.0.0\"\n+  },\n   \"license\": \"MIT\"\n-}\n\\ No newline at end of file\n+}\n",
+					"match": false,
+					"packageHash": "fc18a9d1ebb92ec73519ee221d89c86893076a6d525434acaebbf1761df4390c",
+					"size": 495,
+					"sourceHash": "6a3f8c6c89b4d7ffc38af518fe13638b6fc3f1890616d34f5c138420918883d4",
+					"status": "content"
+				},
+				".github/workflows/ci.yml": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				".pre-commit-config.yaml": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"CHANGELOG.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"CMakeLists.txt": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"LICENSE.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"doc/asyncworker.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"doc/buffers.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"doc/callback.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"doc/converters.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"doc/errors.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"doc/json.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"doc/maybe_types.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"doc/methods.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"doc/new.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"doc/node_misc.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"doc/object_wrappers.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"doc/persistent.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"doc/scopes.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"doc/script.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"doc/string_bytes.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"doc/v8_internals.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"doc/v8_misc.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"include_dirs.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"nan_callbacks.h": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"nan_callbacks_12_inl.h": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"nan_callbacks_pre_12_inl.h": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"nan_converters.h": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"nan_converters_43_inl.h": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"nan_converters_pre_43_inl.h": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"nan_define_own_property_helper.h": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"nan_implementation_12_inl.h": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"nan_implementation_pre_12_inl.h": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"nan_json.h": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"nan_maybe_43_inl.h": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"nan_maybe_pre_43_inl.h": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"nan_new.h": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"nan_object_wrap.h": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"nan_persistent_12_inl.h": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"nan_persistent_pre_12_inl.h": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"nan_private.h": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"nan_scriptorigin.h": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"nan_string_bytes.h": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"nan_typedarray_contents.h": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"nan_weak.h": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"tools/1to2.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"tools/README.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"tools/package.json": {
+					"match": false,
+					"status": "missing-in-package"
+				}
+			},
+			"summary": {
+				"differentFiles": 3,
+				"matchingFiles": 0,
+				"missingInPackage": 47,
+				"missingInSource": 2,
+				"score": 0,
+				"totalFiles": 52
+			}
+		}
+	}
+]
