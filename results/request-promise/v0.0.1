@@ -1,0 +1,75 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2025-12-31T13:52:09.862Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:11.7.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "request-promise@0.0.1",
+			"name": "request-promise",
+			"version": "0.0.1",
+			"location": "https://registry.npmjs.org/request-promise/-/request-promise-0.0.1.tgz",
+			"integrity": "sha512-PdwXlP84xsqxb5kCAk9AJ2pbu/GIjsI+mpv9t3ZXl1CMwg16xTZk1SvCpt+u55K5sCry/9E0sY74OGQCYy4XNw==",
+			"publishedAt": "2013-10-04T17:46:34.565Z",
+			"publishedWith": {
+				"node": null,
+				"npm": "1.3.11"
+			}
+		},
+		"source": {
+			"integrity": null,
+			"location": "https://github.com/tyabonil/request-promise",
+			"spec": "github:tyabonil/request-promise#HEAD"
+		},
+		"comparisonHash": "8a2a8dcbb729bf3ee9216e490c955701f0ddebe1",
+		"diff": {
+			"files": {
+				".npmignore": {
+					"match": false,
+					"packageHash": "679a4e833dec44672373378d8e1ae30748071ba7c1db8dc17e802c3b01c27cdb",
+					"size": 96,
+					"status": "missing-in-source"
+				},
+				"lib/rp.js": {
+					"diff": "--- published/lib/rp.js\n+++ rebuilt/lib/rp.js\n@@ -1,40 +1,52 @@\n-var Promise = require('bluebird'),\n-    request = require('request');\n+'use strict';\n \n-function rp(options) {\n-    var statusCodes = {\n-        'GET' : [200],\n-        'HEAD' : [200],\n-        'PUT' : [200, 201],\n-        'POST' : [200, 201]\n-    }, c = {}, i;\n-    if (typeof options === 'string') {\n-        c.uri = options;\n-        c.method = 'GET';\n-    }\n-    if (typeof options === 'object') {\n-        for (i in options) {\n-            if (options.hasOwnProperty(i)) {\n-                c[i] = options[i];\n-            }\n-        }\n-    }\n-    c.method = c.method || 'GET';\n-    return new Promise(function (resolve, reject) {\n-        request(c, function (error, response, body) {\n-            if (error) {\n-                reject(error);\n-            } else if (c.simple && (statusCodes[c.method].indexOf(response.statusCode) > -1)) {\n-                reject(response.statusCode);\n-            } else {\n-                if (c.transform && typeof c.transform === 'function') {\n-                    resolve(c.transform(body));\n-                } else {\n-                    resolve(body);\n-                }\n-            }\n-        });\n-    });\n+var Bluebird = require('bluebird').getNewLibraryCopy(),\n+    configure = require('request-promise-core/configure/request2'),\n+    stealthyRequire = require('stealthy-require');\n+\n+try {\n+\n+    // Load Request freshly - so that users can require an unaltered request instance!\n+    var request = stealthyRequire(require.cache, function () {\n+        return require('request');\n+    },\n+    function () {\n+        require('tough-cookie');\n+    }, module);\n+\n+} catch (err) {\n+    /* istanbul ignore next */\n+    var EOL = require('os').EOL;\n+    /* istanbul ignore next */\n+    console.error(EOL + '###' + EOL + '### The \"request\" library is not installed automatically anymore.' + EOL + '### But is a dependency of \"request-promise\".' + EOL + '### Please install it with:' + EOL + '### npm install request --save' + EOL + '###' + EOL);\n+    /* istanbul ignore next */\n+    throw err;\n }\n \n-module.exports = rp;\n+Bluebird.config({cancellation: true});\n+\n+configure({\n+    request: request,\n+    PromiseImpl: Bluebird,\n+    expose: [\n+        'then',\n+        'catch',\n+        'finally',\n+        'cancel',\n+        'promise'\n+        // Would you like to expose more Bluebird methods? Try e.g. `rp(...).promise().tap(...)` first. `.promise()` returns the full-fledged Bluebird promise.\n+    ],\n+    constructorMixin: function (resolve, reject, onCancel) {\n+        var self = this;\n+        onCancel(function () {\n+            self.abort();\n+        });\n+    }\n+});\n+\n+request.bindCLS = function RP$bindCLS() {\n+    throw new Error('CLS support was dropped. To get it back read: https://github.com/request/request-promise/wiki/Getting-Back-Support-for-Continuation-Local-Storage');\n+};\n+\n+\n+module.exports = request;\n",
+					"match": false,
+					"packageHash": "00b72f42d166a373d72c9ea131dd71134a62c839696e43591f88896cd4fb5273",
+					"size": 1126,
+					"sourceHash": "2acc966de4cb1c8b1781717a9336cc8264456839c422aba1f6b2f9dcd2be6810",
+					"status": "content"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -1,23 +1,59 @@\n {\n   \"name\": \"request-promise\",\n-  \"version\": \"0.0.1\",\n-  \"description\": \"Promise-based Wrapper for XHR using Request and Bluebird\",\n-  \"main\": \"lib/tp.js\",\n+  \"version\": \"4.2.6\",\n+  \"description\": \"The simplified HTTP request client 'request' with Promise support. Powered by Bluebird.\",\n+  \"keywords\": [\n+    \"xhr\",\n+    \"http\",\n+    \"https\",\n+    \"promise\",\n+    \"request\",\n+    \"then\",\n+    \"thenable\",\n+    \"bluebird\"\n+  ],\n+  \"main\": \"./lib/rp.js\",\n   \"scripts\": {\n-    \"test\": \"To Do\"\n+    \"test\": \"./node_modules/.bin/gulp ci\",\n+    \"test-publish\": \"./node_modules/.bin/gulp ci-no-cov\",\n+    \"publish-please\": \"publish-please\",\n+    \"prepublish\": \"publish-please guard\"\n   },\n   \"repository\": {\n     \"type\": \"git\",\n-    \"url\": \"https://github.com/tyabonil/request-promise\"\n+    \"url\": \"git+https://github.com/request/request-promise.git\"\n+  },\n+  \"author\": \"Nicolai Kamenzky (https://github.com/analog-nico)\",\n+  \"license\": \"ISC\",\n+  \"bugs\": {\n+    \"url\": \"https://github.com/request/request-promise/issues\"\n+  },\n+  \"homepage\": \"https://github.com/request/request-promise#readme\",\n+  \"engines\": {\n+    \"node\": \">=0.10.0\"\n   },\n-  \"keywords\": [\n-    \"xhr\",\n-    \"promise\",\n-    \"request\"\n-  ],\n-  \"author\": \"Ty Abonil\",\n-  \"license\": \"MIT\",\n   \"dependencies\": {\n-    \"bluebird\": \"~0.7.9-1\"\n+    \"request-promise-core\": \"1.1.4\",\n+    \"bluebird\": \"^3.5.0\",\n+    \"stealthy-require\": \"^1.1.1\",\n+    \"tough-cookie\": \"^2.3.3\"\n+  },\n+  \"peerDependencies\": {\n+    \"request\": \"^2.34\"\n+  },\n+  \"devDependencies\": {\n+    \"body-parser\": \"~1.15.2\",\n+    \"chai\": \"~3.5.0\",\n+    \"chalk\": \"~1.1.3\",\n+    \"gulp\": \"~3.9.1\",\n+    \"gulp-coveralls\": \"~0.1.4\",\n+    \"gulp-eslint\": \"~2.1.0\",\n+    \"gulp-istanbul\": \"~1.0.0\",\n+    \"gulp-mocha\": \"~2.2.0\",\n+    \"lodash\": \"~4.13.1\",\n+    \"publish-please\": \"~2.1.4\",\n+    \"request\": \"^2.34.0\",\n+    \"rimraf\": \"~2.5.3\",\n+    \"run-sequence\": \"~1.2.2\"\n   }\n }\n",
+					"match": false,
+					"packageHash": "e0d07ccfc030348e34904d3700caa590c9c6d0c3291291f40332b638564951d7",
+					"size": 451,
+					"sourceHash": "fa456ea8951d4eed6a3b7aabbd3c5c616c9afd63d1465345f0bb991dc55a5dc5",
+					"status": "content"
+				},
+				"LICENSE": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"README.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"errors.js": {
+					"match": false,
+					"status": "missing-in-package"
+				}
+			},
+			"summary": {
+				"differentFiles": 2,
+				"matchingFiles": 0,
+				"missingInPackage": 3,
+				"missingInSource": 1,
+				"score": 0,
+				"totalFiles": 6
+			}
+		}
+	}
+]

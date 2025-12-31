@@ -1,0 +1,85 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2025-12-31T13:53:11.301Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:11.7.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "request-promise@0.2.2",
+			"name": "request-promise",
+			"version": "0.2.2",
+			"location": "https://registry.npmjs.org/request-promise/-/request-promise-0.2.2.tgz",
+			"integrity": "sha512-iTDh5OsRT3xWRBtCDXvfGLp+h4GnU/suJbCCJSjigQowdAZ3A4QSiPN9Jw254ckGZbo/A1tm70OxMmwRRs8hew==",
+			"publishedAt": "2014-10-11T17:52:38.024Z",
+			"publishedWith": {
+				"node": null,
+				"npm": "1.2.15"
+			}
+		},
+		"source": {
+			"integrity": null,
+			"location": "https://github.com/tyabonil/request-promise",
+			"spec": "github:tyabonil/request-promise#HEAD"
+		},
+		"comparisonHash": "8a2a8dcbb729bf3ee9216e490c955701f0ddebe1",
+		"diff": {
+			"files": {
+				".npmignore": {
+					"match": false,
+					"packageHash": "b9b67b66a8cc7e3896043c5f8d93031b46360ffdedaeaf4c2272db93a5586a6d",
+					"size": 105,
+					"status": "missing-in-source"
+				},
+				"README.md": {
+					"diff": "--- published/README.md\n+++ rebuilt/README.md\n@@ -1,73 +1,762 @@\n+<a href=\"http://promisesaplus.com/\">\n+    <img src=\"https://promises-aplus.github.io/promises-spec/assets/logo-small.png\" align=\"right\" alt=\"Promises/A+ logo\" />\n+</a>\n+\n # Request-Promise\n \n-[![Dependency Status](https://david-dm.org/tyabonil/request-promise.svg)](https://david-dm.org/tyabonil/request-promise)\n+[![Gitter](https://img.shields.io/badge/gitter-join_chat-blue.svg?style=flat-square&maxAge=2592000)](https://gitter.im/request/request-promise?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)\n+[![Build Status](https://img.shields.io/travis/request/request-promise/master.svg?style=flat-square&maxAge=2592000)](https://travis-ci.org/request/request-promise)\n+[![Coverage Status](https://img.shields.io/coveralls/request/request-promise.svg?style=flat-square&maxAge=2592000)](https://coveralls.io/r/request/request-promise)\n+[![Dependency Status](https://img.shields.io/david/request/request-promise.svg?style=flat-square&maxAge=2592000)](https://david-dm.org/request/request-promise)\n+[![Known Vulnerabilities](https://snyk.io/test/npm/request-promise/badge.svg?style=flat-square&maxAge=2592000)](https://snyk.io/test/npm/request-promise)\n \n-A Promises/A XHR wrapper for Bluebird and Request\n+# Deprecated!\n \n-[Bluebird](https://github.com/petkaantonov/bluebird) and\n-[Request](https://github.com/mikeal/request) are pretty awesome, but I found\n-myself using the same design pattern.  This is a simple wrapper that takes in a\n-request options object (or URI string), and returns a chainable promise.  By\n-default, http response codes other than 2xx will cause the promise to\n-be rejected.  This can be over-ridden by setting `options.simple` to `false`.\n-\n-Note: As of version 0.1, `reject` now passes  an object containing the following:\n-```js    \n-    reject({\n-      error: body,\n-      options: c,\n-      response: response,\n-      statusCode: response.statusCode\n-    });\n-```\n+As of Feb 11th 2020, [`request`](https://github.com/request/request) is fully deprecated. No new changes are expected to land. In fact, none have landed for some time. This package is also deprecated because it depends on `request`.\n+\n+Fyi, here is the [reasoning of `request`'s deprecation](https://github.com/request/request/issues/3142) and a [list of alternative libraries](https://github.com/request/request/issues/3143).\n+\n+---\n+\n+The simplified HTTP request client 'request' with Promise support. Powered by Bluebird.\n+\n+[Request](https://github.com/request/request) and [Bluebird](https://github.com/petkaantonov/bluebird) are pretty awesome, but I found myself using the same design pattern. Request-Promise adds a Bluebird-powered `.then(...)` method to Request call objects. By default, http response codes other than 2xx will cause the promise to be rejected. This can be overwritten by setting `options.simple = false`.\n+\n+Also check out the new libraries that are **very similar to `request-promise` v4**:\n+- [`request-promise-native`](https://github.com/request/request-promise-native) v1 &ndash; Does not depend on Bluebird and uses native ES6 promises instead.\n+- [`request-promise-any`](https://github.com/request/request-promise-any) v1 &ndash; Allows you to register any Promise library supported by [`any-promise`](https://www.npmjs.com/package/any-promise).\n+\n+---\n+\n+## Migration from v3 to v4\n+\n+1. `request` became a peer dependency. Thus make sure that `request` is installed into your project as a direct dependency. (`npm install --save request`)\n+2. Continuation Local Storage is no longer supported. However, you [can get back the support](https://github.com/request/request-promise/wiki/Getting-Back-Support-for-Continuation-Local-Storage) by using `request-promise-any`.\n+3. When you migrated your `transform` function to v3 and had to add `if (!(/^2/.test('' + response.statusCode))) { return resolveWithFullResponse ? response : body; }` you may now set the option `transform2xxOnly = true` instead.\n+\n+## Migration from v2 to v3\n+\n+1. The handling of the `transform` function got overhauled. This has two effects:\n+    - `StatusCodeError.response` is the transformed instead of the original response now. This error is thrown for non-2xx responses when `options.simple` is `true` (default). Please update your `transform` functions to also cover the transformation of non-2xx responses. To get the old behavior you may add `if (!(/^2/.test('' + response.statusCode))) { return resolveWithFullResponse ? response : body; }` to the first line of your `transform` functions that are used for requests with `options.simple === true`. However, you may prefer updating your `transform` functions to being able to transform 2xx as well as non-2xx responses because this decouples their implementation from the use of the `simple` option when doing requests.\n+    - If a transform operation throws an error, the request will be rejected with a `TransformError`. Its `cause` attribute contains the error thrown by the transform operation. Previously, the request was rejected directly with the error thrown by the transform operation. Wrapping it into a `TransformError` makes the error handling easier.\n+\n+2. Bluebird got updated from v2 to v3. This won't make a difference for most use cases. However, if you use advanced Promise chains starting with the Promise returned by Request-Promise, please check [Bluebird's new features and changes](http://bluebirdjs.com/docs/new-in-bluebird-3.html).\n+\n+---\n \n ## Installation\n \n-`npm install request-promise`\n+This module is installed via npm:\n+\n+```\n+npm install --save request\n+npm install --save request-promise\n+```\n \n-## Examples\n+`request` is defined as a peer-dependency and thus has to be installed separately.\n+\n+## Cheat Sheet\n \n ``` js\n var rp = require('request-promise');\n+```\n+\n+Since `request-promise` wraps around `request` everything that works with `request` also works with `request-promise`. Also check out the [`request` docs](https://github.com/request/request) for more examples.\n \n+### Crawl a webpage\n+\n+``` js\n rp('http://www.google.com')\n-    .then(console.dir)\n-    .catch(console.error);\n+    .then(function (htmlString) {\n+        // Process html...\n+    })\n+    .catch(function (err) {\n+        // Crawling failed...\n+    });\n",
+					"match": false,
+					"packageHash": "3efb2410badbeb712fb534634532a94d2031cdcb493555ab05eb6dea46143d6a",
+					"size": 1816,
+					"sourceHash": "96f0277e3939cfc4501897a2f62cf5d78fa855323ce35b688e6471c6abb1f568",
+					"status": "content"
+				},
+				"lib/rp.js": {
+					"diff": "--- published/lib/rp.js\n+++ rebuilt/lib/rp.js\n@@ -1,135 +1,52 @@\n-var Promise = require('bluebird'),\n-    request = require('request'),\n-    util = require('util');\n-\n-var defaultOptions = {simple: true, resolveWithFullResponse: false};\n-\n-function rp(options) {\n-    var c = defaultOptions, i;\n-    if (typeof options === 'string') {\n-        c.uri = options;\n-        c.method = 'GET';\n-    }\n-    if (typeof options === 'object') {\n-        for (i in options) {\n-            if (options.hasOwnProperty(i)) {\n-                c[i] = options[i];\n-            }\n-        }\n-    }\n-    c.method = c.method || 'GET';\n-    c.method = c.method.toUpperCase();\n-    return buildPromise(c);\n-}\n+'use strict';\n \n-function buildPromise (c, requester) {\n-    var _requester = requester || request;\n-    return new Promise(function (resolve, reject) {\n-            _requester(c, function (error, response, body) {\n-            if (error) {\n-                reject({\n-                    error: error,\n-                    options: c,\n-                    response: response\n-                });\n-            } else if (c.simple && !(/^2/.test('' + response.statusCode))) {\n-                reject({\n-                    error: body,\n-                    options: c,\n-                    response: response,\n-                    statusCode: response.statusCode\n-                });\n-            } else {\n-                if (c.transform && typeof c.transform === 'function') {\n-                    resolve(c.transform(body));\n-                } else if (c.resolveWithFullResponse) {\n-                    resolve(response);\n-                } else {\n-                    resolve(body);\n-                }\n-            }\n-        });\n-    });\n+var Bluebird = require('bluebird').getNewLibraryCopy(),\n+    configure = require('request-promise-core/configure/request2'),\n+    stealthyRequire = require('stealthy-require');\n+\n+try {\n+\n+    // Load Request freshly - so that users can require an unaltered request instance!\n+    var request = stealthyRequire(require.cache, function () {\n+        return require('request');\n+    },\n+    function () {\n+        require('tough-cookie');\n+    }, module);\n+\n+} catch (err) {\n+    /* istanbul ignore next */\n+    var EOL = require('os').EOL;\n+    /* istanbul ignore next */\n+    console.error(EOL + '###' + EOL + '### The \"request\" library is not installed automatically anymore.' + EOL + '### But is a dependency of \"request-promise\".' + EOL + '### Please install it with:' + EOL + '### npm install request --save' + EOL + '###' + EOL);\n+    /* istanbul ignore next */\n+    throw err;\n }\n \n-var wrapMethods = [\n-    'post',\n-    'put',\n-    'patch',\n-    'head',\n-    'del',\n-    'get'\n-];\n-\n-var methodNameLookup = {\n-    'post'  : 'POST',\n-    'put'   : 'PUT',\n-    'patch' : 'PATCH',\n-    'head'  : 'HEAD',\n-    'del'   : 'DELETE',\n-    'get'   : 'GET'\n-};\n-\n-Object.keys(request).filter(function(key){\n-    return typeof(request[key]) === \"function\" && !wrapMethods.indexOf(key) +1 && key !== 'defaults';\n-}).forEach(function(key){\n",
+					"match": false,
+					"packageHash": "61a754ab86abac2f83756eb8aab79dec29937b56ff32cefe49deb6613e3eebd5",
+					"size": 4029,
+					"sourceHash": "2acc966de4cb1c8b1781717a9336cc8264456839c422aba1f6b2f9dcd2be6810",
+					"status": "content"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -1,29 +1,59 @@\n {\n   \"name\": \"request-promise\",\n-  \"version\": \"0.2.2\",\n-  \"description\": \"Promise-based Wrapper for XHR using Request and Bluebird\",\n+  \"version\": \"4.2.6\",\n+  \"description\": \"The simplified HTTP request client 'request' with Promise support. Powered by Bluebird.\",\n+  \"keywords\": [\n+    \"xhr\",\n+    \"http\",\n+    \"https\",\n+    \"promise\",\n+    \"request\",\n+    \"then\",\n+    \"thenable\",\n+    \"bluebird\"\n+  ],\n   \"main\": \"./lib/rp.js\",\n   \"scripts\": {\n-    \"test\": \"istanbul test _mocha --report html -- test/*-test*.js -R spec\"\n+    \"test\": \"./node_modules/.bin/gulp ci\",\n+    \"test-publish\": \"./node_modules/.bin/gulp ci-no-cov\",\n+    \"publish-please\": \"publish-please\",\n+    \"prepublish\": \"publish-please guard\"\n   },\n   \"repository\": {\n     \"type\": \"git\",\n-    \"url\": \"https://github.com/tyabonil/request-promise\"\n+    \"url\": \"git+https://github.com/request/request-promise.git\"\n+  },\n+  \"author\": \"Nicolai Kamenzky (https://github.com/analog-nico)\",\n+  \"license\": \"ISC\",\n+  \"bugs\": {\n+    \"url\": \"https://github.com/request/request-promise/issues\"\n+  },\n+  \"homepage\": \"https://github.com/request/request-promise#readme\",\n+  \"engines\": {\n+    \"node\": \">=0.10.0\"\n   },\n-  \"keywords\": [\n-    \"xhr\",\n-    \"promise\",\n-    \"request\"\n-  ],\n-  \"readmeFilename\": \"README.md\",\n-  \"author\": \"Ty Abonil\",\n-  \"license\": \"MIT\",\n   \"dependencies\": {\n-    \"bluebird\": \"^2.3\",\n+    \"request-promise-core\": \"1.1.4\",\n+    \"bluebird\": \"^3.5.0\",\n+    \"stealthy-require\": \"^1.1.1\",\n+    \"tough-cookie\": \"^2.3.3\"\n+  },\n+  \"peerDependencies\": {\n     \"request\": \"^2.34\"\n   },\n   \"devDependencies\": {\n-    \"mocha\": \"~1.17.1\",\n-    \"istanbul\": \"~0.2.4\"\n+    \"body-parser\": \"~1.15.2\",\n+    \"chai\": \"~3.5.0\",\n+    \"chalk\": \"~1.1.3\",\n+    \"gulp\": \"~3.9.1\",\n+    \"gulp-coveralls\": \"~0.1.4\",\n+    \"gulp-eslint\": \"~2.1.0\",\n+    \"gulp-istanbul\": \"~1.0.0\",\n+    \"gulp-mocha\": \"~2.2.0\",\n+    \"lodash\": \"~4.13.1\",\n+    \"publish-please\": \"~2.1.4\",\n+    \"request\": \"^2.34.0\",\n+    \"rimraf\": \"~2.5.3\",\n+    \"run-sequence\": \"~1.2.2\"\n   }\n }\n",
+					"match": false,
+					"packageHash": "4552bd39c5939ac9ac23043896e11be8fb89614d5b81b76719f5effdb3dcdf73",
+					"size": 639,
+					"sourceHash": "fa456ea8951d4eed6a3b7aabbd3c5c616c9afd63d1465345f0bb991dc55a5dc5",
+					"status": "content"
+				},
+				"test/request-test.js": {
+					"match": false,
+					"packageHash": "ace5817a30582d55cad97f2b78b3d82473018ad9b642be4a25ae39d3e6c0c65b",
+					"size": 4863,
+					"status": "missing-in-source"
+				},
+				"LICENSE": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"errors.js": {
+					"match": false,
+					"status": "missing-in-package"
+				}
+			},
+			"summary": {
+				"differentFiles": 3,
+				"matchingFiles": 0,
+				"missingInPackage": 2,
+				"missingInSource": 2,
+				"score": 0,
+				"totalFiles": 7
+			}
+		}
+	}
+]
