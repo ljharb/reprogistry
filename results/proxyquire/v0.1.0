@@ -1,0 +1,355 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2025-12-31T11:44:33.516Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:11.7.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "proxyquire@0.1.0",
+			"name": "proxyquire",
+			"version": "0.1.0",
+			"location": "https://registry.npmjs.org/proxyquire/-/proxyquire-0.1.0.tgz",
+			"integrity": "sha512-2cOkRbd9hdJlnlqmHBO/Zpvs5teBmMP16MnYCIXsxhsC8p0aAf9cA2+bsbmEWagk4HmvUyx5vCFlltwpYV0taw==",
+			"publishedAt": "2012-07-14T02:46:06.005Z",
+			"publishedWith": {
+				"node": null,
+				"npm": null
+			}
+		},
+		"source": {
+			"integrity": null,
+			"location": "https://github.com/thlorenz/proxyquire.git",
+			"spec": "github:thlorenz/proxyquire#HEAD"
+		},
+		"comparisonHash": "8a2a8dcbb729bf3ee9216e490c955701f0ddebe1",
+		"diff": {
+			"files": {
+				".npmignore": {
+					"match": false,
+					"packageHash": "02e0ce3a6cb97aea2d261f1575b44b8632ae6740108cafd9b487df5465c2b5dc",
+					"size": 105,
+					"status": "missing-in-source"
+				},
+				".travis.yml": {
+					"match": false,
+					"packageHash": "db49736315b0f9e7aaf4644a91e258e802442a5b53bd389dbafe23853d8010c8",
+					"size": 51,
+					"status": "missing-in-source"
+				},
+				"README.md": {
+					"diff": "--- published/README.md\n+++ rebuilt/README.md\n@@ -1,13 +1,18 @@\n-# proxyquire [![Build Status](https://secure.travis-ci.org/thlorenz/proxyquire.png)](http://travis-ci.org/thlorenz/proxyquire)\n+# proxyquire [![Build Status](https://secure.travis-ci.org/thlorenz/proxyquire.svg?branch=master)](http://travis-ci.org/thlorenz/proxyquire)\n \n-Proxies nodejs's require in order to make overriding dependencies during testing easy while staying **totally unobstrusive**.\n+Proxies nodejs's require in order to make overriding dependencies during testing easy while staying **totally unobtrusive**.\n+\n+If you want to stub dependencies for your client side modules, try\n+[proxyquireify](https://github.com/thlorenz/proxyquireify), a proxyquire for [browserify\n+v2](https://github.com/substack/browserify) or [proxyquire-universal](https://github.com/bendrucker/proxyquire-universal) \n+to test in both Node and the browser.\n \n # Features\n \n-- **no changes to your code** are necessary \n-- non overriden methods of a module behave like the original\n-- overrides can be removed individually after they were added\n-- strict mode to enforce overriding all methods used in a to be tested module\n+- **no changes to your code** are necessary\n+- non overridden methods of a module behave like the original\n+- mocking framework agnostic, if it can stub a function then it works with proxyquire\n+- \"use strict\" compliant\n \n # Example\n \n@@ -16,11 +21,11 @@\n ```javascript\n var path = require('path');\n \n-module.exports.extnameAllCaps = function (file) { \n+module.exports.extnameAllCaps = function (file) {\n   return path.extname(file).toUpperCase();\n };\n \n-module.exports.basenameAllCaps = function (file) { \n+module.exports.basenameAllCaps = function (file) {\n   return path.basename(file).toUpperCase();\n };\n ```\n@@ -28,209 +33,478 @@\n **foo.test.js:**\n \n ```javascript\n-var proxyquire = require('proxyquire').setup()\n-  , assert = require('assert');\n-\n-// no overrides yet, so path.extname behaves normally\n-var foo = proxyquire.require('./foo');\n-assert.equal(foo.extnameAllCaps('file.txt'), '.TXT');\n+var proxyquire =  require('proxyquire')\n+  , assert     =  require('assert')\n+  , pathStub   =  { };\n+\n+// when no overrides are specified, path.extname behaves normally\n+var foo = proxyquire('./foo', { 'path': pathStub });\n+assert.strictEqual(foo.extnameAllCaps('file.txt'), '.TXT');\n \n // override path.extname\n-proxyquire({\n-  path: { extname: function (file) { return 'Exterminate, exterminate the ' + file; } }\n-});\n+pathStub.extname = function (file) { return 'Exterminate, exterminate the ' + file; };\n \n // path.extname now behaves as we told it to\n-foo = proxyquire.require('./foo');\n-assert.equal(foo.extnameAllCaps('file.txt'), 'EXTERMINATE, EXTERMINATE THE FILE.TXT');\n+assert.strictEqual(foo.extnameAllCaps('file.txt'), 'EXTERMINATE, EXTERMINATE THE FILE.TXT');\n \n // path.basename and all other path module methods still function as before\n-assert.equal(foo.basenameAllCaps('/a/b/file.txt'), 'FILE.TXT');\n+assert.strictEqual(foo.basenameAllCaps('/a/b/file.txt'), 'FILE.TXT');\n ```\n \n-**Table of Contents**  *generated with [DocToc](http://doctoc.herokuapp.com/)*\n+You can also replace functions directly:\n+\n+**get.js:**\n+\n+```js\n+var get    = require('simple-get');\n+var assert = require('assert');\n+\n+module.exports = function fetch (callback) {\n+  get('https://api/users', callback);\n+};\n+```\n+\n+**get.test.js:**\n+\n+```js\n+var proxyquire = require('proxyquire').noCallThru();\n+var assert = require('assert');\n+\n+var fetch = proxyquire('./get', {\n+  'simple-get': function (url, callback) {\n+    process.nextTick(function () {\n+      callback(null, { statusCode: 200 })\n+    })\n",
+					"match": false,
+					"packageHash": "2be95fccb3323a1aa25a5cc32e99cdb11beb3327fe338cb9503bebc50d9871af",
+					"size": 7078,
+					"sourceHash": "754c405c91ddc5a555a87577d84140bd9b954419c7da46d6142181b242dc9a1e",
+					"status": "content"
+				},
+				"examples/example-utils.js": {
+					"diff": "--- published/examples/example-utils.js\n+++ rebuilt/examples/example-utils.js\n@@ -1,19 +1,17 @@\n-var fs = require('fs');\n+var fs = require('fs')\n \n module.exports.listModuleAndTests = function (module, tests) {\n-\n   console.log(\n     '\\n**********\\n' +\n-    '* Module:*\\n' + \n+    '* Module:*\\n' +\n     '**********\\n\\n' +\n     fs.readFileSync(module).toString()\n-  );\n+  )\n \n   console.log(\n     '**********\\n' +\n-    '* Tests: *\\n' + \n+    '* Tests: *\\n' +\n     '**********\\n' +\n-    fs.readFileSync(tests).toString()  \n-  );\n-\n-};\n+    fs.readFileSync(tests).toString()\n+  )\n+}\n",
+					"match": false,
+					"packageHash": "e69bb914d575790aa3eaa2dab5640acdcaf1a7a74ab95302df0822aed3f64309",
+					"size": 345,
+					"sourceHash": "53420fe4e3efe0f087a05462c91d4656252fb977272171dc8ab55cf070cccb92",
+					"status": "content"
+				},
+				"examples/example.js": {
+					"match": false,
+					"packageHash": "b97ba66980371948651734bc3101be254a9d8e5b18edc9e22b12188e22afe639",
+					"size": 1681,
+					"status": "missing-in-source"
+				},
+				"examples/simple/foo.js": {
+					"diff": "--- published/examples/simple/foo.js\n+++ rebuilt/examples/simple/foo.js\n@@ -1,9 +1,9 @@\n-var path = require('path');\n+var path = require('path')\n \n-module.exports.extnameAllCaps = function (file) { \n-  return path.extname(file).toUpperCase();\n-};\n+module.exports.extnameAllCaps = function (file) {\n+  return path.extname(file).toUpperCase()\n+}\n \n-module.exports.basenameAllCaps = function (file) { \n-  return path.basename(file).toUpperCase();\n-};\n+module.exports.basenameAllCaps = function (file) {\n+  return path.basename(file).toUpperCase()\n+}\n",
+					"match": false,
+					"packageHash": "c39fe121ba0963f35f8df7e8b09f36885f0abae348b5c7f4ff0903ba96ad4a78",
+					"size": 226,
+					"sourceHash": "8f90d9cf68ea08a71188f4a5a24f740fb698950566a9421b97feda5b23e5c6d6",
+					"status": "content"
+				},
+				"examples/simple/foo.test.js": {
+					"diff": "--- published/examples/simple/foo.test.js\n+++ rebuilt/examples/simple/foo.test.js\n@@ -1,26 +1,24 @@\n-require('../example-utils').listModuleAndTests(__dirname + '/foo.js', __filename);\n+'use strict'\n \n-var proxyquire = require('../../proxyquire').setup()\n-  , assert = require('assert')\n-  ;\n-\n-// Needed since we use proxyquire locally instead of an imported module inside 'node_modules'\n-proxyquire._proxyquire = '../../proxyquire';\n-\n-// no overrides yet, so path.extname behaves normally\n-var foo = proxyquire.require('./foo');\n-assert.equal(foo.extnameAllCaps('file.txt'), '.TXT');\n+var path = require('path')\n+\n+require('../example-utils').listModuleAndTests(path.resolve(__dirname, '/foo.js'), __filename)\n+\n+var proxyquire = require('../..')\n+var assert = require('assert')\n+var pathStub = { }\n+\n+// when not overridden, path.extname behaves normally\n+var foo = proxyquire('./foo', { path: pathStub })\n+assert.strictEqual(foo.extnameAllCaps('file.txt'), '.TXT')\n \n // override path.extname\n-proxyquire({\n-  path: { extname: function (file) { return 'Exterminate, exterminate the ' + file; } }\n-});\n+pathStub.extname = function (file) { return 'Exterminate, exterminate the ' + file }\n \n // path.extname now behaves as we told it to\n-foo = proxyquire.require('./foo');\n-assert.equal(foo.extnameAllCaps('file.txt'), 'EXTERMINATE, EXTERMINATE THE FILE.TXT');\n+assert.strictEqual(foo.extnameAllCaps('file.txt'), 'EXTERMINATE, EXTERMINATE THE FILE.TXT')\n \n-// path.basename on the other hand still functions as before\n-assert.equal(foo.basenameAllCaps('/a/b/file.txt'), 'FILE.TXT');\n+// path.basename and all other path module methods still function as before\n+assert.strictEqual(foo.basenameAllCaps('/a/b/file.txt'), 'FILE.TXT')\n \n-console.log('*** All asserts passed ***');\n+console.log('*** All asserts passed ***')\n",
+					"match": false,
+					"packageHash": "845a287db6c429bf8fbfbdce7b218f5f83051d4ae1161852c828b8e3d632de16",
+					"size": 929,
+					"sourceHash": "a7ad0203adf6ec8484e855ce8393d8f74aa25b90dfefd9f3a4757610dac52316",
+					"status": "content"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -1,10 +1,10 @@\n {\n   \"name\": \"proxyquire\",\n-  \"version\": \"0.1.0\",\n+  \"version\": \"2.1.3\",\n   \"description\": \"Proxies nodejs require in order to allow overriding dependencies during testing.\",\n-  \"main\": \"proxyquire.js\",\n+  \"main\": \"index.js\",\n   \"scripts\": {\n-    \"test\": \"mocha\"\n+    \"test\": \"standard && mocha\"\n   },\n   \"repository\": {\n     \"type\": \"git\",\n@@ -13,19 +13,30 @@\n   \"keywords\": [\n     \"require\",\n     \"dependency\",\n+    \"injection\",\n+    \"di\",\n+    \"inject\",\n+    \"swap\",\n     \"test\",\n     \"mock\",\n     \"stub\"\n   ],\n   \"author\": \"Thorsten Lorenz\",\n-  \"licenses\": [\n-    {\n-      \"type\": \"MIT\",\n-      \"url\": \"http://www.opensource.org/licenses/mit-license.php\"\n-    }\n-  ],\n+  \"license\": \"MIT\",\n   \"devDependencies\": {\n-    \"mocha\": \"1.3.x\",\n-    \"should\": \"0.6.x\"\n+    \"mocha\": \"^5.2.0\",\n+    \"should\": \"^13.2.3\",\n+    \"sinon\": \"^7.3.2\",\n+    \"standard\": \"^13.0.1\"\n+  },\n+  \"dependencies\": {\n+    \"fill-keys\": \"^1.0.2\",\n+    \"module-not-found-error\": \"^1.0.1\",\n+    \"resolve\": \"^1.11.1\"\n+  },\n+  \"standard\": {\n+    \"env\": [\n+      \"mocha\"\n+    ]\n   }\n }\n",
+					"match": false,
+					"packageHash": "db4d99393b2116e357f98825f9eab5b6c9fa645f377078b885c4579ca003ebd1",
+					"size": 627,
+					"sourceHash": "e102fad0d13149219ae08ea906158fe905dfab9d841c04164681b2b4b6874243",
+					"status": "content"
+				},
+				"proxyquire.js": {
+					"match": false,
+					"packageHash": "90be659c3f43dc51414a555c6c627a835e10f52ad0f9cbef660985897e82615a",
+					"size": 9396,
+					"status": "missing-in-source"
+				},
+				"test/mocha.opts": {
+					"diff": "--- published/test/mocha.opts\n+++ rebuilt/test/mocha.opts\n@@ -1,4 +1,4 @@\n --require should\n --reporter spec\n --ui bdd\n---growl\n+test\n",
+					"match": false,
+					"packageHash": "a57c1458aba0fba6d9d5ee2017e90f4093d136b122f6df7e3aaa3eb56e49ee80",
+					"size": 50,
+					"sourceHash": "82cdf850b4a738704ecd7b723f5c8edb30c8664bfd710e851e15292594a141b3",
+					"status": "content"
+				},
+				"test/proxyquire.js": {
+					"diff": "--- published/test/proxyquire.js\n+++ rebuilt/test/proxyquire.js\n@@ -1,356 +1,178 @@\n-/*jshint asi:true */\n+/* jshint asi:true */\n+'use strict'\n \n-var path = require('path')\n-  , should = require('should')\n-  ;\n+var assert = require('assert')\n+var proxyquire = require('..')\n+var stats = require('./samples/stats')\n \n-var proxyquire = require('../proxyquire').setup();\n+describe('Given foo requires the bar and path modules and bar.bar() returns \"bar\"', function () {\n+  var file = '/folder/test.ext'\n+  var foo\n+  var foober\n+  var barber = { bar: function () { return 'barber' } }\n \n-proxyquire._proxyquire = '../../proxyquire';\n-\n-describe('when no module was overridden', function () {\n-\n-  beforeEach(function () {\n-    proxyquire.reset();\n-  });\n-\n-  describe('built in modules are used', function () {\n-    it('path.extname(\"a.txt\") returns \".txt\"', function () {\n-      var path = proxyquire('path');\n-      path.extname('a.txt').should.eql('.txt')\n-    })\n-  })\n-  \n-})\n-\n-describe('module overrides', function () {\n-\n-  describe('override extname to return \".xtx\"', function () {\n-    var path \n-\n-    beforeEach(function () {\n-      proxyquire({ \n-          path: { \n-            extname: function () { return '.xtx'; }\n-          }\n-        });\n-\n-      path = proxyquire('path');\n-    });\n-\n-    it('path.extname(\"a.txt\") returns \".xtx\"', function () {\n-      path.extname('a.txt').should.eql('.xtx');\n+  describe('When I resolve foo with no overrides to bar as foo and resolve foo with barber stub as foober.', function () {\n+    before(function () {\n+      stats.reset()\n+      foo = proxyquire('./samples/foo', { './bar': { /* no overrides */ } })\n+      foober = proxyquire('./samples/foo', { './bar': barber })\n     })\n \n-    it('path.basename(\"/path/a.txt\" returns \"a.txt\"', function () {\n-      path.basename('/path/a.txt').should.eql('a.txt');\n+    it('foo is required 2 times', function () {\n+      assert.strictEqual(stats.fooRequires(), 2)\n     })\n-    \n-  })\n-\n-  describe('strict override extname to return \".xtx\"', function () {\n-    var path \n-\n-    beforeEach(function () {\n-      proxyquire\n-        .reset()\n-        .add({ \n-          path: { \n-              extname: function () { return '.xtx'; }\n-            , __proxyquire: { strict: true }\n-          }\n-        });\n \n-      path = proxyquire('path');\n-    });\n-\n-    it('path.extname(\"a.txt\") returns \".xtx\"', function () {\n-      path.extname('a.txt').should.eql('.xtx');\n-    })\n-\n-    it('path.basename(\"/path/a.txt\" throws \"has no method basename\"', function () {\n-      (function () {\n-        path.basename('/path/a.txt')\n-      }).should.throw(/has no method.*basename/);\n+    describe('foo\\'s bar is unchanged', function () {\n+      it('foo.bigBar() == \"BAR\"', function () {\n+        assert.strictEqual(foo.bigBar(), 'BAR')\n+      })\n     })\n-  })\n",
+					"match": false,
+					"packageHash": "cfce5b031fa8a1bc713e6f23a06fd22da325c167144d80bd029bbb2632bb4037",
+					"size": 9579,
+					"sourceHash": "40b8875501d363ed33a729b57a36dd185f3211a484f3ca2467d16a0686021d9d",
+					"status": "content"
+				},
+				"test/samples/bar.js": {
+					"diff": "--- published/test/samples/bar.js\n+++ rebuilt/test/samples/bar.js\n@@ -1,8 +1,9 @@\n+function bar () {\n+  return 'bar'\n+}\n \n-module.exports.drinkUp = function () {\n-  return 'you are a drunk';\n-};\n+function rab () {\n+  return 'rab'\n+}\n \n-module.exports.drinksOnMe = function () {\n-  return 'you are rich';\n-};\n+module.exports = { bar: bar, rab: rab }\n",
+					"match": false,
+					"packageHash": "7c044d02c10c52dcdaae2733714379e4367e9a4c5104df487e50d00193570480",
+					"size": 142,
+					"sourceHash": "f7e9dc7c2d76f497d58e8e95d9f3c67dc4a14971e1e29550f6ec51bb81b718f7",
+					"status": "content"
+				},
+				"test/samples/foo-without-require-override.js": {
+					"match": false,
+					"packageHash": "87634a1d1422f4bbb7e3e38a32e362b56a011385693e35e0fadba824a25505fb",
+					"size": 169,
+					"status": "missing-in-source"
+				},
+				"test/samples/foo.js": {
+					"diff": "--- published/test/samples/foo.js\n+++ rebuilt/test/samples/foo.js\n@@ -1,12 +1,48 @@\n-var require = require('../../proxyquire')\n-  , bar = require('./bar')\n-  ;\n-\n-module.exports.gotoBar = function () {\n-  return bar.drinkUp();\n-};\n-\n-module.exports.throwRound = function () {\n-  return bar.drinksOnMe();\n-};\n+var stats = require('./stats')\n+var bar = require('./bar')\n+var boof = require('./boof')\n+var foonum = require('./foonum')\n+var foobool = require('./foobool')\n+var fooarray = require('./fooarray')\n+var path = require('path')\n+var crypto\n \n+// Require if present.\n+try { crypto = require('crypto') } catch (e) { crypto = 'caught' }\n+\n+stats.incFooRequires()\n+\n+function bigBar () {\n+  // inline require\n+  return require('./bar').bar().toUpperCase()\n+}\n+\n+function bigRab () {\n+  // module wide require\n+  return bar.rab().toUpperCase()\n+}\n+\n+function bigExt (file) {\n+  return path.extname(file).toUpperCase()\n+}\n+\n+function bigBas (file) {\n+  return path.basename(file).toUpperCase()\n+}\n+\n+function bigCrypto () {\n+  return crypto\n+}\n+\n+module.exports = {\n+  bigBar: bigBar,\n+  bigRab: bigRab,\n+  bigExt: bigExt,\n+  bigBas: bigBas,\n+  boof: boof,\n+  foonum: foonum,\n+  foobool: foobool,\n+  fooarray: fooarray,\n+  bigCrypto: bigCrypto,\n+  state: ''\n+}\n",
+					"match": false,
+					"packageHash": "7ffe5589e05bfaef5d326a0256aad205471140c1c8a9782a1949964f88fe9b0d",
+					"size": 214,
+					"sourceHash": "0e5dbe248c782a3faff98dad4a5762f9265755a50d05ef1eb63a6a99768f04ce",
+					"status": "content"
+				},
+				".github/workflows/test.yml": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				".jshintrc": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"LICENSE": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"examples/api/api-test.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"examples/api/samples/bar.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"examples/api/samples/foo.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"examples/api/samples/stats.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"examples/async/foo-tests.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"examples/async/foo.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"examples/simple/foo.inlineoverride.test.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"examples/sinon/foo-tests.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"examples/sinon/foo.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"index.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/is.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/proxyquire-error.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/proxyquire.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"tea.yaml": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/proxyquire-api.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/proxyquire-argumentvalidation.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/proxyquire-cache.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/proxyquire-compat.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/proxyquire-extensions.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/proxyquire-global.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/proxyquire-independence.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/proxyquire-non-object.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/proxyquire-notexisting.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/proxyquire-relative-paths.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/proxyquire-remove.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/proxyquire-sub-dependencies.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/samples/boof.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/samples/cache/bar.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/samples/cache/foo.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/samples/extensions.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/samples/foo-singleton.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/samples/fooarray.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/samples/foobool.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/samples/foonum.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/samples/global/bar.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/samples/global/baz.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/samples/global/foo-deferred.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/samples/global/foo.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/samples/no-call-thru-test/index.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/samples/no-call-thru-test/required.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/samples/notexisting/foo-relative.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/samples/notexisting/foo.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/samples/relative-paths/a/index.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/samples/relative-paths/a/util.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/samples/relative-paths/b/index.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/samples/relative-paths/b/util.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/samples/stats.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/samples/sub-dependencies/bar.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/samples/sub-dependencies/baz.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/samples/sub-dependencies/foo.js": {
+					"match": false,
+					"status": "missing-in-package"
+				}
+			},
+			"summary": {
+				"differentFiles": 9,
+				"matchingFiles": 0,
+				"missingInPackage": 53,
+				"missingInSource": 5,
+				"score": 0,
+				"totalFiles": 67
+			}
+		}
+	}
+]
