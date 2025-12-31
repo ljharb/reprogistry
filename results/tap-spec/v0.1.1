@@ -1,0 +1,107 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2025-12-31T16:43:30.443Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:11.7.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "tap-spec@0.1.1",
+			"name": "tap-spec",
+			"version": "0.1.1",
+			"location": "https://registry.npmjs.org/tap-spec/-/tap-spec-0.1.1.tgz",
+			"integrity": "sha512-p6JfQBTay9EAzVywcoNLLw1RyI26jtiadsWID8TOMAocSF0T3k8H7UNybZkvdipxUlvor/jREgRbXnz5SwYE/Q==",
+			"publishedAt": "2014-01-03T22:59:13.670Z",
+			"publishedWith": {
+				"node": null,
+				"npm": "1.3.11"
+			}
+		},
+		"source": {
+			"integrity": "sha512-ZRmLSi4nusJQTMFagt8Z2bvo+vs+8TAuUeJ/pMtTMsc02vE/Sr5FEe49hRGjrxCOUctZjatJq/LDVDDogU+FyQ==",
+			"location": "https://github.com/scottcorgan/tap-spec.git",
+			"spec": "github:scottcorgan/tap-spec#HEAD"
+		},
+		"comparisonHash": "8a2a8dcbb729bf3ee9216e490c955701f0ddebe1",
+		"diff": {
+			"files": {
+				".npmignore": {
+					"match": false,
+					"packageHash": "cdccd1e86c45e5223f889a52b2bf3a9bd77d2b776df2ad9f202f0ca76e069b31",
+					"size": 100,
+					"status": "missing-in-source"
+				},
+				"README.md": {
+					"diff": "--- published/README.md\n+++ rebuilt/README.md\n@@ -1,24 +1,52 @@\n-# tap-spec\n- \n+# tap-spec [![NPM version](https://img.shields.io/npm/v/tap-spec.svg?style=flat-square)](https://www.npmjs.com/package/tap-spec) [![NPM download count](https://img.shields.io/npm/dm/tap-spec.svg?style=flat-square)](https://www.npmjs.com/package/tap-spec)\n+\n Formatted TAP output like Mocha's spec reporter\n- \n+\n+![iterm - 2 bash - may 29 2015 at 10 17 am screen shot](https://cloud.githubusercontent.com/assets/974723/7888261/03366236-05ec-11e5-9f94-d9c2707526b7.png)\n+\n ## Install\n- \n+\n ```\n npm install tap-spec --save-dev\n ```\n- \n+\n ## Usage\n- \n+\n+### Streaming\n+\n+```js\n+var test = require('tape');\n+var tapSpec = require('tap-spec');\n+\n+test.createStream()\n+  .pipe(tapSpec())\n+  .pipe(process.stdout);\n+```\n+\n+### CLI\n+\n+**package.json**\n+\n+```json\n+{\n+  \"name\": \"module-name\",\n+  \"scripts\": {\n+    \"test\": \"node ./test/tap-test.js | tap-spec\"\n+  }\n+}\n+```\n+\n+Then run with `npm test`\n+\n **Terminal**\n \n ```\n-tape test/index.js | node_modules/.bin/tspec\n-``` \n+tape test/index.js | node_modules/.bin/tap-spec\n+```\n \n **Testling**\n \n ```\n npm install testling -g\n-testling test/index.js | node_modules/.bin/tspec\n-```\n\\ No newline at end of file\n+testling test/index.js | node_modules/.bin/tap-spec\n+```\n",
+					"match": false,
+					"packageHash": "abda1e472b27d72629c62958edc1c5d567e0834d9632a0130c3365fdeaddfa47",
+					"size": 292,
+					"sourceHash": "5e4c7a0ca00dccac757a82ea62362c83a289be54dd10f46c2a47136c90d86577",
+					"status": "content"
+				},
+				"bin/cmd.js": {
+					"diff": "--- published/bin/cmd.js\n+++ rebuilt/bin/cmd.js\n@@ -1,65 +1,19 @@\n #!/usr/bin/env node\n \n-var through = require('through2');\n-var parser = require('tap-parser');\n-var duplexer = require('duplexer');\n-var chalk = require('chalk');\n+var tapSpec = require('../');\n+var tapSpec = tapSpec();\n \n-var out = through();\n-var tap = parser();\n-var dup = duplexer(tap, out);\n-var currentTestName = '';\n-var errors = [];\n-\n-out.push('\\n');\n-\n-tap.on('comment', function (comment) {\n-  currentTestName = comment;\n-  \n-  \n-  if (/^tests [1-9]$/gi.test(comment)) comment = chalk.bold(comment);\n-  else if (/^pass  [1-9]$/gi.test(comment)) comment = chalk.bold(comment);\n-  else if (/^ok$/gi.test(comment)) return;\n-  else out.push('\\n')\n-    \n-  // if (!(/^tests [1-9]$/gi.test(comment))) console.log(true);//out.push('\\n');\n-  // else if (!(/^pass [1-9]$/gi.test(comment))) console.log(true);//out.push('\\n');\n-  \n-  // out.push('\\n');\n-  out.push('  ' + comment + '\\n');\n-});\n+process.stdin\n+  .pipe(tapSpec)\n+  .pipe(process.stdout);\n \n-tap.on('assert', function (res) {\n-  var output = (res.ok)\n-    ? chalk.green('\\u2713')\n-    : chalk.red('✗');\n-  \n-  if (!res.ok) errors.push(currentTestName + ' ' + res.name);\n+process.on('exit', function (status) {\n   \n-  out.push('    ' + output + ' ' + chalk.gray(res.name) + '\\n');\n-});\n-\n-tap.on('extra', function (extra) {\n-  out.push('   ' + extra + '\\n');\n-});\n-\n-tap.on('results', function (res) {\n-  if (errors.length) {\n-    var past = (errors.length == 1) ? 'was' : 'were';\n-    var plural = (errors.length == 1) ? 'error' : 'errors';\n-    \n-    out.push('  ' + chalk.red('Fail: '));\n-    out.push('There ' + past + ' ' + chalk.red(errors.length) + ' ' + plural + '\\n\\n');\n-    \n-    errors.forEach(function (error) {\n-      out.push('    ' + chalk.red('✗') + ' ' + chalk.red(error) + '\\n');\n-    });\n+  if (status === 1) {\n+    process.exit(1);\n   }\n-  else{\n-    out.push('  ' + chalk.green('Pass!') + '\\n');\n+  \n+  if (tapSpec.failed) {\n+    process.exit(1);\n   }\n });\n-\n-process.stdin\n-  .pipe(dup)\n-  .pipe(process.stdout);\n\\ No newline at end of file\n",
+					"match": false,
+					"packageHash": "b22c87ae3e63ca7f846fb66a8605a593642e9761276e7f18e06a5fb9a45055e3",
+					"size": 1687,
+					"sourceHash": "baba51c14ad2eb1441631d9deed0d3e45a234c927b0ec44dc910d2ebd5c3140a",
+					"status": "content"
+				},
+				"index.js": {
+					"diff": "--- published/index.js\n+++ rebuilt/index.js\n@@ -0,0 +1,169 @@\n+var fs = require('fs');\n+\n+var tapOut = require('tap-out');\n+var through = require('through2');\n+var duplexer = require('duplexer');\n+var format = require('chalk');\n+var prettyMs = require('pretty-ms');\n+var _ = require('lodash');\n+var repeat = require('repeat-string');\n+var symbols = require('figures');\n+\n+var lTrimList = require('./lib/utils/l-trim-list');\n+\n+module.exports = function (spec) {\n+\n+  spec = spec || {};\n+\n+  var OUTPUT_PADDING = spec.padding || '  ';\n+\n+  var output = through();\n+  var parser = tapOut();\n+  var stream = duplexer(parser, output);\n+  var startTime = new Date().getTime();\n+\n+  output.push('\\n');\n+\n+  parser.on('test', function (test) {\n+\n+    output.push('\\n' + pad(format.underline(test.name)) + '\\n\\n');\n+  });\n+\n+  // Passing assertions\n+  parser.on('pass', function (assertion) {\n+\n+    if (/# SKIP/.test(assertion.name)) {\n+      var name = assertion.name.replace(' # SKIP', '')\n+      name = format.cyan('- ' + name);\n+\n+      output.push(pad('  ' + name + '\\n'));\n+    }\n+    else {\n+      var glyph = format.green(symbols.tick);\n+      var name = format.dim(assertion.name);\n+\n+      output.push(pad('  ' + glyph + ' ' + name + '\\n'));\n+    }\n+\n+  });\n+\n+  // Failing assertions\n+  parser.on('fail', function (assertion) {\n+\n+    var glyph = symbols.cross;\n+    var title =  glyph + ' ' + assertion.name;\n+    var raw = format.cyan(prettifyRawError(assertion.error.raw));\n+    var divider = _.fill(\n+      new Array((title).length + 1),\n+      '-'\n+    ).join('');\n+\n+    output.push('\\n' + pad('  ' + format.red(title) + '\\n'));\n+    output.push(pad('  ' + format.red(divider) + '\\n'));\n+    output.push(raw);\n+\n+    stream.failed = true;\n+  });\n+\n+  parser.on('comment', function (comment) {\n+\n+    output.push(pad('  ' + format.yellow(comment.raw)) + '\\n');\n+  });\n+\n+  // All done\n+  parser.on('output', function (results) {\n+\n+    output.push('\\n\\n');\n+\n+    // Most likely a failure upstream\n+    if (results.plans.length < 1) {\n+      process.exit(1);\n+    }\n+\n+    if (results.fail.length > 0) {\n+      output.push(formatErrors(results));\n+      output.push('\\n');\n+    }\n+\n+    output.push(formatTotals(results));\n+    output.push('\\n\\n\\n');\n+\n+    // Exit if no tests run. This is a result of 1 of 2 things:\n+    //  1. No tests and asserts were written\n+    //  2. There was some error before the TAP got to the parser\n+    if (results.tests.length === 0 &&\n+        results.asserts.length === 0) {\n+      process.exit(1);\n+    }\n",
+					"match": false,
+					"packageHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+					"size": 0,
+					"sourceHash": "1f71464940af4084ae9df3c0687ed05d458a56b92cd4b91f872594033d848c0e",
+					"status": "content"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -1,10 +1,10 @@\n {\n   \"name\": \"tap-spec\",\n-  \"version\": \"0.1.1\",\n+  \"version\": \"5.0.0\",\n   \"description\": \"Formatted TAP output like Mocha's spec reporter\",\n   \"main\": \"index.js\",\n   \"scripts\": {\n-    \"test\": \"node test/index.js\"\n+    \"test\": \"echo 'Tests are out of date. Not running until fixed.'\"\n   },\n   \"repository\": {\n     \"type\": \"git\",\n@@ -23,12 +23,20 @@\n     \"url\": \"https://github.com/scottcorgan/tap-spec/issues\"\n   },\n   \"dependencies\": {\n-    \"chalk\": \"~0.4.0\",\n-    \"through2\": \"~0.2.3\",\n-    \"tap-parser\": \"~0.4.1\",\n-    \"duplexer\": \"~0.1.1\"\n+    \"chalk\": \"^1.0.0\",\n+    \"duplexer\": \"^0.1.1\",\n+    \"figures\": \"^1.4.0\",\n+    \"lodash\": \"^4.17.10\",\n+    \"pretty-ms\": \"^2.1.0\",\n+    \"repeat-string\": \"^1.5.2\",\n+    \"tap-out\": \"^2.1.0\",\n+    \"through2\": \"^2.0.0\"\n   },\n   \"bin\": {\n-    \"tspec\": \"bin/cmd.js\"\n+    \"tspec\": \"bin/cmd.js\",\n+    \"tap-spec\": \"bin/cmd.js\"\n+  },\n+  \"devDependencies\": {\n+    \"tapes\": \"^2.0.0\"\n   }\n }\n",
+					"match": false,
+					"packageHash": "3337cd831ca03238f18ce4f1a21f7b265d81f581616ef5ce89522af8fe36dc41",
+					"size": 667,
+					"sourceHash": "1989e07ae27be723a6052fb25691a9e73fc60523e390b2a302ea4579f3dddcf1",
+					"status": "content"
+				},
+				".travis.yml": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"LICENSE": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/utils/l-trim-list.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/e2e/index.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/fixtures/not-ok.txt": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/fixtures/ok.txt": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/unit/index.js": {
+					"match": false,
+					"status": "missing-in-package"
+				}
+			},
+			"summary": {
+				"differentFiles": 4,
+				"matchingFiles": 0,
+				"missingInPackage": 7,
+				"missingInSource": 1,
+				"score": 0,
+				"totalFiles": 12
+			}
+		}
+	}
+]
