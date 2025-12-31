@@ -1,0 +1,81 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2025-12-31T21:24:26.437Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:6.14.10",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "@oclif/config@1.17.1",
+			"name": "@oclif/config",
+			"version": "1.17.1",
+			"location": "https://registry.npmjs.org/@oclif/config/-/config-1.17.1.tgz",
+			"integrity": "sha512-UqV5qsN2np96TNlJspSNlRl7CpFmxYSrB0iLe3XV9NDkbFEE5prGP++h6w6xOR/FL3QV7BoqrbwGuJdJdFbidw==",
+			"publishedAt": "2021-11-18T18:45:08.424Z",
+			"publishedWith": {
+				"node": "14.15.4",
+				"npm": "7.16.0"
+			}
+		},
+		"source": {
+			"integrity": null,
+			"location": "git+https://github.com/oclif/config.git",
+			"spec": "github:oclif/config#fa8b32678a23d86efa24793dc19aaec6455faa51"
+		},
+		"comparisonHash": "8a2a8dcbb729bf3ee9216e490c955701f0ddebe1",
+		"diff": {
+			"files": {
+				"README.md": {
+					"diff": "--- published/README.md\n+++ rebuilt/README.md\n@@ -1,11 +1,4 @@\n @oclif/config\n ==============\n \n-base config object and standard interfaces for oclif components\n-\n-[![Version](https://img.shields.io/npm/v/@oclif/config.svg)](https://npmjs.org/package/@oclif/config)\n-[![CircleCI](https://circleci.com/gh/oclif/config/tree/master.svg?style=svg)](https://circleci.com/gh/oclif/config/tree/master)\n-[![Appveyor CI](https://ci.appveyor.com/api/projects/status/github/oclif/config?branch=master&svg=true)](https://ci.appveyor.com/project/heroku/config/branch/master)\n-[![Known Vulnerabilities](https://snyk.io/test/npm/@oclif/config/badge.svg)](https://snyk.io/test/npm/@oclif/config)\n-[![Downloads/week](https://img.shields.io/npm/dw/@oclif/config.svg)](https://npmjs.org/package/@oclif/config)\n-[![License](https://img.shields.io/npm/l/@oclif/config.svg)](https://github.com/oclif/config/blob/master/package.json)\n+**This library has been replaced by [@oclif/core](https://github.com/oclif/core) and is no longer maintained**\n",
+					"match": false,
+					"packageHash": "a18a1b61062931dee41c1d3a488a9f6b24914ececdce19469acac51816954b13",
+					"size": 837,
+					"sourceHash": "88506089d0b3d217b67a93ba44d222b23c89e5a179c47306e8ff21a319f22834",
+					"status": "content"
+				},
+				"lib/plugin.js": {
+					"diff": "--- published/lib/plugin.js\n+++ rebuilt/lib/plugin.js\n@@ -30,23 +30,34 @@\n         return [Object.assign(Object.assign({}, input[k]), { name: `${base}${k}` })].concat(topicsToArray(input[k].subtopics, `${base}${input[k].name}`));\n     });\n }\n-// eslint-disable-next-line valid-jsdoc\n+// essentially just \"cd ..\"\n+function* up(from) {\n+    while (path.dirname(from) !== from) {\n+        yield from;\n+        from = path.dirname(from);\n+    }\n+    yield from;\n+}\n+async function findSourcesRoot(root) {\n+    for (const next of up(root)) {\n+        const cur = path.join(next, 'package.json');\n+        // eslint-disable-next-line no-await-in-loop\n+        if (await util_2.exists(cur))\n+            return path.dirname(cur);\n+    }\n+}\n /**\n+ * @returns string\n+ * @param name string\n+ * @param root string\n  * find package root\n  * for packages installed into node_modules this will go up directories until\n  * it finds a node_modules directory with the plugin installed into it\n  *\n- * This is needed because of the deduping npm does\n+ * This is needed because some oclif plugins do not declare the `main` field in their package.json\n+ * https://github.com/oclif/config/pull/289#issuecomment-983904051\n  */\n-async function findRoot(name, root) {\n-    // essentially just \"cd ..\"\n-    function* up(from) {\n-        while (path.dirname(from) !== from) {\n-            yield from;\n-            from = path.dirname(from);\n-        }\n-        yield from;\n-    }\n+async function findRootLegacy(name, root) {\n     for (const next of up(root)) {\n         let cur;\n         if (name) {\n@@ -70,6 +81,17 @@\n         }\n     }\n }\n+async function findRoot(name, root) {\n+    if (name) {\n+        let pkgPath;\n+        try {\n+            pkgPath = util_2.resolvePackage(name, { paths: [root] });\n+        }\n+        catch (error) { }\n+        return pkgPath ? findSourcesRoot(path.dirname(pkgPath)) : findRootLegacy(name, root);\n+    }\n+    return findSourcesRoot(root);\n+}\n class Plugin {\n     // eslint-disable-next-line no-useless-constructor\n     constructor(options) {\n",
+					"match": false,
+					"packageHash": "1a8e2735f2b708abbdcbda89d5546a81c399d54ac7a82e3a9a41162edcbefe9e",
+					"size": 9731,
+					"sourceHash": "7ce2f39b04b765d25a28916dfdc5f9981c4ff37830451997cd4ff7049c9156a8",
+					"status": "content"
+				},
+				"lib/util.d.ts": {
+					"diff": "--- published/lib/util.d.ts\n+++ rebuilt/lib/util.d.ts\n@@ -5,6 +5,9 @@\n     [P in keyof T]: TResult;\n };\n export declare function exists(path: string): Promise<boolean>;\n+export declare function resolvePackage(id: string, paths: {\n+    paths: string[];\n+}): string;\n export declare function loadJSON(path: string): Promise<any>;\n export declare function compact<T>(a: (T | undefined)[]): T[];\n export declare function uniq<T>(arr: T[]): T[];\n",
+					"match": false,
+					"packageHash": "77c0d8c2da2b735ef9ad170825d70983023447fd47cfcf8d64d0cdd6fae9b9aa",
+					"size": 486,
+					"sourceHash": "7ece8d86428c48f3a9ee58fa2ba7660f3a13e5a58bbca9daa1d7992c8570801c",
+					"status": "content"
+				},
+				"lib/util.js": {
+					"diff": "--- published/lib/util.js\n+++ rebuilt/lib/util.js\n@@ -18,6 +18,10 @@\n     return new Promise(resolve => resolve(fs.existsSync(path)));\n }\n exports.exists = exists;\n+function resolvePackage(id, paths) {\n+    return require.resolve(id, paths);\n+}\n+exports.resolvePackage = resolvePackage;\n function loadJSON(path) {\n     debug('loadJSON %s', path);\n     // let loadJSON\n",
+					"match": false,
+					"packageHash": "65a7982db132efd53f4ea790e0a1adfd426d13ce3514cfb537e0270520d4878c",
+					"size": 1356,
+					"sourceHash": "7374034738fe05cfa286f52021dc59b003ac2e194832b212683e0e536981dde4",
+					"status": "content"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -1,27 +1,27 @@\n {\n   \"name\": \"@oclif/config\",\n   \"description\": \"base config object and standard interfaces for oclif components\",\n-  \"version\": \"1.17.1\",\n-  \"author\": \"Jeff Dickey @jdxcode\",\n+  \"version\": \"1.18.17\",\n+  \"author\": \"Salesforce\",\n   \"bugs\": \"https://github.com/oclif/config/issues\",\n   \"dependencies\": {\n-    \"@oclif/errors\": \"^1.3.3\",\n-    \"@oclif/parser\": \"^3.8.6\",\n-    \"debug\": \"^4.1.1\",\n-    \"globby\": \"^11.0.1\",\n+    \"@oclif/errors\": \"^1.3.6\",\n+    \"@oclif/parser\": \"^3.8.17\",\n+    \"debug\": \"^4.3.4\",\n+    \"globby\": \"^11.1.0\",\n     \"is-wsl\": \"^2.1.1\",\n-    \"tslib\": \"^2.0.0\"\n+    \"tslib\": \"^2.6.1\"\n   },\n   \"devDependencies\": {\n-    \"@types/chai\": \"^4.1.7\",\n+    \"@types/chai\": \"^4.3.5\",\n     \"@types/indent-string\": \"^4.0.1\",\n-    \"@types/lodash\": \"^4.14.123\",\n-    \"@types/mocha\": \"^8.0.0\",\n-    \"@types/node\": \"^14.0.14\",\n+    \"@types/lodash\": \"^4.14.181\",\n+    \"@types/mocha\": \"^8.2.3\",\n+    \"@types/node\": \"^14.18.54\",\n     \"@types/proxyquire\": \"^1.3.28\",\n     \"@types/wrap-ansi\": \"^3.0.0\",\n-    \"chai\": \"^4.2.0\",\n-    \"conventional-changelog-cli\": \"^2.0.21\",\n+    \"chai\": \"^4.3.7\",\n+    \"conventional-changelog-cli\": \"^2.2.2\",\n     \"eslint\": \"^7.3.1\",\n     \"eslint-config-oclif\": \"^3.1.0\",\n     \"eslint-config-oclif-typescript\": \"^0.2.0\",\n@@ -55,4 +55,4 @@\n     \"pretest\": \"yarn build --noEmit && tsc -p test --noEmit\"\n   },\n   \"types\": \"lib/index.d.ts\"\n-}\n+}\n\\ No newline at end of file\n",
+					"match": false,
+					"packageHash": "694007e9cb853933d53ed761a39ede40099af264c6df9d6ed60bb1d1b14739e5",
+					"size": 1645,
+					"sourceHash": "c9d91382e9ff962e723a5d1faf21bd178ec5e6333925b0c014537429198245c9",
+					"status": "content"
+				}
+			},
+			"summary": {
+				"differentFiles": 5,
+				"matchingFiles": 22,
+				"missingInPackage": 0,
+				"missingInSource": 0,
+				"score": 0.8148148148148148,
+				"totalFiles": 27
+			}
+		}
+	}
+]
