@@ -27,6 +27,7 @@ jobs:
         id: get-task
         run: |
           QUEUE_FILE="cache-queue.txt"
+          MAX_VERSIONS=200  # Limit to avoid payload size issues
 
           if [ ! -f "${QUEUE_FILE}" ] || [ ! -s "${QUEUE_FILE}" ]; then
             echo "::notice::Cache queue is empty"
@@ -48,7 +49,31 @@ jobs:
 
           # Split package||versions (using awk since || is two characters)
           PACKAGE=$(echo "${TASK}" | awk -F'\\|\\|' '{print $1}')
-          VERSIONS=$(echo "${TASK}" | awk -F'\\|\\|' '{for(i=2;i<=NF;i++) printf "%s%s", (i>2?"||":""), $i}')
+          ALL_VERSIONS=$(echo "${TASK}" | awk -F'\\|\\|' '{for(i=2;i<=NF;i++) printf "%s%s", (i>2?"||":""), $i}')
+
+          # Validate package name (must not be empty or start with -)
+          if [ -z "${PACKAGE}" ] || [ "${PACKAGE:0:1}" = "-" ]; then
+            echo "::warning::Skipping invalid package name: ${PACKAGE}"
+            # Remove the malformed line and exit - next run will process next task
+            echo "empty=true" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
+          # Count versions and split if needed
+          VERSION_COUNT=$(echo "${ALL_VERSIONS}" | tr '|' '\n' | grep -c . || echo 0)
+          echo "::notice::Package ${PACKAGE} has ${VERSION_COUNT} versions"
+
+          if [ "${VERSION_COUNT}" -gt "${MAX_VERSIONS}" ]; then
+            # Take first MAX_VERSIONS versions
+            VERSIONS=$(echo "${ALL_VERSIONS}" | tr '|' '\n' | head -n "${MAX_VERSIONS}" | tr '\n' '|' | sed 's/|$//' | sed 's/||*$//')
+            # Get remaining versions for requeue
+            REMAINING_VERSIONS=$(echo "${ALL_VERSIONS}" | tr '|' '\n' | tail -n +$((MAX_VERSIONS + 1)) | tr '\n' '|' | sed 's/|$//' | sed 's/||*$//')
+            echo "requeue=${PACKAGE}||${REMAINING_VERSIONS}" >> $GITHUB_OUTPUT
+            echo "::notice::Processing first ${MAX_VERSIONS} versions, requeueing $((VERSION_COUNT - MAX_VERSIONS)) remaining"
+          else
+            VERSIONS="${ALL_VERSIONS}"
+            echo "requeue=" >> $GITHUB_OUTPUT
+          fi
 
           echo "package=${PACKAGE}" >> $GITHUB_OUTPUT
           echo "versions=${VERSIONS}" >> $GITHUB_OUTPUT
@@ -70,6 +95,16 @@ jobs:
           git config --global user.name "${GITHUB_ACTOR}"
           git add cache-queue.txt
           git commit -m 'queue: remove processed cache task' || true
+          git fetch origin queue
+          git rebase origin/queue || (git rebase --abort && git merge origin/queue)
+          git push
+
+      - name: Requeue remaining versions
+        if: steps.get-task.outputs.empty == 'false' && steps.get-task.outputs.requeue != ''
+        run: |
+          echo "${{ steps.get-task.outputs.requeue }}" >> cache-queue.txt
+          git add cache-queue.txt
+          git commit -m 'queue: requeue overflow versions for `${{ steps.get-task.outputs.package }}`'
           git fetch origin queue
           git rebase origin/queue || (git rebase --abort && git merge origin/queue)
           git push
