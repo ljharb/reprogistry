@@ -1,0 +1,103 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2025-12-31T10:35:43.486Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:11.7.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "phantomjs-prebuilt@2.1.2",
+			"name": "phantomjs-prebuilt",
+			"version": "2.1.2",
+			"location": "https://registry.npmjs.org/phantomjs-prebuilt/-/phantomjs-prebuilt-2.1.2.tgz",
+			"integrity": "sha512-3kiDxFcDUdLXbXBUNSuWqOi5niFUyu4KbKWWBdPV5duz+gOtBwrIhABFILW9a7Bnruy8D+gEzfn/i5DpAPlFgA==",
+			"publishedAt": "2016-01-27T14:14:26.568Z",
+			"publishedWith": {
+				"node": "4.2.3",
+				"npm": "2.14.7"
+			}
+		},
+		"source": {
+			"integrity": null,
+			"location": "git://github.com/Medium/phantomjs.git",
+			"spec": "github:Medium/phantomjs#ee7015bcc6429963d0656f3b0b6fedc5e32b23d4"
+		},
+		"comparisonHash": "8a2a8dcbb729bf3ee9216e490c955701f0ddebe1",
+		"diff": {
+			"files": {
+				".eslintrc": {
+					"diff": "--- published/.eslintrc\n+++ rebuilt/.eslintrc\n@@ -15,7 +15,8 @@\n         ]\n     },\n     \"env\": {\n-        \"node\": true\n+        \"node\": true,\n+        \"phantomjs\": true\n     },\n     \"extends\": \"eslint:recommended\"\n }\n\\ No newline at end of file\n",
+					"match": false,
+					"packageHash": "ac82035126488cd697c922855a379f71c4ca6272b89499e633de01ab61e87e2b",
+					"size": 331,
+					"sourceHash": "30b1e3ffb4a6a51a55910a04eef88105329870d4c1870ba00944ca093512c4fe",
+					"status": "content"
+				},
+				".npmignore": {
+					"match": false,
+					"packageHash": "b24cb499327c5afe196bef2d622b94fd432a586ecfea9aa9462ea27cf338ed4c",
+					"size": 63,
+					"status": "missing-in-source"
+				},
+				"README.md": {
+					"diff": "--- published/README.md\n+++ rebuilt/README.md\n@@ -1,6 +1,8 @@\n phantomjs-prebuilt\n ==================\n \n+**WARNING:** This repository and NPM package are now deprecated since PhantomJS development had been suspended.\n+\n An NPM installer for [PhantomJS](http://phantomjs.org/), headless webkit with JS API.\n \n [![Build Status](https://travis-ci.org/Medium/phantomjs.svg?branch=master)](https://travis-ci.org/Medium/phantomjs)\n@@ -22,11 +24,6 @@\n this module) version of Phantom. As new versions of Phantom are released\n and vetted, this module will be updated accordingly.\n \n-The package has been set up to fetch and run Phantom for MacOS (darwin),\n-Linux based platforms (as identified by nodejs), and -- as of version 0.2.0 --\n-Windows (thanks to [Domenic Denicola](https://github.com/domenic)).  If you\n-spot any platform weirdnesses, let us know or send a patch.\n-\n Running\n -------\n \n@@ -62,6 +59,40 @@\n \n ```\n \n+Or `exec()` method is also provided for convenience:\n+\n+```javascript\n+var phantomjs = require('phantomjs-prebuilt')\n+var program = phantomjs.exec('phantomjs-script.js', 'arg1', 'arg2')\n+program.stdout.pipe(process.stdout)\n+program.stderr.pipe(process.stderr)\n+program.on('exit', code => {\n+  // do something on end\n+})\n+```\n+\n+Note: [childProcess.spawn()](https://nodejs.org/api/child_process.html#child_process_child_process_spawn_command_args_options) is called inside `exec()`.\n+\n+Running with WebDriver\n+----------------------\n+\n+`run()` method detects when PhantomJS gets ready. It's handy to use with WebDriver (Selenium).\n+\n+```javascript\n+var phantomjs = require('phantomjs-prebuilt')\n+var webdriverio = require('webdriverio')\n+var wdOpts = { desiredCapabilities: { browserName: 'phantomjs' } }\n+\n+phantomjs.run('--webdriver=4444').then(program => {\n+  webdriverio.remote(wdOpts).init()\n+    .url('https://developer.mozilla.org/en-US/')\n+    .getTitle().then(title => {\n+      console.log(title) // 'Mozilla Developer Network'\n+      program.kill() // quits PhantomJS\n+    })\n+})\n+```\n+\n Versioning\n ----------\n \n@@ -69,31 +100,63 @@\n installed. The patch number is incremented when there is either an installer\n update or a patch build of the phantom binary.\n \n+Pre-2.0, this package was published to NPM as [phantomjs](https://www.npmjs.com/package/phantomjs).\n+We changed the name to [phantomjs-prebuilt](https://www.npmjs.com/package/phantomjs-prebuilt) at\n+the request of PhantomJS team.\n+\n+Continuous Integration\n+----------------------\n+\n+Please **do not** download PhantomJS for every CI job because it can quickly\n+overload our CDNs. Instead take advantage of CI caching.\n+\n+In [Travis-CI](https://travis-ci.org/) add the following to your `.travis.yml`\n+to [enable caching](https://docs.travis-ci.com/user/caching/) & avoid repeated\n+downloads of PhantomJS.\n+\n+#### .travis.yml\n+```yml\n+cache:\n+  directories:\n+    - travis_phantomjs\n+\n+before_install:\n+  # Upgrade PhantomJS to v2.1.1.\n+  - \"export PHANTOMJS_VERSION=2.1.1\"\n+  - \"export PATH=$PWD/travis_phantomjs/phantomjs-$PHANTOMJS_VERSION-linux-x86_64/bin:$PATH\"\n+  - \"if [ $(phantomjs --version) != $PHANTOMJS_VERSION ]; then rm -rf $PWD/travis_phantomjs; mkdir -p $PWD/travis_phantomjs; fi\"\n+  - \"if [ $(phantomjs --version) != $PHANTOMJS_VERSION ]; then wget https://github.com/Medium/phantomjs/releases/download/v$PHANTOMJS_VERSION/phantomjs-$PHANTOMJS_VERSION-linux-x86_64.tar.bz2 -O $PWD/travis_phantomjs/phantomjs-$PHANTOMJS_VERSION-linux-x86_64.tar.bz2; fi\"\n+  - \"if [ $(phantomjs --version) != $PHANTOMJS_VERSION ]; then tar -xvf $PWD/travis_phantomjs/phantomjs-$PHANTOMJS_VERSION-linux-x86_64.tar.bz2 -C $PWD/travis_phantomjs; fi\"\n+  - \"phantomjs --version\"\n+```\n+\n Deciding Where To Get PhantomJS\n -------------------------------\n",
+					"match": false,
+					"packageHash": "17b317cdaca2235c3c97037a23f71246901474d0a0835e2eb3df4f345c919df3",
+					"size": 8495,
+					"sourceHash": "b208c57fbb6abadd882b1688ffe4b7993dd168ae220ab7442bf163c65dde9f80",
+					"status": "content"
+				},
+				"install.js": {
+					"diff": "--- published/install.js\n+++ rebuilt/install.js\n@@ -8,19 +8,28 @@\n \n var requestProgress = require('request-progress')\n var progress = require('progress')\n-var AdmZip = require('adm-zip')\n+var extractZip = require('extract-zip')\n var cp = require('child_process')\n var fs = require('fs-extra')\n var helper = require('./lib/phantomjs')\n var kew = require('kew')\n-var md5 = require('md5')\n var path = require('path')\n var request = require('request')\n var url = require('url')\n+var util = require('./lib/util')\n var which = require('which')\n+var os = require('os')\n \n var originalPath = process.env.PATH\n \n+var checkPhantomjsVersion = util.checkPhantomjsVersion\n+var getTargetPlatform = util.getTargetPlatform\n+var getTargetArch = util.getTargetArch\n+var getDownloadSpec = util.getDownloadSpec\n+var findValidPhantomJsBinary = util.findValidPhantomJsBinary\n+var verifyChecksum = util.verifyChecksum\n+var writeLocationFile = util.writeLocationFile\n+\n // If the process exits without going through exit(), then we did not complete.\n var validExit = false\n \n@@ -86,27 +95,6 @@\n     exit(1)\n   })\n \n-\n-function writeLocationFile(location) {\n-  console.log('Writing location.js file')\n-  if (getTargetPlatform() === 'win32') {\n-    location = location.replace(/\\\\/g, '\\\\\\\\')\n-  }\n-\n-  var platform = getTargetPlatform()\n-  var arch = getTargetArch()\n-\n-  var contents = 'module.exports.location = \"' + location + '\"\\n'\n-\n-  if (/^[a-zA-Z0-9]*$/.test(platform) && /^[a-zA-Z0-9]*$/.test(arch)) {\n-    contents +=\n-        'module.exports.platform = \"' + getTargetPlatform() + '\"\\n' +\n-        'module.exports.arch = \"' + getTargetArch() + '\"\\n'\n-  }\n-\n-  fs.writeFileSync(path.join(libPath, 'location.js'), contents)\n-}\n-\n function exit(code) {\n   validExit = true\n   process.env.PATH = originalPath\n@@ -117,15 +105,17 @@\n function findSuitableTempDirectory() {\n   var now = Date.now()\n   var candidateTmpDirs = [\n-    process.env.TMPDIR || process.env.TEMP || process.env.npm_config_tmp,\n-    '/tmp',\n+    process.env.npm_config_tmp,\n+    os.tmpdir(),\n     path.join(process.cwd(), 'tmp')\n   ]\n \n   for (var i = 0; i < candidateTmpDirs.length; i++) {\n-    var candidatePath = path.join(candidateTmpDirs[i], 'phantomjs')\n+    var candidatePath = candidateTmpDirs[i]\n+    if (!candidatePath) continue\n \n     try {\n+      candidatePath = path.join(path.resolve(candidatePath), 'phantomjs')\n       fs.mkdirsSync(candidatePath, '0777')\n       // Make double sure we have 0777 permissions; some operating systems\n       // default umask does not allow write by default.\n@@ -140,7 +130,7 @@\n   }\n \n   console.error('Can not find a writable tmp directory, please report issue ' +\n-      'on https://github.com/Obvious/phantomjs/issues/59 with as much ' +\n+      'on https://github.com/Medium/phantomjs/issues with as much ' +\n       'information as possible.')\n   exit(1)\n }\n@@ -185,7 +175,16 @@\n   var ca = process.env.npm_config_ca\n   if (!ca && process.env.npm_config_cafile) {\n     try {\n-      ca = fs.readFileSync(process.env.npm_config_cafile)\n+      ca = fs.readFileSync(process.env.npm_config_cafile, {encoding: 'utf8'})\n+        .split(/\\n(?=-----BEGIN CERTIFICATE-----)/g)\n+\n+      // Comments at the beginning of the file result in the first\n",
+					"match": false,
+					"packageHash": "2cfcff32baf8db9e3d20d50e258c343d1d9daec364b62c45cd045fad8b380000",
+					"size": 15873,
+					"sourceHash": "15794e15994e4b093ddec381378a9da6e6f2d2e4de744b35b64df1b44ade6ebf",
+					"status": "content"
+				},
+				"lib/phantomjs.js": {
+					"diff": "--- published/lib/phantomjs.js\n+++ rebuilt/lib/phantomjs.js\n@@ -7,7 +7,8 @@\n \n var fs = require('fs')\n var path = require('path')\n-var which = require('which')\n+var spawn = require('child_process').spawn\n+var Promise = require('es6-promise').Promise\n \n \n /**\n@@ -15,7 +16,10 @@\n  * @type {string}\n  */\n try {\n-  exports.path = path.resolve(__dirname, require('./location').location)\n+  var location = require('./location')\n+  exports.path = path.resolve(__dirname, location.location)\n+  exports.platform = location.platform\n+  exports.arch = location.arch\n } catch(e) {\n   // Must be running inside install script.\n   exports.path = null\n@@ -49,13 +53,72 @@\n if (exports.path) {\n   try {\n     // avoid touching the binary if it's already got the correct permissions\n-    var st = fs.statSync(exports.path);\n-    var mode = st.mode | 0555;\n+    var st = fs.statSync(exports.path)\n+    var mode = st.mode | parseInt('0555', 8)\n     if (mode !== st.mode) {\n-      fs.chmodSync(exports.path, mode);\n+      fs.chmodSync(exports.path, mode)\n     }\n   } catch (e) {\n     // Just ignore error if we don't have permission.\n     // We did our best. Likely because phantomjs was already installed.\n   }\n }\n+\n+/**\n+ * Executes a script or just runs PhantomJS\n+ */\n+exports.exec = function () {\n+  var args = Array.prototype.slice.call(arguments)\n+  return spawn(exports.path, args)\n+}\n+\n+/**\n+ * Runs PhantomJS with provided options\n+ * @example\n+ * // handy with WebDriver\n+ * phantomjs.run('--webdriver=4444').then(program => {\n+ *   // do something\n+ *   program.kill()\n+ * })\n+ * @returns {Promise} the process of PhantomJS\n+ */\n+exports.run = function () {\n+  var args = arguments\n+  return new Promise(function (resolve, reject) {\n+    try {\n+      var program = exports.exec.apply(null, args)\n+      var isFirst = true\n+      var stderr = ''\n+      program.stdout.on('data', function () {\n+        // This detects PhantomJS instance get ready.\n+        if (!isFirst) return\n+        isFirst = false\n+        resolve(program)\n+      })\n+      program.stderr.on('data', function (data) {\n+        stderr = stderr + data.toString('utf8')\n+      })\n+      program.on('error', function (err) {\n+        if (!isFirst) return\n+        isFirst = false\n+        reject(err)\n+      })\n+      program.on('exit', function (code) {\n+        if (!isFirst) return\n+        isFirst = false\n+        if (code == 0) {\n+          // PhantomJS doesn't use exit codes correctly :(\n+          if (stderr.indexOf('Error:') == 0) {\n+            reject(new Error(stderr))\n+          } else {\n+            resolve(program)\n+          }\n+        } else {\n+          reject(new Error('Exit code: ' + code))\n+        }\n+      })\n+    } catch (err) {\n+      reject(err)\n+    }\n+  })\n+}\n",
+					"match": false,
+					"packageHash": "9aeacc4386b56ade7de09e41a737d2fecf5458d999b56a266f1efc406f03510e",
+					"size": 1457,
+					"sourceHash": "c1cfa59a778d24db4c7a16969102e637770fe029c13ee3806d06afed1eb78bde",
+					"status": "content"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -1,6 +1,6 @@\n {\n   \"name\": \"phantomjs-prebuilt\",\n-  \"version\": \"2.1.2\",\n+  \"version\": \"2.1.16\",\n   \"keywords\": [\n     \"phantomjs\",\n     \"headless\",\n@@ -36,20 +36,22 @@\n   },\n   \"scripts\": {\n     \"install\": \"node install.js\",\n-    \"test\": \"nodeunit --reporter=minimal test/tests.js && eslint install.js\"\n+    \"test\": \"nodeunit --reporter=minimal test/tests.js && eslint .\"\n   },\n   \"dependencies\": {\n-    \"adm-zip\": \"~0.4.7\",\n-    \"fs-extra\": \"~0.26.4\",\n-    \"kew\": \"~0.7.0\",\n-    \"md5\": \"~2.0.0\",\n-    \"progress\": \"~1.1.8\",\n-    \"request\": \"~2.67.0\",\n-    \"request-progress\": \"~2.0.1\",\n-    \"which\": \"~1.2.2\"\n+    \"es6-promise\": \"^4.0.3\",\n+    \"extract-zip\": \"^1.6.5\",\n+    \"fs-extra\": \"^1.0.0\",\n+    \"hasha\": \"^2.2.0\",\n+    \"kew\": \"^0.7.0\",\n+    \"progress\": \"^1.1.8\",\n+    \"request\": \"^2.81.0\",\n+    \"request-progress\": \"^2.0.1\",\n+    \"which\": \"^1.2.10\"\n   },\n   \"devDependencies\": {\n-    \"eslint\": \"1.10.3\",\n-    \"nodeunit\": \"0.9.1\"\n+    \"eslint\": \"2.7.0\",\n+    \"nodeunit\": \"0.9.1\",\n+    \"webdriverio\": \"~4.2.3\"\n   }\n }\n",
+					"match": false,
+					"packageHash": "35cf5084e2fcf6879cba372848abcb97813285752d63e2ca5caf6420eea25505",
+					"size": 1215,
+					"sourceHash": "da93904fc7f230f67d355c1224a222e4b4a2fc3066ece09be0346ed1e440b253",
+					"status": "content"
+				},
+				"test/tests.js": {
+					"diff": "--- published/test/tests.js\n+++ rebuilt/test/tests.js\n@@ -6,8 +6,9 @@\n var childProcess = require('child_process')\n var fs = require('fs')\n var path = require('path')\n+var webdriverio = require('webdriverio')\n var phantomjs = require('../lib/phantomjs')\n-\n+var util = require('../lib/util')\n \n exports.testDownload = function (test) {\n   test.expect(1)\n@@ -24,7 +25,7 @@\n     'http://www.google.com/'\n   ]\n \n-  childProcess.execFile(phantomjs.path, childArgs, function (err, stdout, stderr) {\n+  childProcess.execFile(phantomjs.path, childArgs, function (err, stdout) {\n     var value = (stdout.indexOf('msec') !== -1)\n     test.ok(value, 'Test script should have executed and returned run time')\n     test.done()\n@@ -34,7 +35,7 @@\n \n exports.testPhantomExitCode = function (test) {\n   test.expect(1)\n-  childProcess.execFile(phantomjs.path, [path.join(__dirname, 'exit.js')], function (err, stdout, stderr) {\n+  childProcess.execFile(phantomjs.path, [path.join(__dirname, 'exit.js')], function (err) {\n     test.equals(err.code, 123, 'Exit code should be returned from phantom script')\n     test.done()\n   })\n@@ -44,11 +45,11 @@\n exports.testBinFile = function (test) {\n   test.expect(1)\n \n-  var binPath = process.platform === 'win32' ? \n+  var binPath = process.platform === 'win32' ?\n       path.join(__dirname, '..', 'lib', 'phantom', 'phantomjs.exe') :\n       path.join(__dirname, '..', 'bin', 'phantomjs')\n \n-  childProcess.execFile(binPath, ['--version'], function (err, stdout, stderr) {\n+  childProcess.execFile(binPath, ['--version'], function (err, stdout) {\n     test.equal(phantomjs.version, stdout.trim(), 'Version should be match')\n     test.done()\n   })\n@@ -64,3 +65,72 @@\n   test.equal('/Work/bin:/usr/bin', phantomjs.cleanPath('/Work/bin:/Work/phantomjs/node_modules/.bin:/usr/bin'))\n   test.done()\n }\n+\n+exports.testBogusReinstallLocation = function (test) {\n+  util.findValidPhantomJsBinary('./blargh')\n+  .then(function (binaryLocation) {\n+    test.ok(!binaryLocation, 'Expected link to fail')\n+    test.done()\n+  })\n+}\n+\n+exports.testSuccessfulReinstallLocation = function (test) {\n+  util.findValidPhantomJsBinary(path.resolve(__dirname, '../lib/location'))\n+  .then(function (binaryLocation) {\n+    test.ok(binaryLocation, 'Expected link to succeed')\n+    test.done()\n+  })\n+}\n+\n+exports.testBogusVerifyChecksum = function (test) {\n+  util.verifyChecksum(path.resolve(__dirname, './exit.js'), 'blargh')\n+  .then(function (success) {\n+    test.ok(!success, 'Expected checksum to fail')\n+    test.done()\n+  })\n+}\n+\n+exports.testSuccessfulVerifyChecksum = function (test) {\n+  util.verifyChecksum(path.resolve(__dirname, './exit.js'),\n+                      '217b7bccebefe5f5e267162060660b03de577867b6123ecfd3b26b5c6af2e92b')\n+  .then(function (success) {\n+    test.ok(success, 'Expected checksum to succeed')\n+    test.done()\n+  })\n+}\n+\n+exports.testPhantomExec = function (test) {\n+  test.expect(1)\n+  var p = phantomjs.exec(path.join(__dirname, 'exit.js'))\n+  p.on('exit', function (code) {\n+    test.equals(code, 123, 'Exit code should be returned from phantom script')\n+    test.done()\n+  })\n+}\n+\n+exports.testPhantomRun = function (test) {\n+  test.expect(1)\n+  var wdOpts = { desiredCapabilities: { browserName: 'phantomjs' } }\n+  phantomjs.run('--webdriver=4444').then(function (p) {\n+    webdriverio.remote(wdOpts).init()\n+      .url('https://developer.mozilla.org/en-US/')\n+      .getTitle().then(function (title) {\n+        test.equals(title, 'Mozilla Developer Network', 'Page title')\n",
+					"match": false,
+					"packageHash": "a4f241c92f4d0dfb22a798c0c41683ec97d427b904fbd93ae4a6d0721fc7126b",
+					"size": 1980,
+					"sourceHash": "738693b335d6c2b3e43f2a8f485285394838dbb5405fc598630d65266cb416f5",
+					"status": "content"
+				},
+				".eslintignore": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/util.js": {
+					"match": false,
+					"status": "missing-in-package"
+				}
+			},
+			"summary": {
+				"differentFiles": 6,
+				"matchingFiles": 6,
+				"missingInPackage": 2,
+				"missingInSource": 1,
+				"score": 0.4,
+				"totalFiles": 15
+			}
+		}
+	}
+]
