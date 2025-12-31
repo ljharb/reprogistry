@@ -134,7 +134,7 @@ async function performComparison(result) {
 		 * For monorepos, run in the package subdirectory
 		 * Use --ignore-scripts to avoid postinstall failures from old native deps
 		 */
-		execSync(`cd "${packageDir}" && npm install --ignore-scripts`, { stdio: 'pipe' });
+		execSync(`cd "${packageDir}" && npm install --ignore-scripts --legacy-peer-deps`, { stdio: 'pipe' });
 		const packOutput = execSync(
 			`cd "${packageDir}" && npm pack --pack-destination "${tempDir}"`,
 			{ env: { ...process.env, PATH: `${packageDir}/node_modules/.bin:${process.env.PATH}` }, stdio: 'pipe' },

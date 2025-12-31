@@ -79,21 +79,20 @@ function execWithNodeVersion(nodeVersion, command, options) {
 
 function tryInstallNodeVersion(version) {
 	try {
-		var installed = execSync(
-			'source "' + NVM_SCRIPT + '" && nvm ls ' + version + ' 2>/dev/null',
-			merge(EXEC_OPTIONS, { shell: '/bin/bash' }),
-		).toString();
-
-		if (installed.indexOf(version) !== -1 && installed.indexOf('N/A') === -1) {
-			return version;
-		}
-
+		// Try to install directly - nvm will use cached version if already installed
 		console.log('  -> Installing node ' + version + ' via nvm...');
 		execSync(
-			'source "' + NVM_SCRIPT + '" && nvm install ' + version,
+			'source "' + NVM_SCRIPT + '" && nvm install ' + version + ' 2>/dev/null',
 			merge(EXEC_OPTIONS, { shell: '/bin/bash' }),
 		);
-		return version;
+
+		// Verify it's actually usable
+		var installedVersion = execSync(
+			'source "' + NVM_SCRIPT + '" && nvm use ' + version + ' --silent && node --version 2>/dev/null',
+			merge(EXEC_OPTIONS, { shell: '/bin/bash' }),
+		).toString().trim().replace(/^v/, '');
+
+		return installedVersion;
 	} catch (err) {
 		console.error('  -> Failed to install node ' + version + ': ' + err.message);
 		return null;
@@ -149,7 +148,7 @@ function getNpmVersion(nodeVersion) {
 
 function npmInstall(dir, options) {
 	options = options || {};
-	var cmd = 'npm install --ignore-scripts --no-audit --no-fund';
+	var cmd = 'npm install --ignore-scripts --no-audit --no-fund --legacy-peer-deps';
 
 	if (!options.before) {
 		throw new Error('npmInstall requires a --before timestamp for reproducible builds');
