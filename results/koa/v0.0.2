@@ -1,0 +1,91 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2025-12-31T06:41:33.211Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:11.7.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "koa@0.0.2",
+			"name": "koa",
+			"version": "0.0.2",
+			"location": "https://registry.npmjs.org/koa/-/koa-0.0.2.tgz",
+			"integrity": "sha512-voCfGy0h6QaU7su/7/NW3TivCPaeMIT630M218FpOoAiz1E+ABx6Zn+fok1G881UV5XvKmSpSZWvhmCjt/DgfA==",
+			"publishedAt": "2013-12-18T01:55:07.330Z",
+			"publishedWith": {
+				"node": null,
+				"npm": "1.3.15"
+			}
+		},
+		"source": {
+			"integrity": "sha512-eHgDGbu5CO0lK3WGxwZ4ufjuub8pM3wZd73+SCzO0YxW5QRI2qVz2DbfVn7kNqARjwFlcQzHjJ/wicqkFE6X8g==",
+			"location": "git://github.com/koajs/koa",
+			"spec": "github:koajs/koa#0.0.2"
+		},
+		"comparisonHash": "8a2a8dcbb729bf3ee9216e490c955701f0ddebe1",
+		"diff": {
+			"files": {
+				".npmignore": {
+					"match": false,
+					"packageHash": "7c31d1d9c7cd0d98ed695db6119a63fa46db177234d6326b7ed72aadd631e2b5",
+					"size": 39,
+					"status": "missing-in-source"
+				},
+				"Readme.md": {
+					"diff": "--- published/Readme.md\n+++ rebuilt/Readme.md\n@@ -1,9 +1,8 @@\n-![koa middleware framework for nodejs](https://i.cloudup.com/uXIzgVnPWG-150x150.png)\n \n-  [![Build Status](https://travis-ci.org/koajs/koa.png)](https://travis-ci.org/koajs/koa)\n+![koa middleware framework for nodejs](https://i.cloudup.com/uXIzgVnPWG-150x150.png)\n \n   Expressive middleware for node.js using generators via [co](https://github.com/visionmedia/co)\n-  to make web applications and REST APIs more enjoyable to write.\n+  to make writing web applications and REST APIs more enjoyable to write. \n \n   Only methods that are common to nearly all HTTP servers are integrated directly into Koa's small ~400 SLOC codebase. This\n   includes things like content-negotiation, normalization of node inconsistencies, redirection, and a few others.\n@@ -26,9 +25,8 @@\n \n ## Community\n \n- - [API](docs/api/index.md) documentation\n- - [Examples](https://github.com/koajs/examples)\n- - [Middleware](https://github.com/koajs/koa/wiki) list\n+ - [API](docs/api.md) documentation\n+ - [Middleware](https://github.com/koajs/koa/wiki/Koa) list\n  - [Wiki](https://github.com/koajs/koa/wiki)\n  - [G+ Community](https://plus.google.com/communities/101845768320796750641)\n  - [Mailing list](https://groups.google.com/forum/#!forum/koajs)\n@@ -68,36 +66,40 @@\n \n ## Benchmarks\n \n-  If you like silly benchmarks, here's the requests per second using\n-  [wrk](https://github.com/wg/wrk) 3.x on my MBP.\n+  Average latency with one middleware:\n+\n+    0.628ms\n+\n+  Average latency with __400__ noop middleware:\n+\n+    1.5ms\n+\n+  If you like silly benchmarks, here's the requests per second:\n \n ```\n 1 middleware\n-8367.03\n+8083.45\n \n 5 middleware\n-8074.10\n+7449.95\n \n 10 middleware\n-7526.55\n+7166.66\n \n 15 middleware\n-7399.92\n+6992.18\n \n 20 middleware\n-7055.33\n+6650.28\n \n 30 middleware\n-6460.17\n+6113.57\n \n 50 middleware\n-5671.98\n-\n-100 middleware\n-4349.37\n+5117.46\n ```\n \n-  With __50__ middleware (likely much more than you'll need), that's __340,260__ requests per minute, and __20,415,600__ per hour,  and over __440 million__ per day, so unless you're a Facebook and can't manage to spin up more\n+  With __50__ middleware (likely much more than you'll need), that's __307,020__ requests per minute, and __18,421,200__ per hour,  __442 million__ per day, so unless you're a facebook and can't manage to spin up more\n   than one process to scale horizontally you'll be fine ;)\n \n ## Authors\n",
+					"match": false,
+					"packageHash": "f574d71854b3ab409873f559d53c7722262ed187828f69dee52808db8038da76",
+					"size": 2655,
+					"sourceHash": "9b5e909c1bdebe6c6a6a6c01d29963fc8ddeab8d20082bfcbd27b333ab0bd125",
+					"status": "content"
+				},
+				"lib/application.js": {
+					"diff": "--- published/lib/application.js\n+++ rebuilt/lib/application.js\n@@ -1,3 +1,4 @@\n+\n /**\n  * Module dependencies.\n  */\n@@ -6,10 +7,7 @@\n var Emitter = require('events').EventEmitter;\n var compose = require('koa-compose');\n var context = require('./context');\n-var request = require('./request');\n-var response = require('./response');\n var Cookies = require('cookies');\n-var Keygrip = require('keygrip');\n var Stream = require('stream');\n var http = require('http');\n var co = require('co');\n@@ -41,9 +39,8 @@\n   this.poweredBy = true;\n   this.jsonSpaces = 2;\n   this.middleware = [];\n-  this.context = Object.create(context);\n-  this.request = Object.create(request);\n-  this.response = Object.create(response);\n+  this.Context = createContext();\n+  this.context(context);\n }\n \n /**\n@@ -63,7 +60,6 @@\n  */\n \n app.listen = function(){\n-  debug('listen');\n   var server = http.createServer(this.callback());\n   return server.listen.apply(server, arguments);\n };\n@@ -83,79 +79,63 @@\n };\n \n /**\n- * Return a request handler callback\n- * for node's native http server.\n+ * Mixin `obj` to this app's context.\n  *\n- * @return {Function}\n+ *   app.context({\n+ *     get something(){\n+ *       return 'hi';\n+ *     },\n+ *\n+ *     set something(val){\n+ *       this._something = val;\n+ *     },\n+ *\n+ *     render: function(){\n+ *       this.body = '<html></html>';\n+ *     }\n+ *   });\n+ *\n+ * @param {Object} obj\n+ * @return {Application} self\n  * @api public\n  */\n \n-app.callback = function(){\n-  var mw = [respond].concat(this.middleware);\n-  var gen = compose(mw);\n-  var self = this;\n+app.context = function(obj){\n+  var ctx = this.Context.prototype;\n+  var names = Object.getOwnPropertyNames(obj);\n+\n+  debug('context: %j', names);\n+  names.forEach(function(name){\n+    if (Object.getOwnPropertyDescriptor(ctx, name)) {\n+      debug('context: overwriting %j', name);\n+    }\n+    var descriptor = Object.getOwnPropertyDescriptor(obj, name);\n+    Object.defineProperty(ctx, name, descriptor);\n+  });\n \n-  return function(req, res, next){\n-    var ctx = self.createContext(req, res);\n-    next = next || ctx.onerror;\n-    ctx.socket.once('error', next);\n-    co.call(ctx, gen)(next);\n-  }\n+  return this;\n };\n \n /**\n- * Set signed cookie keys.\n- *\n- * These are passed to [KeyGrip](https://github.com/jed/keygrip),\n- * however you may also pass your own `KeyGrip` instance. For\n- * example the following are acceptable:\n- *\n- *   app.keys = ['im a newer secret', 'i like turtle'];\n",
+					"match": false,
+					"packageHash": "94970af3de870a427e5103251c4dee7bbc7d8cb7194ab839950d12bc2d9ef1f0",
+					"size": 5026,
+					"sourceHash": "66cbc8458371d3279758dc8c1b31f725e5a91284256fe4214fb9a52bd8bd4385",
+					"status": "content"
+				},
+				"lib/context.js": {
+					"diff": "--- published/lib/context.js\n+++ rebuilt/lib/context.js\n@@ -1,10 +1,21 @@\n-\n /**\n  * Module dependencies.\n  */\n \n var debug = require('debug')('koa:context');\n+var Negotiator = require('negotiator');\n+var statuses = require('./status');\n+var qs = require('querystring');\n+var Stream = require('stream');\n+var fresh = require('fresh');\n var http = require('http');\n+var path = require('path');\n+var mime = require('mime');\n+var basename = path.basename;\n+var extname = path.extname;\n+var url = require('url');\n+var parse = url.parse;\n+var stringify = url.format;\n \n /**\n  * Prototype.\n@@ -13,478 +24,1028 @@\n module.exports = {\n \n   /**\n-   * Inspect implementation.\n+   * Return request header.\n    *\n    * @return {Object}\n    * @api public\n    */\n \n-  inspect: function(){\n-    return this.toJSON();\n+  get header() {\n+    return this.req.headers;\n   },\n \n   /**\n-   * Return JSON representation.\n+   * Return response header.\n    *\n    * @return {Object}\n    * @api public\n    */\n \n-  toJSON: function(){\n-    return {\n-      request: this.request,\n-      response: this.response\n-    }\n+  get responseHeader() {\n+    // TODO: wtf\n+    return this.res._headers || {};\n   },\n \n   /**\n-   * Throw an error with `msg` and optional `status`\n-   * defaulting to 500. Note that these are user-level\n-   * errors, and the message may be exposed to the client.\n-   *\n-   *    this.throw(403)\n-   *    this.throw('name required', 400)\n-   *    this.throw('something exploded')\n+   * Return response status string.\n    *\n-   * @param {String|Number} msg\n-   * @param {Number} status\n+   * @return {String}\n    * @api public\n    */\n \n-  throw: function(msg, status){\n-    // TODO: switch order... feels weird now that im used to express\n-    if ('number' == typeof msg) {\n-      var tmp = msg;\n-      msg = http.STATUS_CODES[tmp];\n-      status = tmp;\n-    }\n-\n-    var err = new Error(msg);\n-    err.status = status || 500;\n-    err.expose = true;\n-    throw err;\n+  get statusString() {\n+    return http.STATUS_CODES[this.status];\n   },\n \n   /**\n-   * Alias for .throw() for backwards compatibility.\n-   * Do not use - will be removed in the future.\n+   * Get request URL.\n    *\n-   * @param {String|Number} msg\n-   * @param {Number} status\n-   * @api private\n",
+					"match": false,
+					"packageHash": "a574475d3c5ba0b9dfcf10017e8c9075414cada24b3e32194a1eb0feb70735c8",
+					"size": 7606,
+					"sourceHash": "8795f1bab147afb94ff7904e7b7dcea333a992a839677b41f927d34dd8906eea",
+					"status": "content"
+				},
+				"lib/request.js": {
+					"match": false,
+					"packageHash": "d349c5e0b427276d92cd94d80c3cd8dc23417ae7e759adac9c1c4477a46bc7fe",
+					"size": 13890,
+					"status": "missing-in-source"
+				},
+				"lib/response.js": {
+					"match": false,
+					"packageHash": "16609d2fdd968806e12cc29383503e2a0838e381ac1776a136d2766ea15669df",
+					"size": 9097,
+					"status": "missing-in-source"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -21,29 +21,22 @@\n   ],\n   \"license\": \"MIT\",\n   \"dependencies\": {\n-    \"co\": \"~2.3.0\",\n+    \"co\": \"2.2.0\",\n     \"debug\": \"*\",\n-    \"mime\": \"~1.2.11\",\n-    \"fresh\": \"~0.2.0\",\n-    \"negotiator\": \"~0.3.0\",\n-    \"koa-compose\": \"~2.0.0\",\n-    \"cookies\": \"~0.3.7\",\n-    \"keygrip\": \"~0.2.4\"\n+    \"mime\": \"1.2.10\",\n+    \"fresh\": \"0.2.0\",\n+    \"negotiator\": \"0.2.7\",\n+    \"koa-compose\": \"2.0.0\",\n+    \"cookies\": \"~0.3.6\"\n   },\n   \"devDependencies\": {\n-    \"bytes\": \"~0.2.1\",\n-    \"should\": \"~2.1.0\",\n-    \"mocha\": \"~1.14.0\",\n-    \"supertest\": \"~0.8.1\",\n-    \"co-fs\": \"~1.1\",\n-    \"co-views\": \"~0.1.0\",\n-    \"ejs\": \"~0.8.4\",\n-    \"koa-logger\": \"~1.0.1\",\n-    \"koa-static\": \"~1.2.0\",\n-    \"co-busboy\": \"git://github.com/cojs/busboy\",\n-    \"koa-route\": \"~1.0.2\",\n-    \"swig\": \"~1.1.0\",\n-    \"co-body\": \"0.0.1\"\n+    \"bytes\": \"*\",\n+    \"should\": \"1.2.2\",\n+    \"mocha\": \"1.12.0\",\n+    \"supertest\": \"0.7.1\",\n+    \"co-fs\": \"~1.0.1\",\n+    \"co-views\": \"0.0.1\",\n+    \"ejs\": \"~0.8.4\"\n   },\n   \"engines\": {\n     \"node\": \"> 0.11.4\"\n",
+					"match": false,
+					"packageHash": "50e0306fef5c016cedabb60bfda90ba05caa75d80dd0b407e2fcae995b072a0f",
+					"size": 998,
+					"sourceHash": "ec24869b9eb09a9d5250eeea85c457187742022d67a935ba86390812bde25d3a",
+					"status": "content"
+				}
+			},
+			"summary": {
+				"differentFiles": 4,
+				"matchingFiles": 4,
+				"missingInPackage": 0,
+				"missingInSource": 3,
+				"score": 0.36363636363636365,
+				"totalFiles": 11
+			}
+		}
+	}
+]
