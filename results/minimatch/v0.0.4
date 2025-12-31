@@ -1,0 +1,73 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2025-12-31T07:52:48.969Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:11.7.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "minimatch@0.0.4",
+			"name": "minimatch",
+			"version": "0.0.4",
+			"location": "https://registry.npmjs.org/minimatch/-/minimatch-0.0.4.tgz",
+			"integrity": "sha512-vkUtv3vFj5nLzMHi2kksBn9f8Glfpl/kCe6DNmK5PuLGKOgeGyRL39HSQmYxBu2HOp6luKAPDVHVZf6Ey8fSSQ==",
+			"publishedAt": "2011-07-29T19:13:01.148Z",
+			"publishedWith": {
+				"node": "v0.4.11",
+				"npm": "1.0.28-pre-DEV-UNSTABLE"
+			}
+		},
+		"source": {
+			"integrity": null,
+			"location": "git://github.com/isaacs/minimatch.git",
+			"spec": "github:isaacs/minimatch#0.0.4"
+		},
+		"comparisonHash": "8a2a8dcbb729bf3ee9216e490c955701f0ddebe1",
+		"diff": {
+			"files": {
+				"node_modules/lru-cache/README.md": {
+					"diff": "--- published/node_modules/lru-cache/README.md\n+++ rebuilt/node_modules/lru-cache/README.md\n@@ -9,4 +9,6 @@\n     cache.set(\"key\", \"value\")\n     cache.get(\"key\") // \"value\"\n \n+    cache.reset()    // empty the cache\n+\n RTFS for more info.\n",
+					"match": false,
+					"packageHash": "1be8a85354dde1cc899d801ca14af469ee53ee83b75db6edae508d58d89f0382",
+					"size": 259,
+					"sourceHash": "bd1abeb16cb29b1a23ebfa27eddd1ef0242609e0faddc3fc687b1a10b89811af",
+					"status": "content"
+				},
+				"node_modules/lru-cache/lib/lru-cache.js": {
+					"diff": "--- published/node_modules/lru-cache/lib/lru-cache.js\n+++ rebuilt/node_modules/lru-cache/lib/lru-cache.js\n@@ -1,5 +1,11 @@\n+;(function () { // closure for web browsers\n \n-module.exports = LRUCache\n+if (module) {\n+  module.exports = LRUCache\n+} else {\n+  // just set the global for non-node platforms.\n+  ;(function () { return this })().LRUCache = LRUCache\n+}\n \n function hOP (obj, key) {\n   return Object.prototype.hasOwnProperty.call(obj, key)\n@@ -27,12 +33,28 @@\n     , get : function () { return maxLength }\n     , enumerable : true\n     })\n+\n   this.maxLength = maxLength\n+\n   Object.defineProperty(this, \"length\",\n     { get : function () { return length }\n     , enumerable : true\n     })\n \n+  this.reset = function () {\n+    cache = {}\n+    lruList = {}\n+    lru = 0\n+    mru = 0\n+    length = 0\n+  }\n+\n+  // Provided for debugging/dev purposes only. No promises whatsoever that\n+  // this API stays stable.\n+  this.dump = function () {\n+    return cache\n+  }\n+\n   this.set = function (key, value) {\n     if (hOP(cache, key)) {\n       this.get(key)\n@@ -44,6 +66,7 @@\n     length ++\n     if (length > maxLength) trim()\n   }\n+\n   this.get = function (key) {\n     if (!hOP(cache, key)) return undefined\n     var hit = cache[key]\n@@ -53,6 +76,7 @@\n     lruList[hit.lu] = hit\n     return hit.value\n   }\n+\n   this.del = function (key) {\n     if (!hOP(cache, key)) return undefined\n     var hit = cache[key]\n@@ -61,10 +85,12 @@\n     if (hit.lu === lru) lruWalk()\n     length --\n   }\n+\n   function lruWalk () {\n     // lru has been deleted, hop up to the next hit.\n     lru = Object.keys(lruList).shift()\n   }\n+\n   function trim () {\n     if (length <= maxLength) return undefined\n     var prune = Object.keys(lruList).slice(0, length - maxLength)\n@@ -77,75 +103,4 @@\n   }\n }\n \n-if (!process || !module || module !== process.mainModule) return undefined\n-\n-var l = LRUCache(3)\n-  , assert = require(\"assert\")\n-\n-l.set(1, 1)\n-l.set(2, 1)\n-l.set(3, 1)\n-l.set(4, 1)\n-l.set(5, 1)\n-l.set(6, 1)\n-\n-assert.equal(l.get(1), undefined)\n-assert.equal(l.get(2), undefined)\n-assert.equal(l.get(3), undefined)\n-assert.equal(l.get(4), 1)\n-assert.equal(l.get(5), 1)\n-assert.equal(l.get(6), 1)\n-\n-// now keep re-getting the 6 so it remains the most recently used.\n-// in this case, we'll have 6, 7, 8, 9, 10, 11, so the ending length = 5\n-l.set(7, 1)\n-l.get(6)\n",
+					"match": false,
+					"packageHash": "d37756024c4c30cc3cb2a5c2085fcfa7ad8034a55b2b451f5bba7981ace12736",
+					"size": 3917,
+					"sourceHash": "ff6964c873f76d0656c92757820132c4102dfbc3fd2dc4466659b8c2baab77a4",
+					"status": "content"
+				},
+				"node_modules/lru-cache/package.json": {
+					"diff": "--- published/node_modules/lru-cache/package.json\n+++ rebuilt/node_modules/lru-cache/package.json\n@@ -1,13 +1,13 @@\n-{ \"name\" : \"lru-cache\"\n-, \"description\" : \"A cache object that deletes the least-recently-used items.\"\n-, \"version\" : \"1.0.4\"\n-, \"author\" : \"Isaac Z. Schlueter <i@izs.me>\"\n-, \"scripts\" : { \"test\" : \"node lib/lru-cache.js\" }\n-, \"main\" : \"lib/lru-cache\"\n-, \"repository\" : \"git://github.com/isaacs/node-lru-cache.git\"\n-, \"licenses\" :\n-  [ { \"type\" : \"MIT\"\n-    , \"url\" : \"http://github.com/isaacs/node-lru-cache/raw/master/LICENSE\"\n-    }\n-  ]\n+{ \"name\": \"lru-cache\"\n+, \"description\": \"A cache object that deletes the least-recently-used items.\"\n+, \"version\": \"1.0.6\"\n+, \"author\": \"Isaac Z. Schlueter <i@izs.me>\"\n+, \"scripts\": { \"test\": \"tap test\" }\n+, \"main\": \"lib/lru-cache.js\"\n+, \"repository\": \"git://github.com/isaacs/node-lru-cache.git\"\n+, \"devDependencies\": { \"tap\": \"0\" }\n+, \"license\":\n+  { \"type\": \"MIT\"\n+  , \"url\": \"http://github.com/isaacs/node-lru-cache/raw/master/LICENSE\"\n+  }\n }\n",
+					"match": false,
+					"packageHash": "9fd54c6b88345c42b74f6788641b49ae2cfe672010ad662fea6a1b62a0c3a88a",
+					"size": 432,
+					"sourceHash": "eb741ea92cc9c3b4609e97e7839a4c74d9ca0804dfa1da1a1dc97614176dfad4",
+					"status": "content"
+				},
+				"node_modules/lru-cache/.npmignore": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"node_modules/lru-cache/test/basic.js": {
+					"match": false,
+					"status": "missing-in-package"
+				}
+			},
+			"summary": {
+				"differentFiles": 3,
+				"matchingFiles": 7,
+				"missingInPackage": 2,
+				"missingInSource": 0,
+				"score": 0.5833333333333334,
+				"totalFiles": 12
+			}
+		}
+	}
+]
