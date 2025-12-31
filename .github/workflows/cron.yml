@@ -114,16 +114,36 @@ jobs:
           node-version: "node"
 
       - name: validate package name
-        run: npx validate-npm-package-name-cli "${PACKAGE}"
+        id: validate
+        run: |
+          SAFE_NAME=$(echo "${PACKAGE}" | sed 's/\//__/g')
+          mkdir -p /tmp/removals
+          if npx validate-npm-package-name-cli "${PACKAGE}"; then
+            echo "valid=true" >> $GITHUB_OUTPUT
+          else
+            echo "::warning::Skipping invalid package name: ${PACKAGE}"
+            echo "valid=false" >> $GITHUB_OUTPUT
+            echo "safe_name=${SAFE_NAME}" >> $GITHUB_OUTPUT
+            echo "${PACKAGE}||invalid package name" > "/tmp/removals/${SAFE_NAME}.txt"
+          fi
         env:
           PACKAGE: ${{ matrix.package }}
 
+      - uses: actions/upload-artifact@v4
+        if: steps.validate.outputs.valid == 'false'
+        with:
+          name: removal-${{ steps.validate.outputs.safe_name }}
+          path: /tmp/removals/${{ steps.validate.outputs.safe_name }}.txt
+          retention-days: 1
+
       - run: node scripts/versions.mjs
+        if: steps.validate.outputs.valid == 'true'
         id: versions
         env:
           PACKAGE: ${{ matrix.package }}
 
       - name: Save result
+        if: steps.validate.outputs.valid == 'true'
         id: save
         run: |
           # Sanitize package name for filename (replace / with --)
@@ -138,13 +158,14 @@ jobs:
           fi
 
       - uses: actions/upload-artifact@v4
+        if: steps.validate.outputs.valid == 'true'
         with:
           name: result-${{ steps.save.outputs.safe_name }}
           path: /tmp/results/${{ steps.save.outputs.safe_name }}.txt
           retention-days: 1
 
       - uses: actions/upload-artifact@v4
-        if: steps.versions.outputs.removed == 'true'
+        if: steps.validate.outputs.valid == 'true' && steps.versions.outputs.removed == 'true'
         with:
           name: removal-${{ steps.save.outputs.safe_name }}
           path: /tmp/removals/${{ steps.save.outputs.safe_name }}.txt
