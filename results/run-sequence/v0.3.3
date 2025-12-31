@@ -1,0 +1,93 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2025-12-31T14:50:52.852Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:11.7.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "run-sequence@0.3.3",
+			"name": "run-sequence",
+			"version": "0.3.3",
+			"location": "https://registry.npmjs.org/run-sequence/-/run-sequence-0.3.3.tgz",
+			"integrity": "sha512-QxS5FCcvOMwERbXxSqFMuQgAfazgiSOLBhX3k09yMah1OO3043hv6NVqpYjwo49oUHkCfybvVYqWuQvqJJlHsg==",
+			"publishedAt": "2014-02-04T15:37:26.567Z",
+			"publishedWith": {
+				"node": null,
+				"npm": "1.3.25"
+			}
+		},
+		"source": {
+			"integrity": "sha512-xcpFdeO/aD/r7IBl1PO64Iglj52OElsRNhL3MSqWmrxJKMJcOSSx/BPCaxUbbwHBEPKvVntExdQ8k3QHiSJ0ww==",
+			"location": "git://github.com/OverZealous/run-sequence.git",
+			"spec": "github:OverZealous/run-sequence#HEAD"
+		},
+		"comparisonHash": "8a2a8dcbb729bf3ee9216e490c955701f0ddebe1",
+		"diff": {
+			"files": {
+				".hgignore": {
+					"match": false,
+					"packageHash": "560b3dc432df0a0e7c5842ad51598d71ee55f68cd9c8c460bc53f0bbc7a8e3e2",
+					"size": 92,
+					"status": "missing-in-source"
+				},
+				".npmignore": {
+					"match": false,
+					"packageHash": "f02e445b5ce101a4609b807ae8d447a0936a62c903722feb0a93e60f887b81f0",
+					"size": 91,
+					"status": "missing-in-source"
+				},
+				".travis.yml": {
+					"diff": "--- published/.travis.yml\n+++ rebuilt/.travis.yml\n@@ -1,5 +1,8 @@\n-language: node_js\r\n-node_js:\r\n-  - \"0.9\"\r\n-  - \"0.10\"\r\n-  - \"0.11\"\n\\ No newline at end of file\n+sudo: false\n+language: node_js\n+node_js:\n+  - \"0.10\"\n+  - \"0.12\"\n+  - \"4\"\n+  - \"5\"\n+  - \"6\"\n",
+					"match": false,
+					"packageHash": "83956cbc09559c4601740c3583d40e2d6fd3d69e6af0d40ce7e3df8bec2b6c5d",
+					"size": 62,
+					"sourceHash": "3c68200da6ac0822c176a275c844ba531e7ba72d5d24a5dfa7717f7cb28959a0",
+					"status": "content"
+				},
+				"README.md": {
+					"diff": "--- published/README.md\n+++ rebuilt/README.md\n@@ -1,91 +1,129 @@\n-# run-sequence\r\n-\r\n-[![NPM version][npm-image]][npm-url] [![Build Status][travis-image]][travis-url]\r\n-\r\n-Runs a sequence of gulp tasks in the specified order.  This function is designed to solve the situation where you have defined run-order, but choose not to or cannot use dependencies.\r\n-\r\n-> ### Please Note\r\n->\r\n-> This is intended to be a temporary solution until [orchestrator](https://github.com/robrich/orchestrator/) is updated to support [non-dependent ordered tasks](https://github.com/robrich/orchestrator/issues/21).\r\n-> \r\n-> Be aware that this solution is a hack, and may stop working with a future update to orchestrator. \r\n-\r\n-Each argument to `run-sequence` is run in order.  This works by listening to the `task_stop` and `task_err` events, and keeping track of which tasks have been completed.  You can still run some of the tasks in parallel, by providing an array of task names for one or more of the arguments.\r\n-\r\n-If the final argument is a function, it will be used as a callback after all the functions are either finished or an error has occurred.\r\n-\r\n-## Usage\r\n-\r\n-First, install `run-sequence` as a development dependency:\r\n-\r\n-```shell\r\n-npm install --save-dev run-sequence\r\n-```\r\n-\r\n-Then add use it in your gulpfile, like so:\r\n-\r\n-```js\r\n-var gulp = require('gulp');\r\n-var runSequence = require('run-sequence');\r\n-var clean = require('gulp-clean');\r\n-\r\n-// This will run in this order:\r\n-// * build-clean\r\n-// * build-scripts and build-styles in parallel\r\n-// * build-html\r\n-// * Finally call the callback function\r\n-gulp.task('build', function(callback) {\r\n-  runSequence('build-clean',\r\n-              ['build-scripts', 'build-styles'],\r\n-              'build-html',\r\n-              callback);\r\n-});\r\n-\r\n-// configure build-clean, build-scripts, build-styles, build-html as you\r\n-// wish, but make sure they either return a stream or handle the callback\r\n-// Example:\r\n-\r\n-gulp.task('build-clean', function() {\r\n-    return gulp.src(BUILD_DIRECTORY).pipe(clean());\r\n-//  ^^^^^^\r\n-//   This is the key here, to make sure tasks run asynchronously!\r\n-});\r\n-\r\n-gulp.task('build-scripts', function() {\r\n-    return gulp.src(SCRIPTS_SRC).pipe(...)...\r\n-//  ^^^^^^\r\n-//   This is the key here, to make sure tasks run asynchronously!\r\n-});\r\n-```\r\n-\r\n-## LICENSE\r\n-\r\n-(MIT License)\r\n-\r\n-Copyright (c) 2014 [Phil DeJarnett](http://overzealous.com)\r\n-\r\n-Permission is hereby granted, free of charge, to any person obtaining\r\n-a copy of this software and associated documentation files (the\r\n-\"Software\"), to deal in the Software without restriction, including\r\n-without limitation the rights to use, copy, modify, merge, publish,\r\n-distribute, sublicense, and/or sell copies of the Software, and to\r\n-permit persons to whom the Software is furnished to do so, subject to\r\n-the following conditions:\r\n-\r\n-The above copyright notice and this permission notice shall be\r\n-included in all copies or substantial portions of the Software.\r\n-\r\n-THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND,\r\n-EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF\r\n-MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND\r\n-NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE\r\n-LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION\r\n-OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION\r\n-WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.\r\n-\r\n-\r\n-[npm-url]: https://npmjs.org/package/run-sequence\r\n-[npm-image]: https://badge.fury.io/js/run-sequence.png\r\n-\r\n-[travis-url]: http://travis-ci.org/OverZealous/run-sequence\r\n-[travis-image]: https://secure.travis-ci.org/OverZealous/run-sequence.png?branch=master\n\\ No newline at end of file\n+# run-sequence\n+\n+[![NPM version][npm-image]][npm-url] [![Build Status][travis-image]][travis-url]\n+\n+Runs a sequence of gulp tasks in the specified order.  This function is designed to solve the situation where you have defined run-order, but choose not to or cannot use dependencies.\n",
+					"match": false,
+					"packageHash": "cc37183cd419643a6eb77f648a1e37040e88d4c1d86a8310f8bb312cba6d327a",
+					"size": 3616,
+					"sourceHash": "c7dc7dc1725ed089dfa89fc971b7095b1d7f95d4b42184568227d4efe483672e",
+					"status": "content"
+				},
+				"index.js": {
+					"diff": "--- published/index.js\n+++ rebuilt/index.js\n@@ -1,75 +1,147 @@\n-/*jshint node:true */\r\n-\r\n-\"use strict\";\r\n-\r\n-var colors = require('chalk');\r\n-var gulp = require('gulp');\r\n-\r\n-var verifyTaskSets = function(taskSets, skipArrays) {\r\n-\ttaskSets.forEach(function(t, i) {\r\n-\t\tvar isTask = typeof t === \"string\",\r\n-\t\t\tisArray = !skipArrays && Array.isArray(t);\r\n-\t\tif(!isTask && !isArray) {\r\n-\t\t\tthrow new Error(\"Task \"+t+\" is not a valid task string.\");\r\n-\t\t}\r\n-\t\tif(isTask && !gulp.hasTask(t)) {\r\n-\t\t\tthrow new Error(\"Task \"+t+\" is not configured as a task on gulp.\");\r\n-\t\t}\r\n-\t\tif(isArray) {\r\n-\t\t\tif(t.length === 0) {\r\n-\t\t\t\tthrow new Error(\"An empty array was provided as a task set\");\r\n-\t\t\t}\r\n-\t\t\tverifyTaskSets(t, true);\r\n-\t\t}\r\n-\t})\r\n-}\r\n-\r\n-module.exports = function() {\r\n-\tvar taskSets = Array.prototype.slice.call(arguments),\r\n-\t\tcallBack = typeof taskSets[taskSets.length-1] === 'function' ? taskSets.pop() : false,\r\n-\t\tcurrentTaskSet,\r\n-\t\tfinish = function(err) {\r\n-\t\t\tgulp.removeListener('task_stop', onTaskEnd);\r\n-\t\t\tgulp.removeListener('task_err', onError);\r\n-\t\t\tif(callBack) {\r\n-\t\t\t\tcallBack(err);\r\n-\t\t\t} else if(err) {\r\n-\t\t\t\tconsole.log(colors.red('Error running task sequence:'), err);\r\n-\t\t\t}\r\n-\t\t},\r\n-\t\tonError = function(err) {\r\n-\t\t\tfinish(err);\r\n-\t\t},\r\n-\t\tonTaskEnd = function(event) {\r\n-\t\t\tvar idx = currentTaskSet.indexOf(event.task);\r\n-\t\t\tif(idx > -1) {\r\n-\t\t\t\tcurrentTaskSet.splice(idx,1);\r\n-\t\t\t}\r\n-\t\t\tif(currentTaskSet.length === 0) {\r\n-\t\t\t\trunNextSet();\r\n-\t\t\t}\r\n-\t\t},\r\n-\t\trunNextSet = function() {\r\n-\t\t\tif(taskSets.length) {\r\n-\t\t\t\tvar command = taskSets.shift();\r\n-\t\t\t\tif(!Array.isArray(command)) {\r\n-\t\t\t\t\tcommand = [command];\r\n-\t\t\t\t}\r\n-\t\t\t\tcurrentTaskSet = command;\r\n-\t\t\t\tgulp.start.apply(gulp, command);\r\n-\t\t\t} else {\r\n-\t\t\t\tfinish();\r\n-\t\t\t}\r\n-\t\t};\r\n-\t\r\n-\tif(taskSets.length === 0) {\r\n-\t\tthrow new Error('No tasks were provided to run-sequence');\r\n-\t}\r\n-\tverifyTaskSets(taskSets);\r\n-\t\r\n-\tgulp.on('task_stop', onTaskEnd);\r\n-\tgulp.on('task_err', onError);\r\n-\t\r\n-\trunNextSet();\r\n-};\r\n-\r\n+/*jshint node:true */\n+\n+\"use strict\";\n+\n+var colors = require('chalk');\n+var fancyLog = require('fancy-log');\n+var PluginError = require('plugin-error');\n+\n+function options() { return module.exports.options }\n+\n+function verifyTaskSets(gulp, taskSets, skipArrays) {\n+\tif(taskSets.length === 0) {\n+\t\tthrow new Error('No tasks were provided to run-sequence');\n+\t}\n+\n+\tvar foundTasks = {};\n+\ttaskSets.forEach(function(t) {\n+\t\tvar isTask = typeof t === \"string\";\n+\t\tvar isArray = !skipArrays && Array.isArray(t);\n+\t\tif(!isTask && !isArray) {\n+\t\t\tthrow new Error(\"Task \" + t + \" is not a valid task string.\");\n+\t\t}\n",
+					"match": false,
+					"packageHash": "0903f365c5f9f5cdd334e65278b609fa2107f370c6c27da8935b9c7b3adfd627",
+					"size": 1865,
+					"sourceHash": "e16dcaf08a168af76ec6381dac8ee26740ecbba456960cd38ce9e795542daf45",
+					"status": "content"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -1,7 +1,7 @@\n {\n   \"name\": \"run-sequence\",\n   \"description\": \"Run a series of dependent gulp tasks in order\",\n-  \"version\": \"0.3.3\",\n+  \"version\": \"2.2.1\",\n   \"homepage\": \"https://github.com/OverZealous/run-sequence\",\n   \"repository\": {\n     \"type\": \"git\",\n@@ -23,12 +23,14 @@\n     \"orchestrator\"\n   ],\n   \"dependencies\": {\n-    \"chalk\": \"*\"\n+    \"chalk\": \"^1.1.3\",\n+    \"fancy-log\": \"^1.3.2\",\n+    \"plugin-error\": \"^0.1.2\"\n   },\n   \"devDependencies\": {\n-    \"gulp\": \"*\",\n-    \"mocha\": \"*\",\n-    \"should\": \"*\"\n+    \"gulp\": \"^3.9.1\",\n+    \"mocha\": \"^3.4.2\",\n+    \"should\": \"~11.2.0\"\n   },\n   \"scripts\": {\n     \"test\": \"mocha --reporter spec\"\n@@ -36,10 +38,5 @@\n   \"engines\": {\n     \"node\": \">= 0.8.0\"\n   },\n-  \"licenses\": [\n-    {\n-      \"type\": \"MIT\",\n-      \"url\": \"http://github.com/OverZealous/run-sequence/raw/master/LICENSE\"\n-    }\n-  ]\n+  \"license\": \"MIT\"\n }\n",
+					"match": false,
+					"packageHash": "72c5f13b95e90c9384aa339532bc13f3f189cf772fc49529857c6eef9db15716",
+					"size": 923,
+					"sourceHash": "b3ba8f00a79716bd4f1c0407bebc9e57a033bcbfee268ba753ec028be8b284d5",
+					"status": "content"
+				},
+				".eslintrc": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"CHANGELOG.md": {
+					"match": false,
+					"status": "missing-in-package"
+				}
+			},
+			"summary": {
+				"differentFiles": 4,
+				"matchingFiles": 1,
+				"missingInPackage": 2,
+				"missingInSource": 2,
+				"score": 0.1111111111111111,
+				"totalFiles": 9
+			}
+		}
+	}
+]
