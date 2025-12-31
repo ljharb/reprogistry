@@ -1,0 +1,105 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2025-12-31T18:50:24.886Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:11.7.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "yeoman-generator@0.10.1",
+			"name": "yeoman-generator",
+			"version": "0.10.1",
+			"location": "https://registry.npmjs.org/yeoman-generator/-/yeoman-generator-0.10.1.tgz",
+			"integrity": "sha512-dqmTCZJb4ceS1Yl7t7/lzRPUdbm1QwQR7ZVyW6KxU600JNFUZDQTLz9Jo8ZbWbF3GHDUw5ajJEvT5ixi50FRJg==",
+			"publishedAt": "2013-02-22T15:42:13.410Z",
+			"publishedWith": {
+				"node": null,
+				"npm": "1.2.10"
+			}
+		},
+		"source": {
+			"integrity": null,
+			"location": "git://github.com/yeoman/generator.git",
+			"spec": "github:yeoman/generator#v0.10.1"
+		},
+		"comparisonHash": "8a2a8dcbb729bf3ee9216e490c955701f0ddebe1",
+		"diff": {
+			"files": {
+				".npmignore": {
+					"match": false,
+					"packageHash": "d17d239bb23f6a7d04ac2dae3deec14fe15299d5bcdbf2ddad6bdd465041ad2c",
+					"size": 29,
+					"status": "missing-in-source"
+				},
+				"lib/actions/wiring.js": {
+					"diff": "--- published/lib/actions/wiring.js\n+++ rebuilt/lib/actions/wiring.js\n@@ -69,17 +69,27 @@\n // - optimizedPath  - the final file to build\n // - filesBlock     - a string containing populated script/style tags ready to be\n //                    injected into a usemin block.\n+// - searchPath     - an alternate search path to look in for files\n //\n // Returns the new block.\n-wiring.generateBlock = function generateBlock(blockType, optimizedPath, filesBlock) {\n-  var blockStart = '\\n        <!-- build:' + blockType + ' ' + optimizedPath + ' -->\\n';\n-  var blockEnd = '        <!-- endbuild -->\\n';\n+wiring.generateBlock = function generateBlock(blockType, optimizedPath, filesBlock, searchPath) {\n+  var blockStart, blockEnd;\n+  var blockSearchPath = '';\n+\n+  if (searchPath !== undefined) {\n+    blockSearchPath = '(' + searchPath +  ')';\n+  }\n+\n+  blockStart = '\\n        <!-- build:' + blockType + blockSearchPath + ' ' + optimizedPath + ' -->\\n';\n+  blockEnd = '        <!-- endbuild -->\\n';\n   return blockStart + filesBlock + blockEnd;\n };\n \n // Append files, specifying the optimized path and generating the necessary\n // usemin blocks to be used for the build process.\n //\n+// - htmlOrOptions  - string to append the files to or an object of this and\n+//                    the remaining options\n // - fileType       - js (appends to the end of 'body'), css (appends to the\n //                    end of 'head')\n // - optimizedPath  - the final file to build\n@@ -88,25 +98,36 @@\n //                    them and the right usemin blocks generated.\n // - attrs          - A Hash of html attributes to generate along the generated\n //                    script / link tags\n+// - searchPath     - an alternate path to look in for files\n //\n // Returns updated content.\n-wiring.appendFiles = function appendFiles(html, fileType, optimizedPath, sourceFileList, attrs) {\n+wiring.appendFiles = function appendFiles(htmlOrOptions, fileType, optimizedPath, sourceFileList, attrs, searchPath) {\n   var blocks, updatedContent;\n+  var html = htmlOrOptions;\n   var files = '';\n \n+  if (typeof htmlOrOptions === 'object') {\n+    html = htmlOrOptions.html;\n+    fileType = htmlOrOptions.fileType;\n+    optimizedPath = htmlOrOptions.optimizedPath;\n+    sourceFileList = htmlOrOptions.sourceFileList;\n+    attrs = htmlOrOptions.attrs;\n+    searchPath = htmlOrOptions.searchPath;\n+  }\n+\n   attrs = this.attributes(attrs);\n \n   if (fileType === 'js') {\n     sourceFileList.forEach(function (el) {\n         files += '        <script ' + attrs + ' src=\"' + el + '\"></script>\\n';\n     });\n-    blocks = this.generateBlock('js', optimizedPath, files);\n+    blocks = this.generateBlock('js', optimizedPath, files, searchPath);\n     updatedContent = this.append(html, 'body', blocks);\n   } else if (fileType === 'css') {\n     sourceFileList.forEach(function(el) {\n         files += '        <link ' + attrs + ' rel=\"stylesheet\" href=\"' + el  + '\">\\n';\n     });\n-    blocks = this.generateBlock('css', optimizedPath, files);\n+    blocks = this.generateBlock('css', optimizedPath, files, searchPath);\n     updatedContent = this.append(html, 'head', blocks);\n   }\n \n@@ -139,7 +160,7 @@\n   return this.appendFiles(html, 'css', optimizedPath, sourceFileList, attrs);\n };\n \n-wiring.removeStyle = function removeStyle( html, path ) {\n+wiring.removeStyle = function removeStyle(html, path) {\n   return this.domUpdate(html, 'link[href$=\"' + path + '\"]' , '', 'd');\n };\n \n",
+					"match": false,
+					"packageHash": "e0876fb90c6049610a3238758fd073067db675dbbfd7cab2fe8a8ce3f6dc859a",
+					"size": 6165,
+					"sourceHash": "4eb70e3a94c007ab9a61d10eee73cec09e50ae5cc4ba097715f246a32cbb9a32",
+					"status": "content"
+				},
+				"lib/base.js": {
+					"diff": "--- published/lib/base.js\n+++ rebuilt/lib/base.js\n@@ -220,8 +220,18 @@\n   this.emit('run');\n \n   var methods = Object.keys(Object.getPrototypeOf(this));\n+  // As the end of the methods list processing has a signification and trigger a dedicated\n+  // process (runHooks), and as Array.shift will always return undefined whatever the number\n+  // of time we call it, we need to have a marker for the end of the list (this will help\n+  // us to perform test in a synchronous way -- i.e. without prompting user)\n+  methods.push ( -1 );\n+\n   (function next(method) {\n     if (!method) {\n+      return;\n+    }\n+\n+    if (method === -1) {\n       return self.runHooks(cb);\n     }\n \n",
+					"match": false,
+					"packageHash": "9bd455d79c674c47de51aa3b27df87c9b22a08ed70a4e6cbc6746cab7fa77c11",
+					"size": 13485,
+					"sourceHash": "1a6229bd57728636e7eb7cb69faaaffd97178fea4af1c4ddb104a3837fc64ade",
+					"status": "content"
+				},
+				"lib/env.js": {
+					"diff": "--- published/lib/env.js\n+++ rebuilt/lib/env.js\n@@ -591,10 +591,10 @@\n   }, ns);\n \n   ns = ns\n-    .replace(/\\/?node_modules\\/?/, '')\n-    .replace(/\\/(index|main)$/, '')\n-    .replace(/\\.+\\/?/g, '')\n-    .replace(/\\/+/g, ':');\n+    .replace(/[\\/\\\\]?node_modules\\/?/, '')\n+    .replace(/[\\/\\\\](index|main)$/, '')\n+    .replace(/\\.+[\\/\\\\]?/g, '')\n+    .replace(/[\\/\\\\]+/g, ':');\n \n   // if we still have prefix match at this point, then remove anything before\n   // that match, this would catch symlinked package with a name begining with\n",
+					"match": false,
+					"packageHash": "a84adcfd7e6e1fb4a03c63bf8fcf9b41fd5fdb139c2f77a6adda8c4221a2620e",
+					"size": 21790,
+					"sourceHash": "463c7a2b22e9c7238481f7d38d24e05bca7027f26074a520318a8477251a63a3",
+					"status": "content"
+				},
+				"lib/test/helpers.js": {
+					"diff": "--- published/lib/test/helpers.js\n+++ rebuilt/lib/test/helpers.js\n@@ -2,6 +2,7 @@\n var path = require('path');\n var rimraf = require('rimraf');\n var mkdirp = require('mkdirp');\n+var util = require('util');\n var assert = require('assert');\n var generators = require('../..');\n \n@@ -72,59 +73,111 @@\n   assert.ok(reg.test(body));\n };\n \n-// Temporary mocking prompt\n-helpers.mockPrompt = function (fn, cb) {\n-  var prompt = require('prompt');\n-  var _getInput = prompt.getInput;\n-\n-  prompt.getInput = function (option, done) {\n-    console.log(option.message);\n-    setTimeout(function () {\n-      done(null, option.default)\n-    }, 200);\n-  };\n+// Check all files present in the array are existing.\n+// If the item is an array first item is the file path, 2nd a regexp\n+// to check file content with\n+//\n+// helpers.assertFiles(['foo.js', 'bar.js', ['baz.js', /function baz/]]);\n+//\n+helpers.assertFiles = function(files) {\n+  files.forEach(function(item) {\n+    var file = item;\n+    var rx;\n+    if (item instanceof Array) {\n+      file = item[0];\n+      rx = item[1];\n+    };\n \n-  fn(function (err) {\n-    prompt.getInput = _getInput;\n-    cb(err);\n+    helpers.assertFile(file, rx);\n   });\n-};\n+}\n \n-// Used to run a given generator from provided `args`, with the given set of\n-// `options, calling back the `done` handler on completion.\n+// Clean-up the test directory and ce into it.\n+// Call given callback when you're there.\n //\n-// - args   - String of remaining arguments, or Array of arguments (equivalent\n-//            of grunt.cli.tasks)\n-// - opts   - Optional set of options (equivalent of grunt.cli.options)\n-// - done   - Function triggered on completion\n+helpers.testDirectory = function(dir, cb) {\n+  if (!dir) {\n+    throw new Error('Missing directory');\n+  }\n+\n+  dir = path.resolve(dir);\n+\n+  rimraf(dir, function (err) {\n+    if (err) {\n+      return cb(err);\n+    }\n+    mkdirp.sync(dir);\n+    process.chdir(dir);\n+    cb();\n+  });\n+};\n+\n+// Will answer to the questions for the furnished generator\n //\n-//  Example:\n+// Example:\n+//  mockPrompt(angular, {'bootstrap': 'Y', 'compassBoostrap': 'Y'});\n //\n-//      helpers.runGenerator('angular:app appname', done);\n+helpers.mockPrompt = function( generator, answers) {\n+    var origPrompt = generator.prompt;\n+    generator.prompt = function(prompts, done) {\n+      done(null, answers);\n+    };\n+    generator.origPrompt = origPrompt;\n+}\n+\n //\n-//      helpers.runGenerator('angular:controller MyController', {\n-//        views: true\n-//      }, done);\n+// Create a simple, dummy generator\n //\n-// Return the generator instance, when resolved.\n-helpers.runGenerator = function (args, opts, done) {\n-  args = Array.isArray(args) ? args : args.split(' ');\n+helpers.createDummyGenerator = function() {\n+  var dummy = function Dummy() {\n",
+					"match": false,
+					"packageHash": "07fb9222d06e7eeac779732394ade2d423becc4314dd3a0c014504c6c6f52587",
+					"size": 3051,
+					"sourceHash": "6529f1ac9ec3a630503ad7f0cc64163a3054c541d2a27fbcd459d1612fdca32a",
+					"status": "content"
+				},
+				"test/temp/Gruntfile.js": {
+					"match": false,
+					"packageHash": "f6fb2c7fcde4a14f53c6a4f7413b3f7c150962a2ee8cc0682269eeb799eb7ff1",
+					"size": 82,
+					"status": "missing-in-source"
+				},
+				"test/temp.dev/Gruntfile.js": {
+					"match": false,
+					"packageHash": "f6fb2c7fcde4a14f53c6a4f7413b3f7c150962a2ee8cc0682269eeb799eb7ff1",
+					"size": 82,
+					"status": "missing-in-source"
+				},
+				"test/temp.dev/app/scripts/models/application-model.js": {
+					"match": false,
+					"packageHash": "75a1c081ff5ff32fc49b9fdae895cc926cbcd397b3612f9e03488e33b3530eb7",
+					"size": 6,
+					"status": "missing-in-source"
+				},
+				"test/fixtures/js_block.html": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/wiring.js": {
+					"match": false,
+					"status": "missing-in-package"
+				}
+			},
+			"summary": {
+				"differentFiles": 4,
+				"matchingFiles": 59,
+				"missingInPackage": 2,
+				"missingInSource": 4,
+				"score": 0.855072463768116,
+				"totalFiles": 69
+			}
+		}
+	}
+]
