@@ -1,0 +1,63 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-01T10:14:35.701Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:6.14.5",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "dateformat@4.2.2",
+			"name": "dateformat",
+			"version": "4.2.2",
+			"location": "https://registry.npmjs.org/dateformat/-/dateformat-4.2.2.tgz",
+			"integrity": "sha512-xuYrpI9DKHMDmbGOuxYnDl2kP+/ADeCjGV55uk8zDpPr19VyTla4QcOVZvI5RqU59376dMe0oqs1HkF9S+tyxw==",
+			"publishedAt": "2020-12-04T09:57:49.935Z",
+			"publishedWith": {
+				"node": "12.18.2",
+				"npm": "6.14.8"
+			}
+		},
+		"source": {
+			"integrity": "sha512-4sZ+d20kMOhg72xhttErCr+s+Frn3vfHFk6znilvqDWn37U7sVS7nQ2FUrKTSEEdwt3YzGfAfuw6eMTyte8jzg==",
+			"location": "git+https://github.com/felixge/node-dateformat.git",
+			"spec": "github:felixge/node-dateformat#83820b26ceb3cbdee24c878a2b36bac87b46b4a1"
+		},
+		"comparisonHash": "8a2a8dcbb729bf3ee9216e490c955701f0ddebe1",
+		"diff": {
+			"files": {
+				"Readme.md": {
+					"diff": "--- published/Readme.md\n+++ rebuilt/Readme.md\n@@ -2,8 +2,6 @@\n \n A node.js package for Steven Levithan's excellent [dateFormat()][dateformat] function.\n \n-[![Build Status](https://travis-ci.org/felixge/node-dateformat.svg)](https://travis-ci.org/felixge/node-dateformat)\n-\n ## Modifications\n \n - Removed the `Date.prototype.format` method. Sorry folks, but extending native prototypes is for suckers.\n@@ -22,8 +20,8 @@\n As taken from Steven's post, modified to match the Modifications listed above:\n \n ```js\n-var dateFormat = require(\"dateformat\");\n-var now = new Date();\n+import dateFormat, { masks } from \"dateformat\";\n+const now = new Date();\n \n // Basic usage\n dateFormat(now, \"dddd, mmmm dS, yyyy, h:MM:ss TT\");\n@@ -34,7 +32,7 @@\n // 2007-06-09T17:46:21\n \n // ...Or add your own\n-dateFormat.masks.hammerTime = 'HH:MM! \"Can\\'t touch this!\"';\n+masks.hammerTime = 'HH:MM! \"Can\\'t touch this!\"';\n dateFormat(now, \"hammerTime\");\n // 17:46! Can't touch this!\n \n@@ -82,7 +80,9 @@\n | `d`              | Day of the month as digits; no leading zero for single-digit days.                                                                                            |\n | `dd`             | Day of the month as digits; leading zero for single-digit days.                                                                                               |\n | `ddd`            | Day of the week as a three-letter abbreviation.                                                                                                               |\n+| `DDD`            | \"Ysd\", \"Tdy\" or \"Tmw\" if date lies within these three days. Else fall back to ddd.                                                                            |\n | `dddd`           | Day of the week as its full name.                                                                                                                             |\n+| `DDDD`           | \"Yesterday\", \"Today\" or \"Tomorrow\" if date lies within these three days. Else fall back to dddd.                                                              |\n | `m`              | Month as digits; no leading zero for single-digit months.                                                                                                     |\n | `mm`             | Month as digits; leading zero for single-digit months.                                                                                                        |\n | `mmm`            | Month as a three-letter abbreviation.                                                                                                                         |\n@@ -97,6 +97,7 @@\n | `MM`             | Minutes; leading zero for single-digit minutes.                                                                                                               |\n | `N`              | ISO 8601 numeric representation of the day of the week.                                                                                                       |\n | `o`              | GMT/UTC timezone offset, e.g. -0500 or +0230.                                                                                                                 |\n+| `p`              | GMT/UTC timezone offset, e.g. -05:00 or +02:30.                                                                                                               |\n | `s`              | Seconds; no leading zero for single-digit seconds.                                                                                                            |\n | `ss`             | Seconds; leading zero for single-digit seconds.                                                                                                               |\n | `S`              | The date's ordinal suffix (st, nd, rd, or th). Works well with `d`.                                                                                           |\n@@ -106,8 +107,9 @@\n | `tt`             | Lowercase, two-character time marker string: am or pm.                                                                                                        |\n | `T`              | Uppercase, single-character time marker string: A or P.                                                                                                       |\n | `TT`             | Uppercase, two-character time marker string: AM or PM.                                                                                                        |\n-| `W`              | ISO 8601 week number of the year, e.g. 42                                                                                                                     |\n-| `Z`              | US timezone abbreviation, e.g. EST or MDT. With non-US timezones or in the                                                                                    |\n+| `W`              | ISO 8601 week number of the year, e.g. 4, 42                                                                                                                  |\n+| `WW`             | ISO 8601 week number of the year, leading zero for single-digit, e.g. 04, 42                                                                                  |\n+| `Z`              | US timezone abbreviation, e.g. EST or MDT. For non-US timezones, the GMT/UTC offset is returned, e.g. GMT-0500                                                |\n | `'...'`, `\"...\"` | Literal character sequence. Surrounding quotes are removed.                                                                                                   |\n | `UTC:`           | Must be the first four characters of the mask. Converts the date from local time to UTC/GMT/Zulu time before applying the mask. The \"UTC:\" prefix is removed. |\n \n@@ -126,7 +128,7 @@\n | `longTime`        | `h:MM:ss TT Z`                 | 5:46:21 PM EST           |\n | `isoDate`         | `yyyy-mm-dd`                   | 2007-06-09               |\n | `isoTime`         | `HH:MM:ss`                     | 17:46:21                 |\n-| `isoDateTime`     | `yyyy-mm-dd'T'HH:MM:ss`        | 2007-06-09T17:46:21      |\n+| `isoDateTime`     | `yyyy-mm-dd'T'HH:MM:sso`       | 2007-06-09T17:46:21+0700 |\n | `isoUtcDateTime`  | `UTC:yyyy-mm-dd'T'HH:MM:ss'Z'` | 2007-06-09T22:46:21Z     |\n \n ### Localization\n@@ -135,52 +137,53 @@\n passing an object with the necessary strings. For example:\n \n ```js\n-var dateFormat = require(\"dateformat\");\n-dateFormat.i18n = {\n-  dayNames: [\n-    \"Sun\",\n-    \"Mon\",\n-    \"Tue\",\n-    \"Wed\",\n-    \"Thu\",\n-    \"Fri\",\n-    \"Sat\",\n-    \"Sunday\",\n-    \"Monday\",\n-    \"Tuesday\",\n-    \"Wednesday\",\n-    \"Thursday\",\n-    \"Friday\",\n-    \"Saturday\",\n-  ],\n-  monthNames: [\n-    \"Jan\",\n-    \"Feb\",\n-    \"Mar\",\n-    \"Apr\",\n-    \"May\",\n-    \"Jun\",\n-    \"Jul\",\n",
+					"match": false,
+					"packageHash": "ed2ceef529a9c1e33cb8e3da9ade50d60915a78d5165562d778ce187154c6b5a",
+					"size": 10798,
+					"sourceHash": "5d18ed1a7baff56fcd5a9785d5cf7697b86ddcf70b5f6fabae6805aa63a763e7",
+					"status": "content"
+				},
+				"lib/dateformat.js": {
+					"match": false,
+					"packageHash": "c9e93b96dc7d6e903094a16d701ae6d2028f088f56078643f1b7cd2e44c58a7f",
+					"size": 5443,
+					"status": "missing-in-source"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -2,7 +2,8 @@\n   \"name\": \"dateformat\",\n   \"description\": \"A node.js package for Steven Levithan's excellent dateFormat() function.\",\n   \"maintainers\": [\n-    \"Felix Geisendörfer <felix@debuggable.com>\"\n+    \"Felix Geisendörfer <felix@debuggable.com>\",\n+    \"Chase Manning <me@chasemanning.co.nz>\"\n   ],\n   \"homepage\": \"https://github.com/felixge/node-dateformat\",\n   \"author\": \"Steven Levithan\",\n@@ -10,20 +11,22 @@\n     \"Steven Levithan\",\n     \"Felix Geisendörfer <felix@debuggable.com>\",\n     \"Christoph Tavan <dev@tavan.de>\",\n-    \"Jon Schlinkert (https://github.com/jonschlinkert)\"\n+    \"Jon Schlinkert (https://github.com/jonschlinkert)\",\n+    \"Chase Manning <me@chasemanning.co.nz>\"\n   ],\n-  \"version\": \"4.2.2\",\n+  \"version\": \"5.0.3\",\n   \"license\": \"MIT\",\n-  \"main\": \"lib/dateformat\",\n+  \"type\": \"module\",\n+  \"main\": \"lib/dateformat.js\",\n   \"devDependencies\": {\n-    \"@babel/cli\": \"^7.12.1\",\n-    \"@babel/core\": \"^7.12.3\",\n-    \"@babel/preset-env\": \"^7.12.1\",\n-    \"mocha\": \"^8.2.1\",\n-    \"uglify-js\": \"^3.12.1\"\n+    \"@babel/cli\": \"^7.14.8\",\n+    \"@babel/core\": \"^7.15.0\",\n+    \"@babel/preset-env\": \"^7.15.0\",\n+    \"mocha\": \"^9.0.3\",\n+    \"uglify-js\": \"^3.14.1\"\n   },\n   \"engines\": {\n-    \"node\": \"*\"\n+    \"node\": \">=12.20\"\n   },\n   \"scripts\": {\n     \"build\": \"./node_modules/.bin/babel src --out-dir lib && uglifyjs lib/dateformat.js -o lib/dateformat.js\",\n@@ -33,6 +36,5 @@\n   \"repository\": {\n     \"type\": \"git\",\n     \"url\": \"https://github.com/felixge/node-dateformat.git\"\n-  },\n-  \"dependencies\": {}\n+  }\n }\n",
+					"match": false,
+					"packageHash": "bb2ed46016885d9c4b2a2bce8b7f50c6205abe8037fc2b123d666ae66c39f4cb",
+					"size": 1114,
+					"sourceHash": "ca0aefc9f4dd31bd3e276235ec0a66d37eb7f6033b6da96865c105b2cb0f05a7",
+					"status": "content"
+				}
+			},
+			"summary": {
+				"differentFiles": 2,
+				"matchingFiles": 1,
+				"missingInPackage": 0,
+				"missingInSource": 1,
+				"score": 0.25,
+				"totalFiles": 4
+			}
+		}
+	}
+]

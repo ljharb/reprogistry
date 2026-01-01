@@ -1,0 +1,87 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-01T10:12:23.850Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:11.7.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "dateformat@1.0.8-1.2.3",
+			"name": "dateformat",
+			"version": "1.0.8-1.2.3",
+			"location": "https://registry.npmjs.org/dateformat/-/dateformat-1.0.8-1.2.3.tgz",
+			"integrity": "sha512-BPVTmjZf5yNGBTzkjS50AhKOmTN0Y1FaZfZ9qjw8G/EcIcqu4TZlUbxLhZOa5H9NaPPRDFIQ86hXi00OK7zaFw==",
+			"publishedAt": "2014-05-20T11:22:52.635Z",
+			"publishedWith": {
+				"node": null,
+				"npm": "1.3.24"
+			}
+		},
+		"source": {
+			"integrity": "sha512-brbPZ4vryeQw/EycD1PdE7hYwJeUOB1R4mIfedRyXF7gTnnZ5+KnYYaFwlTbVvrZfxW1v0MS2fb/unVYCPoILg==",
+			"location": "https://github.com/felixge/node-dateformat.git",
+			"spec": "github:felixge/node-dateformat#HEAD"
+		},
+		"comparisonHash": "8a2a8dcbb729bf3ee9216e490c955701f0ddebe1",
+		"diff": {
+			"files": {
+				"Readme.md": {
+					"diff": "--- published/Readme.md\n+++ rebuilt/Readme.md\n@@ -4,73 +4,197 @@\n \n ## Modifications\n \n-* Removed the `Date.prototype.format` method. Sorry folks, but extending native prototypes is for suckers.\n-* Added a `module.exports = dateFormat;` statement at the bottom\n-* Added the placeholder `N` to get the ISO 8601 numeric representation of the day of the week\n+- Removed the `Date.prototype.format` method. Sorry folks, but extending native prototypes is for suckers.\n+- Added a `module.exports = dateFormat;` statement at the bottom\n+- Added the placeholder `N` to get the ISO 8601 numeric representation of the day of the week\n \n ## Installation\n \n ```bash\n $ npm install dateformat\n+$ dateformat --help\n ```\n \n ## Usage\n \n As taken from Steven's post, modified to match the Modifications listed above:\n+\n+```js\n+import dateFormat, { masks } from \"dateformat\";\n+const now = new Date();\n+\n+// Basic usage\n+dateFormat(now, \"dddd, mmmm dS, yyyy, h:MM:ss TT\");\n+// Saturday, June 9th, 2007, 5:46:21 PM\n+\n+// You can use one of several named masks\n+dateFormat(now, \"isoDateTime\");\n+// 2007-06-09T17:46:21\n+\n+// ...Or add your own\n+masks.hammerTime = 'HH:MM! \"Can\\'t touch this!\"';\n+dateFormat(now, \"hammerTime\");\n+// 17:46! Can't touch this!\n+\n+// You can also provide the date as a string\n+dateFormat(\"Jun 9 2007\", \"fullDate\");\n+// Saturday, June 9, 2007\n+\n+// Note that if you don't include the mask argument,\n+// dateFormat.masks.default is used\n+dateFormat(now);\n+// Sat Jun 09 2007 17:46:21\n+\n+// And if you don't include the date argument,\n+// the current date and time is used\n+dateFormat();\n+// Sat Jun 09 2007 17:46:22\n+\n+// You can also skip the date argument (as long as your mask doesn't\n+// contain any numbers), in which case the current date/time is used\n+dateFormat(\"longTime\");\n+// 5:46:22 PM EST\n+\n+// And finally, you can convert local time to UTC time. Simply pass in\n+// true as an additional argument (no argument skipping allowed in this case):\n+dateFormat(now, \"longTime\", true);\n+// 10:46:21 PM UTC\n+\n+// ...Or add the prefix \"UTC:\" or \"GMT:\" to your mask.\n+dateFormat(now, \"UTC:h:MM:ss TT Z\");\n+// 10:46:21 PM UTC\n+\n+// You can also get the ISO 8601 week of the year:\n+dateFormat(now, \"W\");\n+// 42\n+\n+// and also get the ISO 8601 numeric representation of the day of the week:\n+dateFormat(now, \"N\");\n+// 6\n+```\n+\n+### Mask options\n+\n+| Mask             | Description                                                                                                                                                   |\n+| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |\n+| `d`              | Day of the month as digits; no leading zero for single-digit days.                                                                                            |\n+| `dd`             | Day of the month as digits; leading zero for single-digit days.                                                                                               |\n+| `ddd`            | Day of the week as a three-letter abbreviation.                                                                                                               |\n+| `DDD`            | \"Ysd\", \"Tdy\" or \"Tmw\" if date lies within these three days. Else fall back to ddd.                                                                            |\n+| `dddd`           | Day of the week as its full name.                                                                                                                             |\n+| `DDDD`           | \"Yesterday\", \"Today\" or \"Tomorrow\" if date lies within these three days. Else fall back to dddd.                                                              |\n+| `m`              | Month as digits; no leading zero for single-digit months.                                                                                                     |\n+| `mm`             | Month as digits; leading zero for single-digit months.                                                                                                        |\n+| `mmm`            | Month as a three-letter abbreviation.                                                                                                                         |\n+| `mmmm`           | Month as its full name.                                                                                                                                       |\n+| `yy`             | Year as last two digits; leading zero for years less than 10.                                                                                                 |\n+| `yyyy`           | Year represented by four digits.                                                                                                                              |\n+| `h`              | Hours; no leading zero for single-digit hours (12-hour clock).                                                                                                |\n+| `hh`             | Hours; leading zero for single-digit hours (12-hour clock).                                                                                                   |\n+| `H`              | Hours; no leading zero for single-digit hours (24-hour clock).                                                                                                |\n+| `HH`             | Hours; leading zero for single-digit hours (24-hour clock).                                                                                                   |\n+| `M`              | Minutes; no leading zero for single-digit minutes.                                                                                                            |\n+| `MM`             | Minutes; leading zero for single-digit minutes.                                                                                                               |\n",
+					"match": false,
+					"packageHash": "b99550fdbe571f4c4f8c2d5980c9c55ac0937ce7ae413a81d692ea30170fb72a",
+					"size": 2429,
+					"sourceHash": "5d18ed1a7baff56fcd5a9785d5cf7697b86ddcf70b5f6fabae6805aa63a763e7",
+					"status": "content"
+				},
+				"lib/dateformat.js": {
+					"match": false,
+					"packageHash": "5ed0b17545c8b54058bf9694e858d74cf3d3b63068ed60afa72076ccb798fe0b",
+					"size": 5647,
+					"status": "missing-in-source"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -1,20 +1,37 @@\n {\n   \"name\": \"dateformat\",\n   \"description\": \"A node.js package for Steven Levithan's excellent dateFormat() function.\",\n-  \"maintainers\": \"Felix Geisendörfer <felix@debuggable.com>\",\n+  \"maintainers\": [\n+    \"Felix Geisendörfer <felix@debuggable.com>\",\n+    \"Chase Manning <me@chasemanning.co.nz>\"\n+  ],\n   \"homepage\": \"https://github.com/felixge/node-dateformat\",\n   \"author\": \"Steven Levithan\",\n   \"contributors\": [\n     \"Steven Levithan\",\n     \"Felix Geisendörfer <felix@debuggable.com>\",\n-    \"Christoph Tavan <dev@tavan.de>\"\n+    \"Christoph Tavan <dev@tavan.de>\",\n+    \"Jon Schlinkert (https://github.com/jonschlinkert)\",\n+    \"Chase Manning <me@chasemanning.co.nz>\"\n   ],\n-  \"version\": \"1.0.8-1.2.3\",\n-  \"main\": \"./lib/dateformat\",\n-  \"dependencies\": {},\n-  \"devDependencies\": {},\n+  \"version\": \"5.0.3\",\n+  \"license\": \"MIT\",\n+  \"type\": \"module\",\n+  \"main\": \"lib/dateformat.js\",\n+  \"devDependencies\": {\n+    \"@babel/cli\": \"^7.14.8\",\n+    \"@babel/core\": \"^7.15.0\",\n+    \"@babel/preset-env\": \"^7.15.0\",\n+    \"mocha\": \"^9.0.3\",\n+    \"uglify-js\": \"^3.14.1\"\n+  },\n   \"engines\": {\n-    \"node\": \"*\"\n+    \"node\": \">=12.20\"\n+  },\n+  \"scripts\": {\n+    \"build\": \"./node_modules/.bin/babel src --out-dir lib && uglifyjs lib/dateformat.js -o lib/dateformat.js\",\n+    \"test\": \"npm run build && mocha\",\n+    \"benchmark\": \"npm run build && node ./benchmark/benchmark.js\"\n   },\n   \"repository\": {\n     \"type\": \"git\",\n",
+					"match": false,
+					"packageHash": "56f891edde4d3ccd1f7cc2ea42bd9f239fcc657d5fef10b98f6f2b605e4f8146",
+					"size": 652,
+					"sourceHash": "ca0aefc9f4dd31bd3e276235ec0a66d37eb7f6033b6da96865c105b2cb0f05a7",
+					"status": "content"
+				},
+				"test/basic.js": {
+					"match": false,
+					"packageHash": "060653906891a1d03218a4d3198b570a759b2753a525abea60eabbc8eda4ec4d",
+					"size": 1448,
+					"status": "missing-in-source"
+				},
+				"test/test_dayofweek.js": {
+					"match": false,
+					"packageHash": "d8dd1de7840e8a23cff02a0e5ff1f35b4473a806a0d39409cfae264b3e51fc1c",
+					"size": 369,
+					"status": "missing-in-source"
+				},
+				"test/test_weekofyear.js": {
+					"match": false,
+					"packageHash": "0cc4ceb229d366db10ed3a3830d851f73ae945b2237b4a783a318c3ea542c3c7",
+					"size": 127,
+					"status": "missing-in-source"
+				},
+				"test/test_weekofyear.sh": {
+					"match": false,
+					"packageHash": "6148658cb4a509c27a0ef7db725406440a1b0c880891b5b31da641d101593acf",
+					"size": 757,
+					"status": "missing-in-source"
+				}
+			},
+			"summary": {
+				"differentFiles": 2,
+				"matchingFiles": 1,
+				"missingInPackage": 0,
+				"missingInSource": 5,
+				"score": 0.125,
+				"totalFiles": 8
+			}
+		}
+	}
+]
