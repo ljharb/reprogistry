@@ -1,0 +1,955 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-01T04:30:52.747Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:11.7.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "@vueuse/core@4.0.0-beta.9",
+			"name": "@vueuse/core",
+			"version": "4.0.0-beta.9",
+			"location": "https://registry.npmjs.org/@vueuse/core/-/core-4.0.0-beta.9.tgz",
+			"integrity": "sha512-7qGDQkCCCnGZAXF+xAjnUCsYNjYmYcoRxeb0IsopJAPbtWL0Q/mD3Wgkysdl88qpUxaHNd7uzS762cLnFqJc7A==",
+			"publishedAt": "2020-08-22T18:08:04.216Z",
+			"publishedWith": {
+				"node": null,
+				"npm": null
+			}
+		},
+		"source": {
+			"integrity": "sha512-2W303v71xP1J1BlYo70le2kALX+Uq9ik39XUZrSTZX9ZQ1qrMiFWdgjvZKq+uNbpA7Z+c/qQVdw/Aukz+VCKTA==",
+			"location": "git+https://github.com/antfu/vueuse.git",
+			"spec": "github:antfu/vueuse#v4.0.0-beta.9"
+		},
+		"comparisonHash": "8a2a8dcbb729bf3ee9216e490c955701f0ddebe1",
+		"diff": {
+			"files": {
+				"index.cjs.js": {
+					"match": false,
+					"packageHash": "1a04e76e4f74463af1ec263c2b820604b50256f5931eea6a924333f3dd154f05",
+					"size": 53680,
+					"status": "missing-in-source"
+				},
+				"index.d.ts": {
+					"match": false,
+					"packageHash": "14989493c13612ab8e6847a92a1d16b0048bb50dfa322bbedce0b4a3c7d77854",
+					"size": 14314,
+					"status": "missing-in-source"
+				},
+				"index.esm.js": {
+					"match": false,
+					"packageHash": "2c017c54709886097715e6930982c47a5929f465dbe3893791df785b97f879b5",
+					"size": 51439,
+					"status": "missing-in-source"
+				},
+				"index.umd.js": {
+					"match": false,
+					"packageHash": "05baa304bce11bed30182bc703bf9da704a82a2978b360ade6d4e67df11913a9",
+					"size": 56892,
+					"status": "missing-in-source"
+				},
+				"index.umd.min.js": {
+					"match": false,
+					"packageHash": "240d736e169a13f16bca02fa6dec5c9e0e08561d41ad245d55e114fd16519789",
+					"size": 20591,
+					"status": "missing-in-source"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -1,12 +1,37 @@\n {\n   \"name\": \"@vueuse/core\",\n-  \"description\": \"Collection of essential Vue Composition API\",\n   \"version\": \"4.0.0-beta.9\",\n-  \"main\": \"index.cjs.js\",\n-  \"types\": \"index.d.ts\",\n-  \"module\": \"index.esm.js\",\n-  \"unpkg\": \"index.umd.min.js\",\n-  \"jsdelivr\": \"index.umd.min.js\",\n+  \"description\": \"Collection of essential Vue Composition API\",\n+  \"scripts\": {\n+    \"build\": \"node ./scripts/build\",\n+    \"release\": \"npm run readme:update && bump --commit --tag --push --preid beta\",\n+    \"release:gh\": \"conventional-github-releaser -p angular\",\n+    \"release:local\": \"npm run readme:update && bump --commit --tag --preid beta && npm run publish:ci\",\n+    \"publish:ci\": \"node ./scripts/publish.js\",\n+    \"import:generate\": \"node ./scripts/import\",\n+    \"types:fix\": \"node ./scripts/types-fix\",\n+    \"types:generate\": \"tsc --emitDeclarationOnly && npm run types:fix\",\n+    \"test\": \"jest\",\n+    \"test:watch\": \"jest --watch\",\n+    \"lint\": \"eslint './{packages,.storybook,scripts}/**/*.{js,ts,tsx,vue,md}'\",\n+    \"lint:fix\": \"npm run lint -- --fix\",\n+    \"readme:update\": \"node ./scripts/updateReadme && git add '*/README.md'\",\n+    \"clean\": \"rimraf dist types typings storybook-static\",\n+    \"dev\": \"start-storybook -p 6006\",\n+    \"storybook\": \"start-storybook -p 6006\",\n+    \"storybook:build\": \"npm run import:generate && npm run types:generate && build-storybook\"\n+  },\n+  \"husky\": {\n+    \"hooks\": {\n+      \"pre-commit\": \"lint-staged\"\n+    }\n+  },\n+  \"lint-staged\": {\n+    \"{packages,.storybook,scripts}/**/*.{js,ts,tsx,vue,md} *.js\": [\n+      \"eslint --fix\",\n+      \"git add\"\n+    ]\n+  },\n   \"repository\": {\n     \"type\": \"git\",\n     \"url\": \"git+https://github.com/antfu/vueuse.git\"\n@@ -23,6 +48,76 @@\n   },\n   \"homepage\": \"https://github.com/antfu/vueuse#readme\",\n   \"dependencies\": {\n-    \"vue-demi\": \"latest\"\n+    \"vue-demi\": \"^0.2.0\"\n+  },\n+  \"devDependencies\": {\n+    \"@antfu/eslint-config\": \"^0.3.2\",\n+    \"@babel/core\": \"^7.11.1\",\n+    \"@babel/plugin-proposal-optional-chaining\": \"^7.11.0\",\n+    \"@babel/preset-env\": \"^7.11.0\",\n+    \"@babel/preset-typescript\": \"^7.10.4\",\n+    \"@rollup/plugin-replace\": \"^2.3.3\",\n+    \"@rollup/plugin-typescript\": \"^5.0.2\",\n+    \"@storybook/addon-actions\": \"^5.3.19\",\n+    \"@storybook/addon-knobs\": \"^5.3.19\",\n+    \"@storybook/addon-links\": \"^5.3.19\",\n+    \"@storybook/addon-notes\": \"^5.3.19\",\n+    \"@storybook/addons\": \"^5.3.19\",\n+    \"@storybook/theming\": \"^5.3.19\",\n+    \"@storybook/vue\": \"^5.3.19\",\n+    \"@types/fs-extra\": \"^9.0.1\",\n+    \"@types/inquirer\": \"^7.3.0\",\n+    \"@types/jest\": \"^26.0.10\",\n+    \"@types/js-yaml\": \"^3.12.5\",\n+    \"@types/node\": \"^14.6.0\",\n+    \"@types/semver\": \"^7.3.3\",\n+    \"@vue/babel-preset-jsx\": \"^1.1.2\",\n+    \"@vue/runtime-dom\": \"^3.0.0-rc.5\",\n+    \"@vue/test-utils\": \"^1.0.4\",\n+    \"autoprefixer\": \"^9.8.6\",\n+    \"axios\": \"^0.19.2\",\n+    \"babel-loader\": \"^8.1.0\",\n+    \"babel-preset-vue\": \"^2.0.2\",\n+    \"commander\": \"^6.0.0\",\n+    \"consola\": \"^2.15.0\",\n+    \"conventional-github-releaser\": \"^3.1.5\",\n+    \"dayjs\": \"^1.8.33\",\n+    \"eslint\": \"^7.7.0\",\n+    \"eslint-plugin-jest\": \"^23.20.0\",\n+    \"eslint-plugin-markdown\": \"^1.0.2\",\n+    \"fast-glob\": \"^3.2.4\",\n+    \"firebase\": \"^7.18.0\",\n+    \"fs-extra\": \"^9.0.1\",\n+    \"github-markdown-css\": \"^4.0.0\",\n+    \"husky\": \"^4.2.5\",\n+    \"inquirer\": \"^7.3.3\",\n+    \"jest\": \"^26.4.0\",\n+    \"js-yaml\": \"^3.14.0\",\n+    \"lint-staged\": \"^10.2.11\",\n+    \"markdown-it\": \"^11.0.0\",\n+    \"markdown-it-highlight-lines\": \"^1.0.2\",\n+    \"markdown-it-link-attributes\": \"^3.0.0\",\n",
+					"match": false,
+					"packageHash": "5f40c25356c57c3a4ae369e18ec79c423a088024eeaf3d785045357664f72114",
+					"size": 667,
+					"sourceHash": "312e2310345e9a6be83a44be6e6f265ac1d7e4fcf86b5c4c0f676bd1567cd71e",
+					"status": "content"
+				},
+				".babelrc": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				".editorconfig": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				".eslintignore": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				".eslintrc.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				".github/FUNDING.yml": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				".github/workflows/publish.yml": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				".github/workflows/test.yml": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				".storybook/addons.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				".storybook/base16-gruvbox.dark.css": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				".storybook/config.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				".storybook/manager-head.html": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				".storybook/style.css": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				".storybook/theme.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				".storybook/webpack.config.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				".vscode/settings.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"CODE_OF_CONDUCT.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"docs/Contributing.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"jest.config.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/_docs/readme.stories.tsx": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/_docs/showcases/textParticles.stories.tsx": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/_docs/showdocs.tsx": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/_docs/test.setup.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/_docs/tests.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/core/createGlobalState/index.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/core/createGlobalState/index.stories.tsx": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/core/createGlobalState/index.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/core/useAsyncState/index.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/core/useAsyncState/index.stories.tsx": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/core/useAsyncState/index.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/core/useBattery/index.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/core/useBattery/index.stories.tsx": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/core/useBattery/index.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/core/useBrowserLocation/index.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/core/useBrowserLocation/index.stories.tsx": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/core/useBrowserLocation/index.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/core/useClipboard/index.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/core/useClipboard/index.stories.tsx": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/core/useClipboard/index.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/core/useCounter/index.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/core/useCounter/index.stories.tsx": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/core/useCounter/index.test.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/core/useCounter/index.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/core/useCssVar/index.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/core/useCssVar/index.stories.tsx": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/core/useCssVar/index.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/core/useDebounce/index.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/core/useDebounce/index.stories.tsx": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/core/useDebounce/index.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/core/useDebounceFn/index.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/core/useDebounceFn/index.stories.tsx": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/core/useDebounceFn/index.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/core/useDeviceLight/index.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/core/useDeviceLight/index.stories.tsx": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/core/useDeviceLight/index.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/core/useDeviceMotion/index.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/core/useDeviceMotion/index.stories.tsx": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/core/useDeviceMotion/index.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/core/useDeviceOrientation/index.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/core/useDeviceOrientation/index.stories.tsx": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/core/useDeviceOrientation/index.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/core/useDevicePixelRatio/index.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/core/useDevicePixelRatio/index.stories.tsx": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/core/useDevicePixelRatio/index.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/core/useDocumentVisibility/index.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/core/useDocumentVisibility/index.stories.tsx": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/core/useDocumentVisibility/index.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/core/useElementVisibility/index.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/core/useElementVisibility/index.stories.tsx": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/core/useElementVisibility/index.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/core/useEventListener/index.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/core/useEventListener/index.stories.tsx": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/core/useEventListener/index.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/core/useFullscreen/index.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/core/useFullscreen/index.stories.tsx": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/core/useFullscreen/index.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/core/useGeolocation/index.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/core/useGeolocation/index.stories.tsx": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/core/useGeolocation/index.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/core/useIdle/index.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/core/useIdle/index.stories.tsx": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/core/useIdle/index.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/core/useInterval/index.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/core/useInterval/index.stories.tsx": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/core/useInterval/index.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/core/useIntervalFn/index.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/core/useIntervalFn/index.stories.tsx": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/core/useIntervalFn/index.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/core/useLocalStorage/index.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/core/useLocalStorage/index.stories.tsx": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/core/useLocalStorage/index.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/core/useMediaQuery/index.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/core/useMediaQuery/index.stories.tsx": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/core/useMediaQuery/index.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/core/useMouse/index.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/core/useMouse/index.stories.tsx": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/core/useMouse/index.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/core/useMouseInElement/index.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/core/useMouseInElement/index.stories.tsx": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/core/useMouseInElement/index.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/core/useNetwork/index.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/core/useNetwork/index.stories.tsx": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/core/useNetwork/index.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/core/useNow/index.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/core/useNow/index.stories.tsx": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/core/useNow/index.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/core/useOnline/index.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/core/useOnline/index.stories.tsx": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/core/useOnline/index.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/core/usePageLeave/index.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/core/usePageLeave/index.stories.tsx": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/core/usePageLeave/index.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/core/useParallax/index.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/core/useParallax/index.stories.tsx": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/core/useParallax/index.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/core/usePermission/index.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/core/usePermission/index.stories.tsx": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/core/usePermission/index.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/core/usePreferredColorScheme/index.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/core/usePreferredColorScheme/index.stories.tsx": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/core/usePreferredColorScheme/index.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/core/usePreferredDark/index.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/core/usePreferredDark/index.stories.tsx": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/core/usePreferredDark/index.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/core/usePreferredLanguages/index.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/core/usePreferredLanguages/index.stories.tsx": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/core/usePreferredLanguages/index.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/core/useRaf/index.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/core/useRaf/index.stories.tsx": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/core/useRaf/index.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/core/useRafFn/index.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/core/useRafFn/index.stories.tsx": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/core/useRafFn/index.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/core/useSessionStorage/index.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/core/useSessionStorage/index.stories.tsx": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/core/useSessionStorage/index.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/core/useShare/index.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/core/useShare/index.stories.tsx": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/core/useShare/index.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/core/useStorage/index.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/core/useStorage/index.stories.tsx": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/core/useStorage/index.test.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/core/useStorage/index.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/core/useStoragePlain/index.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/core/useStoragePlain/index.stories.tsx": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/core/useStoragePlain/index.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/core/useThrottle/index.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/core/useThrottle/index.stories.tsx": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/core/useThrottle/index.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/core/useThrottleFn/index.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/core/useThrottleFn/index.stories.tsx": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/core/useThrottleFn/index.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/core/useTimeout/index.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/core/useTimeout/index.stories.tsx": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/core/useTimeout/index.test.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/core/useTimeout/index.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/core/useTimeoutFn/index.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/core/useTimeoutFn/index.stories.tsx": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/core/useTimeoutFn/index.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/core/useTransition/index.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/core/useTransition/index.stories.tsx": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/core/useTransition/index.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/core/useWebSocket/index.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/core/useWebSocket/index.stories.tsx": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/core/useWebSocket/index.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/core/useWebWorker/index.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/core/useWebWorker/index.stories.tsx": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/core/useWebWorker/index.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/core/useWebWorkerFn/index.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/core/useWebWorkerFn/index.stories.tsx": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/core/useWebWorkerFn/index.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/core/useWebWorkerFn/lib/createWorkerBlobUrl.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/core/useWebWorkerFn/lib/depsParser.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/core/useWebWorkerFn/lib/jobRunner.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/core/useWindowScroll/index.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/core/useWindowScroll/index.stories.tsx": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/core/useWindowScroll/index.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/core/useWindowSize/index.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/core/useWindowSize/index.stories.tsx": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/core/useWindowSize/index.test.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/core/useWindowSize/index.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/core/utils/index.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/firebase/README.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/firebase/readme.stories.tsx": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/firebase/useFirestore/index.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/firebase/useFirestore/index.stories.tsx": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/firebase/useFirestore/index.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/firebase/useRTDB/index.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/firebase/useRTDB/index.stories.tsx": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/firebase/useRTDB/index.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/i18n/README.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/i18n/createI18n/index.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/i18n/createI18n/index.stories.tsx": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/i18n/createI18n/index.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/i18n/readme.stories.tsx": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/i18n/useI18n/index.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/i18n/useI18n/index.stories.tsx": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/i18n/useI18n/index.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/utils/index.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/utils/storybook/fix/placeholder.stories.tsx": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/utils/throttle.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"renovate.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"resources/favicon/android-chrome-192x192.png": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"resources/favicon/android-chrome-512x512.png": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"resources/favicon/favicon-16x16.png": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"resources/favicon/favicon-32x32.png": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"resources/favicon/favicon.ico": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"resources/logo-storybook.png": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"resources/logo-vertical.png": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"rollup.config.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"scripts/build.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"scripts/import.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"scripts/packages.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"scripts/publish.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"scripts/types-fix.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"scripts/types-loader.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"scripts/updateReadme.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"tailwind.config.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"tsconfig.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"tsconfig.rollup.json": {
+					"match": false,
+					"status": "missing-in-package"
+				}
+			},
+			"summary": {
+				"differentFiles": 1,
+				"matchingFiles": 2,
+				"missingInPackage": 219,
+				"missingInSource": 5,
+				"score": 0.00881057268722467,
+				"totalFiles": 227
+			}
+		}
+	}
+]
