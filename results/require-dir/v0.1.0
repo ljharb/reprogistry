@@ -1,0 +1,143 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-01T23:32:47.050Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:2.15.11",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "require-dir@0.1.0",
+			"name": "require-dir",
+			"version": "0.1.0",
+			"location": "https://registry.npmjs.org/require-dir/-/require-dir-0.1.0.tgz",
+			"integrity": "sha512-SayW+miccZExpY+fwAlDgtgeLKczOsa7hjUUIeFuTSBVPI5PLK+hSkcDe4kndowSeyCLk91d32NRAroIm2P3TQ==",
+			"publishedAt": "2012-07-03T03:41:31.703Z",
+			"publishedWith": {
+				"node": "v0.6.16",
+				"npm": "1.1.21"
+			}
+		},
+		"source": {
+			"integrity": null,
+			"location": "git://github.com/aseemk/requireDir.git",
+			"spec": "github:aseemk/requireDir#HEAD"
+		},
+		"comparisonHash": "8a2a8dcbb729bf3ee9216e490c955701f0ddebe1",
+		"diff": {
+			"files": {
+				".npmignore": {
+					"match": false,
+					"packageHash": "51c2b9520b429236f1d61fa87fc6aff27f4ef20714a093e15e425e18f729c6b2",
+					"size": 26,
+					"status": "missing-in-source"
+				},
+				"README.md": {
+					"diff": "--- published/README.md\n+++ rebuilt/README.md\n@@ -1,3 +1,6 @@\n+[![Build Status](https://travis-ci.org/aseemk/requireDir.svg?branch=master)](https://travis-ci.org/aseemk/requireDir)\n+[![npm version](https://badge.fury.io/js/require-dir.svg)](http://badge.fury.io/js/require-dir)\n+\n # requireDir()\n \n Node helper to `require()` directories. The directory's files are examined,\n@@ -19,12 +22,14 @@\n `requireDir('./dir')` will return the equivalent of:\n \n ```js\n-{ a: require('./dir/a.js')\n-, b: require('./dir/b.json')\n+{\n+  a: require('./dir/a.js'),\n+  b: require('./dir/b.json')\n }\n ```\n \n-And if CoffeeScript was registered, `c.coffee` will also be returned.\n+If CoffeeScript is registered via `require('coffee-script/register')`,\n+`c.coffee` will also be returned. Any extension registered with node will work the same way without any additional configuration.\n \n ## Installation\n \n@@ -47,14 +52,45 @@\n You can optionally customize the behavior by passing an extra options object:\n \n ```js\n-var dir = requireDir('./path/to/dir', {recurse: true});\n+var dir = requireDir('./path/to/dir', { recurse: true });\n ```\n \n ## Options\n \n `recurse`: Whether to recursively `require()` subdirectories too.\n+(`node_modules` within subdirectories will be ignored.)\n Default is false.\n \n+`filter`: Apply a filter on the filename before require-ing. For example, ignoring files prefixed with `dev` in a production environment:\n+\n+```js\n+requireDir('./dir', {\n+  filter: function (fullPath) {\n+    return process.env.NODE_ENV !== 'production' && !fullPath.match(/$dev/);\n+  }\n+})\n+```\n+\n+`mapKey`: Apply a transform to the module base name after require-ing. For example, uppercasing any module names:\n+\n+```js\n+requireDir('./dir', {\n+  mapKey: function (value, baseName) {\n+    return baseName.toUpperCase();\n+  }\n+})\n+```\n+\n+`mapValue`: Apply a transform to the value after require-ing. For example, uppercasing any text exported:\n+\n+```js\n+requireDir('./dir', {\n+  mapValue: function (value, baseName) {\n+    return typeof value === 'string' ? value.toUpperCase() : value;\n+  }\n+})\n+```\n+\n `duplicates`: By default, if multiple files share the same basename, only the\n highest priority one is `require()`'d and returned. (Priority is determined by\n the order of `require.extensions` keys, with directories taking precedence\n@@ -62,47 +98,37 @@\n files and returns full filename keys in addition to basename keys.\n Default is false.\n \n-E.g. in the example above, if there were also an `a.json`, the behavior would\n+In the example above, if there were also an `a.json`, the behavior would\n be the same by default, but specifying `duplicates: true` would yield:\n \n ```js\n-{ a: require('./dir/a.js')\n-, 'a.js': require('./dir/a.js')\n-, 'a.json': require('./dir/a.json')\n-, b: require('./dir/b.json')\n-, 'b.json': require('./dir/b.json')\n+{\n+  a: require('./dir/a.js'),\n+  'a.js': require('./dir/a.js'),\n+  'a.json': require('./dir/a.json'),\n+  b: require('./dir/b.json'),\n+  'b.json': require('./dir/b.json')\n }\n ```\n \n-There might be more options in the future. ;)\n-\n-## Tips\n",
+					"match": false,
+					"packageHash": "d1f5e2f890cb80b9f163d7272a4ed693e47a587b00530a8a5cb7f96fb95bc1c3",
+					"size": 3048,
+					"sourceHash": "37cb458f8088fa70b53e92b24a8d8f6e04f6300d4eb50f039a9ade8190cec2f7",
+					"status": "content"
+				},
+				"index.js": {
+					"diff": "--- published/index.js\n+++ rebuilt/index.js\n@@ -1,15 +1,15 @@\n // requireDir.js\n // See README.md for details.\n \n-var FS = require('fs');\n-var Path = require('path');\n+var fs = require('fs');\n+var path = require('path');\n \n // make a note of the calling file's path, so that we can resolve relative\n // paths. this only works if a fresh version of this module is run on every\n // require(), so important: we clear the require() cache each time!\n var parent = module.parent;\n var parentFile = parent.filename;\n-var parentDir = Path.dirname(parentFile);\n+var parentDir = path.dirname(parentFile);\n delete require.cache[__filename];\n \n module.exports = function requireDir(dir, opts) {\n@@ -18,11 +18,11 @@\n     opts = opts || {};\n \n     // resolve the path to an absolute one:\n-    dir = Path.resolve(parentDir, dir);\n+    dir = path.resolve(parentDir, dir);\n \n     // read the directory's files:\n     // note that this'll throw an error if the path isn't a directory.\n-    var files = FS.readdirSync(dir);\n+    var files = fs.readdirSync(dir);\n \n     // to prioritize between multiple files with the same basename, we'll\n     // first derive all the basenames and create a map from them to files:\n@@ -30,9 +30,8 @@\n \n     for (var i = 0; i < files.length; i++) {\n         var file = files[i];\n-        var ext = Path.extname(file);\n-        var base = Path.basename(file, ext);\n-\n+        var ext = path.extname(file);\n+        var base = path.basename(file, ext);\n         (filesForBase[base] = filesForBase[base] || []).push(file);\n     }\n \n@@ -46,6 +45,9 @@\n     // to the map using the full filename as a key also.\n     var map = {};\n \n+    // get the array of extensions we need to require\n+    var extensions = opts.extensions || Object.keys(require.extensions);\n+\n     for (var base in filesForBase) {\n         // protect against enumerable object prototype extensions:\n         if (!filesForBase.hasOwnProperty(base)) {\n@@ -60,16 +62,24 @@\n \n         for (var i = 0; i < files.length; i++) {\n             var file = files[i];\n-            var path = Path.resolve(dir, file);\n+            var abs = path.resolve(dir, file);\n \n             // ignore the calling file:\n-            if (path === parentFile) {\n+            if (abs === parentFile) {\n+                continue;\n+            }\n+            // apply file filter:\n+            if (opts.filter && !opts.filter(abs)) {\n                 continue;\n             }\n \n-            if (FS.statSync(path).isDirectory()) {\n+            if (fs.statSync(abs).isDirectory()) {\n                 if (opts.recurse) {\n-                    map[base] = requireDir(path, opts);\n+                    if (base === 'node_modules') {\n+                        continue;\n+                    }\n+\n+                    map[base] = requireDir(abs, opts);\n \n                     // if duplicates are wanted, key off the full name too:\n                     if (opts.duplicates) {\n@@ -77,7 +87,7 @@\n                     }\n                 }\n             } else {\n-                filesMinusDirs[file] = path;\n+                filesMinusDirs[file] = abs;\n             }\n         }\n \n@@ -88,33 +98,52 @@\n         }\n \n         // otherwise, go through and try each require.extension key!\n-        for (ext in require.extensions) {\n",
+					"match": false,
+					"packageHash": "4f053885cec59ace08810300f1a5710c1dc61ba055d93b99a2d261558d5aa686",
+					"size": 4358,
+					"sourceHash": "fe02668a17ead89c7ac9f193e616d6deaaaa3aac91638e521eb193a41ea57025",
+					"status": "content"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -1,20 +1,24 @@\n-{ \"name\": \"require-dir\"\n-, \"description\": \"Helper to require() directories.\"\n-, \"version\": \"0.1.0\"\n-, \"author\": \"Aseem Kishore <aseem.kishore@gmail.com>\"\n-, \"dependencies\": {}\n-, \"devDependencies\":\n-  { \"coffee-script\": \"~1.3.3\"\n-  }\n-, \"engines\":\n-  { \"node\": \"*\"\n-  }\n-, \"scripts\":\n-  { \"test\": \"node test\"\n-  }\n-, \"homepage\": \"https://github.com/aseemk/requireDir\"\n-, \"repository\":\n-  { \"type\": \"git\"\n-  , \"url\": \"git://github.com/aseemk/requireDir.git\"\n+{\n+  \"name\": \"require-dir\",\n+  \"description\": \"Helper to require() directories.\",\n+  \"version\": \"1.2.0\",\n+  \"author\": \"Aseem Kishore <aseem.kishore@gmail.com>\",\n+  \"license\": \"MIT\",\n+  \"dependencies\": {},\n+  \"devDependencies\": {\n+    \"coffee-script\": \"^1.3.3\",\n+    \"ts-node\": \"^1.3.0\",\n+    \"typescript\": \"^1.8.0\"\n+  },\n+  \"engines\": {\n+    \"node\": \"*\"\n+  },\n+  \"scripts\": {\n+    \"test\": \"node test\"\n+  },\n+  \"homepage\": \"https://github.com/aseemk/requireDir\",\n+  \"repository\": {\n+    \"type\": \"git\",\n+    \"url\": \"git://github.com/aseemk/requireDir.git\"\n   }\n }\n",
+					"match": false,
+					"packageHash": "b19b5ae9a64888530df637d68d582a459c7528bb7f950d420389a3cd80907d44",
+					"size": 446,
+					"sourceHash": "ab95cff4f40bff18009b84875cd4653154021fedde4a7b8344f6533e5af4ee45",
+					"status": "content"
+				},
+				"test/recurse.js": {
+					"diff": "--- published/test/recurse.js\n+++ rebuilt/test/recurse.js\n@@ -19,6 +19,12 @@\n     c: {\n         '3': 3\n     },\n+    // note that node_modules was explicitly ignored\n+});\n+\n+// finally, test that node_modules can still be required directly:\n+assert.deepEqual(requireDir('./recurse/node_modules'), {\n+    fake: 'fake',\n });\n \n console.log('Recurse tests passed.');\n",
+					"match": false,
+					"packageHash": "5f3bd1a2096b05fe476e642eeef41634ffbf626389a7dd26bcf94502b9249073",
+					"size": 490,
+					"sourceHash": "a914aae20fb667084bc369ad2c7dda3d5e07b1003bf57b4186514fd13df2f8bb",
+					"status": "content"
+				},
+				"test/simple.js": {
+					"diff": "--- published/test/simple.js\n+++ rebuilt/test/simple.js\n@@ -10,11 +10,21 @@\n // now register CoffeeScript and do it again:\n // note that CoffeeScript shouldn't be used by any other tests! we can't rely\n // on ordering of tests, and require.extensions and require.cache are global.\n-require('coffee-script');\n+require('coffee-script/register');\n assert.deepEqual(requireDir('./simple'), {\n     a: 'a',\n     b: 'b',\n     c: 'c',\n });\n \n+// now register TypeScript and do it again:\n+// note that we include typescript files but not declarations.\n+require('ts-node/register');\n+assert.deepEqual(requireDir('./simple'), {\n+    a: 'a',\n+    b: 'b',\n+    c: 'c',\n+    e: 'e',\n+});\n+\n console.log('Simple tests passed.');\n",
+					"match": false,
+					"packageHash": "b5c4ea271cc39d903227200e3732671de94d453b20732ae9d8edbd305c96bfdc",
+					"size": 511,
+					"sourceHash": "5966d2261c65a14eb0d4277b6091a4e84f4bca6bc5958ee9092b398fa0e1e25c",
+					"status": "content"
+				},
+				".travis.yml": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"CHANGELOG.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"LICENSE": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/camelcase/a_main.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/camelcase/sub-dir/a-sub.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/extensions.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/filter.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/mapKey.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/mapValue.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/noCache/a.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/noCache/b.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/noCache.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/simple/e.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/simple/f.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				}
+			},
+			"summary": {
+				"differentFiles": 5,
+				"matchingFiles": 21,
+				"missingInPackage": 14,
+				"missingInSource": 1,
+				"score": 0.5121951219512195,
+				"totalFiles": 41
+			}
+		}
+	}
+]
