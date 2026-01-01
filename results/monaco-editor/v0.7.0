@@ -1,0 +1,4149 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-01T19:23:18.441Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:3.10.3",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "monaco-editor@0.7.0",
+			"name": "monaco-editor",
+			"version": "0.7.0",
+			"location": "https://registry.npmjs.org/monaco-editor/-/monaco-editor-0.7.0.tgz",
+			"integrity": "sha512-xSGzgDEoiB5pdY1WIG2eBD5jhP8lNNF/aPM12KBCRvRKgbqia0Zc6OvR5SPgxMSVSQDeGzz9+H+7ITgfc7x2nA==",
+			"publishedAt": "2016-10-07T13:45:23.135Z",
+			"publishedWith": {
+				"node": "6.6.0",
+				"npm": "3.10.7"
+			}
+		},
+		"source": {
+			"integrity": null,
+			"location": "git+https://github.com/Microsoft/monaco-editor.git",
+			"spec": "github:Microsoft/monaco-editor#HEAD"
+		},
+		"comparisonHash": "8a2a8dcbb729bf3ee9216e490c955701f0ddebe1",
+		"diff": {
+			"files": {
+				"LICENSE": {
+					"match": false,
+					"packageHash": "f8f057fa033db3e3e13dfad75ebc4c794a26f3aa73a4e0eb48d995d3dd9d78ee",
+					"size": 1088,
+					"status": "missing-in-source"
+				},
+				"README.md": {
+					"diff": "--- published/README.md\n+++ rebuilt/README.md\n@@ -1,232 +1,123 @@\n-# Monaco Editor\r\n-\r\n-[Demo page](https://microsoft.github.io/monaco-editor/)\r\n-\r\n-The Monaco Editor is the code editor that powers [VS Code](https://github.com/Microsoft/vscode), a good page describing the code editor's features is [here](https://code.visualstudio.com/docs/editor/editingevolved).\r\n-\r\n-![image](https://cloud.githubusercontent.com/assets/5047891/15751937/4267b918-28ec-11e6-9fbd-d6cd2973c770.png)\r\n-\r\n-## Try it out\r\n-\r\n-See the editor in action [here](https://microsoft.github.io/monaco-editor/index.html).\r\n-\r\n-Learn how to extend the editor and try out your own customizations in the [playground](https://microsoft.github.io/monaco-editor/playground.html).\r\n-\r\n-Browse the latest editor API at [`monaco.d.ts`](https://github.com/Microsoft/monaco-editor/blob/master/website/playground/monaco.d.ts.txt).\r\n-\r\n-## Issues\r\n-\r\n-Please mention the version of the editor when creating issues and the browser you're having trouble in. Create issues in this repository.\r\n-\r\n-## Known issues\r\n-In IE, the editor must be completely surrounded in the body element, otherwise the hit testing we do for mouse operations does not work. You can inspect this using F12 and clicking on the body element and confirm that visually it surrounds the editor.\r\n-\r\n-## Installing\r\n-\r\n-```\r\n-npm install monaco-editor\r\n-```\r\n-\r\n-You will get:\r\n-* inside `dev`: bundled, not minified\r\n-* inside `min`: bundled, and minified\r\n-* inside `min-maps`: source maps for `min`\r\n-* `monaco.d.ts`: this specifies the API of the editor (this is what is actually versioned, everything else is considered private and might break with any release).\r\n-\r\n-It is recommended to develop against the `dev` version, and in production to use the `min` version.\r\n-\r\n-## Integrate\r\n-\r\n-Here is the most basic HTML page that embeds the editor. More samples are available at [monaco-editor-samples](https://github.com/Microsoft/monaco-editor-samples).\r\n-\r\n-```html\r\n-<!DOCTYPE html>\r\n-<html>\r\n-<head>\r\n-\t<meta http-equiv=\"X-UA-Compatible\" content=\"IE=edge\" />\r\n-\t<meta http-equiv=\"Content-Type\" content=\"text/html;charset=utf-8\" >\r\n-</head>\r\n-<body>\r\n-\r\n-<div id=\"container\" style=\"width:800px;height:600px;border:1px solid grey\"></div>\r\n-\r\n-<script src=\"monaco-editor/min/vs/loader.js\"></script>\r\n-<script>\r\n-\trequire.config({ paths: { 'vs': 'monaco-editor/min/vs' }});\r\n-\trequire(['vs/editor/editor.main'], function() {\r\n-\t\tvar editor = monaco.editor.create(document.getElementById('container'), {\r\n-\t\t\tvalue: [\r\n-\t\t\t\t'function x() {',\r\n-\t\t\t\t'\\tconsole.log(\"Hello world!\");',\r\n-\t\t\t\t'}'\r\n-\t\t\t].join('\\n'),\r\n-\t\t\tlanguage: 'javascript'\r\n-\t\t});\r\n-\t});\r\n-</script>\r\n-</body>\r\n-</html>\r\n-```\r\n-\r\n-## Integrate cross domain\r\n-\r\n-If you are hosting your `.js` on a different domain (e.g. on a CDN) than the HTML, you should know that the Monaco Editor creates web workers for smart language features. Cross-domain web workers are not allowed, but here is how you can proxy their loading and get them to work:\r\n-\r\n-```html\r\n-<!--\r\n-\tAssuming the HTML lives on www.mydomain.com and that the editor is hosted on www.mycdn.com\r\n--->\r\n-<script type=\"text/javascript\" src=\"http://www.mycdn.com/monaco-editor/min/vs/loader.js\"></script>\r\n-<script>\r\n-\trequire.config({ paths: { 'vs': 'http://www.mycdn.com/monaco-editor/min/vs' }});\r\n-\r\n-\t// Before loading vs/editor/editor.main, define a global MonacoEnvironment that overwrites\r\n-\t// the default worker url location (used when creating WebWorkers). The problem here is that\r\n-\t// HTML5 does not allow cross-domain web workers, so we need to proxy the instantion of\r\n-\t// a web worker through a same-domain script\r\n-\twindow.MonacoEnvironment = {\r\n-\t\tgetWorkerUrl: function(workerId, label) {\r\n-\t\t\treturn 'monaco-editor-worker-loader-proxy.js';\r\n-\t\t}\r\n-\t};\r\n-\r\n-\trequire([\"vs/editor/editor.main\"], function () {\r\n-\t\t// ...\r\n-\t});\r\n-</script>\r\n-\r\n",
+					"match": false,
+					"packageHash": "ef3f4239d533edee074d8192ed5d6c961bb03e551abcf6a4dd55bf694509ff92",
+					"size": 10006,
+					"sourceHash": "333e7215227199c4ba97ec927bb09cfcf69b297ba3be108e866aed735a312822",
+					"status": "content"
+				},
+				"ThirdPartyNotices.txt": {
+					"diff": "--- published/ThirdPartyNotices.txt\n+++ rebuilt/ThirdPartyNotices.txt\n@@ -1,214 +1,392 @@\n-THIRD-PARTY SOFTWARE NOTICES AND INFORMATION\r\n-Do Not Translate or Localize\r\n-\r\n-This project incorporates components from the projects listed below. The original copyright notices and the licenses\r\n-under which Microsoft received such components are set forth below. Microsoft reserves all rights not expressly granted\r\n-herein, whether by implication, estoppel or otherwise.\r\n-\r\n-\r\n-\r\n-\r\n-%% winjs version 4.4.0 (https://github.com/winjs/winjs)\r\n-=========================================\r\n-WinJS\r\n-\r\n-Copyright (c) Microsoft Corporation\r\n-\r\n-All rights reserved.\r\n-\r\n-MIT License\r\n-\r\n-Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the \"\"Software\"\"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:\r\n-\r\n-The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.\r\n-\r\n-THE SOFTWARE IS PROVIDED *AS IS*, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.\r\n-\r\n-=========================================\r\n-END OF winjs NOTICES AND INFORMATION\r\n-\r\n-\r\n-\r\n-\r\n-%% HTML 5.1 W3C Working Draft version 08 October 2015 (http://www.w3.org/TR/2015/WD-html51-20151008/)\r\n-=========================================\r\n-Copyright © 2015 W3C® (MIT, ERCIM, Keio, Beihang). This software or document includes material copied\r\n-from or derived from HTML 5.1 W3C Working Draft (http://www.w3.org/TR/2015/WD-html51-20151008/.)\r\n-\r\n-THIS DOCUMENT IS PROVIDED \"AS IS,\" AND COPYRIGHT HOLDERS MAKE NO REPRESENTATIONS OR WARRANTIES, EXPRESS OR IMPLIED, INCLUDING, BUT\r\n-NOT LIMITED TO, WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, NON-INFRINGEMENT, OR TITLE; THAT THE CONTENTS OF\r\n-THE DOCUMENT ARE SUITABLE FOR ANY PURPOSE; NOR THAT THE IMPLEMENTATION OF SUCH CONTENTS WILL NOT INFRINGE ANY THIRD PARTY\r\n-PATENTS, COPYRIGHTS, TRADEMARKS OR OTHER RIGHTS.\r\n-\r\n-COPYRIGHT HOLDERS WILL NOT BE LIABLE FOR ANY DIRECT, INDIRECT, SPECIAL OR CONSEQUENTIAL DAMAGES ARISING OUT OF ANY USE OF THE\r\n-DOCUMENT OR THE PERFORMANCE OR IMPLEMENTATION OF THE CONTENTS THEREOF.\r\n-\r\n-The name and trademarks of copyright holders may NOT be used in advertising or publicity pertaining to this document or its contents\r\n-without specific, written prior permission. Title to copyright in this document will at all times remain with copyright holders.\r\n-=========================================\r\n-END OF HTML 5.1 W3C Working Draft NOTICES AND INFORMATION\r\n-\r\n-\r\n-\r\n-\r\n-%% js-beautify version 1.5.10 (https://github.com/beautify-web/js-beautify)\r\n-=========================================\r\n-The MIT License (MIT)\r\n-\r\n-Copyright (c) 2007-2013 Einar Lielmanis and contributors.\r\n-\r\n-Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the \"Software\"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:\r\n-\r\n-The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.\r\n-\r\n-THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.\r\n-=========================================\r\n-END OF js-beautify NOTICES AND INFORMATION\r\n-\r\n-\r\n-\r\n-\r\n-%% string_scorer version 0.1.20 (https://github.com/joshaven/string_score)\r\n-=========================================\r\n-This software is released under the MIT license:\r\n-\r\n-Copyright (c) Joshaven Potter\r\n-\r\n-Permission is hereby granted, free of charge, to any person obtaining a copy of\r\n-this software and associated documentation files (the \"Software\"), to deal in\r\n-the Software without restriction, including without limitation the rights to\r\n-use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of\r\n-the Software, and to permit persons to whom the Software is furnished to do so,\r\n-subject to the following conditions:\r\n-\r\n-The above copyright notice and this permission notice shall be included in all\r\n-copies or substantial portions of the Software.\r\n-\r\n-THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR\r\n-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS\r\n-FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR\r\n-COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER\r\n-IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN\r\n-CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.\r\n-=========================================\r\n-END OF string_scorer NOTICES AND INFORMATION\r\n-\r\n-\r\n-\r\n",
+					"match": false,
+					"packageHash": "6fa8ada915005c9e8eccd48aa48561c542a5ec33fa56f7d5637c87f81d900039",
+					"size": 17815,
+					"sourceHash": "5b40eb9e046e24e28148b7cebf91ce346bf839eb4cfdcd3bd21140af2b3512bb",
+					"status": "content"
+				},
+				"dev/bundleInfo.json": {
+					"match": false,
+					"packageHash": "2e67bbbd8e00183d354967228d4871a1abdfbaa6f73f76c1fd2c1a576f4eaacb",
+					"size": 147052,
+					"status": "missing-in-source"
+				},
+				"dev/nls.metadata.json": {
+					"match": false,
+					"packageHash": "fa56688e2b6f3d3ea82788e0cd7745e4b0d0248e77345ccb213fb68250a620e5",
+					"size": 30022,
+					"status": "missing-in-source"
+				},
+				"dev/vs/base/worker/workerMain.js": {
+					"match": false,
+					"packageHash": "9292fbda36b944a5f59b0e678caeef8d9ace8a4f1ac06b566b1f5885ab7f8b35",
+					"size": 478511,
+					"status": "missing-in-source"
+				},
+				"dev/vs/base/worker/workerMain.js.map": {
+					"match": false,
+					"packageHash": "2344dab8069f13bb9c73728cbb1390f3f97c141349eb3e1e19d5c9b96f81cbbe",
+					"size": 649831,
+					"status": "missing-in-source"
+				},
+				"dev/vs/basic-languages/src/bat.js": {
+					"match": false,
+					"packageHash": "3fa402ffed83bc741bb1cf70b97c859f7a97cf1443371b897bc1de832cf4d836",
+					"size": 2195,
+					"status": "missing-in-source"
+				},
+				"dev/vs/basic-languages/src/coffee.js": {
+					"match": false,
+					"packageHash": "4ac96435a5d9e47e809720c7d39faedd716ea663c943260d7d0c6b65ced6b5d8",
+					"size": 3846,
+					"status": "missing-in-source"
+				},
+				"dev/vs/basic-languages/src/cpp.js": {
+					"match": false,
+					"packageHash": "93ad8ef53bc1c0bc82d4112fcd55bd50dede1e47fcf43f4a883f363d946a16fa",
+					"size": 4590,
+					"status": "missing-in-source"
+				},
+				"dev/vs/basic-languages/src/csharp.js": {
+					"match": false,
+					"packageHash": "bea0b8373d8c4e973699be365be8ee9eeb02347cfc13368bdab0aeac4f82e6bc",
+					"size": 4479,
+					"status": "missing-in-source"
+				},
+				"dev/vs/basic-languages/src/css.js": {
+					"match": false,
+					"packageHash": "449133f6b877d7027f67e772592276b7076ec24e9adf46edc7ce7afc571ec910",
+					"size": 4480,
+					"status": "missing-in-source"
+				},
+				"dev/vs/basic-languages/src/dockerfile.js": {
+					"match": false,
+					"packageHash": "702d8ec1359166563b1b74f575ad0cd35f5a3c42dc78219077e53b10eb0a4f34",
+					"size": 2356,
+					"status": "missing-in-source"
+				},
+				"dev/vs/basic-languages/src/fsharp.js": {
+					"match": false,
+					"packageHash": "a7ddde859aa1a27dd2916bfae8461bf8ed33eaa10cda8788a207a4ff93f79e68",
+					"size": 3113,
+					"status": "missing-in-source"
+				},
+				"dev/vs/basic-languages/src/go.js": {
+					"match": false,
+					"packageHash": "c190de2224ffb49133df4c5410f05fdb2440f9239f15f58db983f24242cdf5c8",
+					"size": 2844,
+					"status": "missing-in-source"
+				},
+				"dev/vs/basic-languages/src/handlebars.js": {
+					"match": false,
+					"packageHash": "db077e98290f7de6070ab3864c3c95e409bda22ef4ae2706b3fd9a508d046fea",
+					"size": 6492,
+					"status": "missing-in-source"
+				},
+				"dev/vs/basic-languages/src/html.js": {
+					"match": false,
+					"packageHash": "16a5e2886767bdbfda26de71a4b8c7f36eebd45e5a26990fddf43bd7fe6a51c8",
+					"size": 4705,
+					"status": "missing-in-source"
+				},
+				"dev/vs/basic-languages/src/ini.js": {
+					"match": false,
+					"packageHash": "36d31b273220f92221a8596feeb076e8e707c3670c0356e54a3c97ec7a3136a2",
+					"size": 1488,
+					"status": "missing-in-source"
+				},
+				"dev/vs/basic-languages/src/jade.js": {
+					"match": false,
+					"packageHash": "a420f38c5e81c7cb14477b100b7bd7489ef1dcd6cd5d168ef0afa9ca663cfea9",
+					"size": 5210,
+					"status": "missing-in-source"
+				},
+				"dev/vs/basic-languages/src/java.js": {
+					"match": false,
+					"packageHash": "4ca46acf00b9491b56beb7e5618e53cf85abb31ba1d6333e60843b40bb8b0a5f",
+					"size": 3174,
+					"status": "missing-in-source"
+				},
+				"dev/vs/basic-languages/src/less.js": {
+					"match": false,
+					"packageHash": "c4005000ab08faa935893bc65c2ef934b0ce4a4521d93507d8906f7dce896f2e",
+					"size": 4290,
+					"status": "missing-in-source"
+				},
+				"dev/vs/basic-languages/src/lua.js": {
+					"match": false,
+					"packageHash": "4b68a9e717a67a9256e2323789acf5c8f45aa557bc017cfcfa861532951466b9",
+					"size": 2452,
+					"status": "missing-in-source"
+				},
+				"dev/vs/basic-languages/src/markdown.js": {
+					"match": false,
+					"packageHash": "10970595245abf0a188b800771a0607eefcfed839900b8e13fda4963e429fcf0",
+					"size": 3685,
+					"status": "missing-in-source"
+				},
+				"dev/vs/basic-languages/src/objective-c.js": {
+					"match": false,
+					"packageHash": "970b3f83585fe7324ae4d64896bc21383dde7fab3e475889e3b05f86c20902bc",
+					"size": 2793,
+					"status": "missing-in-source"
+				},
+				"dev/vs/basic-languages/src/php.js": {
+					"match": false,
+					"packageHash": "83bb0b6a3e709f5bd15de8e0f967e7e975fc515a4b9af691276198cd5807714a",
+					"size": 8250,
+					"status": "missing-in-source"
+				},
+				"dev/vs/basic-languages/src/postiats.js": {
+					"match": false,
+					"packageHash": "2f84bf74e7ffe225cdaf067266b07c6b13314c38fb029a61f1fe3c59b344a4aa",
+					"size": 8294,
+					"status": "missing-in-source"
+				},
+				"dev/vs/basic-languages/src/powershell.js": {
+					"match": false,
+					"packageHash": "bbb10759e120454d67c7ba18fd2cff9a0a5c28d4bfae8795209e8db7fc6f3253",
+					"size": 3372,
+					"status": "missing-in-source"
+				},
+				"dev/vs/basic-languages/src/python.js": {
+					"match": false,
+					"packageHash": "9bdb9fb961d1d0c933f163e51b66d9b377992ae34aa8e3fd55b469f527c551f3",
+					"size": 3206,
+					"status": "missing-in-source"
+				},
+				"dev/vs/basic-languages/src/r.js": {
+					"match": false,
+					"packageHash": "52120e215104db2e34b010d3351638b782572ac7720a79fd20323bac25e5db39",
+					"size": 3170,
+					"status": "missing-in-source"
+				},
+				"dev/vs/basic-languages/src/razor.js": {
+					"match": false,
+					"packageHash": "17935e0248e0957e06e238c45d7b83bca8582b2e8707afc10b5d2b8078d3bd73",
+					"size": 8863,
+					"status": "missing-in-source"
+				},
+				"dev/vs/basic-languages/src/ruby.js": {
+					"match": false,
+					"packageHash": "8c74c9b226f4530128caf0088f9a0996950141cac3b2592476b84679785b3024",
+					"size": 9248,
+					"status": "missing-in-source"
+				},
+				"dev/vs/basic-languages/src/scss.js": {
+					"match": false,
+					"packageHash": "35681319a7df0cc7f642c2a6357a86737133b7ba76d001fdae044dd576eed5df",
+					"size": 7428,
+					"status": "missing-in-source"
+				},
+				"dev/vs/basic-languages/src/sql.js": {
+					"match": false,
+					"packageHash": "e1fef56f348cb0a4a75e4f94ceb230ec97d7ee97d93d6ea8481ce5e71cec5563",
+					"size": 18802,
+					"status": "missing-in-source"
+				},
+				"dev/vs/basic-languages/src/swift.js": {
+					"match": false,
+					"packageHash": "dd98ba46b9b74fdf892496ff5e1c54f4a64ceedfe6805089d2ed6a81b905a54b",
+					"size": 4643,
+					"status": "missing-in-source"
+				},
+				"dev/vs/basic-languages/src/vb.js": {
+					"match": false,
+					"packageHash": "47e5be1d105d16faf8b64fa92bc61352b50b23d43cd8117bef62b695b474c787",
+					"size": 5988,
+					"status": "missing-in-source"
+				},
+				"dev/vs/basic-languages/src/xml.js": {
+					"match": false,
+					"packageHash": "5d64baba36ec81a78dfecff6c450bb0ccc2c587d4a0cb1b3762baab81952b53b",
+					"size": 2373,
+					"status": "missing-in-source"
+				},
+				"dev/vs/basic-languages/src/yaml.js": {
+					"match": false,
+					"packageHash": "bfba9a3eae639146630ac6806e6b8e84bf27b30d027d4b657e713b1aa4b8b47d",
+					"size": 3760,
+					"status": "missing-in-source"
+				},
+				"dev/vs/editor/contrib/quickOpen/browser/symbol-sprite.svg": {
+					"match": false,
+					"packageHash": "fcc3026b97068f3d9e1743d36ca26b96ffdbcd2841fa9d804caccc4f249911c8",
+					"size": 20729,
+					"status": "missing-in-source"
+				},
+				"dev/vs/editor/contrib/suggest/browser/symbol-sprite.svg": {
+					"match": false,
+					"packageHash": "ce3aebe320fbd74323b1d27370c056de3720f1ca5dc6431ab280c8ffe9d44bfe",
+					"size": 13292,
+					"status": "missing-in-source"
+				},
+				"dev/vs/editor/editor.main.css": {
+					"match": false,
+					"packageHash": "3db907f6df50bfed939805dbb8fbc6036a0ef9fcb217650c1a3afe749f1d10fc",
+					"size": 209598,
+					"status": "missing-in-source"
+				},
+				"dev/vs/editor/editor.main.js": {
+					"match": false,
+					"packageHash": "3afda76a0e09381824022ac9b0b283f8853d87cfdf1600604ba325ed366d584c",
+					"size": 4029221,
+					"status": "missing-in-source"
+				},
+				"dev/vs/editor/editor.main.js.map": {
+					"match": false,
+					"packageHash": "b059280614096c51f2a2bd53cccff5ea0573c7b530ded8643b6af445bcf19ea3",
+					"size": 6462477,
+					"status": "missing-in-source"
+				},
+				"dev/vs/editor/editor.main.nls.de.js": {
+					"match": false,
+					"packageHash": "1526199e3733fd4e9b1ad0c10ae3737992374a07d1947a7da58cc4090563a31e",
+					"size": 18131,
+					"status": "missing-in-source"
+				},
+				"dev/vs/editor/editor.main.nls.es.js": {
+					"match": false,
+					"packageHash": "5e2e13f39854ab54bf378b590391073ca25dfc009b7cb3b8e05bc796cf9538f6",
+					"size": 17660,
+					"status": "missing-in-source"
+				},
+				"dev/vs/editor/editor.main.nls.fr.js": {
+					"match": false,
+					"packageHash": "498508b9f4f368b1daac148a022a7c31e0c250e675d121f6ac1962fa2c2007df",
+					"size": 18717,
+					"status": "missing-in-source"
+				},
+				"dev/vs/editor/editor.main.nls.it.js": {
+					"match": false,
+					"packageHash": "4a4d530ebc115269e9d0713fc707549153f893b8f5634e239e645de744b8ec34",
+					"size": 18388,
+					"status": "missing-in-source"
+				},
+				"dev/vs/editor/editor.main.nls.ja.js": {
+					"match": false,
+					"packageHash": "db67acfffbb2c244995bc3f66a18749cd16990314b004f54e736a703b08e5642",
+					"size": 19900,
+					"status": "missing-in-source"
+				},
+				"dev/vs/editor/editor.main.nls.js": {
+					"match": false,
+					"packageHash": "1d14c557a728e3c08a733bf632e9cd31acca6407feafe3d177f55b842fd76750",
+					"size": 15689,
+					"status": "missing-in-source"
+				},
+				"dev/vs/editor/editor.main.nls.ko.js": {
+					"match": false,
+					"packageHash": "ed8dfd13e9393b08bc3b9bfaae5fad6c78cf70ae6c868a7db266b187e52ee68e",
+					"size": 17902,
+					"status": "missing-in-source"
+				},
+				"dev/vs/editor/editor.main.nls.ru.js": {
+					"match": false,
+					"packageHash": "f8e86ac29f4807e6c4d3b708621fd7481cc94a25b05f7d89d139afe06527fba9",
+					"size": 25818,
+					"status": "missing-in-source"
+				},
+				"dev/vs/editor/editor.main.nls.zh-cn.js": {
+					"match": false,
+					"packageHash": "f28dc13b5e5ebeb8a7a24c9b8e9851874ab827bd8a72704792c687d5b8166b4d",
+					"size": 14592,
+					"status": "missing-in-source"
+				},
+				"dev/vs/editor/editor.main.nls.zh-tw.js": {
+					"match": false,
+					"packageHash": "87af6931c01c8ac64d218fce1d44dc5cb969a04d55de73d5aad195dbc85fd9fc",
+					"size": 14968,
+					"status": "missing-in-source"
+				},
+				"dev/vs/language/css/cssMode.js": {
+					"match": false,
+					"packageHash": "8c06f1f2059786f05abb359f6c5ca8fffda1d55ced5b74112a381e7e810542a0",
+					"size": 17260,
+					"status": "missing-in-source"
+				},
+				"dev/vs/language/css/cssWorker.js": {
+					"match": false,
+					"packageHash": "c134d6afd87d85fd163ae7e27d29d9d706ef8df1875a7c1c45c549b57fe64c74",
+					"size": 446696,
+					"status": "missing-in-source"
+				},
+				"dev/vs/language/html/htmlMode.js": {
+					"match": false,
+					"packageHash": "ca5f75b798108c32c039f3158d80dff1b0f83684ae1b3504b460bd961f462b31",
+					"size": 16196,
+					"status": "missing-in-source"
+				},
+				"dev/vs/language/html/htmlWorker.js": {
+					"match": false,
+					"packageHash": "c6a9711fc98a8c47ee9d604576f298548b3c58fa1e00ecc8451ca04fe9525722",
+					"size": 94208,
+					"status": "missing-in-source"
+				},
+				"dev/vs/language/json/jsonMode.js": {
+					"match": false,
+					"packageHash": "d74d0a32db89bd37d9dec5242ebd4949c5b4c9262ef4d7e024f46c39a80ca4bd",
+					"size": 37155,
+					"status": "missing-in-source"
+				},
+				"dev/vs/language/json/jsonWorker.js": {
+					"match": false,
+					"packageHash": "ace66f79fa4ba14d496e8b03a29912869861160bc3f54b5d39c5028b615eefae",
+					"size": 84737,
+					"status": "missing-in-source"
+				},
+				"dev/vs/language/typescript/lib/typescriptServices.js": {
+					"match": false,
+					"packageHash": "3e32fd63bf47a41c1ca9fa9f2af71bca8ad21404509f0753b69a4959d3a35357",
+					"size": 992453,
+					"status": "missing-in-source"
+				},
+				"dev/vs/language/typescript/src/mode.js": {
+					"match": false,
+					"packageHash": "cd2d3b7f9a4a208fe1949a5b19789674b88330e66341af9f8759dd9c1b4dd832",
+					"size": 19254,
+					"status": "missing-in-source"
+				},
+				"dev/vs/language/typescript/src/worker.js": {
+					"match": false,
+					"packageHash": "9208a166589e3aaec785800e15dec12165ca8fc250ab2824f460c0df869b5cc3",
+					"size": 1847940,
+					"status": "missing-in-source"
+				},
+				"dev/vs/loader.js": {
+					"match": false,
+					"packageHash": "a4d9436e88b26032abf6cd8e165e771d315dff6bfb6c57c4488f23bd27e6c721",
+					"size": 91829,
+					"status": "missing-in-source"
+				},
+				"dev/vs/loader.js.map": {
+					"match": false,
+					"packageHash": "db53d1b4b5ae5fd67586df270735c64173be7db1c93790e6e80fbeb1f82c9fc8",
+					"size": 103901,
+					"status": "missing-in-source"
+				},
+				"min/vs/base/worker/workerMain.js": {
+					"match": false,
+					"packageHash": "0013df09141339520b96b525db4a578e47ae3778aedaaac3cb487e32f2ea0e7e",
+					"size": 136471,
+					"status": "missing-in-source"
+				},
+				"min/vs/basic-languages/src/bat.js": {
+					"match": false,
+					"packageHash": "3fa402ffed83bc741bb1cf70b97c859f7a97cf1443371b897bc1de832cf4d836",
+					"size": 2195,
+					"status": "missing-in-source"
+				},
+				"min/vs/basic-languages/src/coffee.js": {
+					"match": false,
+					"packageHash": "4ac96435a5d9e47e809720c7d39faedd716ea663c943260d7d0c6b65ced6b5d8",
+					"size": 3846,
+					"status": "missing-in-source"
+				},
+				"min/vs/basic-languages/src/cpp.js": {
+					"match": false,
+					"packageHash": "93ad8ef53bc1c0bc82d4112fcd55bd50dede1e47fcf43f4a883f363d946a16fa",
+					"size": 4590,
+					"status": "missing-in-source"
+				},
+				"min/vs/basic-languages/src/csharp.js": {
+					"match": false,
+					"packageHash": "bea0b8373d8c4e973699be365be8ee9eeb02347cfc13368bdab0aeac4f82e6bc",
+					"size": 4479,
+					"status": "missing-in-source"
+				},
+				"min/vs/basic-languages/src/css.js": {
+					"match": false,
+					"packageHash": "449133f6b877d7027f67e772592276b7076ec24e9adf46edc7ce7afc571ec910",
+					"size": 4480,
+					"status": "missing-in-source"
+				},
+				"min/vs/basic-languages/src/dockerfile.js": {
+					"match": false,
+					"packageHash": "702d8ec1359166563b1b74f575ad0cd35f5a3c42dc78219077e53b10eb0a4f34",
+					"size": 2356,
+					"status": "missing-in-source"
+				},
+				"min/vs/basic-languages/src/fsharp.js": {
+					"match": false,
+					"packageHash": "a7ddde859aa1a27dd2916bfae8461bf8ed33eaa10cda8788a207a4ff93f79e68",
+					"size": 3113,
+					"status": "missing-in-source"
+				},
+				"min/vs/basic-languages/src/go.js": {
+					"match": false,
+					"packageHash": "c190de2224ffb49133df4c5410f05fdb2440f9239f15f58db983f24242cdf5c8",
+					"size": 2844,
+					"status": "missing-in-source"
+				},
+				"min/vs/basic-languages/src/handlebars.js": {
+					"match": false,
+					"packageHash": "db077e98290f7de6070ab3864c3c95e409bda22ef4ae2706b3fd9a508d046fea",
+					"size": 6492,
+					"status": "missing-in-source"
+				},
+				"min/vs/basic-languages/src/html.js": {
+					"match": false,
+					"packageHash": "16a5e2886767bdbfda26de71a4b8c7f36eebd45e5a26990fddf43bd7fe6a51c8",
+					"size": 4705,
+					"status": "missing-in-source"
+				},
+				"min/vs/basic-languages/src/ini.js": {
+					"match": false,
+					"packageHash": "36d31b273220f92221a8596feeb076e8e707c3670c0356e54a3c97ec7a3136a2",
+					"size": 1488,
+					"status": "missing-in-source"
+				},
+				"min/vs/basic-languages/src/jade.js": {
+					"match": false,
+					"packageHash": "a420f38c5e81c7cb14477b100b7bd7489ef1dcd6cd5d168ef0afa9ca663cfea9",
+					"size": 5210,
+					"status": "missing-in-source"
+				},
+				"min/vs/basic-languages/src/java.js": {
+					"match": false,
+					"packageHash": "4ca46acf00b9491b56beb7e5618e53cf85abb31ba1d6333e60843b40bb8b0a5f",
+					"size": 3174,
+					"status": "missing-in-source"
+				},
+				"min/vs/basic-languages/src/less.js": {
+					"match": false,
+					"packageHash": "c4005000ab08faa935893bc65c2ef934b0ce4a4521d93507d8906f7dce896f2e",
+					"size": 4290,
+					"status": "missing-in-source"
+				},
+				"min/vs/basic-languages/src/lua.js": {
+					"match": false,
+					"packageHash": "4b68a9e717a67a9256e2323789acf5c8f45aa557bc017cfcfa861532951466b9",
+					"size": 2452,
+					"status": "missing-in-source"
+				},
+				"min/vs/basic-languages/src/markdown.js": {
+					"match": false,
+					"packageHash": "10970595245abf0a188b800771a0607eefcfed839900b8e13fda4963e429fcf0",
+					"size": 3685,
+					"status": "missing-in-source"
+				},
+				"min/vs/basic-languages/src/objective-c.js": {
+					"match": false,
+					"packageHash": "970b3f83585fe7324ae4d64896bc21383dde7fab3e475889e3b05f86c20902bc",
+					"size": 2793,
+					"status": "missing-in-source"
+				},
+				"min/vs/basic-languages/src/php.js": {
+					"match": false,
+					"packageHash": "83bb0b6a3e709f5bd15de8e0f967e7e975fc515a4b9af691276198cd5807714a",
+					"size": 8250,
+					"status": "missing-in-source"
+				},
+				"min/vs/basic-languages/src/postiats.js": {
+					"match": false,
+					"packageHash": "2f84bf74e7ffe225cdaf067266b07c6b13314c38fb029a61f1fe3c59b344a4aa",
+					"size": 8294,
+					"status": "missing-in-source"
+				},
+				"min/vs/basic-languages/src/powershell.js": {
+					"match": false,
+					"packageHash": "bbb10759e120454d67c7ba18fd2cff9a0a5c28d4bfae8795209e8db7fc6f3253",
+					"size": 3372,
+					"status": "missing-in-source"
+				},
+				"min/vs/basic-languages/src/python.js": {
+					"match": false,
+					"packageHash": "9bdb9fb961d1d0c933f163e51b66d9b377992ae34aa8e3fd55b469f527c551f3",
+					"size": 3206,
+					"status": "missing-in-source"
+				},
+				"min/vs/basic-languages/src/r.js": {
+					"match": false,
+					"packageHash": "52120e215104db2e34b010d3351638b782572ac7720a79fd20323bac25e5db39",
+					"size": 3170,
+					"status": "missing-in-source"
+				},
+				"min/vs/basic-languages/src/razor.js": {
+					"match": false,
+					"packageHash": "17935e0248e0957e06e238c45d7b83bca8582b2e8707afc10b5d2b8078d3bd73",
+					"size": 8863,
+					"status": "missing-in-source"
+				},
+				"min/vs/basic-languages/src/ruby.js": {
+					"match": false,
+					"packageHash": "8c74c9b226f4530128caf0088f9a0996950141cac3b2592476b84679785b3024",
+					"size": 9248,
+					"status": "missing-in-source"
+				},
+				"min/vs/basic-languages/src/scss.js": {
+					"match": false,
+					"packageHash": "35681319a7df0cc7f642c2a6357a86737133b7ba76d001fdae044dd576eed5df",
+					"size": 7428,
+					"status": "missing-in-source"
+				},
+				"min/vs/basic-languages/src/sql.js": {
+					"match": false,
+					"packageHash": "e1fef56f348cb0a4a75e4f94ceb230ec97d7ee97d93d6ea8481ce5e71cec5563",
+					"size": 18802,
+					"status": "missing-in-source"
+				},
+				"min/vs/basic-languages/src/swift.js": {
+					"match": false,
+					"packageHash": "dd98ba46b9b74fdf892496ff5e1c54f4a64ceedfe6805089d2ed6a81b905a54b",
+					"size": 4643,
+					"status": "missing-in-source"
+				},
+				"min/vs/basic-languages/src/vb.js": {
+					"match": false,
+					"packageHash": "47e5be1d105d16faf8b64fa92bc61352b50b23d43cd8117bef62b695b474c787",
+					"size": 5988,
+					"status": "missing-in-source"
+				},
+				"min/vs/basic-languages/src/xml.js": {
+					"match": false,
+					"packageHash": "5d64baba36ec81a78dfecff6c450bb0ccc2c587d4a0cb1b3762baab81952b53b",
+					"size": 2373,
+					"status": "missing-in-source"
+				},
+				"min/vs/basic-languages/src/yaml.js": {
+					"match": false,
+					"packageHash": "bfba9a3eae639146630ac6806e6b8e84bf27b30d027d4b657e713b1aa4b8b47d",
+					"size": 3760,
+					"status": "missing-in-source"
+				},
+				"min/vs/editor/contrib/quickOpen/browser/symbol-sprite.svg": {
+					"match": false,
+					"packageHash": "fcc3026b97068f3d9e1743d36ca26b96ffdbcd2841fa9d804caccc4f249911c8",
+					"size": 20729,
+					"status": "missing-in-source"
+				},
+				"min/vs/editor/contrib/suggest/browser/symbol-sprite.svg": {
+					"match": false,
+					"packageHash": "ce3aebe320fbd74323b1d27370c056de3720f1ca5dc6431ab280c8ffe9d44bfe",
+					"size": 13292,
+					"status": "missing-in-source"
+				},
+				"min/vs/editor/editor.main.css": {
+					"match": false,
+					"packageHash": "eec72931ed18b0457d4dc43e34d2cb48c0e5c07feb7ac4db412587989a543940",
+					"size": 157367,
+					"status": "missing-in-source"
+				},
+				"min/vs/editor/editor.main.js": {
+					"match": false,
+					"packageHash": "3e68f982daaafc1e60325df6f8830bae5d9956387bbc15f806414cf140965cfb",
+					"size": 1533031,
+					"status": "missing-in-source"
+				},
+				"min/vs/editor/editor.main.nls.de.js": {
+					"match": false,
+					"packageHash": "e0758b90ef910d00a7c7d8b96badba61263edacd1c723f47da09894064d485d6",
+					"size": 16808,
+					"status": "missing-in-source"
+				},
+				"min/vs/editor/editor.main.nls.es.js": {
+					"match": false,
+					"packageHash": "8bab87b7d4f8e6b308c05520524efb2b5074606459470767c0fda691f69dde9f",
+					"size": 16415,
+					"status": "missing-in-source"
+				},
+				"min/vs/editor/editor.main.nls.fr.js": {
+					"match": false,
+					"packageHash": "2ffe34363e18d2784d87da66da0f20556edd2a16c6cac7ecf72bd1d72ba29220",
+					"size": 17320,
+					"status": "missing-in-source"
+				},
+				"min/vs/editor/editor.main.nls.it.js": {
+					"match": false,
+					"packageHash": "c0103c6c216646a6619faf8c0f6f07923a1afc17eaeca35d5879a7638273b58e",
+					"size": 17124,
+					"status": "missing-in-source"
+				},
+				"min/vs/editor/editor.main.nls.ja.js": {
+					"match": false,
+					"packageHash": "07750312c2133e7af43dd012ca5bf8d0714ee41eedad8b956bd1128eae6b0fb7",
+					"size": 18696,
+					"status": "missing-in-source"
+				},
+				"min/vs/editor/editor.main.nls.js": {
+					"match": false,
+					"packageHash": "157799f87bb2bd06562c1c147f1b6fb6549f77fec76d8a8fb29091a64bbc576e",
+					"size": 14399,
+					"status": "missing-in-source"
+				},
+				"min/vs/editor/editor.main.nls.ko.js": {
+					"match": false,
+					"packageHash": "794c6e70af37888e7aff9faff5288bd6c60aa5fe7022ef589186c0d8be913cf2",
+					"size": 16693,
+					"status": "missing-in-source"
+				},
+				"min/vs/editor/editor.main.nls.ru.js": {
+					"match": false,
+					"packageHash": "7e6e26f250130ac3c9d18627b9b8affe853f8d2db49e97bab5bfab3d6a422fb8",
+					"size": 24569,
+					"status": "missing-in-source"
+				},
+				"min/vs/editor/editor.main.nls.zh-cn.js": {
+					"match": false,
+					"packageHash": "250ace55249f892e9b34f1a036b966beaa8918f694948f6c6dd43db9b41416f3",
+					"size": 13352,
+					"status": "missing-in-source"
+				},
+				"min/vs/editor/editor.main.nls.zh-tw.js": {
+					"match": false,
+					"packageHash": "22bfb9daa5e6d894a33fba5d47b8b8dc9ac0e62e9dbaea88bd5ca238ff694d0d",
+					"size": 13746,
+					"status": "missing-in-source"
+				},
+				"min/vs/language/css/cssMode.js": {
+					"match": false,
+					"packageHash": "8c06f1f2059786f05abb359f6c5ca8fffda1d55ced5b74112a381e7e810542a0",
+					"size": 17260,
+					"status": "missing-in-source"
+				},
+				"min/vs/language/css/cssWorker.js": {
+					"match": false,
+					"packageHash": "c134d6afd87d85fd163ae7e27d29d9d706ef8df1875a7c1c45c549b57fe64c74",
+					"size": 446696,
+					"status": "missing-in-source"
+				},
+				"min/vs/language/html/htmlMode.js": {
+					"match": false,
+					"packageHash": "ca5f75b798108c32c039f3158d80dff1b0f83684ae1b3504b460bd961f462b31",
+					"size": 16196,
+					"status": "missing-in-source"
+				},
+				"min/vs/language/html/htmlWorker.js": {
+					"match": false,
+					"packageHash": "c6a9711fc98a8c47ee9d604576f298548b3c58fa1e00ecc8451ca04fe9525722",
+					"size": 94208,
+					"status": "missing-in-source"
+				},
+				"min/vs/language/json/jsonMode.js": {
+					"match": false,
+					"packageHash": "d74d0a32db89bd37d9dec5242ebd4949c5b4c9262ef4d7e024f46c39a80ca4bd",
+					"size": 37155,
+					"status": "missing-in-source"
+				},
+				"min/vs/language/json/jsonWorker.js": {
+					"match": false,
+					"packageHash": "ace66f79fa4ba14d496e8b03a29912869861160bc3f54b5d39c5028b615eefae",
+					"size": 84737,
+					"status": "missing-in-source"
+				},
+				"min/vs/language/typescript/lib/typescriptServices.js": {
+					"match": false,
+					"packageHash": "3e32fd63bf47a41c1ca9fa9f2af71bca8ad21404509f0753b69a4959d3a35357",
+					"size": 992453,
+					"status": "missing-in-source"
+				},
+				"min/vs/language/typescript/src/mode.js": {
+					"match": false,
+					"packageHash": "cd2d3b7f9a4a208fe1949a5b19789674b88330e66341af9f8759dd9c1b4dd832",
+					"size": 19254,
+					"status": "missing-in-source"
+				},
+				"min/vs/language/typescript/src/worker.js": {
+					"match": false,
+					"packageHash": "9208a166589e3aaec785800e15dec12165ca8fc250ab2824f460c0df869b5cc3",
+					"size": 1847940,
+					"status": "missing-in-source"
+				},
+				"min/vs/loader.js": {
+					"match": false,
+					"packageHash": "b6a115f71bac85bd8bb9a03112fcdacf38b1104331c1a8c1e4243f5a4aad769a",
+					"size": 32105,
+					"status": "missing-in-source"
+				},
+				"min-maps/vs/base/worker/workerMain.js.map": {
+					"match": false,
+					"packageHash": "72c8f48314e0cee7cf2fe7b8c216b2829292d308c5bba3bef6112c98bb527d75",
+					"size": 619995,
+					"status": "missing-in-source"
+				},
+				"min-maps/vs/editor/editor.main.js.map": {
+					"match": false,
+					"packageHash": "38fd67e5ad8f444da1fa980212c549b353d54a911dd09d68b1556881e6c4f32f",
+					"size": 5573674,
+					"status": "missing-in-source"
+				},
+				"min-maps/vs/editor/editor.main.nls.de.js.map": {
+					"match": false,
+					"packageHash": "dc857dd9380ca371a0e555eac7666a7f288efaf55808f08c6ac5b32173697667",
+					"size": 25454,
+					"status": "missing-in-source"
+				},
+				"min-maps/vs/editor/editor.main.nls.es.js.map": {
+					"match": false,
+					"packageHash": "4eb0611765bbbe60f388c7735b8f656a9cdaa0d723b3b3768554447a1becd0b2",
+					"size": 24829,
+					"status": "missing-in-source"
+				},
+				"min-maps/vs/editor/editor.main.nls.fr.js.map": {
+					"match": false,
+					"packageHash": "260ab8ab117438a65aa2048b3a0d4cc9e0bcfcf43c944469bce6bfd8092fd188",
+					"size": 25980,
+					"status": "missing-in-source"
+				},
+				"min-maps/vs/editor/editor.main.nls.it.js.map": {
+					"match": false,
+					"packageHash": "c9dad56cca2e6afe0d022e192e274e87f5e30e602cda97e62a54844ea0b04416",
+					"size": 25512,
+					"status": "missing-in-source"
+				},
+				"min-maps/vs/editor/editor.main.nls.ja.js.map": {
+					"match": false,
+					"packageHash": "2828b1d2e049a479cb25012a6fa987a4f341fe34d35066ea6d6e62d08ff7129c",
+					"size": 26861,
+					"status": "missing-in-source"
+				},
+				"min-maps/vs/editor/editor.main.nls.js.map": {
+					"match": false,
+					"packageHash": "ba4d31a6c99db3bd36a5cb6e06c96d8ce9c45582e423625af6b7d3a157dac13f",
+					"size": 22685,
+					"status": "missing-in-source"
+				},
+				"min-maps/vs/editor/editor.main.nls.ko.js.map": {
+					"match": false,
+					"packageHash": "0c56e03f120e7bd874e1e04373c34b6dc0f69f4f4908f6c5a8d5dd6083090dec",
+					"size": 24874,
+					"status": "missing-in-source"
+				},
+				"min-maps/vs/editor/editor.main.nls.ru.js.map": {
+					"match": false,
+					"packageHash": "9f95ffd690e84149daded06936468b4d2f1d4bf1edfadd3708aa75e7d34a1ec1",
+					"size": 32997,
+					"status": "missing-in-source"
+				},
+				"min-maps/vs/editor/editor.main.nls.zh-cn.js.map": {
+					"match": false,
+					"packageHash": "8cc6d4d2d155ca32307c862f31f8c2a3e0318c01f87c7207214e539fd7a23d09",
+					"size": 21640,
+					"status": "missing-in-source"
+				},
+				"min-maps/vs/editor/editor.main.nls.zh-tw.js.map": {
+					"match": false,
+					"packageHash": "373a496f3fa972b5d76404a25a6e434fbfc25b135a4561e00c01c07d2ed3c165",
+					"size": 21931,
+					"status": "missing-in-source"
+				},
+				"min-maps/vs/loader.js.map": {
+					"match": false,
+					"packageHash": "1874d55096fd9d19075dacdc27669aa962f847aa176fb2abf837a5551ff83ece",
+					"size": 129693,
+					"status": "missing-in-source"
+				},
+				"monaco.d.ts": {
+					"match": false,
+					"packageHash": "e3851f9c0fb60445fcf49c2215c6a123355996d653c81ab5fa5b455d36d2d67a",
+					"size": 166029,
+					"status": "missing-in-source"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -1,30 +1,104 @@\n {\n-  \"name\": \"monaco-editor\",\n-  \"private\": false,\n-  \"version\": \"0.7.0\",\n-  \"description\": \"A browser based code editor\",\n-  \"author\": \"Microsoft Corporation\",\n-  \"license\": \"MIT\",\n-  \"scripts\": {\n-    \"simpleserver\": \"gulp simpleserver\",\n-    \"release\": \"gulp release\",\n-    \"website\": \"gulp website\"\n-  },\n-  \"typings\": \"./monaco.d.ts\",\n-  \"repository\": {\n-    \"type\": \"git\",\n-    \"url\": \"https://github.com/Microsoft/monaco-editor\"\n-  },\n-  \"devDependencies\": {\n-    \"event-stream\": \"^3.3.2\",\n-    \"gulp\": \"^3.9.1\",\n-    \"http-server\": \"^0.9.0\",\n-    \"monaco-css\": \"1.2.1\",\n-    \"monaco-editor-core\": \"0.7.3\",\n-    \"monaco-json\": \"1.1.1\",\n-    \"monaco-html\": \"1.1.0\",\n-    \"monaco-languages\": \"0.6.0\",\n-    \"monaco-typescript\": \"2.0.1\",\n-    \"rimraf\": \"^2.5.2\"\n-  }\n-}\n\\ No newline at end of file\n+\t\"name\": \"monaco-editor\",\n+\t\"version\": \"0.55.1\",\n+\t\"vscodeRef\": \"86f5a62f058e3905f74a9fa65d04b2f3b533408e\",\n+\t\"private\": true,\n+\t\"description\": \"A browser based code editor\",\n+\t\"homepage\": \"https://github.com/microsoft/monaco-editor\",\n+\t\"author\": \"Microsoft Corporation\",\n+\t\"license\": \"MIT\",\n+\t\"scripts\": {\n+\t\t\"import-typescript\": \"ts-node ./build/importTypescript\",\n+\t\t\"postinstall\": \"ts-node ./build/postinstall\",\n+\t\t\"prettier-check\": \"prettier --check .\",\n+\t\t\"prettier\": \"prettier --write .\",\n+\t\t\"pretty-quick\": \"pretty-quick --staged\",\n+\t\t\"simpleserver\": \"ts-node ./build/simpleserver\",\n+\t\t\"package-for-smoketest\": \"npm run package-for-smoketest-webpack && npm run package-for-smoketest-esbuild && npm run package-for-smoketest-vite\",\n+\t\t\"package-for-smoketest-webpack\": \"ts-node ./test/smoke/package-webpack\",\n+\t\t\"package-for-smoketest-webpack-cross-origin\": \"ts-node ./test/smoke/package-webpack --cross-origin\",\n+\t\t\"package-for-smoketest-esbuild\": \"ts-node ./test/smoke/package-esbuild\",\n+\t\t\"package-for-smoketest-vite\": \"ts-node ./test/smoke/package-vite\",\n+\t\t\"smoketest\": \"playwright test --config=test/smoke/playwright.config.ts\",\n+\t\t\"smoketest-debug\": \"playwright test --config=test/smoke/playwright.config.ts --debug\",\n+\t\t\"smoketest-ui\": \"playwright test --config=test/smoke/playwright.config.ts --ui\",\n+\t\t\"smoketest-headed\": \"playwright test --config=test/smoke/playwright.config.ts --headed\",\n+\t\t\"test\": \"ts-node ./build/check-samples\",\n+\t\t\"deps-all-remove\": \"ts-node ./build/npm/removeAll\",\n+\t\t\"deps-all-install\": \"ts-node ./build/npm/installAll\",\n+\t\t\"update-actions\": \"pin-github-action ./.github/workflows/website.yml\",\n+\t\t\"watch\": \"tsc -w -p ./src\",\n+\t\t\"build-all\": \"npm run build-lsp && npm run build-monaco-editor && npm run package-for-smoketest\",\n+\t\t\"build\": \"npm run build-lsp && npm run build-monaco-editor\",\n+\t\t\"build-monaco-editor\": \"ts-node ./build/build-monaco-editor\",\n+\t\t\"build-lsp\": \"cd monaco-lsp-client && npm install && npm run build\"\n+\t},\n+\t\"typings\": \"./esm/vs/editor/editor.main.d.ts\",\n+\t\"main\": \"./min/vs/editor/editor.main.js\",\n+\t\"module\": \"./esm/vs/editor/editor.main.js\",\n+\t\"exports\": {\n+\t\t\".\": {\n+\t\t\t\"types\": \"./esm/vs/editor/editor.main.d.ts\",\n+\t\t\t\"import\": \"./esm/vs/editor/editor.main.js\",\n+\t\t\t\"require\": \"./min/vs/editor/editor.main.js\"\n+\t\t},\n+\t\t\"./*\": \"./*\"\n+\t},\n+\t\"repository\": {\n+\t\t\"type\": \"git\",\n+\t\t\"url\": \"https://github.com/microsoft/monaco-editor\"\n+\t},\n+\t\"devDependencies\": {\n+\t\t\"@playwright/test\": \"^1.56.1\",\n+\t\t\"@rollup/plugin-alias\": \"^5.1.1\",\n+\t\t\"@rollup/plugin-node-resolve\": \"^16.0.2\",\n+\t\t\"@types/mocha\": \"^10.0.10\",\n+\t\t\"@types/shelljs\": \"^0.8.11\",\n+\t\t\"@types/trusted-types\": \"^1.0.6\",\n+\t\t\"@typescript/vfs\": \"^1.3.5\",\n+\t\t\"@vscode/monaco-lsp-client\": \"file:./monaco-lsp-client\",\n+\t\t\"chai\": \"^4.3.6\",\n+\t\t\"clean-css\": \"^5.2.4\",\n+\t\t\"css-loader\": \"^6.7.1\",\n+\t\t\"esbuild\": \"^0.25.9\",\n+\t\t\"esbuild-plugin-alias\": \"^0.2.1\",\n+\t\t\"file-loader\": \"^6.2.0\",\n+\t\t\"glob\": \"^7.2.0\",\n+\t\t\"http-server\": \"^14.1.1\",\n",
+					"match": false,
+					"packageHash": "cb026ce2299a918115e3e3727bfee324bddcaf721fc50cd2b0ab6c1ed0b1fb84",
+					"size": 743,
+					"sourceHash": "a345a9e31b4c390ace3c64f0d76f5416ecfc6fe9872441604328fa561a8052b7",
+					"status": "content"
+				},
+				".azure-pipelines/publish-nightly.yml": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				".azure-pipelines/publish-stable.yml": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				".devcontainer/devcontainer.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				".gitattributes": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				".github/ISSUE_TEMPLATE/1_bug_report.yaml": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				".github/ISSUE_TEMPLATE/2_feature_request.yaml": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				".github/ISSUE_TEMPLATE/3_other.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				".github/ISSUE_TEMPLATE/config.yml": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				".github/commands.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				".github/publish-failure-issue-template.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				".github/workflows/ci.yml": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				".github/workflows/website.yml": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				".husky/pre-commit": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				".mocharc.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				".nvmrc": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				".prettierignore": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				".prettierrc": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				".vscode/launch.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				".vscode/settings.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				".vscode/tasks.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"CHANGELOG.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"CONTRIBUTING.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"LICENSE.txt": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"MAINTAINING.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"SECURITY.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"build/amd/build.script.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"build/amd/plugin.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"build/amd/rollup-types.config.mjs": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"build/amd/src/editor.main.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"build/amd/src/loader.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"build/amd/src/nls.messages-loader.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"build/amd/src/types.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"build/amd/vite.config.mjs": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"build/build-monaco-editor.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"build/check-samples.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"build/esm/build.script.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"build/esm/rollup-plugin-keep-css-imports/LICENSE": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"build/esm/rollup-plugin-keep-css-imports/README.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"build/esm/rollup-plugin-keep-css-imports/dist/ImportUpdater.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"build/esm/rollup-plugin-keep-css-imports/dist/compileSass.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"build/esm/rollup-plugin-keep-css-imports/dist/constants.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"build/esm/rollup-plugin-keep-css-imports/dist/helpers.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"build/esm/rollup-plugin-keep-css-imports/dist/index.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"build/esm/rollup-plugin-keep-css-imports/dist/index.mjs": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"build/esm/rollup-plugin-keep-css-imports/dist/index.original.mjs": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"build/esm/rollup-plugin-keep-css-imports/dist/types.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"build/esm/rollup-plugin-keep-css-imports/package.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"build/esm/rollup-types.config.mjs": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"build/esm/rollup-url-to-module-plugin/index.mjs": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"build/esm/rollup.config.mjs": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"build/fs.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"build/importTypescript.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"build/npm/installAll.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"build/npm/removeAll.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"build/postinstall.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"build/releaseMetadata.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"build/shared.mjs": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"build/simpleserver.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"build/tsconfig.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"build/utils.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"docs/code-structure.dio.svg": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"docs/debugging-core.gif": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"docs/debugging-languages.gif": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"docs/integrate-esm.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"docs/launch config.png": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"docs/out-folders.dio.svg": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"editor.code-workspace": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"gulpfile.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"monaco-lsp-client/README.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"monaco-lsp-client/generator/index.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"monaco-lsp-client/package-lock.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"monaco-lsp-client/package.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"monaco-lsp-client/rolldown.config.mjs": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"monaco-lsp-client/src/adapters/ITextModelBridge.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"monaco-lsp-client/src/adapters/LspCapabilitiesRegistry.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"monaco-lsp-client/src/adapters/LspClient.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"monaco-lsp-client/src/adapters/LspConnection.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"monaco-lsp-client/src/adapters/TextDocumentSynchronizer.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"monaco-lsp-client/src/adapters/languageFeatures/LspCodeActionFeature.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"monaco-lsp-client/src/adapters/languageFeatures/LspCodeLensFeature.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"monaco-lsp-client/src/adapters/languageFeatures/LspCompletionFeature.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"monaco-lsp-client/src/adapters/languageFeatures/LspDeclarationFeature.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"monaco-lsp-client/src/adapters/languageFeatures/LspDefinitionFeature.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"monaco-lsp-client/src/adapters/languageFeatures/LspDiagnosticsFeature.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"monaco-lsp-client/src/adapters/languageFeatures/LspDocumentHighlightFeature.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"monaco-lsp-client/src/adapters/languageFeatures/LspDocumentLinkFeature.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"monaco-lsp-client/src/adapters/languageFeatures/LspDocumentSymbolFeature.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"monaco-lsp-client/src/adapters/languageFeatures/LspFoldingRangeFeature.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"monaco-lsp-client/src/adapters/languageFeatures/LspFormattingFeature.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"monaco-lsp-client/src/adapters/languageFeatures/LspHoverFeature.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"monaco-lsp-client/src/adapters/languageFeatures/LspImplementationFeature.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"monaco-lsp-client/src/adapters/languageFeatures/LspInlayHintsFeature.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"monaco-lsp-client/src/adapters/languageFeatures/LspOnTypeFormattingFeature.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"monaco-lsp-client/src/adapters/languageFeatures/LspRangeFormattingFeature.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"monaco-lsp-client/src/adapters/languageFeatures/LspReferencesFeature.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"monaco-lsp-client/src/adapters/languageFeatures/LspRenameFeature.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"monaco-lsp-client/src/adapters/languageFeatures/LspSelectionRangeFeature.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"monaco-lsp-client/src/adapters/languageFeatures/LspSemanticTokensFeature.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"monaco-lsp-client/src/adapters/languageFeatures/LspSignatureHelpFeature.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"monaco-lsp-client/src/adapters/languageFeatures/LspTypeDefinitionFeature.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"monaco-lsp-client/src/adapters/languageFeatures/common.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"monaco-lsp-client/src/index.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"monaco-lsp-client/src/types.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"monaco-lsp-client/src/utils.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"samples/README.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"samples/browser-esm-esbuild/build.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"samples/browser-esm-esbuild/index.html": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"samples/browser-esm-esbuild/index.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"samples/browser-esm-esbuild/package.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"samples/browser-esm-parcel/index.html": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"samples/browser-esm-parcel/package-lock.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"samples/browser-esm-parcel/package.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"samples/browser-esm-parcel/src/index.html": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"samples/browser-esm-parcel/src/index.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"samples/browser-esm-vite/index.html": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"samples/browser-esm-vite/main.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"samples/browser-esm-vite/package-lock.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"samples/browser-esm-vite/package.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"samples/browser-esm-vite/style.css": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"samples/browser-esm-vite/tsconfig.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"samples/browser-esm-vite/vite.config.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"samples/browser-esm-vite-react/index.html": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"samples/browser-esm-vite-react/package-lock.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"samples/browser-esm-vite-react/package.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"samples/browser-esm-vite-react/src/components/Editor.module.css": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"samples/browser-esm-vite-react/src/components/Editor.tsx": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"samples/browser-esm-vite-react/src/main.tsx": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"samples/browser-esm-vite-react/src/userWorker.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"samples/browser-esm-vite-react/src/vite-env.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"samples/browser-esm-vite-react/tsconfig.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"samples/browser-esm-vite-react/vite.config.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"samples/browser-esm-webpack/index.html": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"samples/browser-esm-webpack/index.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"samples/browser-esm-webpack/package.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"samples/browser-esm-webpack/webpack.config.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"samples/browser-esm-webpack-monaco-plugin/index.html": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"samples/browser-esm-webpack-monaco-plugin/index.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"samples/browser-esm-webpack-monaco-plugin/package.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"samples/browser-esm-webpack-monaco-plugin/webpack.config.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"samples/browser-esm-webpack-small/generate-imports.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"samples/browser-esm-webpack-small/index.html": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"samples/browser-esm-webpack-small/index.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"samples/browser-esm-webpack-small/package.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"samples/browser-esm-webpack-small/webpack.config.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"samples/browser-esm-webpack-typescript/package.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"samples/browser-esm-webpack-typescript/src/index.css": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"samples/browser-esm-webpack-typescript/src/index.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"samples/browser-esm-webpack-typescript/tsconfig.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"samples/browser-esm-webpack-typescript/webpack.config.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"samples/browser-esm-webpack-typescript-react/package-lock.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"samples/browser-esm-webpack-typescript-react/package.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"samples/browser-esm-webpack-typescript-react/src/components/Editor.tsx": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"samples/browser-esm-webpack-typescript-react/src/index.css": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"samples/browser-esm-webpack-typescript-react/src/index.html": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"samples/browser-esm-webpack-typescript-react/src/index.tsx": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"samples/browser-esm-webpack-typescript-react/tsconfig.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"samples/browser-esm-webpack-typescript-react/webpack.config.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"samples/electron-esm-webpack/index.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"samples/electron-esm-webpack/main.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"samples/electron-esm-webpack/package.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"samples/electron-esm-webpack/webpack.config.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"samples/legacy/README.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"samples/legacy/browser-amd-diff-editor/index.html": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"samples/legacy/browser-amd-diff-editor/modified.txt": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"samples/legacy/browser-amd-diff-editor/original.txt": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"samples/legacy/browser-amd-editor/index.html": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"samples/legacy/browser-amd-iframe/index.html": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"samples/legacy/browser-amd-iframe/inner.html": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"samples/legacy/browser-amd-localized/index.html": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"samples/legacy/browser-amd-monarch/index.html": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"samples/legacy/browser-amd-requirejs/index.html": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"samples/legacy/browser-amd-shadow-dom/index.html": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"samples/legacy/browser-amd-shared-model/index.html": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"samples/legacy/browser-amd-trusted-types/index.html": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"samples/legacy/electron-amd/electron-index.html": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"samples/legacy/electron-amd/index.html": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"samples/legacy/electron-amd/main.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"samples/legacy/electron-amd/package.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"samples/legacy/electron-amd-nodeIntegration/electron-index.html": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"samples/legacy/electron-amd-nodeIntegration/index.html": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"samples/legacy/electron-amd-nodeIntegration/main.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"samples/legacy/electron-amd-nodeIntegration/package.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"samples/nwjs-amd/index.html": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"samples/nwjs-amd-v2/index.html": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"samples/package-lock.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"samples/package.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"scripts/ci/build-monaco-editor-core-pkg.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"scripts/ci/build-monaco-editor-pkg.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"scripts/ci/env.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"scripts/lib/index.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/_.contribution.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/abap/abap.contribution.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/abap/abap.test.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/abap/abap.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/apex/apex.contribution.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/apex/apex.test.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/apex/apex.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/azcli/azcli.contribution.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/azcli/azcli.test.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/azcli/azcli.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/bat/bat.contribution.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/bat/bat.test.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/bat/bat.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/bicep/bicep.contribution.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/bicep/bicep.test.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/bicep/bicep.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/cameligo/cameligo.contribution.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/cameligo/cameligo.test.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/cameligo/cameligo.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/clojure/clojure.contribution.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/clojure/clojure.test.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/clojure/clojure.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/coffee/coffee.contribution.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/coffee/coffee.test.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/coffee/coffee.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/cpp/cpp.contribution.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/cpp/cpp.test.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/cpp/cpp.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/csharp/csharp.contribution.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/csharp/csharp.test.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/csharp/csharp.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/csp/csp.contribution.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/csp/csp.test.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/csp/csp.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/css/css.contribution.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/css/css.test.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/css/css.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/cypher/cypher.contribution.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/cypher/cypher.test.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/cypher/cypher.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/dart/dart.contribution.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/dart/dart.test.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/dart/dart.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/dockerfile/dockerfile.contribution.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/dockerfile/dockerfile.test.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/dockerfile/dockerfile.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/ecl/ecl.contribution.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/ecl/ecl.test.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/ecl/ecl.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/elixir/elixir.contribution.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/elixir/elixir.test.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/elixir/elixir.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/flow9/flow9.contribution.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/flow9/flow9.test.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/flow9/flow9.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/freemarker2/freemarker2-angle-bracket.test.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/freemarker2/freemarker2-angle-dollar.test.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/freemarker2/freemarker2-auto-bracket.test.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/freemarker2/freemarker2-auto-dollar.test.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/freemarker2/freemarker2-bracket-bracket.test.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/freemarker2/freemarker2-bracket-dollar.test.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/freemarker2/freemarker2.contribution.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/freemarker2/freemarker2.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/fsharp/fsharp.contribution.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/fsharp/fsharp.test.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/fsharp/fsharp.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/go/go.contribution.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/go/go.test.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/go/go.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/graphql/graphql.contribution.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/graphql/graphql.test.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/graphql/graphql.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/handlebars/handlebars.contribution.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/handlebars/handlebars.test.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/handlebars/handlebars.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/hcl/hcl.contribution.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/hcl/hcl.test.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/hcl/hcl.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/html/html.contribution.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/html/html.test.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/html/html.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/ini/ini.contribution.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/ini/ini.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/java/java.contribution.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/java/java.test.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/java/java.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/javascript/javascript.contribution.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/javascript/javascript.test.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/javascript/javascript.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/julia/julia.contribution.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/julia/julia.test.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/julia/julia.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/kotlin/kotlin.contribution.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/kotlin/kotlin.test.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/kotlin/kotlin.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/less/less.contribution.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/less/less.test.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/less/less.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/lexon/lexon.contribution.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/lexon/lexon.test.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/lexon/lexon.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/liquid/liquid.contribution.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/liquid/liquid.test.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/liquid/liquid.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/lua/lua.contribution.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/lua/lua.test.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/lua/lua.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/m3/m3.contribution.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/m3/m3.test.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/m3/m3.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/markdown/markdown.contribution.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/markdown/markdown.test.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/markdown/markdown.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/mdx/mdx.contribution.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/mdx/mdx.test.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/mdx/mdx.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/mips/mips.contribution.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/mips/mips.test.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/mips/mips.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/monaco.contribution.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/msdax/msdax.contribution.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/msdax/msdax.test.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/msdax/msdax.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/mysql/keywords.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/mysql/keywords.mysql.txt": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/mysql/mysql.contribution.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/mysql/mysql.test.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/mysql/mysql.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/objective-c/objective-c.contribution.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/objective-c/objective-c.test.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/objective-c/objective-c.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/pascal/pascal.contribution.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/pascal/pascal.test.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/pascal/pascal.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/pascaligo/pascaligo.contribution.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/pascaligo/pascaligo.test.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/pascaligo/pascaligo.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/perl/perl.contribution.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/perl/perl.test.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/perl/perl.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/pgsql/keywords.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/pgsql/keywords.postgresql.txt": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/pgsql/pgsql.contribution.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/pgsql/pgsql.test.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/pgsql/pgsql.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/php/php.contribution.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/php/php.test.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/php/php.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/pla/pla.contribution.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/pla/pla.test.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/pla/pla.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/postiats/postiats.contribution.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/postiats/postiats.test.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/postiats/postiats.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/powerquery/powerquery.contribution.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/powerquery/powerquery.test.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/powerquery/powerquery.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/powershell/powershell.contribution.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/powershell/powershell.test.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/powershell/powershell.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/protobuf/protobuf.contribution.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/protobuf/protobuf.test.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/protobuf/protobuf.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/pug/pug.contribution.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/pug/pug.test.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/pug/pug.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/python/python.contribution.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/python/python.test.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/python/python.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/qsharp/qsharp.contribution.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/qsharp/qsharp.test.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/qsharp/qsharp.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/r/r.contribution.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/r/r.test.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/r/r.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/razor/razor.contribution.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/razor/razor.test.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/razor/razor.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/redis/redis.contribution.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/redis/redis.test.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/redis/redis.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/redshift/redshift.contribution.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/redshift/redshift.test.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/redshift/redshift.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/restructuredtext/restructuredtext.contribution.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/restructuredtext/restructuredtext.test.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/restructuredtext/restructuredtext.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/ruby/ruby.contribution.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/ruby/ruby.test.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/ruby/ruby.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/rust/rust.contribution.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/rust/rust.test.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/rust/rust.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/sb/sb.contribution.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/sb/sb.test.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/sb/sb.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/scala/scala.contribution.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/scala/scala.test.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/scala/scala.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/scheme/scheme.contribution.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/scheme/scheme.test.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/scheme/scheme.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/scss/scss.contribution.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/scss/scss.test.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/scss/scss.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/shell/shell.contribution.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/shell/shell.test.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/shell/shell.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/solidity/solidity.contribution.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/solidity/solidity.test.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/solidity/solidity.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/sophia/sophia.contribution.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/sophia/sophia.test.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/sophia/sophia.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/sparql/sparql.contribution.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/sparql/sparql.test.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/sparql/sparql.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/sql/keywords.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/sql/sql.contribution.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/sql/sql.test.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/sql/sql.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/st/st.contribution.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/st/st.test.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/st/st.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/swift/swift.contribution.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/swift/swift.test.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/swift/swift.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/systemverilog/systemverilog.contribution.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/systemverilog/systemverilog.test.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/systemverilog/systemverilog.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/tcl/tcl.contribution.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/tcl/tcl.test.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/tcl/tcl.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/test/testRunner.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/twig/twig.contribution.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/twig/twig.test.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/twig/twig.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/typescript/typescript.contribution.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/typescript/typescript.test.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/typescript/typescript.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/typespec/typespec.contribution.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/typespec/typespec.test.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/typespec/typespec.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/vb/vb.contribution.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/vb/vb.test.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/vb/vb.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/wgsl/wgsl.contribution.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/wgsl/wgsl.test.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/wgsl/wgsl.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/xml/xml.contribution.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/xml/xml.test.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/xml/xml.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/yaml/yaml.contribution.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/yaml/yaml.test.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/basic-languages/yaml/yaml.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/common/initialize.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/common/workers.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/editor/edcore.main.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/editor/editor.all.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/editor/editor.api.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/editor/editor.main.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/editor/editor.worker.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/editor/internal/editorWithLanguages.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/editor/internal/initialize.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/language/common/lspLanguageFeatures.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/language/css/css.worker.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/language/css/cssMode.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/language/css/cssWorker.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/language/css/monaco.contribution.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/language/css/workerManager.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/language/html/html.worker.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/language/html/htmlMode.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/language/html/htmlWorker.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/language/html/monaco.contribution.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/language/html/workerManager.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/language/json/json.worker.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/language/json/jsonMode.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/language/json/jsonWorker.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/language/json/monaco.contribution.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/language/json/tokenization.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/language/json/workerManager.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/language/typescript/languageFeatures.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/language/typescript/lib/editor.worker.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/language/typescript/lib/lib.index.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/language/typescript/lib/lib.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/language/typescript/lib/typescriptServices.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/language/typescript/lib/typescriptServices.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/language/typescript/lib/typescriptServicesMetadata.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/language/typescript/monaco.contribution.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/language/typescript/ts.worker.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/language/typescript/tsMode.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/language/typescript/tsWorker.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/language/typescript/workerManager.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/tsconfig.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/manual/cross-origin.html": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/manual/dev-setup.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/manual/diff.html": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/manual/diff.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/manual/iframe-inner.html": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/manual/iframe.html": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/manual/index.css": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/manual/index.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/manual/index2.html": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/manual/mouse-fixed.html": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/manual/mouse-scrollable-body.html": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/manual/mouse-scrollable-element.html": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/manual/samples/run-editor-failing-js.txt": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/manual/samples/run-editor-intellisense-js.txt": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/manual/samples/run-editor-jquery-min-js.txt": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/manual/samples/run-editor-korean.txt": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/manual/samples/run-editor-sample-big-css.txt": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/manual/samples/run-editor-sample-bom-cs.txt": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/manual/samples/run-editor-sample-cr-ps1.txt": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/manual/samples/run-editor-sample-dynamic.txt": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/manual/samples/run-editor-sample-f12-css.txt": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/manual/samples/run-editor-sample-html.txt": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/manual/samples/run-editor-sample-js.txt": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/manual/samples/run-editor-sample-msn-js.txt": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/manual/samples.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/manual/shadow-dom.html": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/manual/transform.html": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/manual/typescript/custom-worker.html": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/manual/typescript/custom-worker.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/manual/typescript/index.html": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/smoke/amd/index.html": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/smoke/common.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/smoke/esbuild/index.html": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/smoke/esbuild/index.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/smoke/package-esbuild.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/smoke/package-vite.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/smoke/package-webpack.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/smoke/parcel/index.html": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/smoke/parcel/index.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/smoke/parcel/package.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/smoke/playwright.config.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/smoke/server.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/smoke/smoke.test.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/smoke/vite/index.html": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/smoke/vite/index.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/smoke/webpack/index.html": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/smoke/webpack/index.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"webpack-plugin/LICENSE": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"webpack-plugin/README.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"webpack-plugin/package-lock.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"webpack-plugin/package.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"webpack-plugin/tsconfig.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/.prettierrc.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/index/samples/sample.mdx.txt": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/package-lock.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/package.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/scripts/check-playground-samples-js.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/monaco-loader.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/runner/debug.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/runner/index.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/runner/style.scss": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/shared.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/tsconfig.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/types.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/bootstrap.scss": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/code-oss.svg": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/components/Loader.tsx": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/components/Nav.tsx": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/components/Page.tsx": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/components/Radio.tsx": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/components/Select.tsx": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/components/TextBox.tsx": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/components/bootstrap.tsx": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/components/monaco/MonacoEditor.tsx": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/components/monaco/MonacoLoader.tsx": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/diff-sample/modified.txt": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/diff-sample/original.txt": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/home-samples/sample.abap.txt": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/home-samples/sample.aes.txt": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/home-samples/sample.apex.txt": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/home-samples/sample.azcli.txt": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/home-samples/sample.bat.txt": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/home-samples/sample.bicep.txt": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/home-samples/sample.c.txt": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/home-samples/sample.cameligo.txt": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/home-samples/sample.clojure.txt": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/home-samples/sample.coffeescript.txt": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/home-samples/sample.cpp.txt": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/home-samples/sample.csharp.txt": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/home-samples/sample.csp.txt": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/home-samples/sample.css.txt": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/home-samples/sample.cypher.txt": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/home-samples/sample.dart.txt": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/home-samples/sample.dockerfile.txt": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/home-samples/sample.ecl.txt": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/home-samples/sample.elixir.txt": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/home-samples/sample.flow9.txt": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/home-samples/sample.freemarker2.tag-angle.interpolation-bracket.txt": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/home-samples/sample.freemarker2.tag-angle.interpolation-dollar.txt": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/home-samples/sample.freemarker2.tag-auto.interpolation-bracket.txt": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/home-samples/sample.freemarker2.tag-auto.interpolation-dollar.txt": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/home-samples/sample.freemarker2.tag-bracket.interpolation-bracket.txt": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/home-samples/sample.freemarker2.tag-bracket.interpolation-dollar.txt": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/home-samples/sample.freemarker2.txt": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/home-samples/sample.fsharp.txt": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/home-samples/sample.go.txt": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/home-samples/sample.graphql.txt": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/home-samples/sample.handlebars.txt": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/home-samples/sample.hcl.txt": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/home-samples/sample.html.txt": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/home-samples/sample.ini.txt": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/home-samples/sample.java.txt": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/home-samples/sample.javascript.txt": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/home-samples/sample.json.txt": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/home-samples/sample.julia.txt": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/home-samples/sample.kotlin.txt": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/home-samples/sample.less.txt": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/home-samples/sample.lex.txt": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/home-samples/sample.lexon.txt": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/home-samples/sample.liquid.txt": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/home-samples/sample.lua.txt": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/home-samples/sample.m3.txt": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/home-samples/sample.markdown.txt": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/home-samples/sample.mdx.txt": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/home-samples/sample.mips.txt": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/home-samples/sample.msdax.txt": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/home-samples/sample.mysql.txt": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/home-samples/sample.objective-c.txt": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/home-samples/sample.pascal.txt": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/home-samples/sample.pascaligo.txt": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/home-samples/sample.perl.txt": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/home-samples/sample.pgsql.txt": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/home-samples/sample.php.txt": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/home-samples/sample.pla.txt": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/home-samples/sample.plaintext.txt": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/home-samples/sample.postiats.txt": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/home-samples/sample.powerquery.txt": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/home-samples/sample.powershell.txt": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/home-samples/sample.proto.txt": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/home-samples/sample.pug.txt": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/home-samples/sample.python.txt": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/home-samples/sample.qsharp.txt": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/home-samples/sample.r.txt": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/home-samples/sample.razor.txt": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/home-samples/sample.redis.txt": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/home-samples/sample.redshift.txt": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/home-samples/sample.restructuredtext.txt": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/home-samples/sample.ruby.txt": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/home-samples/sample.rust.txt": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/home-samples/sample.sb.txt": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/home-samples/sample.scala.txt": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/home-samples/sample.scheme.txt": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/home-samples/sample.scss.txt": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/home-samples/sample.shell.txt": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/home-samples/sample.sol.txt": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/home-samples/sample.sparql.txt": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/home-samples/sample.sql.txt": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/home-samples/sample.st.txt": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/home-samples/sample.swift.txt": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/home-samples/sample.systemverilog.txt": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/home-samples/sample.tcl.txt": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/home-samples/sample.twig.txt": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/home-samples/sample.typescript.txt": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/home-samples/sample.typespec.txt": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/home-samples/sample.vb.txt": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/home-samples/sample.verilog.txt": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/home-samples/sample.wgsl.txt": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/home-samples/sample.xml.txt": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/home-samples/sample.yaml.txt": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/playground-samples/all.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/playground-samples/creating-the-diffeditor/chapter.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/playground-samples/creating-the-diffeditor/hello-diff-world/sample.css": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/playground-samples/creating-the-diffeditor/hello-diff-world/sample.html": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/playground-samples/creating-the-diffeditor/hello-diff-world/sample.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/playground-samples/creating-the-diffeditor/hello-diff-world/sample.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/playground-samples/creating-the-diffeditor/inline-diff-example/sample.css": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/playground-samples/creating-the-diffeditor/inline-diff-example/sample.html": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/playground-samples/creating-the-diffeditor/inline-diff-example/sample.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/playground-samples/creating-the-diffeditor/inline-diff-example/sample.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/playground-samples/creating-the-diffeditor/multi-line-example/sample.css": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/playground-samples/creating-the-diffeditor/multi-line-example/sample.html": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/playground-samples/creating-the-diffeditor/multi-line-example/sample.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/playground-samples/creating-the-diffeditor/multi-line-example/sample.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/playground-samples/creating-the-editor/chapter.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/playground-samples/creating-the-editor/editor-basic-options/sample.css": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/playground-samples/creating-the-editor/editor-basic-options/sample.html": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/playground-samples/creating-the-editor/editor-basic-options/sample.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/playground-samples/creating-the-editor/editor-basic-options/sample.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/playground-samples/creating-the-editor/hard-wrapping/sample.css": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/playground-samples/creating-the-editor/hard-wrapping/sample.html": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/playground-samples/creating-the-editor/hard-wrapping/sample.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/playground-samples/creating-the-editor/hard-wrapping/sample.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/playground-samples/creating-the-editor/hello-world/sample.css": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/playground-samples/creating-the-editor/hello-world/sample.html": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/playground-samples/creating-the-editor/hello-world/sample.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/playground-samples/creating-the-editor/hello-world/sample.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/playground-samples/creating-the-editor/syntax-highlighting-for-html-elements/sample.css": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/playground-samples/creating-the-editor/syntax-highlighting-for-html-elements/sample.html": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/playground-samples/creating-the-editor/syntax-highlighting-for-html-elements/sample.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/playground-samples/creating-the-editor/syntax-highlighting-for-html-elements/sample.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/playground-samples/creating-the-editor/web-component/sample.css": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/playground-samples/creating-the-editor/web-component/sample.html": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/playground-samples/creating-the-editor/web-component/sample.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/playground-samples/creating-the-editor/web-component/sample.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/playground-samples/customizing-the-appearence/chapter.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/playground-samples/customizing-the-appearence/exposed-colors/sample.css": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/playground-samples/customizing-the-appearence/exposed-colors/sample.html": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/playground-samples/customizing-the-appearence/exposed-colors/sample.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/playground-samples/customizing-the-appearence/exposed-colors/sample.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/playground-samples/customizing-the-appearence/scrollbars/sample.css": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/playground-samples/customizing-the-appearence/scrollbars/sample.html": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/playground-samples/customizing-the-appearence/scrollbars/sample.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/playground-samples/customizing-the-appearence/scrollbars/sample.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/playground-samples/customizing-the-appearence/tokens-and-colors/sample.css": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/playground-samples/customizing-the-appearence/tokens-and-colors/sample.html": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/playground-samples/customizing-the-appearence/tokens-and-colors/sample.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/playground-samples/customizing-the-appearence/tokens-and-colors/sample.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/playground-samples/extending-language-services/chapter.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/playground-samples/extending-language-services/codelens-provider-example/sample.css": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/playground-samples/extending-language-services/codelens-provider-example/sample.html": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/playground-samples/extending-language-services/codelens-provider-example/sample.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/playground-samples/extending-language-services/codelens-provider-example/sample.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/playground-samples/extending-language-services/color-provider-example/sample.css": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/playground-samples/extending-language-services/color-provider-example/sample.html": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/playground-samples/extending-language-services/color-provider-example/sample.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/playground-samples/extending-language-services/color-provider-example/sample.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/playground-samples/extending-language-services/completion-provider-example/sample.css": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/playground-samples/extending-language-services/completion-provider-example/sample.html": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/playground-samples/extending-language-services/completion-provider-example/sample.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/playground-samples/extending-language-services/completion-provider-example/sample.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/playground-samples/extending-language-services/configure-javascript-defaults/sample.css": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/playground-samples/extending-language-services/configure-javascript-defaults/sample.html": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/playground-samples/extending-language-services/configure-javascript-defaults/sample.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/playground-samples/extending-language-services/configure-javascript-defaults/sample.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/playground-samples/extending-language-services/configure-json-defaults/sample.css": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/playground-samples/extending-language-services/configure-json-defaults/sample.html": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/playground-samples/extending-language-services/configure-json-defaults/sample.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/playground-samples/extending-language-services/configure-json-defaults/sample.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/playground-samples/extending-language-services/custom-languages/sample.css": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/playground-samples/extending-language-services/custom-languages/sample.html": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/playground-samples/extending-language-services/custom-languages/sample.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/playground-samples/extending-language-services/custom-languages/sample.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/playground-samples/extending-language-services/folding-provider-example/sample.css": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/playground-samples/extending-language-services/folding-provider-example/sample.html": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/playground-samples/extending-language-services/folding-provider-example/sample.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/playground-samples/extending-language-services/folding-provider-example/sample.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/playground-samples/extending-language-services/hover-provider-example/sample.css": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/playground-samples/extending-language-services/hover-provider-example/sample.html": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/playground-samples/extending-language-services/hover-provider-example/sample.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/playground-samples/extending-language-services/hover-provider-example/sample.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/playground-samples/extending-language-services/inlay-hints-provider-example/sample.css": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/playground-samples/extending-language-services/inlay-hints-provider-example/sample.html": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/playground-samples/extending-language-services/inlay-hints-provider-example/sample.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/playground-samples/extending-language-services/inlay-hints-provider-example/sample.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/playground-samples/extending-language-services/model-markers-example/sample.css": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/playground-samples/extending-language-services/model-markers-example/sample.html": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/playground-samples/extending-language-services/model-markers-example/sample.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/playground-samples/extending-language-services/model-markers-example/sample.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/playground-samples/extending-language-services/semantic-tokens-provider-example/sample.css": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/playground-samples/extending-language-services/semantic-tokens-provider-example/sample.html": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/playground-samples/extending-language-services/semantic-tokens-provider-example/sample.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/playground-samples/extending-language-services/semantic-tokens-provider-example/sample.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/playground-samples/extending-language-services/symbols-provider-example/sample.css": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/playground-samples/extending-language-services/symbols-provider-example/sample.html": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/playground-samples/extending-language-services/symbols-provider-example/sample.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/playground-samples/extending-language-services/symbols-provider-example/sample.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/playground-samples/interacting-with-the-editor/adding-a-command-to-an-editor-instance/sample.css": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/playground-samples/interacting-with-the-editor/adding-a-command-to-an-editor-instance/sample.html": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/playground-samples/interacting-with-the-editor/adding-a-command-to-an-editor-instance/sample.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/playground-samples/interacting-with-the-editor/adding-a-command-to-an-editor-instance/sample.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/playground-samples/interacting-with-the-editor/adding-a-keybinding-to-an-existing-command/sample.css": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/playground-samples/interacting-with-the-editor/adding-a-keybinding-to-an-existing-command/sample.html": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/playground-samples/interacting-with-the-editor/adding-a-keybinding-to-an-existing-command/sample.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/playground-samples/interacting-with-the-editor/adding-a-keybinding-to-an-existing-command/sample.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/playground-samples/interacting-with-the-editor/adding-an-action-to-an-editor-instance/sample.css": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/playground-samples/interacting-with-the-editor/adding-an-action-to-an-editor-instance/sample.html": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/playground-samples/interacting-with-the-editor/adding-an-action-to-an-editor-instance/sample.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/playground-samples/interacting-with-the-editor/adding-an-action-to-an-editor-instance/sample.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/playground-samples/interacting-with-the-editor/chapter.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/playground-samples/interacting-with-the-editor/customizing-the-line-numbers/sample.css": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/playground-samples/interacting-with-the-editor/customizing-the-line-numbers/sample.html": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/playground-samples/interacting-with-the-editor/customizing-the-line-numbers/sample.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/playground-samples/interacting-with-the-editor/customizing-the-line-numbers/sample.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/playground-samples/interacting-with-the-editor/line-and-inline-decorations/sample.css": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/playground-samples/interacting-with-the-editor/line-and-inline-decorations/sample.html": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/playground-samples/interacting-with-the-editor/line-and-inline-decorations/sample.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/playground-samples/interacting-with-the-editor/line-and-inline-decorations/sample.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/playground-samples/interacting-with-the-editor/listening-to-key-events/sample.css": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/playground-samples/interacting-with-the-editor/listening-to-key-events/sample.html": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/playground-samples/interacting-with-the-editor/listening-to-key-events/sample.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/playground-samples/interacting-with-the-editor/listening-to-key-events/sample.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/playground-samples/interacting-with-the-editor/listening-to-mouse-events/sample.css": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/playground-samples/interacting-with-the-editor/listening-to-mouse-events/sample.html": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/playground-samples/interacting-with-the-editor/listening-to-mouse-events/sample.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/playground-samples/interacting-with-the-editor/listening-to-mouse-events/sample.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/playground-samples/interacting-with-the-editor/rendering-glyphs-in-the-margin/sample.css": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/playground-samples/interacting-with-the-editor/rendering-glyphs-in-the-margin/sample.html": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/playground-samples/interacting-with-the-editor/rendering-glyphs-in-the-margin/sample.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/playground-samples/interacting-with-the-editor/rendering-glyphs-in-the-margin/sample.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/playground-samples/interacting-with-the-editor/revealing-a-position/sample.css": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/playground-samples/interacting-with-the-editor/revealing-a-position/sample.html": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/playground-samples/interacting-with-the-editor/revealing-a-position/sample.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/data/playground-samples/interacting-with-the-editor/revealing-a-position/sample.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/index.tsx": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/monaco-loader-chunk.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/monacoEditorVersion.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/pages/App.tsx": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/pages/DocsPage.tsx": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/pages/MonarchPage.tsx": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/pages/home/Home.tsx": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/pages/playground/BisectModel.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/pages/playground/LocationModel.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/pages/playground/PlaygroundModel.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/pages/playground/PlaygroundPage.tsx": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/pages/playground/PlaygroundPageContent.tsx": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/pages/playground/Preview.tsx": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/pages/playground/SettingsDialog.tsx": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/pages/playground/SettingsModel.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/pages/playground/Source.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/pages/playground/getNpmVersionsSync.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/pages/playground/playgroundExamples.tsx": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/pages/playground/utils.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/pages/routes.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/style.scss": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/utils/Debouncer.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/utils/ObservableHistory.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/utils/ObservablePromise.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/utils/hotComponent.tsx": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/utils/lzmaCompressor.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/utils/ref.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/utils/types.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/website/utils/utils.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/static/monarch/monarch-34px.png": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/static/monarch/monarch.css": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/static/monarch/monarch.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/static/monarch-static.html": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/tsconfig.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/tslint.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/typedoc/tsconfig.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/typedoc/typedoc.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/vscode-web-editors.tgz": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/webpack.config.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				}
+			},
+			"summary": {
+				"differentFiles": 3,
+				"matchingFiles": 0,
+				"missingInPackage": 826,
+				"missingInSource": 130,
+				"score": 0,
+				"totalFiles": 959
+			}
+		}
+	}
+]
