@@ -1,0 +1,127 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-01T14:53:50.098Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:11.7.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "grunt-contrib-connect@0.1.1",
+			"name": "grunt-contrib-connect",
+			"version": "0.1.1",
+			"location": "https://registry.npmjs.org/grunt-contrib-connect/-/grunt-contrib-connect-0.1.1.tgz",
+			"integrity": "sha512-MBODI5Rv9soHWRVs7/o5/fl+Bj4RzlpHMULa4T7PRLricb5YAcCKlTL38JI1Jys9QEeLs9SDY61fUA0HRwv9+w==",
+			"publishedAt": "2013-02-16T01:21:21.759Z",
+			"publishedWith": {
+				"node": null,
+				"npm": "1.1.65"
+			}
+		},
+		"source": {
+			"integrity": "sha512-Hfq/0QJl3ddD2N/a/1cDJHkKEOGk6m7W6uxNe0AmYwtf6v0F/4+8q9rvPJ1tl+mrI90lU/89I9T/h48qqeMfQA==",
+			"location": "git://github.com/gruntjs/grunt-contrib-connect.git",
+			"spec": "github:gruntjs/grunt-contrib-connect#HEAD"
+		},
+		"comparisonHash": "8a2a8dcbb729bf3ee9216e490c955701f0ddebe1",
+		"diff": {
+			"files": {
+				".travis.yml": {
+					"match": false,
+					"packageHash": "df93dfd00c63acc28ae480bac495a85c90bf09f9c435dab14a3242c1cf1b0dba",
+					"size": 79,
+					"status": "missing-in-source"
+				},
+				"AUTHORS": {
+					"match": false,
+					"packageHash": "46aeccc2535d6e9fc9be4ddfea86df1a2a792800778304aea54f2e92d4b565bf",
+					"size": 119,
+					"status": "missing-in-source"
+				},
+				"CHANGELOG": {
+					"match": false,
+					"packageHash": "1ddb26d48064aec3a0890ed2b9b64df37f6036af8fb21390ff34eb6d26805a79",
+					"size": 472,
+					"status": "missing-in-source"
+				},
+				"CONTRIBUTING.md": {
+					"match": false,
+					"packageHash": "88d8478bcbc1b2369bba8fe8f034f86d736bf665ec38b2644ddaf285e1c5206c",
+					"size": 127,
+					"status": "missing-in-source"
+				},
+				"LICENSE-MIT": {
+					"match": false,
+					"packageHash": "8605d6ae7784090c79128aa288cac5cf9478365a69f7eaf8720c93a56df4f9da",
+					"size": 1076,
+					"status": "missing-in-source"
+				},
+				"README.md": {
+					"diff": "--- published/README.md\n+++ rebuilt/README.md\n@@ -1,16 +1,23 @@\n-# grunt-contrib-connect [![Build Status](https://secure.travis-ci.org/gruntjs/grunt-contrib-connect.png?branch=master)](http://travis-ci.org/gruntjs/grunt-contrib-connect)\n+# grunt-contrib-connect v5.0.1 [![Build Status](https://github.com/gruntjs/grunt-contrib-connect/workflows/Tests/badge.svg)](https://github.com/gruntjs/grunt-contrib-connect/actions?workflow=Tests)\n \n-> Start a connect web server.\n+> Start a connect web server\n \n \n \n ## Getting Started\n-If you haven't used [Grunt](http://gruntjs.com/) before, be sure to check out the [Getting Started](http://gruntjs.com/getting-started) guide, as it explains how to create a [Gruntfile](http://gruntjs.com/sample-gruntfile) as well as install and use Grunt plugins. Once you're familiar with that process, you may install this plugin with this command:\n+\n+If you haven't used [Grunt](https://gruntjs.com/) before, be sure to check out the [Getting Started](https://gruntjs.com/getting-started) guide, as it explains how to create a [Gruntfile](https://gruntjs.com/sample-gruntfile) as well as install and use Grunt plugins. Once you're familiar with that process, you may install this plugin with this command:\n \n ```shell\n npm install grunt-contrib-connect --save-dev\n ```\n \n+Once the plugin has been installed, it may be enabled inside your Gruntfile with this line of JavaScript:\n+\n+```js\n+grunt.loadNpmTasks('grunt-contrib-connect');\n+```\n+\n \n \n \n@@ -23,44 +30,166 @@\n ### Options\n \n #### port\n-Type: `Integer`\n+Type: `Integer`  \n Default: `8000`\n \n-The port on which the webserver will respond. The task will fail if the specified port is already in use.\n+The port on which the webserver will respond. The task will fail if the specified port is already in use (unless [useAvailablePort](#useavailableport) is set). You can use the special values `0` or `'?'` to use a system-assigned port.\n+\n+#### protocol\n+Type: `String`  \n+Default: `'http'`\n+\n+May be `'http'`, `'http2'` or `'https'`.\n \n #### hostname\n-Type: `String`\n-Default: `'localhost'`\n+Type: `String`  \n+Default: `'0.0.0.0'`\n \n-The hostname the webserver will use.\n+The hostname on which the webserver can be accessed.\n+\n+Setting it to `'*'`, like '`0.0.0.0`', will make the server accessible from any **local** IPv4 address like  `'127.0.0.1'` and the IP assigned to an ethernet or wireless interface (like `'192.168.0.x'` or `'10.0.0.x'`). [More info](https://en.wikipedia.org/wiki/0.0.0.0)\n+\n+If [`open`](#open) is set to `true`, the `hostname` setting will be used to generate the URL that is opened by the browser, defaulting to `localhost` if a wildcard hostname was specified.\n \n #### base\n-Type: `String`\n+Type: `String` or `Array` or `Object`  \n Default: `'.'`\n \n-The base (or root) directory from which files will be served. Defaults to the project Gruntfile's directory.\n+| Type     | Result                                                                                                                                           | Example                                              |\n+| ---      | :---                                                                                                                                             | ---                                                  |\n+| *String* | The base (or root) directory from which files will be served. Defaults to the project Gruntfile's directory.                                     | `'public'`                                           |\n+| *Array*  | Array of `String` (or `Object`) bases to serve multiple directories. The last base given will be the [directory][] to become browse-able.        | `['public','www-root']`                              |\n+| *Object* | Map containing `path` and `options` keys. `options` are passed on to the [serve-static](https://www.npmjs.com/package/serve-static) module. | `{ path: 'public', options: { maxAge: 1000*60*5 } }` |\n+\n+\n+#### directory\n+Type: `String`  \n+Default: `null`\n+\n+Set to the directory you wish to be browse-able. Used to override the `base` option browse-able directory.\n+\n+See https://www.npmjs.com/package/serve-index for details.\n \n #### keepalive\n-Type: `Boolean`\n+Type: `Boolean`  \n Default: `false`\n \n Keep the server alive indefinitely. Note that if this option is enabled, any tasks specified after this task will _never run_. By default, once grunt's tasks have completed, the web server stops. This option changes that behavior.\n \n This option can also be enabled ad-hoc by running the task like `grunt connect:targetname:keepalive`\n \n+#### debug\n+Type: `Boolean`  \n+Default: `false`\n+\n+Set the `debug` option to true to enable logging instead of using the `--debug` flag.\n+\n+#### livereload\n+Type: `Boolean`, `Number`, or `Object`  \n+Default: `false`\n+\n+Set to anything but `false` to inject a live reload script tag into your page using [connect-livereload](https://github.com/intesso/connect-livereload).\n",
+					"match": false,
+					"packageHash": "92d352e75f039d038501de6dbbf80a823d390dea2b9f918e71f9681878313a3a",
+					"size": 5690,
+					"sourceHash": "975a6645088758f53756c797227aa751292a4a2e3b40df76e163787bfc2d2dfb",
+					"status": "content"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -1,45 +1,44 @@\n {\n   \"name\": \"grunt-contrib-connect\",\n-  \"description\": \"Start a connect web server.\",\n-  \"version\": \"0.1.1\",\n-  \"homepage\": \"https://github.com/gruntjs/grunt-contrib-connect\",\n+  \"description\": \"Start a connect web server\",\n+  \"version\": \"5.0.1\",\n   \"author\": {\n     \"name\": \"Grunt Team\",\n-    \"url\": \"http://gruntjs.com/\"\n+    \"url\": \"https://gruntjs.com/\"\n   },\n-  \"repository\": {\n-    \"type\": \"git\",\n-    \"url\": \"git://github.com/gruntjs/grunt-contrib-connect.git\"\n-  },\n-  \"bugs\": {\n-    \"url\": \"https://github.com/gruntjs/grunt-contrib-connect/issues\"\n-  },\n-  \"licenses\": [\n-    {\n-      \"type\": \"MIT\",\n-      \"url\": \"https://github.com/gruntjs/grunt-contrib-connect/blob/master/LICENSE-MIT\"\n-    }\n-  ],\n-  \"main\": \"Gruntfile.js\",\n+  \"repository\": \"gruntjs/grunt-contrib-connect\",\n+  \"license\": \"MIT\",\n   \"engines\": {\n-    \"node\": \">= 0.8.0\"\n+    \"node\": \">=16\"\n   },\n+  \"main\": \"tasks/connect.js\",\n   \"scripts\": {\n     \"test\": \"grunt test\"\n   },\n   \"dependencies\": {\n-    \"connect\": \"~2.4.4\"\n+    \"async\": \"^3.2.5\",\n+    \"connect\": \"^3.7.0\",\n+    \"connect-livereload\": \"^0.6.1\",\n+    \"http2-wrapper\": \"^2.2.1\",\n+    \"morgan\": \"^1.10.0\",\n+    \"open\": \"^8.0.0\",\n+    \"portscanner\": \"^2.2.0\",\n+    \"serve-index\": \"^1.9.1\",\n+    \"serve-static\": \"^1.15.0\"\n   },\n   \"devDependencies\": {\n-    \"grunt-contrib-jshint\": \"~0.1.1\",\n-    \"grunt-contrib-nodeunit\": \"~0.1.2\",\n-    \"grunt-contrib-internal\": \"~0.4.0\",\n-    \"grunt\": \"~0.4.0\"\n+    \"grunt\": \"^1.6.1\",\n+    \"grunt-contrib-internal\": \"^9.0.0\",\n+    \"grunt-contrib-jshint\": \"^3.2.0\",\n+    \"grunt-contrib-nodeunit\": \"^5.0.0\"\n   },\n   \"keywords\": [\n     \"gruntplugin\",\n     \"server\",\n     \"connect\",\n     \"http\"\n+  ],\n+  \"files\": [\n+    \"tasks\"\n   ]\n }\n",
+					"match": false,
+					"packageHash": "5d5fc1d76d7d7af6d86504d2ecb8ec01a747d1baddbd49b05938462b0ab5b725",
+					"size": 997,
+					"sourceHash": "4d28ab995556e2d7391e1f5f922da2d682539f6d3b640899bc62a02ef5327b77",
+					"status": "content"
+				},
+				"tasks/connect.js": {
+					"diff": "--- published/tasks/connect.js\n+++ rebuilt/tasks/connect.js\n@@ -1,73 +1,259 @@\n /*\n  * grunt-contrib-connect\n- * http://gruntjs.com/\n+ * https://gruntjs.com/\n  *\n- * Copyright (c) 2012 \"Cowboy\" Ben Alman, contributors\n+ * Copyright (c) 2016 \"Cowboy\" Ben Alman, contributors\n  * Licensed under the MIT license.\n  */\n \n 'use strict';\n \n module.exports = function(grunt) {\n-\n-  // Nodejs libs.\n   var path = require('path');\n-\n-  // External libs.\n   var connect = require('connect');\n+  var morgan = require('morgan');\n+  var serveStatic = require('serve-static');\n+  var serveIndex = require('serve-index');\n+  var http = require('http');\n+  var https = require('https');\n+  var http2 = require('http2-wrapper');\n+  var injectLiveReload = require('connect-livereload');\n+  var open = require('open');\n+  var portscanner = require('portscanner');\n+  var async = require('async');\n+\n+  var MAX_PORTS = 30; // Maximum available ports to check after the specified port\n+\n+  var createDefaultMiddleware = function createDefaultMiddleware(connect, options) {\n+    var middlewares = [];\n+    if (!Array.isArray(options.base)) {\n+      options.base = [options.base];\n+    }\n+    // Options for serve-static module. See https://www.npmjs.com/package/serve-static\n+    var defaultStaticOptions = {};\n+    var directory = options.directory || options.base[options.base.length - 1];\n+    options.base.forEach(function(base) {\n+      // Serve static files.\n+      var path = base.path || base;\n+      var staticOptions = base.options || defaultStaticOptions;\n+      middlewares.push(serveStatic(path, staticOptions));\n+    });\n+    // Make directory browse-able.\n+    middlewares.push(serveIndex(directory.path || directory, directory.options));\n+    return middlewares;\n+  };\n \n   grunt.registerMultiTask('connect', 'Start a connect web server.', function() {\n-\n+    var done = this.async();\n     // Merge task-specific options with these defaults.\n     var options = this.options({\n+      protocol: 'http',\n       port: 8000,\n-      hostname: 'localhost',\n+      hostname: '0.0.0.0',\n       base: '.',\n+      directory: null,\n       keepalive: false,\n-      middleware: function(connect, options) {\n-        return [\n-          // Serve static files.\n-          connect.static(options.base),\n-          // Make empty directories browsable.\n-          connect.directory(options.base),\n-        ];\n-      }\n+      debug: false,\n+      livereload: false,\n+      open: false,\n+      useAvailablePort: false,\n+      onCreateServer: null,\n+      // if nothing passed, then is set below 'middleware = createDefaultMiddleware.call(this, connect, options);'\n+      middleware: null\n     });\n \n+    if (options.protocol !== 'http' && options.protocol !== 'https' && options.protocol !== 'http2') {\n+      grunt.fatal('protocol option must be \\'http\\', \\'https\\' or \\'http2\\'');\n+    }\n+\n     // Connect requires the base path to be absolute.\n-    options.base = path.resolve(options.base);\n+    if (Array.isArray(options.base)) {\n+      options.base = options.base.map(function(base) {\n+        if (base.path) {\n+          base.path = path.resolve(base.path);\n+          return base;\n+        }\n+        return path.resolve(base);\n+      });\n+    } else {\n+      if (options.base.path) {\n+        options.base.path = path.resolve(options.base.path);\n",
+					"match": false,
+					"packageHash": "244ae7936223a477cb3ca80415d9b27570f73d129b35e7a90491080811291f82",
+					"size": 2237,
+					"sourceHash": "4e9d10fc963fcee952cef07a71f8720b1c555e517fe4bed418bb9fcfef0d489c",
+					"status": "content"
+				},
+				"tasks/certs/ca.crt": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"tasks/certs/ca.csr": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"tasks/certs/ca.key": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"tasks/certs/ca.srl": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"tasks/certs/server.crt": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"tasks/certs/server.csr": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"tasks/certs/server.key": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"tasks/certs/server.key.org": {
+					"match": false,
+					"status": "missing-in-package"
+				}
+			},
+			"summary": {
+				"differentFiles": 3,
+				"matchingFiles": 0,
+				"missingInPackage": 8,
+				"missingInSource": 5,
+				"score": 0,
+				"totalFiles": 16
+			}
+		}
+	}
+]
