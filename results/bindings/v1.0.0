@@ -1,0 +1,57 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-01T06:31:18.064Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:11.7.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "bindings@1.0.0",
+			"name": "bindings",
+			"version": "1.0.0",
+			"location": "https://registry.npmjs.org/bindings/-/bindings-1.0.0.tgz",
+			"integrity": "sha512-0HUHVSjpd72yMgZyCcW86RcSoOhhEMQp4WwjlCEw80eTgDwab8iE9ZBYw5NaKSek3wn45RBEQd5Waj4j+wGaIg==",
+			"publishedAt": "2012-07-18T18:49:12.866Z",
+			"publishedWith": {
+				"node": null,
+				"npm": null
+			}
+		},
+		"source": {
+			"integrity": "sha512-KuYouE4i/z2LWGv+fcHfJnasWaS2Pg/JWv9KXfTFAbQURRB2ZVF1TKicvW6VNezmtbDVAfyUs9W58yNn/p0+aA==",
+			"location": "git://github.com/TooTallNate/node-bindings.git",
+			"spec": "github:TooTallNate/node-bindings#v1.0.0"
+		},
+		"comparisonHash": "8a2a8dcbb729bf3ee9216e490c955701f0ddebe1",
+		"diff": {
+			"files": {
+				"README.md": {
+					"diff": "--- published/README.md\n+++ rebuilt/README.md\n@@ -1,19 +1,49 @@\n node-bindings\n =============\n-### Helper module for loading your native module's .node file\n+### Helper module for loading your native module's bindings\n \n-This is a helper module for authors of Node.js native addon modules.\n-It is basically the \"swiss army knife\" of `require()`ing your native module's\n-`.node` file.\n-\n-Throughout the course of Node's native addon history, addons have ended up being\n-compiled in a variety of different places, depending on which build tool and which\n-version of node was used. To make matters worse, now the _gyp_ build tool can\n-produce either a _Release_ or _Debug_ build, each being built into different\n-locations.\n+This is a helper module for authors of Node.js native addon modules. In node >=\n+0.7.0, it is encouraged to statically precompile your native addons for your\n+various supported platforms and architectures, rather than depend on your users\n+to do that. This adds two new burdens on the developer that we now need to\n+consider while writing our module:\n \n-This module checks _all_ the possible locations that a native addon would be built\n-at, and returns the first one that loads successfully.\n+ 1. You now have to compile the bindings yourself, before publishing the module.\n+ 2. You now have to figure out which version of the bindings to load at runtime.\n+\n+`node-bindings` attempts to solve probelm `#2`.\n+\n+This module solves the organizational problem of how to store these bindings\n+files with a simple directory convention:\n+\n+```\n+<module_root>/compiled/<node_version>/<platform>/<arch>/bindings.node\n+```\n+\n+So for example, on a 32-bit Windows platform, running node `v0.6.9`, the\n+`bindings.node` file should be placed in:\n+\n+```\n+<module_root>/compiled/0.6/win32/ia32/bindings.node\n+```\n+\n+On 64-bit Mac OS X, running node `v0.7.1`, then the bindings file should be\n+placed in:\n+\n+```\n+<module_root>/compiled/0.7/darwin/x64/bindings.node\n+```\n+\n+For reference, the calculations for the various parts that makes up the require\n+path are:\n+\n+ * `<module_root>` - The directory where `package.json` is found is the root.\n+ * `<platform>` - `process.platform`\n+ * `<arch>` - `process.arch`\n+ * `<node_version>` - `parseFloat(process.versions.node)`\n+\n+The default \"compiled\" directory is `compiled` and the default name of every\n+\"bindings\" file is `bindings.node`. This is configurable if you'd like.\n \n \n Installation\n@@ -25,8 +55,6 @@\n $ npm install bindings\n ```\n \n-Or add it to the `\"dependencies\"` section of your _package.json_ file.\n-\n \n Example\n -------\n@@ -35,41 +63,49 @@\n and architecture is as simple as:\n \n ``` js\n-var bindings = require('bindings')('binding.node')\n+var bindings = require('bindings')()\n \n // Use your bindings defined in your C files\n bindings.your_c_function()\n ```\n \n+You can specify the name of the bindings file if you desire:\n+\n+``` js\n+var bindings = require('bindings')('my_bindings')\n+```\n+\n+Or you can pass in an options Object for full configuration:\n+\n+\n+``` js\n+var bindings = require('bindings')({\n+    bindings: 'my_bindings'\n+  , compiled: 'builddir'\n+})\n+```\n \n",
+					"match": false,
+					"packageHash": "cb5f397bda9631a6686bff7dce5714b741698eb3e4c1c474b4bcccc31bb2c121",
+					"size": 3343,
+					"sourceHash": "e3aaf6d61de44cce4d9142c31ed88cacc81ea96bdac48e7083469433b55cee69",
+					"status": "content"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -1,8 +1,9 @@\n { \"name\": \"bindings\"\n-, \"description\": \"Helper module for loading your native module's .node file\"\n-, \"keywords\": [ \"native\", \"addon\", \"bindings\", \"gyp\", \"waf\", \"c\", \"c++\" ]\n+, \"description\": \"Helper module for loading your native module's bindings\"\n+, \"keywords\": [ \"native\", \"addon\", \"bindings\", \"gyp\", \"waf\" ]\n , \"version\": \"1.0.0\"\n , \"author\": \"Nathan Rajlich <nathan@tootallnate.net> (http://tootallnate.net)\"\n , \"repository\": { \"type\": \"git\", \"url\": \"git://github.com/TooTallNate/node-bindings.git\" }\n , \"main\": \"./bindings.js\"\n+, \"engines\": { \"node\": \"*\" }\n }\n",
+					"match": false,
+					"packageHash": "105924099bcf34566ff1617017595a25e1e648b3c4cb04d00e6c4cb20eb03a8b",
+					"size": 391,
+					"sourceHash": "e1bfe4f4fa1445e5359489ee657fd8fb2a9ee67fce01e68ab5b9e31f74dbafa8",
+					"status": "content"
+				}
+			},
+			"summary": {
+				"differentFiles": 2,
+				"matchingFiles": 1,
+				"missingInPackage": 0,
+				"missingInSource": 0,
+				"score": 0.3333333333333333,
+				"totalFiles": 3
+			}
+		}
+	}
+]
