@@ -1,0 +1,73 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-01T13:29:03.676Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:11.7.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "estraverse@0.0.3",
+			"name": "estraverse",
+			"version": "0.0.3",
+			"location": "https://registry.npmjs.org/estraverse/-/estraverse-0.0.3.tgz",
+			"integrity": "sha512-en1NE9blJLD5vNAd8xhD1w2KSBhuTGczYIbb2AKgkxtCWGQz7gadEGJ7LtlybYRy1l0W1NMwP8iWnUwcZbGj+A==",
+			"publishedAt": "2012-10-14T20:22:02.442Z",
+			"publishedWith": {
+				"node": null,
+				"npm": "1.1.59"
+			}
+		},
+		"source": {
+			"integrity": null,
+			"location": "http://github.com/Constellation/estraverse.git",
+			"spec": "github:Constellation/estraverse#HEAD"
+		},
+		"comparisonHash": "8a2a8dcbb729bf3ee9216e490c955701f0ddebe1",
+		"diff": {
+			"files": {
+				"README.md": {
+					"diff": "--- published/README.md\n+++ rebuilt/README.md\n@@ -1,10 +1,134 @@\n-Estraverse ([estraverse](http://github.com/Constellation/estraverse)) is\n+### Estraverse [![Build Status](https://secure.travis-ci.org/estools/estraverse.svg)](http://travis-ci.org/estools/estraverse)\n+\n+Estraverse ([estraverse](http://github.com/estools/estraverse)) is\n [ECMAScript](http://www.ecma-international.org/publications/standards/Ecma-262.htm)\n-traversal functions from [esmangle project](http://github.com/Constellation/esmangle).\n+traversal functions from [esmangle project](http://github.com/estools/esmangle).\n+\n+### Documentation\n+\n+You can find usage docs at [wiki page](https://github.com/estools/estraverse/wiki/Usage).\n+\n+### Example Usage\n+\n+The following code will output all variables declared at the root of a file.\n+\n+```javascript\n+estraverse.traverse(ast, {\n+    enter: function (node, parent) {\n+        if (node.type == 'FunctionExpression' || node.type == 'FunctionDeclaration')\n+            return estraverse.VisitorOption.Skip;\n+    },\n+    leave: function (node, parent) {\n+        if (node.type == 'VariableDeclarator')\n+          console.log(node.id.name);\n+    }\n+});\n+```\n+\n+We can use `this.skip`, `this.remove` and `this.break` functions instead of using Skip, Remove and Break.\n+\n+```javascript\n+estraverse.traverse(ast, {\n+    enter: function (node) {\n+        this.break();\n+    }\n+});\n+```\n+\n+And estraverse provides `estraverse.replace` function. When returning node from `enter`/`leave`, current node is replaced with it.\n+\n+```javascript\n+result = estraverse.replace(tree, {\n+    enter: function (node) {\n+        // Replace it with replaced.\n+        if (node.type === 'Literal')\n+            return replaced;\n+    }\n+});\n+```\n+\n+By passing `visitor.keys` mapping, we can extend estraverse traversing functionality.\n+\n+```javascript\n+// This tree contains a user-defined `TestExpression` node.\n+var tree = {\n+    type: 'TestExpression',\n+\n+    // This 'argument' is the property containing the other **node**.\n+    argument: {\n+        type: 'Literal',\n+        value: 20\n+    },\n+\n+    // This 'extended' is the property not containing the other **node**.\n+    extended: true\n+};\n+estraverse.traverse(tree, {\n+    enter: function (node) { },\n+\n+    // Extending the existing traversing rules.\n+    keys: {\n+        // TargetNodeName: [ 'keys', 'containing', 'the', 'other', '**node**' ]\n+        TestExpression: ['argument']\n+    }\n+});\n+```\n+\n+By passing `visitor.fallback` option, we can control the behavior when encountering unknown nodes.\n+\n+```javascript\n+// This tree contains a user-defined `TestExpression` node.\n+var tree = {\n+    type: 'TestExpression',\n+\n+    // This 'argument' is the property containing the other **node**.\n+    argument: {\n+        type: 'Literal',\n+        value: 20\n+    },\n+\n+    // This 'extended' is the property not containing the other **node**.\n+    extended: true\n+};\n+estraverse.traverse(tree, {\n+    enter: function (node) { },\n+\n",
+					"match": false,
+					"packageHash": "65f91b8c8ea5b945289c9f588537b1e8e17376adddc1438e47134723eb44618f",
+					"size": 1646,
+					"sourceHash": "623a48ac487901c20b18ff241617efb3adf6a3b8c077073fccdddc770404c991",
+					"status": "content"
+				},
+				"estraverse.js": {
+					"diff": "--- published/estraverse.js\n+++ rebuilt/estraverse.js\n@@ -1,5 +1,5 @@\n /*\n-  Copyright (C) 2012 Yusuke Suzuki <utatane.tea@gmail.com>\n+  Copyright (C) 2012-2013 Yusuke Suzuki <utatane.tea@gmail.com>\n   Copyright (C) 2012 Ariya Hidayat <ariya.hidayat@gmail.com>\n \n   Redistribution and use in source and binary forms, with or without\n@@ -22,62 +22,122 @@\n   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF\n   THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.\n */\n-\n-/*jslint bitwise:true */\n-/*global exports:true, define:true, window:true */\n-(function (factory) {\n-    'use strict';\n-\n-    // Universal Module Definition (UMD) to support AMD, CommonJS/Node.js,\n-    // and plain browser loading,\n-    if (typeof define === 'function' && define.amd) {\n-        define(['exports'], factory);\n-    } else if (typeof exports !== 'undefined') {\n-        factory(exports);\n-    } else {\n-        factory((window.estraverse = {}));\n-    }\n-}(function (exports) {\n+/*jslint vars:false, bitwise:true*/\n+/*jshint indent:4*/\n+/*global exports:true*/\n+(function clone(exports) {\n     'use strict';\n \n     var Syntax,\n-        isArray,\n         VisitorOption,\n-        VisitorKeys;\n+        VisitorKeys,\n+        BREAK,\n+        SKIP,\n+        REMOVE;\n+\n+    function deepCopy(obj) {\n+        var ret = {}, key, val;\n+        for (key in obj) {\n+            if (obj.hasOwnProperty(key)) {\n+                val = obj[key];\n+                if (typeof val === 'object' && val !== null) {\n+                    ret[key] = deepCopy(val);\n+                } else {\n+                    ret[key] = val;\n+                }\n+            }\n+        }\n+        return ret;\n+    }\n+\n+    // based on LLVM libc++ upper_bound / lower_bound\n+    // MIT License\n+\n+    function upperBound(array, func) {\n+        var diff, len, i, current;\n+\n+        len = array.length;\n+        i = 0;\n+\n+        while (len) {\n+            diff = len >>> 1;\n+            current = i + diff;\n+            if (func(array[current])) {\n+                len = diff;\n+            } else {\n+                i = current + 1;\n+                len -= diff + 1;\n+            }\n+        }\n+        return i;\n+    }\n \n     Syntax = {\n         AssignmentExpression: 'AssignmentExpression',\n+        AssignmentPattern: 'AssignmentPattern',\n         ArrayExpression: 'ArrayExpression',\n+        ArrayPattern: 'ArrayPattern',\n+        ArrowFunctionExpression: 'ArrowFunctionExpression',\n+        AwaitExpression: 'AwaitExpression', // CAUTION: It's deferred to ES7.\n         BlockStatement: 'BlockStatement',\n         BinaryExpression: 'BinaryExpression',\n         BreakStatement: 'BreakStatement',\n         CallExpression: 'CallExpression',\n         CatchClause: 'CatchClause',\n+        ChainExpression: 'ChainExpression',\n+        ClassBody: 'ClassBody',\n+        ClassDeclaration: 'ClassDeclaration',\n+        ClassExpression: 'ClassExpression',\n+        ComprehensionBlock: 'ComprehensionBlock',  // CAUTION: It's deferred to ES7.\n+        ComprehensionExpression: 'ComprehensionExpression',  // CAUTION: It's deferred to ES7.\n         ConditionalExpression: 'ConditionalExpression',\n",
+					"match": false,
+					"packageHash": "9681c607ff42beb5179bf31c2fc899ab1abfa7d3c2ac821931ce7dbac976d908",
+					"size": 10792,
+					"sourceHash": "818578222a4686be24197cac7e9ea00a6b32a0312c86a2bb946ec4b7faeee93c",
+					"status": "content"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -1,30 +1,40 @@\n {\n-    \"name\": \"estraverse\",\n-    \"description\": \"ECMAScript JS AST traversal functions\",\n-    \"homepage\": \"http://github.com/Constellation/estraverse.html\",\n-    \"main\": \"estraverse.js\",\n-    \"version\": \"0.0.3\",\n-    \"engines\": {\n-        \"node\": \">=0.4.0\"\n-    },\n-    \"maintainers\": [{\n-        \"name\": \"Yusuke Suzuki\",\n-        \"email\": \"utatane.tea@gmail.com\",\n-        \"web\": \"http://github.com/Constellation\"\n-    }],\n-    \"repository\": {\n-        \"type\": \"git\",\n-        \"url\": \"http://github.com/Constellation/estraverse.git\"\n-    },\n-    \"devDependencies\": {\n-        \"mocha\": \"*\",\n-        \"chai\": \"*\"\n-    },\n-    \"licenses\": [{\n-        \"type\": \"BSD\",\n-        \"url\": \"http://github.com/Constellation/estraverse/raw/master/LICENSE.BSD\"\n-    }],\n-    \"scripts\": {\n-        \"test\": \"./node_modules/.bin/mocha\"\n+  \"name\": \"estraverse\",\n+  \"description\": \"ECMAScript JS AST traversal functions\",\n+  \"homepage\": \"https://github.com/estools/estraverse\",\n+  \"main\": \"estraverse.js\",\n+  \"version\": \"5.3.0\",\n+  \"engines\": {\n+    \"node\": \">=4.0\"\n+  },\n+  \"maintainers\": [\n+    {\n+      \"name\": \"Yusuke Suzuki\",\n+      \"email\": \"utatane.tea@gmail.com\",\n+      \"web\": \"http://github.com/Constellation\"\n     }\n+  ],\n+  \"repository\": {\n+    \"type\": \"git\",\n+    \"url\": \"http://github.com/estools/estraverse.git\"\n+  },\n+  \"devDependencies\": {\n+    \"babel-preset-env\": \"^1.6.1\",\n+    \"babel-register\": \"^6.3.13\",\n+    \"chai\": \"^2.1.1\",\n+    \"espree\": \"^1.11.0\",\n+    \"gulp\": \"^3.8.10\",\n+    \"gulp-bump\": \"^0.2.2\",\n+    \"gulp-filter\": \"^2.0.0\",\n+    \"gulp-git\": \"^1.0.1\",\n+    \"gulp-tag-version\": \"^1.3.0\",\n+    \"jshint\": \"^2.5.6\",\n+    \"mocha\": \"^2.1.0\"\n+  },\n+  \"license\": \"BSD-2-Clause\",\n+  \"scripts\": {\n+    \"test\": \"npm run-script lint && npm run-script unit-test\",\n+    \"lint\": \"jshint estraverse.js\",\n+    \"unit-test\": \"mocha --compilers js:babel-register\"\n+  }\n }\n",
+					"match": false,
+					"packageHash": "6a2917ad0edefe476e32239bdd64111a15c1f3c637f4b4f6105cb7d8d3ab2900",
+					"size": 802,
+					"sourceHash": "133a5be160a0123ad20ab8f2bdaa9da2fd94ebf3403996bf4cb69606e6a84a65",
+					"status": "content"
+				},
+				".jshintrc": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"gulpfile.js": {
+					"match": false,
+					"status": "missing-in-package"
+				}
+			},
+			"summary": {
+				"differentFiles": 3,
+				"matchingFiles": 1,
+				"missingInPackage": 2,
+				"missingInSource": 0,
+				"score": 0.16666666666666666,
+				"totalFiles": 6
+			}
+		}
+	}
+]
