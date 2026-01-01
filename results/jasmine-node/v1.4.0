@@ -1,0 +1,71 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-01T16:37:00.148Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:11.7.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "jasmine-node@1.4.0",
+			"name": "jasmine-node",
+			"version": "1.4.0",
+			"location": "https://registry.npmjs.org/jasmine-node/-/jasmine-node-1.4.0.tgz",
+			"integrity": "sha512-AHUhcGvulpxrvXhrp6ON+KNizv8LHKZqTPPeRR4Ee3dzJ8CVwo4AgdNMWZJB7Gc6r34eS1b2b27tuQtQsuWr7Q==",
+			"publishedAt": "2013-03-13T17:26:18.201Z",
+			"publishedWith": {
+				"node": null,
+				"npm": "1.2.14"
+			}
+		},
+		"source": {
+			"integrity": "sha512-8jVTAkJUJ8acsKemcsJddFeqvO5KDJEi0Odf1RmOx3qtPN3hAyLp2uary3FcfRV2X6dnl1tWUHs7KyXJL3a7EQ==",
+			"location": "https://github.com/mhevery/jasmine-node.git",
+			"spec": "github:mhevery/jasmine-node#v1.4.0"
+		},
+		"comparisonHash": "8a2a8dcbb729bf3ee9216e490c955701f0ddebe1",
+		"diff": {
+			"files": {
+				".npmignore": {
+					"match": false,
+					"packageHash": "4bfa54f6278779d6b98072e17176d67f868d3205699109e2a19ece4a52891182",
+					"size": 121,
+					"status": "missing-in-source"
+				},
+				"README.md": {
+					"diff": "--- published/README.md\n+++ rebuilt/README.md\n@@ -135,7 +135,7 @@\n changelog\n ---------\n \n-*  _1.4.0 - Optional flag to suppress stack trace on test failure (thanks to [Lastalas](https://github.com/Lastalas)_\n+*  _1.4.0 - Optional flag to suppress stack trace on test failure (thanks to [Lastalas](https://github.com/Lastalas))_\n *  _1.3.1 - Fixed context for async tests (thanks to [omryn](https://github.com/omryn))_\n *  _1.3.0 - Added --config flag for changeable testing environments_\n *  _1.2.3 - Fixed #179, #184, #198, #199. Fixes autotest, afterEach in requirejs, terminal reporter is in jasmine object, done function missing in async tests_\n",
+					"match": false,
+					"packageHash": "32031a462a3f7c99f952a29849680be8e5236d37a544a8ef77e347b0176598f7",
+					"size": 6046,
+					"sourceHash": "f32bfd8f230418821ed5875b301b43663800a8398ce3226145d5227ee618eca4",
+					"status": "content"
+				},
+				"spec/reporter_spec.js": {
+					"diff": "--- published/spec/reporter_spec.js\n+++ rebuilt/spec/reporter_spec.js\n@@ -19,6 +19,12 @@\n       expect(this.reporter.color_).toEqual(jasmineNode.TerminalReporter.prototype.ANSIColors);\n     });\n \n+    it('initializes includeStackTrace_ from config', function () {\n+        var config = {}\n+        this.reporter = new jasmineNode.TerminalReporter(config);\n+        expect(this.reporter.includeStackTrace_).toBeTruthy();\n+    });\n+\n     it('sets the started_ flag to false', function() {\n       var config = {}\n       this.reporter = new jasmineNode.TerminalReporter(config);\n@@ -298,6 +304,38 @@\n       expect(this.printSpy.argsForCall[0]).toEqual(['Failures:']);\n       expect(this.printSpy.argsForCall[1]).toEqual(['     the stackTrace']);\n     });\n+\n+    it('prints the failures without a Stacktrace', function () {\n+        var config = { includeStackTrace: false };\n+        this.reporter = new jasmineNode.TerminalReporter(config);\n+        this.printSpy = spyOn(this.reporter, 'print_');\n+        this.printLineSpy = spyOn(this.reporter, 'printLine_');\n+\n+        var failure = {\n+            spec: 'the spec',\n+            message: 'the message',\n+            stackTrace: 'the stackTrace'\n+        }\n+\n+        this.reporter.failures_ = new Array();\n+        this.reporter.failures_.push(failure);\n+\n+        this.reporter.reportFailures_();\n+\n+        var generatedOutput =\n+                 [ [ '\\n' ],\n+                 [ '\\n' ],\n+                 [ '  1) the spec' ],\n+                 [ '   Message:' ],\n+                 [ '     the message' ] ];\n+\n+        expect(this.printLineSpy).toHaveBeenCalled();\n+        expect(this.printLineSpy.argsForCall).toEqual(generatedOutput);\n+\n+        expect(this.printSpy).toHaveBeenCalled();\n+        expect(this.printSpy.argsForCall[0]).toEqual(['Failures:']);\n+        expect(this.printSpy.argsForCall[1]).toBeUndefined();\n+    });\n   });\n });\n \n",
+					"match": false,
+					"packageHash": "c9596700bf1e05d2c79bedf5ba587e7acc905860631ec5ec691630abe8c09e20",
+					"size": 13205,
+					"sourceHash": "167368cd2b5e937da4c01f533727b7fea0d7cb9e3f01aa363bfa25720f8af69e",
+					"status": "content"
+				},
+				"specs.sh": {
+					"diff": "--- published/specs.sh\n+++ rebuilt/specs.sh\n@@ -6,14 +6,14 @@\n command=$entry\"spec\"\n echo $command\n time $command #/nested/uber-nested\n-echo -e \"\\033[1;35m--- Should have 55 tests and 95 assertions and 2 Failure. ---\\033[0m\"\n+echo -e \"\\033[1;35m--- Should have 57 tests and 101 assertions and 2 Failure. ---\\033[0m\"\n echo \"\"\n \n echo \"Running all tests located in the spec directory with coffee option\"\n command=$entry\"--coffee spec\"\n echo $command\n time $command #/nested/uber-nested\n-echo -e \"\\033[1;35m--- Should have 59 tests and 99 assertions and 4 Failures. ---\\033[0m\"\n+echo -e \"\\033[1;35m--- Should have 61 tests and 105 assertions and 4 Failures. ---\\033[0m\"\n echo \"\"\n \n echo \"Running all tests located in the spec directory with requirejs option\"\n@@ -21,7 +21,7 @@\n command=$entry\"--runWithRequireJs spec\"\n echo $command\n time $command\n-echo -e \"\\033[1;35m--- Should have 55 tests and 95 assertions and 2 Failure. ---\\033[0m\"\n+echo -e \"\\033[1;35m--- Should have 57 tests and 101 assertions and 2 Failure. ---\\033[0m\"\n echo \"\"\n \n echo \"Running all tests located in the spec-requirejs directory with requirejs, requirejs setup, and coffee option\"\n",
+					"match": false,
+					"packageHash": "2ccc8b051d87422b275889df353ac855160d7bcdc7b25a3852badca71577f745",
+					"size": 1196,
+					"sourceHash": "7bf734e6243d435e99f18104c391a1bdbf29d29490c74a93f440ec320d99793b",
+					"status": "content"
+				}
+			},
+			"summary": {
+				"differentFiles": 3,
+				"matchingFiles": 35,
+				"missingInPackage": 0,
+				"missingInSource": 1,
+				"score": 0.8974358974358975,
+				"totalFiles": 39
+			}
+		}
+	}
+]

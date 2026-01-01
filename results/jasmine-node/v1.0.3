@@ -1,0 +1,249 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-01T16:33:33.437Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:2.15.11",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "jasmine-node@1.0.3",
+			"name": "jasmine-node",
+			"version": "1.0.3",
+			"location": "https://registry.npmjs.org/jasmine-node/-/jasmine-node-1.0.3.tgz",
+			"integrity": "sha512-+I7xv3nsVPAezv4gXd2h/FzyldI6Reaoj6hO70KsO2tFtUtACxYz0+YMxu29MnX6SOuzXcaso6PzA/X2B44WKg==",
+			"publishedAt": "2011-04-22T17:24:35.561Z",
+			"publishedWith": {
+				"node": "v0.4.5",
+				"npm": "0.2.14-2"
+			}
+		},
+		"source": {
+			"integrity": null,
+			"location": "https://github.com/mhevery/jasmine-node.git",
+			"spec": "github:mhevery/jasmine-node#HEAD"
+		},
+		"comparisonHash": "8a2a8dcbb729bf3ee9216e490c955701f0ddebe1",
+		"diff": {
+			"files": {
+				"._package.json": {
+					"match": false,
+					"packageHash": "4fb2c5bf08a369896321939fa5bb1b244bdec64ff6d47dd1749c839ca672b377",
+					"size": 186,
+					"status": "missing-in-source"
+				},
+				"bin/jasmine-node": {
+					"diff": "--- published/bin/jasmine-node\n+++ rebuilt/bin/jasmine-node\n@@ -1,8 +1,6 @@\n #!/usr/bin/env node\n \n-var path = require('path');\n-var fs   = require('fs');\n-var lib  = path.join(path.dirname(fs.realpathSync(__filename)), '../lib');\n-require.paths.push(lib)\n+if( !process.env.NODE_ENV ) process.env.NODE_ENV = 'test';\n \n-require('jasmine-node/cli.js');\n+var path = require('path');\n+require(path.join(__dirname,'../lib/jasmine-node/cli.js'));\n",
+					"match": false,
+					"packageHash": "08bb1bbc2587e6de7d704ad563468854fd866299ccee629b562579705d1f9d56",
+					"size": 207,
+					"sourceHash": "065fa9eab36541b48e7032b2d8ec9f05786dff68682e2fd38e3dca1bbf92925c",
+					"status": "content"
+				},
+				"lib/jasmine-node/._cli.js": {
+					"match": false,
+					"packageHash": "4f61a0b82b8432b79f8225bf1b44c14e6f8041a28959059320f80dfff8f9678f",
+					"size": 186,
+					"status": "missing-in-source"
+				},
+				"lib/jasmine-node/._index.js": {
+					"match": false,
+					"packageHash": "8dd6fed495d898796bb763f027126d53779a645ef2bea6338171c5071e490041",
+					"size": 186,
+					"status": "missing-in-source"
+				},
+				"lib/jasmine-node/cli.js": {
+					"diff": "--- published/lib/jasmine-node/cli.js\n+++ rebuilt/lib/jasmine-node/cli.js\n@@ -1,44 +1,287 @@\n-var jasmine = require('jasmine-node');\n-var sys = require('sys'),\n-    Path= require('path');\n+var util,\n+    Path= require('path'),\n+    fs  = require('fs');\n \n+var jasmine = require('./index');\n \n-var SPEC_FOLDER= Path.join(process.cwd(), 'spec'),\n-    HELPER_MATCHER_REGEX= \"^.+[-_]helper\\.(js|coffee)$\";\n \n+try {\n+  util = require('util')\n+} catch(e) {\n+  util = require('sys')\n+}\n+\n+var helperCollection = require('./spec-collection');\n+\n+var specFolders = [];\n+var watchFolders = [];\n+\n+// The following line keeps the jasmine setTimeout in the proper scope\n+jasmine.setTimeout = jasmine.getGlobal().setTimeout;\n+jasmine.setInterval = jasmine.getGlobal().setInterval;\n for (var key in jasmine)\n   global[key] = jasmine[key];\n \n var isVerbose = false;\n var showColors = true;\n+// Disable if we're not on a TTY\n+if (!process.stdout.isTTY) {\n+    showColors = false;\n+}\n+var teamcity = process.env.TEAMCITY_PROJECT_NAME || false;\n+var useRequireJs = false;\n+var extensions = \"js\";\n+var match = '.';\n+var matchall = false;\n+var autotest = false;\n+var useHelpers = true;\n+var forceExit = false;\n+var captureExceptions = false;\n+var includeStackTrace = true;\n+var growl = false;\n+\n+var junitreport = {\n+  report: false,\n+  savePath : \"./reports/\",\n+  useDotNotation: true,\n+  consolidate: true\n+}\n+\n+var args = process.argv.slice(2);\n+var existsSync = fs.existsSync || Path.existsSync;\n+\n+while(args.length) {\n+  var arg = args.shift();\n \n-process.argv.slice(2).forEach(function(arg){\n   switch(arg)\n   {\n+    case '--version':\n+      printVersion();\n     case '--color':\n       showColors = true;\n       break;\n     case '--noColor':\n+    case '--nocolor':\n       showColors = false;\n       break;\n     case '--verbose':\n       isVerbose = true;\n       break;\n     case '--coffee':\n-      require('coffee-script');\n+      try {\n+        require('coffeescript/register'); // support CoffeeScript >=1.7.0\n+      } catch ( e ) {\n+        require('coffeescript'); // support CoffeeScript <=1.6.3\n+      }\n+      extensions = \"js|coffee|litcoffee\";\n+      break;\n+    case '-m':\n+    case '--match':\n+      match = args.shift();\n+      break;\n+    case '--matchall':\n+      matchall = true;\n       break;\n+    case '--junitreport':\n+        junitreport.report = true;\n+        break;\n+    case '--output':\n+        junitreport.savePath = args.shift();\n+        break;\n",
+					"match": false,
+					"packageHash": "4ed8bf83a1b6039b41bd67e373047a85d50f874a87267d301f13e3b1752297da",
+					"size": 969,
+					"sourceHash": "88dd00cc19947a9ff13ddd44ab9aad2469d6137b0fc8229cc9a464a50de1f5b6",
+					"status": "content"
+				},
+				"lib/jasmine-node/index.js": {
+					"diff": "--- published/lib/jasmine-node/index.js\n+++ rebuilt/lib/jasmine-node/index.js\n@@ -1,176 +1,172 @@\n var fs = require('fs');\n-var sys = require('sys');\n+var mkdirp = require('mkdirp');\n+var util;\n+try {\n+  util = require('util')\n+} catch(e) {\n+  util = require('sys')\n+}\n+\n var path = require('path');\n \n-var filename = __dirname + '/jasmine-1.0.1.js';\n-global.window = {\n-  setTimeout: setTimeout,\n-  clearTimeout: clearTimeout,\n-  setInterval: setInterval,\n-  clearInterval: clearInterval\n-};\n+var filename = __dirname + '/jasmine-1.3.1.js';\n+var isWindowUndefined = typeof global.window === 'undefined';\n+if (isWindowUndefined) {\n+  global.window = {\n+    setTimeout: setTimeout,\n+    clearTimeout: clearTimeout,\n+    setInterval: setInterval,\n+    clearInterval: clearInterval\n+  };\n+}\n \n var src = fs.readFileSync(filename);\n-var jasmine;\n-var minorVersion = process.version.match(/\\d\\.(\\d)\\.\\d/)[1];\n-switch (minorVersion) {\n-  case \"1\":\n-  case \"2\":\n-    jasmine = process.compile(src + '\\njasmine;', filename);\n-    break;\n-  default:\n-    jasmine = require('vm').runInThisContext(src + \"\\njasmine;\", filename);\n-}\n-\n-delete global.window;\n-\n-function noop(){}\n-\n-jasmine.loadHelpersInFolder=function(folder, matcher)\n-{\n-  var helpers = jasmine.getAllSpecFiles(folder, matcher);\n-\n-  for (var i = 0, len = helpers.length; i < len; ++i)\n-  {\n-    var filename = helpers[i];\n-    var helper= require(filename.replace(/\\.*$/, \"\"));\n-    for (var key in helper)\n-      global[key]= helper[key];\n-  }\n+// Put jasmine in the global context, this is somewhat like running in a\n+// browser where every file will have access to `jasmine`\n+var jasmine = require('vm').runInThisContext(src + \"\\njasmine;\", filename);\n+\n+\n+if (isWindowUndefined) {\n+  delete global.window;\n }\n+require(\"./async-callback\");\n+require(\"jasmine-reporters\");\n+var nodeReporters = require('./reporter').jasmineNode;\n+jasmine.TerminalVerboseReporter = nodeReporters.TerminalVerboseReporter;\n+jasmine.TerminalReporter = nodeReporters.TerminalReporter;\n+jasmine.TeamcityReporter = nodeReporters.TeamcityReporter;\n+jasmine.GrowlReporter = require('jasmine-growl-reporter');\n \n-jasmine.executeSpecsInFolder = function(folder, done, isVerbose, showColors, matcher){\n-  var log = [];\n-  var columnCounter = 0;\n-  var start = 0;\n-  var elapsed = 0;\n-  var verbose = isVerbose || false;\n-  var fileMatcher = new RegExp(matcher || \"spec\\.(js|coffee)$\", \"i\");\n-  var colors = showColors || false;\n-  var specs = jasmine.getAllSpecFiles(folder, fileMatcher);\n-\n-  var ansi = {\n-    green: '\\033[32m',\n-    red: '\\033[31m',\n-    yellow: '\\033[33m',\n-    none: '\\033[0m'\n-  };\n \n-  for (var i = 0, len = specs.length; i < len; ++i){\n-    var filename = specs[i];\n-    require(filename.replace(/\\.\\w+$/, \"\"));\n-  }\n-\n-  var jasmineEnv = jasmine.getEnv();\n-  jasmineEnv.reporter = {\n",
+					"match": false,
+					"packageHash": "a611a933914c0a7de266db539a293489c31a2bdba99ac2fe4a9f06c536763823",
+					"size": 5366,
+					"sourceHash": "26931c94e53c49851e0bd3fd709831a43ce2bd3521396900b3e132661e13b3ae",
+					"status": "content"
+				},
+				"lib/jasmine-node/jasmine-1.0.1.js": {
+					"match": false,
+					"packageHash": "1290cdcab98f290e01a17befe602725b8d36a4bfbb257cb08cb908094af749ae",
+					"size": 64942,
+					"status": "missing-in-source"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -1,23 +1,33 @@\n {\n-  \"name\"          : \"jasmine-node\"\n-, \"version\"       : \"1.0.3\"\n-, \"description\"   : \"DOM-less simple JavaScript BDD testing framework for Node\"\n-, \"homepage\"      : [ \"http://pivotal.github.com/jasmine\"\n-                    , \"https://github.com/mhevery/jasmine-node\"]\n-, \"repository\"    : { \"type\" : \"git\"\n-                    , \"url\"  : \"https://github.com/mhevery/jasmine-node.git\"\n-                    }\n-, \"keywords\"      : [\"testing\", \"bdd\"]\n-, \"author\"        : \"Misko Hevery <misko@hevery.com>\"\n-, \"contributors\"  : [ \"Rajan Agaskar <rajan@pivotallabs.com\"\n-                    , \"Christian Williams <xian@pivotallabs.com\"\n-                    , \"Davis W. Frank <dwfrank@pivotallabs.com>\"\n-                    , \"Matteo Collina <matteo.collina@gmail.com>\"\n-                    ]\n-, \"maintainers\"   : \"Martin Häger <martin.haeger@gmail.com>\"\n-, \"licenses\"      : [\"MIT\"]\n-, \"dependencies\"  : { \"coffee-script\" : \">=1.0.1\"}\n-, \"files\"         : [\"lib/jasmine-node/\"]\n-, \"bin\"           : \"bin/jasmine-node\"\n-, \"main\"          : \"jasmine-node\"\n+  \"name\": \"jasmine-node\",\n+  \"version\": \"3.0.0\",\n+  \"description\": \"DOM-less simple JavaScript BDD testing framework for Node\",\n+  \"homepage\": \"https://github.com/mhevery/jasmine-node\",\n+  \"repository\": {\n+    \"type\": \"git\",\n+    \"url\": \"https://github.com/mhevery/jasmine-node.git\"\n+  },\n+  \"keywords\": [\n+    \"testing\",\n+    \"bdd\"\n+  ],\n+  \"author\": \"Misko Hevery <misko@hevery.com>\",\n+  \"license\": \"MIT\",\n+  \"dependencies\": {\n+    \"coffeescript\": \"~1.12.7\",\n+    \"gaze\": \"~1.1.2\",\n+    \"jasmine-growl-reporter\": \"~2.0.0\",\n+    \"jasmine-reporters\": \"~1.0.0\",\n+    \"mkdirp\": \"~0.3.5\",\n+    \"requirejs\": \"~2.3.6\",\n+    \"underscore\": \"~1.9.1\",\n+    \"walkdir\": \"~0.0.12\"\n+  },\n+  \"bin\": \"bin/jasmine-node\",\n+  \"preferGlobal\": true,\n+  \"main\": \"lib/jasmine-node\",\n+  \"scripts\": {\n+    \"test\": \"node lib/jasmine-node/cli.js spec\"\n+  },\n+  \"devDependencies\": {}\n }\n",
+					"match": false,
+					"packageHash": "2804d7255c7471e119a8b8606039a4207c98e84e44589e19e586f7e00ee42017",
+					"size": 1035,
+					"sourceHash": "e00e45c546dcb56aaa23ce2b65fdc0c83535e72ec137d8d7e326bffafca3b9df",
+					"status": "content"
+				},
+				".travis.yml": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"LICENSE": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"README.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"bower.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/jasmine-node/async-callback.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/jasmine-node/autotest.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/jasmine-node/cs.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/jasmine-node/jasmine-1.3.1.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/jasmine-node/reporter.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/jasmine-node/requirejs-runner.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/jasmine-node/requirejs-spec-loader.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/jasmine-node/requirejs-wrapper-template.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/jasmine-node/spec-collection.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"scripts/specs": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"spec/AsyncSpec.coffee": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"spec/CoffeeSpec.coffee": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"spec/GrammarHelper.coffee": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"spec/HelperSpec.coffee": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"spec/SampleSpecs.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"spec/TestSpec.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"spec/TimerSpec.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"spec/async-callback_spec.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"spec/helper_spec.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"spec/litcoffee/Litcoffee.spec.litcoffee": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"spec/nested/NestedSpec.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"spec/nested/uber-nested/UberNestedSpec.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"spec/nested.js/NestedSpec.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"spec/reporter_spec.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"spec/sample_helper.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"spec-requirejs/requirejs-setup.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"spec-requirejs/requirejs-wrapper-template.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"spec-requirejs/requirejs.spec.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"spec-requirejs/requirejs.sut.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"spec-requirejs-coffee/RequireCsSpec.coffee": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"spec-requirejs-coffee/RequireJsSpec.coffee": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"spec-requirejs-coffee/requirecs.sut.coffee": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"spec-requirejs-coffee/requirejs-setup.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"specs.sh": {
+					"match": false,
+					"status": "missing-in-package"
+				}
+			},
+			"summary": {
+				"differentFiles": 4,
+				"matchingFiles": 0,
+				"missingInPackage": 38,
+				"missingInSource": 4,
+				"score": 0,
+				"totalFiles": 46
+			}
+		}
+	}
+]
