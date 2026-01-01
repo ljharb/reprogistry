@@ -1,0 +1,103 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-01T11:04:01.209Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:3.10.3",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "ember-cli-app-version@2.1.0",
+			"name": "ember-cli-app-version",
+			"version": "2.1.0",
+			"location": "https://registry.npmjs.org/ember-cli-app-version/-/ember-cli-app-version-2.1.0.tgz",
+			"integrity": "sha512-+JXozFR8K+wNz2ju1qWyTHozalBVBwAOlVp4wIo6RRcoXIt/UyB+l62cMppbphKqh/PifdAZYDvrgAoFkTstkw==",
+			"publishedAt": "2017-08-16T19:39:42.018Z",
+			"publishedWith": {
+				"node": "6.7.0",
+				"npm": "3.10.3"
+			}
+		},
+		"source": {
+			"integrity": null,
+			"location": "git+https://github.com/embersherpa/ember-cli-app-version.git",
+			"spec": "github:embersherpa/ember-cli-app-version#12d51951cc3431bf0f381d8a088fed48be0503a3"
+		},
+		"comparisonHash": "8a2a8dcbb729bf3ee9216e490c955701f0ddebe1",
+		"diff": {
+			"files": {
+				"README.md": {
+					"diff": "--- published/README.md\n+++ rebuilt/README.md\n@@ -1,8 +1,26 @@\n-# ember-cli-app-version [![Build Status](https://travis-ci.org/EmberSherpa/ember-cli-app-version.svg?branch=master)](https://travis-ci.org/EmberSherpa/ember-cli-app-version) ![[EmberObserver Badge](http://emberobserver.com/addons/ember-cli-app-version)](http://emberobserver.com/badges/ember-cli-app-version.svg)\n+# ember-cli-app-version\n+\n+[![CI](https://github.com/ember-cli/ember-cli-app-version/workflows/CI/badge.svg)](https://github.com/ember-cli/ember-cli-app-version/actions?query=workflow%3ACI)\n+[![NPM Version](https://badge.fury.io/js/ember-cli-app-version.svg)](https://badge.fury.io/js/ember-cli-app-version)\n+[![Ember Observer Score](https://emberobserver.com/badges/ember-cli-app-version.svg)](https://emberobserver.com/addons/ember-cli-app-version)\n \n Adds your Ember App's version to Info tab in Ember Inspector. The version is taken from your project's package.json#version.\n If you add build metadata to the version, this addon will automatically append SHA to the end of the version.\n \n+## Compatibility\n+\n+- Ember.js v3.28 or above\n+- Ember CLI v3.28 or above\n+- Node.js v18 or above\n+\n+## Installation\n+\n+```\n+ember install ember-cli-app-version\n+```\n+\n+## Usage\n+\n ![Ember Inspector Info Tab](https://www.evernote.com/shard/s51/sh/c2f52608-bc17-4d5c-ac76-dec044eeb2e2/2f08de0cfb77217502cfc3a9188d84bf/res/3fb1d3d9-d809-48f6-9d3b-6e9a4af29892/skitch.png?resizeSmall&width=832)\n \n ## {{app-version}} helper\n@@ -11,24 +29,31 @@\n \n The addon has flags to display parts of the version:\n \n-* `{{app-version hideSha=true}} // => 2.0.1`\n-* `{{app-version hideVersion=true}} // => <git SHA>`\n+- `{{app-version versionOnly=true}} // => 2.0.1`\n+- `{{app-version versionOnly=true showExtended=true}} // => 2.0.1-alpha.1`\n+- `{{app-version shaOnly=true}} // => <git SHA>`\n \n Flags are `false` by default.\n \n-## Installation\n+## Heroku\n \n-* ember install ember-cli-app-version\n+When running on Heroku the `.git` folder is not present, making it impossible to fetch the `git SHA`. A workaround for this is adding the below in your `config/environment.js`:\n \n-## Running Tests\n+```js\n+// Heroku Git Hash support\n+if (process.env.SOURCE_VERSION) {\n+  const pkg = require('../package.json');\n+  const hash = process.env.SOURCE_VERSION.substr(0, 7);\n+  ENV['ember-cli-app-version'] = {\n+    version: `${pkg.version}+${hash}`,\n+  };\n+}\n+```\n \n-* `git clone git@github.com:EmberSherpa/ember-cli-app-version.git`\n-* `npm install`\n-* `bower install`\n-* `ember test`\n+## Contributing\n \n-## Building\n+See the [Contributing](CONTRIBUTING.md) guide for details.\n \n-* `ember build`\n+## License\n \n-For more information on using ember-cli, visit [http://www.ember-cli.com/](http://www.ember-cli.com/).\n+This project is licensed under the [MIT License](LICENSE.md).\n",
+					"match": false,
+					"packageHash": "c37b64382232f894f14e8af2291d7ca4eb1c3145d33095b51191fe4d40b32125",
+					"size": 1405,
+					"sourceHash": "acc9b46888014bf8bf7e086fe90aee1ead89fe311af709d28745ee0900473d4e",
+					"status": "content"
+				},
+				"addon/initializer-factory.js": {
+					"diff": "--- published/addon/initializer-factory.js\n+++ rebuilt/addon/initializer-factory.js\n@@ -1,17 +1,11 @@\n-import Ember from 'ember';\n-\n-const { \n-  String: { classify },\n-  libraries\n-} = Ember;\n+import { libraries } from '@ember/-internals/metal';\n \n export default function initializerFactory(name, version) {\n   let registered = false;\n \n-  return function() {\n+  return function () {\n     if (!registered && name && version) {\n-      var appName = classify(name);\n-      libraries.register(appName, version);\n+      libraries.register(name, version);\n       registered = true;\n     }\n   };\n",
+					"match": false,
+					"packageHash": "c7016840cefe3ff0388f6c8d16c4a36ccc3ac75113b21b162e3d3477cbe0b2cd",
+					"size": 354,
+					"sourceHash": "4b3b80c5baf2614434897510153e1b1ffb3f321e878798a4f46fe164e7dd9df0",
+					"status": "content"
+				},
+				"addon/utils/regexp.js": {
+					"diff": "--- published/addon/utils/regexp.js\n+++ rebuilt/addon/utils/regexp.js\n@@ -1,2 +1,3 @@\n-export const versionRegExp = /\\d[.]\\d[.]\\d/;\n-export const shaRegExp = /[a-z\\d]{8}/;\n+export const versionRegExp = /\\d+[.]\\d+[.]\\d+/; // Match any number of 3 sections of digits separated by .\n+export const versionExtendedRegExp = /\\d+[.]\\d+[.]\\d+-[a-z]*([.]\\d+)?/; // Match the above but also hyphen followed by any number of lowercase letters, then optionally period and digits\n+export const shaRegExp = /[a-z\\d]{8}$/; // Match 8 lowercase letters and digits, at the end of the string only (to avoid matching with version extended part)\n",
+					"match": false,
+					"packageHash": "27e64dd94031763a1e93e7297b5803e09d7eec438faee1dca1812c43bb4f1416",
+					"size": 84,
+					"sourceHash": "09cc7591513f552b93618b2c1b04704b71ed5c3440bc14011369d62c37b7ef1e",
+					"status": "content"
+				},
+				"app/helpers/app-version.js": {
+					"diff": "--- published/app/helpers/app-version.js\n+++ rebuilt/app/helpers/app-version.js\n@@ -1,23 +1,36 @@\n-import Ember from 'ember';\n+import { helper } from '@ember/component/helper';\n import config from '../config/environment';\n-import { shaRegExp, versionRegExp } from 'ember-cli-app-version/utils/regexp';\n-\n-const {\n-  APP: {\n-    version\n-  }\n-} = config;\n+import {\n+  shaRegExp,\n+  versionRegExp,\n+  versionExtendedRegExp,\n+} from 'ember-cli-app-version/utils/regexp';\n \n export function appVersion(_, hash = {}) {\n-  if (hash.hideSha) {\n-    return version.match(versionRegExp)[0];\n+  const version = config.APP.version;\n+  // e.g. 1.0.0-alpha.1+4jds75hf\n+\n+  // Allow use of 'hideSha' and 'hideVersion' For backwards compatibility\n+  let versionOnly = hash.versionOnly || hash.hideSha;\n+  let shaOnly = hash.shaOnly || hash.hideVersion;\n+\n+  let match = null;\n+\n+  if (versionOnly) {\n+    if (hash.showExtended) {\n+      match = version.match(versionExtendedRegExp); // 1.0.0-alpha.1\n+    }\n+    // Fallback to just version\n+    if (!match) {\n+      match = version.match(versionRegExp); // 1.0.0\n+    }\n   }\n \n-  if (hash.hideVersion) {\n-    return version.match(shaRegExp)[0];\n+  if (shaOnly) {\n+    match = version.match(shaRegExp); // 4jds75hf\n   }\n \n-  return version;\n+  return match ? match[0] : version;\n }\n \n-export default Ember.Helper.helper(appVersion);\n+export default helper(appVersion);\n",
+					"match": false,
+					"packageHash": "c2da46a7bb41d21f50f85b7fb9b23dc4fdd0998466441f935eea19a212efa7b5",
+					"size": 451,
+					"sourceHash": "2a00abc6f912d357cfa1bcb635aef3b7d09794777a2b776b5dfcf98fef66981e",
+					"status": "content"
+				},
+				"app/initializers/app-version.js": {
+					"diff": "--- published/app/initializers/app-version.js\n+++ rebuilt/app/initializers/app-version.js\n@@ -1,14 +1,13 @@\n import initializerFactory from 'ember-cli-app-version/initializer-factory';\n import config from '../config/environment';\n \n-const {\n-  APP: {\n-    name,\n-    version\n-  }\n-} = config;\n+let name, version;\n+if (config.APP) {\n+  name = config.APP.name;\n+  version = config.APP.version;\n+}\n \n export default {\n   name: 'App Version',\n-  initialize: initializerFactory(name, version)\n+  initialize: initializerFactory(name, version),\n };\n",
+					"match": false,
+					"packageHash": "3886a9415e7dbcc62d3ee7cb2166df8f2c45671e3cffcde8681561ffe81d9e83",
+					"size": 268,
+					"sourceHash": "aec0b3585a653f653712f2696225dfcc49dccbb8daf5c5d5d7060e9739037e8b",
+					"status": "content"
+				},
+				"config/environment.js": {
+					"match": false,
+					"packageHash": "622ea39eaab6c828c0f9a02ec6cb54a905fe084f84f951863f173b30972d1bc0",
+					"size": 112,
+					"status": "missing-in-source"
+				},
+				"index.js": {
+					"diff": "--- published/index.js\n+++ rebuilt/index.js\n@@ -1,18 +1,58 @@\n-/* global module, require */\n 'use strict';\n-var fs = require('fs');\n+\n+const getGitInfo = require('git-repo-info');\n+const path = require('path');\n+\n+function gitRepoVersion(options) {\n+  options = options || {};\n+  let shaLength = options.shaLength != null ? options.shaLength : 8;\n+  let includeDate = options.includeDate || false;\n+  let projectPath = options.projectPath || process.cwd();\n+  let info = getGitInfo(projectPath);\n+  let packageVersion = require(path.join(projectPath, 'package.json')).version;\n+\n+  let prefix;\n+  if (info.tag && !(packageVersion && info.tag.includes(packageVersion))) {\n+    prefix = info.tag;\n+  } else if (packageVersion) {\n+    prefix = packageVersion;\n+  } else if (info.branch) {\n+    prefix = info.branch;\n+  } else {\n+    prefix = 'DETACHED_HEAD';\n+  }\n+\n+  let sha = '';\n+  if (shaLength > 0 && info.sha) {\n+    sha = '+' + info.sha.substring(0, shaLength);\n+  }\n+\n+  let authorDate = includeDate ? ' ' + info.authorDate : '';\n+\n+  return prefix + sha + authorDate;\n+}\n \n module.exports = {\n-  name: 'ember-cli-app-version',\n-  config: function(env, baseConfig) {\n-    var config = this._super.config.apply(this, arguments);\n+  name: require('./package').name,\n+  config(env, baseConfig) {\n+    let config = this._super.config.apply(this, arguments);\n+\n+    if (!baseConfig.APP) {\n+      return config;\n+    }\n+\n+    baseConfig.APP.name = this.project.pkg.name;\n \n-    var version = require('git-repo-version')(null, this.project.root);\n+    if (baseConfig[this.name] && baseConfig[this.name].version) {\n+      baseConfig.APP.version = baseConfig[this.name].version;\n+      return config;\n+    }\n+\n+    let version = gitRepoVersion(null, this.project.root);\n     if (version && baseConfig.APP) {\n-      baseConfig.APP.name = this.project.pkg.name;\n       baseConfig.APP.version = version;\n     }\n \n     return config;\n-  }\n+  },\n };\n",
+					"match": false,
+					"packageHash": "c9ef845489b3440997d7667c8d05e1a232bb4f4df8a1b9f75b912d720270d7ba",
+					"size": 452,
+					"sourceHash": "9f4eb1c41b8d9760e6344089559d5d9b9fbda08c192ec97fe028a11600e658eb",
+					"status": "content"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -1,56 +1,115 @@\n {\n   \"name\": \"ember-cli-app-version\",\n-  \"version\": \"2.1.0\",\n+  \"version\": \"7.0.0\",\n   \"description\": \"Adds App version number to Ember Inspector Info Tab\",\n+  \"keywords\": [\n+    \"ember-addon\"\n+  ],\n+  \"repository\": \"https://github.com/ember-cli/ember-cli-app-version.git\",\n+  \"license\": \"MIT\",\n+  \"author\": \"Taras Mankovski <taras@embersherpa.com>\",\n   \"directories\": {\n     \"doc\": \"doc\",\n     \"test\": \"tests\"\n   },\n-  \"scripts\": {\n-    \"build\": \"ember build\",\n-    \"start\": \"ember server\",\n-    \"test\": \"ember try:each\"\n-  },\n-  \"repository\": \"https://github.com/embersherpa/ember-cli-app-version.git\",\n   \"files\": [\n     \"addon/\",\n     \"app/\",\n-    \"config/environment.js\",\n     \"index.js\"\n   ],\n-  \"engines\": {\n-    \"node\": \"^4.5 || 6.* || >= 7.*\"\n+  \"scripts\": {\n+    \"build\": \"ember build --environment=production\",\n+    \"lint\": \"concurrently \\\"npm:lint:*(!fix)\\\" --names \\\"lint:\\\"\",\n+    \"lint:css\": \"stylelint \\\"**/*.css\\\"\",\n+    \"lint:css:fix\": \"concurrently \\\"npm:lint:css -- --fix\\\"\",\n+    \"lint:fix\": \"concurrently \\\"npm:lint:*:fix\\\" --names \\\"fix:\\\"\",\n+    \"lint:hbs\": \"ember-template-lint .\",\n+    \"lint:hbs:fix\": \"ember-template-lint . --fix\",\n+    \"lint:js\": \"eslint . --cache\",\n+    \"lint:js:fix\": \"eslint . --fix\",\n+    \"start\": \"ember serve\",\n+    \"test\": \"concurrently \\\"npm:lint\\\" \\\"npm:test:*\\\" --names \\\"lint,test:\\\"\",\n+    \"test:ember\": \"ember test\",\n+    \"test:ember-compatibility\": \"ember try:each\"\n+  },\n+  \"dependencies\": {\n+    \"ember-cli-babel\": \"^7.26.11\",\n+    \"git-repo-info\": \"^2.1.1\"\n   },\n-  \"author\": \"Taras Mankovski <taras@embersherpa.com>\",\n-  \"license\": \"MIT\",\n   \"devDependencies\": {\n-    \"broccoli-asset-rev\": \"^2.4.5\",\n-    \"ember-ajax\": \"^3.0.0\",\n-    \"ember-cli\": \"~2.14.1\",\n-    \"ember-cli-dependency-checker\": \"^1.3.0\",\n-    \"ember-cli-eslint\": \"^3.0.0\",\n-    \"ember-cli-htmlbars\": \"^2.0.1\",\n-    \"ember-cli-htmlbars-inline-precompile\": \"^0.4.3\",\n-    \"ember-cli-inject-live-reload\": \"^1.4.1\",\n-    \"ember-cli-qunit\": \"^4.0.0\",\n-    \"ember-cli-shims\": \"^1.1.0\",\n-    \"ember-cli-sri\": \"^2.1.0\",\n-    \"ember-cli-uglify\": \"^1.2.0\",\n-    \"ember-disable-prototype-extensions\": \"^1.1.2\",\n-    \"ember-export-application-global\": \"^2.0.0\",\n-    \"ember-load-initializers\": \"^1.0.0\",\n-    \"ember-resolver\": \"^4.0.0\",\n-    \"ember-source\": \"~2.14.1\",\n-    \"loader.js\": \"^4.2.3\"\n+    \"@babel/eslint-parser\": \"^7.22.5\",\n+    \"@babel/plugin-proposal-decorators\": \"^7.22.5\",\n+    \"@ember/optional-features\": \"^2.0.0\",\n+    \"@ember/string\": \"^3.1.1\",\n+    \"@ember/test-helpers\": \"^2.7.0\",\n+    \"@embroider/test-setup\": \"^3.0.1\",\n+    \"@glimmer/component\": \"^1.1.2\",\n+    \"@glimmer/tracking\": \"^1.1.2\",\n+    \"@release-it-plugins/lerna-changelog\": \"^5.0.0\",\n+    \"concurrently\": \"^8.2.0\",\n+    \"ember-auto-import\": \"^2.6.3\",\n+    \"ember-cli\": \"^4.12.0\",\n+    \"ember-cli-dependency-checker\": \"^3.3.1\",\n+    \"ember-cli-htmlbars\": \"^6.2.0\",\n+    \"ember-cli-inject-live-reload\": \"^2.1.0\",\n+    \"ember-load-initializers\": \"^2.1.2\",\n+    \"ember-page-title\": \"^7.0.0\",\n+    \"ember-qunit\": \"^6.0.0\",\n+    \"ember-resolver\": \"^10.1.0\",\n+    \"ember-source\": \"^4.12.0\",\n+    \"ember-source-channel-url\": \"^3.0.0\",\n+    \"ember-template-lint\": \"^5.10.1\",\n+    \"ember-try\": \"^2.0.0\",\n+    \"eslint\": \"^8.42.0\",\n+    \"eslint-config-prettier\": \"^8.8.0\",\n+    \"eslint-plugin-ember\": \"^11.8.0\",\n+    \"eslint-plugin-prettier\": \"^4.2.1\",\n+    \"eslint-plugin-qunit\": \"^7.3.4\",\n",
+					"match": false,
+					"packageHash": "d6005adfb62ec8591f4c0b1b1aedc928def7051e8f3dcf1d4b098ebba8e14423",
+					"size": 1485,
+					"sourceHash": "e6d08ca1dc56cfb26056e757c090f54f0a1281b26ab66467295c8f70ef891996",
+					"status": "content"
+				}
+			},
+			"summary": {
+				"differentFiles": 7,
+				"matchingFiles": 1,
+				"missingInPackage": 0,
+				"missingInSource": 1,
+				"score": 0.1111111111111111,
+				"totalFiles": 9
+			}
+		}
+	}
+]
