@@ -1,0 +1,197 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-01T14:59:18.082Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:11.7.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "gulp-bump@0.0.6",
+			"name": "gulp-bump",
+			"version": "0.0.6",
+			"location": "https://registry.npmjs.org/gulp-bump/-/gulp-bump-0.0.6.tgz",
+			"integrity": "sha512-hVWiEYbYBlINpj7m9UDKCWLrWX20A9WJt3gAIA7rIq88JwIGFy94HRFGWYknaDn855Of7Dsgs4mH06zqJCDqLg==",
+			"publishedAt": "2014-01-02T23:51:36.877Z",
+			"publishedWith": {
+				"node": null,
+				"npm": "1.3.17"
+			}
+		},
+		"source": {
+			"integrity": null,
+			"location": "git://github.com/stevelacy/gulp-bump.git",
+			"spec": "github:stevelacy/gulp-bump#HEAD"
+		},
+		"comparisonHash": "8a2a8dcbb729bf3ee9216e490c955701f0ddebe1",
+		"diff": {
+			"files": {
+				".npmignore": {
+					"match": false,
+					"packageHash": "b5583496f58cbc857c9d26bef794fceb3cf9a081ac380586e11ed636d7b7089b",
+					"size": 107,
+					"status": "missing-in-source"
+				},
+				".travis.yml": {
+					"diff": "--- published/.travis.yml\n+++ rebuilt/.travis.yml\n@@ -1,7 +1,5 @@\n+sudo: false\n language: node_js\n node_js:\n-  - 0.8\n-  - 0.9\n-  - 0.10\n-  - 0.11\n-\n+  - \"6.9.4\"\n+  - \"7.4.0\"\n",
+					"match": false,
+					"packageHash": "47f6dbfaeba120f496ef5df3395f1226ae7c548b48f996bc12f26ae903f7fa4b",
+					"size": 62,
+					"sourceHash": "2ccbf31c5af807c426e36dce4a1d6044291214892f16a989b9c9b5fc047926aa",
+					"status": "content"
+				},
+				"LICENSE": {
+					"diff": "--- published/LICENSE\n+++ rebuilt/LICENSE\n@@ -1,4 +1,4 @@\n-Copyright (c) 2014 Steve Lacy <me@slacy.me> slacy.me\n+Copyright (c) 2015 Steve Lacy <me@slacy.me> slacy.me\n \n Permission is hereby granted, free of charge, to any person obtaining\n a copy of this software and associated documentation files (the\n",
+					"match": false,
+					"packageHash": "54d3a07d6b45724db87eec07d725e06566aa23f81310ea3bba75171b6f49a54f",
+					"size": 1077,
+					"sourceHash": "4e7321d577e6d891c4cdf065ac8adb5b439cc3d5bbcd0e083012bf4258ebf6e0",
+					"status": "content"
+				},
+				"README.md": {
+					"diff": "--- published/README.md\n+++ rebuilt/README.md\n@@ -1,20 +1,23 @@\n-#gulp-bump\n-[![Build Status](https://travis-ci.org/stevelacy/gulp-bump.png?branch=master)](https://travis-ci.org/stevelacy/gulp-bump)\n-[![NPM version](https://badge.fury.io/js/gulp-bump.png)](http://badge.fury.io/js/gulp-bump)\n+# gulp-bump\n+[![Build Status](https://travis-ci.org/stevelacy/gulp-bump.svg?branch=master)](https://travis-ci.org/stevelacy/gulp-bump)\n+[![NPM version](https://badge.fury.io/js/gulp-bump.svg)](http://badge.fury.io/js/gulp-bump)\n+\n+> Bump any version in any file which supports [semver](http://semver.org/) versioning\n \n ## Information\n \n <table>\n-<tr> \n+<tr>\n <td>Package</td><td>gulp-bump</td>\n </tr>\n <tr>\n <td>Description</td>\n-<td>Bump npm versions with Gulp (gulpjs.com)</td>\n+<td>Bump any Semver version in any file\n+ with gulp (gulpjs.com)</td>\n </tr>\n <tr>\n <td>Node Version</td>\n-<td>>= 0.8</td>\n+<td>>= 0.9</td>\n </tr>\n <tr>\n <td>Gulp Version</td>\n@@ -23,63 +26,132 @@\n </table>\n \n ## Usage\n+\n+If you are just requiring a bump for npm, consider using [npm version](https://docs.npmjs.com/cli/version)\n+\n #### Install\n-    npm install gulp-bump --save\n+\n+```bash\n+$ npm install gulp-bump --save\n+```\n+#### Breaking changes\n+\n+`gulp-bump` v2 supports Any valid semver in any filetype.\n+  - v2 no longer creates the version [key] if it does not exist.\n \n ## Example\n \n-```javascript\n+```js\n var gulp = require('gulp');\n var bump = require('gulp-bump');\n \n // Basic usage:\n // Will patch the version\n gulp.task('bump', function(){\n-  gulp.src('./package.json')\n+  gulp.src('./component.json')\n   .pipe(bump())\n   .pipe(gulp.dest('./'));\n });\n \n-\n // Defined method of updating:\n // Semantic\n gulp.task('bump', function(){\n-  var options = {\n-    bump: 'minor'\n-  };\n+  gulp.src('./*.json')\n+  .pipe(bump({type:'minor'}))\n+  .pipe(gulp.dest('./'));\n+});\n+\n+// Defined method of updating:\n+// Semantic major\n+gulp.task('bump', function(){\n+  gulp.src('./package.yml')\n+  .pipe(bump({type:'major'}))\n+  .pipe(gulp.dest('./'));\n+});\n+\n+// Defined method of updating:\n+// Set a specific version\n+gulp.task('bump', function(){\n+  gulp.src('./*.json')\n+  .pipe(bump({version: '1.2.3'}))\n+  .pipe(gulp.dest('./'));\n+});\n+\n+// Update bower, component, npm at once:\n+gulp.task('bump', function(){\n+  gulp.src(['./bower.json', './component.json', './package.json'])\n+  .pipe(bump({type:'major'}))\n+  .pipe(gulp.dest('./'));\n+});\n",
+					"match": false,
+					"packageHash": "164b2d4634b131c54693345c688765835d92b3fee5a56f23dd76ccd2a0dd3935",
+					"size": 2756,
+					"sourceHash": "b62c8a2a3e4fae9ef665c0ca994e2638bc25284221da70f87838c809cd1cd671",
+					"status": "content"
+				},
+				"examples/gulpfile.js": {
+					"diff": "--- published/examples/gulpfile.js\n+++ rebuilt/examples/gulpfile.js\n@@ -1,16 +1,64 @@\n+'use strict';\n+\n var gulp = require('gulp');\n var bump = require('../');\n \n gulp.task('bump', function(){\n   var options = {\n-    bump: 'minor'\n+    type: 'minor'\n   };\n   gulp.src('./package.json')\n   .pipe(bump(options))\n-  .pipe(gulp.dest('./'));\n+  .pipe(gulp.dest('./build'));\n+});\n+\n+gulp.task('version', function(){\n+  gulp.src('./package.json')\n+  .pipe(bump({version: '1.2.3'}))\n+  .pipe(gulp.dest('./version'));\n });\n \n+gulp.task('xml', function(){\n+  gulp.src('./file.xml')\n+  .pipe(bump())\n+  .pipe(gulp.dest('./build'));\n+});\n+\n+// WordPress Theme: https://developer.wordpress.org/themes/basics/main-stylesheet-style-css/\n+gulp.task('wptheme', function(){\n+  gulp.src('./style.css')\n+  .pipe(bump())\n+  .pipe(gulp.dest('./build'));\n+});\n \n-gulp.task('default', function(){\n-  gulp.run('bump');\n+// WordPress Plugin: https://developer.wordpress.org/plugins/the-basics/header-requirements/\n+gulp.task('wpplugin', function(){\n+  gulp.src('./plugin.php')\n+  .pipe(bump())\n+  .pipe(gulp.dest('./build'));\n });\n+\n+// PHP Constant: `define( 'MY_PLUGIN_VERSION', '1.0.0' );`\n+gulp.task('phpconstant', function(){\n+  var constant = \"MY_PLUGIN_VERSION\";\n+  gulp.src('./plugin.php')\n+  .pipe(bump({\n+    key: constant, // for error reference\n+    regex: new RegExp('([<|\\'|\"]?(' + constant + ')[>|\\'|\"]?[ ]*[:=,]?[ ]*[\\'|\"]?[a-z]?)(\\\\d+.\\\\d+.\\\\d+)(-[0-9A-Za-z.-]+)?(\\\\+[0-9A-Za-z\\\\.-]+)?([\\'|\"|<]?)', 'i')\n+  }))\n+  .pipe(gulp.dest('./build'));\n+});\n+\n+gulp.task('key', function(){\n+  gulp.src('./key.json')\n+  .pipe(bump({key: 'appversion'}))\n+  .pipe(gulp.dest('./build'));\n+});\n+\n+gulp.task('patch', function(){\n+  gulp.src('./package.json')\n+  .pipe(bump())\n+  .pipe(gulp.dest('./build'));\n+});\n+\n+gulp.task('default', ['bump']);\n",
+					"match": false,
+					"packageHash": "864381ef712ba9524e530868588ebd0d03c95ae83c9148ed3785e150000750a5",
+					"size": 268,
+					"sourceHash": "e08dbb318f53030948165d65a474ebb221b6846ad30fd15b53d8cdf8189c2424",
+					"status": "content"
+				},
+				"examples/package.json": {
+					"diff": "--- published/examples/package.json\n+++ rebuilt/examples/package.json\n@@ -1,15 +1,14 @@\n {\n   \"name\": \"gulp-bump\",\n   \"description\": \"Bump npm versions with Gulp (gulpjs.com)\",\n-  \"version\": \"0.1.0\",\n+  \"version\": \"0.1.9\",\n   \"homepage\": \"http://github.com/stevelacy/gulp-bump\",\n   \"repository\": \"git://github.com/stevelacy/gulp-bump.git\",\n   \"author\": \"Steve Lacy me@slacy.me (slacy.me)\",\n   \"main\": \"./index.js\",\n   \"dependencies\": {\n     \"semver\":\"*\",\n-    \"gulp\":\"*\",\n-    \"event-stream\":\"*\"\n+    \"gulp\":\"*\"\n   },\n   \"devDependencies\": {\n     \"mocha\": \"*\",\n",
+					"match": false,
+					"packageHash": "737c31047075660f929b77f738e21f8f1727da4001ce670e05007f22b0b45184",
+					"size": 673,
+					"sourceHash": "1493059b17428855d5b49c7a98791804f71d31f55064d3d1a5cfafbd82335bdf",
+					"status": "content"
+				},
+				"index.js": {
+					"diff": "--- published/index.js\n+++ rebuilt/index.js\n@@ -1,26 +1,44 @@\n-var es = require('event-stream');\n+'use strict';\n+\n+var path = require('path');\n+var pluginError = require('plugin-error');\n+var log = require('plugin-log');\n+var through = require('through2');\n+var bump = require('bump-regex');\n var semver = require('semver');\n \n+var PLUGIN_NAME = 'gulp-bump';\n+\n module.exports = function(opts) {\n-  if(!opts) opts = {};\n-  if(!semver.inc('0.0.1', opts.bump)) opts.bump = false;\n-  // Map each file to this function\n-  function modifyContents(file, cb) {\n-    // Remember that contents is ALWAYS a buffer\n-    if(file.isNull()) return cb(null, file);\n-    if(file.isStream()) return cb(new Error('gulp-bump: streams not supported'));\n-\n-    var regex = /([\\'|\\\"]?version[\\'|\\\"]?[ ]*:[ ]*[\\'|\\\"]?)([\\d||A-a|.|-]*)([\\'|\\\"]?)/i;\n-    var data = file.contents.toString();\n-\n-    data = data.replace(regex, function(match, prefix, version, suffix){\n-       var newVersion = semver.inc(version, opts.setVersion || opts.bump || 'patch');\n-       return prefix + newVersion + suffix;\n-    });\n-    file.contents = new Buffer(data);\n-    cb(null, file);\n+\n+  opts = opts || {};\n+  if (!opts.type || !semver.inc('0.0.1', opts.type)) {\n+    opts.type = 'patch';\n   }\n \n-  // Return a stream\n-  return es.map(modifyContents);\n+  return through.obj(function(file, enc, cb) {\n+\n+    if (file.isNull()) {\n+      return cb(null, file);\n+    }\n+    if (file.isStream()) {\n+      return cb(new pluginError(PLUGIN_NAME, 'Streaming not supported'));\n+    }\n+\n+    opts.str = String(file.contents);\n+    bump(opts, function(err, res) {\n+      if (err) {\n+        return cb(new pluginError(PLUGIN_NAME, err));\n+      }\n+      file.contents = new Buffer(res.str);\n+\n+      if (!opts.quiet) {\n+      log('Bumped', log.colors.cyan(res.prev),\n+        'to', log.colors.magenta(res.new),\n+        'with type:', log.colors.cyan(res.type));\n+      }\n+      file.bumpData = res;\n+      cb(null, file);\n+    });\n+  });\n };\n",
+					"match": false,
+					"packageHash": "98de0f04d5523656edaf24cb7c93f04f4ef1d7085ba62883758713ecbc7aa52d",
+					"size": 894,
+					"sourceHash": "24900b8881e984c33b17263fddb2c07a013187da3618c0b22bcfc07ce2ddbd10",
+					"status": "content"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -1,37 +1,38 @@\n {\n   \"name\": \"gulp-bump\",\n   \"description\": \"Bump npm versions with Gulp (gulpjs.com)\",\n-  \"version\": \"0.0.6\",\n-  \"homepage\": \"http://github.com/stevelacy/gulp-bump\",\n+  \"version\": \"3.2.0\",\n+  \"homepage\": \"https://github.com/stevelacy/gulp-bump\",\n   \"repository\": \"git://github.com/stevelacy/gulp-bump.git\",\n-  \"author\": \"Steve Lacy me@slacy.me (slacy.me)\",\n+  \"author\": \"Steve Lacy <me@slacy.me> (http://slacy.me)\",\n   \"main\": \"./index.js\",\n   \"dependencies\": {\n-    \"semver\": \"~2.2.1\",\n-    \"event-stream\": \"~3.0.20\"\n+    \"bump-regex\": \"^4.1.0\",\n+    \"plugin-error\": \"^1.0.1\",\n+    \"plugin-log\": \"^0.1.0\",\n+    \"semver\": \"^5.3.0\",\n+    \"through2\": \"^2.0.1\"\n   },\n   \"devDependencies\": {\n     \"mocha\": \"*\",\n     \"should\": \"*\",\n-    \"gulp-util\": \"~2.2.5\"\n+    \"vinyl\": \"^2.0.0\"\n   },\n   \"scripts\": {\n-    \"test\": \"mocha\"\n+    \"test\": \"mocha --reporter spec\"\n   },\n   \"engines\": {\n-    \"node\": \">= 0.8.0\"\n+    \"node\": \">= 0.9.0\"\n   },\n   \"keywords\": [\n     \"gulp\",\n     \"bump\",\n     \"semver\",\n     \"gulpplugin\",\n+    \"version\",\n+    \"versioning\",\n+    \"gulp-version\",\n     \"gulp-plugin\"\n   ],\n-  \"licenses\": [\n-    {\n-      \"type\": \"MIT\",\n-      \"url\": \"http://github.com/stevelacy/gulp-bump/raw/master/LICENSE\"\n-    }\n-  ]\n+  \"license\": \"MIT\"\n }\n",
+					"match": false,
+					"packageHash": "4357ac95038d65eecdde189bb901276de8f3705ef6ade32ead51c5546bcafc1d",
+					"size": 771,
+					"sourceHash": "7e4e1cc8fa72d629073a50d0eb2d675d0bf851e273ffad6817e238625d192c14",
+					"status": "content"
+				},
+				"test/expected/default.json": {
+					"diff": "--- published/test/expected/default.json\n+++ rebuilt/test/expected/default.json\n@@ -7,14 +7,12 @@\n   \"author\": \"Steve Lacy me@slacy.me (slacy.me)\",\n   \"main\": \"./index.js\",\n   \"dependencies\": {\n-    \"semver\":\"*\",\n-    \"gulp\":\"*\",\n-    \"event-stream\":\"*\"\n+    \"semver\": \"*\"\n   },\n   \"devDependencies\": {\n     \"mocha\": \"*\",\n     \"should\": \"*\",\n-    \"gulp-util\":\"*\"\n+    \"gulp-util\": \"*\"\n   },\n   \"scripts\": {\n     \"test\": \"mocha\"\n",
+					"match": false,
+					"packageHash": "99682fe4c5059cf14166bab4d0535ff51d09bfd778a54f310c493fbaff77aba1",
+					"size": 673,
+					"sourceHash": "29b6398b4481f3570f608f9faff8930685beb56cae53c073f15a2ad66e831376",
+					"status": "content"
+				},
+				"test/expected/major.json": {
+					"diff": "--- published/test/expected/major.json\n+++ rebuilt/test/expected/major.json\n@@ -7,14 +7,12 @@\n   \"author\": \"Steve Lacy me@slacy.me (slacy.me)\",\n   \"main\": \"./index.js\",\n   \"dependencies\": {\n-    \"semver\":\"*\",\n-    \"gulp\":\"*\",\n-    \"event-stream\":\"*\"\n+    \"semver\": \"*\"\n   },\n   \"devDependencies\": {\n     \"mocha\": \"*\",\n     \"should\": \"*\",\n-    \"gulp-util\":\"*\"\n+    \"gulp-util\": \"*\"\n   },\n   \"scripts\": {\n     \"test\": \"mocha\"\n",
+					"match": false,
+					"packageHash": "59d3b01cf6edfd4e34e6e8f8e18a4092e4ee9a0d461a22a3d959735063bc59a9",
+					"size": 673,
+					"sourceHash": "b61eb0d652619611f7803632dd99518903779f6848eda488ec119fe29d396a12",
+					"status": "content"
+				},
+				"test/expected/minor.json": {
+					"match": false,
+					"packageHash": "39411e04561fa4bb400c6249d379fb471bca81acf0b540bc0131b2a160fd3fba",
+					"size": 673,
+					"status": "missing-in-source"
+				},
+				"test/main.js": {
+					"match": false,
+					"packageHash": "9d86c4eeb8a82a9aa81ba2182609ce62df61dec5d7db8eeb97034ae64175a291",
+					"size": 2531,
+					"status": "missing-in-source"
+				},
+				"test/package.json": {
+					"match": false,
+					"packageHash": "737c31047075660f929b77f738e21f8f1727da4001ce670e05007f22b0b45184",
+					"size": 673,
+					"status": "missing-in-source"
+				},
+				".editorconfig": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				".jshintrc": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"examples/file.xml": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"examples/key.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"examples/plugin.php": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"examples/style.css": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/errorCases.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/expected/key.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/expected/minor.yml": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/expected/version.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/fileFixtures.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/fixtures/key.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/fixtures/minor.yml": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/fixtures/package.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/index.js": {
+					"match": false,
+					"status": "missing-in-package"
+				}
+			},
+			"summary": {
+				"differentFiles": 9,
+				"matchingFiles": 0,
+				"missingInPackage": 15,
+				"missingInSource": 4,
+				"score": 0,
+				"totalFiles": 28
+			}
+		}
+	}
+]
