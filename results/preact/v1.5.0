@@ -1,0 +1,63 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-01T21:47:25.081Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:2.11.3",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "preact@1.5.0",
+			"name": "preact",
+			"version": "1.5.0",
+			"location": "https://registry.npmjs.org/preact/-/preact-1.5.0.tgz",
+			"integrity": "sha512-YpkXo9DQv/KgR0BE8lbL94SLzVUz6L5BEUkBu5t/cjEymIoGoae8kiOuZeLbwggqXEPpOTN+HoOGpvKse/wIGw==",
+			"publishedAt": "2015-10-16T03:18:49.860Z",
+			"publishedWith": {
+				"node": "0.12.7",
+				"npm": "2.11.3"
+			}
+		},
+		"source": {
+			"integrity": null,
+			"location": "git+https://github.com/developit/preact.git",
+			"spec": "github:developit/preact#5928485f570e97dd2360571c5f61a796cdf9037a"
+		},
+		"comparisonHash": "8a2a8dcbb729bf3ee9216e490c955701f0ddebe1",
+		"diff": {
+			"files": {
+				".npmignore": {
+					"match": false,
+					"packageHash": "70559453d982dad7aa3ffa52283e996bb85bd856bf81d2f53a031476278954c3",
+					"size": 37,
+					"status": "missing-in-source"
+				},
+				"src/preact.js": {
+					"diff": "--- published/src/preact.js\n+++ rebuilt/src/preact.js\n@@ -543,9 +543,6 @@\n \t\t\tif (items[len]._dirty) {\n \t\t\t\titems[len]._render();\n \t\t\t}\n-\t\t\telse {\n-\t\t\t\tconsole.warn('Skipping non-dirty queued update', items[len]);\n-\t\t\t}\n \t\t}\n \t}\n };\n",
+					"match": false,
+					"packageHash": "ce52d29c2ee7b5c72f16f138697c49688c1edc83320032c5645e9f58d6789269",
+					"size": 19401,
+					"sourceHash": "560922b65eb6b8ed961ab200e0885cc2ce822a722e5b489d0eac328ba29221f4",
+					"status": "content"
+				},
+				"test/browser/render.js": {
+					"diff": "--- published/test/browser/render.js\n+++ rebuilt/test/browser/render.js\n@@ -1,5 +1,4 @@\n-import { h, render, rerender, Component } from '../../src/preact';\n-// import { h, render, rerender, Component } from '../../preact';\n+import { h, render, rerender, Component } from '../../preact';\n let { expect } = chai;\n \n /** @jsx h */\n@@ -307,82 +306,4 @@\n \t\texpect(scratch.innerHTML).to.equal('<div j=\"3\" foo=\"bar\" i=\"3\">inner</div>');\n \t});\n \n-\tit('should re-render nested components', () => {\n-\t\tlet doRender = null;\n-\t\tclass Outer extends Component {\n-\t\t\tcomponentDidMount() {\n-\t\t\t\tlet i = 1;\n-\t\t\t\tdoRender = () => this.setState({ i: ++i });\n-\t\t\t}\n-\t\t\tcomponentWillUnmount() {}\n-\t\t\trender(props, { i }) {\n-\t\t\t\treturn <Inner i={i} {...props} />;\n-\t\t\t}\n-\t\t}\n-\t\tsinon.spy(Outer.prototype, 'render');\n-\t\tsinon.spy(Outer.prototype, 'componentWillUnmount');\n-\n-\t\tlet j = 0;\n-\t\tclass Inner extends Component {\n-\t\t\tcomponentDidMount() {}\n-\t\t\tcomponentWillUnmount() {}\n-\t\t\trender(props) {\n-\t\t\t\treturn <div j={ ++j } {...props}>inner</div>;\n-\t\t\t}\n-\t\t}\n-\t\tsinon.spy(Inner.prototype, 'constructor');\n-\t\tsinon.spy(Inner.prototype, 'render');\n-\t\tsinon.spy(Inner.prototype, 'componentDidMount');\n-\t\tsinon.spy(Inner.prototype, 'componentWillUnmount');\n-\n-\t\trender(<Outer foo=\"bar\" />, scratch);\n-\n-\t\tconsole.log('1', scratch.firstElementChild._componentConstructor);\n-\n-\t\t// update & flush\n-\t\tdoRender();\n-\t\trerender();\n-\n-\t\tconsole.log('2', scratch.firstElementChild && scratch.firstElementChild._component);\n-\t\tconsole.log('3', scratch.firstElementChild && scratch.firstElementChild._componentConstructor);\n-\n-\t\texpect(Outer.prototype.componentWillUnmount).not.to.have.been.called;\n-\n-\t\texpect(Inner.prototype.constructor).to.have.been.calledOnce;\n-\t\texpect(Inner.prototype.componentWillUnmount).not.to.have.been.called;\n-\t\texpect(Inner.prototype.componentDidMount).to.have.been.calledOnce;\n-\t\texpect(Inner.prototype.render).to.have.been.calledTwice;\n-\n-\t\texpect(Inner.prototype.render.secondCall)\n-\t\t\t.to.have.been.calledWith({ foo:'bar', i:2 })\n-\t\t\t.and.to.have.returned(sinon.match({\n-\t\t\t\tattributes: {\n-\t\t\t\t\tj: 2,\n-\t\t\t\t\ti: 2,\n-\t\t\t\t\tfoo: 'bar'\n-\t\t\t\t}\n-\t\t\t}));\n-\n-\t\texpect(scratch.innerHTML).to.equal('<div j=\"2\" i=\"2\" foo=\"bar\">inner</div>');\n-\n-\t\t// update & flush\n-\t\tdoRender();\n-\t\trerender();\n-\n-\t\texpect(Inner.prototype.componentWillUnmount).not.to.have.been.called;\n-\t\texpect(Inner.prototype.componentDidMount).to.have.been.calledOnce;\n-\t\texpect(Inner.prototype.render).to.have.been.calledThrice;\n-\n-\t\texpect(Inner.prototype.render.thirdCall)\n-\t\t\t.to.have.been.calledWithExactly({ foo:'bar', i:3 })\n-\t\t\t.and.to.have.returned(sinon.match({\n-\t\t\t\tattributes: {\n-\t\t\t\t\tj: 3,\n-\t\t\t\t\ti: 3,\n-\t\t\t\t\tfoo: 'bar'\n-\t\t\t\t}\n-\t\t\t}));\n-\n-\t\texpect(scratch.innerHTML).to.equal('<div j=\"3\" foo=\"bar\" i=\"3\">inner</div>');\n-\t});\n });\n",
+					"match": false,
+					"packageHash": "6cad42ab0f9d2c36e9c22bf9ee010b8bcb469c754bf19d21134e5fa5dd274a2a",
+					"size": 10204,
+					"sourceHash": "ccd60c8b0cddbaf9391cd56df9b4ddd6d3f16e624ebdc6d2ecd23371e25a6776",
+					"status": "content"
+				}
+			},
+			"summary": {
+				"differentFiles": 2,
+				"matchingFiles": 12,
+				"missingInPackage": 0,
+				"missingInSource": 1,
+				"score": 0.8,
+				"totalFiles": 15
+			}
+		}
+	}
+]
