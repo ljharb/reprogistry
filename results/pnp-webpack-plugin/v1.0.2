@@ -1,0 +1,89 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-01T20:48:04.391Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:11.7.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "pnp-webpack-plugin@1.0.2",
+			"name": "pnp-webpack-plugin",
+			"version": "1.0.2",
+			"location": "https://registry.npmjs.org/pnp-webpack-plugin/-/pnp-webpack-plugin-1.0.2.tgz",
+			"integrity": "sha512-yBMCTsVDfBkYhkBFPuS8CqvH78Rg6xM6H4T0JrYMYwxwMJJAs/pUfaqtfSoXyhtGK9V9LcViRPsjJulBlJ+Mpg==",
+			"publishedAt": "2018-09-28T14:20:16.725Z",
+			"publishedWith": {
+				"node": null,
+				"npm": null
+			}
+		},
+		"source": {
+			"integrity": null,
+			"location": "https://github.com/arcanis/pnp-webpack-plugin.git",
+			"spec": "github:arcanis/pnp-webpack-plugin#HEAD"
+		},
+		"comparisonHash": "8a2a8dcbb729bf3ee9216e490c955701f0ddebe1",
+		"diff": {
+			"files": {
+				"README.md": {
+					"diff": "--- published/README.md\n+++ rebuilt/README.md\n@@ -3,6 +3,8 @@\n [![npm version](https://img.shields.io/npm/v/pnp-webpack-plugin.svg)](https://www.npmjs.com/package/pnp-webpack-plugin)\n [![node version](https://img.shields.io/node/v/pnp-webpack-plugin.svg)](https://www.npmjs.com/package/pnp-webpack-plugin)\n \n+*This plugin is also available for Jest ([jest-pnp-resolver](https://github.com/arcanis/jest-pnp-resolver)), Rollup ([rollup-plugin-pnp-resolve](https://github.com/arcanis/rollup-plugin-pnp-resolve)), and TypeScript ([ts-pnp](https://github.com/arcanis/ts-pnp))*\n+\n ## Installation\n \n ```\n",
+					"match": false,
+					"packageHash": "fb507288ea848d244759e72aaad57c6124d92b9d5df00e0654636a2be7619aa5",
+					"size": 2663,
+					"sourceHash": "5f4d138374a496bf97510910563c92b48cfe10522f9f8be2935428b0a6121b93",
+					"status": "content"
+				},
+				"index.js": {
+					"diff": "--- published/index.js\n+++ rebuilt/index.js\n@@ -1,22 +1,20 @@\n-let pnp;\n-\n-try {\n-  pnp = require(`pnpapi`);\n-} catch (error) {\n-  // not in PnP; not a problem\n-}\n+const path = require(`path`);\n+const {resolveModuleName} = require(`ts-pnp`);\n+const {makeResolver} = require('./resolver');\n \n function nothing() {\n   // ¯\\_(ツ)_/¯\n }\n \n-function getModuleLocator(module) {\n-  const moduleLocation = module.filename;\n+function getModuleLocator(module, pnpapi) {\n+  const moduleLocation = typeof module === `string`\n+    ? module\n+    : module.filename;\n \n   if (!moduleLocation)\n     throw new Error(`The specified module doesn't seem to exist on the filesystem`);\n \n-  const moduleLocator = pnp.findPackageLocator(moduleLocation);\n+  const moduleLocator = pnpapi.findPackageLocator(moduleLocation);\n \n   if (!moduleLocator)\n     throw new Error(`the specified module doesn't seem to be part of the dependency tree`);\n@@ -24,75 +22,71 @@\n   return moduleLocator;\n }\n \n-function getSourceLocation(sourceLocator) {\n-  if (!sourceLocator)\n-    return null;\n-\n-  const sourceInformation = pnp.getPackageInformation(sourceLocator);\n-\n-  if (!sourceInformation)\n-    throw new Error(`Couldn't find the package to use as resolution source`);\n-\n-  if (!sourceInformation.packageLocation)\n-    throw new Error(`The package to use as resolution source seem to not have been installed - maybe it's a devDependency not installed in prod?`);\n-\n-  return sourceInformation.packageLocation.replace(/\\/?$/, `/`);\n-}\n-\n-function makeResolver(sourceLocator) {\n-  const sourceLocation = getSourceLocation(sourceLocator);\n+function getDependencyLocator(sourceLocator, name, pnpapi) {\n \n-  return resolver => {\n-    const MAYBE_BUILTIN = /^[^\\/]$/;\n+  const {packageDependencies} = pnpapi.getPackageInformation(sourceLocator);\n+  const reference = packageDependencies.get(name);\n \n-    const resolvedHook = resolver.ensureHook(`resolve`);\n-    resolver.getHook(`before-module`).tapAsync(`PnpResolver`, (requestContext, resolveContext, callback) => {\n-      let request = requestContext.request;\n-      let issuer = sourceLocation || requestContext.context.issuer;\n-\n-      // When using require.context, issuer seems to be false (cf https://github.com/webpack/webpack-dev-server/blob/d0725c98fb752d8c0b1e8c9067e526e22b5f5134/client-src/default/index.js#L94)\n-      if (!issuer) {\n-        issuer = `${requestContext.path}/`;\n-      // We only support issuer when they're absolute paths. I'm not sure the opposite can ever happen, but better check here.\n-      } else if (!issuer.startsWith(`/`)) {\n-        throw new Error(`Cannot successfully resolve this dependency - issuer not supported (${issuer})`);\n-      }\n-\n-      let resolution;\n-\n-      try {\n-        resolution = pnp.resolveToUnqualified(request, issuer, {considerBuiltins: false});\n-      } catch (error) {\n-        return callback(error);\n-      }\n-\n-      resolver.doResolve(\n-        resolvedHook,\n-        Object.assign({}, requestContext, {\n-          request: resolution,\n-        }),\n-        null,\n-        resolveContext,\n-        callback,\n-      );\n-    });\n-  };\n+  return {name, reference};\n }\n \n-module.exports = pnp ? {\n-  apply: makeResolver(null),\n+module.exports = process.versions.pnp ? {\n+  apply: makeResolver({pnpapi: require(`pnpapi`)}),\n",
+					"match": false,
+					"packageHash": "b606c8b1c582f9ee8396cded5428957bd377b0ed95298074b381daaba4980a27",
+					"size": 2753,
+					"sourceHash": "17c55c49df58df63bb3f26d2699d2d26855fab81bf0d574ef0089c4d07a81940",
+					"status": "content"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -1,6 +1,6 @@\n {\n     \"name\": \"pnp-webpack-plugin\",\n-    \"version\": \"1.0.2\",\n+    \"version\": \"1.7.0\",\n     \"description\": \"plug'n'play resolver for Webpack\",\n     \"license\": \"MIT\",\n     \"engines\": {\n@@ -19,5 +19,18 @@\n         \"yarn\",\n         \"plugnplay\",\n         \"pnp\"\n-    ]\n+    ],\n+    \"dependencies\": {\n+        \"ts-pnp\": \"^1.1.6\"\n+    },\n+    \"devDependencies\": {\n+        \"enhanced-resolve\": \"^4.1.0\",\n+        \"jest\": \"^23.6.0\",\n+        \"jest-environment-node\": \"^23.4.0\",\n+        \"jest-pnp-resolver\": \"^1.0.1\",\n+        \"source-map\": \"^0.7.3\"\n+    },\n+    \"installConfig\": {\n+        \"pnp\": true\n+    }\n }\n",
+					"match": false,
+					"packageHash": "79bf0fe8f56ecafe793f87910d00d3427470ac31c19bad07d0fe71b60c6bedfc",
+					"size": 552,
+					"sourceHash": "c827675f7b74b847028510ee04fd41a68746a133920768282f20913218ee06d8",
+					"status": "content"
+				},
+				"fixtures/file.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"fixtures/index.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"index.test.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"jest.config.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"resolver.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"ts.js": {
+					"match": false,
+					"status": "missing-in-package"
+				}
+			},
+			"summary": {
+				"differentFiles": 3,
+				"matchingFiles": 0,
+				"missingInPackage": 6,
+				"missingInSource": 0,
+				"score": 0,
+				"totalFiles": 9
+			}
+		}
+	}
+]

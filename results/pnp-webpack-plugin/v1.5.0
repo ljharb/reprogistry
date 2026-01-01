@@ -1,0 +1,57 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-01T20:49:09.816Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:11.7.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "pnp-webpack-plugin@1.5.0",
+			"name": "pnp-webpack-plugin",
+			"version": "1.5.0",
+			"location": "https://registry.npmjs.org/pnp-webpack-plugin/-/pnp-webpack-plugin-1.5.0.tgz",
+			"integrity": "sha512-jd9olUr9D7do+RN8Wspzhpxhgp1n6Vd0NtQ4SFkmIACZoEL1nkyAdW9Ygrinjec0vgDcWjscFQQ1gDW8rsfKTg==",
+			"publishedAt": "2019-06-06T06:26:30.101Z",
+			"publishedWith": {
+				"node": null,
+				"npm": null
+			}
+		},
+		"source": {
+			"integrity": null,
+			"location": "https://github.com/arcanis/pnp-webpack-plugin.git",
+			"spec": "github:arcanis/pnp-webpack-plugin#v1.5.0"
+		},
+		"comparisonHash": "8a2a8dcbb729bf3ee9216e490c955701f0ddebe1",
+		"diff": {
+			"files": {
+				"README.md": {
+					"diff": "--- published/README.md\n+++ rebuilt/README.md\n@@ -47,45 +47,6 @@\n };\n ```\n \n-### `ts-loader` integration\n-\n-This plugin as an integration to easily add support for TypeScript in your applications through `ts-loader`. In order to do this, just do the following:\n-\n-```js\n-const PnpWebpackPlugin = require(`pnp-webpack-plugin`);\n-\n-module.exports = {\n-  module: {\n-    rules: [{\n-      test: /\\.ts$/,\n-      loader: require.resolve('ts-loader'),\n-      options: PnpWebpackPlugin.tsLoaderOptions({\n-        // ... regular options go there ...\n-      }),\n-    }],\n-  },\n-};\n-```\n-\n-If you have any options you want to pass to `ts-loader`, just pass them as parameter of the `tsLoaderOptions` function and it will take care of forwarding them properly.\n-\n-## `fork-ts-checker-webpack-plugin` integration\n-\n-We also provide an integration for `fork-ts-checker-webpack-plugin`, in a similar way to what we do with `ts-loader`. Here's an example:\n-\n-```js\n-const ForkTsCheckerWebpackPlugin = require(`fork-ts-checker-webpack-plugin`);\n-const PnpWebpackPlugin = require(`pnp-webpack-plugin`);\n-\n-module.exports = {\n-  plugins: [\n-    new ForkTsCheckerWebpackPlugin(PnpWebpackPlugin.forkTsCheckerOptions({\n-      // ... regular options go there ...\n-    }),\n-  ],\n-};\n-```\n-\n ## License (MIT)\n \n > **Copyright © 2016 Maël Nison**\n",
+					"match": false,
+					"packageHash": "30443968f92c88ce863744777c315c1a810c2979699cf39e9acb8f05eea77637",
+					"size": 4077,
+					"sourceHash": "5f4d138374a496bf97510910563c92b48cfe10522f9f8be2935428b0a6121b93",
+					"status": "content"
+				},
+				"index.js": {
+					"diff": "--- published/index.js\n+++ rebuilt/index.js\n@@ -68,6 +68,11 @@\n       }\n     });\n \n+    resolver.getHook(`after-module`).tapAsync(`PnpResolver`, (request, resolveContext, callback) => {\n+      // rethrow pnp errors if we have any for this request\n+      return callback(resolveContext.pnpErrors && resolveContext.pnpErrors.get(request.context.issuer));\n+    });\n+\n     // Register a plugin that will resolve bare imports into the package location on the filesystem before leaving the rest of the resolution to Webpack\n     resolver.getHook(`before-module`).tapAsync(`PnpResolver`, (requestContext, resolveContext, callback) => {\n       let request = requestContext.request;\n@@ -94,7 +99,16 @@\n       try {\n         resolution = pnp.resolveToUnqualified(request, resolutionIssuer, {considerBuiltins: false});\n       } catch (error) {\n-        return callback(error);\n+        if (resolveContext.missingDependencies)\n+          resolveContext.missingDependencies.add(requestContext.path);\n+\n+        if (resolveContext.log)\n+          resolveContext.log(error.message);\n+\n+        resolveContext.pnpErrors = resolveContext.pnpErrors || new Map();\n+        resolveContext.pnpErrors.set(issuer, error);\n+\n+        return callback();\n       }\n \n       resolver.doResolve(\n",
+					"match": false,
+					"packageHash": "6e7290565f003468f24e093591911bd4de43bb514621d213aba16a58edbe598f",
+					"size": 4672,
+					"sourceHash": "3568ce88bbf84447cb76b33c1c7d652316e846fdf800c4d421bec121e6d45ac7",
+					"status": "content"
+				}
+			},
+			"summary": {
+				"differentFiles": 2,
+				"matchingFiles": 6,
+				"missingInPackage": 0,
+				"missingInSource": 0,
+				"score": 0.75,
+				"totalFiles": 8
+			}
+		}
+	}
+]

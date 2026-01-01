@@ -1,0 +1,73 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-01T20:49:02.854Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:11.7.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "pnp-webpack-plugin@1.4.1",
+			"name": "pnp-webpack-plugin",
+			"version": "1.4.1",
+			"location": "https://registry.npmjs.org/pnp-webpack-plugin/-/pnp-webpack-plugin-1.4.1.tgz",
+			"integrity": "sha512-S4kz+5rvWvD0w1O63eTJeXIxW4JHK0wPRMO7GmPhbZXJnTePcfrWZlni4BoglIf7pLSY18xtqo3MSnVkoAFXKg==",
+			"publishedAt": "2019-03-05T13:15:02.809Z",
+			"publishedWith": {
+				"node": null,
+				"npm": null
+			}
+		},
+		"source": {
+			"integrity": null,
+			"location": "https://github.com/arcanis/pnp-webpack-plugin.git",
+			"spec": "github:arcanis/pnp-webpack-plugin#HEAD"
+		},
+		"comparisonHash": "8a2a8dcbb729bf3ee9216e490c955701f0ddebe1",
+		"diff": {
+			"files": {
+				"README.md": {
+					"diff": "--- published/README.md\n+++ rebuilt/README.md\n@@ -47,26 +47,6 @@\n };\n ```\n \n-### `ts-loader` integration\n-\n-This plugin as an integration to easily add support for TypeScript in your applications through `ts-loader`. In order to do this, just do the following:\n-\n-```js\n-const PnpWebpackPlugin = require(`pnp-webpack-plugin`);\n-\n-module.exports = {\n-  module: {\n-    rules: [{\n-      test: /\\.ts$/,\n-      loader: require.resolve('ts-loader'),\n-      options: PnpWebpackPlugin.tsLoaderOptions(),\n-    }],\n-  },\n-};\n-```\n-\n-If you have any options you want to pass to `ts-loader`, just pass them as parameter of the `tsLoaderOptions` function and it will take care of forwarding them properly.\n-\n ## License (MIT)\n \n > **Copyright © 2016 Maël Nison**\n",
+					"match": false,
+					"packageHash": "d7a377b6ae955aa32fbe248e1b287cfd5ca22c785742ac7491c7d2f3c35c72fd",
+					"size": 3526,
+					"sourceHash": "5f4d138374a496bf97510910563c92b48cfe10522f9f8be2935428b0a6121b93",
+					"status": "content"
+				},
+				"index.js": {
+					"diff": "--- published/index.js\n+++ rebuilt/index.js\n@@ -1,18 +1,12 @@\n const path = require(`path`);\n-\n-let pnp;\n-\n-try {\n-  pnp = require(`pnpapi`);\n-} catch (error) {\n-  // not in PnP; not a problem\n-}\n+const {resolveModuleName} = require(`ts-pnp`);\n+const {makeResolver} = require('./resolver');\n \n function nothing() {\n   // ¯\\_(ツ)_/¯\n }\n \n-function getModuleLocator(module) {\n+function getModuleLocator(module, pnpapi) {\n   const moduleLocation = typeof module === `string`\n     ? module\n     : module.filename;\n@@ -20,7 +14,7 @@\n   if (!moduleLocation)\n     throw new Error(`The specified module doesn't seem to exist on the filesystem`);\n \n-  const moduleLocator = pnp.findPackageLocator(moduleLocation);\n+  const moduleLocator = pnpapi.findPackageLocator(moduleLocation);\n \n   if (!moduleLocator)\n     throw new Error(`the specified module doesn't seem to be part of the dependency tree`);\n@@ -28,117 +22,71 @@\n   return moduleLocator;\n }\n \n-function getDependencyLocator(sourceLocator, name) {\n-  const {packageDependencies} = pnp.getPackageInformation(sourceLocator);\n+function getDependencyLocator(sourceLocator, name, pnpapi) {\n+\n+  const {packageDependencies} = pnpapi.getPackageInformation(sourceLocator);\n   const reference = packageDependencies.get(name);\n \n   return {name, reference};\n }\n \n-function getSourceLocation(sourceLocator) {\n-  if (!sourceLocator)\n-    return null;\n-\n-  const sourceInformation = pnp.getPackageInformation(sourceLocator);\n-\n-  if (!sourceInformation)\n-    throw new Error(`Couldn't find the package to use as resolution source`);\n-\n-  if (!sourceInformation.packageLocation)\n-    throw new Error(`The package to use as resolution source seem to not have been installed - maybe it's a devDependency not installed in prod?`);\n-\n-  return sourceInformation.packageLocation.replace(/\\/?$/, `/`);\n-}\n-\n-function makeResolver(sourceLocator, filter) {\n-  const sourceLocation = getSourceLocation(sourceLocator);\n-\n-  return resolver => {\n-    const BACKWARD_PATH = /^\\.\\.([\\\\\\/]|$)/;\n-\n-    const resolvedHook = resolver.ensureHook(`resolve`);\n-\n-    // Prevents the SymlinkPlugin from kicking in. We need the symlinks to be preserved because that's how we deal with peer dependencies ambiguities.\n-    resolver.getHook(`file`).intercept({\n-      register: tapInfo => {\n-        return tapInfo.name !== `SymlinkPlugin` ? tapInfo : Object.assign({}, tapInfo, {fn: (request, resolveContext, callback) => {\n-          callback();\n-        }});\n-      }\n-    });\n-\n-    // Register a plugin that will resolve bare imports into the package location on the filesystem before leaving the rest of the resolution to Webpack\n-    resolver.getHook(`before-module`).tapAsync(`PnpResolver`, (requestContext, resolveContext, callback) => {\n-      let request = requestContext.request;\n-      let issuer = requestContext.context.issuer;\n-\n-      // When using require.context, issuer seems to be false (cf https://github.com/webpack/webpack-dev-server/blob/d0725c98fb752d8c0b1e8c9067e526e22b5f5134/client-src/default/index.js#L94)\n-      if (!issuer) {\n-        issuer = `${requestContext.path}/`;\n-      // We only support issuer when they're absolute paths. I'm not sure the opposite can ever happen, but better check here.\n-      } else if (!path.isAbsolute(issuer)) {\n-        throw new Error(`Cannot successfully resolve this dependency - issuer not supported (${issuer})`);\n-      }\n-\n-      if (filter) {\n-        const relative = path.relative(filter, issuer);\n-        if (path.isAbsolute(relative) || BACKWARD_PATH.test(relative)) {\n-          return callback(null);\n-        }\n-      }\n-\n-      let resolutionIssuer = sourceLocation || issuer;\n",
+					"match": false,
+					"packageHash": "cf2f2c517f85393d63d886d91497ac350c17d3ccd2afeba45786d7793564af51",
+					"size": 4369,
+					"sourceHash": "17c55c49df58df63bb3f26d2699d2d26855fab81bf0d574ef0089c4d07a81940",
+					"status": "content"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -1,6 +1,6 @@\n {\n     \"name\": \"pnp-webpack-plugin\",\n-    \"version\": \"1.4.1\",\n+    \"version\": \"1.7.0\",\n     \"description\": \"plug'n'play resolver for Webpack\",\n     \"license\": \"MIT\",\n     \"engines\": {\n@@ -21,7 +21,7 @@\n         \"pnp\"\n     ],\n     \"dependencies\": {\n-        \"ts-pnp\": \"^1.0.0\"\n+        \"ts-pnp\": \"^1.1.6\"\n     },\n     \"devDependencies\": {\n         \"enhanced-resolve\": \"^4.1.0\",\n",
+					"match": false,
+					"packageHash": "3ebbe5f412f5ed1087ba36a5da1c14e7dc2b7eae33e4c1a8f65b5f8ceda53caf",
+					"size": 869,
+					"sourceHash": "c827675f7b74b847028510ee04fd41a68746a133920768282f20913218ee06d8",
+					"status": "content"
+				},
+				"resolver.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"ts.js": {
+					"match": false,
+					"status": "missing-in-package"
+				}
+			},
+			"summary": {
+				"differentFiles": 3,
+				"matchingFiles": 4,
+				"missingInPackage": 2,
+				"missingInSource": 0,
+				"score": 0.4444444444444444,
+				"totalFiles": 9
+			}
+		}
+	}
+]
