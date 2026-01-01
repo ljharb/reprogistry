@@ -1,0 +1,239 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-01T23:51:04.948Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:11.7.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "rewire@2.0.1",
+			"name": "rewire",
+			"version": "2.0.1",
+			"location": "https://registry.npmjs.org/rewire/-/rewire-2.0.1.tgz",
+			"integrity": "sha512-ahxgEmI6gW1hm8fuPiAOsLO1fOEEvSW4yn8F9OUDPhKh3Lk/C4jLsfIK3K7hGLYR66AkIKp3UBUt4KR32lvVsg==",
+			"publishedAt": "2014-05-20T11:34:46.008Z",
+			"publishedWith": {
+				"node": null,
+				"npm": "1.3.17"
+			}
+		},
+		"source": {
+			"integrity": "sha512-dnbLeTwHpXvWJjswC6CshXUUnnpE5AVhlayVRvDJhJx5ejbO4nbj1IXqN2urErgB7TpHUAMpf6iPDhQIxeSQOQ==",
+			"location": "git://github.com/jhnns/rewire.git",
+			"spec": "github:jhnns/rewire#HEAD"
+		},
+		"comparisonHash": "8a2a8dcbb729bf3ee9216e490c955701f0ddebe1",
+		"diff": {
+			"files": {
+				".istanbul.yml": {
+					"match": false,
+					"packageHash": "5ee774a0d4e24ac639a0657e829a36ee461177e8216e0e8339d61f39ba51e426",
+					"size": 192,
+					"status": "missing-in-source"
+				},
+				".jshintignore": {
+					"match": false,
+					"packageHash": "02ef90989338852fb3d965df1f7bbb3a26cada68bbbf5d3191078a5bc77e1453",
+					"size": 250,
+					"status": "missing-in-source"
+				},
+				".jshintrc": {
+					"match": false,
+					"packageHash": "734b5399ac99a21e926d41254133c65e5bc5ef781a13ec596df61cd2164d5c56",
+					"size": 145,
+					"status": "missing-in-source"
+				},
+				".npmignore": {
+					"match": false,
+					"packageHash": "f6f1d916ef767782aad41b157f10ce28e84edc30859e9000252263fd514dd28f",
+					"size": 141,
+					"status": "missing-in-source"
+				},
+				".travis.yml": {
+					"match": false,
+					"packageHash": "e861e497c1bb5cba6f8044d4c79afbf14d62137c6eceb2b6bb0efffe7bd4c999",
+					"size": 333,
+					"status": "missing-in-source"
+				},
+				"CHANGELOG.md": {
+					"match": false,
+					"packageHash": "9f8bd13d9f3aebd5377d275de1133dc77b7a896fb347b5e75b19ff5b96e364e0",
+					"size": 1163,
+					"status": "missing-in-source"
+				},
+				"README.md": {
+					"diff": "--- published/README.md\n+++ rebuilt/README.md\n@@ -1,149 +1,236 @@\n-rewire\r\n-=====\r\n-**Easy dependency injection for node.js unit testing**.\r\n-\r\n-rewire adds a special setter and getter to modules so you can modify their behaviour for better unit testing. You may\r\n-\r\n-- inject mocks for other modules or globals like `process`\r\n-- leak private variables\r\n-- override variables within the module.\r\n-\r\n-rewire does **not** load the file and eval the contents to emulate node's require mechanism. In fact it uses node's own\r\n-require to load the module. Thus your module behaves exactly the same in your test environment as under regular\r\n-circumstances (except your modifications).\r\n-\r\n-Good news to all caffeine-addicts: rewire works also with [Coffee-Script](http://coffeescript.org/). Note that in this\r\n-case CoffeeScript needs to be listed in your devDependencies.\r\n-\r\n-If you want to use rewire also on the client-side take a look at [client-side bundlers](https://github.com/jhnns/rewire#client-side-bundlers)\r\n-\r\n-[![Build Status](https://travis-ci.org/jhnns/rewire.svg?branch=master)](http://travis-ci.org/jhnns/rewire)\r\n-[![Dependency Status](https://david-dm.org/jhnns/rewire.svg)](https://david-dm.org/jhnns/rewire)\r\n-[![Coverage Status](https://img.shields.io/coveralls/jhnns/rewire.svg)](https://coveralls.io/r/jhnns/rewire)\r\n-\r\n-<br />\r\n-\r\n-Installation\r\n-------------\r\n-\r\n-`npm install rewire`\r\n-\r\n-<br />\r\n-\r\n-Examples\r\n---------\r\n-\r\n-Imagine you want to test this module:\r\n-\r\n-```javascript\r\n-// lib/myModule.js\r\n-\r\n-// With rewire you can change all these variables\r\n-var fs = require(\"fs\"),\r\n-    http = require(\"http\"),\r\n-    someOtherVar = \"hi\",\r\n-    myPrivateVar = 1;\r\n-\r\n-function readSomethingFromFileSystem(cb) {\r\n-    // But no scoped variables\r\n-    var path = \"/somewhere/on/the/disk\";\r\n-\r\n-    console.log(\"Reading from file system ...\");\r\n-    fs.readFile(path, \"utf8\", cb);\r\n-}\r\n-\r\n-exports.readSomethingFromFileSystem = readSomethingFromFileSystem;\r\n-```\r\n-\r\n-Now within your test module:\r\n-\r\n-```javascript\r\n-// test/myModule.test.js\r\n-\r\n-var rewire = require(\"rewire\");\r\n-\r\n-// rewire acts exactly like require.\r\n-var myModule = rewire(\"../lib/myModule.js\");\r\n-\r\n-// Just with one difference:\r\n-// Your module will now export a special setter and getter for private variables.\r\n-myModule.__set__(\"myPrivateVar\", 123);\r\n-myModule.__get__(\"myPrivateVar\"); // = 123\r\n-\r\n-// This allows you to mock almost everything within the module e.g. the fs-module.\r\n-// Just pass the variable name as first parameter and your mock as second.\r\n-myModule.__set__(\"fs\", {\r\n-    readFile: function (path, encoding, cb) {\r\n-        cb(null, \"Success!\");\r\n-    }\r\n-});\r\n-myModule.readSomethingFromFileSystem(function (err, data) {\r\n-    console.log(data); // = Success!\r\n-});\r\n-\r\n-// You can set different variables with one call.\r\n-myModule.__set__({\r\n-    fs: fsMock,\r\n-    http: httpMock,\r\n-    someOtherVar: \"hello\"\r\n-});\r\n-\r\n-// You may also override globals. These changes are only within the module, so\r\n-// you don't have to be concerned that other modules are influenced by your mock.\r\n-myModule.__set__({\r\n-    console: {\r\n-        log: function () { /* be quiet */ }\r\n-    },\r\n-    process: {\r\n",
+					"match": false,
+					"packageHash": "08b3a989e0349435cbaf82e0e532a40a73194f1ad8614b61ea64b8390337f732",
+					"size": 4342,
+					"sourceHash": "a1901abfd3d32362c8e7ad1f9ab29e784bc1490b5cb1c7785e51173f3b8cdd25",
+					"status": "content"
+				},
+				"lib/__set__.js": {
+					"diff": "--- published/lib/__set__.js\n+++ rebuilt/lib/__set__.js\n@@ -1,42 +1,74 @@\n-/**\r\n- * This function will be stringified and then injected into every rewired module.\r\n- * Then you can set private variables by calling myModule.__set__(\"myPrivateVar\", newValue);\r\n- *\r\n- * All variables within this function are namespaced in the arguments array because every\r\n- * var declaration could possibly clash with a variable in the module scope.\r\n- *\r\n- * @param {!String|!Object} varName name of the variable to set\r\n- * @param {String} varValue new value\r\n- * @throws {TypeError}\r\n- * @throws {ReferenceError} When the variable is unknown\r\n- * @return {*}\r\n- */\r\n-function __set__() {\r\n-    arguments.varName = arguments[0];\r\n-    arguments.varValue = arguments[1];\r\n-    arguments.src = \"\";\r\n-\r\n-    if (typeof arguments[0] === \"object\" && arguments.length === 1) {\r\n-        arguments.env = arguments.varName;\r\n-        if (!arguments.env || Array.isArray(arguments.env)) {\r\n-            throw new TypeError(\"__set__ expects an object as env\");\r\n-        }\r\n-        for (arguments.varName in arguments.env) {\r\n-            if (arguments.env.hasOwnProperty(arguments.varName)) {\r\n-                arguments.varValue = arguments.env[arguments.varName];\r\n-                arguments.src += arguments.varName + \" = arguments.env.\" + arguments.varName + \"; \";\r\n-            }\r\n-        }\r\n-    } else if (typeof arguments.varName === \"string\" && arguments.length === 2) {\r\n-        if (!arguments.varName) {\r\n-            throw new TypeError(\"__set__ expects a non-empty string as a variable name\");\r\n-        }\r\n-        arguments.src = arguments.varName + \" = arguments.varValue;\";\r\n-    } else {\r\n-        throw new TypeError(\"__set__ expects an environment object or a non-empty string as a variable name\");\r\n-    }\r\n-\r\n-    eval(arguments.src);\r\n-}\r\n-\r\n-module.exports = __set__;\n\\ No newline at end of file\n+/**\n+ * This function will be stringified and then injected into every rewired module.\n+ * Then you can set private variables by calling myModule.__set__(\"myPrivateVar\", newValue);\n+ *\n+ * All variables within this function are namespaced in the arguments array because every\n+ * var declaration could possibly clash with a variable in the module scope.\n+ *\n+ * @param {String|Object} varName name of the variable to set\n+ * @param {String} varValue new value\n+ * @return {Function}\n+ */\n+function __set__() {\n+    arguments.varName = arguments[0];\n+    arguments.varValue = arguments[1];\n+    // Saving references to global objects and functions. Thus a test may even change these variables\n+    // without interfering with rewire().\n+    // @see https://github.com/jhnns/rewire/issues/40\n+    arguments.refs = arguments[2] || {\n+        isArray: Array.isArray,\n+        TypeError: TypeError,\n+        stringify: JSON.stringify\n+        // We can't save eval() because eval() is a *special* global function\n+        // That's why it can't be re-assigned in strict mode\n+        //eval: eval\n+    };\n+    arguments.src = \"\";\n+    arguments.revertArgs = [];\n+\n+    if (typeof arguments[0] === \"object\") {\n+        arguments.env = arguments.varName;\n+        if (!arguments.env || arguments.refs.isArray(arguments.env)) {\n+            throw new arguments.refs.TypeError(\"__set__ expects an object as env\");\n+        }\n+        arguments.revertArgs[0] = {};\n+        for (arguments.varName in arguments.env) {\n+            if (arguments.env.hasOwnProperty(arguments.varName)) {\n+                arguments.varValue = arguments.env[arguments.varName];\n+                arguments.src += arguments.varName + \" = arguments.env[\" + arguments.refs.stringify(arguments.varName) + \"]; \";\n+                try {\n+                    // Allow tests to mock implicit globals\n+                    // @see https://github.com/jhnns/rewire/issues/35\n+                    arguments.revertArgs[0][arguments.varName] = eval(arguments.varName);\n+                } catch (err) {\n+                    arguments.revertArgs[0][arguments.varName] = undefined;\n+                }\n+            }\n+        }\n+    } else if (typeof arguments.varName === \"string\") {\n+        if (!arguments.varName) {\n+            throw new arguments.refs.TypeError(\"__set__ expects a non-empty string as a variable name\");\n+        }\n+        arguments.src = arguments.varName + \" = arguments.varValue;\";\n+        try {\n+            // Allow tests to mock implicit globals\n",
+					"match": false,
+					"packageHash": "bc2874cbbd19c4a4aa16b48d354bc4d6dba0a86f7f243d65eef0396e8268163d",
+					"size": 1755,
+					"sourceHash": "ecea9a62140d9f82c127f6577deaed2442d1bb69960a188795c58dd30eae0845",
+					"status": "content"
+				},
+				"lib/detectStrictMode.js": {
+					"diff": "--- published/lib/detectStrictMode.js\n+++ rebuilt/lib/detectStrictMode.js\n@@ -1,12 +1,28 @@\n-/**\r\n- * Returns true if the source code is intended to run in strict mode. Does not detect\r\n- * \"use strict\" if it occurs in a nested function.\r\n- *\r\n- * @param {String} src\r\n- * @return {Boolean}\r\n- */\r\n-function detectStrictMode(src) {\r\n-    return (/^\\s*(?:\"use strict\"|'use strict')[ \\t]*(?:[\\r\\n]|;)/g).test(src);\r\n-}\r\n-\r\n-module.exports = detectStrictMode;\n\\ No newline at end of file\n+var multiLineComment = /^\\s*\\/\\*.*?\\*\\//;\n+var singleLineComment = /^\\s*\\/\\/.*?[\\r\\n]/;\n+var strictMode = /^\\s*(?:\"use strict\"|'use strict')[ \\t]*(?:[\\r\\n]|;)/;\n+\n+/**\n+ * Returns true if the source code is intended to run in strict mode. Does not detect\n+ * \"use strict\" if it occurs in a nested function.\n+ *\n+ * @param {String} src\n+ * @return {Boolean}\n+ */\n+function detectStrictMode(src) {\n+    var singleLine;\n+    var multiLine;\n+\n+    while ((singleLine = singleLineComment.test(src)) || (multiLine = multiLineComment.test(src))) {\n+        if (singleLine) {\n+            src = src.replace(singleLineComment, \"\");\n+        }\n+        if (multiLine) {\n+            src = src.replace(multiLineComment, \"\");\n+        }\n+    }\n+\n+    return strictMode.test(src);\n+}\n+\n+module.exports = detectStrictMode;\n",
+					"match": false,
+					"packageHash": "5a787839dc670d9b9f67dfa4c19385e3651ace5ddc0130035ec06664a92b5916",
+					"size": 352,
+					"sourceHash": "51ac021894886913b510883c07d752c2339758ff5a21d27773cd47726eff334b",
+					"status": "content"
+				},
+				"lib/getImportGlobalsSrc.js": {
+					"diff": "--- published/lib/getImportGlobalsSrc.js\n+++ rebuilt/lib/getImportGlobalsSrc.js\n@@ -1,31 +1,50 @@\n-/**\r\n- * Declares all globals with a var and assigns the global object. Thus you're able to\r\n- * override globals without changing the global object itself.\r\n- *\r\n- * Returns something like\r\n- * \"var console = global.console; var process = global.process; ...\"\r\n- *\r\n- * @return {String}\r\n- */\r\n-function getImportGlobalsSrc(ignore) {\r\n-    var key,\r\n-        value,\r\n-        src = \"\",\r\n-        globalObj = typeof global === \"undefined\"? window: global;\r\n-\r\n-    ignore = ignore || [];\r\n-    // global itself can't be overridden because it's the only reference to our real global objects\r\n-    ignore.push(\"global\");\r\n-\r\n-    for (key in globalObj) { /* jshint forin: false */\r\n-        if (ignore.indexOf(key) !== -1) {\r\n-            continue;\r\n-        }\r\n-        value = globalObj[key];\r\n-        src += \"var \" + key + \" = global.\" + key + \"; \";\r\n-    }\r\n-\r\n-    return src;\r\n-}\r\n-\r\n-module.exports = getImportGlobalsSrc;\n\\ No newline at end of file\n+/**\n+ * Declares all globals with a var and assigns the global object. Thus you're able to\n+ * override globals without changing the global object itself.\n+ *\n+ * Returns something like\n+ * \"var console = globalThis.console; var process = globalThis.process; ...\"\n+ *\n+ * @return {String}\n+ */\n+function getImportGlobalsSrc(ignore) {\n+    var key,\n+        src = \"\",\n+        globalObj = typeof globalThis === \"undefined\"? window : globalThis;\n+\n+    ignore = ignore || [];\n+    ignore.push(\n+        // globalThis itself can't be overridden because it's the only reference to our real global objects\n+        \"globalThis\",\n+        // ignore 'module', 'exports' and 'require' on the global scope, because otherwise our code would\n+        // shadow the module-internal variables\n+        // @see https://github.com/jhnns/rewire-webpack/pull/6\n+        \"module\", \"exports\", \"require\",\n+        // strict mode doesn't allow to (re)define 'undefined', 'eval' & 'arguments'\n+        \"undefined\", \"eval\", \"arguments\",\n+        // 'GLOBAL' and 'root' are deprecated in Node\n+        // (assigning them causes a DeprecationWarning)\n+        \"GLOBAL\", \"root\",\n+        // 'NaN' and 'Infinity' are immutable\n+        // (doesn't throw an error if you set 'var NaN = ...', but doesn't work either)\n+        \"NaN\", \"Infinity\",\n+    );\n+\n+    const globals = Object.getOwnPropertyNames(globalObj);\n+\n+    for (key of globals) {\n+        if (ignore.indexOf(key) !== -1) {\n+            continue;\n+        }\n+\n+        // key may be an invalid variable name (e.g. 'a-b')\n+        try {\n+          eval(\"var \" + key + \";\");\n+          src += \"var \" + key + \" = globalThis.\" + key + \"; \";\n+        } catch(e) {}\n+    }\n+\n+    return src;\n+}\n+\n+module.exports = getImportGlobalsSrc;\n",
+					"match": false,
+					"packageHash": "e805dc085930cda9aeb7c5fa42e0c93297aad1eadf45a8c99710b29b15535c14",
+					"size": 897,
+					"sourceHash": "48d3ea7b5d5064d3914485f677e7cca87c749395f3f135f1dedd75458cc7695b",
+					"status": "content"
+				},
+				"lib/index.js": {
+					"diff": "--- published/lib/index.js\n+++ rebuilt/lib/index.js\n@@ -1,16 +1,16 @@\n-var rewireModule = require(\"./rewire.js\");\r\n-\r\n-/**\r\n- * Adds a special setter and getter to the module located at filename. After the module has been rewired, you can\r\n- * call myModule.__set__(name, value) and myModule.__get__(name) to manipulate private variables.\r\n- *\r\n- * @param {!String} filename Path to the module that shall be rewired. Use it exactly like require().\r\n- * @return {*} the rewired module\r\n- */\r\n-function rewire(filename) {\r\n-    return rewireModule(module.parent, filename);\r\n-}\r\n-\r\n-module.exports = rewire;\r\n-\r\n-delete require.cache[__filename];   // deleting self from module cache so the parent module is always up to date\n\\ No newline at end of file\n+var rewireModule = require(\"./rewire.js\");\n+\n+/**\n+ * Adds a special setter and getter to the module located at filename. After the module has been rewired, you can\n+ * call myModule.__set__(name, value) and myModule.__get__(name) to manipulate private variables.\n+ *\n+ * @param {!String} filename Path to the module that shall be rewired. Use it exactly like require().\n+ * @return {*} the rewired module\n+ */\n+function rewire(filename) {\n+    return rewireModule(module.parent, filename);\n+}\n+\n+module.exports = rewire;\n+\n+delete require.cache[__filename];   // deleting self from module cache so the parent module is always up to date\n",
+					"match": false,
+					"packageHash": "f667806772b428c94b3e3f659b8fec2b4463e1924003e6287c7da0c7fb03e8c7",
+					"size": 637,
+					"sourceHash": "2987d8fabe010f60349b3dc29eaab26bba1d2051ceab5b1a4b4ad40b52f40f48",
+					"status": "content"
+				},
+				"lib/moduleEnv.js": {
+					"diff": "--- published/lib/moduleEnv.js\n+++ rebuilt/lib/moduleEnv.js\n@@ -1,82 +1,103 @@\n-\"use strict\";\r\n-\r\n-var Module = require(\"module\"),\r\n-    fs = require(\"fs\");\r\n-\r\n-    // caching original wrapper\r\n-var moduleWrapper0 = Module.wrapper[0],\r\n-    moduleWrapper1 = Module.wrapper[1],\r\n-    originalExtensions = {},\r\n-    nodeRequire,\r\n-    currentModule;\r\n-\r\n-function load(targetModule) {\r\n-    nodeRequire = targetModule.require;\r\n-    targetModule.require = requireProxy;\r\n-    currentModule = targetModule;\r\n-\r\n-    registerExtensions();\r\n-    targetModule.load(targetModule.id);\r\n-\r\n-    // This is only necessary if nothing has been required within the module\r\n-    reset();\r\n-}\r\n-\r\n-function reset() {\r\n-    Module.wrapper[0] = moduleWrapper0;\r\n-    Module.wrapper[1] = moduleWrapper1;\r\n-    restoreExtensions();\r\n-}\r\n-\r\n-function inject(prelude, appendix) {\r\n-    Module.wrapper[0] = moduleWrapper0 + prelude;\r\n-    Module.wrapper[1] = appendix + moduleWrapper1;\r\n-}\r\n-\r\n-/**\r\n- * Proxies the first require call in order to draw back all changes to the Module.wrapper.\r\n- * Thus our changes don't influence other modules\r\n- *\r\n- * @param {!String} path\r\n- */\r\n-function requireProxy(path) {\r\n-    reset();\r\n-    currentModule.require = nodeRequire;\r\n-    return nodeRequire.call(currentModule, path);  // node's require only works when \"this\" points to the module\r\n-}\r\n-\r\n-function registerExtensions() {\r\n-    originalExtensions.coffee = require.extensions[\".coffee\"];\r\n-    require.extensions[\".coffee\"] = coffeeExtension;\r\n-}\r\n-\r\n-function restoreExtensions() {\r\n-    require.extensions[\".coffee\"] = originalExtensions.coffee;\r\n-}\r\n-\r\n-function coffeeExtension(module, filename) {\r\n-    var coffee = require(\"coffee-script\"),\r\n-        content = stripBOM(fs.readFileSync(filename, \"utf8\"));\r\n-\r\n-    content = coffee.compile(content, {\r\n-        filename: filename,\r\n-        bare: true\r\n-    });\r\n-    module._compile(content, filename);\r\n-}\r\n-\r\n-/**\r\n- * @see https://github.com/joyent/node/blob/master/lib/module.js\r\n- */\r\n-function stripBOM(content) {\r\n-    // Remove byte order marker. This catches EF BB BF (the UTF-8 BOM)\r\n-    // because the buffer-to-string conversion in `fs.readFileSync()`\r\n-    // translates it to FEFF, the UTF-16 BOM.\r\n-    if (content.charCodeAt(0) === 0xFEFF) {\r\n-        content = content.slice(1);\r\n-    }\r\n-    return content;\r\n-}\r\n-\r\n-exports.load = load;\r\n-exports.inject = inject;\n\\ No newline at end of file\n+\"use strict\";\n+\n+var Module = require(\"module\"),\n+    pirates = require(\"pirates\"),\n+    eslint = require(\"eslint\");\n+\n+var moduleWrapper0 = Module.wrapper[0],\n+    moduleWrapper1 = Module.wrapper[1],\n+    linter = new eslint.Linter(),\n+    eslintOptions = {\n+        languageOptions: {\n+            ecmaVersion: 6,\n+            parserOptions: {\n+                ecmaFeatures: {\n",
+					"match": false,
+					"packageHash": "78961082588b6ebf46a142f2c392927995da920bf0cad1ea8e4d69767b5232cf",
+					"size": 2263,
+					"sourceHash": "21d22000d65278bca7093cd3bd4482341b8a3c22f1c4c5cd9eb0adb5030e6a89",
+					"status": "content"
+				},
+				"lib/rewire.js": {
+					"diff": "--- published/lib/rewire.js\n+++ rebuilt/lib/rewire.js\n@@ -1,61 +1,54 @@\n-var Module = require(\"module\"),\r\n-    fs = require(\"fs\"),\r\n-    __get__ = require(\"./__get__.js\"),\r\n-    __set__ = require(\"./__set__.js\"),\r\n-    getImportGlobalsSrc = require(\"./getImportGlobalsSrc.js\"),\r\n-    detectStrictMode = require(\"./detectStrictMode.js\"),\r\n-    moduleEnv = require(\"./moduleEnv.js\");\r\n-\r\n-var __get__Src = __get__.toString(),\r\n-    __set__Src = __set__.toString();\r\n-\r\n-/**\r\n- * Does actual rewiring the module. For further documentation @see index.js\r\n- */\r\n-function internalRewire(parentModulePath, targetPath) {\r\n-    var targetModule,\r\n-        prelude,\r\n-        appendix,\r\n-        src;\r\n-\r\n-    // Checking params\r\n-    if (typeof targetPath !== \"string\") {\r\n-        throw new TypeError(\"Filename must be a string\");\r\n-    }\r\n-\r\n-    // Resolve full filename relative to the parent module\r\n-    targetPath = Module._resolveFilename(targetPath, parentModulePath);\r\n-\r\n-    // Special support for older node versions that returned an array on Module._resolveFilename\r\n-    // @see https://github.com/joyent/node/blob/865b077819a9271a29f982faaef99dc635b57fbc/lib/module.js#L319\r\n-    // TODO Remove this switch on the next major release\r\n-    /* istanbul ignore next because it will be removed soon */\r\n-    if (Array.isArray(targetPath)) {\r\n-        targetPath = targetPath[1];\r\n-    }\r\n-\r\n-    // Create testModule as it would be created by require()\r\n-    targetModule = new Module(targetPath, parentModulePath);\r\n-\r\n-    // We prepend a list of all globals declared with var so they can be overridden (without changing original globals)\r\n-    prelude = getImportGlobalsSrc();\r\n-\r\n-    // We append our special setter and getter.\r\n-    appendix = \"\\n\";\r\n-    appendix += \"module.exports.__set__ = \" + __set__Src + \"; \";\r\n-    appendix += \"module.exports.__get__ = \" + __get__Src + \"; \";\r\n-\r\n-    // Check if the module uses the strict mode.\r\n-    // If so we must ensure that \"use strict\"; stays at the beginning of the module.\r\n-    src = fs.readFileSync(targetPath, \"utf8\");\r\n-    if (detectStrictMode(src) === true) {\r\n-        prelude = ' \"use strict\"; ' + prelude;\r\n-    }\r\n-\r\n-    moduleEnv.inject(prelude, appendix);\r\n-    moduleEnv.load(targetModule);\r\n-\r\n-    return targetModule.exports;\r\n-}\r\n-\r\n-module.exports = internalRewire;\n\\ No newline at end of file\n+var Module = require(\"module\"),\n+    fs = require(\"fs\"),\n+    getImportGlobalsSrc = require(\"./getImportGlobalsSrc.js\"),\n+    getDefinePropertySrc = require(\"./getDefinePropertySrc.js\"),\n+    detectStrictMode = require(\"./detectStrictMode.js\"),\n+    moduleEnv = require(\"./moduleEnv.js\");\n+\n+/**\n+ * Does actual rewiring the module. For further documentation @see index.js\n+ */\n+function internalRewire(parentModulePath, targetPath) {\n+    var targetModule,\n+        prelude,\n+        appendix,\n+        src;\n+\n+    // Checking params\n+    if (typeof targetPath !== \"string\") {\n+        throw new TypeError(\"Filename must be a string\");\n+    }\n+\n+    // Resolve full filename relative to the parent module\n+    targetPath = Module._resolveFilename(targetPath, parentModulePath);\n+\n+    // Create testModule as it would be created by require()\n+    targetModule = new Module(targetPath, parentModulePath);\n+\n+    // We prepend a list of all globals declared with var so they can be overridden (without changing original globals)\n+    prelude = getImportGlobalsSrc();\n+\n+    // Wrap module src inside IIFE so that function declarations do not clash with global variables\n+    // @see https://github.com/jhnns/rewire/issues/56\n+    prelude += \"(function () { \";\n+\n+    // We append our special setter and getter.\n",
+					"match": false,
+					"packageHash": "2bff253d4c4274e3132eede0b871b26b46758a37af1b121554ecee2a62faef7b",
+					"size": 2213,
+					"sourceHash": "82877afb11d4f332ad889830175c9248ef388ab728d35272b43cdd5047bcf816",
+					"status": "content"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -1,39 +1,52 @@\n-{\r\n-    \"name\" : \"rewire\",\r\n-    \"version\" : \"2.0.1\",\r\n-    \"description\" : \"Easy dependency injection for node.js unit testing\",\r\n-    \"keywords\" : [\r\n-        \"dependency\",\r\n-        \"injection\",\r\n-        \"mock\",\r\n-        \"shim\",\r\n-        \"module\",\r\n-        \"unit\",\r\n-        \"test\",\r\n-        \"leak\",\r\n-        \"inspect\"\r\n-    ],\r\n-    \"author\" : {\r\n-        \"name\" : \"Johannes Ewald\",\r\n-        \"email\" : \"mail@johannesewald.de\"\r\n-    },\r\n-    \"main\" : \"lib/index.js\",\r\n-    \"homepage\": \"https://github.com/jhnns/rewire\",\r\n-    \"bugs\" : {\r\n-        \"url\" : \"https://github.com/jhnns/rewire/issues\",\r\n-        \"email\" : \"mail@johannesewald.de\"\r\n-    },\r\n-    \"repository\": {\r\n-        \"type\": \"git\",\r\n-        \"url\": \"git://github.com/jhnns/rewire.git\"\r\n-    },\r\n-    \"devDependencies\": {\r\n-        \"mocha\": \"1.x\",\r\n-        \"expect.js\": \"0.x\",\r\n-        \"coffee-script\": \"1.x\"\r\n-    },\r\n-    \"scripts\" : {\r\n-        \"test\" : \"node node_modules/mocha/bin/mocha -R spec\",\r\n-        \"coverage\": \"istanbul cover ./node_modules/mocha/bin/_mocha\"\r\n-    }\r\n-}\n\\ No newline at end of file\n+{\n+  \"name\": \"rewire\",\n+  \"version\": \"9.0.1\",\n+  \"description\": \"Easy dependency injection for node.js unit testing\",\n+  \"keywords\": [\n+    \"dependency\",\n+    \"injection\",\n+    \"mock\",\n+    \"shim\",\n+    \"module\",\n+    \"unit\",\n+    \"test\",\n+    \"leak\",\n+    \"inspect\",\n+    \"fake\",\n+    \"require\"\n+  ],\n+  \"author\": {\n+    \"name\": \"Johannes Ewald\",\n+    \"email\": \"mail@johannesewald.de\"\n+  },\n+  \"main\": \"lib/index.js\",\n+  \"homepage\": \"https://github.com/jhnns/rewire\",\n+  \"bugs\": {\n+    \"url\": \"https://github.com/jhnns/rewire/issues\",\n+    \"email\": \"mail@johannesewald.de\"\n+  },\n+  \"repository\": {\n+    \"type\": \"git\",\n+    \"url\": \"git://github.com/jhnns/rewire.git\"\n+  },\n+  \"devDependencies\": {\n+    \"@types/node\": \"^22.15.21\",\n+    \"expect.js\": \"^0.3.1\",\n+    \"mocha\": \"^11.4.0\",\n+    \"nyc\": \"^17.1.0\",\n+    \"rewire\": \"file://.\",\n+    \"ts-node\": \"^10.9.0\",\n+    \"typescript\": \"^4.6.4\"\n+  },\n+  \"license\": \"MIT\",\n+  \"scripts\": {\n+    \"test\": \"nyc --reporter=html --reporter=lcov mocha -r ts-node/register -R spec\"\n+  },\n+  \"dependencies\": {\n+    \"eslint\": \"^9.30\",\n+    \"pirates\": \"^4.0.7\"\n+  },\n+  \"files\": [\n+    \"lib\"\n+  ]\n+}\n",
+					"match": false,
+					"packageHash": "86fe5d7237c3e1b8cb5168e05bd280e5e8d81f54238913874637258ee213dc3c",
+					"size": 1022,
+					"sourceHash": "f7c58af287fe2a2b778d48baaa72c2dca2dfbbc699cb51751428e3c9b6778fd4",
+					"status": "content"
+				},
+				"test/__get__.test.js": {
+					"match": false,
+					"packageHash": "bf9c8870a409fc292bbd2c7ba7b1365a920d0b65a2098d9b9bd71737456cd928",
+					"size": 2750,
+					"status": "missing-in-source"
+				},
+				"test/__set__.test.js": {
+					"match": false,
+					"packageHash": "81622a0ca4f81b43a36cc8f3d4dc741f419397f0de1246ea50f4ad63e36677a2",
+					"size": 4005,
+					"status": "missing-in-source"
+				},
+				"test/detectStrictMode.test.js": {
+					"match": false,
+					"packageHash": "15f56eaef9be6df047d0f34165c96f23c51a93c0ce74a4ae290a49015e8e6498",
+					"size": 1275,
+					"status": "missing-in-source"
+				},
+				"test/getImportGlobalsSrc.test.js": {
+					"match": false,
+					"packageHash": "e04b513980c45eec67e8d6a877141bc1f1c6bfbda1450b5fee70cf67eb4e0f28",
+					"size": 2175,
+					"status": "missing-in-source"
+				},
+				"test/rewire.test.js": {
+					"match": false,
+					"packageHash": "fd2c0e2f61b2eee78307f4197b3f59df1f7026fec98089a88591915f2707cf21",
+					"size": 1193,
+					"status": "missing-in-source"
+				},
+				"test/testModules/debuggerModule.js": {
+					"match": false,
+					"packageHash": "5a664bd82c52c601f4a7f5388d07e4fc29714aca613defd2356547295d522e7e",
+					"size": 122,
+					"status": "missing-in-source"
+				},
+				"test/testModules/emptyModule.js": {
+					"match": false,
+					"packageHash": "cc916b75f435c78cff5ecc34c0fb4c94c6e1d37b5d246ceb10c05a74ffce3610",
+					"size": 118,
+					"status": "missing-in-source"
+				},
+				"test/testModules/module.coffee": {
+					"match": false,
+					"packageHash": "628b96b829200d00ccad3784e77e74eb925af2240cd643a7cb2e3c607daa9b9c",
+					"size": 70,
+					"status": "missing-in-source"
+				},
+				"test/testModules/moduleA.js": {
+					"match": false,
+					"packageHash": "f6734997510cbe537e2cfedc9663250457724139afce8e89585d0540dcd75313",
+					"size": 4082,
+					"status": "missing-in-source"
+				},
+				"test/testModules/moduleB.js": {
+					"match": false,
+					"packageHash": "064519c94cb3cc12f1ac536ac00daa00797935905ee4e4a97be2f00f3b8f56a0",
+					"size": 4051,
+					"status": "missing-in-source"
+				},
+				"test/testModules/node_modules/rewire/package.json": {
+					"match": false,
+					"packageHash": "3714a2b03551e699d85c2519411267399d4bea5d81590baf9cfa25cb778cdc62",
+					"size": 44,
+					"status": "missing-in-source"
+				},
+				"test/testModules/sharedTestCases.js": {
+					"match": false,
+					"packageHash": "879780efba7fa19cf27e3e7bdc0e599c0f72bea9fca3d723887f315cea99d46f",
+					"size": 8426,
+					"status": "missing-in-source"
+				},
+				"test/testModules/someOtherModule.js": {
+					"match": false,
+					"packageHash": "4ca6d6f857cc3bef4a7ebccc2afd472845baa2c4623ed33cd55c90f5fc7e97e8",
+					"size": 152,
+					"status": "missing-in-source"
+				},
+				"test/testModules/strictModule.js": {
+					"match": false,
+					"packageHash": "94db193e5ca02533b4cea36a2c83975a416b0986d00f8fa14e22373e5d8601b0",
+					"size": 246,
+					"status": "missing-in-source"
+				},
+				"test/testModules/throwError.js": {
+					"match": false,
+					"packageHash": "27853444bd56050dd036fa9ed88043f4c41cbd60ade859ecde2c1ee4c294e025",
+					"size": 60,
+					"status": "missing-in-source"
+				},
+				"lib/__with__.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/getDefinePropertySrc.js": {
+					"match": false,
+					"status": "missing-in-package"
+				}
+			},
+			"summary": {
+				"differentFiles": 8,
+				"matchingFiles": 2,
+				"missingInPackage": 2,
+				"missingInSource": 21,
+				"score": 0.06060606060606061,
+				"totalFiles": 33
+			}
+		}
+	}
+]
