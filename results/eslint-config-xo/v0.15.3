@@ -1,0 +1,95 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-01T12:15:21.419Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:2.15.5",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "eslint-config-xo@0.15.3",
+			"name": "eslint-config-xo",
+			"version": "0.15.3",
+			"location": "https://registry.npmjs.org/eslint-config-xo/-/eslint-config-xo-0.15.3.tgz",
+			"integrity": "sha512-ryMswsR91r94jOYAiPiiWaYVDp4Xw0pcySVYqmxWkJ5prU0ATIiAPwIqdHZ/8SEK8Ii3IWGqf/WOXb4k2TNghA==",
+			"publishedAt": "2016-07-15T21:20:54.573Z",
+			"publishedWith": {
+				"node": "4.4.5",
+				"npm": "3.10.3"
+			}
+		},
+		"source": {
+			"integrity": null,
+			"location": "git+https://github.com/sindresorhus/eslint-config-xo.git",
+			"spec": "github:sindresorhus/eslint-config-xo#9c9978c15b62ef328c966a7e2b409757a42db17f"
+		},
+		"comparisonHash": "8a2a8dcbb729bf3ee9216e490c955701f0ddebe1",
+		"diff": {
+			"files": {
+				"browser.js": {
+					"diff": "--- published/browser.js\n+++ rebuilt/browser.js\n@@ -1,10 +1,25 @@\n-'use strict';\n-var path = require('path');\n+import globals from 'globals';\n+import confusingBrowserGlobals from 'confusing-browser-globals';\n+import eslintConfigXo from './index.js';\n \n-module.exports = {\n-\textends: path.join(__dirname, 'index.js'),\n-\tenv: {\n-\t\tnode: false,\n-\t\tbrowser: true\n-\t}\n-};\n+const [config] = eslintConfigXo;\n+\n+export default [\n+\t{\n+\t\t...config,\n+\t\tlanguageOptions: {\n+\t\t\t...config.languageOptions,\n+\t\t\tglobals: {\n+\t\t\t\t...globals.es2021,\n+\t\t\t\t...globals.browser,\n+\t\t\t},\n+\t\t},\n+\t\trules: {\n+\t\t\t...config.rules,\n+\t\t\t'no-restricted-globals': [\n+\t\t\t\t'error',\n+\t\t\t\t...confusingBrowserGlobals,\n+\t\t\t],\n+\t\t},\n+\t},\n+];\n",
+					"match": false,
+					"packageHash": "7e7b5dcd53c19a0122681b90356535e2cc148059b41413e292bc3e804cf27df0",
+					"size": 151,
+					"sourceHash": "0c44c03eee2a78e731a1413897ff27a461ac0b600381f2ac77841a620761aca4",
+					"status": "content"
+				},
+				"esnext.js": {
+					"match": false,
+					"packageHash": "44a739298a4ed136b66e54ffdef61dd46ceee589e0b00b62a0a06c5b27aa4a4c",
+					"size": 1123,
+					"status": "missing-in-source"
+				},
+				"index.js": {
+					"diff": "--- published/index.js\n+++ rebuilt/index.js\n@@ -1,235 +1,835 @@\n-'use strict';\n+import globals from 'globals';\n+import stylistic from '@stylistic/eslint-plugin';\n+import json from '@eslint/json';\n+import css from '@eslint/css';\n \n-module.exports = {\n-\tparserOptions: {\n-\t\tecmaVersion: 7,\n-\t\tsourceType: 'module',\n-\t\tecmaFeatures: {\n-\t\t\tjsx: true,\n-\t\t\texperimentalObjectRestSpread: true\n-\t\t}\n-\t},\n-\tenv: {\n-\t\tnode: true,\n-\t\tes6: true\n-\t},\n-\trules: {\n-\t\t'comma-dangle': ['error', 'never'],\n-\t\t'no-cond-assign': 'error',\n-\t\t'no-constant-condition': 'error',\n-\t\t'no-control-regex': 'error',\n-\t\t'no-debugger': 'error',\n-\t\t'no-dupe-args': 'error',\n-\t\t'no-dupe-keys': 'error',\n-\t\t'no-duplicate-case': 'error',\n-\t\t'no-empty-character-class': 'error',\n-\t\t'no-empty': ['error', {\n-\t\t\tallowEmptyCatch: true\n-\t\t}],\n-\t\t'no-ex-assign': 'error',\n-\t\t'no-extra-boolean-cast': 'error',\n-\t\t// disabled because of https://github.com/eslint/eslint/issues/6028\n-\t\t// 'no-extra-parens': [2, 'all', {nestedBinaryExpressions: false}],\n-\t\t'no-extra-semi': 'error',\n-\t\t'no-func-assign': 'error',\n-\t\t'no-inner-declarations': 'error',\n-\t\t'no-invalid-regexp': 'error',\n-\t\t'no-irregular-whitespace': 'error',\n-\t\t'no-negated-in-lhs': 'error',\n-\t\t'no-obj-calls': 'error',\n-\t\t'no-prototype-builtins': 'error',\n-\t\t'no-regex-spaces': 'error',\n-\t\t'no-sparse-arrays': 'error',\n-\t\t'no-unreachable': 'error',\n-\t\t'no-unsafe-finally': 'error',\n-\t\t'use-isnan': 'error',\n-\t\t'valid-typeof': 'error',\n-\t\t'no-unexpected-multiline': 'error',\n-\t\t'accessor-pairs': 'error',\n-\t\t'array-callback-return': 'error',\n-\t\t'block-scoped-var': 'error',\n-\t\t'complexity': 'warn',\n-\t\t'curly': 'error',\n-\t\t'default-case': 'error',\n-\t\t'dot-notation': 'error',\n-\t\t'dot-location': ['error', 'property'],\n-\t\t'eqeqeq': 'error',\n-\t\t'guard-for-in': 'error',\n-\t\t'no-alert': 'error',\n-\t\t'no-caller': 'error',\n-\t\t'no-case-declarations': 'error',\n-\t\t'no-div-regex': 'error',\n-\t\t'no-else-return': 'error',\n-\t\t'no-empty-pattern': 'error',\n-\t\t'no-eq-null': 'error',\n-\t\t'no-eval': 'error',\n-\t\t'no-extend-native': 'error',\n-\t\t'no-extra-bind': 'error',\n-\t\t'no-extra-label': 'error',\n-\t\t'no-fallthrough': 'error',\n-\t\t'no-floating-decimal': 'error',\n-\t\t'no-implicit-coercion': 'error',\n-\t\t'no-implicit-globals': 'error',\n-\t\t'no-implied-eval': 'error',\n-\t\t'no-iterator': 'error',\n-\t\t'no-labels': 'error',\n-\t\t'no-lone-blocks': 'error',\n-\t\t'no-loop-func': 'error',\n-\t\t'no-multi-spaces': 'error',\n-\t\t'no-multi-str': 'error',\n-\t\t'no-native-reassign': 'error',\n-\t\t'no-new-func': 'error',\n-\t\t'no-new-wrappers': 'error',\n-\t\t'no-new': 'error',\n-\t\t'no-octal-escape': 'error',\n-\t\t'no-octal': 'error',\n-\t\t'no-proto': 'error',\n-\t\t'no-redeclare': 'error',\n-\t\t'no-return-assign': ['error', 'always'],\n-\t\t'no-script-url': 'error',\n-\t\t'no-self-assign': 'error',\n-\t\t'no-self-compare': 'error',\n-\t\t'no-sequences': 'error',\n-\t\t'no-throw-literal': 'error',\n",
+					"match": false,
+					"packageHash": "0ff2b458a6b3b6f6d6ae2ef23eff94a839c9bc10ebffcfd682c0b7f541650263",
+					"size": 6683,
+					"sourceHash": "3960799104620be49934445692efd158b12d318ebabccac0cabed1cc705faa99",
+					"status": "content"
+				},
+				"license": {
+					"diff": "--- published/license\n+++ rebuilt/license\n@@ -1,21 +1,9 @@\n-The MIT License (MIT)\n+MIT License\n \n-Copyright (c) Sindre Sorhus <sindresorhus@gmail.com> (sindresorhus.com)\n+Copyright (c) Sindre Sorhus <sindresorhus@gmail.com> (https://sindresorhus.com)\n \n-Permission is hereby granted, free of charge, to any person obtaining a copy\n-of this software and associated documentation files (the \"Software\"), to deal\n-in the Software without restriction, including without limitation the rights\n-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell\n-copies of the Software, and to permit persons to whom the Software is\n-furnished to do so, subject to the following conditions:\n+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the \"Software\"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:\n \n-The above copyright notice and this permission notice shall be included in\n-all copies or substantial portions of the Software.\n+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.\n \n-THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR\n-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,\n-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE\n-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER\n-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,\n-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN\n-THE SOFTWARE.\n+THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.\n",
+					"match": false,
+					"packageHash": "6fb9754611c20f6649f68805e8c990e83261f29316e29de9e6cedae607b8634c",
+					"size": 1119,
+					"sourceHash": "5c932d88256b4ab958f64a856fa48e8bd1f55bc1d96b8149c65689e0c61789d3",
+					"status": "content"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -1,63 +1,75 @@\n {\n-  \"name\": \"eslint-config-xo\",\n-  \"version\": \"0.15.3\",\n-  \"description\": \"ESLint shareable config for XO\",\n-  \"license\": \"MIT\",\n-  \"repository\": \"sindresorhus/eslint-config-xo\",\n-  \"author\": {\n-    \"name\": \"Sindre Sorhus\",\n-    \"email\": \"sindresorhus@gmail.com\",\n-    \"url\": \"sindresorhus.com\"\n-  },\n-  \"engines\": {\n-    \"node\": \">=0.10.0\"\n-  },\n-  \"scripts\": {\n-    \"test\": \"ava\"\n-  },\n-  \"files\": [\n-    \"index.js\",\n-    \"esnext.js\",\n-    \"browser.js\"\n-  ],\n-  \"keywords\": [\n-    \"❤️\",\n-    \"eslintconfig\",\n-    \"xo\",\n-    \"xoxo\",\n-    \"hugs\",\n-    \"kisses\",\n-    \"happy\",\n-    \"happiness\",\n-    \"code\",\n-    \"quality\",\n-    \"style\",\n-    \"lint\",\n-    \"linter\",\n-    \"jscs\",\n-    \"jshint\",\n-    \"jslint\",\n-    \"eslint\",\n-    \"validate\",\n-    \"code style\",\n-    \"standard\",\n-    \"strict\",\n-    \"check\",\n-    \"checker\",\n-    \"verify\",\n-    \"enforce\",\n-    \"hint\",\n-    \"simple\"\n-  ],\n-  \"devDependencies\": {\n-    \"ava\": \"*\",\n-    \"babel-eslint\": \"^6.0.0\",\n-    \"eslint\": \"^2.12.0\",\n-    \"eslint-plugin-babel\": \"^3.0.0\",\n-    \"is-plain-obj\": \"^1.0.0\",\n-    \"temp-write\": \"^2.1.0\"\n-  },\n-  \"peerDependencies\": {\n-    \"eslint\": \">=2.12.0\"\n-  }\n+\t\"name\": \"eslint-config-xo\",\n+\t\"version\": \"0.49.0\",\n+\t\"description\": \"ESLint shareable config for XO\",\n+\t\"license\": \"MIT\",\n+\t\"repository\": \"xojs/eslint-config-xo\",\n+\t\"funding\": \"https://github.com/sponsors/sindresorhus\",\n+\t\"author\": {\n+\t\t\"name\": \"Sindre Sorhus\",\n+\t\t\"email\": \"sindresorhus@gmail.com\",\n+\t\t\"url\": \"https://sindresorhus.com\"\n+\t},\n+\t\"type\": \"module\",\n+\t\"exports\": {\n+\t\t\".\": \"./index.js\",\n+\t\t\"./browser\": \"./browser.js\",\n+\t\t\"./space\": \"./space.js\",\n+\t\t\"./space/browser\": \"./space-browser.js\"\n+\t},\n+\t\"sideEffects\": false,\n+\t\"engines\": {\n+\t\t\"node\": \">=20\"\n+\t},\n+\t\"scripts\": {\n+\t\t\"test\": \"eslint && ava\"\n+\t},\n+\t\"files\": [\n+\t\t\"index.js\",\n+\t\t\"browser.js\",\n+\t\t\"space.js\",\n+\t\t\"space-browser.js\"\n+\t],\n+\t\"keywords\": [\n+\t\t\"eslintconfig\",\n+\t\t\"xo\",\n+\t\t\"xoxo\",\n",
+					"match": false,
+					"packageHash": "db362c7fc6a5fda5d4cd05243afa5bbf0b47ab81257fb3daefc5d5e8c5beca2c",
+					"size": 1088,
+					"sourceHash": "e7d2ae7643130f1215b456d0d996c91a68e871d255f35d5ea8df9b47153a440c",
+					"status": "content"
+				},
+				"readme.md": {
+					"diff": "--- published/readme.md\n+++ rebuilt/readme.md\n@@ -1,73 +1,80 @@\n-# eslint-config-xo [![Build Status](https://travis-ci.org/sindresorhus/eslint-config-xo.svg?branch=master)](https://travis-ci.org/sindresorhus/eslint-config-xo)\n+# eslint-config-xo\n \n-> ESLint [shareable config](http://eslint.org/docs/developer-guide/shareable-configs.html) for [XO](https://github.com/sindresorhus/xo)\n+> ESLint [shareable config](https://eslint.org/docs/developer-guide/shareable-configs.html) for [XO](https://github.com/xojs/xo)\n \n-This is for advanced users. You probably want to use XO directly.\n+This is for advanced users. [You probably want to use XO directly.](#use-the-xo-cli-instead)\n \n-See [eslint-plugin-xo](https://github.com/sindresorhus/eslint-plugin-xo) for some additional useful rules.\n+See [eslint-plugin-unicorn](https://github.com/sindresorhus/eslint-plugin-unicorn) for some additional useful rules.\n \n+**Use the [XO issue tracker](https://github.com/xojs/xo/issues) instead of this one.**\n \n ## Install\n \n+```sh\n+npm install --save-dev eslint-config-xo\n ```\n-$ npm install --save-dev eslint-config-xo\n-```\n-\n-For the `esnext` version you'll also need Babel's ESLint [parser](https://github.com/babel/babel-eslint) and [plugin](https://github.com/babel/eslint-plugin-babel):\n-\n-```\n-$ npm install --save-dev babel-eslint eslint-plugin-babel\n-```\n-\n-This will let you use ES2016 features like [`async`/`await`](https://github.com/lukehoban/ecmascript-asyncawait) and [decorators](https://github.com/wycats/javascript-decorators). For a full list of features see [Babel's experimental features](https://babeljs.io/docs/usage/experimental/) and their [Learn ES2015](https://babeljs.io/docs/learn-es2015/).\n-\n \n ## Usage\n \n-Add some ESLint config to your `package.json`:\n+```js\n+// eslint.config.js\n+import xo from 'eslint-config-xo';\n \n-```json\n-{\n-\t\"name\": \"my-awesome-project\",\n-\t\"eslintConfig\": {\n-\t\t\"extends\": \"xo\"\n-\t}\n-}\n+export default [\n+\t...xo,\n+];\n ```\n \n-Or to `.eslintrc`:\n+This package also exposes [`eslint-config-xo/browser`](browser.js) if you're in the browser:\n+\n+```js\n+import xoBrowser from 'eslint-config-xo/browser';\n \n-```json\n-{\n-\t\"extends\": \"xo\"\n-}\n+export default [\n+\t...xoBrowser,\n+];\n ```\n \n-Supports parsing ES2015, but doesn't enforce it by default.\n+This package also exposes [`eslint-config-xo/space`](space.js) if you're in favor of 2-space indent:\n \n-This package also exposes [`xo/esnext`](esnext.js) if you want ES2015+ rules:\n+```js\n+import xoSpace from 'eslint-config-xo/space';\n \n-```json\n-{\n-\t\"extends\": \"xo/esnext\"\n-}\n+export default [\n+\t...xoSpace,\n+];\n ```\n \n-And [`xo/browser`](browser.js) if you're in the browser:\n+This package also exposes [`eslint-config-xo/space/browser`](space-browser.js) if you're in favor of 2-space indent and in browser:\n+\n+```js\n+import xoSpaceBrowser from 'eslint-config-xo/space/browser';\n \n-```json\n-{\n-\t\"extends\": \"xo/browser\"\n-}\n+export default [\n+\t...xoSpaceBrowser,\n+];\n ```\n \n+## Use the XO CLI instead\n",
+					"match": false,
+					"packageHash": "79c211e748e2e40bc38fdd4797e0ab9fd7f649d07445b9d76fbafa6a8722bffb",
+					"size": 1966,
+					"sourceHash": "0f9dd6d270fae89ebf0f4b9966fb9a80b618d7b3ea033228e4b8eba7e3bb8247",
+					"status": "content"
+				},
+				"space-browser.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"space.js": {
+					"match": false,
+					"status": "missing-in-package"
+				}
+			},
+			"summary": {
+				"differentFiles": 5,
+				"matchingFiles": 0,
+				"missingInPackage": 2,
+				"missingInSource": 1,
+				"score": 0,
+				"totalFiles": 8
+			}
+		}
+	}
+]
