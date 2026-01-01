@@ -1,0 +1,85 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-01T19:34:19.686Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:11.7.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "mysql2@0.8.19",
+			"name": "mysql2",
+			"version": "0.8.19",
+			"location": "https://registry.npmjs.org/mysql2/-/mysql2-0.8.19.tgz",
+			"integrity": "sha512-8PaH0Z39M7ky4F+M9wCOWx6uiXmHiYv8C0f8vo1s2u6fWedXZOtGU3ldzJ67qxSC4s+rn5BNtmHI6Vw8OFFBOQ==",
+			"publishedAt": "2013-07-29T14:01:54.199Z",
+			"publishedWith": {
+				"node": null,
+				"npm": "1.2.32"
+			}
+		},
+		"source": {
+			"integrity": "sha512-9FuYnt1Bn1wbMZS9k3EwDIm1bpCEiyj59sx5flhOaTkbCza1MqApYv0/Oe9bT2QIJSg556asztnk+g2UFaAK8w==",
+			"location": "https://github.com/sidorares/node-mysql2",
+			"spec": "github:sidorares/node-mysql2#v0.8.19"
+		},
+		"comparisonHash": "8a2a8dcbb729bf3ee9216e490c955701f0ddebe1",
+		"diff": {
+			"files": {
+				".npmignore": {
+					"match": false,
+					"packageHash": "57e2231b7cf17857e41496a34df98a029e4f5e28c5d05055800f2e31d532bd79",
+					"size": 104,
+					"status": "missing-in-source"
+				},
+				"benchmarks/bench-fake-server.js": {
+					"diff": "--- published/benchmarks/bench-fake-server.js\n+++ rebuilt/benchmarks/bench-fake-server.js\n@@ -33,7 +33,7 @@\n }\n \n function benchmarkSelects(n, cb) {\n-  var numSelects = 1000;\n+  var numSelects = 100000;\n   var start = process.hrtime();\n   benchmarkSelect(numSelects, function(rowsPerQuery) {\n     var end = process.hrtime();\n",
+					"match": false,
+					"packageHash": "264fa0b3262531571c3a9b4f00a9874aa3873c48430b53d6021adeb0b2ff8c31",
+					"size": 1573,
+					"sourceHash": "4a396fdff5b13730cc51bede0606d0341dc9906c2af98d8b7e07a9f8e77f2d5d",
+					"status": "content"
+				},
+				"benchmarks/benchmark-query.js": {
+					"diff": "--- published/benchmarks/benchmark-query.js\n+++ rebuilt/benchmarks/benchmark-query.js\n@@ -12,7 +12,6 @@\n        function bench()\n        {\n            db.query(sql).on('end', function(err, res) {\n-           //db.execute(sql).on('end', function(err, res) {\n                left--;\n                if (left % 1000 === 0)\n                {\n",
+					"match": false,
+					"packageHash": "59d9f27effc896d835a7bd5043d084bfc69c7d6d38bf13c40632d86e82483321",
+					"size": 1027,
+					"sourceHash": "3d4668ae6feb708737a3718b1a9ca71dd1317a4096811884b7bcc225d2b70e80",
+					"status": "content"
+				},
+				"benchmarks/benchmark-server.js": {
+					"diff": "--- published/benchmarks/benchmark-server.js\n+++ rebuilt/benchmarks/benchmark-server.js\n@@ -52,10 +52,10 @@\n       columnType: 3, //253,\n       flags: 0,\n       decimals: 0\n-    }], ['12345'], 10000);\n+    }], ['12345'], 1);\n \n var server = mysql.createServer();\n-server.listen('/tmp/mybench4.sock');\n+server.listen('/tmp/mybench3.sock');\n server.on('connection', function(conn) {\n   conn.serverHandshake({\n     protocolVersion: 10,\n",
+					"match": false,
+					"packageHash": "b581628519e5efc166d11f16fb3648141468df301909f66a3ca50c1fac007908",
+					"size": 1803,
+					"sourceHash": "30245faa403db2e1eceeef200c0a077e19ed4baa4d80d58c66d98176b7da247c",
+					"status": "content"
+				},
+				"examples/simple-select.js": {
+					"diff": "--- published/examples/simple-select.js\n+++ rebuilt/examples/simple-select.js\n@@ -1,126 +1,5 @@\n-var mysql = require('../test/common').createConnection({multipleStatements: true});\n-var assert = require('assert');\n-mysql.query('CREATE TEMPORARY TABLE no_rows (test int)');\n-mysql.query('CREATE TEMPORARY TABLE some_rows (test int)');\n-mysql.query('INSERT INTO some_rows values(0)');\n-mysql.query('INSERT INTO some_rows values(42)');\n-mysql.query('INSERT INTO some_rows values(314149)');\n+var mysql = require('../test/common').createConnection();\n \n-var clone = function(obj) { return JSON.parse(JSON.stringify(obj)); };\n-\n-var rs1 = {\n-  affectedRows: 0,\n-  fieldCount: 0,\n-  insertId: 0,\n-  serverStatus: 10,\n-  warningStatus: 0\n-};\n-var rs2 = clone(rs1);\n-rs2.serverStatus = 2;\n-\n-var twoInsertResult = [[rs1, rs2], [undefined, undefined], 2];\n-var select1 = [{\"1\":\"1\"}];\n-var select2 = [{\"2\":\"2\"}];\n-var fields1 = [{\n-  catalog: \"def\",\n-  characterSet: 63,\n-  columnLength: 1,\n-  columnType: 8,\n-  decimals: 0,\n-  flags: 129,\n-  name: \"1\",\n-  orgName: \"\",\n-  orgTable: \"\",\n-  schema: \"\",\n-  table: \"\"\n-}];\n-var nr_fields = [{\n-  catalog: \"def\",\n-  characterSet: 63,\n-  columnLength: 11,\n-  columnType: 3,\n-  decimals: 0,\n-  flags: 0,\n-  name: \"test\",\n-  orgName: \"test\",\n-  orgTable: \"no_rows\",\n-  schema: \"test\",\n-  table: \"no_rows\"\n-}];\n-var sr_fields = clone(nr_fields);\n-sr_fields[0].orgTable = \"some_rows\";\n-sr_fields[0].table = \"some_rows\";\n-var select3 = [{\"test\":0},{\"test\":42},{\"test\":314149}];\n-\n-var fields2 = clone(fields1);\n-fields2[0].name = \"2\";\n-\n-var tests = [\n-  [\"SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT; SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS;\", twoInsertResult],\n-  [\"/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;\", twoInsertResult], // issue #26\n-  [\"set @a = 1\", [rs2, undefined, 1]],  // one insert result\n-  [\"set @a = 1; set @b = 2\", twoInsertResult],\n-  [\"select 1; select 2\", [[select1,select2],[fields1,fields2], 2]],\n-  [\"set @a = 1; select 1\", [[rs1, select1], [undefined, fields1], 2]],\n-  [\"select 1; set @a = 1\", [[select1, rs2], [fields1, undefined], 2]],\n-  [\"select * from no_rows\", [[], nr_fields, 1]],    // select 0 rows\"\n-  [\"set @a = 1; select * from no_rows\", [[rs1, []], [undefined, nr_fields], 2]], // insert + select 0 rows\n-  [\"select * from no_rows; set @a = 1\", [[[], rs2], [nr_fields, undefined], 2]], //  select 0 rows + insert\n-  [\"set @a = 1; select * from some_rows\", [[rs1, select3],[undefined,sr_fields],2]], // insert + select 3 rows\n-  [\"select * from some_rows; set @a = 1\", [[select3,rs2],[sr_fields,undefined],2]] //  select 3 rows + insert\n-];\n-\n-// TODO: tests with error in the query with different index\n-\n-function do_test(testIndex) {\n-  var entry = tests[testIndex];\n-  var sql = entry[0];\n-  var expectation = entry[1];\n-  mysql.query(sql, function(err, _rows, _columns, _numResults) {\n-    if (err) return; //process.exit(1);\n-    assert.deepEqual(expectation, [_rows, _columns, _numResults]);\n-    //assert.deepEqual(expectation[0], _rows);\n-    //assert.deepEqual(expectation[1], _columns);\n-    //assert.deepEqual(expectation[2], _numResults);\n-    var q = mysql.query(sql);\n-    var resIndex = 0;\n-    var rowIndex = 0;\n-    function checkRow(row, index) {\n-      if (_numResults == 1) {\n-        assert.equal(index, 0);\n-        if (row.constructor.name == 'ResultSetHeader')\n-          assert.deepEqual(_rows, row);\n-        else\n-          assert.deepEqual(_rows[rowIndex], row);\n-      } else {\n-        if (resIndex != index) {\n",
+					"match": false,
+					"packageHash": "62fbd4928929ada05f4d0f780e33e70baada868562c1b0e51d3652cac7db10ee",
+					"size": 4099,
+					"sourceHash": "300156e24003ad9008af48b9bf47b931985f67a7a58c880754450750bec1c4b6",
+					"status": "content"
+				},
+				"examples/test-select-1.js": {
+					"match": false,
+					"packageHash": "69c5510a7241db202bb2a5baffa80af7a3e15c3daa4323d30d83270a96aeb6e8",
+					"size": 422,
+					"status": "missing-in-source"
+				}
+			},
+			"summary": {
+				"differentFiles": 4,
+				"matchingFiles": 93,
+				"missingInPackage": 0,
+				"missingInSource": 2,
+				"score": 0.9393939393939394,
+				"totalFiles": 99
+			}
+		}
+	}
+]
