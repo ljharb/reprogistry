@@ -1,0 +1,113 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-01T09:15:18.818Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:2.15.11",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "color-convert@0.1.0",
+			"name": "color-convert",
+			"version": "0.1.0",
+			"location": "https://registry.npmjs.org/color-convert/-/color-convert-0.1.0.tgz",
+			"integrity": "sha512-2l6bh1YOdc3zRK432q6ka7oJ5RDq/fHkeF2gOc7O82B0GH65eTp6eZe8kNAE+qzJNMp/Pi7IoD4ruNa3Y1KB1Q==",
+			"publishedAt": "2011-06-10T04:11:24.939Z",
+			"publishedWith": {
+				"node": "v0.5.0-pre",
+				"npm": "1.0.5"
+			}
+		},
+		"source": {
+			"integrity": null,
+			"location": "git://github.com/harthur/color-convert.git",
+			"spec": "github:harthur/color-convert#HEAD"
+		},
+		"comparisonHash": "8a2a8dcbb729bf3ee9216e490c955701f0ddebe1",
+		"diff": {
+			"files": {
+				"Jakefile.js": {
+					"match": false,
+					"packageHash": "7525fb08a47225bd299d27aee9e9823c953fe2e8e64f7947df0e1e37a34c9811",
+					"size": 1378,
+					"status": "missing-in-source"
+				},
+				"README.md": {
+					"diff": "--- published/README.md\n+++ rebuilt/README.md\n@@ -1,51 +1,165 @@\n # color-convert\n-Color-convert is a library of plain color conversion functions. It converts between rgb, hsl, hsv, and cmyk:\n \n-```javascript\n-colorConvert.rgb2hsl([140, 200, 100]));   // [96, 48, 59]\n-```\t\n+Color-convert is a color conversion library for JavaScript and node.\n+It converts all ways between `rgb`, `hsl`, `hsv`, `hwb`, `cmyk`, `ansi`, `ansi16`, `hex` strings, and CSS `keyword`s (will round to closest):\n+\n+```js\n+import convert from 'color-convert';\n+\n+convert.rgb.hsl(140, 200, 100);             // [96, 48, 59]\n+convert.keyword.rgb('blue');                // [0, 0, 255]\n+\n+const rgbChannels = convert.rgb.channels;     // 3\n+const cmykChannels = convert.cmyk.channels;   // 4\n+const ansiChannels = convert.ansi16.channels; // 1\n+```\n \n # Install\n-For [node](http://nodejs.org) with [npm](http://npmjs.org):\n \n-\tnpm install color-convert\n-\t\n-For the browser, download the latest [color-convert.js](http://github.com/harthur/color-convert/downloads). All the methods are on the `colorConvert` object.\n+```sh\n+npm install color-convert\n+```\n \n # API\n-color-convert exports these methods:\n \n-```javascript\n-var convert = require(\"color-convert\");\n+Simply get the property of the _from_ and _to_ conversion that you're looking for.\n \n-convert.rgb2hsl([255, 255, 255])\n-convert.hsl2rgb([360, 100, 100])\n+All functions have a rounded and unrounded variant. By default, return values are rounded. To get the unrounded (raw) results, simply tack on `.raw` to the function.\n \n-convert.rgb2hsv([255, 255, 255])\n-convert.hsv2rgb([360, 100, 100])\n+All 'from' functions have a hidden property called `.channels` that indicates the number of channels the function expects (not including alpha).\n \n-convert.hsv2hsl([360, 100, 100])\n-convert.hsl2hsv([360, 100, 100])\n+```js\n+import convert from 'color-convert';\n \n-convert.cmyk2rgb([100, 100, 100, 100])\n-convert.rgb2cmyk([100, 200, 100, 100])\n+// Hex to LAB\n+convert.hex.lab('DEADBF');         // [ 76, 21, -2 ]\n+convert.hex.lab.raw('DEADBF');     // [ 75.56213190997677, 20.653827952644754, -2.290532499330533 ]\n \n-convert.keyword2rgb(\"blue\")\n-convert.rgb2keyword([255, 255, 255])\n+// RGB to CMYK\n+convert.rgb.cmyk(167, 255, 4);     // [ 35, 0, 98, 0 ]\n+convert.rgb.cmyk.raw(167, 255, 4); // [ 34.509803921568626, 0, 98.43137254901961, 0 ]\n+```\n \n-// the following methods assume sRGB color profile\n-convert.rgb2xyz([255, 255, 255])\n-convert.xyz2rgb([100, 100, 100])\n+### Arrays\n+All functions that accept multiple arguments also support passing an array.\n \n-convert.rgb2lab([255, 255, 255])\n-```\n+Note that this does **not** apply to functions that convert from a color that only requires one value (e.g. `keyword`, `ansi256`, `hex`, etc.)\n \n-### Unrounded\n-To get the unrounded conversion, append `Raw` to the function name:\n+```js\n+import convert from 'color-convert';\n \n-```javascript\n-colorConvert.rgb2hslRaw([140, 200, 100]);   // [95.99999999999999, 47.619047619047606, 58.82352941176471]\n+convert.rgb.hex(123, 45, 67);      // '7B2D43'\n+convert.rgb.hex([123, 45, 67]);    // '7B2D43'\n ```\n \n+## Routing\n+\n+Conversions that don't have an _explicitly_ defined conversion (in [conversions.js](conversions.js)), but can be converted by means of sub-conversions (e.g. XYZ -> **RGB** -> CMYK), are automatically routed together. This allows just about any color model supported by `color-convert` to be converted to any other model, so long as a sub-conversion path exists. This is also true for conversions requiring more than one step in between (e.g. LCH -> **LAB** -> **XYZ** -> **RGB** -> Hex).\n+\n+Keep in mind that extensive conversions _may_ result in a loss of precision, and exist only to be complete. For a list of \"direct\" (single-step) conversions, see [conversions.js](conversions.js).\n+\n+## Color Space Scales\n+Conversions rely on an agreed upon 'full-scale' value for each of the channels. Listed here are those values for the most common color spaces\n+\n+### rgb\n+channel | full-scale value\n+---|---\n+r | 255\n",
+					"match": false,
+					"packageHash": "d5a0fb1a46fdb2b157c526ade65a2ea67411537a3d110b7f4cb18ec1760b7cec",
+					"size": 1482,
+					"sourceHash": "ff9e89a35e6ff9163f2999f85ba97633c68fb6c7ca88c756612df6fec11237f5",
+					"status": "content"
+				},
+				"color-convert-0.1.0.js": {
+					"match": false,
+					"packageHash": "0d637050d1e0452ee4e9ebe162d299fedaf558a000d2c4d11943469d3e132761",
+					"size": 40044,
+					"status": "missing-in-source"
+				},
+				"color-convert-0.1.0.min.js": {
+					"match": false,
+					"packageHash": "c4e36f8e38ed378ca30ee75c0d50a5131c9a70a979138ff2366bad3c813a8523",
+					"size": 19154,
+					"status": "missing-in-source"
+				},
+				"convertions.js": {
+					"match": false,
+					"packageHash": "da1a037ed46b24348975c2c3ce24995cdbc0f082dbf28271eec4b696a7eb9e12",
+					"size": 10115,
+					"status": "missing-in-source"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -1,16 +1,58 @@\n {\n-    \"name\": \"color-convert\",\n-    \"description\": \"Plain color conversion functions\",\n-    \"version\": \"0.1.0\",\n-    \"author\": \"Heather Arthur <fayearthur@gmail.com>\",\n-    \"repository\": {\n-        \"type\": \"git\",\n-        \"url\": \"http://github.com/harthur/color-convert.git\"\n-    },\n-    \"main\": \"./convertions\",\n-    \"devDependencies\": {\n-        \"browserify\": \">=1.0.0\",\n-        \"uglify-js\": \"1.0.x\"\n-    },\n-    \"keywords\": [\"color\", \"colour\", \"rgb\"]\n-}\n\\ No newline at end of file\n+  \"name\": \"color-convert\",\n+  \"description\": \"Plain color conversion functions\",\n+  \"version\": \"3.1.3\",\n+  \"author\": \"Josh Junon <josh@junon.me>\",\n+  \"contributors\": [\n+    \"Heather Arthur <fayearthur@gmail.com>\"\n+  ],\n+  \"license\": \"MIT\",\n+  \"repository\": \"Qix-/color-convert\",\n+  \"type\": \"module\",\n+  \"exports\": \"./index.js\",\n+  \"types\": \"./index.d.ts\",\n+  \"engines\": {\n+    \"node\": \">=14.6\"\n+  },\n+  \"scripts\": {\n+    \"test\": \"xo && tsd && node test/basic.js\"\n+  },\n+  \"files\": [\n+    \"index.js\",\n+    \"index.d.ts\",\n+    \"conversions.js\",\n+    \"route.js\"\n+  ],\n+  \"keywords\": [\n+    \"color\",\n+    \"colour\",\n+    \"convert\",\n+    \"converter\",\n+    \"conversion\",\n+    \"rgb\",\n+    \"hsl\",\n+    \"hsv\",\n+    \"hwb\",\n+    \"cmyk\",\n+    \"ansi\",\n+    \"ansi16\"\n+  ],\n+  \"xo\": {\n+    \"rules\": {\n+      \"default-case\": 0,\n+      \"no-inline-comments\": 0,\n+      \"operator-linebreak\": 0,\n+      \"unicorn/prefer-exponentiation-operator\": 0,\n+      \"@typescript-eslint/naming-convention\": 0\n+    }\n+  },\n+  \"devDependencies\": {\n+    \"chalk\": \"^5.2.0\",\n+    \"jimp\": \"^0.22.8\",\n+    \"tsd\": \"^0.28.1\",\n+    \"xo\": \"^0.54.2\"\n+  },\n+  \"dependencies\": {\n+    \"color-name\": \"^2.0.0\"\n+  }\n+}\n",
+					"match": false,
+					"packageHash": "1c767264a1a31a8d70720a9b878f443cecbad5f547b13bc30d685df9dab4c11e",
+					"size": 443,
+					"sourceHash": "2ca1a776fdacc56b2c1463045e8b2edcc7ff31490c362ee84e258cc905b90e73",
+					"status": "content"
+				},
+				"test/basic.js": {
+					"match": false,
+					"packageHash": "e9de483dfeb072cadc8db0784b3dfe2548138b8f2f9b4d45f146736510f9a445",
+					"size": 2205,
+					"status": "missing-in-source"
+				},
+				"test.hml": {
+					"match": false,
+					"packageHash": "c13e07335926a182cfb08ace3c04399f94c04c89dc70e1f3aa517053af95d347",
+					"size": 131,
+					"status": "missing-in-source"
+				},
+				"LICENSE": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"conversions.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"index.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"index.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"route.js": {
+					"match": false,
+					"status": "missing-in-package"
+				}
+			},
+			"summary": {
+				"differentFiles": 2,
+				"matchingFiles": 0,
+				"missingInPackage": 5,
+				"missingInSource": 6,
+				"score": 0,
+				"totalFiles": 13
+			}
+		}
+	}
+]
