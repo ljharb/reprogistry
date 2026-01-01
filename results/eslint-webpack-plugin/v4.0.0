@@ -1,0 +1,97 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-01T13:17:57.812Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:9.2.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "eslint-webpack-plugin@4.0.0",
+			"name": "eslint-webpack-plugin",
+			"version": "4.0.0",
+			"location": "https://registry.npmjs.org/eslint-webpack-plugin/-/eslint-webpack-plugin-4.0.0.tgz",
+			"integrity": "sha512-eM9ccGRWkU+btBSVfABRn8CjT7jZ2Q+UV/RfErMDVCFXpihEbvajNrLltZpwTAcEoXSqESGlEPIUxl7PoDlLWw==",
+			"publishedAt": "2023-02-03T20:08:12.307Z",
+			"publishedWith": {
+				"node": "19.4.0",
+				"npm": "8.13.2"
+			}
+		},
+		"source": {
+			"integrity": "sha512-3/N4VA6e+AKxDqeEASc8jBxilNMwtBJjklElzGXVe7/ZrQCyHFO1X0eFSYPZavE9uqq17y+C4qY1i5pmB0c0Kg==",
+			"location": "git+https://github.com/webpack-contrib/eslint-webpack-plugin.git",
+			"spec": "github:webpack-contrib/eslint-webpack-plugin#6713b0e036ca43a88daf82f3f5c07f6c48e61515"
+		},
+		"comparisonHash": "8a2a8dcbb729bf3ee9216e490c955701f0ddebe1",
+		"diff": {
+			"files": {
+				"dist/ESLintError.js": {
+					"diff": "--- published/dist/ESLintError.js\n+++ rebuilt/dist/ESLintError.js\n@@ -9,7 +9,5 @@\n     this.name = 'ESLintError';\n     this.stack = '';\n   }\n-\n }\n-\n module.exports = ESLintError;\n\\ No newline at end of file\n",
+					"match": false,
+					"packageHash": "eb7e5100766563fb3b560f3807497a14ac9312ac5afc527a29cda9fc425165b7",
+					"size": 242,
+					"sourceHash": "6143e5f8fd3f39456d1c4198868b43ca13c43761e5b158b271b003c9332200d7",
+					"status": "content"
+				},
+				"dist/getESLint.js": {
+					"diff": "--- published/dist/getESLint.js\n+++ rebuilt/dist/getESLint.js\n@@ -3,85 +3,70 @@\n const {\n   cpus\n } = require('os');\n-\n const {\n   Worker: JestWorker\n } = require('jest-worker');\n-\n const {\n   getESLintOptions\n } = require('./options');\n-\n const {\n   jsonStringifyReplacerSortKeys\n } = require('./utils');\n-/** @type {{[key: string]: any}} */\n-\n \n+/** @type {{[key: string]: any}} */\n const cache = {};\n-/** @typedef {import('eslint').ESLint} ESLint */\n \n+/** @typedef {import('eslint').ESLint} ESLint */\n /** @typedef {import('eslint').ESLint.LintResult} LintResult */\n-\n /** @typedef {import('./options').Options} Options */\n-\n /** @typedef {() => Promise<void>} AsyncTask */\n-\n /** @typedef {(files: string|string[]) => Promise<LintResult[]>} LintTask */\n-\n /** @typedef {{threads: number, ESLint: ESLint, eslint: ESLint, lintFiles: LintTask, cleanup: AsyncTask}} Linter */\n-\n /** @typedef {JestWorker & {lintFiles: LintTask}} Worker */\n \n /**\n  * @param {Options} options\n  * @returns {Linter}\n  */\n-\n function loadESLint(options) {\n   const {\n     eslintPath\n   } = options;\n-\n   const {\n     ESLint\n-  } = require(eslintPath || 'eslint'); // Filter out loader options before passing the options to ESLint.\n-\n+  } = require(eslintPath || 'eslint');\n \n+  // Filter out loader options before passing the options to ESLint.\n   const eslint = new ESLint(getESLintOptions(options));\n   return {\n     threads: 1,\n     ESLint,\n     eslint,\n     lintFiles: async files => {\n-      const results = await eslint.lintFiles(files); // istanbul ignore else\n-\n+      const results = await eslint.lintFiles(files);\n+      // istanbul ignore else\n       if (options.fix) {\n         await ESLint.outputFixes(results);\n       }\n-\n       return results;\n     },\n     // no-op for non-threaded\n     cleanup: async () => {}\n   };\n }\n+\n /**\n  * @param {string|undefined} key\n  * @param {number} poolSize\n  * @param {Options} options\n  * @returns {Linter}\n  */\n-\n-\n function loadESLintThreaded(key, poolSize, options) {\n   const cacheKey = getCacheKey(key, options);\n   const {\n     eslintPath = 'eslint'\n   } = options;\n-\n   const source = require.resolve('./worker');\n-\n   const workerOptions = {\n     enableWorkerThreads: true,\n     numWorkers: poolSize,\n@@ -91,21 +76,16 @@\n     }]\n   };\n   const local = loadESLint(options);\n-  let worker =\n",
+					"match": false,
+					"packageHash": "25313bfc3ff0089dc20f97cfb2c1eda062dc4942079e432b39a1d8fab81c00ff",
+					"size": 3209,
+					"sourceHash": "4a759ce52c7040fba54f52533582638d9019899dad353d019252184220fd3522",
+					"status": "content"
+				},
+				"dist/index.js": {
+					"diff": "--- published/dist/index.js\n+++ rebuilt/dist/index.js\n@@ -4,35 +4,27 @@\n   isAbsolute,\n   join\n } = require('path');\n-\n const {\n   isMatch\n } = require('micromatch');\n-\n const {\n   getOptions\n } = require('./options');\n-\n const linter = require('./linter');\n-\n const {\n   arrify,\n   parseFiles,\n   parseFoldersToGlobs\n } = require('./utils');\n-/** @typedef {import('webpack').Compiler} Compiler */\n \n+/** @typedef {import('webpack').Compiler} Compiler */\n /** @typedef {import('webpack').Module} Module */\n-\n /** @typedef {import('webpack').NormalModule} NormalModule */\n-\n /** @typedef {import('./options').Options} Options */\n \n-\n const ESLINT_PLUGIN = 'ESLintWebpackPlugin';\n const DEFAULT_FOLDER_TO_EXCLUDE = '**/node_modules/**';\n let compilerId = 0;\n-\n class ESLintWebpackPlugin {\n   /**\n    * @param {Options} options\n@@ -42,12 +34,11 @@\n     this.options = getOptions(options);\n     this.run = this.run.bind(this);\n   }\n+\n   /**\n    * @param {Compiler} compiler\n    * @returns {void}\n    */\n-\n-\n   apply(compiler) {\n     // Generate key for each compilation,\n     // this differentiates one from the other when being cached.\n@@ -55,7 +46,8 @@\n     const excludedFiles = parseFiles(this.options.exclude || [], this.getContext(compiler));\n     const resourceQueries = arrify(this.options.resourceQueryExclude || []);\n     const excludedResourceQueries = resourceQueries.map(item => item instanceof RegExp ? item : new RegExp(item));\n-    const options = { ...this.options,\n+    const options = {\n+      ...this.options,\n       exclude: excludedFiles,\n       resourceQueryExclude: excludedResourceQueries,\n       extensions: arrify(this.options.extensions),\n@@ -63,13 +55,13 @@\n     };\n     const foldersToExclude = this.options.exclude ? options.exclude : DEFAULT_FOLDER_TO_EXCLUDE;\n     const exclude = parseFoldersToGlobs(foldersToExclude);\n-    const wanted = parseFoldersToGlobs(options.files, options.extensions); // If `lintDirtyModulesOnly` is disabled,\n-    // execute the linter on the build\n+    const wanted = parseFoldersToGlobs(options.files, options.extensions);\n \n+    // If `lintDirtyModulesOnly` is disabled,\n+    // execute the linter on the build\n     if (!this.options.lintDirtyModulesOnly) {\n       compiler.hooks.run.tapPromise(this.key, c => this.run(c, options, wanted, exclude));\n     }\n-\n     let hasCompilerRunByDirtyModule = this.options.lintDirtyModulesOnly;\n     compiler.hooks.watchRun.tapPromise(this.key, c => {\n       if (!hasCompilerRunByDirtyModule) return this.run(c, options, wanted, exclude);\n@@ -77,14 +69,13 @@\n       return Promise.resolve();\n     });\n   }\n+\n   /**\n    * @param {Compiler} compiler\n    * @param {Omit<Options, 'resourceQueryExclude'> & {resourceQueryExclude: RegExp[]}} options\n    * @param {string[]} wanted\n    * @param {string[]} exclude\n    */\n-\n-\n   async run(compiler, options, wanted, exclude) {\n     // @ts-ignore\n     const isCompilerHooked = compiler.hooks.compilation.taps.find(({\n@@ -95,12 +86,9 @@\n       /** @type {import('./linter').Linter} */\n       let lint;\n       /** @type {import('./linter').Reporter} */\n",
+					"match": false,
+					"packageHash": "2c635bf0c87610a801b978585fdcfbada9fd61cd41b5abb0310fcad87f370e8d",
+					"size": 5567,
+					"sourceHash": "5c729a7050ffffb9b2c42a3fbd0206c575d7b8b48dcf8d788ccacbf00162f3ef",
+					"status": "content"
+				},
+				"dist/linter.js": {
+					"diff": "--- published/dist/linter.js\n+++ rebuilt/dist/linter.js\n@@ -5,68 +5,52 @@\n   isAbsolute,\n   join\n } = require('path');\n-\n const ESLintError = require('./ESLintError');\n-\n const {\n   getESLint\n } = require('./getESLint');\n-\n const {\n   arrify\n } = require('./utils');\n-/** @typedef {import('eslint').ESLint} ESLint */\n \n+/** @typedef {import('eslint').ESLint} ESLint */\n /** @typedef {import('eslint').ESLint.Formatter} Formatter */\n-\n /** @typedef {import('eslint').ESLint.LintResult} LintResult */\n-\n /** @typedef {import('webpack').Compiler} Compiler */\n-\n /** @typedef {import('webpack').Compilation} Compilation */\n-\n /** @typedef {import('./options').Options} Options */\n-\n /** @typedef {import('./options').FormatterFunction} FormatterFunction */\n-\n /** @typedef {(compilation: Compilation) => Promise<void>} GenerateReport */\n-\n /** @typedef {{errors?: ESLintError, warnings?: ESLintError, generateReportAsset?: GenerateReport}} Report */\n-\n /** @typedef {() => Promise<Report>} Reporter */\n-\n /** @typedef {(files: string|string[]) => void} Linter */\n-\n /** @typedef {{[files: string]: LintResult}} LintResultMap */\n \n /** @type {WeakMap<Compiler, LintResultMap>} */\n-\n-\n const resultStorage = new WeakMap();\n+\n /**\n  * @param {string|undefined} key\n  * @param {Options} options\n  * @param {Compilation} compilation\n  * @returns {{lint: Linter, report: Reporter, threads: number}}\n  */\n-\n function linter(key, options, compilation) {\n   /** @type {ESLint} */\n   let eslint;\n-  /** @type {(files: string|string[]) => Promise<LintResult[]>} */\n \n+  /** @type {(files: string|string[]) => Promise<LintResult[]>} */\n   let lintFiles;\n-  /** @type {() => Promise<void>} */\n \n+  /** @type {() => Promise<void>} */\n   let cleanup;\n-  /** @type number */\n \n+  /** @type number */\n   let threads;\n-  /** @type {Promise<LintResult[]>[]} */\n \n+  /** @type {Promise<LintResult[]>[]} */\n   const rawResults = [];\n   const crossRunResultStorage = getResultStorage(compilation);\n-\n   try {\n     ({\n       eslint,\n@@ -77,44 +61,40 @@\n   } catch (e) {\n     throw new ESLintError(e.message);\n   }\n-\n   return {\n     lint,\n     report,\n     threads\n   };\n+\n   /**\n    * @param {string | string[]} files\n    */\n-\n   function lint(files) {\n     for (const file of arrify(files)) {\n       delete crossRunResultStorage[file];\n     }\n-\n     rawResults.push(lintFiles(files).catch(e => {\n       // @ts-ignore\n       compilation.errors.push(new ESLintError(e.message));\n",
+					"match": false,
+					"packageHash": "1707bf5773737feeb1b02cc72a01ba9e8ab0747067dc4af9ab8205a8dbbcffc7",
+					"size": 7924,
+					"sourceHash": "d7c6303de1432cd6f8be598fc57183bbda3f464e9eb491e3b112f56cac89f599",
+					"status": "content"
+				},
+				"dist/options.js": {
+					"diff": "--- published/dist/options.js\n+++ rebuilt/dist/options.js\n@@ -3,12 +3,10 @@\n const {\n   validate\n } = require('schema-utils');\n-\n const schema = require('./options.json');\n-/** @typedef {import(\"eslint\").ESLint.Options} ESLintOptions */\n \n+/** @typedef {import(\"eslint\").ESLint.Options} ESLintOptions */\n /** @typedef {import('eslint').ESLint.LintResult} LintResult */\n-\n /** @typedef {import('eslint').ESLint.LintResultData} LintResultData */\n \n /**\n@@ -50,8 +48,6 @@\n  * @param {Options} pluginOptions\n  * @returns {PluginOptions}\n  */\n-\n-\n function getOptions(pluginOptions) {\n   const options = {\n     extensions: 'js',\n@@ -64,39 +60,40 @@\n       emitError: true,\n       emitWarning: false\n     } : {})\n-  }; // @ts-ignore\n+  };\n \n+  // @ts-ignore\n   validate(schema, options, {\n     name: 'ESLint Webpack Plugin',\n     baseDataPath: 'options'\n   });\n   return options;\n }\n+\n /**\n  * @param {Options} loaderOptions\n  * @returns {ESLintOptions}\n  */\n-\n-\n function getESLintOptions(loaderOptions) {\n-  const eslintOptions = { ...loaderOptions\n-  }; // Keep the fix option because it is common to both the loader and ESLint.\n+  const eslintOptions = {\n+    ...loaderOptions\n+  };\n \n+  // Keep the fix option because it is common to both the loader and ESLint.\n   const {\n     fix,\n     extensions,\n     ...eslintOnlyOptions\n-  } = schema.properties; // No need to guard the for-in because schema.properties has hardcoded keys.\n-  // eslint-disable-next-line guard-for-in\n+  } = schema.properties;\n \n+  // No need to guard the for-in because schema.properties has hardcoded keys.\n+  // eslint-disable-next-line guard-for-in\n   for (const option in eslintOnlyOptions) {\n     // @ts-ignore\n     delete eslintOptions[option];\n   }\n-\n   return eslintOptions;\n }\n-\n module.exports = {\n   getOptions,\n   getESLintOptions\n",
+					"match": false,
+					"packageHash": "b7a4608163eefe20b9738e9138bd8a29fd6efcd7423b573a6bf71d15d7684a40",
+					"size": 2409,
+					"sourceHash": "bd3b5c31fce1c93a15b3d80fc56454189b1dfcaa93cec3ebbc2044c429986658",
+					"status": "content"
+				},
+				"dist/utils.js": {
+					"diff": "--- published/dist/utils.js\n+++ rebuilt/dist/utils.js\n@@ -3,12 +3,11 @@\n const {\n   resolve\n } = require('path');\n-\n const {\n   statSync\n } = require('fs');\n-\n const normalizePath = require('normalize-path');\n+\n /**\n  * @template T\n  * @param {T} value\n@@ -24,84 +23,69 @@\n            : [T]\n  }\n  */\n-\n /* istanbul ignore next */\n-\n-\n function arrify(value) {\n   // eslint-disable-next-line no-undefined\n   if (value === null || value === undefined) {\n     // @ts-ignore\n     return [];\n   }\n-\n   if (Array.isArray(value)) {\n     // @ts-ignore\n     return value;\n   }\n-\n   if (typeof value === 'string') {\n     // @ts-ignore\n     return [value];\n-  } // @ts-ignore\n-\n+  }\n \n+  // @ts-ignore\n   if (typeof value[Symbol.iterator] === 'function') {\n     // @ts-ignore\n     return [...value];\n-  } // @ts-ignore\n-\n+  }\n \n+  // @ts-ignore\n   return [value];\n }\n+\n /**\n  * @param {string|string[]} files\n  * @param {string} context\n  * @returns {string[]}\n  */\n-\n-\n function parseFiles(files, context) {\n-  return arrify(files).map((\n-  /** @type {string} */\n-  file) => normalizePath(resolve(context, file)));\n+  return arrify(files).map(( /** @type {string} */file) => normalizePath(resolve(context, file)));\n }\n+\n /**\n  * @param {string|string[]} patterns\n  * @param {string|string[]} extensions\n  * @returns {string[]}\n  */\n-\n-\n function parseFoldersToGlobs(patterns, extensions = []) {\n   const extensionsList = arrify(extensions);\n   const [prefix, postfix] = extensionsList.length > 1 ? ['{', '}'] : ['', ''];\n-  const extensionsGlob = extensionsList.map((\n-  /** @type {string} */\n-  extension) => extension.replace(/^\\./u, '')).join(',');\n-  return arrify(patterns).map((\n-  /** @type {string} */\n-  pattern) => {\n+  const extensionsGlob = extensionsList.map(( /** @type {string} */extension) => extension.replace(/^\\./u, '')).join(',');\n+  return arrify(patterns).map(( /** @type {string} */pattern) => {\n     try {\n       // The patterns are absolute because they are prepended with the context.\n       const stats = statSync(pattern);\n       /* istanbul ignore else */\n-\n       if (stats.isDirectory()) {\n         return pattern.replace(/[/\\\\]*?$/u, `/**${extensionsGlob ? `/*.${prefix + extensionsGlob + postfix}` : ''}`);\n       }\n-    } catch (_) {// Return the pattern as is on error.\n+    } catch (_) {\n+      // Return the pattern as is on error.\n     }\n-\n",
+					"match": false,
+					"packageHash": "6927decf6f77016ccc6ff85587c438ee5bff44925c8b0d620ead37bc6cd75e69",
+					"size": 2608,
+					"sourceHash": "bcc505b6e09956a822ce1d008bc85b6cede307d8646252e84c39f9a60558581a",
+					"status": "content"
+				},
+				"dist/worker.js": {
+					"diff": "--- published/dist/worker.js\n+++ rebuilt/dist/worker.js\n@@ -1,21 +1,22 @@\n \"use strict\";\n \n /** @typedef {import('eslint').ESLint} ESLint */\n-\n /** @typedef {import('eslint').ESLint.Options} ESLintOptions */\n+\n Object.assign(module.exports, {\n   lintFiles,\n   setup\n });\n-/** @type {{ new (arg0: import(\"eslint\").ESLint.Options): import(\"eslint\").ESLint; outputFixes: (arg0: import(\"eslint\").ESLint.LintResult[]) => any; }} */\n \n+/** @type {{ new (arg0: import(\"eslint\").ESLint.Options): import(\"eslint\").ESLint; outputFixes: (arg0: import(\"eslint\").ESLint.LintResult[]) => any; }} */\n let ESLint;\n-/** @type {ESLint} */\n \n+/** @type {ESLint} */\n let eslint;\n-/** @type {boolean} */\n \n+/** @type {boolean} */\n let fix;\n+\n /**\n  * @typedef {object} setupOptions\n  * @property {string=} eslintPath - import path of eslint\n@@ -23,7 +24,6 @@\n  *\n  * @param {setupOptions} arg0 - setup worker\n  */\n-\n function setup({\n   eslintPath,\n   eslintOptions = {}\n@@ -34,17 +34,15 @@\n   } = require(eslintPath || 'eslint'));\n   eslint = new ESLint(eslintOptions);\n }\n+\n /**\n  * @param {string | string[]} files\n  */\n-\n-\n async function lintFiles(files) {\n-  const result = await eslint.lintFiles(files); // if enabled, use eslint autofixing where possible\n-\n+  const result = await eslint.lintFiles(files);\n+  // if enabled, use eslint autofixing where possible\n   if (fix) {\n     await ESLint.outputFixes(result);\n   }\n-\n   return result;\n }\n\\ No newline at end of file\n",
+					"match": false,
+					"packageHash": "4a25ddf0981594fe43df204468c7691eb0d223acc162869c511e67c2b4278f01",
+					"size": 1088,
+					"sourceHash": "a961b82f15163164091383de6a2b1ec3823e930ffb182523321995c0a13e8cba",
+					"status": "content"
+				}
+			},
+			"summary": {
+				"differentFiles": 7,
+				"matchingFiles": 11,
+				"missingInPackage": 0,
+				"missingInSource": 0,
+				"score": 0.6111111111111112,
+				"totalFiles": 18
+			}
+		}
+	}
+]
