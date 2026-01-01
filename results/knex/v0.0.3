@@ -1,0 +1,947 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-01T17:50:44.306Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:11.7.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "knex@0.0.3",
+			"name": "knex",
+			"version": "0.0.3",
+			"location": "https://registry.npmjs.org/knex/-/knex-0.0.3.tgz",
+			"integrity": "sha512-tmvMkh47eOVcexgVH75oIQy9njz7LJr3yIqAP87Qt5yIN3PcHQwia7/LJay7CDep5yPaTwjqQqE0kOndqStuCg==",
+			"publishedAt": "2013-05-08T20:55:34.245Z",
+			"publishedWith": {
+				"node": null,
+				"npm": "1.2.14"
+			}
+		},
+		"source": {
+			"integrity": null,
+			"location": "https://github.com/tgriesser/knex",
+			"spec": "github:tgriesser/knex#HEAD"
+		},
+		"comparisonHash": "8a2a8dcbb729bf3ee9216e490c955701f0ddebe1",
+		"diff": {
+			"files": {
+				".npmignore": {
+					"match": false,
+					"packageHash": "3586f46911f29bab1720c7017a8cdeae3c8a57cf816a03b288c794bf7c9fe4df",
+					"size": 16,
+					"status": "missing-in-source"
+				},
+				".travis.yml": {
+					"match": false,
+					"packageHash": "b49d6fa06e4a8c594637eaa0a98f9e9b1dafd6301c8f91b72ec4246a3edeec0b",
+					"size": 185,
+					"status": "missing-in-source"
+				},
+				"CNAME": {
+					"match": false,
+					"packageHash": "3efa1f1604a5c76d1d586071aa88e453f1a2918a5befd4803779e6af50729fd3",
+					"size": 10,
+					"status": "missing-in-source"
+				},
+				"README.md": {
+					"diff": "--- published/README.md\n+++ rebuilt/README.md\n@@ -1,21 +1,156 @@\n+# [knex.js](https://knex.github.io/documentation/)\n+\n+[![npm version](http://img.shields.io/npm/v/knex.svg)](https://npmjs.org/package/knex)\n+[![npm downloads](https://img.shields.io/npm/dm/knex.svg)](https://npmjs.org/package/knex)\n+![](https://github.com/knex/knex/workflows/CI/badge.svg)\n+[![Coverage Status](https://coveralls.io/repos/knex/knex/badge.svg?branch=master)](https://coveralls.io/r/knex/knex?branch=master)\n+[![Dependencies Status](https://img.shields.io/librariesio/github/knex/knex)](https://libraries.io/npm/knex)\n+[![Gitter chat](https://badges.gitter.im/tgriesser/knex.svg)](https://gitter.im/tgriesser/knex)\n+\n+> **A SQL query builder that is _flexible_, _portable_, and _fun_ to use!**\n+\n+A batteries-included, multi-dialect (PostgreSQL, MariaDB, MySQL, CockroachDB, MSSQL, SQLite3, Oracle (including Oracle Wallet Authentication)) query builder for\n+Node.js, featuring:\n+\n+- [transactions](https://knexjs.org/guide/transactions.html)\n+- [connection pooling](https://knexjs.org/guide/#pool)\n+- [streaming queries](https://knexjs.org/guide/interfaces.html#streams)\n+- both a [promise](https://knexjs.org/#Interfaces-Promises) and [callback](https://knexjs.org/guide/interfaces.html#callbacks) API\n+- a [thorough test suite](https://github.com/knex/knex/actions)\n+\n+Node.js versions 16+ are supported.\n+\n+- Take a look at the [full documentation](https://knexjs.org/) to get started!\n+- Browse the [list of plugins and tools](https://github.com/knex/knex/blob/master/ECOSYSTEM.md) built for knex\n+- Check out our [recipes wiki](https://github.com/knex/knex/wiki/Recipes) to search for solutions to some specific problems\n+- In case of upgrading from an older version, see [migration guide](https://github.com/knex/knex/blob/master/UPGRADING.md)\n+\n+You can report bugs and discuss features on the [GitHub issues page](https://github.com/knex/knex/issues) or send tweets to [@kibertoad](http://twitter.com/kibertoad).\n+\n+For support and questions, join our [Gitter channel](https://gitter.im/tgriesser/knex).\n+\n+For knex-based Object Relational Mapper, see:\n+\n+- https://github.com/Vincit/objection.js\n+- https://github.com/mikro-orm/mikro-orm\n+- https://bookshelfjs.org\n+\n+To see the SQL that Knex will generate for a given query, you can use [Knex Query Lab](https://michaelavila.com/knex-querylab/)\n+\n+## Examples\n+\n+We have several examples [on the website](http://knexjs.org). Here is the first one to get you started:\n+\n+```js\n+const knex = require('knex')({\n+  client: 'sqlite3',\n+  connection: {\n+    filename: './data.db',\n+  },\n+});\n+\n+try {\n+  // Create a table\n+  await knex.schema\n+    .createTable('users', (table) => {\n+      table.increments('id');\n+      table.string('user_name');\n+    })\n+    // ...and another\n+    .createTable('accounts', (table) => {\n+      table.increments('id');\n+      table.string('account_name');\n+      table.integer('user_id').unsigned().references('users.id');\n+    });\n+\n+  // Then query the table...\n+  const insertedRows = await knex('users').insert({ user_name: 'Tim' });\n+\n+  // ...and using the insert id, insert into the other table.\n+  await knex('accounts').insert({\n+    account_name: 'knex',\n+    user_id: insertedRows[0],\n+  });\n+\n+  // Query both of the rows.\n+  const selectedRows = await knex('users')\n+    .join('accounts', 'users.id', 'accounts.user_id')\n+    .select('users.user_name as user', 'accounts.account_name as account');\n+\n+  // map over the results\n+  const enrichedRows = selectedRows.map((row) => ({ ...row, active: true }));\n+\n+  // Finally, add a catch statement\n+} catch (e) {\n+  console.error(e);\n+}\n ```\n-._____.                                                                        ______\n-|     |                                                                       /     /\n-|     |                                                                      /     /\n-|     |     _____   ._____      ._____.     ,_____________.   ______        /     /\n-|     |    /    /   |     \\     |     |     /             \\   \\     \\      /     /\n-|     |   /    /    |      \\    |     |    /               \\   \\     \\    /     /\n-|     |  /    /     |       \\   |     |   /     ,______.    \\   \\     \\  /     /\n-|     | /    /      |        \\  |     |  /     /       \\     \\   \\     \\/     /\n-|     |/    \\       |         \\ |     |  |     |    ____\\    |    \\          /\n-|     |\\     \\      |          \\|     |  |     |   /         |     \\         \\\n",
+					"match": false,
+					"packageHash": "ae0ddb8c6fd6689a5f9f327e0c79dc2bc3c239f992fb8006a4efa29c68f5a4ec",
+					"size": 1330,
+					"sourceHash": "ec68fceccea64c4393478408b918f3107d7609e78ab7b90c1f6e31d6fabfc15c",
+					"status": "content"
+				},
+				"clients/base.js": {
+					"match": false,
+					"packageHash": "ae241921795b4c3c6da135156c3302cd573d576d0a4264a0c1c82bce3c42128f",
+					"size": 2836,
+					"status": "missing-in-source"
+				},
+				"clients/mysql.js": {
+					"match": false,
+					"packageHash": "0c4a8336b077791cabafe542b0e9ead1393c0d18f06abf7737527ea932873090",
+					"size": 8300,
+					"status": "missing-in-source"
+				},
+				"clients/postgres.js": {
+					"match": false,
+					"packageHash": "1b2303757304da465f316b41d63e80783bb6b964d41905e9eb4bd63ee07743f2",
+					"size": 8387,
+					"status": "missing-in-source"
+				},
+				"clients/sqlite3.js": {
+					"match": false,
+					"packageHash": "e879621330a796bd635371257ca5f6442ec404ab19de3c201f4b88c5e0055e2c",
+					"size": 10476,
+					"status": "missing-in-source"
+				},
+				"knex.js": {
+					"diff": "--- published/knex.js\n+++ rebuilt/knex.js\n@@ -1,1598 +1,23 @@\n-//     Knex.js  0.0.0\n-//\n-//     (c) 2013 Tim Griesser\n+// Knex.js\n+// --------------\n+//     (c) 2013-present Tim Griesser\n //     Knex may be freely distributed under the MIT license.\n //     For details and documentation:\n //     http://knexjs.org\n-(function() {\n \n-  \"use strict\";\n-  \n-  // Required dependencies.\n-  var _ = require('underscore');\n-  var Q = require('q');\n+const knex = require('./lib/index');\n \n-  var push = Array.prototype.push;\n+/**\n+ * These export configurations enable JS and TS developers\n+ * to consume knex in whatever way best suits their needs.\n+ * Some examples of supported import syntax includes:\n+ * - `const knex = require('knex')`\n+ * - `const { knex } = require('knex')`\n+ * - `import * as knex from 'knex'`\n+ * - `import { knex } from 'knex'`\n+ * - `import knex from 'knex'`\n+ */\n+knex.knex = knex;\n+knex.default = knex;\n \n-  // `Knex` is the root namespace and a chainable function: `Knex('tableName')`\n-  var Knex = function(table) {\n-    if (!Knex.Instances['main']) {\n-      throw new Error('The Knex instance has not been initialized yet.');\n-    }\n-    return Knex.Instances['main'](table);\n-  };\n-\n-  // Keep in sync with package.json\n-  Knex.VERSION = '0.0.0';\n-\n-  // Methods common to both the `Grammar` and `SchemaGrammar` interfaces,\n-  // used to generate the sql in one form or another.\n-  var Common = {\n-\n-    _debug: false,\n-\n-    debug: function(val) {\n-      this._debug = val;\n-      return this;\n-    },\n-\n-    // For those who dislike promise interfaces.\n-    exec: function(callback) {\n-      var run = Knex.runQuery(this);\n-      return run.nodeify(callback);\n-    },\n-\n-    // The promise interface for the query builder.\n-    then: function(onFulfilled, onRejected) {\n-      var run = Knex.runQuery(this);\n-      return run.then(onFulfilled, onRejected);\n-    },\n-\n-    // Specifies to resolve the statement with the `data` rather \n-    // than a promise... useful in testing/debugging.\n-    toString: function() {\n-      if (!this.type) {\n-        throw new Error('Cannot be converted to string');\n-      }\n-      var data = this.toSql();\n-      var builder = this;\n-      if (!_.isArray(data)) data = [data];\n-      return _.map(data, function(str) {\n-        var questionCount = 0;\n-        return str.replace(/\\?/g, function() {\n-          return builder.bindings[questionCount++];\n-        });\n-      }).join('; ');\n-    },\n-\n-    // Sets the connection\n-    connection: function(connection) {\n-      this._connection = connection;\n-      return this;\n-    },\n-\n-    // The connection the current query is being run on, optionally\n-    // specified by the `connection` method.\n-    _connection: false,\n-\n-    // Sets the \"type\" of the current query, so we can potentially place\n-    // `select`, `update`, `del`, etc. anywhere in the query statement\n-    // and have it come out fine.\n-    _setType: function(type) {\n",
+					"match": false,
+					"packageHash": "41a056c99be2f0845aa707468e57fc171c5db05250f943355d6fae45cc4b41a6",
+					"size": 48586,
+					"sourceHash": "246d0ca9232c11f7e2f244f04e31ff8fbb94600a549882710d3ac1b5182f499b",
+					"status": "content"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -1,32 +1,279 @@\n {\n   \"name\": \"knex\",\n-  \"version\": \"0.0.3\",\n-  \"description\": \"a fun sql query builder\",\n+  \"version\": \"3.1.0\",\n+  \"description\": \"A batteries-included SQL query & schema builder for PostgresSQL, MySQL, CockroachDB, MSSQL and SQLite3\",\n   \"main\": \"knex.js\",\n-  \"directories\": {\n-    \"test\": \"test\"\n+  \"types\": \"types/index.d.ts\",\n+  \"exports\": {\n+    \".\": {\n+      \"import\": {\n+        \"types\": \"./types/index.d.mts\",\n+        \"default\": \"./knex.mjs\"\n+      },\n+      \"require\": {\n+        \"types\": \"./types/index.d.ts\",\n+        \"default\": \"./knex.js\"\n+      }\n+    }\n   },\n-  \"devDependencies\": {\n-    \"mocha\": \"1.7.x\",\n-    \"objectdump\": \">=0.3.0\",\n-    \"mysql\": \"~2.0.0-alpha7\",\n-    \"pg\": \"~1.1.0\",\n-    \"sqlite3\": \"~2.1.7\"\n+  \"engines\": {\n+    \"node\": \">=16\"\n+  },\n+  \"scripts\": {\n+    \"build\": \"npm run build:gitignore && npm run build:ts && npm run format\",\n+    \"clean\": \"node scripts/clean.js\",\n+    \"build:ts\": \"tsc\",\n+    \"build:gitignore\": \"node scripts/update_gitignore_for_tsc_output.js run\",\n+    \"format\": \"prettier --write --list-different .\",\n+    \"format:check\": \"prettier --list-different .\",\n+    \"debug:test\": \"mocha --inspect-brk --exit -t 0 test/all-tests-suite.js\",\n+    \"debug:tape\": \"node --inspect-brk test/tape/index.js\",\n+    \"coveralls\": \"nyc report --reporter=lcov\",\n+    \"lint\": \"eslint --cache .\",\n+    \"lint:fix\": \"eslint --cache --fix .\",\n+    \"lint:types\": \"tsd\",\n+    \"lint:everything\": \"npm run lint && npm run lint:types\",\n+    \"lint:fix:everything\": \"npm run lint:fix && npm run lint:types\",\n+    \"test:unit\": \"npm run test:unit-only && npm run test:cli\",\n+    \"test:unit-only\": \"mocha --exit -t 10000 --config test/mocha-unit-config-test.js\",\n+    \"test:db\": \"mocha --exit -t 10000 --config test/mocha-integration-config-test.js\",\n+    \"test:db:coverage\": \"nyc mocha --exit --check-leaks -t 10000 --config test/mocha-integration-config-test.js && npm run test:tape\",\n+    \"test:db:no-oracle\": \"cross-env DB=\\\"mssql mysql mysql2 postgres sqlite3\\\" mocha --exit -t 10000 --config test/mocha-integration-config-test.js && npm run test:tape\",\n+    \"test\": \"mocha --exit -t 10000 --config test/mocha-all-config-test.js && npm run test:tape && npm run test:cli\",\n+    \"test:coverage\": \"nyc mocha --exit --check-leaks -t 10000 --config test/mocha-all-config-test.js && npm run test:tape && npm run test:cli\",\n+    \"test:everything\": \"npm run lint:everything && npm run test:coverage\",\n+    \"test:mssql\": \"cross-env DB=mssql npm run test:db\",\n+    \"test:mysql\": \"cross-env DB=mysql npm run test:db\",\n+    \"test:mysql2\": \"cross-env DB=mysql2 npm run test:db\",\n+    \"test:oracledb\": \"cross-env DB=oracledb npm run test:db\",\n+    \"test:sqlite\": \"cross-env DB=sqlite3 npm run test:db\",\n+    \"test:better-sqlite3\": \"cross-env DB=better-sqlite3 npm run test:db\",\n+    \"test:postgres\": \"cross-env DB=postgres npm run test:db\",\n+    \"test:cockroachdb\": \"cross-env DB=cockroachdb npm run test:db\",\n+    \"test:pgnative\": \"cross-env DB=pgnative npm run test:db\",\n+    \"test:tape\": \"node test/tape/index.js | faucet\",\n+    \"test:cli\": \"cross-env KNEX_PATH=../knex.js KNEX=bin/cli.js jake -f test/jake/Jakefile && mocha --exit -t 10000 test/cli-tests-suite.js\",\n+    \"db:start\": \"docker compose -f scripts/docker-compose.yml up --build -d mysql oracledb postgres mssql cockroachdb pgnative && docker compose -f scripts/docker-compose.yml up waitmssql waitmysql waitpostgres waitoracledb\",\n+    \"db:start:no-oracle\": \"docker compose -f scripts/docker-compose.yml up --build -d mysql postgres mssql cockroachdb pgnative && docker compose -f scripts/docker-compose.yml up waitmssql waitmysql waitpostgres\",\n+    \"db:stop\": \"docker compose -f scripts/docker-compose.yml down\",\n+    \"db:start:postgres\": \"docker compose -f scripts/docker-compose.yml up --build -d postgres && docker compose -f scripts/docker-compose.yml up waitpostgres\",\n+    \"db:stop:postgres\": \"docker compose -f scripts/docker-compose.yml down\",\n+    \"db:start:pgnative\": \"docker compose -f scripts/docker-compose.yml up --build -d pgnative && docker compose -f scripts/docker-compose.yml up waitpgnative\",\n+    \"db:stop:pgnative\": \"docker compose -f scripts/docker-compose.yml down\",\n+    \"db:start:mysql\": \"docker compose -f scripts/docker-compose.yml up --build -d mysql && docker compose -f scripts/docker-compose.yml up waitmysql\",\n+    \"db:stop:mysql\": \"docker compose -f scripts/docker-compose.yml down\",\n+    \"db:start:mssql\": \"docker compose -f scripts/docker-compose.yml up --build -d mssql && docker compose -f scripts/docker-compose.yml up waitmssql\",\n+    \"db:stop:mssql\": \"docker compose -f scripts/docker-compose.yml down\",\n+    \"db:start:cockroachdb\": \"docker compose -f scripts/docker-compose.yml up --build -d cockroachdb && docker compose -f scripts/docker-compose.yml up waitcockroachdb\",\n+    \"db:stop:cockroachdb\": \"docker compose -f scripts/docker-compose.yml down\",\n+    \"db:start:oracle\": \"docker compose -f scripts/docker-compose.yml up --build -d oracledb && docker compose -f scripts/docker-compose.yml up waitoracledb\",\n+    \"db:stop:oracle\": \"docker compose -f scripts/docker-compose.yml down\",\n+    \"stress:init\": \"docker compose -f scripts/stress-test/docker-compose.yml up --no-start && docker compose -f scripts/stress-test/docker-compose.yml start\",\n+    \"stress:test\": \"node scripts/stress-test/knex-stress-test.js | grep -A 5 -B 60 -- '- STATS '\",\n+    \"stress:destroy\": \"docker compose -f scripts/stress-test/docker-compose.yml stop\"\n   },\n   \"dependencies\": {\n-    \"q\": \"~0.9.3\",\n-    \"underscore\": \"~1.4.4\",\n-    \"generic-pool\": \"~2.0.3\"\n+    \"colorette\": \"2.0.19\",\n+    \"commander\": \"^10.0.0\",\n+    \"debug\": \"4.3.4\",\n+    \"escalade\": \"^3.1.1\",\n+    \"esm\": \"^3.2.25\",\n+    \"get-package-type\": \"^0.1.0\",\n+    \"getopts\": \"2.3.0\",\n+    \"interpret\": \"^2.2.0\",\n+    \"lodash\": \"^4.17.21\",\n",
+					"match": false,
+					"packageHash": "57105e811560179e589b5def513cc360ba5b0ea7f68859a3c89c5fba63bb5a47",
+					"size": 627,
+					"sourceHash": "a169cc6c2833f7c798f4c5930fb547ae0c0f1da6d31cf1ad99b9a8639668c5f3",
+					"status": "content"
+				},
+				"test/index.js": {
+					"match": false,
+					"packageHash": "b3aa9da867057d1067b2c9a292c3e7938e2d36649b95509cfe09e88ba73faf8c",
+					"size": 1410,
+					"status": "missing-in-source"
+				},
+				"test/lib/additional.js": {
+					"match": false,
+					"packageHash": "292dad9168a8d7e2ece55e6f0f31d4d816edf447324a29c3bdfc2a378a879e76",
+					"size": 891,
+					"status": "missing-in-source"
+				},
+				"test/lib/aggregate.js": {
+					"match": false,
+					"packageHash": "640aaebeec70edf84fd60f68bd9f528428592979342077733e7bbabaed356054",
+					"size": 196,
+					"status": "missing-in-source"
+				},
+				"test/lib/deletes.js": {
+					"match": false,
+					"packageHash": "30086ed48487c0bb596e7b442bedfa8911c92504d8dabd273827823f26e5ead9",
+					"size": 248,
+					"status": "missing-in-source"
+				},
+				"test/lib/inserts.js": {
+					"match": false,
+					"packageHash": "6f5f4e782b81257620ecdec09b12a4108c0b9a26c666a9e081e0b1dca1f18f71",
+					"size": 3086,
+					"status": "missing-in-source"
+				},
+				"test/lib/joins.js": {
+					"match": false,
+					"packageHash": "c7ae640ad9f3e15a51313ab97a812f92b8589bf2da9f48cd170ad514a8af2786",
+					"size": 1054,
+					"status": "missing-in-source"
+				},
+				"test/lib/schema.js": {
+					"match": false,
+					"packageHash": "f2b19735fa27da781cc1e839685ce9d2c617a09d7cc8084bf5bf01002ccb7d05",
+					"size": 1912,
+					"status": "missing-in-source"
+				},
+				"test/lib/selects.js": {
+					"match": false,
+					"packageHash": "432629d490eec084e2f4a377c76d62f5f7a31ceb86a5b748fd88283f3c4fb917",
+					"size": 2863,
+					"status": "missing-in-source"
+				},
+				"test/lib/unions.js": {
+					"match": false,
+					"packageHash": "e6c5be72803b1040295e3fe4e1a58565d19668b69f51b8faf3ad4e3ffdcd87a1",
+					"size": 377,
+					"status": "missing-in-source"
+				},
+				"test/lib/updates.js": {
+					"match": false,
+					"packageHash": "079160875fc2cd2644202cf5e09ea058ae015cd33c02da332954bccca446af47",
+					"size": 402,
+					"status": "missing-in-source"
+				},
+				"test/regular.js": {
+					"match": false,
+					"packageHash": "849bf0d9bc5bbb43d00b43a28c5b03fb821c42f1da91d120a66d81ca1f28caaa",
+					"size": 2884,
+					"status": "missing-in-source"
+				},
+				"test/shared/config.js": {
+					"match": false,
+					"packageHash": "b7a4bddf362b520d0f5d1df6a62d2c29cd5065085e66492590c7b2e1192009a2",
+					"size": 245,
+					"status": "missing-in-source"
+				},
+				"test/shared/output.js": {
+					"match": false,
+					"packageHash": "73a6a17ec49e7bede5e5226bc94d4b3314a81835c45b26dd6f3075d55e8cf3b5",
+					"size": 64532,
+					"status": "missing-in-source"
+				},
+				"test/string.js": {
+					"match": false,
+					"packageHash": "6d9a11aaeee334fd563322cd4a54c2e3fa0887d2a79f39c2b7a2626ce24b6540",
+					"size": 2871,
+					"status": "missing-in-source"
+				},
+				"CHANGELOG.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"CONTRIBUTING.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"LICENSE": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"UPGRADING.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"bin/cli.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"bin/knexfile-runtime-error.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"bin/utils/cli-config-utils.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"bin/utils/constants.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"bin/utils/migrationsLister.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"knex.mjs": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/builder-interface-augmenter.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/client.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/constants.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/dialects/better-sqlite3/index.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/dialects/cockroachdb/crdb-columncompiler.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/dialects/cockroachdb/crdb-querybuilder.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/dialects/cockroachdb/crdb-querycompiler.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/dialects/cockroachdb/crdb-tablecompiler.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/dialects/cockroachdb/crdb-viewcompiler.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/dialects/cockroachdb/index.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/dialects/index.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/dialects/mssql/index.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/dialects/mssql/mssql-formatter.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/dialects/mssql/query/mssql-querycompiler.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/dialects/mssql/schema/mssql-columncompiler.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/dialects/mssql/schema/mssql-compiler.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/dialects/mssql/schema/mssql-tablecompiler.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/dialects/mssql/schema/mssql-viewcompiler.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/dialects/mssql/transaction.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/dialects/mysql/index.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/dialects/mysql/query/mysql-querybuilder.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/dialects/mysql/query/mysql-querycompiler.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/dialects/mysql/schema/mysql-columncompiler.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/dialects/mysql/schema/mysql-compiler.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/dialects/mysql/schema/mysql-tablecompiler.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/dialects/mysql/schema/mysql-viewbuilder.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/dialects/mysql/schema/mysql-viewcompiler.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/dialects/mysql/transaction.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/dialects/mysql2/index.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/dialects/mysql2/transaction.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/dialects/oracle/DEAD_CODE.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/dialects/oracle/index.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/dialects/oracle/query/oracle-querycompiler.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/dialects/oracle/schema/internal/incrementUtils.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/dialects/oracle/schema/internal/trigger.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/dialects/oracle/schema/oracle-columnbuilder.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/dialects/oracle/schema/oracle-columncompiler.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/dialects/oracle/schema/oracle-compiler.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/dialects/oracle/schema/oracle-tablecompiler.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/dialects/oracle/utils.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/dialects/oracledb/index.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/dialects/oracledb/query/oracledb-querycompiler.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/dialects/oracledb/schema/oracledb-columncompiler.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/dialects/oracledb/schema/oracledb-tablecompiler.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/dialects/oracledb/schema/oracledb-viewbuilder.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/dialects/oracledb/schema/oracledb-viewcompiler.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/dialects/oracledb/transaction.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/dialects/oracledb/utils.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/dialects/pgnative/index.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/dialects/postgres/execution/pg-transaction.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/dialects/postgres/index.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/dialects/postgres/query/pg-querybuilder.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/dialects/postgres/query/pg-querycompiler.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/dialects/postgres/schema/pg-columncompiler.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/dialects/postgres/schema/pg-compiler.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/dialects/postgres/schema/pg-tablecompiler.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/dialects/postgres/schema/pg-viewbuilder.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/dialects/postgres/schema/pg-viewcompiler.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/dialects/redshift/index.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/dialects/redshift/query/redshift-querycompiler.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/dialects/redshift/schema/redshift-columnbuilder.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/dialects/redshift/schema/redshift-columncompiler.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/dialects/redshift/schema/redshift-compiler.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/dialects/redshift/schema/redshift-tablecompiler.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/dialects/redshift/schema/redshift-viewcompiler.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/dialects/redshift/transaction.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/dialects/sqlite3/execution/sqlite-transaction.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/dialects/sqlite3/index.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/dialects/sqlite3/query/sqlite-querybuilder.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/dialects/sqlite3/query/sqlite-querycompiler.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/dialects/sqlite3/schema/ddl.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/dialects/sqlite3/schema/internal/compiler.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/dialects/sqlite3/schema/internal/parser-combinator.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/dialects/sqlite3/schema/internal/parser.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/dialects/sqlite3/schema/internal/sqlite-ddl-operations.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/dialects/sqlite3/schema/internal/tokenizer.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/dialects/sqlite3/schema/internal/utils.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/dialects/sqlite3/schema/sqlite-columncompiler.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/dialects/sqlite3/schema/sqlite-compiler.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/dialects/sqlite3/schema/sqlite-tablecompiler.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/dialects/sqlite3/schema/sqlite-viewcompiler.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/execution/batch-insert.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/execution/internal/delay.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/execution/internal/ensure-connection-callback.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/execution/internal/query-executioner.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/execution/runner.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/execution/transaction.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/formatter/formatterUtils.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/formatter/rawFormatter.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/formatter/wrappingFormatter.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/formatter.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/index.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/knex-builder/FunctionHelper.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/knex-builder/Knex.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/knex-builder/internal/config-resolver.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/knex-builder/internal/parse-connection.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/knex-builder/make-knex.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/logger.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/migrations/common/MigrationsLoader.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/migrations/migrate/MigrationGenerator.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/migrations/migrate/Migrator.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/migrations/migrate/migrate-stub.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/migrations/migrate/migration-list-resolver.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/migrations/migrate/migrator-configuration-merger.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/migrations/migrate/sources/fs-migrations.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/migrations/migrate/stub/cjs.stub": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/migrations/migrate/stub/coffee.stub": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/migrations/migrate/stub/eg.stub": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/migrations/migrate/stub/js-schema.stub": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/migrations/migrate/stub/js.stub": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/migrations/migrate/stub/knexfile-coffee.stub": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/migrations/migrate/stub/knexfile-eg.stub": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/migrations/migrate/stub/knexfile-js.stub": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/migrations/migrate/stub/knexfile-ls.stub": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/migrations/migrate/stub/knexfile-ts.stub": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/migrations/migrate/stub/ls.stub": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/migrations/migrate/stub/mjs.stub": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/migrations/migrate/stub/ts-schema.stub": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/migrations/migrate/stub/ts.stub": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/migrations/migrate/table-creator.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/migrations/migrate/table-resolver.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/migrations/seed/Seeder.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/migrations/seed/seed-stub.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/migrations/seed/seeder-configuration-merger.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/migrations/seed/sources/fs-seeds.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/migrations/seed/stub/coffee.stub": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/migrations/seed/stub/eg.stub": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/migrations/seed/stub/js.stub": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/migrations/seed/stub/ls.stub": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/migrations/seed/stub/mjs.stub": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/migrations/seed/stub/ts.stub": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/migrations/util/fs.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/migrations/util/import-file.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/migrations/util/is-module-type.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/migrations/util/template.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/migrations/util/timestamp.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/query/analytic.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/query/constants.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/query/joinclause.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/query/method-constants.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/query/querybuilder.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/query/querycompiler.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/raw.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/ref.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/schema/builder.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/schema/columnbuilder.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/schema/columncompiler.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/schema/compiler.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/schema/internal/helpers.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/schema/tablebuilder.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/schema/tablecompiler.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/schema/viewbuilder.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/schema/viewcompiler.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/util/finally-mixin.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/util/helpers.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/util/is.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/util/nanoid.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/util/noop.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/util/save-async-stack.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/util/security.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/util/string.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/util/timeout.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"scripts/build.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"scripts/clean.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"scripts/docker-compose.yml": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"scripts/next-release-howto.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"scripts/oracledb-install-driver-libs.sh": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"scripts/release.sh": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"scripts/runkit-example.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"scripts/stress-test/README.txt": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"scripts/stress-test/docker-compose.yml": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"scripts/stress-test/knex-stress-test.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"scripts/stress-test/mysql2-random-hanging-every-now-and-then.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"scripts/stress-test/mysql2-sudden-exit-without-error.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"scripts/stress-test/reconnect-test-mysql-based-drivers.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"scripts/update_gitignore_for_tsc_output.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"types/index.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"types/result.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"types/tables.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				}
+			},
+			"summary": {
+				"differentFiles": 3,
+				"matchingFiles": 0,
+				"missingInPackage": 189,
+				"missingInSource": 21,
+				"score": 0,
+				"totalFiles": 213
+			}
+		}
+	}
+]
