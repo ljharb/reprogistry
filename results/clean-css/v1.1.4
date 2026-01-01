@@ -1,0 +1,93 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-01T08:35:30.371Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:11.7.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "clean-css@1.1.4",
+			"name": "clean-css",
+			"version": "1.1.4",
+			"location": "https://registry.npmjs.org/clean-css/-/clean-css-1.1.4.tgz",
+			"integrity": "sha512-/qWzr7k+USaZrf9FPspevo6+iHVG++7AS20ywuPusCvrHApnRgzEmt8lfCOKO5Er9ynFTPhDfP1E8xBFGCsODg==",
+			"publishedAt": "2013-10-23T14:23:01.379Z",
+			"publishedWith": {
+				"node": null,
+				"npm": "1.2.30"
+			}
+		},
+		"source": {
+			"integrity": "sha512-FS42if8HdYOQ32Q0aO1yP9LmUYYNTpKhavcbsDePCgZweAebFZU8Vtd+/pzBEVqBTuv9Blg5tlP+JvPR6fs3oA==",
+			"location": "https://github.com/GoalSmashers/clean-css.git",
+			"spec": "github:GoalSmashers/clean-css#v1.1.4"
+		},
+		"comparisonHash": "8a2a8dcbb729bf3ee9216e490c955701f0ddebe1",
+		"diff": {
+			"files": {
+				"History.md": {
+					"diff": "--- published/History.md\n+++ rebuilt/History.md\n@@ -1,3 +1,8 @@\n+2.0.0 / 2013-xx-xx (UNRELEASED)\n+==================\n+\n+* Adds simplified and more advanced text escaping / restoring via `EscapeStore` class.\n+\n 1.1.4 / 2013-10-23\n ==================\n \n@@ -6,7 +11,7 @@\n 1.1.3 / 2013-10-04\n ==================\n \n-* Fixed issue [#150](https://github.com/GoalSmashers/clean-css/issues/150) - minifying background:none.\n+* Fixed issue [#150](https://github.com/GoalSmashers/clean-css/issues/150) - minifying `background:none`.\n \n 1.1.2 / 2013-09-29\n ==================\n",
+					"match": false,
+					"packageHash": "ec59983128e83e86ec13dacfdc9e01f2ad0c437d0dbbe5212faaf3762e70b221",
+					"size": 10562,
+					"sourceHash": "cca1d6e493cecbab80ebf5e43cc141b20d9fcf86f848487689877b674aa77f2e",
+					"status": "content"
+				},
+				"lib/text/comments.js": {
+					"diff": "--- published/lib/text/comments.js\n+++ rebuilt/lib/text/comments.js\n@@ -1,5 +1,7 @@\n+var EscapeStore = require('./escape-store');\n+\n module.exports = function Comments(keepSpecialComments, keepBreaks, lineBreak) {\n-  var comments = [];\n+  var comments = new EscapeStore('CSSCOMMENT');\n \n   return {\n     // Strip special comments (/*! ... */) by replacing them by __CSSCOMMENT__ marker\n@@ -20,8 +22,9 @@\n         tempData.push(data.substring(cursor, nextStart));\n         if (data[nextStart + 2] == '!') {\n           // in case of special comments, replace them with a placeholder\n-          comments.push(data.substring(nextStart, nextEnd + 2));\n-          tempData.push('__CSSCOMMENT__');\n+          var comment = data.substring(nextStart, nextEnd + 2);\n+          var placeholder = comments.store(comment);\n+          tempData.push(placeholder);\n         }\n         cursor = nextEnd + 2;\n       }\n@@ -32,16 +35,18 @@\n     },\n \n     restore: function(data) {\n-      var commentsCount = comments.length;\n+      var restored = 0;\n       var breakSuffix = keepBreaks ? lineBreak : '';\n \n-      return data.replace(new RegExp('__CSSCOMMENT__(' + lineBreak + '| )?', 'g'), function() {\n+      return data.replace(new RegExp(comments.placeholderPattern + '(' + lineBreak + '| )?', 'g'), function(match, placeholder) {\n+        restored++;\n+\n         switch (keepSpecialComments) {\n           case '*':\n-            return comments.shift() + breakSuffix;\n+            return comments.restore(placeholder) + breakSuffix;\n           case 1:\n-            return comments.length == commentsCount ?\n-              comments.shift() + breakSuffix :\n+            return restored == 1 ?\n+              comments.restore(placeholder) + breakSuffix :\n               '';\n           case 0:\n             return '';\n",
+					"match": false,
+					"packageHash": "ec955f062e72420dbdb476515f5ea87d26c90d59764b893e737483f5a91158a7",
+					"size": 1696,
+					"sourceHash": "2617e1d1c3ec2d720f34b54d9788f6928aa08dd165feba63e9ee60b4933cb892",
+					"status": "content"
+				},
+				"lib/text/expressions.js": {
+					"diff": "--- published/lib/text/expressions.js\n+++ rebuilt/lib/text/expressions.js\n@@ -1,5 +1,7 @@\n+var EscapeStore = require('./escape-store');\n+\n module.exports = function Expressions() {\n-  var expressions = [];\n+  var expressions = new EscapeStore('EXPRESSION');\n \n   var findEnd = function(data, start) {\n     var end = start + 'expression'.length;\n@@ -44,9 +46,10 @@\n \n         nextEnd = findEnd(data, nextStart);\n \n+        var expression = data.substring(nextStart, nextEnd);\n+        var placeholder = expressions.store(expression);\n         tempData.push(data.substring(cursor, nextStart));\n-        tempData.push('__EXPRESSION__');\n-        expressions.push(data.substring(nextStart, nextEnd));\n+        tempData.push(placeholder);\n         cursor = nextEnd;\n       }\n \n@@ -56,9 +59,7 @@\n     },\n \n     restore: function(data) {\n-      return data.replace(/__EXPRESSION__/g, function() {\n-        return expressions.shift();\n-      });\n+      return data.replace(expressions.placeholderRegExp, expressions.restore);\n     }\n   };\n };\n",
+					"match": false,
+					"packageHash": "5b3013f4fb4912c120f2e9332c77210438831cb0f15d6ffb3aa767a5d5a37192",
+					"size": 1522,
+					"sourceHash": "bd34601988e5b6bfcd55def8cc62f7d175c9398a9085118e4ed6f36bc1f6db44",
+					"status": "content"
+				},
+				"lib/text/free.js": {
+					"diff": "--- published/lib/text/free.js\n+++ rebuilt/lib/text/free.js\n@@ -1,5 +1,7 @@\n+var EscapeStore = require('./escape-store');\n+\n module.exports = function Free() {\n-  var texts = [];\n+  var texts = new EscapeStore('CSSFREETEXT');\n \n   return {\n     // Strip content tags by replacing them by the __CSSFREETEXT__\n@@ -39,9 +41,10 @@\n         if (nextStart == -1 || nextEnd == -1)\n           break;\n \n+        var text = data.substring(nextStart, nextEnd + 1);\n+        var placeholder = texts.store(text);\n         tempData.push(data.substring(cursor, nextStart));\n-        tempData.push('__CSSFREETEXT__');\n-        texts.push(data.substring(nextStart, nextEnd + 1));\n+        tempData.push(placeholder);\n         cursor = nextEnd + 1;\n       }\n \n@@ -51,9 +54,7 @@\n     },\n \n     restore: function(data) {\n-      return data.replace(/__CSSFREETEXT__/g, function() {\n-        return texts.shift();\n-      });\n+      return data.replace(texts.placeholderRegExp, texts.restore);\n     }\n   };\n };\n",
+					"match": false,
+					"packageHash": "206f9025ae00fc8a83975e7d13ef1ce48f921784ca0476e3147c47622dcbf18f",
+					"size": 1760,
+					"sourceHash": "c36e67081ddabd99ca1ac799c69c30e30f5d8a65f9003b04402975361acaee4d",
+					"status": "content"
+				},
+				"lib/text/urls.js": {
+					"diff": "--- published/lib/text/urls.js\n+++ rebuilt/lib/text/urls.js\n@@ -1,5 +1,7 @@\n+var EscapeStore = require('./escape-store');\n+\n module.exports = function Urls() {\n-  var urls = [];\n+  var urls = new EscapeStore('URL');\n \n   return {\n     // Strip urls by replacing them by the __URL__\n@@ -18,9 +20,10 @@\n \n         nextEnd = data.indexOf(')', nextStart);\n \n+        var url = data.substring(nextStart, nextEnd + 1);\n+        var placeholder = urls.store(url);\n         tempData.push(data.substring(cursor, nextStart));\n-        tempData.push('__URL__');\n-        urls.push(data.substring(nextStart, nextEnd + 1));\n+        tempData.push(placeholder);\n         cursor = nextEnd + 1;\n       }\n \n@@ -30,9 +33,7 @@\n     },\n \n     restore: function(data) {\n-      return data.replace(/__URL__/g, function() {\n-        return urls.shift();\n-      });\n+      return data.replace(urls.placeholderRegExp, urls.restore);\n     }\n   };\n };\n",
+					"match": false,
+					"packageHash": "683830009692409fd82dbe56b8ef13fab758a50a99a24366431512db0745d310",
+					"size": 992,
+					"sourceHash": "24ad65c8c71adf6845711a8526189d7748438b3abe29b14862ffa498adf5f066",
+					"status": "content"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -3,6 +3,7 @@\n   \"version\": \"1.1.4\",\n   \"author\": \"Jakub Pawlowicz <jakub@goalsmashers.com> (http://twitter.com/GoalSmashers)\",\n   \"description\": \"A well-tested CSS minifier\",\n+  \"license\": \"MIT\",\n   \"keywords\": [\n     \"css\",\n     \"minifier\"\n@@ -37,12 +38,10 @@\n   },\n   \"devDependencies\": {\n     \"vows\": \"0.7.x\",\n-    \"jshint\": \"~2.1.9\"\n+    \"jshint\": \"2.2.x\"\n   },\n   \"jshintConfig\": {\n     \"browser\": false,\n-    \"maxerr\": 100,\n-    \"node\": true,\n     \"camelcase\": true,\n     \"curly\": false,\n     \"eqeqeq\": false,\n@@ -51,6 +50,7 @@\n     \"latedef\": true,\n     \"multistr\": true,\n     \"noarg\": true,\n+    \"node\": true,\n     \"plusplus\": false,\n     \"quotmark\": \"true\",\n     \"regexp\": false,\n@@ -61,6 +61,5 @@\n   },\n   \"engines\": {\n     \"node\": \">=0.8.0\"\n-  },\n-  \"license\": \"MIT\"\n+  }\n }\n",
+					"match": false,
+					"packageHash": "88325312ca1539c10e9894d54bbae7a05ce36571b74098f393405ffd7de2ea26",
+					"size": 1344,
+					"sourceHash": "9cd190e0964ee96ca7be82e78cdc0a853f469f6bce2b8388960a4d75d2f9b77b",
+					"status": "content"
+				},
+				"lib/text/escape-store.js": {
+					"match": false,
+					"status": "missing-in-package"
+				}
+			},
+			"summary": {
+				"differentFiles": 6,
+				"matchingFiles": 13,
+				"missingInPackage": 1,
+				"missingInSource": 0,
+				"score": 0.65,
+				"totalFiles": 20
+			}
+		}
+	}
+]
