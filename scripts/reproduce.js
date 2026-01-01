@@ -148,7 +148,7 @@ function getNpmVersion(nodeVersion) {
 
 function npmInstall(dir, options) {
 	options = options || {};
-	var cmd = 'npm install --ignore-scripts --no-audit --no-fund --legacy-peer-deps';
+	var cmd = 'npm install --ignore-scripts --no-audit --no-fund --legacy-peer-deps --force';
 
 	if (!options.before) {
 		throw new Error('npmInstall requires a --before timestamp for reproducible builds');

@@ -134,8 +134,9 @@ async function performComparison(result) {
 		 * This is needed because prepack scripts may use local binaries
 		 * For monorepos, run in the package subdirectory
 		 * Use --ignore-scripts to avoid postinstall failures from old native deps
+		 * Use --force to ignore platform checks (e.g., darwin-only packages on linux)
 		 */
-		execSync(`cd "${packageDir}" && npm install --ignore-scripts --legacy-peer-deps`, { stdio: 'pipe' });
+		execSync(`cd "${packageDir}" && npm install --ignore-scripts --legacy-peer-deps --force`, { stdio: 'pipe' });
 		const packOutput = execSync(
 			`cd "${packageDir}" && npm pack --pack-destination "${tempDir}"`,
 			{ env: { ...process.env, PATH: `${packageDir}/node_modules/.bin:${process.env.PATH}` }, stdio: 'pipe' },
