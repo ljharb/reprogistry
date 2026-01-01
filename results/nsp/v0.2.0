@@ -1,0 +1,191 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-01T19:51:36.994Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:11.7.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "nsp@0.2.0",
+			"name": "nsp",
+			"version": "0.2.0",
+			"location": "https://registry.npmjs.org/nsp/-/nsp-0.2.0.tgz",
+			"integrity": "sha512-RzEBg5aDX41SizcD1H4yoKIyG2suDVplu8A0koEHaXBqL1m2srSSOn9WsCIVhVQ7XuSgVLVCJGKQM0DHpnmhww==",
+			"publishedAt": "2014-08-01T21:46:58.449Z",
+			"publishedWith": {
+				"node": null,
+				"npm": "1.4.20"
+			}
+		},
+		"source": {
+			"integrity": "sha512-aF7kd6aK2UFgz48AdBn31RWkK4wIkd1UMewkm2w6PJ8kqMu8j+cxgHpufg0TkROkHoc1f1bndxMcBIGAt+jLgg==",
+			"location": "git@github.com:nodesecurity/nsp.git",
+			"spec": "github:nodesecurity/nsp#239568facef19ac547dba85b1be41f6d72a7b616"
+		},
+		"comparisonHash": "8a2a8dcbb729bf3ee9216e490c955701f0ddebe1",
+		"diff": {
+			"files": {
+				".jshintignore": {
+					"match": false,
+					"packageHash": "16d30e4462189fb14dd611bdb708c510630c576a1f35b9383e89a4352da36c97",
+					"size": 13,
+					"status": "missing-in-source"
+				},
+				".jshintrc": {
+					"match": false,
+					"packageHash": "e68dc0ca07eae9b657318e9b097bcf87c870a3bfc831da25781f527325272710",
+					"size": 500,
+					"status": "missing-in-source"
+				},
+				".npmignore": {
+					"match": false,
+					"packageHash": "28cd7f12e84240c85c9d1fb749c394cefb9bf19e9a5c32e109b9faf7105c50bd",
+					"size": 33,
+					"status": "missing-in-source"
+				},
+				"README.md": {
+					"diff": "--- published/README.md\n+++ rebuilt/README.md\n@@ -1,45 +1,242 @@\n-# Node Security Project \n-**Command Line Tools**\n+## The Node Security Platform has been acquired by npm, Inc.\n+## On April 10, 2018, the Node Security Platform joined npm, Inc., which operates the npm JavaScript package registry. \n \n-## Badgers\n-[![Dependency Status](https://david-dm.org/nodesecurity/nsp.png)](https://david-dm.org/nodesecurity/nsp)\n+## [Learn more here.](https://medium.com/npm-inc/npm-acquires-lift-security-258e257ef639)\n \n-![](https://nodesecurity.io/img/nodesecurity.png)\n+## This service remains operational for current users in its current state. No new features or fixes will be implemented.\n \n+## Follow [@npmjs](https://twitter.com/npmjs) on Twitter for updates.\n \n-## Installation\n+## About Node Security\n \n-Through NPM\n+Node Security helps you keep your node applications secure. With Node Security you can:\n+\n+* Make use of the CLI tool to help identify [known vulnerabilities](https://nodesecurity.io/advisories/) in your own projects.\n+* Get access to Node Security news and information from the ^lift team.\n+\n+## Installing the CLI (nsp)\n+\n+* To install the Node Security command line tool: `npm install -g nsp`\n+* Then run `nsp --help` to find out more.\n+\n+## Filter and threshold\n+\n+The results of the `check` command may be altered based on either a `filter` or `threshold`.\n+\n+- `--filter`: hide all vulnerabilities below the given CVSS score\n+- `--threshold`: display all vulnerabilities, but only exit with an error code if at least one finding has a CVSS score above the given value\n+\n+## Exit codes\n+\n+The CLI tool exits with the following codes to signify state\n+\n+- 0: command ran with success\n+- 1: command run was 'check', was successful, but returned vulnerabilities outside of the threshold or filter\n+- 2: command received a server error (5xx)\n+- 3: unknown error\n+- 4: there was an error in the output reporter\n+\n+## Output Reporters\n+\n+You can adjust how the client outputs findings by specifying one of the following built in reporters:\n+\n+- table\n+- summary\n+- json\n+- codeclimate\n+- minimal\n+\n+Example: `nsp check --reporter summary`\n+\n+Additionally, you can use [third-party reporter](https://www.npmjs.com/search?q=nsp+reporter). The packages of custom reporters must adhere to the naming scheme `nsp-reporter-<name>` and can then be referenced by that name:\n ```bash\n-npm i nsp -g\n+$ npm install -g nsp nsp-reporter-checkstyle\n+$ nsp check --reporter checkstyle\n ```\n+Please note that in case of naming conflicts built-in reporters (as listed above) take precedence. For instance, `nsp-reporter-json` would never be used since nsp ships with a `json` formatter.\n \n-Through github\n-```bash\n-git clone git@github.com:nodesecurity/nsp.git\n-cd nsp\n-npm link\n+### Creating a reporter\n+\n+A custom reporter should be a module named with the prefix `nsp-reporter-`, it must export two functions at minimum `error` and `success`.\n+\n+The `error` function accepts two arguments, `(err, args)` where `err` is an `Error` object representing the failure that occurred during whatever command may have been run, and `args` is an object representing all of the\n+command line arguments that were passed to the CLI at run time.\n+\n+The `success` function also accepts two arguments `(result, args)` where `args` is the same CLI arguments and `result` is an object with these three properties:\n+\n+- `message`: a string summary of the command's result\n+- `data`: the actual result of the command, the shape of this parameter varies for each command\n+- `meta`: detailed information from behind the scenes (response headers, etc)\n+\n+In addition to the top level `success` and `error` functions, specific handlers may be specified for each command that the CLI tool handles. For example\n+\n+```js\n+exports.error = function (err, args) {\n+  // run for all failures of any command\n+};\n+\n+exports.success = function (result, args) {\n+  // run for success of any command _except_ for 'check'\n+};\n+\n+exports.check = {};\n+exports.check.success = function (result, args) {\n+  // run for success of _only_ the 'check' command\n",
+					"match": false,
+					"packageHash": "33c981381f824b38a898fa3516426d87a72a16d47a5106d7573adf6508a123af",
+					"size": 966,
+					"sourceHash": "636bcfa3b14d0f17ab7a6a8bc3145c6d7f761b8a2056f46d7d0dccb960575fba",
+					"status": "content"
+				},
+				"bin/nsp-cli.js": {
+					"match": false,
+					"packageHash": "fce4902a6e39be83bf00ac512f9cc67f0e1114d7e04fce7f5750c8fda55218bb",
+					"size": 108,
+					"status": "missing-in-source"
+				},
+				"commands/audit-package/index.js": {
+					"match": false,
+					"packageHash": "5bfb3f0f059f2cb6789cf7da47550decb1080439ec42339df20c1e3ccc15159a",
+					"size": 380,
+					"status": "missing-in-source"
+				},
+				"commands/audit-shrinkwrap/index.js": {
+					"match": false,
+					"packageHash": "5dcb52a463921119f74c9820a07287471b65fd296515c4ffba671b3c023b7a0a",
+					"size": 409,
+					"status": "missing-in-source"
+				},
+				"commands/index.js": {
+					"match": false,
+					"packageHash": "c2a7edca7d9568959d73942fa70a50601a0fa61a16a415c555245afc16be6205",
+					"size": 58,
+					"status": "missing-in-source"
+				},
+				"lib/error.js": {
+					"match": false,
+					"packageHash": "60d1068f6fff2986e399e8da4973498a0749f725cedf55b82655a27e21d3570d",
+					"size": 132,
+					"status": "missing-in-source"
+				},
+				"lib/package.js": {
+					"diff": "--- published/lib/package.js\n+++ rebuilt/lib/package.js\n@@ -1,149 +1,26 @@\n-require('colors');\n-var fs  = require('fs');\n-var path = require('path');\n-var request = require('request');\n-var npmconf = require('npmconf');\n-var RegClient = require('npm-registry-client');\n-var semver = require('semver');\n-var async = require('async');\n+'use strict';\n \n-var table = require('text-table');\n-var color = require('cli-color');\n-var ansiTrim = require('cli-color/lib/trim');\n-\n-var error = require('../lib/error');\n-\n-exports = module.exports = package;\n- \n-var registry;\n-var file = path.resolve(process.cwd(), 'package.json');\n-var pkg;\n- \n-function package(args) {\n-    fs.exists(file, function (exists) {\n-        if (!exists) {\n-            error('Can\\'t load ' + file);\n-            process.exit(0);\n-        }\n-        pkg = JSON.parse(fs.readFileSync(file));\n-        npmconf.load(function (err, config) {\n-            config.log = {\n-                verbose: function () {},\n-                info: function () {},\n-                http: function () {},\n-                silly: function () {},\n-                error: function () {},\n-                warn: function () {},\n-            };\n-            registry = new RegClient(config);\n-            checkPackage(pkg, undefined, prettyOutput);\n-        });\n-// <<<<<<< HEAD\n-//     } else {\n-//         console.error(color.green('No vulnerable modules found'));\n-//         process.exit(0);\n-//     }\n-// =======\n-    });\n-// >>>>>>> 42575a3f67812b47f2149a1e4ab7bdf94d3c663f\n-}\n-\n-\n-// Get package\n-// Get versions\n-// max satisfy\n-// verify if it's vuln\n-var parents = {};\n-\n-function resolveParents(module, current) {\n-    current = current || [];\n-    var parent = parents[module] && parents[module].length ? parents[module][0] : undefined;\n-    if (parent && parent !== pkg.name && current.indexOf(parent) === -1) {\n-        current.unshift(parent);\n-        return resolveParents(parent, current);\n+const internals = {};\n+internals.whitelist = [\n+  'name',\n+  'version',\n+  'engine',\n+  'dependencies',\n+  'devDependencies',\n+  'optionalDependencies',\n+  'peerDependencies',\n+  'bundleDependencies',\n+  'bundledDependencies'\n+];\n+\n+exports.sanitize = function (pkg) {\n+\n+  const result = {};\n+  for (const key in pkg) {\n+    if (internals.whitelist.includes(key)) {\n+      result[key] = pkg[key];\n     }\n-    return current;\n-}\n-\n-function checkPackage(pkginfo, results, callback) {\n-    results = results || [];\n-\n-    async.forEach(Object.keys(pkginfo.dependencies), function (module, cb) {\n+  }\n \n-        parents[module] = parents[module] || [];\n-        if (parents[module].indexOf(pkginfo.name) === -1) {\n-            parents[module].push(pkginfo.name);\n-        }\n",
+					"match": false,
+					"packageHash": "12fa81e8a796afaaecd030be78c339535751899bbb2782ffdf796aa8acbf6a04",
+					"size": 4525,
+					"sourceHash": "aaf03b6e796425f3a980568feeb921db7f2a825656ceb62e33af667d99c157ca",
+					"status": "content"
+				},
+				"lib/shrinkwrap.js": {
+					"match": false,
+					"packageHash": "22bf1e2faeddefcf2cd12ed971ce70150829fd1f39985db66dc4b10ebb8a7e30",
+					"size": 2164,
+					"status": "missing-in-source"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -1,41 +1,56 @@\n {\n   \"name\": \"nsp\",\n-  \"description\": \"Node Security Project command line tool\",\n-  \"version\": \"0.2.0\",\n-  \"author\": \"Node Security Project\",\n-  \"bin\": \"./bin/nsp-cli.js\",\n-  \"bugs\": \"https://github.com/nodesecurity/nsp/issues\",\n+  \"description\": \"The Node Security (nodesecurity.io) command line interface\",\n+  \"version\": \"3.2.1\",\n+  \"author\": \"^lift security\",\n+  \"bin\": {\n+    \"nsp\": \"bin/nsp\"\n+  },\n   \"dependencies\": {\n-    \"async\": \"^0.2.10\",\n-    \"celeri\": \"git://github.com/diasdavid/celeri\",\n-    \"cli-color\": \"^0.2.3\",\n-    \"colors\": \"^0.6.2\",\n-    \"minimist\": \"0.0.8\",\n-    \"node-print\": \"0.0.4\",\n-    \"npm-registry-client\": \"^0.4.5\",\n-    \"npmconf\": \"^0.1.13\",\n-    \"optimist\": \"~0.6.0\",\n-    \"osenv\": \"0.0.3\",\n-    \"read\": \"~1.0.5\",\n-    \"request\": \"~2.34.0\",\n-    \"semver\": \"^2.2.1\",\n-    \"strscanner\": \"0.0.8\",\n-    \"text-table\": \"^0.2.0\"\n+    \"chalk\": \"^2.1.0\",\n+    \"cli-table2\": \"^0.2.0\",\n+    \"cvss\": \"^1.0.2\",\n+    \"https-proxy-agent\": \"^2.1.0\",\n+    \"inquirer\": \"^3.3.0\",\n+    \"nodesecurity-npm-utils\": \"^6.0.0\",\n+    \"semver\": \"^5.4.1\",\n+    \"wreck\": \"^12.5.1\",\n+    \"yargs\": \"^9.0.1\"\n   },\n   \"devDependencies\": {\n-    \"precommit-hook\": \"^0.3.10\"\n+    \"boom\": \"^5.2.0\",\n+    \"code\": \"^4.1.0\",\n+    \"eslint-config-nodesecurity\": \"^1.3.1\",\n+    \"hapi\": \"^16.6.2\",\n+    \"lab\": \"^14.3.1\",\n+    \"mock-fs\": \"^4.4.1\"\n+  },\n+  \"engines\": {\n+    \"node\": \">=6.0.0\"\n   },\n-  \"homepage\": \"https://nodesecurity.io\",\n+  \"files\": [\n+    \"bin\",\n+    \"commands\",\n+    \"lib\",\n+    \"reporters\",\n+    \"package.json\",\n+    \"npm-shrinkwrap.json\",\n+    \"README.md\",\n+    \"LICENSE\"\n+  ],\n   \"keywords\": [\n-    \"nsp\",\n     \"security\",\n-    \"node\",\n-    \"shrinkwrap\"\n+    \"nsp\",\n+    \"nodesecurity\"\n   ],\n-  \"license\": \"MIT\",\n-  \"main\": \"index.js\",\n-  \"repository\": \"git@github.com:nodesecurity/nsp.git\",\n+  \"license\": \"Apache-2.0\",\n+  \"main\": \"lib/index.js\",\n+  \"repository\": {\n+    \"type\": \"git\",\n+    \"url\": \"git://github.com/nodesecurity/nsp.git\"\n+  },\n   \"scripts\": {\n-    \"test\": \"echo \\\"Error: no test specified\\\" && exit 0\"\n+    \"nsp\": \"bin/nsp check\",\n+    \"test\": \"lab -a code -t 1 -L\"\n   }\n }\n",
+					"match": false,
+					"packageHash": "def8ce83c79f27e4d01d01b043ca9c9d4e3a6d34f36f8a71bf68da875a9d3682",
+					"size": 1017,
+					"sourceHash": "3fbca02da328facd8da26de60fde67906fddde6758255ac088303a4866c2e787",
+					"status": "content"
+				},
+				"LICENSE": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"bin/nsp": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"commands/check.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"commands/gather.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"commands/login.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/api.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/command.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/config.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/index.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/offline.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/preprocessor.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/wreck.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"reporters/codeclimate.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"reporters/index.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"reporters/json.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"reporters/minimal.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"reporters/summary.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"reporters/table.js": {
+					"match": false,
+					"status": "missing-in-package"
+				}
+			},
+			"summary": {
+				"differentFiles": 3,
+				"matchingFiles": 0,
+				"missingInPackage": 18,
+				"missingInSource": 9,
+				"score": 0,
+				"totalFiles": 30
+			}
+		}
+	}
+]
