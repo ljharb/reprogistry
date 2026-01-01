@@ -1,0 +1,235 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-01T18:57:53.939Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:5.0.3",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "luxon@0.0.11",
+			"name": "luxon",
+			"version": "0.0.11",
+			"location": "https://registry.npmjs.org/luxon/-/luxon-0.0.11.tgz",
+			"integrity": "sha512-JT9UEFzy3f0frla1P18+m4FBtwGzhLtFH4MlSOjLpgiw61JDEedrkow2Tec+XDqZdGpKdNHkbQmR3J38MkdwvA==",
+			"publishedAt": "2017-11-01T00:33:45.350Z",
+			"publishedWith": {
+				"node": "8.1.3",
+				"npm": "5.4.2"
+			}
+		},
+		"source": {
+			"integrity": null,
+			"location": "git+https://github.com/moment/luxon.git",
+			"spec": "github:moment/luxon#3b43a716af9822dfff924f3093c9bed7e20958cb"
+		},
+		"comparisonHash": "8a2a8dcbb729bf3ee9216e490c955701f0ddebe1",
+		"diff": {
+			"files": {
+				"build/cjs/luxon.js": {
+					"match": false,
+					"packageHash": "9b07914c47c8e9edeb8b1ae29c0f6788106fcd150c955c7e7568d6c9354b1c07",
+					"size": 261752,
+					"status": "missing-in-source"
+				},
+				"build/readme.md": {
+					"match": false,
+					"packageHash": "5a8f3366e1d83ef91feefd15ae4f0a2d829d9974612b08b8ea8f2bb8016791f9",
+					"size": 95,
+					"status": "missing-in-source"
+				},
+				"changelog.md": {
+					"match": false,
+					"packageHash": "a3c0c10e8ca9dbdc235a3b7fd3b6eb6d6d1e7b8207a462bb569209674ade5f89",
+					"size": 745,
+					"status": "missing-in-source"
+				},
+				"license.txt": {
+					"match": false,
+					"packageHash": "de44074cee34d90f9b911eeeb011399fca0a45d1cb46dffdfe2f0cd82bb78d2e",
+					"size": 1076,
+					"status": "missing-in-source"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -1,62 +1,87 @@\n {\n   \"name\": \"luxon\",\n-  \"version\": \"0.0.11\",\n+  \"version\": \"3.7.2\",\n   \"description\": \"Immutable date wrapper\",\n   \"author\": \"Isaac Cambron\",\n-  \"keywords\": [\"date\", \"immutable\"],\n+  \"keywords\": [\n+    \"date\",\n+    \"immutable\"\n+  ],\n   \"repository\": \"https://github.com/moment/luxon\",\n-  \"dependencies\": {\n-    \"core-js\": \"latest\",\n-    \"gulp-cli\": \"^1.4.0\"\n+  \"exports\": {\n+    \".\": {\n+      \"import\": \"./build/es6/luxon.mjs\",\n+      \"require\": \"./build/node/luxon.js\"\n+    },\n+    \"./package.json\": \"./package.json\"\n   },\n   \"scripts\": {\n-    \"precommit\": \"lint-staged\"\n+    \"build\": \"babel-node tasks/buildAll.js\",\n+    \"build-node\": \"babel-node tasks/buildNode.js\",\n+    \"build-global\": \"babel-node tasks/buildGlobal.js\",\n+    \"jest\": \"jest\",\n+    \"test\": \"jest --coverage\",\n+    \"api-docs\": \"mkdir -p build && documentation build src/luxon.js -f html -o build/api-docs && sed -i.bak 's/<\\\\/body>/<script src=\\\"\\\\..\\\\/global\\\\/luxon.js\\\"><\\\\/script><script>console.log(\\\"You can try Luxon right here using the `luxon` global, like `luxon.DateTime.now()`\\\");<\\\\/script><\\\\/body>/g' build/api-docs/index.html && rm build/api-docs/index.html.bak\",\n+    \"copy-site\": \"mkdir -p build && rsync -a docs/ build/docs && rsync -a site/ build\",\n+    \"site\": \"npm run api-docs && npm run copy-site\",\n+    \"format\": \"prettier --write 'src/**/*.js' 'test/**/*.js' 'benchmarks/*.js'\",\n+    \"format-check\": \"prettier --check 'src/**/*.js' 'test/**/*.js' 'benchmarks/*.js'\",\n+    \"benchmark\": \"node benchmarks/index.js\",\n+    \"codecov\": \"codecov\",\n+    \"prepack\": \"babel-node tasks/buildAll.js\",\n+    \"prepare\": \"husky install\",\n+    \"show-site\": \"http-server build\"\n   },\n   \"lint-staged\": {\n-    \"*.{js,json}\": [\"prettier --config .prettier.js --write\", \"git add\"]\n+    \"*.{js,json}\": [\n+      \"prettier --write\"\n+    ]\n   },\n   \"devDependencies\": {\n-    \"babel-jest\": \"latest\",\n-    \"babel-preset-es2015\": \"latest\",\n-    \"babel-preset-es2015-rollup\": \"latest\",\n+    \"@babel/core\": \"^7.18.6\",\n+    \"@babel/node\": \"^7.18.6\",\n+    \"@babel/plugin-external-helpers\": \"^7.18.6\",\n+    \"@babel/preset-env\": \"^7.18.6\",\n+    \"@rollup/plugin-babel\": \"^5.3.0\",\n+    \"@rollup/plugin-commonjs\": \"^19.0.0\",\n+    \"@rollup/plugin-node-resolve\": \"^13.0.0\",\n+    \"babel-jest\": \"^28.1.2\",\n     \"benchmark\": \"latest\",\n-    \"coveralls\": \"latest\",\n-    \"eslint\": \"latest\",\n-    \"eslint-config-airbnb-base\": \"12.0.2\",\n-    \"eslint-config-prettier\": \"latest\",\n-    \"eslint-plugin-import\": \"latest\",\n-    \"eslint-plugin-prettier\": \"latest\",\n-    \"gulp\": \"latest\",\n-    \"gulp-babili\": \"latest\",\n-    \"gulp-bench\": \"latest\",\n-    \"gulp-coveralls\": \"latest\",\n-    \"gulp-debug\": \"latest\",\n-    \"gulp-esdoc\": \"latest\",\n-    \"gulp-eslint\": \"latest\",\n-    \"gulp-filter\": \"latest\",\n-    \"gulp-jest\": \"latest\",\n-    \"gulp-rename\": \"latest\",\n-    \"gulp-sourcemaps\": \"latest\",\n-    \"gulp-uglify\": \"latest\",\n-    \"husky\": \"^0.14.3\",\n-    \"jest-cli\": \"latest\",\n-    \"lazypipe\": \"latest\",\n-    \"lint-staged\": \"^4.3.0\",\n+    \"codecov\": \"latest\",\n+    \"documentation\": \"latest\",\n+    \"fs-extra\": \"^6.0.1\",\n+    \"http-server\": \"^14.1.1\",\n+    \"husky\": \"^7.0.0\",\n+    \"jest\": \"^29.4.3\",\n+    \"lint-staged\": \"^13.2.1\",\n     \"prettier\": \"latest\",\n-    \"rollup-plugin-babel\": \"latest\",\n-    \"rollup-plugin-commonjs\": \"latest\",\n-    \"rollup-plugin-node-resolve\": \"latest\",\n-    \"rollup-stream\": \"latest\",\n-    \"run-sequence\": \"latest\",\n-    \"tap-min\": \"latest\",\n-    \"through2\": \"latest\",\n-    \"vinyl-buffer\": \"latest\",\n",
+					"match": false,
+					"packageHash": "dbf3655e2abe4e1c359e851932d4d2ed61fc34ace4a03b261f59a19a125c3dbd",
+					"size": 1700,
+					"sourceHash": "bf8c55f4072d01467c1c0c49807722f79577680ac1ff7fa7c030a83716d3db4f",
+					"status": "content"
+				},
+				"readme.md": {
+					"match": false,
+					"packageHash": "8292a68c7b9d056c156ca31487cf8531ce762836eb65fb97f5900341f8a62819",
+					"size": 1849,
+					"status": "missing-in-source"
+				},
+				"LICENSE.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"README.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"build/amd/luxon.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"build/amd/luxon.js.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"build/cjs-browser/luxon.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"build/cjs-browser/luxon.js.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"build/es6/luxon.mjs": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"build/es6/luxon.mjs.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"build/global/luxon.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"build/global/luxon.js.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"build/global/luxon.min.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"build/global/luxon.min.js.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"build/node/luxon.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"build/node/luxon.js.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/datetime.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/duration.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/errors.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/impl/conversions.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/impl/diff.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/impl/digits.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/impl/english.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/impl/formats.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/impl/formatter.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/impl/invalid.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/impl/locale.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/impl/regexParser.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/impl/tokenParser.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/impl/util.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/impl/zoneUtil.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/info.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/interval.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/luxon.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/package.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/settings.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/zone.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/zones/IANAZone.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/zones/fixedOffsetZone.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/zones/invalidZone.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/zones/systemZone.js": {
+					"match": false,
+					"status": "missing-in-package"
+				}
+			},
+			"summary": {
+				"differentFiles": 1,
+				"matchingFiles": 0,
+				"missingInPackage": 39,
+				"missingInSource": 5,
+				"score": 0,
+				"totalFiles": 45
+			}
+		}
+	}
+]
