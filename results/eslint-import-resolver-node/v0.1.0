@@ -1,0 +1,101 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-01T12:22:04.544Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:2.14.7",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "eslint-import-resolver-node@0.1.0",
+			"name": "eslint-import-resolver-node",
+			"version": "0.1.0",
+			"location": "https://registry.npmjs.org/eslint-import-resolver-node/-/eslint-import-resolver-node-0.1.0.tgz",
+			"integrity": "sha512-uyMh/qGhN/eRxzNu2PzR1VP6Vn45tua+55rKflKSq37l45czttQhRg27Pgz0V2FCcJpLGT0G30dUn5cA8IfWTQ==",
+			"publishedAt": "2015-11-28T01:14:38.588Z",
+			"publishedWith": {
+				"node": "4.2.2",
+				"npm": "2.14.7"
+			}
+		},
+		"source": {
+			"integrity": null,
+			"location": "git+https://github.com/benmosher/eslint-plugin-import.git",
+			"spec": "github:benmosher/eslint-plugin-import#v0.1.0"
+		},
+		"comparisonHash": "8a2a8dcbb729bf3ee9216e490c955701f0ddebe1",
+		"diff": {
+			"files": {
+				"README.md": {
+					"diff": "--- published/README.md\n+++ rebuilt/README.md\n@@ -1,44 +1,21 @@\n-# eslint-import-resolver-node\n+eslint-plugin-import\n+---\n \n-[![npm](https://img.shields.io/npm/v/eslint-import-resolver-node.svg)](https://www.npmjs.com/package/eslint-import-resolver-node)\n+This plugin intends to support linting of ES6 import syntax, and prevent issues with misspelling of file paths and import names. All the goodness that the ES6 static module syntax intends to provide, marked up in your editor.\n \n-Default Node-style module resolution plugin for [`eslint-plugin-import`](https://www.npmjs.com/package/eslint-plugin-import).\n+Current support:\n \n-Published separately to allow pegging to a specific version in case of breaking\n-changes.\n+* Ensures relative imports point to a file that exists. ([`valid-relative-path`](#valid-relative-path))\n \n-Config is passed directly through to [`resolve`](https://www.npmjs.com/package/resolve#resolve-sync-id-opts) as options:\n-\n-```yaml\n-settings:\n-  import/resolver:\n-    node:\n-      extensions:\n-        # if unset, default is just '.js', but it must be re-added explicitly if set\n-        - .js\n-        - .jsx\n-        - .es6\n-        - .coffee\n-\n-      paths:\n-        # an array of absolute paths which will also be searched\n-        # think NODE_PATH\n-        - /usr/local/share/global_modules\n-\n-      # this is technically for identifying `node_modules` alternate names\n-      moduleDirectory:\n-\n-        - node_modules # defaults to 'node_modules', but...\n-        - bower_components\n-\n-        - project/src  # can add a path segment here that will act like\n-                       # a source root, for in-project aliasing (i.e.\n-                       # `import MyStore from 'stores/my-store'`)\n-```\n-\n-or to use the default options:\n-\n-```yaml\n-settings:\n-  import/resolver: node\n-```\n+Planned:\n+\n+* Validate that named imports match named exports.\n+* Validate that `*` imports exist as named exports in remote file, where dereferenced.\n+* Validate that a default export exists, when imported.\n+\n+\n+## Rules\n+\n+### `valid-relative-path`\n+\n+Ensures an imported file with a relative path exists at that path. Default search extensions are `[\".js\", \".coffee\", \".es6\"]`. Provide an alternative array if you want more or fewer. Also, note that you'll need to provide `\"\"` as an extension if you reference your imports with the full extension inline (i.e. `import foo from './bar.js'`).\n",
+					"match": false,
+					"packageHash": "d9c2b3406af256d50ec205869f1214820e4f94bf4a4936b14e19b8392f96f6cf",
+					"size": 1339,
+					"sourceHash": "ca61aea33e1c0172c72b563b528557e137a134035531e440cc463a2d2df15f0b",
+					"status": "content"
+				},
+				"index.js": {
+					"diff": "--- published/index.js\n+++ rebuilt/index.js\n@@ -1,17 +1,7 @@\n-var resolve = require('resolve')\n-  , path = require('path')\n-  , assign = require('object-assign')\n-\n-exports.resolveImport = function resolveImport(source, file, config) {\n-  if (resolve.isCore(source)) return null\n-\n-  return resolve.sync(source, opts(path.dirname(file), config))\n-}\n-\n-function opts(basedir, config) {\n-  return assign( {}\n-               , config\n-               , { basedir: basedir }\n-               )\n-}\n+exports.rules = {\n+  \"valid-relative-path\": require(\"./lib/rules/valid-relative-path\")\n+};\n \n+exports.rulesConfig = {\n+  \"valid-relative-path\": [2, [\".js\", \".coffee\", \".es6\"]]\n+};\n",
+					"match": false,
+					"packageHash": "9284fb5ffbe2f683ec756895db06fff1f066b947cd2ac1e1a394384262b5e153",
+					"size": 415,
+					"sourceHash": "19c879c392424394f158b1b00c4c4315d503a6ad25a8f8088b36c3eb6145b02f",
+					"status": "content"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -1,10 +1,13 @@\n {\n-  \"name\": \"eslint-import-resolver-node\",\n+  \"name\": \"eslint-plugin-import\",\n   \"version\": \"0.1.0\",\n-  \"description\": \"Node default behavior import resolution plugin for eslint-plugin-import.\",\n+  \"description\": \"Import with sanity.\",\n   \"main\": \"index.js\",\n+  \"directories\": {\n+    \"test\": \"tests\"\n+  },\n   \"scripts\": {\n-    \"test\": \"echo \\\"Error: no test specified\\\" && exit 1\"\n+    \"test\": \"mocha --recursive tests/\"\n   },\n   \"repository\": {\n     \"type\": \"git\",\n@@ -13,9 +16,8 @@\n   \"keywords\": [\n     \"eslint\",\n     \"eslintplugin\",\n-    \"esnext\",\n-    \"modules\",\n-    \"eslint-plugin-import\"\n+    \"es6\",\n+    \"jsnext\"\n   ],\n   \"author\": \"Ben Mosher (me@benmosher.com)\",\n   \"license\": \"MIT\",\n@@ -23,8 +25,14 @@\n     \"url\": \"https://github.com/benmosher/eslint-plugin-import/issues\"\n   },\n   \"homepage\": \"https://github.com/benmosher/eslint-plugin-import\",\n-  \"dependencies\": {\n-    \"object-assign\": \"^4.0.1\",\n-    \"resolve\": \"^1.1.6\"\n+  \"devDependencies\": {\n+    \"chai\": \"^2.1.2\",\n+    \"eslint\": \"^0.16.x\",\n+    \"eslint-tester\": \"^0.6.0\",\n+    \"mocha\": \"^2.2.1\",\n+    \"object-assign\": \"^2.0.0\"\n+  },\n+  \"peerDependencies\": {\n+    \"eslint\": \">=0.16.0\"\n   }\n }\n",
+					"match": false,
+					"packageHash": "3233afa664faf3d9e1e7cf656bfea3ab9c4f7880211ae9a9defd1ff0fc8245ec",
+					"size": 774,
+					"sourceHash": "88fcd49e1d56125500c65a22e45f10f331cd0345e340c34a8ca346070a48b66c",
+					"status": "content"
+				},
+				".editorconfig": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				".eslintrc": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"LICENSE": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"files/.eslintrc": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"files/bar.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"files/tall.coffee": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/rules/valid-relative-path.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"tests/.eslintrc": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"tests/lib/rules/valid-relative-path.js": {
+					"match": false,
+					"status": "missing-in-package"
+				}
+			},
+			"summary": {
+				"differentFiles": 3,
+				"matchingFiles": 0,
+				"missingInPackage": 9,
+				"missingInSource": 0,
+				"score": 0,
+				"totalFiles": 12
+			}
+		}
+	}
+]

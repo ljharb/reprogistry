@@ -1,0 +1,167 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-01T12:22:07.319Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:5.5.1",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "eslint-import-resolver-node@0.3.2",
+			"name": "eslint-import-resolver-node",
+			"version": "0.3.2",
+			"location": "https://registry.npmjs.org/eslint-import-resolver-node/-/eslint-import-resolver-node-0.3.2.tgz",
+			"integrity": "sha512-sfmTqJfPSizWu4aymbPr4Iidp5yKm8yDkHp+Ir3YiTHiiDfxh69mOUsmiqW6RZ9zRXFaF64GtYmN7e+8GHBv6Q==",
+			"publishedAt": "2018-01-05T09:06:39.104Z",
+			"publishedWith": {
+				"node": "9.3.0",
+				"npm": "5.5.1"
+			}
+		},
+		"source": {
+			"integrity": null,
+			"location": "git+https://github.com/benmosher/eslint-plugin-import.git",
+			"spec": "github:benmosher/eslint-plugin-import#v0.3.2"
+		},
+		"comparisonHash": "8a2a8dcbb729bf3ee9216e490c955701f0ddebe1",
+		"diff": {
+			"files": {
+				"CHANGELOG.md": {
+					"match": false,
+					"packageHash": "c2367fc198595eed6c7c6980823b4302f6853f313918e5b852229c3c8ab61285",
+					"size": 1752,
+					"status": "missing-in-source"
+				},
+				"README.md": {
+					"diff": "--- published/README.md\n+++ rebuilt/README.md\n@@ -1,44 +1,39 @@\n-# eslint-import-resolver-node\n+eslint-plugin-import\n+---\n+![build status](https://travis-ci.org/benmosher/eslint-plugin-import.svg)\n \n-[![npm](https://img.shields.io/npm/v/eslint-import-resolver-node.svg)](https://www.npmjs.com/package/eslint-import-resolver-node)\n+This plugin intends to support linting of ES6 import syntax, and prevent issues with misspelling of file paths and import names. All the goodness that the ES6 static module syntax intends to provide, marked up in your editor.\n \n-Default Node-style module resolution plugin for [`eslint-plugin-import`](https://www.npmjs.com/package/eslint-plugin-import).\n+**Current support**:\n \n-Published separately to allow pegging to a specific version in case of breaking\n-changes.\n+* Ensure imports point to a file/module that exists. ([`exists`](#exists))\n+* Ensure named imports correspond to a named export in the remote file. ([`named`](#named))\n+* Ensure a default export is present, given a default import. ([`default`](#default))\n \n-Config is passed directly through to [`resolve`](https://www.npmjs.com/package/resolve#resolve-sync-id-opts) as options:\n-\n-```yaml\n-settings:\n-  import/resolver:\n-    node:\n-      extensions:\n-        # if unset, default is just '.js', but it must be re-added explicitly if set\n-        - .js\n-        - .jsx\n-        - .es6\n-        - .coffee\n-\n-      paths:\n-        # an array of absolute paths which will also be searched\n-        # think NODE_PATH\n-        - /usr/local/share/global_modules\n-\n-      # this is technically for identifying `node_modules` alternate names\n-      moduleDirectory:\n-\n-        - node_modules # defaults to 'node_modules', but...\n-        - bower_components\n-\n-        - project/src  # can add a path segment here that will act like\n-                       # a source root, for in-project aliasing (i.e.\n-                       # `import MyStore from 'stores/my-store'`)\n-```\n-\n-or to use the default options:\n-\n-```yaml\n-settings:\n-  import/resolver: node\n-```\n+**Planned**:\n+\n+* Validate that namespace (`*`) imports exist as named exports in remote file, when dereferenced.\n+* Currently, will spuriously report on named imports that are the result of re-exporting from a third file (`export * from \"./baz\"`).\n+\n+\n+## Rules\n+\n+### `exists`\n+\n+Ensures an imported module exists, as defined by standard Node `require.resolve` behavior.\n+\n+### `named`\n+\n+Verifies that all named imports are part of the set of named exports in the referenced module.\n+\n+Note that if there are _no_ named exports, nor a default export, this rule will not report a mismatch, to allow Babel-style `import` of CommonJS modules.\n+\n+Provide the `es6-only` option in your rule config if you would like to enforce this on all imports.\n+\n+### `default`\n+\n+If a default import is requested, this rule will report if there is no default export in the imported module.\n+\n+Note that if there are _no_ named exports, nor a default export, this rule will not report a mismatch, to allow Babel-style `import` of CommonJS modules.\n+\n+Provide the `es6-only` option in your rule config if you would like to enforce this on all imports.\n",
+					"match": false,
+					"packageHash": "d9c2b3406af256d50ec205869f1214820e4f94bf4a4936b14e19b8392f96f6cf",
+					"size": 1339,
+					"sourceHash": "f8145a4df720c60c62c1e440688a42394e617e52407870ddda52e8d9ac3fbc36",
+					"status": "content"
+				},
+				"index.js": {
+					"diff": "--- published/index.js\n+++ rebuilt/index.js\n@@ -1,47 +1,11 @@\n-var resolve = require('resolve')\n-  , path = require('path')\n-\n-var log = require('debug')('eslint-plugin-import:resolver:node')\n-\n-exports.interfaceVersion = 2\n-\n-exports.resolve = function (source, file, config) {\n-  log('Resolving:', source, 'from:', file)\n-  var resolvedPath\n-\n-  if (resolve.isCore(source)) {\n-    log('resolved to core')\n-    return { found: true, path: null }\n-  }\n-\n-  try {\n-    resolvedPath = resolve.sync(source, opts(file, config))\n-    log('Resolved to:', resolvedPath)\n-    return { found: true, path: resolvedPath }\n-  } catch (err) {\n-    log('resolve threw error:', err)\n-    return { found: false }\n-  }\n-}\n-\n-function opts(file, config) {\n-  return Object.assign({\n-      // more closely matches Node (#333)\n-      // plus 'mjs' for native modules! (#939)\n-      extensions: ['.mjs', '.js', '.json'],\n-    },\n-    config,\n-    {\n-      // path.resolve will handle paths relative to CWD\n-      basedir: path.dirname(path.resolve(file)),\n-      packageFilter: packageFilter,\n-\n-    })\n-}\n-\n-function packageFilter(pkg) {\n-  if (pkg['jsnext:main']) {\n-    pkg['main'] = pkg['jsnext:main']\n-  }\n-  return pkg\n-}\n+exports.rules = {\n+  \"exists\": require(\"./lib/rules/exists\"),\n+  \"named\": require(\"./lib/rules/named\"),\n+  \"default\": require(\"./lib/rules/default\")\n+};\n+\n+exports.rulesConfig = {\n+  \"exists\": 2,\n+  \"named\": 2,\n+  \"default\": 2\n+};\n",
+					"match": false,
+					"packageHash": "0e34a46adf76c34fe909280524436397605c58053f5cc4aa97b6e626eadfff75",
+					"size": 1098,
+					"sourceHash": "de3f687bca309d7ee8e2117bacf350f2f5cfb6554ba8367bf509f371a7e352ea",
+					"status": "content"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -1,13 +1,13 @@\n {\n-  \"name\": \"eslint-import-resolver-node\",\n+  \"name\": \"eslint-plugin-import\",\n   \"version\": \"0.3.2\",\n-  \"description\": \"Node default behavior import resolution plugin for eslint-plugin-import.\",\n+  \"description\": \"Import with sanity.\",\n   \"main\": \"index.js\",\n-  \"files\": [\n-    \"index.js\"\n-  ],\n+  \"directories\": {\n+    \"test\": \"tests\"\n+  },\n   \"scripts\": {\n-    \"test\": \"nyc mocha\"\n+    \"test\": \"mocha --recursive tests/\"\n   },\n   \"repository\": {\n     \"type\": \"git\",\n@@ -16,9 +16,8 @@\n   \"keywords\": [\n     \"eslint\",\n     \"eslintplugin\",\n-    \"esnext\",\n-    \"modules\",\n-    \"eslint-plugin-import\"\n+    \"es6\",\n+    \"jsnext\"\n   ],\n   \"author\": \"Ben Mosher (me@benmosher.com)\",\n   \"license\": \"MIT\",\n@@ -26,13 +25,21 @@\n     \"url\": \"https://github.com/benmosher/eslint-plugin-import/issues\"\n   },\n   \"homepage\": \"https://github.com/benmosher/eslint-plugin-import\",\n-  \"dependencies\": {\n-    \"debug\": \"^2.6.9\",\n-    \"resolve\": \"^1.5.0\"\n-  },\n   \"devDependencies\": {\n-    \"chai\": \"^3.5.0\",\n-    \"mocha\": \"^3.5.3\",\n-    \"nyc\": \"^10.3.2\"\n+    \"chai\": \"^2.1.2\",\n+    \"eslint\": \"^0.17.1\",\n+    \"eslint-tester\": \"^0.6.0\",\n+    \"mocha\": \"^2.2.1\",\n+    \"object-assign\": \"^2.0.0\"\n+  },\n+  \"peerDependencies\": {\n+    \"eslint\": \">=0.16.0\"\n+  },\n+  \"dependencies\": {\n+    \"array.prototype.find\": \"^1.0.0\",\n+    \"es6-map\": \"^0.1.1\",\n+    \"es6-set\": \"^0.1.1\",\n+    \"espree\": \"^1.12.0\",\n+    \"resolve\": \"^1.1.6\"\n   }\n }\n",
+					"match": false,
+					"packageHash": "8ff145b54e0b2a1d8987827723b18578e71ecbcec1c135854252f27c28487b57",
+					"size": 859,
+					"sourceHash": "18e4f46f99cfbb919f236f5310b5e76aa2ab68fe2696416fa2283be10a7f5f4f",
+					"status": "content"
+				},
+				".editorconfig": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				".eslintrc": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				".travis.yml": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"LICENSE": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"files/.eslintrc": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"files/bar.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"files/common.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"files/default-class.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"files/default-export.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"files/module/index.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"files/named-exports.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"files/qc.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"files/re-export-names.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"files/re-export.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/getExports.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/parse.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/resolve.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/rules/default.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/rules/exists.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/rules/named.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"tests/.eslintrc": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"tests/lib/rules/default.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"tests/lib/rules/exists.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"tests/lib/rules/named.js": {
+					"match": false,
+					"status": "missing-in-package"
+				}
+			},
+			"summary": {
+				"differentFiles": 3,
+				"matchingFiles": 0,
+				"missingInPackage": 24,
+				"missingInSource": 1,
+				"score": 0,
+				"totalFiles": 28
+			}
+		}
+	}
+]
