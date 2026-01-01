@@ -1,0 +1,101 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-01T22:07:46.618Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:11.7.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "pump@0.1.1",
+			"name": "pump",
+			"version": "0.1.1",
+			"location": "https://registry.npmjs.org/pump/-/pump-0.1.1.tgz",
+			"integrity": "sha512-lN7XPnR8e2kspMgDvPSHPnekaLAZEABJt5ODM9P4kgdA2EmgACHUqCttYeHUaZDRpavh/gxkg+jYOcvLvGL2Mw==",
+			"publishedAt": "2013-08-14T22:41:45.452Z",
+			"publishedWith": {
+				"node": null,
+				"npm": "1.3.5"
+			}
+		},
+		"source": {
+			"integrity": "sha512-todwxLMY7/heScKmntwQG8CXVkWUOdYxIvY2s0VWAAMh/nd8SoYiRaKjlr7+iCs984f2P8zvrfWcDDYVb73NfA==",
+			"location": "git://github.com/mafintosh/pump.git",
+			"spec": "github:mafintosh/pump#HEAD"
+		},
+		"comparisonHash": "8a2a8dcbb729bf3ee9216e490c955701f0ddebe1",
+		"diff": {
+			"files": {
+				".npmignore": {
+					"match": false,
+					"packageHash": "16d30e4462189fb14dd611bdb708c510630c576a1f35b9383e89a4352da36c97",
+					"size": 13,
+					"status": "missing-in-source"
+				},
+				"README.md": {
+					"diff": "--- published/README.md\n+++ rebuilt/README.md\n@@ -2,7 +2,11 @@\n \n pump is a small node module that pipes streams together and destroys all of them if one of them closes.\n \n-\tnpm install pump\n+```\n+npm install pump\n+```\n+\n+[![build status](http://img.shields.io/travis/mafintosh/pump.svg?style=flat)](http://travis-ci.org/mafintosh/pump)\n \n ## What problem does it solve?\n \n@@ -16,33 +20,55 @@\n Simply pass the streams you want to pipe together to pump and add an optional callback\n \n ``` js\n-var pump = require('pump');\n-var fs = require('fs');\n+var pump = require('pump')\n+var fs = require('fs')\n \n-var source = fs.createReadStream('/dev/random');\n-var dest = fs.createWriteStream('/dev/null');\n+var source = fs.createReadStream('/dev/random')\n+var dest = fs.createWriteStream('/dev/null')\n \n pump(source, dest, function(err) {\n-\tconsole.log('pipe finished', err);\n-});\n+  console.log('pipe finished', err)\n+})\n \n setTimeout(function() {\n-\tdest.destroy(); // when dest is closes pump will destroy source\n-}, 1000);\n+  dest.destroy() // when dest is closed pump will destroy source\n+}, 1000)\n ```\n \n You can use pump to pipe more than two streams together as well\n \n ``` js\n-var transform = someTransformStream();\n+var transform = someTransformStream()\n \n pump(source, transform, anotherTransform, dest, function(err) {\n-\tconsole.log('pipe finished', err);\n-});\n+  console.log('pipe finished', err)\n+})\n ```\n \n If `source`, `transform`, `anotherTransform` or `dest` closes all of them will be destroyed.\n \n+Similarly to `stream.pipe()`, `pump()` returns the last stream passed in, so you can do:\n+\n+```\n+return pump(s1, s2) // returns s2\n+```\n+\n+Note that `pump` attaches error handlers to the streams to do internal error handling, so if `s2` emits an\n+error in the above scenario, it will not trigger a `proccess.on('uncaughtException')` if you do not listen for it.\n+\n+If you want to return a stream that combines *both* s1 and s2 to a single stream use\n+[pumpify](https://github.com/mafintosh/pumpify) instead.\n+\n ## License\n \n MIT\n+\n+## Related\n+\n+`pump` is part of the [mississippi stream utility collection](https://github.com/maxogden/mississippi) which includes more useful stream modules similar to this one.\n+\n+## For enterprise\n+\n+Available as part of the Tidelift Subscription.\n+\n+The maintainers of pump and thousands of other packages are working with Tidelift to deliver commercial support and maintenance for the open source dependencies you use to build your applications. Save time, reduce risk, and improve code health, while paying the maintainers of the exact dependencies you use. [Learn more.](https://tidelift.com/subscription/pkg/npm-pump?utm_source=npm-pump&utm_medium=referral&utm_campaign=enterprise)\n",
+					"match": false,
+					"packageHash": "5d423cf9f71e21477755a73de3428158b0d3b92ba97db5f92a58ea7c5d4cd7df",
+					"size": 1151,
+					"sourceHash": "917d565b1c10dad523c417dbd9ee7da48baf40c71a8793c664f3b94c11726d72",
+					"status": "content"
+				},
+				"index.js": {
+					"diff": "--- published/index.js\n+++ rebuilt/index.js\n@@ -1,72 +1,86 @@\n-var once = require('once');\n-var noop = function() {};\n+var once = require('once')\n+var eos = require('end-of-stream')\n+var fs\n+\n+try {\n+  fs = require('fs') // we only need fs to get the ReadStream and WriteStream prototypes\n+} catch (e) {}\n+\n+var noop = function () {}\n+var ancient = typeof process === 'undefined' ? false : /^v?\\.0/.test(process.version)\n+\n+var isFn = function (fn) {\n+  return typeof fn === 'function'\n+}\n+\n+var isFS = function (stream) {\n+  if (!ancient) return false // newer node version do not need to care about fs is a special way\n+  if (!fs) return false // browser\n+  return (stream instanceof (fs.ReadStream || noop) || stream instanceof (fs.WriteStream || noop)) && isFn(stream.close)\n+}\n+\n+var isRequest = function (stream) {\n+  return stream.setHeader && isFn(stream.abort)\n+}\n+\n+var destroyer = function (stream, reading, writing, callback) {\n+  callback = once(callback)\n+\n+  var closed = false\n+  stream.on('close', function () {\n+    closed = true\n+  })\n+\n+  eos(stream, {readable: reading, writable: writing}, function (err) {\n+    if (err) return callback(err)\n+    closed = true\n+    callback()\n+  })\n+\n+  var destroyed = false\n+  return function (err) {\n+    if (closed) return\n+    if (destroyed) return\n+    destroyed = true\n+\n+    if (isFS(stream)) return stream.close(noop) // use close for fs streams to avoid fd leaks\n+    if (isRequest(stream)) return stream.abort() // request.destroy just do .end - .abort is what we want\n+\n+    if (isFn(stream.destroy)) return stream.destroy()\n+\n+    callback(err || new Error('stream was destroyed'))\n+  }\n+}\n+\n+var call = function (fn) {\n+  fn()\n+}\n+\n+var pipe = function (from, to) {\n+  return from.pipe(to)\n+}\n+\n+var pump = function () {\n+  var streams = Array.prototype.slice.call(arguments)\n+  var callback = isFn(streams[streams.length - 1] || noop) && streams.pop() || noop\n+\n+  if (Array.isArray(streams[0])) streams = streams[0]\n+  if (streams.length < 2) throw new Error('pump requires two streams per minimum')\n+\n+  var error\n+  var destroys = streams.map(function (stream, i) {\n+    var reading = i < streams.length - 1\n+    var writing = i > 0\n+    return destroyer(stream, reading, writing, function (err) {\n+      if (!error) error = err\n+      if (err) destroys.forEach(call)\n+      if (reading) return\n+      destroys.forEach(call)\n+      callback(error)\n+    })\n+  })\n \n-var patch = function(stream, onend) { // patch 0.8 stream since they dont emit finish\n-\tvar end = stream.end;\n-\tstream.end = function() {\n-\t\tonend();\n-\t\tend.apply(this, arguments);\n-\t};\n-};\n-\n-var destroyer = function(stream, callback) {\n-\tvar ended = false;\n-\tvar closed = false;\n-\tvar destroyed = false;\n-\n",
+					"match": false,
+					"packageHash": "05788668333c5e6d86f1bb81d3ae782aa896f8c70eb200095fbcefb01de858e3",
+					"size": 1552,
+					"sourceHash": "8fd0d0814ae27d025cbb7e13fb1709f991170235bd5196b84c545ba3ae23046b",
+					"status": "content"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -1,15 +1,24 @@\n {\n   \"name\": \"pump\",\n-  \"version\": \"0.1.1\",\n+  \"version\": \"3.0.3\",\n   \"repository\": \"git://github.com/mafintosh/pump.git\",\n   \"license\": \"MIT\",\n   \"description\": \"pipe streams together and close all of them if one of them closes\",\n-  \"keywords\": [\"streams\", \"pipe\", \"destroy\", \"callback\"],\n+  \"browser\": {\n+    \"fs\": false\n+  },\n+  \"keywords\": [\n+    \"streams\",\n+    \"pipe\",\n+    \"destroy\",\n+    \"callback\"\n+  ],\n   \"author\": \"Mathias Buus Madsen <mathiasbuus@gmail.com>\",\n   \"dependencies\": {\n-    \"once\": \"~1.2.0\"\n+    \"end-of-stream\": \"^1.1.0\",\n+    \"once\": \"^1.3.1\"\n   },\n   \"scripts\": {\n-    \"test\": \"node test.js\"\n+    \"test\": \"node test-browser.js && node test-node.js\"\n   }\n }\n",
+					"match": false,
+					"packageHash": "4afbbcf9552c369f90eb26aa294515ed66213357208c49ead9501d69a5396383",
+					"size": 414,
+					"sourceHash": "adfb35f1acc31a99032086d259599397140da825f34924d31563b92eebdc3e33",
+					"status": "content"
+				},
+				"test.js": {
+					"match": false,
+					"packageHash": "e60ca402180368f0e688acaa6bfea9b20473b1296cf8c4cc6f88096fcb2d7ade",
+					"size": 881,
+					"status": "missing-in-source"
+				},
+				".github/FUNDING.yml": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				".travis.yml": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"LICENSE": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"SECURITY.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test-browser.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test-node.js": {
+					"match": false,
+					"status": "missing-in-package"
+				}
+			},
+			"summary": {
+				"differentFiles": 3,
+				"matchingFiles": 0,
+				"missingInPackage": 6,
+				"missingInSource": 2,
+				"score": 0,
+				"totalFiles": 11
+			}
+		}
+	}
+]
