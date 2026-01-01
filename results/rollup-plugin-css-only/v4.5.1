@@ -1,0 +1,73 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-01T23:57:21.407Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:10.1.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "rollup-plugin-css-only@4.5.1",
+			"name": "rollup-plugin-css-only",
+			"version": "4.5.1",
+			"location": "https://registry.npmjs.org/rollup-plugin-css-only/-/rollup-plugin-css-only-4.5.1.tgz",
+			"integrity": "sha512-s4glUhslU2b0ZRc6p/+0of48sEPwqlcv8MvCOZCIEGKc3PF5+i0x3txGsXvO82yg/WZXvGDCzrUFZhKh6lOFag==",
+			"publishedAt": "2023-11-06T20:03:17.297Z",
+			"publishedWith": {
+				"node": "20.9.0",
+				"npm": "9.8.0"
+			}
+		},
+		"source": {
+			"integrity": "sha512-LbosSGLAhVra2B09uY0Omfkpnn7QrIDmqcybyb1d0heDpN5bU8VJKiTWs7zuqwI7yjx96/NyBKMm11kBwvuoKA==",
+			"location": "git+https://github.com/thgh/rollup-plugin-css-only.git",
+			"spec": "github:thgh/rollup-plugin-css-only#4bd41da24f2b83b018fd4016bcbdaea31af427c2"
+		},
+		"comparisonHash": "8a2a8dcbb729bf3ee9216e490c955701f0ddebe1",
+		"diff": {
+			"files": {
+				"README.md": {
+					"diff": "--- published/README.md\n+++ rebuilt/README.md\n@@ -62,13 +62,32 @@\n \n ### Options\n \n-There is 1 option: `output`.  \n By default the plugin will use `output.assetFileNames` to decide the filename.\n \n ```js\n css({\n-  // Optional: filename to write all styles to\n-  output: 'bundle.css'\n+  exclude,  // [optional] - Array of glob/Strings like what `include` uses.\n+  fileName, // [optional] - File name of emitted asset.\n+  include,  // [optional] - Array of glob/Strings - default: ['**/*.css'].\n+  name,     // [optional] - Name of the emitted asset.\n+  output,   // [optional] - Below are the possible values for `output`:\n+  \n+  // ---------------------------------------------------------------------------\n+  // Filename to write all styles to\n+  output: 'bundle.css',\n+  \n+  // Callback that will be called on generate with two arguments:\n+  // - styles: the contents of all style tags combined: 'body { color: green }'\n+  // - styleNodes: an array of style objects: [{ lang: 'css', content: 'body { color: green }' }]\n+  output: (styles, styleNodes) => {\n+    writeFileSync('bundle.css', styles)\n+  },\n+\n+  // Disable any style output or callbacks\n+  output: false,\n+\n+  // Default behaviour is to write all styles to the bundle destination where .js is replaced by .css\n+  output: null\n })\n ```\n \n",
+					"match": false,
+					"packageHash": "3c2efa40b4f604e2db228cb16063edddfd80b864b38f67ad16206a41d9fdab7a",
+					"size": 2487,
+					"sourceHash": "dcb3385d2fb3bea1fafb5cf9118c7642e2ffad025fa31ffa6de8b586e24cbb2f",
+					"status": "content"
+				},
+				"dist/index.cjs": {
+					"diff": "--- published/dist/index.cjs\n+++ rebuilt/dist/index.cjs\n@@ -1,35 +1,31 @@\n 'use strict';\n \n var pluginutils = require('@rollup/pluginutils');\n+var node_path = require('node:path');\n \n-function css(options) {\n-  if ( options === void 0 ) options = {};\n-\n-  var filter = pluginutils.createFilter(options.include || ['**/*.css'], options.exclude);\n-  var styles = {};\n-  var output = options.output;\n-  var name = options.name;\n-  var fileName = options.fileName;\n+function css(options = {}) {\n+  const filter = pluginutils.createFilter(options.include || ['**/*.css'], options.exclude);\n+  const styles = {};\n+  let output = options.output;\n+  let name = options.name;\n+  let fileName = options.fileName;\n \n   // Get all CSS modules in the order that they were imported\n-  var getCSSModules = function (id, getModuleInfo, modules, visitedModules) {\n-    if ( modules === void 0 ) modules = new Set();\n-    if ( visitedModules === void 0 ) visitedModules = new Set();\n-\n+  const getCSSModules = (id, getModuleInfo, modules = new Set(), visitedModules = new Set()) => {\n     if (modules.has(id) || visitedModules.has(id)) {\n       return new Set()\n     }\n \n-    if (filter(id)) { modules.add(id); }\n+    if (filter(id)) modules.add(id);\n \n     // Prevent infinite recursion with circular dependencies\n     visitedModules.add(id);\n \n     // Recursively retrieve all of imported CSS modules\n-    var info = getModuleInfo(id);\n-    if (!info) { return modules }\n+    const info = getModuleInfo(id);\n+    if (!info) return modules\n \n-    info.importedIds.forEach(function (importId) {\n+    info.importedIds.forEach(importId => {\n       modules = new Set(\n         [].concat(\n           Array.from(modules),\n@@ -43,7 +39,7 @@\n \n   return {\n     name: 'css',\n-    transform: function transform(code, id) {\n+    transform(code, id) {\n       if (!filter(id)) {\n         return\n       }\n@@ -65,18 +61,26 @@\n \n       return ''\n     },\n-    generateBundle: function generateBundle(opts, bundle) {\n-      var ids = [];\n+    generateBundle(opts, bundle) {\n+      const ids = new Set();\n \n       // Determine import order of files\n-      for (var file in bundle) {\n-        var root = bundle[file].facadeModuleId;\n-        var modules = getCSSModules(root, this.getModuleInfo);\n-        ids.push.apply(ids, Array.from(modules));\n+      for (const file in bundle) {\n+        const root = bundle[file].facadeModuleId;\n+        const modules = getCSSModules(root, this.getModuleInfo);\n+        modules.forEach(id => ids.add(id));\n+\n+        // Resolve name if it's empty, see https://github.com/thgh/rollup-plugin-css-only/issues/61\n+        // Solution by @the0neWhoKnocks\n+        // https://github.com/the0neWhoKnocks/rollup-plugin-css-only/commit/cff92ae84792c6ef116276f31cca91407a6b1e28#diff-0b5856b7606f07e47d576a66791b7666ff3239ee4e354656cabefb7d5fecec88R68-R76\n+        if (!name && modules?.size) {\n+          const parsed = node_path.parse(bundle[file].name);\n+          name = `${parsed.name}.css`;\n+        }\n       }\n \n       // Combine all stylesheets, respecting import order\n-      var css = ids.map(function (id) { return styles[id]; }).join('\\n');\n+      const css = Array.from(ids).map(id => styles[id]).join('\\n');\n \n       // Emit styles through callback\n       if (typeof options.output === 'function') {\n@@ -89,7 +93,7 @@\n       }\n \n       // Emit styles to file\n-      this.emitFile({ type: 'asset', name: name, fileName: fileName, source: css + '\\n' });\n+      this.emitFile({ type: 'asset', name, fileName, source: css + '\\n' });\n     }\n",
+					"match": false,
+					"packageHash": "3256721bdc94482ba018d28dc1f84a69c544da18b52070a09bd3b5018e32f036",
+					"size": 2707,
+					"sourceHash": "4eb1592d3bf4c41fdf92e1bb9d31a1bc4f30cf2fae29df95a95b4fb6834ba4df",
+					"status": "content"
+				},
+				"dist/index.mjs": {
+					"diff": "--- published/dist/index.mjs\n+++ rebuilt/dist/index.mjs\n@@ -1,33 +1,29 @@\n import { createFilter } from '@rollup/pluginutils';\n+import { parse } from 'node:path';\n \n-function css(options) {\n-  if ( options === void 0 ) options = {};\n-\n-  var filter = createFilter(options.include || ['**/*.css'], options.exclude);\n-  var styles = {};\n-  var output = options.output;\n-  var name = options.name;\n-  var fileName = options.fileName;\n+function css(options = {}) {\n+  const filter = createFilter(options.include || ['**/*.css'], options.exclude);\n+  const styles = {};\n+  let output = options.output;\n+  let name = options.name;\n+  let fileName = options.fileName;\n \n   // Get all CSS modules in the order that they were imported\n-  var getCSSModules = function (id, getModuleInfo, modules, visitedModules) {\n-    if ( modules === void 0 ) modules = new Set();\n-    if ( visitedModules === void 0 ) visitedModules = new Set();\n-\n+  const getCSSModules = (id, getModuleInfo, modules = new Set(), visitedModules = new Set()) => {\n     if (modules.has(id) || visitedModules.has(id)) {\n       return new Set()\n     }\n \n-    if (filter(id)) { modules.add(id); }\n+    if (filter(id)) modules.add(id);\n \n     // Prevent infinite recursion with circular dependencies\n     visitedModules.add(id);\n \n     // Recursively retrieve all of imported CSS modules\n-    var info = getModuleInfo(id);\n-    if (!info) { return modules }\n+    const info = getModuleInfo(id);\n+    if (!info) return modules\n \n-    info.importedIds.forEach(function (importId) {\n+    info.importedIds.forEach(importId => {\n       modules = new Set(\n         [].concat(\n           Array.from(modules),\n@@ -41,7 +37,7 @@\n \n   return {\n     name: 'css',\n-    transform: function transform(code, id) {\n+    transform(code, id) {\n       if (!filter(id)) {\n         return\n       }\n@@ -63,18 +59,26 @@\n \n       return ''\n     },\n-    generateBundle: function generateBundle(opts, bundle) {\n-      var ids = [];\n+    generateBundle(opts, bundle) {\n+      const ids = new Set();\n \n       // Determine import order of files\n-      for (var file in bundle) {\n-        var root = bundle[file].facadeModuleId;\n-        var modules = getCSSModules(root, this.getModuleInfo);\n-        ids.push.apply(ids, Array.from(modules));\n+      for (const file in bundle) {\n+        const root = bundle[file].facadeModuleId;\n+        const modules = getCSSModules(root, this.getModuleInfo);\n+        modules.forEach(id => ids.add(id));\n+\n+        // Resolve name if it's empty, see https://github.com/thgh/rollup-plugin-css-only/issues/61\n+        // Solution by @the0neWhoKnocks\n+        // https://github.com/the0neWhoKnocks/rollup-plugin-css-only/commit/cff92ae84792c6ef116276f31cca91407a6b1e28#diff-0b5856b7606f07e47d576a66791b7666ff3239ee4e354656cabefb7d5fecec88R68-R76\n+        if (!name && modules?.size) {\n+          const parsed = parse(bundle[file].name);\n+          name = `${parsed.name}.css`;\n+        }\n       }\n \n       // Combine all stylesheets, respecting import order\n-      var css = ids.map(function (id) { return styles[id]; }).join('\\n');\n+      const css = Array.from(ids).map(id => styles[id]).join('\\n');\n \n       // Emit styles through callback\n       if (typeof options.output === 'function') {\n@@ -87,7 +91,7 @@\n       }\n \n       // Emit styles to file\n-      this.emitFile({ type: 'asset', name: name, fileName: fileName, source: css + '\\n' });\n+      this.emitFile({ type: 'asset', name, fileName, source: css + '\\n' });\n     }\n   }\n }\n",
+					"match": false,
+					"packageHash": "75c18274df7a1838ac15a842cbbb98150aa80de9c394492eb757d97215ca8309",
+					"size": 2687,
+					"sourceHash": "c1aaef97f8258666737d57c0a4121af58b36df7d9d653ebcf478922a9de0f72f",
+					"status": "content"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -1,6 +1,6 @@\n {\n   \"name\": \"rollup-plugin-css-only\",\n-  \"version\": \"4.5.1\",\n+  \"version\": \"4.5.5\",\n   \"description\": \"Rollup plugin that bundles imported css\",\n   \"main\": \"dist/index.cjs\",\n   \"module\": \"dist/index.mjs\",\n@@ -18,12 +18,13 @@\n     \"test:nested\": \"cd test/nested && rm -rf output && rollup -c && cmp output/output.js expected.js && cmp output/output.css expected.css && cd ../..\",\n     \"test:empty\": \"cd test/empty && rm -rf output && rollup -c && cmp output/output.js expected.js && cmp output/output.css expected.css && cd ../..\",\n     \"test:simple\": \"cd test/simple && rm -rf output && rollup -c && cmp output/output.js expected.js && cmp output/output.css expected.css && cd ../..\",\n+    \"test:token-names\": \"cd test/token-names && rm -rf output && rollup -c && cmp output/app_sQGiL2.js expected.js && cmp output/app_QeMiKt.css expected.css && cd ../..\",\n+    \"test:unique\": \"cd test/unique && rm -rf output && rollup -c && cmp output/dependency-a.js expected-dep.js && cmp output/main.js expected.js && cmp output/output.css expected.css && cd ../..\",\n     \"test:win:simple\": \"cd .\\\\test\\\\simple && del -f output.* && rollup -c && cd .. && ECHO n|comp simple\\\\output.js expected.js && ECHO n|comp simple\\\\output.css simple\\\\expected.css && cd ..\",\n-    \"test\": \"npm run test:simple && npm run test:nested && npm run test:empty && npm run test:circular\",\n-    \"test:win\": \"npm run test:win:simple\",\n+    \"test\": \"./bin/test-runner.cjs --exclude ':win'\",\n     \"lint\": \"prettier rollup.config.js src/**\",\n     \"prepare\": \"npm run build\",\n-    \"prepublishOnly\": \"npm run build\",\n+    \"prepublish\": \"npm run build\",\n     \"check-updates\": \"npx npm-check-updates\",\n     \"check-updates:minor\": \"npx npm-check-updates --target minor\",\n     \"check-updates:patch\": \"npx npm-check-updates --target patch\"\n@@ -55,7 +56,6 @@\n     \"@rollup/pluginutils\": \"5\"\n   },\n   \"devDependencies\": {\n-    \"@rollup/plugin-buble\": \"^1.0.0\",\n     \"rollup\": \"<5\"\n   }\n }\n",
+					"match": false,
+					"packageHash": "a00ea3b014305efbcf81170fd733d8aff5df4cc32e9e405b2e7bbaf5a3111c0f",
+					"size": 2202,
+					"sourceHash": "71ffba288ac008ed593e566ee7b252963fee03bd0852a329dfbf4e38b52b8315",
+					"status": "content"
+				}
+			},
+			"summary": {
+				"differentFiles": 4,
+				"matchingFiles": 1,
+				"missingInPackage": 0,
+				"missingInSource": 0,
+				"score": 0.2,
+				"totalFiles": 5
+			}
+		}
+	}
+]
