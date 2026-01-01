@@ -1,0 +1,593 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-01T15:47:41.187Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:11.7.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "http-proxy@0.8.3",
+			"name": "http-proxy",
+			"version": "0.8.3",
+			"location": "https://registry.npmjs.org/http-proxy/-/http-proxy-0.8.3.tgz",
+			"integrity": "sha512-H6bHcJUINyImLiw5/FNG1Er43ZXD6eDZOWx773pgCzZFpWB/Wht7Yql1kmOZQUvbNiMTzpHTdNo+B2syLP92Gw==",
+			"publishedAt": "2012-09-20T15:58:56.473Z",
+			"publishedWith": {
+				"node": null,
+				"npm": "1.1.59"
+			}
+		},
+		"source": {
+			"integrity": "sha512-NNzxTgqGwPZr1GtOWrvDoxPleCdw/a1Bxg8c3CY8s2+F56hnvJek17J5egKZlBuHZ/FVcPSPMuI2qi9nRM5rNA==",
+			"location": "http://github.com/nodejitsu/node-http-proxy.git",
+			"spec": "github:nodejitsu/node-http-proxy#HEAD"
+		},
+		"comparisonHash": "8a2a8dcbb729bf3ee9216e490c955701f0ddebe1",
+		"diff": {
+			"files": {
+				".npmignore": {
+					"match": false,
+					"packageHash": "abac7d73f329ebea74a81a69448267eb8a3b891c07c27b18dafc0b5a67438939",
+					"size": 40,
+					"status": "missing-in-source"
+				},
+				".travis.yml": {
+					"match": false,
+					"packageHash": "61459d66a3c2eef4e54a4ee8b2dd5025ce1a0e9d3c4788a4dfecad14e1b53252",
+					"size": 139,
+					"status": "missing-in-source"
+				},
+				"CHANGELOG.md": {
+					"match": false,
+					"packageHash": "84b94df2fabbe7793f97e7b02b54f375dcbb1e1c666b573423c0d21ddeea783f",
+					"size": 4006,
+					"status": "missing-in-source"
+				},
+				"LICENSE": {
+					"diff": "--- published/LICENSE\n+++ rebuilt/LICENSE\n@@ -1,7 +1,7 @@\n \n   node-http-proxy\n \n-  Copyright (c) 2010 Charlie Robbins, Mikeal Rogers, Fedor Indutny, & Marak Squires\n+  Copyright (c) 2010-2016 Charlie Robbins, Jarrett Cruger & the Contributors.\n \n   Permission is hereby granted, free of charge, to any person obtaining\n   a copy of this software and associated documentation files (the\n@@ -20,4 +20,4 @@\n   NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE\n   LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION\n   OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION\n-  WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.\n\\ No newline at end of file\n+  WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.\n",
+					"match": false,
+					"packageHash": "5f3d6f8ab662aa24f14121b611ac8f064fafb48355ee4604330e05a74dbed335",
+					"size": 1159,
+					"sourceHash": "589850dfc0a1d39a97c592d618d5772f84aec2b11c6898e020acb985299f3bab",
+					"status": "content"
+				},
+				"README.md": {
+					"diff": "--- published/README.md\n+++ rebuilt/README.md\n@@ -1,68 +1,107 @@\n-# node-http-proxy\n+<p align=\"center\">\n+  <img src=\"https://raw.github.com/http-party/node-http-proxy/master/doc/logo.png\"/>\n+</p>\n+\n+# node-http-proxy [![Build Status](https://travis-ci.org/http-party/node-http-proxy.svg?branch=master)](https://travis-ci.org/http-party/node-http-proxy) [![codecov](https://codecov.io/gh/http-party/node-http-proxy/branch/master/graph/badge.svg)](https://codecov.io/gh/http-party/node-http-proxy)\n+\n+`node-http-proxy` is an HTTP programmable proxying library that supports\n+websockets. It is suitable for implementing components such as reverse\n+proxies and load balancers.\n+\n+### Table of Contents\n+  * [Installation](#installation)\n+  * [Upgrading from 0.8.x ?](#upgrading-from-08x-)\n+  * [Core Concept](#core-concept)\n+  * [Use Cases](#use-cases)\n+    * [Setup a basic stand-alone proxy server](#setup-a-basic-stand-alone-proxy-server)\n+    * [Setup a stand-alone proxy server with custom server logic](#setup-a-stand-alone-proxy-server-with-custom-server-logic)\n+    * [Setup a stand-alone proxy server with proxy request header re-writing](#setup-a-stand-alone-proxy-server-with-proxy-request-header-re-writing)\n+    * [Modify a response from a proxied server](#modify-a-response-from-a-proxied-server)\n+    * [Setup a stand-alone proxy server with latency](#setup-a-stand-alone-proxy-server-with-latency)\n+    * [Using HTTPS](#using-https)\n+    * [Proxying WebSockets](#proxying-websockets)\n+  * [Options](#options)\n+  * [Listening for proxy events](#listening-for-proxy-events)\n+  * [Shutdown](#shutdown)\n+  * [Miscellaneous](#miscellaneous)\n+    * [Test](#test)\n+    * [ProxyTable API](#proxytable-api)\n+    * [Logo](#logo)\n+  * [Contributing and Issues](#contributing-and-issues)\n+  * [License](#license)\n+\n+### Installation\n+\n+`npm install http-proxy --save`\n+\n+**[Back to top](#table-of-contents)**\n+\n+### Upgrading from 0.8.x ?\n+\n+Click [here](UPGRADING.md)\n \n-<img src=\"http://i.imgur.com/8fTt9.png\" />\n+**[Back to top](#table-of-contents)**\n \n-## Battle-hardened node.js http proxy\n+### Core Concept\n \n-### Features\n+A new proxy is created by calling `createProxyServer` and passing\n+an `options` object as argument ([valid properties are available here](lib/http-proxy.js#L26-L42))\n \n-* Reverse proxies incoming http.ServerRequest streams\n-* Can be used as a CommonJS module in node.js\n-* Uses event buffering to support application latency in proxied requests\n-* Reverse or Forward Proxy based on simple JSON-based configuration\n-* Supports [WebSockets][1]\n-* Supports [HTTPS][2]\n-* Minimal request overhead and latency\n-* Full suite of functional tests\n-* Battled-hardened through __production usage__ @ [nodejitsu.com][0]\n-* Written entirely in Javascript\n-* Easy to use API\n+```javascript\n+var httpProxy = require('http-proxy');\n \n-### When to use node-http-proxy\n+var proxy = httpProxy.createProxyServer(options); // See (†)\n+```\n+†Unless listen(..) is invoked on the object, this does not create a webserver. See below.\n \n-Let's suppose you were running multiple http application servers, but you only wanted to expose one machine to the internet. You could setup node-http-proxy on that one machine and then reverse-proxy the incoming http requests to locally running services which were not exposed to the outside network. \n+An object will be returned with four methods:\n \n-### Installing npm (node package manager)\n+* web `req, res, [options]` (used for proxying regular HTTP(S) requests)\n+* ws `req, socket, head, [options]` (used for proxying WS(S) requests)\n+* listen `port` (a function that wraps the object in a webserver, for your convenience)\n+* close `[callback]` (a function that closes the inner webserver and stops listening on given port)\n \n-```\n-curl https://npmjs.org/install.sh | sh\n+It is then possible to proxy requests by calling these functions\n+\n+```javascript\n+http.createServer(function(req, res) {\n+  proxy.web(req, res, { target: 'http://mytarget.com:8080' });\n+});\n ```\n \n-### Installing node-http-proxy\n+Errors can be listened on either using the Event Emitter API\n \n-```\n-npm install http-proxy\n+```javascript\n",
+					"match": false,
+					"packageHash": "60068384320358c5596ccf8385ff6e16d7fec27b161f737a1f27ef7a0832c809",
+					"size": 16514,
+					"sourceHash": "700d84a730fbfd21833efec6aa59cefdcac88ca26fe19812a04dc886e252da5e",
+					"status": "content"
+				},
+				"benchmarks/ReadMe": {
+					"match": false,
+					"packageHash": "8e0938062ed9f938c6faf5164b676033e4b02ae3369242c9e241e00a6f42299e",
+					"size": 408,
+					"status": "missing-in-source"
+				},
+				"benchmarks/http-server-base": {
+					"match": false,
+					"packageHash": "d46a71dba13a015b72482b2e74685ec49bedf2088c39306dee8f672cc7b8485b",
+					"size": 1586,
+					"status": "missing-in-source"
+				},
+				"benchmarks/proxy-to-http": {
+					"match": false,
+					"packageHash": "42b46c78894a73e244f901d363149af7a6592fb70d64d22f1af7651b1ea4f48c",
+					"size": 1607,
+					"status": "missing-in-source"
+				},
+				"bin/node-http-proxy": {
+					"match": false,
+					"packageHash": "cec202af64454b4be56e67870a8614a22ec58fc0fa55b1dc59d44c3886cce4a3",
+					"size": 2321,
+					"status": "missing-in-source"
+				},
+				"config.sample.json": {
+					"match": false,
+					"packageHash": "2a01bb8fe6ef4c9332f42faca9d271ecb77da2b5ff43fac12b706d2da8cbf345",
+					"size": 136,
+					"status": "missing-in-source"
+				},
+				"examples/balancer/simple-balancer.js": {
+					"match": false,
+					"packageHash": "3d6a9765592a39fbd452eb66b55d9b2847c43edb520c21fb5f8404b7c36aa4e2",
+					"size": 754,
+					"status": "missing-in-source"
+				},
+				"examples/helpers/store.js": {
+					"match": false,
+					"packageHash": "cf67d561e77cc76e424c5d0b5b857179b0738b734e5b02a57fd3c1e00477b79b",
+					"size": 1666,
+					"status": "missing-in-source"
+				},
+				"examples/http/basic-proxy.js": {
+					"match": false,
+					"packageHash": "27fb613e26cee49cee3184127ab70151d60018fa85b07792e9edd390afb37b1f",
+					"size": 2386,
+					"status": "missing-in-source"
+				},
+				"examples/http/concurrent-proxy.js": {
+					"match": false,
+					"packageHash": "f8b868760f55659ae03a2e58465fac7d1e6eaacd43ebf7e1f594639a04c2bd1d",
+					"size": 2300,
+					"status": "missing-in-source"
+				},
+				"examples/http/custom-proxy-error.js": {
+					"match": false,
+					"packageHash": "f80d8341a8efa475b91e553fa52a3980913d7674d1ea1be62345643148648fff",
+					"size": 1994,
+					"status": "missing-in-source"
+				},
+				"examples/http/forward-proxy.js": {
+					"match": false,
+					"packageHash": "a275952e4cbdc7a746604d267b561d7472385a32d2d9ef6c74e6235483916039",
+					"size": 2446,
+					"status": "missing-in-source"
+				},
+				"examples/http/latent-proxy.js": {
+					"match": false,
+					"packageHash": "9a0062dbbf980c934a6e9781aff6feccdd0bbd690718f33f984d4d85de9341c4",
+					"size": 2131,
+					"status": "missing-in-source"
+				},
+				"examples/http/proxy-https-to-http.js": {
+					"match": false,
+					"packageHash": "48805278c115ae64c0e699b50d3d8bca450e53d39c9c975a7c7276c29cc1dd1d",
+					"size": 1994,
+					"status": "missing-in-source"
+				},
+				"examples/http/proxy-https-to-https.js": {
+					"match": false,
+					"packageHash": "156104e6a46991c607d9821716924668c2915dc2c2562a8263cfa50abbec4c60",
+					"size": 2036,
+					"status": "missing-in-source"
+				},
+				"examples/http/proxy-table.js": {
+					"match": false,
+					"packageHash": "9ab24496e12fb2daa523d039cba02bb3d817f3f98a9183f3c47d502e9150dcaf",
+					"size": 1983,
+					"status": "missing-in-source"
+				},
+				"examples/http/standalone-proxy.js": {
+					"match": false,
+					"packageHash": "d20305709c4d9b47b233eaedc8759d33f3ca602a623b206a3583710295de65c8",
+					"size": 2231,
+					"status": "missing-in-source"
+				},
+				"examples/middleware/bodyDecoder-middleware.js": {
+					"match": false,
+					"packageHash": "244d7f5b9b97366c20f30e8f000e83a20d4ba665fece58b7f0ff1e52f6ad4479",
+					"size": 2637,
+					"status": "missing-in-source"
+				},
+				"examples/middleware/gzip-middleware-proxytable.js": {
+					"match": false,
+					"packageHash": "efbacf42efdb92d358a3e76cc5d8f9b3f958f96a72128cafaa05c7de1a4d901f",
+					"size": 2045,
+					"status": "missing-in-source"
+				},
+				"examples/middleware/gzip-middleware.js": {
+					"match": false,
+					"packageHash": "1aa5b106334d3dc255eb2f70dd72ca28d2ed7784035c3e01f81551f0fbb19d06",
+					"size": 1986,
+					"status": "missing-in-source"
+				},
+				"examples/middleware/jsonp-middleware.js": {
+					"match": false,
+					"packageHash": "3dd50d4c8fd9d5823ffc9f28218dde4447a8b7e879f37007c50a105a11f0a812",
+					"size": 1300,
+					"status": "missing-in-source"
+				},
+				"examples/middleware/modifyResponse-middleware.js": {
+					"match": false,
+					"packageHash": "a9ea5d06f55fe291232af1923b356331d5099a70a051ff658c9e305e6919ab15",
+					"size": 2026,
+					"status": "missing-in-source"
+				},
+				"examples/middleware/url-middleware.js": {
+					"match": false,
+					"packageHash": "c1a29e5e1d8d78e9e302e103ec4b3e28d3d79913fb670a470342e870b2d63c76",
+					"size": 2318,
+					"status": "missing-in-source"
+				},
+				"examples/middleware/url-middleware2.js": {
+					"match": false,
+					"packageHash": "a745419b57a4058bf0672494dc6ac13a3e6920eacddd312235c1422fbc3f829d",
+					"size": 1099,
+					"status": "missing-in-source"
+				},
+				"examples/package.json": {
+					"match": false,
+					"packageHash": "69e4f7bf67b5e0d1adf314720a01808940668a141523e38aba0a343ea911de1d",
+					"size": 284,
+					"status": "missing-in-source"
+				},
+				"examples/redirect/proxy.js": {
+					"match": false,
+					"packageHash": "1f7b1611c01a2717bab81bda7366edd8e00f7dc0a137fb2505540a61315296aa",
+					"size": 396,
+					"status": "missing-in-source"
+				},
+				"examples/redirect/server.js": {
+					"match": false,
+					"packageHash": "6dc5f0aceb17a9b9a788020d6309d3bc0064d5aa4eeb9f186dd8836fd234482d",
+					"size": 302,
+					"status": "missing-in-source"
+				},
+				"examples/websocket/latent-websocket-proxy.js": {
+					"match": false,
+					"packageHash": "a1e268f9f42b496df623a7e488bc9be69eb1704ec7f575ef00703385b39eb1f1",
+					"size": 2694,
+					"status": "missing-in-source"
+				},
+				"examples/websocket/standalone-websocket-proxy.js": {
+					"match": false,
+					"packageHash": "57940537c9dbafe562bb2819707cba965d4cb876462f96444d14bf88609651b2",
+					"size": 2600,
+					"status": "missing-in-source"
+				},
+				"examples/websocket/websocket-proxy.js": {
+					"match": false,
+					"packageHash": "9e7cb0da970e263f88d43af714e63966b4afddbc86afb3c4fc35cfd87ac42138",
+					"size": 2199,
+					"status": "missing-in-source"
+				},
+				"lib/node-http-proxy/http-proxy.js": {
+					"match": false,
+					"packageHash": "cff7ca8b1d30e3339a9f1c9f6e64b9cdf1fc5ef47f797859b6a6141d38e0e3e4",
+					"size": 25202,
+					"status": "missing-in-source"
+				},
+				"lib/node-http-proxy/proxy-table.js": {
+					"match": false,
+					"packageHash": "0e01719338a35250b16ae9e3d2b7430ae3c99327a66f47667bb6bcb828cb8a9e",
+					"size": 6934,
+					"status": "missing-in-source"
+				},
+				"lib/node-http-proxy/routing-proxy.js": {
+					"match": false,
+					"packageHash": "083766761ebccfe6f04a8595d33624344c5bbd8c91981d9b457302b447035512",
+					"size": 8592,
+					"status": "missing-in-source"
+				},
+				"lib/node-http-proxy.js": {
+					"match": false,
+					"packageHash": "6b145e93172c91ee135431a5aa80b4c7494de64ae6d8aac68546442fe494672f",
+					"size": 11871,
+					"status": "missing-in-source"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -1,46 +1,41 @@\n {\n   \"name\": \"http-proxy\",\n-  \"version\": \"0.8.3\",\n-  \"description\": \"A full-featured http reverse proxy for node.js\",\n-  \"author\": \"Nodejitsu Inc. <info@nodejitsu.com>\",\n-  \"maintainers\": [\n-    \"indexzero <charlie@nodejitsu.com>\",\n-    \"AvianFlu <avianflu@nodejitsu.com>\"\n-  ],\n+  \"version\": \"1.18.1\",\n   \"repository\": {\n     \"type\": \"git\",\n-    \"url\": \"http://github.com/nodejitsu/node-http-proxy.git\"\n+    \"url\": \"https://github.com/http-party/node-http-proxy.git\"\n   },\n-  \"keywords\": [\n-    \"reverse\",\n-    \"proxy\",\n-    \"http\"\n+  \"description\": \"HTTP proxying for the masses\",\n+  \"author\": \"Charlie Robbins <charlie.robbins@gmail.com>\",\n+  \"maintainers\": [\n+    \"jcrugzz <jcrugzz@gmail.com>\"\n   ],\n+  \"main\": \"index.js\",\n   \"dependencies\": {\n-    \"colors\": \"0.x.x\",\n-    \"optimist\": \"0.3.x\",\n-    \"pkginfo\": \"0.2.x\"\n+    \"eventemitter3\": \"^4.0.0\",\n+    \"requires-port\": \"^1.0.0\",\n+    \"follow-redirects\": \"^1.0.0\"\n   },\n   \"devDependencies\": {\n-    \"request\": \"1.9.x\",\n-    \"vows\": \"0.6.x\",\n-    \"async\": \"0.1.x\",\n-    \"socket.io\": \"0.9.6\",\n-    \"socket.io-client\": \"0.9.6\",\n-    \"ws\": \"0.4.21\"\n-  },\n-  \"main\": \"./lib/node-http-proxy\",\n-  \"bin\": {\n-    \"node-http-proxy\": \"./bin/node-http-proxy\"\n+    \"async\": \"^3.0.0\",\n+    \"auto-changelog\": \"^1.15.0\",\n+    \"concat-stream\": \"^2.0.0\",\n+    \"expect.js\": \"~0.3.1\",\n+    \"mocha\": \"^3.5.3\",\n+    \"nyc\": \"^14.0.0\",\n+    \"semver\": \"^5.0.3\",\n+    \"socket.io\": \"^2.1.0\",\n+    \"socket.io-client\": \"^2.1.0\",\n+    \"sse\": \"0.0.8\",\n+    \"ws\": \"^3.0.0\"\n   },\n   \"scripts\": {\n-    \"test\": \"npm run-script test-http && npm run-script test-https\",\n-    \"test-http\": \"vows --spec && vows --spec --target=https\",\n-    \"test-https\": \"vows --spec --proxy=https && vows --spec --proxy=https --target=https\",\n-    \"test-core\": \"test/core/run\"\n+    \"mocha\": \"mocha test/*-test.js\",\n+    \"test\": \"nyc --reporter=text --reporter=lcov npm run mocha\",\n+    \"version\": \"auto-changelog -p && git add CHANGELOG.md\"\n   },\n   \"engines\": {\n-    \"node\": \">= 0.6.6\"\n-  }\n+    \"node\": \">=8.0.0\"\n+  },\n+  \"license\": \"MIT\"\n }\n-\n",
+					"match": false,
+					"packageHash": "6303e96897d98f7a2dbcffb95d73acf3c6e304ed2fa0c314151922d2825ee1f0",
+					"size": 1121,
+					"sourceHash": "1acdbcb8393b76ae43e8d35ae4b6ba74d0ea7040a6ba93fa03485f89fc7473a8",
+					"status": "content"
+				},
+				"test/core/README.md": {
+					"match": false,
+					"packageHash": "f6ee97d0d2bc0d1ea74de44d32cca203cc9602149e8ed736f6ded1b091d326ef",
+					"size": 380,
+					"status": "missing-in-source"
+				},
+				"test/core/common.js": {
+					"match": false,
+					"packageHash": "eecb6e0fce6bb522409cd8b086f863239ffffc0bfb3ee247bc147af025a1fafc",
+					"size": 4519,
+					"status": "missing-in-source"
+				},
+				"test/core/pummel/test-http-upload-timeout.js": {
+					"match": false,
+					"packageHash": "74141b0addafd19ce910ff6087a9f9562a95b27dbc4a9a24fb6edddfccdd8e35",
+					"size": 2377,
+					"status": "missing-in-source"
+				},
+				"test/core/run": {
+					"match": false,
+					"packageHash": "c596d66e6a17964231ff846434d8c001c4f3eb7d9311f01110c8731c76000fc0",
+					"size": 2915,
+					"status": "missing-in-source"
+				},
+				"test/core/run-single": {
+					"match": false,
+					"packageHash": "514d15838dcc86987a23589054bfed6685771e9a11b1c5b27e520c3f4728635c",
+					"size": 2154,
+					"status": "missing-in-source"
+				},
+				"test/core/simple/test-http-chunked.js": {
+					"match": false,
+					"packageHash": "070a4ffbfa3d140067394ed1c51d23cf181757f67751243389c096caa0a6a7e8",
+					"size": 2998,
+					"status": "missing-in-source"
+				},
+				"test/core/simple/test-http-client-abort.js": {
+					"match": false,
+					"packageHash": "2e61319b0f487c6ae33b9ea2eacd78b6aa1295406261bc549bcb5ce83cff1fc9",
+					"size": 2707,
+					"status": "missing-in-source"
+				},
+				"test/core/simple/test-http-client-abort2.js": {
+					"match": false,
+					"packageHash": "7890ffe5981c86dd5b7bc7c4934f61267534c437df5fdf95dc550f63eec276c9",
+					"size": 1525,
+					"status": "missing-in-source"
+				},
+				"test/core/simple/test-http-client-upload-buf.js": {
+					"match": false,
+					"packageHash": "ab09897932ea7742435243c08ae25f63c3027da4096dd0efad52888d41662c40",
+					"size": 2349,
+					"status": "missing-in-source"
+				},
+				"test/core/simple/test-http-client-upload.js": {
+					"match": false,
+					"packageHash": "83d1a89c9ee8233eddcb6cfd5f6ceddad9ded5def67c4532362d7e7e7c8bca19",
+					"size": 2443,
+					"status": "missing-in-source"
+				},
+				"test/core/simple/test-http-contentLength0.js": {
+					"match": false,
+					"packageHash": "7d680283bea5623da2029d039d2689d14f2458823283e36d0eed5d0f97542293",
+					"size": 1706,
+					"status": "missing-in-source"
+				},
+				"test/core/simple/test-http-eof-on-connect.js": {
+					"match": false,
+					"packageHash": "e678c936e20f250a1ba1e34afdfcd3af9b904c836e953454855ccfe2b7122e41",
+					"size": 1749,
+					"status": "missing-in-source"
+				},
+				"test/core/simple/test-http-extra-response.js": {
+					"match": false,
+					"packageHash": "29e1f319bae8e77cd65663196934cb0dee3b526e55a62e239d6cd5d6e8d6268b",
+					"size": 2750,
+					"status": "missing-in-source"
+				},
+				"test/core/simple/test-http-head-request.js": {
+					"match": false,
+					"packageHash": "a9530591acc0a9ae4152c9ffb9fbe57638ce8483fae3d6651262a0e3fbf47dc3",
+					"size": 1872,
+					"status": "missing-in-source"
+				},
+				"test/core/simple/test-http-head-response-has-no-body-end.js": {
+					"match": false,
+					"packageHash": "eeb41ec15e27576805f8813b999855a6a99c93e2bdb1ee582642d0f2c4264195",
+					"size": 2000,
+					"status": "missing-in-source"
+				},
+				"test/core/simple/test-http-head-response-has-no-body.js": {
+					"match": false,
+					"packageHash": "f89816b69510bc4bad8544d5f796e6faed1d0d4e4cf133a84479f69f985a7c39",
+					"size": 1992,
+					"status": "missing-in-source"
+				},
+				"test/core/simple/test-http-host-headers.js": {
+					"match": false,
+					"packageHash": "841490b94d06f553d4c7e6b8bf49faf85da5f04f64a85f76dd822a335c20ed22",
+					"size": 3146,
+					"status": "missing-in-source"
+				},
+				"test/core/simple/test-http-malformed-request.js": {
+					"match": false,
+					"packageHash": "d73059ab0bfa7466d4a15dce515fd5e4fb0cb04e7838be739326081d8dc59a6c",
+					"size": 2043,
+					"status": "missing-in-source"
+				},
+				"test/core/simple/test-http-many-keep-alive-connections.js": {
+					"match": false,
+					"packageHash": "3b4862724f4c3c8f4efa00189745d2ee2c340c27037a8a6123ce74e87127abed",
+					"size": 2119,
+					"status": "missing-in-source"
+				},
+				"test/core/simple/test-http-multi-line-headers.js": {
+					"match": false,
+					"packageHash": "140f39d12b78cd05b4bc5825f61184d399aee48606ec704d80a32ed9dc291a03",
+					"size": 2048,
+					"status": "missing-in-source"
+				},
+				"test/core/simple/test-http-proxy.js": {
+					"match": false,
+					"packageHash": "d5c860e542d14c41579a3f3c74e808a9f4a658ceb2510b1c24c26350a7c4e71f",
+					"size": 3407,
+					"status": "missing-in-source"
+				},
+				"test/core/simple/test-http-response-close.js": {
+					"match": false,
+					"packageHash": "3b3c44f7c1f05f9c3afcf826e8a3dd1b46a7194cdb7776cea6be651d6a81858c",
+					"size": 1811,
+					"status": "missing-in-source"
+				},
+				"test/core/simple/test-http-server-multiheaders.js": {
+					"match": false,
+					"packageHash": "730692e8c35548156953dc4d3e3183dd2244437966a4a01c5878e795f93b39db",
+					"size": 2172,
+					"status": "missing-in-source"
+				},
+				"test/core/simple/test-http-set-cookies.js": {
+					"match": false,
+					"packageHash": "0e9f460fb2568955b1662745748a74975f3b6eb48cdead3055ce97fb3896d66f",
+					"size": 2703,
+					"status": "missing-in-source"
+				},
+				"test/core/simple/test-http-status-code.js": {
+					"match": false,
+					"packageHash": "fee7c5f87e67df8acaafe7ecb6489905853188db572075f140767ae04e568ad0",
+					"size": 2252,
+					"status": "missing-in-source"
+				},
+				"test/core/simple/test-http-upgrade-server2.js": {
+					"match": false,
+					"packageHash": "a71bd1d92c642592b86d1cf7a9389c4ad2c0a3e115d75a468e20f92d5d94275b",
+					"size": 2318,
+					"status": "missing-in-source"
+				},
+				"test/core/simple/test-http.js": {
+					"match": false,
+					"packageHash": "c04f49f45e6365a176e813a9dd9d3ab46b9208500bf4b4edce3bd4a620b0a693",
+					"size": 3397,
+					"status": "missing-in-source"
+				},
+				"test/examples-test.js": {
+					"match": false,
+					"packageHash": "aef57acce8ec3f44f958416e398552d0ac584378906e50b6271365ae1cbddb10",
+					"size": 547,
+					"status": "missing-in-source"
+				},
+				"test/fixtures/agent2-cert.pem": {
+					"match": false,
+					"packageHash": "e971e132fbd0c215913c95408acefdabc1c8cfb658ea51577157c8f736da78f0",
+					"size": 729,
+					"status": "missing-in-source"
+				},
+				"test/fixtures/agent2-csr.pem": {
+					"match": false,
+					"packageHash": "425efdbd9da7ae2934babd14f96167219bd74aa22c5b4f8a8261bcbdc7e35db1",
+					"size": 550,
+					"status": "missing-in-source"
+				},
+				"test/fixtures/agent2-key.pem": {
+					"match": false,
+					"packageHash": "4db95638f2600970fde2a67350279a815415dbaa9d35da1d442f23306ad14e42",
+					"size": 493,
+					"status": "missing-in-source"
+				},
+				"test/fixtures/agent2.cnf": {
+					"match": false,
+					"packageHash": "d25b3625ec17459b98aa18eb206c17da792f66a7d271d074d881750bd1d56a53",
+					"size": 510,
+					"status": "missing-in-source"
+				},
+				"test/helpers/http.js": {
+					"match": false,
+					"packageHash": "e75717bd43065128e2b73711f0c75357bc4e243681347ee3914a68bd6ed0ea78",
+					"size": 4780,
+					"status": "missing-in-source"
+				},
+				"test/helpers/index.js": {
+					"match": false,
+					"packageHash": "b59d68c4c58416127c5a7381c8379e6f2e7702ad4da812a393da8122711d5a20",
+					"size": 2214,
+					"status": "missing-in-source"
+				},
+				"test/helpers/ws.js": {
+					"match": false,
+					"packageHash": "0953c3230136a5413182f4ed4445a40b5e4d38ab3afc12517f6a9d48ad788464",
+					"size": 3389,
+					"status": "missing-in-source"
+				},
+				"test/http/http-test.js": {
+					"match": false,
+					"packageHash": "331ad32ee8967f6026ef14b2a14c38dcd78dc3e14f3fca5914226e777eedebf4",
+					"size": 2105,
+					"status": "missing-in-source"
+				},
+				"test/http/routing-table-test.js": {
+					"match": false,
+					"packageHash": "92ebade4ee75b6c76e993d8092c60c16fe198bcc7b41dbdbea5aa81c06a46fd4",
+					"size": 2684,
+					"status": "missing-in-source"
+				},
+				"test/macros/examples.js": {
+					"match": false,
+					"packageHash": "4bddf835bde3851d698684c136f2b18cb44a23a9bdd807228cf3a559a1455804",
+					"size": 2603,
+					"status": "missing-in-source"
+				},
+				"test/macros/http.js": {
+					"match": false,
+					"packageHash": "e2058257c61c540e0c731eb3b2fd26aa84e7924f6892472d5521d4bc984249d3",
+					"size": 8407,
+					"status": "missing-in-source"
+				},
+				"test/macros/index.js": {
+					"match": false,
+					"packageHash": "a46666caa397bafc509863b3ef2fb5d0b8c0ec0d0934a45bf04d658ec03cf60f",
+					"size": 229,
+					"status": "missing-in-source"
+				},
+				"test/macros/ws.js": {
+					"match": false,
+					"packageHash": "8f13d4f3699f36504fefa6fa683f2ced0ba6c68c9f320ecddca8657cfb595666",
+					"size": 6607,
+					"status": "missing-in-source"
+				},
+				"test/ws/routing-table-test.js": {
+					"match": false,
+					"packageHash": "1c1c69e086921d48c85bec4b29470bc313e113489c87e143d855b5285772cb8b",
+					"size": 632,
+					"status": "missing-in-source"
+				},
+				"test/ws/socket.io-test.js": {
+					"match": false,
+					"packageHash": "6804a2b2b48c60a73c548c5d21fcb23808b8448ff75ea7c30faae4d39bcb7abb",
+					"size": 473,
+					"status": "missing-in-source"
+				},
+				"test/ws/ws-test.js": {
+					"match": false,
+					"packageHash": "05fc83efd6c0b82af90b9ee15bce142c63d7c2564eaa5287fb60556b4c18f489",
+					"size": 512,
+					"status": "missing-in-source"
+				},
+				".auto-changelog": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				".gitattributes": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"CODE_OF_CONDUCT.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"codecov.yml": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"index.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/http-proxy/common.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/http-proxy/index.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/http-proxy/passes/web-incoming.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/http-proxy/passes/web-outgoing.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/http-proxy/passes/ws-incoming.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/http-proxy.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"renovate.json": {
+					"match": false,
+					"status": "missing-in-package"
+				}
+			},
+			"summary": {
+				"differentFiles": 3,
+				"matchingFiles": 0,
+				"missingInPackage": 12,
+				"missingInSource": 80,
+				"score": 0,
+				"totalFiles": 95
+			}
+		}
+	}
+]

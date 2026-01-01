@@ -1,0 +1,401 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-01T15:47:39.068Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:2.15.11",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "http-proxy@0.7.6",
+			"name": "http-proxy",
+			"version": "0.7.6",
+			"location": "https://registry.npmjs.org/http-proxy/-/http-proxy-0.7.6.tgz",
+			"integrity": "sha512-IMA45qkgt7UaL3fsuSBqTlXF+tvBzaJG5dUxaGCdIQBFEaS+D5K2/stCvgklKm5sOrwNoeA9m16RF+bwsbCanA==",
+			"publishedAt": "2011-11-14T20:44:10.580Z",
+			"publishedWith": {
+				"node": "v0.4.12",
+				"npm": "1.0.103"
+			}
+		},
+		"source": {
+			"integrity": null,
+			"location": "git://github.com/nodejitsu/node-http-proxy.git",
+			"spec": "github:nodejitsu/node-http-proxy#HEAD"
+		},
+		"comparisonHash": "8a2a8dcbb729bf3ee9216e490c955701f0ddebe1",
+		"diff": {
+			"files": {
+				".gitignore": {
+					"match": false,
+					"packageHash": "abac7d73f329ebea74a81a69448267eb8a3b891c07c27b18dafc0b5a67438939",
+					"size": 40,
+					"status": "missing-in-source"
+				},
+				"CHANGELOG.md": {
+					"match": false,
+					"packageHash": "8b3b71a3feff92830389c6719d11951eccedf8076fce82790f06723185ede449",
+					"size": 1956,
+					"status": "missing-in-source"
+				},
+				"LICENCE": {
+					"match": false,
+					"packageHash": "8937affb1fac84258c98aa2351eb161405999975b602140c43bcbac23b22f1e9",
+					"size": 1070,
+					"status": "missing-in-source"
+				},
+				"LICENSE": {
+					"diff": "--- published/LICENSE\n+++ rebuilt/LICENSE\n@@ -1,7 +1,7 @@\n \n   node-http-proxy\n \n-  Copyright (c) 2010 Charlie Robbins, Mikeal Rogers, Fedor Indutny, & Marak Squires\n+  Copyright (c) 2010-2016 Charlie Robbins, Jarrett Cruger & the Contributors.\n \n   Permission is hereby granted, free of charge, to any person obtaining\n   a copy of this software and associated documentation files (the\n@@ -20,4 +20,4 @@\n   NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE\n   LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION\n   OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION\n-  WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.\n\\ No newline at end of file\n+  WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.\n",
+					"match": false,
+					"packageHash": "5f3d6f8ab662aa24f14121b611ac8f064fafb48355ee4604330e05a74dbed335",
+					"size": 1159,
+					"sourceHash": "589850dfc0a1d39a97c592d618d5772f84aec2b11c6898e020acb985299f3bab",
+					"status": "content"
+				},
+				"README.md": {
+					"diff": "--- published/README.md\n+++ rebuilt/README.md\n@@ -1,68 +1,107 @@\n-# node-http-proxy\n+<p align=\"center\">\n+  <img src=\"https://raw.github.com/http-party/node-http-proxy/master/doc/logo.png\"/>\n+</p>\n \n-<img src=\"http://i.imgur.com/8fTt9.png\" />\n+# node-http-proxy [![Build Status](https://travis-ci.org/http-party/node-http-proxy.svg?branch=master)](https://travis-ci.org/http-party/node-http-proxy) [![codecov](https://codecov.io/gh/http-party/node-http-proxy/branch/master/graph/badge.svg)](https://codecov.io/gh/http-party/node-http-proxy)\n \n-## Battle-hardened node.js http proxy\n+`node-http-proxy` is an HTTP programmable proxying library that supports\n+websockets. It is suitable for implementing components such as reverse\n+proxies and load balancers.\n \n-### Features\n+### Table of Contents\n+  * [Installation](#installation)\n+  * [Upgrading from 0.8.x ?](#upgrading-from-08x-)\n+  * [Core Concept](#core-concept)\n+  * [Use Cases](#use-cases)\n+    * [Setup a basic stand-alone proxy server](#setup-a-basic-stand-alone-proxy-server)\n+    * [Setup a stand-alone proxy server with custom server logic](#setup-a-stand-alone-proxy-server-with-custom-server-logic)\n+    * [Setup a stand-alone proxy server with proxy request header re-writing](#setup-a-stand-alone-proxy-server-with-proxy-request-header-re-writing)\n+    * [Modify a response from a proxied server](#modify-a-response-from-a-proxied-server)\n+    * [Setup a stand-alone proxy server with latency](#setup-a-stand-alone-proxy-server-with-latency)\n+    * [Using HTTPS](#using-https)\n+    * [Proxying WebSockets](#proxying-websockets)\n+  * [Options](#options)\n+  * [Listening for proxy events](#listening-for-proxy-events)\n+  * [Shutdown](#shutdown)\n+  * [Miscellaneous](#miscellaneous)\n+    * [Test](#test)\n+    * [ProxyTable API](#proxytable-api)\n+    * [Logo](#logo)\n+  * [Contributing and Issues](#contributing-and-issues)\n+  * [License](#license)\n \n-* Reverse proxies incoming http.ServerRequest streams\n-* Can be used as a CommonJS module in node.js\n-* Uses event buffering to support application latency in proxied requests\n-* Reverse or Forward Proxy based on simple JSON-based configuration\n-* Supports [WebSockets][1]\n-* Supports [HTTPS][2]\n-* Minimal request overhead and latency\n-* Full suite of functional tests\n-* Battled-hardened through __production usage__ @ [nodejitsu.com][0]\n-* Written entirely in Javascript\n-* Easy to use API\n+### Installation\n \n-### When to use node-http-proxy\n+`npm install http-proxy --save`\n \n-Let's suppose you were running multiple http application servers, but you only wanted to expose one machine to the internet. You could setup node-http-proxy on that one machine and then reverse-proxy the incoming http requests to locally running services which were not exposed to the outside network. \n+**[Back to top](#table-of-contents)**\n \n-### Installing npm (node package manager)\n+### Upgrading from 0.8.x ?\n \n-```\n-curl http://npmjs.org/install.sh | sh\n-```\n+Click [here](UPGRADING.md)\n+\n+**[Back to top](#table-of-contents)**\n+\n+### Core Concept\n+\n+A new proxy is created by calling `createProxyServer` and passing\n+an `options` object as argument ([valid properties are available here](lib/http-proxy.js#L26-L42))\n \n-### Installing node-http-proxy\n+```javascript\n+var httpProxy = require('http-proxy');\n \n+var proxy = httpProxy.createProxyServer(options); // See (†)\n ```\n-npm install http-proxy\n+†Unless listen(..) is invoked on the object, this does not create a webserver. See below.\n+\n+An object will be returned with four methods:\n+\n+* web `req, res, [options]` (used for proxying regular HTTP(S) requests)\n+* ws `req, socket, head, [options]` (used for proxying WS(S) requests)\n+* listen `port` (a function that wraps the object in a webserver, for your convenience)\n+* close `[callback]` (a function that closes the inner webserver and stops listening on given port)\n+\n+It is then possible to proxy requests by calling these functions\n+\n+```javascript\n+http.createServer(function(req, res) {\n+  proxy.web(req, res, { target: 'http://mytarget.com:8080' });\n+});\n ```\n \n-## Using node-http-proxy\n+Errors can be listened on either using the Event Emitter API\n+\n",
+					"match": false,
+					"packageHash": "06c79a61d2b5f5a6f80672258027905ea8c839f4ba3f53bfc2daaced07d9ecee",
+					"size": 13938,
+					"sourceHash": "700d84a730fbfd21833efec6aa59cefdcac88ca26fe19812a04dc886e252da5e",
+					"status": "content"
+				},
+				"benchmarks/ReadMe": {
+					"match": false,
+					"packageHash": "8e0938062ed9f938c6faf5164b676033e4b02ae3369242c9e241e00a6f42299e",
+					"size": 408,
+					"status": "missing-in-source"
+				},
+				"benchmarks/http-server-base": {
+					"match": false,
+					"packageHash": "d46a71dba13a015b72482b2e74685ec49bedf2088c39306dee8f672cc7b8485b",
+					"size": 1586,
+					"status": "missing-in-source"
+				},
+				"benchmarks/proxy-to-http": {
+					"match": false,
+					"packageHash": "42b46c78894a73e244f901d363149af7a6592fb70d64d22f1af7651b1ea4f48c",
+					"size": 1607,
+					"status": "missing-in-source"
+				},
+				"bin/node-http-proxy": {
+					"match": false,
+					"packageHash": "2bf01f4880e9e8ae3ecf06b083c7594f853bc23a1e4f701ba78e9d1734a071ec",
+					"size": 2161,
+					"status": "missing-in-source"
+				},
+				"config.sample.json": {
+					"match": false,
+					"packageHash": "2a01bb8fe6ef4c9332f42faca9d271ecb77da2b5ff43fac12b706d2da8cbf345",
+					"size": 136,
+					"status": "missing-in-source"
+				},
+				"docs/balancing-proxy.html": {
+					"match": false,
+					"packageHash": "878a1be4e15de88e94a39d95e21195b32e91a406d24f8d810ce2bab45c421119",
+					"size": 12708,
+					"status": "missing-in-source"
+				},
+				"docs/docco.css": {
+					"match": false,
+					"packageHash": "a260d1119dfcfe604b1cce69626d9fd50882ad3dc9fdbb618f2777b9a7a52e97",
+					"size": 7235,
+					"status": "missing-in-source"
+				},
+				"docs/node-http-proxy.html": {
+					"match": false,
+					"packageHash": "560c667edda60d14ddd77adf7e9c98aa109228960a2031e93ae607253f2b673d",
+					"size": 113834,
+					"status": "missing-in-source"
+				},
+				"docs/proxy-table.html": {
+					"match": false,
+					"packageHash": "b9052c76bfeafb93a6b55bf547c5296568416723584f2e9238fae1f6d8c7e8d9",
+					"size": 21819,
+					"status": "missing-in-source"
+				},
+				"examples/helpers/store.js": {
+					"match": false,
+					"packageHash": "cf67d561e77cc76e424c5d0b5b857179b0738b734e5b02a57fd3c1e00477b79b",
+					"size": 1666,
+					"status": "missing-in-source"
+				},
+				"examples/http/basic-proxy.js": {
+					"match": false,
+					"packageHash": "27fb613e26cee49cee3184127ab70151d60018fa85b07792e9edd390afb37b1f",
+					"size": 2386,
+					"status": "missing-in-source"
+				},
+				"examples/http/concurrent-proxy.js": {
+					"match": false,
+					"packageHash": "f8b868760f55659ae03a2e58465fac7d1e6eaacd43ebf7e1f594639a04c2bd1d",
+					"size": 2300,
+					"status": "missing-in-source"
+				},
+				"examples/http/custom-proxy-error.js": {
+					"match": false,
+					"packageHash": "f80d8341a8efa475b91e553fa52a3980913d7674d1ea1be62345643148648fff",
+					"size": 1994,
+					"status": "missing-in-source"
+				},
+				"examples/http/forward-proxy.js": {
+					"match": false,
+					"packageHash": "a275952e4cbdc7a746604d267b561d7472385a32d2d9ef6c74e6235483916039",
+					"size": 2446,
+					"status": "missing-in-source"
+				},
+				"examples/http/latent-proxy.js": {
+					"match": false,
+					"packageHash": "9a0062dbbf980c934a6e9781aff6feccdd0bbd690718f33f984d4d85de9341c4",
+					"size": 2131,
+					"status": "missing-in-source"
+				},
+				"examples/http/proxy-https-to-http.js": {
+					"match": false,
+					"packageHash": "2625a91cfc259713470e63a326cc99ca36d1d026225fd28584873be1ccf2e63f",
+					"size": 2018,
+					"status": "missing-in-source"
+				},
+				"examples/http/proxy-https-to-https.js": {
+					"match": false,
+					"packageHash": "1eb77350406a0a93acb7cdee0297627e17528c7c7b024689d4486fe6f30660d9",
+					"size": 2051,
+					"status": "missing-in-source"
+				},
+				"examples/http/proxy-table.js": {
+					"match": false,
+					"packageHash": "9ab24496e12fb2daa523d039cba02bb3d817f3f98a9183f3c47d502e9150dcaf",
+					"size": 1983,
+					"status": "missing-in-source"
+				},
+				"examples/http/standalone-proxy.js": {
+					"match": false,
+					"packageHash": "d20305709c4d9b47b233eaedc8759d33f3ca602a623b206a3583710295de65c8",
+					"size": 2231,
+					"status": "missing-in-source"
+				},
+				"examples/middleware/bodyDecoder-middleware.js": {
+					"match": false,
+					"packageHash": "244d7f5b9b97366c20f30e8f000e83a20d4ba665fece58b7f0ff1e52f6ad4479",
+					"size": 2637,
+					"status": "missing-in-source"
+				},
+				"examples/middleware/gzip-middleware.js": {
+					"match": false,
+					"packageHash": "1aa5b106334d3dc255eb2f70dd72ca28d2ed7784035c3e01f81551f0fbb19d06",
+					"size": 1986,
+					"status": "missing-in-source"
+				},
+				"examples/middleware/jsonp-middleware.js": {
+					"match": false,
+					"packageHash": "3dd50d4c8fd9d5823ffc9f28218dde4447a8b7e879f37007c50a105a11f0a812",
+					"size": 1300,
+					"status": "missing-in-source"
+				},
+				"examples/middleware/modifyResponse-middleware.js": {
+					"match": false,
+					"packageHash": "a9ea5d06f55fe291232af1923b356331d5099a70a051ff658c9e305e6919ab15",
+					"size": 2026,
+					"status": "missing-in-source"
+				},
+				"examples/middleware/url-middleware.js": {
+					"match": false,
+					"packageHash": "c1a29e5e1d8d78e9e302e103ec4b3e28d3d79913fb670a470342e870b2d63c76",
+					"size": 2318,
+					"status": "missing-in-source"
+				},
+				"examples/middleware/url-middleware2.js": {
+					"match": false,
+					"packageHash": "a745419b57a4058bf0672494dc6ac13a3e6920eacddd312235c1422fbc3f829d",
+					"size": 1099,
+					"status": "missing-in-source"
+				},
+				"examples/package.json": {
+					"match": false,
+					"packageHash": "69e4f7bf67b5e0d1adf314720a01808940668a141523e38aba0a343ea911de1d",
+					"size": 284,
+					"status": "missing-in-source"
+				},
+				"examples/websocket/latent-websocket-proxy.js": {
+					"match": false,
+					"packageHash": "02dbaa5c5d392fa1b4b8718d5306802e63eca1baf25df37e5349a2a480edfbc7",
+					"size": 3035,
+					"status": "missing-in-source"
+				},
+				"examples/websocket/standalone-websocket-proxy.js": {
+					"match": false,
+					"packageHash": "8c0d85370b3f89795cec49b92c0f972b7b37d2997f77ac18c9a9ad8e630f1562",
+					"size": 2942,
+					"status": "missing-in-source"
+				},
+				"examples/websocket/websocket-proxy.js": {
+					"match": false,
+					"packageHash": "0b53a1235f7e31ddb25dc61a536b3b01a48addbd35136a4b1c43f911d79b5689",
+					"size": 2560,
+					"status": "missing-in-source"
+				},
+				"lib/node-http-proxy/http-proxy.js": {
+					"match": false,
+					"packageHash": "a66695ae8f775dc299df7d7ae0733cc998ff9148685e5caade01e7734dbf0b29",
+					"size": 23713,
+					"status": "missing-in-source"
+				},
+				"lib/node-http-proxy/proxy-table.js": {
+					"match": false,
+					"packageHash": "42ea4fdd5c494bb2a57a4669584070fb6e81d26f870efe952466083cc4abf40e",
+					"size": 5243,
+					"status": "missing-in-source"
+				},
+				"lib/node-http-proxy/routing-proxy.js": {
+					"match": false,
+					"packageHash": "53270a67d9b47562006e8fe04daa94a9f606529d1141de7b706f65fd2975e2e7",
+					"size": 7676,
+					"status": "missing-in-source"
+				},
+				"lib/node-http-proxy.js": {
+					"match": false,
+					"packageHash": "0b37f15be9a48cec7f90726c3844d5c2a6a6450d1cee482f1a0a57f8b31cb92a",
+					"size": 11845,
+					"status": "missing-in-source"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -1,35 +1,41 @@\n {\n   \"name\": \"http-proxy\",\n-  \"version\": \"0.7.6\",\n-  \"description\": \"A full-featured http reverse proxy for node.js\",\n-  \"author\": \"Charlie Robbins <charlie.robbins@gmail.com>\",\n-  \"contributors\": [\n-    { \"name\": \"Mikeal Rogers\", \"email\": \"mikeal.rogers@gmail.com\" }, \n-    { \"name\": \"Marak Squires\", \"email\": \"marak.squires@gmail.com\" },\n-    { \"name\": \"Fedor Indutny\", \"email\": \"fedor.indutny@gmail.com\" },\n-    { \"name\": \"Dominic Tarr\", \"email\": \"dominic@nodejitsu.com\" }\n-  ],\n+  \"version\": \"1.18.1\",\n   \"repository\": {\n     \"type\": \"git\",\n-    \"url\": \"http://github.com/nodejitsu/node-http-proxy.git\" \n+    \"url\": \"https://github.com/http-party/node-http-proxy.git\"\n   },\n-  \"keywords\": [\"reverse\", \"proxy\", \"http\"],\n+  \"description\": \"HTTP proxying for the masses\",\n+  \"author\": \"Charlie Robbins <charlie.robbins@gmail.com>\",\n+  \"maintainers\": [\n+    \"jcrugzz <jcrugzz@gmail.com>\"\n+  ],\n+  \"main\": \"index.js\",\n   \"dependencies\": {\n-    \"colors\": \"0.x.x\",\n-    \"optimist\": \"0.2.x\",\n-    \"pkginfo\": \"0.2.x\"\n+    \"eventemitter3\": \"^4.0.0\",\n+    \"requires-port\": \"^1.0.0\",\n+    \"follow-redirects\": \"^1.0.0\"\n   },\n   \"devDependencies\": {\n-    \"request\": \"1.9.x\",\n-    \"vows\": \"0.5.x\",\n-    \"socket.io\": \"0.6.x\"\n+    \"async\": \"^3.0.0\",\n+    \"auto-changelog\": \"^1.15.0\",\n+    \"concat-stream\": \"^2.0.0\",\n+    \"expect.js\": \"~0.3.1\",\n+    \"mocha\": \"^3.5.3\",\n+    \"nyc\": \"^14.0.0\",\n+    \"semver\": \"^5.0.3\",\n+    \"socket.io\": \"^2.1.0\",\n+    \"socket.io-client\": \"^2.1.0\",\n+    \"sse\": \"0.0.8\",\n+    \"ws\": \"^3.0.0\"\n+  },\n+  \"scripts\": {\n+    \"mocha\": \"mocha test/*-test.js\",\n+    \"test\": \"nyc --reporter=text --reporter=lcov npm run mocha\",\n+    \"version\": \"auto-changelog -p && git add CHANGELOG.md\"\n   },\n-  \"main\": \"./lib/node-http-proxy\",\n-  \"bin\": { \"node-http-proxy\": \"./bin/node-http-proxy\" },\n-  \"scripts\": { \n-    \"test\": \"npm run-script test-http && npm run-script test-https\",\n-    \"test-http\": \"vows --spec && vows --spec --target=secure\",\n-    \"test-https\": \"vows --spec --source=secure && vows --spec --source=secure --target=secure\" \n+  \"engines\": {\n+    \"node\": \">=8.0.0\"\n   },\n-  \"engines\": { \"node\": \"0.4.x || 0.5.x\" }\n+  \"license\": \"MIT\"\n }\n",
+					"match": false,
+					"packageHash": "6c6314f9d58c210e8b1e84968f9d4eadbb2b82ed5570ac695251f92c2a5c3d62",
+					"size": 1199,
+					"sourceHash": "1acdbcb8393b76ae43e8d35ae4b6ba74d0ea7040a6ba93fa03485f89fc7473a8",
+					"status": "content"
+				},
+				"test/config.json": {
+					"match": false,
+					"packageHash": "f93b75a14f35644fdbaeb736c395bc395e4cfb0bcd6a58098fc421596e1dac2c",
+					"size": 97,
+					"status": "missing-in-source"
+				},
+				"test/fixtures/agent2-cert.pem": {
+					"match": false,
+					"packageHash": "e971e132fbd0c215913c95408acefdabc1c8cfb658ea51577157c8f736da78f0",
+					"size": 729,
+					"status": "missing-in-source"
+				},
+				"test/fixtures/agent2-csr.pem": {
+					"match": false,
+					"packageHash": "425efdbd9da7ae2934babd14f96167219bd74aa22c5b4f8a8261bcbdc7e35db1",
+					"size": 550,
+					"status": "missing-in-source"
+				},
+				"test/fixtures/agent2-key.pem": {
+					"match": false,
+					"packageHash": "4db95638f2600970fde2a67350279a815415dbaa9d35da1d442f23306ad14e42",
+					"size": 493,
+					"status": "missing-in-source"
+				},
+				"test/fixtures/agent2.cnf": {
+					"match": false,
+					"packageHash": "d25b3625ec17459b98aa18eb206c17da792f66a7d271d074d881750bd1d56a53",
+					"size": 510,
+					"status": "missing-in-source"
+				},
+				"test/helpers.js": {
+					"match": false,
+					"packageHash": "4b95b7fbdc7222fe3b974e3457910889ab905e1ae389578d4d725a9cc8f50f39",
+					"size": 10361,
+					"status": "missing-in-source"
+				},
+				"test/http/config.json": {
+					"match": false,
+					"packageHash": "f93b75a14f35644fdbaeb736c395bc395e4cfb0bcd6a58098fc421596e1dac2c",
+					"size": 97,
+					"status": "missing-in-source"
+				},
+				"test/http/http-proxy-test.js": {
+					"match": false,
+					"packageHash": "8056936d3b8589628cd8412bebb3950cc9f295e0223b0aa75e9bec56a0ed4a95",
+					"size": 3753,
+					"status": "missing-in-source"
+				},
+				"test/http/routing-proxy-test.js": {
+					"match": false,
+					"packageHash": "b417335fbf689439af0998e1b536355cb3982b9a9669da31af012ab34e8b5ed2",
+					"size": 4610,
+					"status": "missing-in-source"
+				},
+				"test/websocket/websocket-proxy-test.js": {
+					"match": false,
+					"packageHash": "73201506a8ea30646cc01175a83016306002c82281dbb3c56cc4aaa92ead0d0c",
+					"size": 6267,
+					"status": "missing-in-source"
+				},
+				"test/websocket/websocket-routing-proxy-test.js": {
+					"match": false,
+					"packageHash": "d5f186746143e958d1a6c33ed8a4b62f095a0b3ed297a79d93d20c5f5b67d656",
+					"size": 3868,
+					"status": "missing-in-source"
+				},
+				"vendor/websocket.js": {
+					"match": false,
+					"packageHash": "0b18bca82f87567bffc1719c47abc5462984a8768d14562e1b128f6f2e95c00b",
+					"size": 20709,
+					"status": "missing-in-source"
+				},
+				".auto-changelog": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				".gitattributes": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"CODE_OF_CONDUCT.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"codecov.yml": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"index.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/http-proxy/common.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/http-proxy/index.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/http-proxy/passes/web-incoming.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/http-proxy/passes/web-outgoing.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/http-proxy/passes/ws-incoming.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/http-proxy.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"renovate.json": {
+					"match": false,
+					"status": "missing-in-package"
+				}
+			},
+			"summary": {
+				"differentFiles": 3,
+				"matchingFiles": 0,
+				"missingInPackage": 12,
+				"missingInSource": 48,
+				"score": 0,
+				"totalFiles": 63
+			}
+		}
+	}
+]
