@@ -1,0 +1,101 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-01T23:11:11.953Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:11.7.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "readline-sync@0.2.1",
+			"name": "readline-sync",
+			"version": "0.2.1",
+			"location": "https://registry.npmjs.org/readline-sync/-/readline-sync-0.2.1.tgz",
+			"integrity": "sha512-hF1GGLAZZTGsjsSsjix+VZ6nho3jhGSjNo/HHEP/HM/Rd/IoCKZxiTsUsf41O8HSj0BPmOlLqna362PwdGnaMQ==",
+			"publishedAt": "2013-12-17T17:52:55.585Z",
+			"publishedWith": {
+				"node": null,
+				"npm": "1.3.15"
+			}
+		},
+		"source": {
+			"integrity": "sha512-bpij2ZtEAJdq4hftK4whuz3ifWj3PGhe1kFd4MXn8It74Rf89FWC5jVQmfhh5KwOvtnZSUOhbVpeJeSwH61o8Q==",
+			"location": "git://github.com/anseki/readline-sync.git",
+			"spec": "github:anseki/readline-sync#HEAD"
+		},
+		"comparisonHash": "8a2a8dcbb729bf3ee9216e490c955701f0ddebe1",
+		"diff": {
+			"files": {
+				".npmignore": {
+					"match": false,
+					"packageHash": "bcad078364c85b9250791c8665594bfc72170ffc0740e7445ffc97235d69938f",
+					"size": 31,
+					"status": "missing-in-source"
+				},
+				"LICENSE-MIT": {
+					"match": false,
+					"packageHash": "d836da4aefa241e022f825597a6333ba6a767d221b8783a12466e5ba26b3c2f5",
+					"size": 1050,
+					"status": "missing-in-source"
+				},
+				"README.md": {
+					"diff": "--- published/README.md\n+++ rebuilt/README.md\n@@ -1,60 +1,1838 @@\n # readlineSync\n \n-Synchronous [Readline](http://nodejs.org/api/readline.html) for interactively running.  \n-The interface is used with process.stdin and process.stdout in order to accept user input.\n+[![npm](https://img.shields.io/npm/v/readline-sync.svg)](https://www.npmjs.com/package/readline-sync) [![GitHub issues](https://img.shields.io/github/issues/anseki/readline-sync.svg)](https://github.com/anseki/readline-sync/issues) [![dependencies](https://img.shields.io/badge/dependencies-No%20dependency-brightgreen.svg)](package.json) [![license](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)\n \n-## Example\n+**Now, ECMAScript supports `Promise`, `await` and `async`.**\n+\n+Synchronous [Readline](http://nodejs.org/api/readline.html) for interactively running to have a conversation with the user via a console(TTY).\n+\n+readlineSync tries to let your script have a conversation with the user via a console, even when the input/output stream is redirected like `your-script <foo.dat >bar.log`.\n+\n+<table>\n+<tr><td><a href=\"#basic_options\">Basic Options</a></td><td><a href=\"#utility_methods\">Utility Methods</a></td><td><a href=\"#placeholders\">Placeholders</a></td></tr>\n+</table>\n+\n+* Simple case:\n+\n+```js\n+var readlineSync = require('readline-sync');\n+\n+// Wait for user's response.\n+var userName = readlineSync.question('May I have your name? ');\n+console.log('Hi ' + userName + '!');\n+\n+// Handle the secret text (e.g. password).\n+var favFood = readlineSync.question('What is your favorite food? ', {\n+  hideEchoBack: true // The typed text on screen is hidden by `*` (default).\n+});\n+console.log('Oh, ' + userName + ' loves ' + favFood + '!');\n+```\n+\n+```console\n+May I have your name? CookieMonster\n+Hi CookieMonster!\n+What is your favorite food? ****\n+Oh, CookieMonster loves tofu!\n+```\n+\n+* Get the user's response by a single key without the Enter key:\n \n ```js\n var readlineSync = require('readline-sync');\n-var answer = readlineSync.question('What is your favorite food? :');\n-console.log('Oh, so your favorite food is ' + answer);\n+if (readlineSync.keyInYN('Do you want this module?')) {\n+  // 'Y' key was pressed.\n+  console.log('Installing now...');\n+  // Do something...\n+} else {\n+  // Another key was pressed.\n+  console.log('Searching another...');\n+  // Do something...\n+}\n+```\n+\n+* Let the user choose an item from a list:\n+\n+```js\n+var readlineSync = require('readline-sync'),\n+  animals = ['Lion', 'Elephant', 'Crocodile', 'Giraffe', 'Hippo'],\n+  index = readlineSync.keyInSelect(animals, 'Which animal?');\n+console.log('Ok, ' + animals[index] + ' goes to your room.');\n+```\n+\n+```console\n+[1] Lion\n+[2] Elephant\n+[3] Crocodile\n+[4] Giraffe\n+[5] Hippo\n+[0] CANCEL\n+\n+Which animal? [1...5 / 0]: 2\n+Ok, Elephant goes to your room.\n+```\n+\n+* An UI like the Range Slider:  \n+(Press `Z` or `X` key to change a value, and Space Bar to exit)\n+\n+```js\n+var readlineSync = require('readline-sync'),\n+  MAX = 60, MIN = 0, value = 30, key;\n+console.log('\\n\\n' + (new Array(20)).join(' ') +\n+  '[Z] <- -> [X]  FIX: [SPACE]\\n');\n+while (true) {\n+  console.log('\\x1B[1A\\x1B[K|' +\n+    (new Array(value + 1)).join('-') + 'O' +\n+    (new Array(MAX - value + 1)).join('-') + '| ' + value);\n+  key = readlineSync.keyIn('',\n+    {hideEchoBack: true, mask: '', limit: 'zx '});\n+  if (key === 'z') { if (value > MIN) { value--; } }\n+  else if (key === 'x') { if (value < MAX) { value++; } }\n+  else { break; }\n+}\n+console.log('\\nA value the user requested: ' + value);\n",
+					"match": false,
+					"packageHash": "e5fff7f666d72aea8cff4ab99672bc8e971498989cba07ed363951c675e3c8ad",
+					"size": 1475,
+					"sourceHash": "54ebc9cb9bc609b53eb4a3db4b97885178e6cce76f05a88b5254cfa955328ffb",
+					"status": "content"
+				},
+				"lib/readline-sync.js": {
+					"diff": "--- published/lib/readline-sync.js\n+++ rebuilt/lib/readline-sync.js\n@@ -2,66 +2,1328 @@\n  * readlineSync\n  * https://github.com/anseki/readline-sync\n  *\n- * Copyright (c) 2013 anseki\n+ * Copyright (c) 2019 anseki\n  * Licensed under the MIT license.\n  */\n \n 'use strict';\n \n-var promptText = '> ',\n-  encoding = 'utf8',\n-  BUF_SIZE = 256,\n+var\n+  IS_WIN = process.platform === 'win32',\n+\n+  ALGORITHM_CIPHER = 'aes-256-cbc',\n+  ALGORITHM_HASH = 'sha256',\n+  DEFAULT_ERR_MSG = 'The current environment doesn\\'t support interactive reading from TTY.',\n+\n   fs = require('fs'),\n-  stdin = process.stdin,\n-  stdout = process.stdout,\n-  buffer = new Buffer(BUF_SIZE);\n+  TTY = process.binding('tty_wrap').TTY,\n+  childProc = require('child_process'),\n+  pathUtil = require('path'),\n \n-var _readlineSync = function(display) {\n-  var input = '', rsize;\n+  defaultOptions = {\n+    /* eslint-disable key-spacing */\n+    prompt:             '> ',\n+    hideEchoBack:       false,\n+    mask:               '*',\n+    limit:              [],\n+    limitMessage:       'Input another, please.$<( [)limit(])>',\n+    defaultInput:       '',\n+    trueValue:          [],\n+    falseValue:         [],\n+    caseSensitive:      false,\n+    keepWhitespace:     false,\n+    encoding:           'utf8',\n+    bufferSize:         1024,\n+    print:              void 0,\n+    history:            true,\n+    cd:                 false,\n+    phContent:          void 0,\n+    preCheck:           void 0\n+    /* eslint-enable key-spacing */\n+  },\n \n-  if (display) { stdout.write(display, encoding); }\n+  fdR = 'none',\n+  isRawMode = false,\n+  salt = 0,\n+  lastInput = '',\n+  inputHistory = [],\n+  _DBG_useExt = false,\n+  _DBG_checkOptions = false,\n+  _DBG_checkMethod = false,\n+  fdW, ttyR, extHostPath, extHostArgs, tempdir, rawInput;\n \n-  stdin.resume();\n-  while (true) {\n-    rsize = 0;\n+function getHostArgs(options) {\n+  // Send any text to crazy Windows shell safely.\n+  function encodeArg(arg) {\n+    return arg.replace(/[^\\w\\u0080-\\uFFFF]/g, function(chr) {\n+      return '#' + chr.charCodeAt(0) + ';';\n+    });\n+  }\n+\n+  return extHostArgs.concat((function(conf) {\n+    var args = [];\n+    Object.keys(conf).forEach(function(optionName) {\n+      if (conf[optionName] === 'boolean') {\n+        if (options[optionName]) { args.push('--' + optionName); }\n+      } else if (conf[optionName] === 'string') {\n+        if (options[optionName]) {\n+          args.push('--' + optionName, encodeArg(options[optionName]));\n+        }\n+      }\n+    });\n+    return args;\n+  })({\n+    /* eslint-disable key-spacing */\n+    display:        'string',\n+    displayOnly:    'boolean',\n+    keyIn:          'boolean',\n+    hideEchoBack:   'boolean',\n+    mask:           'string',\n+    limit:          'string',\n+    caseSensitive:  'boolean'\n+    /* eslint-enable key-spacing */\n+  }));\n",
+					"match": false,
+					"packageHash": "09d4bb3076ffaaa317eb60a03b48821205bdf414b589662e2a29c36a3d44e9a8",
+					"size": 1533,
+					"sourceHash": "adefb09f7a3ab0bfeb17182658afe01df6d7ad8b0b317cff91fc7457764c7f02",
+					"status": "content"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -1,34 +1,40 @@\n {\n   \"name\": \"readline-sync\",\n-  \"description\": \"Synchronous Readline\",\n-  \"version\": \"0.2.1\",\n-  \"homepage\": \"https://github.com/anseki/readline-sync\",\n-  \"author\": {\n-    \"name\": \"anseki\"\n-  },\n-  \"repository\": {\n-    \"type\": \"git\",\n-    \"url\": \"git://github.com/anseki/readline-sync.git\"\n-  },\n-  \"bugs\": {\n-    \"url\": \"https://github.com/anseki/readline-sync/issues\"\n-  },\n-  \"licenses\": [\n-    {\n-      \"type\": \"MIT\",\n-      \"url\": \"https://github.com/anseki/readline-sync/blob/master/LICENSE-MIT\"\n-    }\n-  ],\n-  \"main\": \"./lib/readline-sync.js\",\n-  \"engines\": {\n-    \"node\": \">= 0.8.0\"\n-  },\n+  \"version\": \"1.4.10\",\n+  \"title\": \"readlineSync\",\n+  \"description\": \"Synchronous Readline for interactively running to have a conversation with the user via a console(TTY).\",\n   \"keywords\": [\n     \"readline\",\n     \"synchronous\",\n+    \"interactive\",\n     \"prompt\",\n     \"question\",\n+    \"password\",\n+    \"cli\",\n+    \"tty\",\n+    \"command\",\n+    \"repl\",\n+    \"keyboard\",\n     \"wait\",\n     \"block\"\n-  ]\n-}\n\\ No newline at end of file\n+  ],\n+  \"main\": \"./lib/readline-sync.js\",\n+  \"files\": [\n+    \"lib/*.@(js|ps1|sh)\",\n+    \"README-Deprecated.md\"\n+  ],\n+  \"engines\": {\n+    \"node\": \">= 0.8.0\"\n+  },\n+  \"homepage\": \"https://github.com/anseki/readline-sync\",\n+  \"repository\": {\n+    \"type\": \"git\",\n+    \"url\": \"git://github.com/anseki/readline-sync.git\"\n+  },\n+  \"bugs\": \"https://github.com/anseki/readline-sync/issues\",\n+  \"license\": \"MIT\",\n+  \"author\": {\n+    \"name\": \"anseki\",\n+    \"url\": \"https://github.com/anseki\"\n+  }\n+}\n",
+					"match": false,
+					"packageHash": "5b6d45608de516b6fa7ac2e7389c78e32d7c1b0a8abe4744d21365ccc1eaa097",
+					"size": 685,
+					"sourceHash": "e7ae040740213d68016c61fd504cb34413d63d7a5fd21b3d95fbcf1b9bfdfdb1",
+					"status": "content"
+				},
+				"LICENSE": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"README-Deprecated.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/encrypt.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/read.ps1": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/read.sh": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/read.wsh.js": {
+					"match": false,
+					"status": "missing-in-package"
+				}
+			},
+			"summary": {
+				"differentFiles": 3,
+				"matchingFiles": 0,
+				"missingInPackage": 6,
+				"missingInSource": 2,
+				"score": 0,
+				"totalFiles": 11
+			}
+		}
+	}
+]
