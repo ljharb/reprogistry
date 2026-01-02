@@ -1,0 +1,135 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-02T16:49:09.327Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:6.9.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "@typechain/ethers-v5@0.0.3",
+			"name": "@typechain/ethers-v5",
+			"version": "0.0.3",
+			"location": "https://registry.npmjs.org/@typechain/ethers-v5/-/ethers-v5-0.0.3.tgz",
+			"integrity": "sha512-Ul8U1pkPj6nafZI3ZbYqndoH6DtCXzX2+clj2olqVZl8fwVPJuJ2Jr7tK3Q+CAH3n6dsZQiEfW7tSkiLOgbNGA==",
+			"publishedAt": "2020-07-16T17:25:48.308Z",
+			"publishedWith": {
+				"node": "10.16.0",
+				"npm": "6.9.0"
+			}
+		},
+		"source": {
+			"integrity": "sha512-i9YzKiXq2XzMFGdBg+VCAoxMewXfJyuilHoZ6vSX1JcyIpyQqXIgnYQ8Nne+Pmm1fac5IAwslN3lv4lNmbyhcg==",
+			"location": "git+https://github.com/ethereum-ts/Typechain.git",
+			"spec": "github:ethereum-ts/Typechain#v0.0.3"
+		},
+		"comparisonHash": "8a2a8dcbb729bf3ee9216e490c955701f0ddebe1",
+		"diff": {
+			"files": {
+				"LICENSE": {
+					"match": false,
+					"packageHash": "c065768413bd073050fe230ef1263597cfec2c97aa73d60b932d98e180dd68ce",
+					"size": 1057,
+					"status": "missing-in-source"
+				},
+				"README.md": {
+					"diff": "--- published/README.md\n+++ rebuilt/README.md\n@@ -1,21 +1,71 @@\n-# Typechain target Ethers-v5\n+# Typechain\n \n-<p align=\"center\">\n-  <img src=\"https://github.com/Neufund/TypeChain/blob/d82f3cc644a11e22ca8e42505c16f035e2f2555d/docs/images/typechain-logo.png?raw=true\" width=\"300\" alt=\"TypeChain\">\n-  <h3 align=\"center\">TypeChain target Ethers-v5</h3>\n-  <p align=\"center\">🔌 TypeScript bindings for Ethers 5.x.x smartcontracts</p>\n-\n-  <p align=\"center\">\n-    <a href=\"https://circleci.com/gh/ethereum-ts/TypeChain\"><img alt=\"Build Status\" src=\"https://circleci.com/gh/ethereum-ts/TypeChain/tree/master.svg?style=svg\"></a>\n-    <a href=\"https://coveralls.io/github/ethereum-ts/TypeChain?branch=master\"><img alt=\"Coverage\" src=\"https://coveralls.io/repos/github/ethereum-ts/TypeChain/badge.svg?branch=master\"></a>\n-    <img alt=\"Downloads\" src=\"https://img.shields.io/npm/dm/typechain.svg\">\n-    <a href=\"https://github.com/prettier/prettier\"><img alt=\"Prettier\" src=\"https://img.shields.io/badge/code_style-prettier-ff69b4.svg\"></a>\n-    <a href=\"/package.json\"><img alt=\"Software License\" src=\"https://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat-square\"></a>\n-  </p>\n-\n-  <p align=\"center\">\n-    <a href=\"https://blog.neufund.org/introducing-typechain-typescript-bindings-for-ethereum-smart-contracts-839fc2becf22\">Medium post</a> | <a href=\"https://www.youtube.com/watch?v=9x6AkShGkwU\">DappCon Video</a>\n-  </p>\n-</p>\n+🔌 Typescript bindings for Ethereum smartcontracts\n \n-## [TypeChain readme](https://github.com/ethereum-ts/TypeChain)\n+## Features ⚡\n+ - static typing - you will never call not existing method again \n+ - IDE support - works with any IDE supporting Typescript\n+ - revamped API - native promises, safety checks and more!\n+ - compatibility - under the hood it uses web3 so it's 100% compatible\n+\n+## Demo 🏎️\n+\n+![Demo](https://media.giphy.com/media/l1J9CYJCRtMVSSPK0/giphy.gif)\n+\n+*[fullsize](https://zippy.gfycat.com/DimBruisedBlacknorwegianelkhound.mp4)*\n+\n+[Example repo](https://github.com/krzkaczor/Typechain-example)\n+\n+## Getting started 📚 \n+\n+### Motivation\n+Interacting with blockchain in Javascript is a pain. Web3 interface is sluggish and when you want to interact with a smartcontract already deployed it only gets worse. Often, you can't be sure what given method call will actually do without looking at ABI file. Typechain is here to solve these problems (as long as you use Typescript).\n+\n+### How does it work?\n+Typechain is just a code generator - provide ABI file and you will get Typescript class with flexible interface for interacting with blockchain. \n+\n+In future we plan to leverage something like tsc plugin system to come up with much more elegant solution. You can keep track of [Allow \"Compiler Plugins\"](https://github.com/Microsoft/TypeScript/issues/16607) issue.\n+\n+### Step by step guide\n+Install typechain with `yarn add --dev typechain`. Run `typechain` (you might need to make sure that it's available in your path if you installed it only locally), it will automatically find all `.abi` files in your project and generate Typescript classes based on them. We recommend git ignoring these generated files and making typechain part of your build process.\n+\n+That's it! Now, just import contract bindings as any other file `import MyAwesomeContract from './contracts/MyAwesomeContract'` and start interacting with it.\n+\n+### API\n+Let's take a look at typings generated for simple [smartcontract](https://github.com/krzkaczor/Typechain-example/blob/master/truffle/contracts/DumbContract.sol):\n+\n+```typescript\n+// interface specifying transaction options\n+interface ITxParams {\n+  from?: string;\n+  gas?: number | string | BigNumber;\n+  gasPrice?: number | string | BigNumber;\n+}\n+\n+declare class Contract {\n+  public constructor(web3: any, address: string);\n+   // alternative way for connecting to blockchain contract. Makes sure that contract exists. Without that web3 would happily return zero/null values for any constant value / function.\n+  static createAndValidate(web3: any, address: string): Promise<Contract>;\n+\n+  // getters are translated as getters\n+  public readonly someValue: Promise<boolean>;\n+  public readonly counter: Promise<BigNumber>;\n+\n+  // constant functions are just methods\n+  public returnAll(): Promise<[BigNumber, BigNumber]>; // tuples in solidity are tuples in TS\n+  public counterWithOffset(offset: BigNumber): Promise<BigNumber>;\n+\n+  // transactions are method with \"Tx\" postfix and additional parameter allowing for specifying transaction related options\n+  public countupTx(params?: ITxParams): Promise<void>;\n+}\n+```\n+\n+## Roadmap 🛣️\n+ - support for all solidity types\n+ - transaction support\n+ - improve generated code (autoformatting, more checks, wiring contracts together)\n+\n+ #### Debugging 🐞\n+ ```sh\n+ DEBUG=typechain typechain\n+ ```\n\\ No newline at end of file\n",
+					"match": false,
+					"packageHash": "226d6e9b1ff312816450156ef3aa23dd50c9d0f56b7eeafe82bf34e63c9f1791",
+					"size": 1405,
+					"sourceHash": "05fe3fbd96df4d7e4eb06b05b03daba4b7b9ed585913cba0a2a6dbb106b081a0",
+					"status": "content"
+				},
+				"dist/codegen/functions.d.ts": {
+					"match": false,
+					"packageHash": "2a1cb49c7b82a4a09b9c07d3e288cf0fecb72e13ea6db37bf929bfa90405ef61",
+					"size": 426,
+					"status": "missing-in-source"
+				},
+				"dist/codegen/functions.js": {
+					"match": false,
+					"packageHash": "59cbee4c6d5d06423ddfc170f7b93560d1d0480b41e17ccca1c4f4907d460666",
+					"size": 2109,
+					"status": "missing-in-source"
+				},
+				"dist/codegen/functions.js.map": {
+					"match": false,
+					"packageHash": "ec9ba544f6a7bb981b88d1882861afcc27196d180639c15d522d6686099ad73f",
+					"size": 1909,
+					"status": "missing-in-source"
+				},
+				"dist/codegen/index.d.ts": {
+					"match": false,
+					"packageHash": "f3b2cbc9e98c5d07f8f79cfe6cc46b87104ce12cff490439f7b352b25e4b2380",
+					"size": 361,
+					"status": "missing-in-source"
+				},
+				"dist/codegen/index.js": {
+					"match": false,
+					"packageHash": "9ceb7d6ad2f72fbc475135298e4981a5f60e0c695fb164e52075a4ce4d4afe3d",
+					"size": 10463,
+					"status": "missing-in-source"
+				},
+				"dist/codegen/index.js.map": {
+					"match": false,
+					"packageHash": "769d134949ea294d09d71860fa81dcf8af5e1843c7bd14819410752a04805c01",
+					"size": 7239,
+					"status": "missing-in-source"
+				},
+				"dist/codegen/types.d.ts": {
+					"match": false,
+					"packageHash": "b55cf20d7846003b7cf17b138c2249bd43156424ab358f994c3e30b7f6b11ce8",
+					"size": 625,
+					"status": "missing-in-source"
+				},
+				"dist/codegen/types.js": {
+					"match": false,
+					"packageHash": "97e3344b9a02ecd4f6edf8cfcdc55da16d40c9283f001b244897474835b2c80f",
+					"size": 3009,
+					"status": "missing-in-source"
+				},
+				"dist/codegen/types.js.map": {
+					"match": false,
+					"packageHash": "a2000715512fa6c0b7a1ce5fc0668a138f29d92accf195242f314a6bb83ae554",
+					"size": 2608,
+					"status": "missing-in-source"
+				},
+				"dist/index.d.ts": {
+					"match": false,
+					"packageHash": "17342ed4c2008b67fa398a5ac208cf23056630e36d2771d3213a293b2713dc7a",
+					"size": 869,
+					"status": "missing-in-source"
+				},
+				"dist/index.js": {
+					"match": false,
+					"packageHash": "11a46d61752e5f23c6388327c6b467179cd8ebf99d661f894117072c94e23643",
+					"size": 4144,
+					"status": "missing-in-source"
+				},
+				"dist/index.js.map": {
+					"match": false,
+					"packageHash": "92622910efe53e699d93ea70291ecd8f66a43c91a8df347b52cc3f7cf31318bc",
+					"size": 3089,
+					"status": "missing-in-source"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -1,69 +1,22 @@\n {\n-  \"name\": \"@typechain/ethers-v5\",\n-  \"description\": \"🔌 TypeChain target for ethers-v5\",\n-  \"keywords\": [\n-    \"ethers\",\n-    \"ethersjs\",\n-    \"ethereum\",\n-    \"TypeChain\",\n-    \"TypeScript\"\n-  ],\n+  \"name\": \"typechain\",\n   \"version\": \"0.0.3\",\n   \"license\": \"MIT\",\n-  \"repository\": \"https://github.com/ethereum-ts/Typechain\",\n-  \"main\": \"./dist/index.js\",\n-  \"module\": \"./dist/index.js\",\n-  \"types\": \"./dist/index.d.ts\",\n-  \"files\": [\n-    \"dist/**\",\n-    \"static/**\",\n-    \"README.md\",\n-    \"LICENSE\"\n-  ],\n-  \"scripts\": {\n-    \"prepublishOnly\": \"yarn lint && yarn format && yarn test && yarn typecheck && (cd ../.. && yarn build)\",\n-    \"start\": \"ts-node -T ./src/index.ts\",\n-    \"format\": \"prettier --config ../../.prettierrc --ignore-path ../../.prettierignore --check \\\"./**/*.ts\\\"\",\n-    \"format:fix\": \"prettier --config ../../.prettierrc --ignore-path ../../.prettierignore --write \\\"./**/*.ts\\\"\",\n-    \"lint\": \"eslint --ext .ts src test\",\n-    \"lint:fix\": \"yarn lint --fix\",\n-    \"typecheck\": \"tsc --noEmit --incremental false --composite false && tsc --noEmit --incremental false --composite false -p tsconfig.types.json\",\n-    \"clean\": \"rm -rf dist && rm -f tsconfig.build.tsbuildinfo\",\n-    \"test\": \"mocha --config ../../.mocharc.js\",\n-    \"test:fix\": \"yarn lint:fix && yarn format:fix && yarn test && yarn typecheck\"\n-  },\n-  \"peerDependencies\": {\n-    \"typechain\": \"^2.0.0\",\n-    \"ethers\": \"^5.0.0\"\n-  },\n   \"devDependencies\": {\n-    \"@types/chai\": \"^4.2.7\",\n-    \"@types/chai-as-promised\": \"^7.1.2\",\n-    \"@types/chai-subset\": \"^1.3.3\",\n-    \"@types/mocha\": \"^5.2.7\",\n-    \"@types/sinon\": \"^7.5.1\",\n-    \"@types/sinon-chai\": \"^3.2.3\",\n-    \"@typescript-eslint/eslint-plugin\": \"^2.25.0\",\n-    \"@typescript-eslint/parser\": \"^2.12.0\",\n-    \"chai\": \"^4.2.0\",\n-    \"chai-as-promised\": \"^7.1.1\",\n-    \"chai-http\": \"^4.3.0\",\n-    \"chai-subset\": \"^1.6.0\",\n-    \"eslint\": \"^6.8.0\",\n-    \"eslint-config-typestrict\": \"^1.0.0\",\n-    \"eslint-plugin-no-only-tests\": \"^2.4.0\",\n-    \"eslint-plugin-sonarjs\": \"^0.5.0\",\n-    \"ganache-cli\": \"^6.9.1\",\n-    \"mocha\": \"^6.2.2\",\n-    \"prettier\": \"^2.0.1\",\n-    \"sinon\": \"^8.0.1\",\n-    \"sinon-chai\": \"^3.3.0\",\n-    \"test-utils\": \"1.0.0\",\n-    \"ts-node\": \"^8.5.4\",\n-    \"typechain\": \"^2.0.0\",\n-    \"typescript\": \"3.9.0-beta\"\n+    \"@types/chalk\": \"^0.4.31\",\n+    \"@types/debug\": \"^0.0.30\",\n+    \"@types/glob\": \"^5.0.32\",\n+    \"@types/node\": \"^8.0.25\",\n+    \"typescript\": \"^2.4.2\"\n   },\n   \"dependencies\": {\n-    \"ethers\": \"^5.0.2\"\n-  }\n+    \"chalk\": \"^2.1.0\",\n+    \"debug\": \"^3.0.1\",\n+    \"glob\": \"^7.1.2\"\n+  },\n+  \"scripts\": {\n+    \"build\": \"rm -rf ./dist && tsc\",\n+    \"postbuild\": \"chmod +x ./dist/cli.js\"\n+  },\n+  \"bin\": \"./dist/cli.js\"\n }\n",
+					"match": false,
+					"packageHash": "e16474baa5fc245765d151f3d30a40c0a3e1a062ba7f6d0cc3476c0fed74efa2",
+					"size": 2236,
+					"sourceHash": "fa1ae3a18823ba23d7c2d271919643ff9f438b896afc1f0ab7b7205c58278571",
+					"status": "content"
+				}
+			},
+			"summary": {
+				"differentFiles": 2,
+				"matchingFiles": 0,
+				"missingInPackage": 0,
+				"missingInSource": 13,
+				"score": 0,
+				"totalFiles": 15
+			}
+		}
+	}
+]
