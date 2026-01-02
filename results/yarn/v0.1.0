@@ -1,0 +1,61 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-02T10:22:46.674Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:2.15.11",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "yarn@0.1.0",
+			"name": "yarn",
+			"version": "0.1.0",
+			"location": "https://registry.npmjs.org/yarn/-/yarn-0.1.0.tgz",
+			"integrity": "sha512-hFQPSzwuI396YeTrd58MAU+JzqF2weybhnD9N6VppwjJDtO5+mJB47Q1Jxeyoo1k/cZIGGk2EGbWJE9ZUca/0A==",
+			"publishedAt": "2012-03-21T17:54:19.600Z",
+			"publishedWith": {
+				"node": "v0.4.0",
+				"npm": "0.3.0-6"
+			}
+		},
+		"source": {
+			"integrity": null,
+			"location": "git://github.com/samholmes/yarn.git",
+			"spec": "github:samholmes/yarn#HEAD"
+		},
+		"comparisonHash": "8a2a8dcbb729bf3ee9216e490c955701f0ddebe1",
+		"diff": {
+			"files": {
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -2,7 +2,7 @@\n   \"author\": \"Sam Holmes (http://github.com/samholmes)\",\n   \"name\": \"yarn\",\n   \"description\": \"A simple asynchronous routing pattern.\",\n-  \"version\": \"0.1.0\",\n+  \"version\": \"0.1.3\",\n   \"repository\": {\n     \"type\": \"git\",\n     \"url\": \"https://github.com/samholmes/yarn\"\n",
+					"match": false,
+					"packageHash": "1bebb2b85457bc820f5f863a972e2982e3677301f6fe18b606c513ed2554a6a4",
+					"size": 381,
+					"sourceHash": "837b64f62967f63d558a8d69e9ee1bc7ac438e1c565d086125cb949af3760a5b",
+					"status": "content"
+				},
+				"yarn.js": {
+					"diff": "--- published/yarn.js\n+++ rebuilt/yarn.js\n@@ -1,18 +1,25 @@\n-module.exports = function(initial) {\r\n-\tvar index = 0;\r\n-\tvar sets = [];\r\n-\tvar next = function(n){\r\n-\t\tif(typeof n == 'number')\r\n-\t\t{\r\n-\t\t\treturn function(){ sets[index++][n].apply(next, arguments); };\r\n-\t\t}\r\n-\t\telse\r\n-\t\t{\r\n-\t\t\tsets.push(Array.prototype.slice.call(arguments));\r\n-\t\t\treturn next;\r\n-\t\t}\r\n+var yarn = function(initial) {\r\n+\tvar clew = []; // clew is a series of sets of functions [[f, ...], ...]\r\n+\tfunction next(i, clewIndex){\r\n+\t\ti = i || 0;\r\n+\t\treturn function(){ clew[clewIndex][i].apply(makeNext(clewIndex+1), arguments); };\r\n+\t}\r\n+\tfunction makeNext(clewIndex){\r\n+\t\tvar f = function(i){ return next(i, clewIndex); };\r\n+\t\tf.error = function(){ if (clew.error) clew.error.apply(null, arguments); };\r\n+\t\treturn f;\r\n+\t}\r\n+\tfunction add(){\r\n+\t\tclew.push(Array.prototype.slice.call(arguments));\r\n+\t\treturn add;\r\n+\t}\r\n+\tadd.error = function(cb){\r\n+\t\tclew.error = cb;\r\n \t};\r\n \t\r\n-\tinitial.call(next);\r\n-\treturn next;\r\n-};\n\\ No newline at end of file\n+\tsetTimeout(function(){ initial.call(makeNext(0)); }, 0);\r\n+\treturn add;\r\n+};\r\n+\r\n+if (module)\r\n+\tmodule.exports = yarn;\n\\ No newline at end of file\n",
+					"match": false,
+					"packageHash": "d9e280aa35d89a4a8b2a8ac2e14bab6389575951cb379afcd30a5ac1d738f657",
+					"size": 339,
+					"sourceHash": "b9b981a9f5d539e2b5b654c8132b54a03b3f29b542ffff6f0868df9d673b9ad7",
+					"status": "content"
+				},
+				"README.md": {
+					"match": false,
+					"status": "missing-in-package"
+				}
+			},
+			"summary": {
+				"differentFiles": 2,
+				"matchingFiles": 1,
+				"missingInPackage": 1,
+				"missingInSource": 0,
+				"score": 0.25,
+				"totalFiles": 4
+			}
+		}
+	}
+]
