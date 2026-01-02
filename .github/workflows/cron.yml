@@ -203,12 +203,40 @@ jobs:
           git add cache-queue.txt
           if git diff --cached --quiet; then
             echo "::notice::No changes to queue"
-          else
-            git commit -m 'queue: add cache tasks'
-            git fetch origin queue
-            git rebase origin/queue
-            git push
+            exit 0
           fi
+
+          git commit -m 'queue: add cache tasks'
+
+          # Retry loop for push conflicts
+          for i in 1 2 3 4 5; do
+            git fetch origin queue
+            if git rebase origin/queue; then
+              if git push; then
+                echo "::notice::Successfully pushed on attempt $i"
+                exit 0
+              fi
+            else
+              git rebase --abort 2>/dev/null || true
+              # Try merge instead
+              git reset --hard HEAD~1
+              git pull --rebase origin queue
+              git cherry-pick ORIG_HEAD 2>/dev/null || {
+                # If cherry-pick fails, manually re-add our changes
+                cat /tmp/results/*.txt >> cache-queue.txt 2>/dev/null || true
+                git add cache-queue.txt
+                git commit -m 'queue: add cache tasks' || true
+              }
+              if git push; then
+                echo "::notice::Successfully pushed on attempt $i (via merge)"
+                exit 0
+              fi
+            fi
+            echo "::warning::Push attempt $i failed, retrying..."
+            sleep $((i * 2))
+          done
+          echo "::error::Failed to push after 5 attempts"
+          exit 1
 
   remove-packages:
     needs: process-package
