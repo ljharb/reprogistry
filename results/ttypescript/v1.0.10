@@ -1,0 +1,63 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-02T08:02:26.904Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:5.6.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "ttypescript@1.0.10",
+			"name": "ttypescript",
+			"version": "1.0.10",
+			"location": "https://registry.npmjs.org/ttypescript/-/ttypescript-1.0.10.tgz",
+			"integrity": "sha512-gLdkHrDxzB7ZznRPQ387Uv6/6+1byYr029FHPTBc6NgbHGwoOTxLpX89e3pkEtkPLfOe+6gwNqu/qD7Om8K5nw==",
+			"publishedAt": "2018-05-06T14:22:57.176Z",
+			"publishedWith": {
+				"node": "8.11.1",
+				"npm": "5.6.0"
+			}
+		},
+		"source": {
+			"integrity": null,
+			"location": "git+https://github.com/cevek/ttypescript.git",
+			"spec": "github:cevek/ttypescript#592885ad397ee5d0ee9ec7d83ebd4e6f828ca06b"
+		},
+		"comparisonHash": "8a2a8dcbb729bf3ee9216e490c955701f0ddebe1",
+		"diff": {
+			"files": {
+				"lib/customRequire.js": {
+					"match": false,
+					"packageHash": "c13a8ece2080384d59dbebe005b7a1818433660c2aeb7e16ec5413c27b971881",
+					"size": 826,
+					"status": "missing-in-source"
+				},
+				"lib/patch.js": {
+					"diff": "--- published/lib/patch.js\n+++ rebuilt/lib/patch.js\n@@ -1,34 +1,39 @@\n-\"use strict\";\n-Object.defineProperty(exports, \"__esModule\", { value: true });\n-const path_1 = require(\"path\");\n-const customRequire_1 = require(\"./customRequire\");\n-if (module.parent.parent === null || module.parent.parent.id.split(/[\\/\\\\]/).indexOf('ts-node') === -1) {\n-    require('ts-node').register({ project: __dirname + '/../ts-node-config/tsconfig.json', transpileOnly: true });\n+const Module = require('module');\n+const path = require('path');\n+require('ts-node').register({ project: __dirname + '/../ts-node-config/tsconfig.json' });\n+\n+function bindSecondArg(fn, secondArg) {\n+    return function(firstArg) {\n+        return fn(firstArg, secondArg);\n+    };\n }\n-function default_1(ts, tsDirname) {\n+\n+module.exports = function(ts) {\n     const originCreateProgram = ts.createProgram;\n-    // (ts as any).version += '.transformers';\n-    ts.createProgram = function (rootNames, options, host, oldProgram) {\n-        const program = originCreateProgram(rootNames, options, host, oldProgram);\n-        // console.log('Used TypeScript from: ' + dirname(tsDirname) + ', version: ' + ts.version);\n-        // console.log('TypeScript from: ' + tsDirname);\n+    ts.version += '.transformers';\n+\n+    ts.createProgram = function() {\n+        const program = originCreateProgram.apply(this, arguments);\n         const originEmit = program.emit;\n-        program.emit = function (targetSourceFile, writeFile, cancellationToken, emitOnlyDtsFiles, customTransformers) {\n-            const transformers = getCustomTransformersFromConfig(ts, program, customTransformers);\n-            return originEmit(targetSourceFile, writeFile, cancellationToken, emitOnlyDtsFiles, transformers);\n+        program.emit = function(sourceFile, writeFileCallback, cancellationToken, emitOnlyDtsFiles, transformers) {\n+            transformers = getCustomTransformersFromConfig(program, transformers);\n+            return originEmit(sourceFile, writeFileCallback, cancellationToken, emitOnlyDtsFiles, transformers);\n         };\n         return program;\n     };\n     return ts;\n-}\n-exports.default = default_1;\n-function requireTransformer(dir, module, program, ts) {\n-    const transformer = customRequire_1.customRequire(dir, module);\n+};\n+\n+function requireTransformer(dir, module, program) {\n+    const m = new Module();\n+    m.filename = dir + '/index.js';\n+    m.paths = Module._nodeModulePaths(dir);\n+    const transformer = Module._load(module, m);\n     if (typeof transformer === 'function') {\n-        return bindSecondArg(transformer, program, ts);\n+        return bindSecondArg(transformer, program);\n     }\n     if (typeof transformer.default === 'function') {\n-        return bindSecondArg(transformer.default, program, ts);\n+        return bindSecondArg(transformer.default, program);\n     }\n     // skip if empty object - recursion bug\n     if (transformer && typeof transformer === 'object' && Object.keys(transformer).length === 0) {\n@@ -36,96 +41,54 @@\n     }\n     console.error(`Transformer \"${module}\" must export a function; got: ${JSON.stringify(transformer)}`);\n }\n-function addCustomTranformers(ts, program, projectDir, transformerPathList, transformers, type) {\n-    if (transformerPathList === undefined)\n-        return;\n-    if (!Array.isArray(transformerPathList)) {\n-        console.error(`plugins.customTransformers.${type} is not an array; got: ` + JSON.stringify(transformerPathList));\n-        return transformerPathList;\n-    }\n-    for (let i = 0; i < transformerPathList.length; i++) {\n-        const transformerPath = transformerPathList[i];\n-        const transformer = requireTransformer(projectDir, transformerPath, program, ts);\n-        if (transformer !== undefined) {\n-            if (type === 'after') {\n-                transformers.after.push(transformer);\n+\n+function getCustomTransformersFromConfig(program, { before = [], after = [] } = {}) {\n+    const transformers = { before, after };\n+    const compilerOptions = program.getCompilerOptions();\n+    const currentDir = compilerOptions.configFilePath ? path.dirname(compilerOptions.configFilePath) : process.cwd();\n+    const customTransformers = compilerOptions.plugins\n+        ? compilerOptions.plugins.reduce((t, p) => (t ? t : p.customTransformers), undefined)\n+        : undefined;\n+    if (customTransformers) {\n+        const errorPrefix = `plugins.customTransformers`;\n+        if (typeof customTransformers !== 'object' || Array.isArray(customTransformers)) {\n+            console.error(`${errorPrefix} is not an object; got: ${JSON.stringify(customTransformers)}`);\n+            return transformers;\n+        }\n+        const keys = Object.keys(customTransformers);\n+        keys.forEach(key => {\n+            if (key !== 'before' && key !== 'after') {\n+                console.error(`Unknown property: ${errorPrefix}.${key}`);\n+            }\n+        });\n",
+					"match": false,
+					"packageHash": "e7b51bb10b7176dcf5df98d6788732d91fe769139883e0a02c140a36481c4261",
+					"size": 6164,
+					"sourceHash": "a950d15ffab04c224ead5b0f4916df2adcf077948f1ac20a1d9ed8b028ef3e62",
+					"status": "content"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -5,7 +5,7 @@\n     \"ttsserver\": \"./bin/tsserver\"\n   },\n   \"scripts\": {},\n-  \"version\": \"1.0.10\",\n+  \"version\": \"1.0.9\",\n   \"description\": \"Over TypeScript tool to use custom transformers in the tsconfig.json\",\n   \"main\": \"lib/typescript.js\",\n   \"author\": \"cevek\",\n",
+					"match": false,
+					"packageHash": "62038f8113754749066d4c353c9a5526d4498a9231b884103c46082ec45e90bc",
+					"size": 505,
+					"sourceHash": "17d7a9bf523c0aef0ec42aa044b82839d2cdb44e91a84f8eecb607b8fbb694b8",
+					"status": "content"
+				}
+			},
+			"summary": {
+				"differentFiles": 2,
+				"matchingFiles": 15,
+				"missingInPackage": 0,
+				"missingInSource": 1,
+				"score": 0.8333333333333334,
+				"totalFiles": 18
+			}
+		}
+	}
+]

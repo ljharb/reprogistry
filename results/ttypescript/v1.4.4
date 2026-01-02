@@ -1,0 +1,337 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-02T08:04:13.144Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:5.6.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "ttypescript@1.4.4",
+			"name": "ttypescript",
+			"version": "1.4.4",
+			"location": "https://registry.npmjs.org/ttypescript/-/ttypescript-1.4.4.tgz",
+			"integrity": "sha512-4MswsHs48Wu0cmGJrJDKc+lgb4mD30ZK1nm3A9X5XLvtkYU0DQMndGl69KSgkBaf+yILO0L8zbxrQf1kMlJ0fQ==",
+			"publishedAt": "2018-05-31T10:52:11.824Z",
+			"publishedWith": {
+				"node": "8.11.1",
+				"npm": "5.6.0"
+			}
+		},
+		"source": {
+			"integrity": null,
+			"location": "git+https://github.com/cevek/ttypescript.git",
+			"spec": "github:cevek/ttypescript#HEAD"
+		},
+		"comparisonHash": "8a2a8dcbb729bf3ee9216e490c955701f0ddebe1",
+		"diff": {
+			"files": {
+				"CHANGELOG.md": {
+					"diff": "--- published/CHANGELOG.md\n+++ rebuilt/CHANGELOG.md\n@@ -1,45 +1 @@\n-# Change Log\n \n-All notable changes to this project will be documented in this file.\n-See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.\n-\n-<a name=\"1.4.4\"></a>\n-## [1.4.4](https://github.com/cevek/ttypescript/compare/v1.4.3...v1.4.4) (2018-05-31)\n-\n-\n-### Bug Fixes\n-\n-* remove config key checks ([629dcbc](https://github.com/cevek/ttypescript/commit/629dcbc))\n-\n-\n-\n-\n-<a name=\"1.4.3\"></a>\n-## [1.4.3](https://github.com/cevek/ttypescript/compare/v1.4.2...v1.4.3) (2018-05-17)\n-\n-\n-### Bug Fixes\n-\n-* compiler options for transformers ([3cc1167](https://github.com/cevek/ttypescript/commit/3cc1167))\n-\n-\n-\n-\n-<a name=\"1.4.2\"></a>\n-## [1.4.2](https://github.com/cevek/ttypescript/compare/v1.4.1...v1.4.2) (2018-05-17)\n-\n-\n-### Bug Fixes\n-\n-* **build:** es5 target for ttypescript build [#14](https://github.com/cevek/ttypescript/issues/14) ([98ae8d4](https://github.com/cevek/ttypescript/commit/98ae8d4))\n-\n-\n-\n-\n-<a name=\"1.4.1\"></a>\n-## [1.4.1](https://github.com/cevek/ttypescript/compare/v1.4.0...v1.4.1) (2018-05-15)\n-\n-\n-### Bug Fixes\n-\n-* **package:** removed examples from build ([4f3f40e](https://github.com/cevek/ttypescript/commit/4f3f40e))\n",
+					"match": false,
+					"packageHash": "d4e493110d27381e478bcdef7636e5192c807dc845009ec02b3baea02dd1a962",
+					"size": 1141,
+					"sourceHash": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+					"status": "content"
+				},
+				"README.md": {
+					"diff": "--- published/README.md\n+++ rebuilt/README.md\n@@ -1 +1,338 @@\n+# Deprecation Notice\n+\n+> **`ttypescript` is deprecated**. It currently works with TS below 5.0, but it will not be updated.\n+ \n+For TypeScript 5+, please use [ts-patch](https://github.com/nonara/ts-patch).\n+\n+---\n+\n+[![npm version](https://badge.fury.io/js/ttypescript.svg)](https://badge.fury.io/js/ttypescript) [![Build Status](https://travis-ci.org/cevek/ttypescript.svg?branch=master)](https://travis-ci.org/cevek/ttypescript)\n+\n # ttypescript\n+\n+## What it is\n+Currently TypeScript doesn't support custom transformers in the tsconfig.json, but supports it programmatically.\n+\n+And there is no way to compile your files using custom transformers using `tsc` command.\n+\n+TTypescript (Transformer TypeScript) solves this problem by patching on the fly the compile module to use transformers from `tsconfig.json`.\n+\n+<!---\n+TTypescript is a drop-in replacement for all typescript modules, located in ``` node_modules/typescript/lib ``` directory:\n+\n+```ts\n+import * as ts from 'ttypescript'\n+import * as tsServer from 'ttypescript/lib/tsserver'\n+import * as watchGuard from 'ttypescript/lib/watchGuard'\n+```\n+--->\n+Instead of tsc and tsserver, use ttsc and ttsserver wrappers. This wrappers try to use locally installed typescript first.\n+\n+No version lock-ins - typescript used as peer dependency.\n+\n+## How to install\n+\n+```\n+npm i ttypescript -D\n+```\n+\n+ttypescript uses your installed `typescript` in your `node_modules`\n+\n+## How to use\n+\n+### tsconfig.json\n+\n+Set a transformer path to the `tsconfig.json` in `compilerOptions` section `plugin` array:\n+```\n+{\n+    \"compilerOptions\": {\n+        \"plugins\": [\n+            { \"transform\": \"transformer-module\" },\n+        ]\n+    }\n+}\n+```\n+\n+plugin entries described in `PluginConfig`:\n+\n+```ts\n+export interface PluginConfig {\n+    /**\n+     * Path to transformer or transformer module name\n+     */\n+    transform?: string;\n+\n+    /**\n+     * The optional name of the exported transform plugin in the transform module.\n+     */\n+    import?: string;\n+\n+    /**\n+     * Plugin entry point format type, default is program\n+     */\n+    type?: 'program' | 'config' | 'checker' | 'raw' | 'compilerOptions';\n+\n+    /**\n+     * Should transformer applied after all ones\n+     */\n+    after?: boolean;\n+\n+    /**\n+     * Should transformer applied for d.ts files, supports from TS2.9\n+     */\n+    afterDeclarations?: boolean;\n+    /**\n+     * any other properties provided to the transformer as config argument\n+     * */\n+    [options: string]: any;\n+}\n+```\n+\n+You just need to add the `transform` block with optional `import`, `type`, `after`, `afterDeclarations` and plugin-related options.\n+\n+`transform` can accept npm module or local file path (.ts or .js) related to `tsconfig.json`\n+\n+### PluginConfig.type\n+Because currently transformers can run only programmatically, most of them use factory wrapper with different signatures.\n+For the possible to work with any of them you can specify `type` in the plugin config.\n",
+					"match": false,
+					"packageHash": "38317b624ae36eb3c917c11a196d80506c22556e62f5decf2b55b7b8d4dcd4af",
+					"size": 14,
+					"sourceHash": "6968e3600f632d6d9e57386b80269bf469923c9638e41609632cb4cf2944d81f",
+					"status": "content"
+				},
+				"bin/tsc": {
+					"match": false,
+					"packageHash": "8d5fa5bd883fec0979fc2004f1fe1d99aef40570155d550eadc0b03b55513bf0",
+					"size": 45,
+					"status": "missing-in-source"
+				},
+				"bin/tsserver": {
+					"match": false,
+					"packageHash": "a088f0c3419bcb2f7b860ad42e4c9f25ead067eda70af6a10d0a7d453954aada",
+					"size": 50,
+					"status": "missing-in-source"
+				},
+				"lib/PluginCreator.d.ts": {
+					"match": false,
+					"packageHash": "736d7d29e3b9415ae8f9d7131d76bb8ba7d0d0e861329720c0ebc82276cb5856",
+					"size": 2519,
+					"status": "missing-in-source"
+				},
+				"lib/PluginCreator.js": {
+					"match": false,
+					"packageHash": "5636de9e5e1bea6f637c362b38f1097803eebb3e2c82a9d54c02104938e6ec53",
+					"size": 6675,
+					"status": "missing-in-source"
+				},
+				"lib/cancelationToken.d.ts": {
+					"match": false,
+					"packageHash": "51ee70aa31a21eb0c4fb77faa149717880dfc5c4aa71b1fe0fc92d6f67f8d334",
+					"size": 99,
+					"status": "missing-in-source"
+				},
+				"lib/cancelationToken.js": {
+					"match": false,
+					"packageHash": "aefb6af53a3449dd5871e7ff3aa8d53e25031edae6a993ab379ae5a22856e38e",
+					"size": 133,
+					"status": "missing-in-source"
+				},
+				"lib/patchCreateProgram.d.ts": {
+					"match": false,
+					"packageHash": "0abadabdd8fe83c748e76ab7bd32b5e21a1db3c37d7d9f7e105abc53c710ad6c",
+					"size": 253,
+					"status": "missing-in-source"
+				},
+				"lib/patchCreateProgram.js": {
+					"match": false,
+					"packageHash": "282a7b6aa8f6b490c65bcfb4a849b808d3d713d6d43bc60947dcb1b9bb67169c",
+					"size": 3472,
+					"status": "missing-in-source"
+				},
+				"lib/tsc.d.ts": {
+					"match": false,
+					"packageHash": "8e609bb71c20b858c77f0e9f90bb1319db8477b13f9f965f1a1e18524bf50881",
+					"size": 11,
+					"status": "missing-in-source"
+				},
+				"lib/tsc.js": {
+					"match": false,
+					"packageHash": "b7229bc26bf26b63c4d9ebe018fab83b28e3846758d316f126cde09778f9fd54",
+					"size": 1366,
+					"status": "missing-in-source"
+				},
+				"lib/tsserver.d.ts": {
+					"match": false,
+					"packageHash": "a0e895337c7d31ec3efc22f4768e00ffb4a073dc8626de2cba89133c2964c780",
+					"size": 72,
+					"status": "missing-in-source"
+				},
+				"lib/tsserver.js": {
+					"match": false,
+					"packageHash": "4e80551f958d48ac4daba1b8e353c63d9c97f1d75c717c286342599bfb88586e",
+					"size": 217,
+					"status": "missing-in-source"
+				},
+				"lib/tsserverlibrary.d.ts": {
+					"match": false,
+					"packageHash": "0597b3d41790c4c9249e05b1ecc0c44a5f8545e949b0cf25ab25525854600930",
+					"size": 71,
+					"status": "missing-in-source"
+				},
+				"lib/tsserverlibrary.js": {
+					"match": false,
+					"packageHash": "1cad3aad289abdbe50d4accce1e79abaf94724c6bda1eb82fee695418049760b",
+					"size": 198,
+					"status": "missing-in-source"
+				},
+				"lib/typescript.d.ts": {
+					"match": false,
+					"packageHash": "29fea400b7096e9cd5925f782c8ded171b8f644b98e5749957281b3c26ee9290",
+					"size": 62,
+					"status": "missing-in-source"
+				},
+				"lib/typescript.js": {
+					"match": false,
+					"packageHash": "d5f4aa71a81d94a8ef44b20a67b6060fa9b6f8bd034ca870fbaf351fc3a8dcf2",
+					"size": 187,
+					"status": "missing-in-source"
+				},
+				"lib/typescriptServices.d.ts": {
+					"match": false,
+					"packageHash": "023e5c3ab7948843f1df636db041260e32b13ec6d5955e0bc5ec73f53839a32d",
+					"size": 76,
+					"status": "missing-in-source"
+				},
+				"lib/typescriptServices.js": {
+					"match": false,
+					"packageHash": "9ddce88ae89dd6a57788fd050ffbd49fb06ced969a809639941f7a017a763a98",
+					"size": 218,
+					"status": "missing-in-source"
+				},
+				"lib/typingsInstaller.d.ts": {
+					"match": false,
+					"packageHash": "1e86da294132779af101bec925c834bbfefd65688b59a746df80c12e1fd63c98",
+					"size": 82,
+					"status": "missing-in-source"
+				},
+				"lib/typingsInstaller.js": {
+					"match": false,
+					"packageHash": "9442c53863dd09f0d98e94725372bb35fb73f2749d982eccf9dec98fdc3f9061",
+					"size": 116,
+					"status": "missing-in-source"
+				},
+				"lib/watchGuard.d.ts": {
+					"match": false,
+					"packageHash": "300d9ab993398ffdf39d5dd98161bfc6dfc00fe2e71aee80723364a78975d2e6",
+					"size": 62,
+					"status": "missing-in-source"
+				},
+				"lib/watchGuard.js": {
+					"match": false,
+					"packageHash": "182edead981a52dfdc8b02cd470592d70dec5eee40779d514a337963f302e3ab",
+					"size": 96,
+					"status": "missing-in-source"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -1,53 +1,39 @@\n {\n-  \"name\": \"ttypescript\",\n-  \"bin\": {\n-    \"ttsc\": \"./bin/tsc\",\n-    \"ttsserver\": \"./bin/tsserver\"\n-  },\n-  \"version\": \"1.4.4\",\n+  \"name\": \"ttypescript-build\",\n+  \"version\": \"1.4.1\",\n   \"description\": \"Over TypeScript tool to use custom transformers in the tsconfig.json\",\n-  \"main\": \"lib/typescript.js\",\n-  \"files\": [\n-    \"*.md\",\n-    \"bin\",\n-    \"lib\",\n-    \"ts-node-config\"\n-  ],\n+  \"private\": true,\n+  \"scripts\": {\n+    \"clean\": \"rm -rf packages/*/dist packages/*/lib\",\n+    \"clean.all\": \"lerna clean --yes && rm -rf package-lock.json packages/*/package-lock.json node_modules packages/*/lib packages/*/dist\",\n+    \"debug\": \"node --inspect-brk ./node_modules/jest/bin/jest --runInBand --no-cache --no-watchman\",\n+    \"postinstall\": \"lerna bootstrap --hoist\",\n+    \"build\": \"lerna exec --scope=ttypescript -- tsc\",\n+    \"test\": \"npm run build && jest\",\n+    \"test.watch\": \"npm run build && jest --watch\",\n+    \"publish\": \"npm test && lerna publish --conventional-commits --yes\"\n+  },\n   \"author\": \"cevek\",\n   \"repository\": {\n     \"type\": \"git\",\n     \"url\": \"https://github.com/cevek/ttypescript.git\"\n   },\n-  \"homepage\": \"https://github.com/cevek/ttypescript/packages/ttypescript/#readme\",\n-  \"keywords\": [\n-    \"typescript\",\n-    \"wrapper\",\n-    \"transform\",\n-    \"transformer\",\n-    \"plugin\",\n-    \"config\"\n-  ],\n+  \"homepage\": \"https://github.com/cevek/ttypescript/#readme\",\n   \"license\": \"MIT\",\n-  \"dependencies\": {\n-    \"resolve\": \"^1.7.1\",\n-    \"ts-node\": \"^6.0.2\"\n-  },\n-  \"peerDependencies\": {\n-    \"typescript\": \"^2.8.3\"\n-  },\n   \"devDependencies\": {\n-    \"@types/jest\": \"^22.2.3\",\n-    \"@types/node\": \"^9.6.1\",\n-    \"@types/resolve\": \"0.0.8\",\n-    \"graphql\": \"^0.13.2\",\n-    \"graphql-tag\": \"^2.9.2\",\n-    \"ts-nameof\": \"^1.0.0\",\n-    \"ts-transform-css-modules\": \"^0.2.2\",\n-    \"ts-transform-graphql-tag\": \"^0.1.3\",\n-    \"ts-transform-img\": \"^0.2.1\",\n-    \"ts-transform-react-intl\": \"^0.2.2\",\n-    \"ts-transformer-enumerate\": \"^0.3.0\",\n-    \"ts-transformer-keys\": \"^0.3.1\",\n-    \"typescript\": \"^2.8.3\"\n+    \"@types/jest\": \">=23.3.11\",\n+    \"@types/node\": \">=10.12.18\",\n+    \"@types/resolve\": \">=0.0.8\",\n+    \"jest\": \">=23.6.0\",\n+    \"lerna\": \">=3.8.1\",\n+    \"ts-jest\": \">=23.10.5\",\n+    \"ts-nameof\": \">=2.0.0\",\n+    \"ts-node\": \">=8.0.2\",\n+    \"ts-transform-css-modules\": \">=0.3.3\",\n+    \"ts-transform-img\": \">=0.3.2\",\n+    \"ts-transform-react-intl\": \">=0.4.0\",\n+    \"ts-transformer-enumerate\": \">=0.3.1\",\n+    \"ts-transformer-keys\": \">=0.3.4\",\n+    \"typescript\": \">=3.2.2\"\n   }\n }\n",
+					"match": false,
+					"packageHash": "abca2be4e10149aef7be723095699ab67197cc5919a10b4930667d7a695e6666",
+					"size": 1250,
+					"sourceHash": "e0b9263cbb58c3552b7e96f9432cfa0d139036096f81d303d8e4ad9746139d69",
+					"status": "content"
+				},
+				".prettierrc.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"jest.config.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lerna.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/parcel-plugin/TTypescriptAsset.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/parcel-plugin/index.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/parcel-plugin/package.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/ttypescript/CHANGELOG.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/ttypescript/README.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/ttypescript/__tests__/PluginCreator.spec.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/ttypescript/__tests__/assets/tsnode.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/ttypescript/__tests__/assets/tsnode.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/ttypescript/__tests__/configs.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/ttypescript/__tests__/helpers.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/ttypescript/__tests__/loadTypeScript/loadTypeScript.spec.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/ttypescript/__tests__/loadTypeScript/mocks/oldVersion.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/ttypescript/__tests__/loadTypeScript/mocks/requireCache.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/ttypescript/__tests__/loadTypeScript/mocks/runInThisContextOnce.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/ttypescript/__tests__/loadTypeScript/mocks/selfRequire.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/ttypescript/__tests__/loadTypeScript/mocks/simple.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/ttypescript/__tests__/transforms/before.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/ttypescript/__tests__/transforms/safely.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/ttypescript/__tests__/transforms/transform-advanced.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/ttypescript/__tests__/transforms/transform-simple.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/ttypescript/__tests__/transforms/transformers.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/ttypescript/__tests__/tsnode.spec.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/ttypescript/__tests__/tsplugins.spec.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/ttypescript/__tests__/ttsc.spec.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/ttypescript/__tests__/typescript.spec.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/ttypescript/bin/tsc": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/ttypescript/bin/tsserver": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/ttypescript/package.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/ttypescript-examples/CHANGELOG.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/ttypescript-examples/README.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/ttypescript-examples/package.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"tsconfig.base.json": {
+					"match": false,
+					"status": "missing-in-package"
+				}
+			},
+			"summary": {
+				"differentFiles": 3,
+				"matchingFiles": 0,
+				"missingInPackage": 35,
+				"missingInSource": 22,
+				"score": 0,
+				"totalFiles": 60
+			}
+		}
+	}
+]

@@ -1,0 +1,117 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-02T08:01:10.500Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:5.5.1",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "ttypescript@1.0.4",
+			"name": "ttypescript",
+			"version": "1.0.4",
+			"location": "https://registry.npmjs.org/ttypescript/-/ttypescript-1.0.4.tgz",
+			"integrity": "sha512-l5B8AH+WD8T45NoZUgWvqJRRh//5AUZMfvBNgihj+9NZPyc0aJNwfPYtbRSlSjDSgzASvXCwlvY1OdptDOuo7w==",
+			"publishedAt": "2018-02-13T12:22:15.760Z",
+			"publishedWith": {
+				"node": "9.2.0",
+				"npm": "5.5.1"
+			}
+		},
+		"source": {
+			"integrity": null,
+			"location": "git+https://github.com/cevek/ttypescript.git",
+			"spec": "github:cevek/ttypescript#25362dad03996cc5a522e5f7e93425ac32c42d75"
+		},
+		"comparisonHash": "8a2a8dcbb729bf3ee9216e490c955701f0ddebe1",
+		"diff": {
+			"files": {
+				"README.md": {
+					"diff": "--- published/README.md\n+++ rebuilt/README.md\n@@ -1,7 +1,5 @@\n # ttypescript\n-\n ## What it is\n-\n Currently TypeScript doesn't support custom transformers in the tsconfig.json, but supports its programatically.\n \n And there is no way to compile your files using custom transformers using `tsc` command.\n@@ -9,57 +7,44 @@\n TTypescript (Transformer Typescript) solves this problem by patching on the fly the compile module to use transformers from `tsconfig.json`.\n \n ## How to install\n-\n ```\n-npm i ttypescript -D\n+npm i ttypescript --save\n+npm i -g ttypescript\n ```\n-\n ttypescript uses your installed `typescript` in your `node_modules`\n \n ## How to use\n \n-You can use transformers written in ts or js\n-\n ### tsconfig.json\n-\n-You just need to add the `customTransformers` block with `before` and(or) `after` object contains array of transformer paths into the `compilerOptions.plugins`\n-\n-Don't forget to exclude your transformers in the tsconfig.json\n-\n+You just need to add the `customTransformers` block with `before` and(or) `after` object contains array of transformer paths into the `compilerOptions`\n ```json\n {\n-    \"compilerOptions\": {\n-        \"plugins\": [\n-            {\n-                \"customTransformers\": {\n-                    \"before\": [\"transformer-module\"],\n-                    \"after\": [\"./transformers/my-transformer.ts\"]\n-                }\n-            }\n-        ]\n-    },\n-    \"exclude\": [\"node_modules\", \"transformers/**/*\"]\n+  \"compilerOptions\": {\n+   \"customTransformers\": {\n+      \"before\": [\n+        \"transformermodule\"\n+      ],\n+      \"after\": [\n+        \"./or_some_path_in_your_project_directory\"\n+      ]\n+    }\n+  }\n }\n ```\n \n ### Command line\n-\n Like usual `tsc`, all arguments work the same way.\n-\n ```\n-npx ttsc\n+ttsc\n ```\n \n ### ts-node\n-\n ```\n-npx ts-node --compiler ttypescript index.ts\n+ts-node --compiler ttypescript index.ts\n or\n-npx ts-node -C ttypescript index.ts\n+ts-node -C ttypescript index.ts\n ```\n-\n ### Webpack\n-\n ```js\n     {\n         test: /\\.(ts|tsx)$/,\n@@ -71,10 +56,11 @@\n     }\n ```\n \n-## Example\n+### Visual Studio Code\n+Set the config `typescript.tsdk` to `/usr/local/lib/node_modules/ttypescript/lib/`\n \n-An example project is in the `example` directory\n+### WebStorm\n+Set in the TypeScript settings tab the typescript path: `/usr/local/lib/node_modules/ttypescript` or from your project node_modules\n \n ## License\n-\n-MIT License\n+MIT License\n",
+					"match": false,
+					"packageHash": "d6873651ba8ba86d7ec3ff8155ac2ee1a5bd9edbe17a309deff9b7f2d883bdb4",
+					"size": 1624,
+					"sourceHash": "c4d51efcb2973372247ce9c9ce06e7ccbb67d292de589832ee3190aa655c8af0",
+					"status": "content"
+				},
+				"lib/patch.js": {
+					"diff": "--- published/lib/patch.js\n+++ rebuilt/lib/patch.js\n@@ -1,82 +1,50 @@\n const Module = require('module');\n-const path = require('path');\n-require('ts-node').register({ project: __dirname + '/../ts-node-config' });\n-\n-function requireTransformer(dir, module) {\n+function customRequire(dir, module) {\n     const m = new Module();\n     m.filename = dir + '/index.js';\n     m.paths = Module._nodeModulePaths(dir);\n-    const transformer = Module._load(module, m);\n-    if (typeof transformer === 'function') {\n-        return transformer;\n-    }\n-    if (typeof transformer.default === 'function') {\n-        return transformer.default;\n-    }\n-    // skip if empty - recursion bug\n-    if (transformer && typeof transformer === 'object' && Object.keys(transformer).length === 0) {\n-        return;\n-    }\n-    console.error(`Transformer \"${module}\" must export a function; got: ${JSON.stringify(transformer)}`);\n+    return Module._load(module, m);\n }\n \n-module.exports = function(ts) {\n+module.exports = (function (ts) {\n     const origin = ts.emitFiles;\n     ts.version += '.transformers';\n \n-    ts.emitFiles = function(resolver, host, targetSourceFile, emitOnlyDtsFiles, transformers) {\n-        const compilerOptions = host.getCompilerOptions();\n-        const currentDir = compilerOptions.configFilePath\n-            ? path.dirname(compilerOptions.configFilePath)\n-            : process.cwd();\n-        // const options = compilerOptions.configFile ? ts.convertToObject(compilerOptions.configFile) : compilerOptions;\n-        const customTransformers = compilerOptions.plugins\n-            ? compilerOptions.plugins.reduce((t, p) => (t ? t : p.customTransformers), undefined)\n-            : undefined;\n-        label: {\n-            if (customTransformers) {\n-                const errorPrefix = `plugins.customTransformers`;\n-                if (typeof customTransformers !== 'object' || Array.isArray(customTransformers)) {\n-                    console.error(`${errorPrefix} is not an object; got: ${JSON.stringify(customTransformers)}`);\n-                    break label;\n+    const item = {\n+        name: \"customTransformers\",\n+        paramType: ts.Diagnostics.KIND,\n+        type: \"object\",\n+    };\n+    ts.optionDeclarations.push(item);\n+\n+    ts.emitFiles = function (resolver, host, targetSourceFile, emitOnlyDtsFiles, transformers) {\n+        const currentDir = host.getCurrentDirectory();\n+        const options = host.getCompilerOptions();\n+        if (options.customTransformers) {\n+            const before = options.customTransformers.before;\n+            const after = options.customTransformers.after;\n+            if (before) {\n+                if (!Array.isArray(before)) {\n+                    throw new Error('customTransformers.before is not an array: ' + JSON.stringify(before));\n                 }\n-                const keys = Object.keys(customTransformers);\n-                keys.forEach(key => {\n-                    if (key !== 'before' && key !== 'after') {\n-                        console.error(`Unknown property: ${errorPrefix}.${key}`);\n-                    }\n-                });\n-                const before = customTransformers.before;\n-                const after = customTransformers.after;\n-                if (before) {\n-                    if (!Array.isArray(before)) {\n-                        console.error(`${errorPrefix}.before is not an array; got: ` + JSON.stringify(before));\n-                        break label;\n-                    }\n-                    for (let i = before.length - 1; i >= 0; i--) {\n-                        const transformerPath = before[i];\n-                        const transformer = requireTransformer(currentDir, transformerPath);\n-                        if (transformer) {\n-                            transformers.unshift(transformer);\n-                        }\n-                    }\n+                for (let i = before.length - 1; i >= 0; i--) {\n+                    const transformerPath = before[i];\n+                    const transformer = customRequire(currentDir, transformerPath);\n+                    transformers.unshift(transformer);\n+                }\n+            }\n+            if (after) {\n+                if (!Array.isArray(after)) {\n+                    throw new Error('customTransformers.after is not an array: ' + JSON.stringify(after));\n                 }\n-                if (after) {\n-                    if (!Array.isArray(after)) {\n-                        console.error(`${errorPrefix}.after is not an array; got: ` + JSON.stringify(after));\n-                        break label;\n-                    }\n-                    for (let i = 0; i < after.length; i++) {\n",
+					"match": false,
+					"packageHash": "4698c4197a0c98958774dd07ced8598b0bafd1af759dc61920aac57935b7f550",
+					"size": 3682,
+					"sourceHash": "002bdf4255f6db2046a2dd08d951eeb8a3fb5443fa59b741bdf046ca08c50919",
+					"status": "content"
+				},
+				"lib/tsc.js": {
+					"diff": "--- published/lib/tsc.js\n+++ rebuilt/lib/tsc.js\n@@ -1,16 +1,18 @@\n+const path = require('path');\n const fs = require('fs');\n const vm = require('vm');\n-__filename = require.resolve('typescript/lib/tsc.js');\n-__dirname = require('path').dirname(__filename);\n-const content = fs.readFileSync(__filename, 'utf8').replace('ts.executeCommandLine(ts.sys.args);', 'module.exports = ts;');\n-const script = new vm.Script(content, {filename: __filename});\n+const tscFilename = require.resolve('typescript/lib/tsc');\n+const content = fs.readFileSync(tscFilename, 'utf8').replace('ts.executeCommandLine(ts.sys.args);', 'module.exports = ts;');\n+\n+const script = new vm.Script(content, {filename: tscFilename});\n const context = vm.createContext(Object.assign({}, global, {\n     require,\n     module: {},\n-    __filename: __filename,\n-    __dirname: __dirname\n+    __filename: tscFilename,\n+    __dirname: path.dirname(tscFilename)\n }));\n const ts = script.runInContext(context);\n+\n require('./patch')(ts);\n \n ts.executeCommandLine(ts.sys.args);\n\\ No newline at end of file\n",
+					"match": false,
+					"packageHash": "6c93f9ce9e0593d4d9562bea870ce54287776be1fd70454d1530555fefe8fdc9",
+					"size": 592,
+					"sourceHash": "a80da23c747a83d14910c8006adf51e7683b91cd37ae98be49186741f5205846",
+					"status": "content"
+				},
+				"lib/tsserver.js": {
+					"diff": "--- published/lib/tsserver.js\n+++ rebuilt/lib/tsserver.js\n@@ -1,5 +1,3 @@\n-__filename = require.resolve('typescript/lib/tsserver.js');\n-__dirname = require('path').dirname(__filename);\n-const ts = require(__filename);\n+const ts = require('typescript/lib/tsserver.js');\n require('./patch')(ts);\n module.exports = ts;\n\\ No newline at end of file\n",
+					"match": false,
+					"packageHash": "1b1fb5de5de603eace0d7554bd459347aea6491edf24a7c1a435d801a85b5298",
+					"size": 185,
+					"sourceHash": "75a167d2312cb4d8529309f6f976ca3e77bc37e86cc875c33f767bb7c78e7f37",
+					"status": "content"
+				},
+				"lib/tsserverlibrary.js": {
+					"match": false,
+					"packageHash": "9603c976d3029958cc6c681e42ddfcea93a40cc42a4293a4001a7fdab8d2ad49",
+					"size": 193,
+					"status": "missing-in-source"
+				},
+				"lib/typescript.js": {
+					"diff": "--- published/lib/typescript.js\n+++ rebuilt/lib/typescript.js\n@@ -1,5 +1,3 @@\n-__filename = require.resolve('typescript/lib/typescript.js');\n-__dirname = require('path').dirname(__filename);\n-const ts = require(__filename);\n+const ts = require('typescript/lib/typescript.js');\n require('./patch')(ts);\n-module.exports = ts;\n+module.exports = ts;\n\\ No newline at end of file\n",
+					"match": false,
+					"packageHash": "1bb05719fb9c1c406237445dbefb5af6d3ccf731aafafef4198ea2bc8b758a7d",
+					"size": 188,
+					"sourceHash": "9d2be87583bbf5215ec03d278d98ddbf72724ef929b18c2d9f0ca522b850ff61",
+					"status": "content"
+				},
+				"lib/typescriptServices.js": {
+					"diff": "--- published/lib/typescriptServices.js\n+++ rebuilt/lib/typescriptServices.js\n@@ -1,5 +1,3 @@\n-__filename = require.resolve('typescript/lib/typescriptServices.js');\n-__dirname = require('path').dirname(__filename);\n-const ts = require(__filename);\n+const ts = require('typescript/lib/typescriptServices.js');\n require('./patch')(ts);\n-module.exports = ts;\n+module.exports = ts;\n\\ No newline at end of file\n",
+					"match": false,
+					"packageHash": "b9e1309747b87b885f8df1d630df709d218d2184f0f0f272aa530808e7a13fea",
+					"size": 196,
+					"sourceHash": "baf7dffcc8b3ff9d9ea6a0481ff55c3a10eb3ccf0520c4d06eda6b9455f6e722",
+					"status": "content"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -4,8 +4,10 @@\n     \"ttsc\": \"./bin/tsc\",\n     \"ttsserver\": \"./bin/tsserver\"\n   },\n-  \"scripts\": {},\n-  \"version\": \"1.0.4\",\n+  \"scripts\": {\n+    \"postinstall\": \"node ./postinstall.js\"\n+  },\n+  \"version\": \"1.0.2\",\n   \"description\": \"Over TypeScript tool to use custom transformers in the tsconfig.json\",\n   \"main\": \"lib/typescript.js\",\n   \"author\": \"cevek\",\n@@ -13,9 +15,5 @@\n     \"type\": \"git\",\n     \"url\": \"https://github.com/cevek/ttypescript.git\"\n   },\n-  \"license\": \"MIT\",\n-  \"dependencies\": {\n-    \"ts-node\": \"*\",\n-    \"typescript\": \"*\"\n-  }\n+  \"license\": \"MIT\"\n }\n",
+					"match": false,
+					"packageHash": "2d692a60f6a5a4a59e8dbcea82b4fba2c636aac1bf406a238d62fd25546fed3d",
+					"size": 466,
+					"sourceHash": "e6f53ac7b19ff83a95007ab95139a7f3df6b25fedc20918a4ab0740a50f787d8",
+					"status": "content"
+				},
+				"ts-node-config/tsconfig.json": {
+					"match": false,
+					"packageHash": "c89efe4eb7ea2c00f4b31ca083be63ca27f0f33c83d2fcc9aa0d22e3ee2308e5",
+					"size": 89,
+					"status": "missing-in-source"
+				},
+				"lib/tsserverlibrary_.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"postinstall.js": {
+					"match": false,
+					"status": "missing-in-package"
+				}
+			},
+			"summary": {
+				"differentFiles": 7,
+				"matchingFiles": 5,
+				"missingInPackage": 2,
+				"missingInSource": 2,
+				"score": 0.3125,
+				"totalFiles": 16
+			}
+		}
+	}
+]
