@@ -1,0 +1,255 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-02T22:52:03.377Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:11.7.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "crypto-browserify@2.1.5",
+			"name": "crypto-browserify",
+			"version": "2.1.5",
+			"location": "https://registry.npmjs.org/crypto-browserify/-/crypto-browserify-2.1.5.tgz",
+			"integrity": "sha512-x/9JcQ3C8KVSCwdYwcmE0uMb7E6bRDeeel5gc+ipKmaWRl3BZSo74loJfcEpJvmZ3f280lJpdAH8QeDZLaXj5Q==",
+			"publishedAt": "2014-04-23T05:41:55.893Z",
+			"publishedWith": {
+				"node": null,
+				"npm": "1.4.6"
+			}
+		},
+		"source": {
+			"integrity": null,
+			"location": "git://github.com/dominictarr/crypto-browserify.git",
+			"spec": "github:dominictarr/crypto-browserify#HEAD"
+		},
+		"comparisonHash": "8a2a8dcbb729bf3ee9216e490c955701f0ddebe1",
+		"diff": {
+			"files": {
+				".npmignore": {
+					"match": false,
+					"packageHash": "16d30e4462189fb14dd611bdb708c510630c576a1f35b9383e89a4352da36c97",
+					"size": 13,
+					"status": "missing-in-source"
+				},
+				".travis.yml": {
+					"diff": "--- published/.travis.yml\n+++ rebuilt/.travis.yml\n@@ -1,5 +1,18 @@\n+sudo: false\n language: node_js\n-node_js:\n-  - 0.8\n-  - \"0.10\"\n-\n+matrix:\n+  include:\n+      env: TEST_SUITE=browser BROWSER_NAME=ie BROWSER_VERSION=\"10..latest\"\n+    - node_js: '4'\n+      env: TEST_SUITE=browser BROWSER_NAME=chrome BROWSER_VERSION=\"-2..beta\"\n+    - node_js: '4'\n+      env: TEST_SUITE=browser BROWSER_NAME=firefox BROWSER_VERSION=\"-2..latest\"\n+    - node_js: '4'\n+      env: TEST_SUITE=browser BROWSER_NAME=safari BROWSER_VERSION=\"7..latest\"\n+    - node_js: '4'\n+      env: TEST_SUITE=browser BROWSER_NAME=android BROWSER_VERSION=\"5.0..latest\"\n+script: \"npm run-script $TEST_SUITE\"\n+env:\n+  global:\n+  - secure: YHNUDQmx/WiW3gmDcRCfb6KLDeio7Mr5tqPY2kHPdZlBSytsQjNk75ytM4U6Cu8Uk8iEIoj/aFlxiVMpJNA8J4QSUyW/YkbVaIz0+1oywoV0Ht8aRBfZ1jvXfX6789+1Q9c4xaMkYYbJpXSh9JcirsiwmqWd4+IDd7hcESodsDQ=\n+  - secure: Nhj5yejKZxUbtHGZta+GjYWqXGaOZB7ainTkOuGcpXM+OwwjeDpYlTBrwS90Q7hqens7KXVzQM09aDbadpsDCsOo1nyaEigMtomAorZ1UC1CpEoVz1ZuikF9bEhb+/7M9pzuL1fX+Ke9Dx4mPPeb8sf/2SrAu1RqXkSwZV/duAc=\n",
+					"match": false,
+					"packageHash": "f1cc9566528aab31e32c45c0c80658934ec974a61ddcf5d4e33bb23ce1f83bff",
+					"size": 47,
+					"sourceHash": "bf898a425f52f0adf86b0fde6881e53f91084d952e8d60388b1e80d58b331246",
+					"status": "content"
+				},
+				"create-hash.js": {
+					"match": false,
+					"packageHash": "91153ad79cda481f3d0d0a4f7b0a4618eecdf3211aa1900a34652520b17306b0",
+					"size": 615,
+					"status": "missing-in-source"
+				},
+				"create-hmac.js": {
+					"match": false,
+					"packageHash": "87e2f2d61bf5617b261b7841a764e2201a293b2ab7c72bf955bb92e1258ef3b1",
+					"size": 994,
+					"status": "missing-in-source"
+				},
+				"example/bundle.js": {
+					"diff": "--- published/example/bundle.js\n+++ rebuilt/example/bundle.js\n@@ -1,419 +1,409 @@\n+'use strict';\n+\n var require = function (file, cwd) {\n-    var resolved = require.resolve(file, cwd || '/');\n-    var mod = require.modules[resolved];\n-    if (!mod) throw new Error(\n-        'Failed to resolve module ' + file + ', tried ' + resolved\n-    );\n-    var res = mod._cached ? mod._cached : mod();\n-    return res;\n-}\n+\tvar resolved = require.resolve(file, cwd || '/');\n+\tvar mod = require.modules[resolved];\n+\tif (!mod) {\n+\t\tthrow new Error('Failed to resolve module ' + file + ', tried ' + resolved);\n+\t}\n+\tvar res = mod._cached ? mod._cached : mod();\n+\treturn res;\n+};\n \n require.paths = [];\n require.modules = {};\n-require.extensions = [\".js\",\".coffee\"];\n+require.extensions = ['.js', '.coffee'];\n \n require._core = {\n-    'assert': true,\n-    'events': true,\n-    'fs': true,\n-    'path': true,\n-    'vm': true\n+\tassert: true,\n+\tevents: true,\n+\tfs: true,\n+\tpath: true,\n+\tvm: true\n };\n \n require.resolve = (function () {\n-    return function (x, cwd) {\n-        if (!cwd) cwd = '/';\n-        \n-        if (require._core[x]) return x;\n-        var path = require.modules.path();\n-        cwd = path.resolve('/', cwd);\n-        var y = cwd || '/';\n-        \n-        if (x.match(/^(?:\\.\\.?\\/|\\/)/)) {\n-            var m = loadAsFileSync(path.resolve(y, x))\n-                || loadAsDirectorySync(path.resolve(y, x));\n-            if (m) return m;\n-        }\n-        \n-        var n = loadNodeModulesSync(x, y);\n-        if (n) return n;\n-        \n-        throw new Error(\"Cannot find module '\" + x + \"'\");\n-        \n-        function loadAsFileSync (x) {\n-            if (require.modules[x]) {\n-                return x;\n-            }\n-            \n-            for (var i = 0; i < require.extensions.length; i++) {\n-                var ext = require.extensions[i];\n-                if (require.modules[x + ext]) return x + ext;\n-            }\n-        }\n-        \n-        function loadAsDirectorySync (x) {\n-            x = x.replace(/\\/+$/, '');\n-            var pkgfile = x + '/package.json';\n-            if (require.modules[pkgfile]) {\n-                var pkg = require.modules[pkgfile]();\n-                var b = pkg.browserify;\n-                if (typeof b === 'object' && b.main) {\n-                    var m = loadAsFileSync(path.resolve(x, b.main));\n-                    if (m) return m;\n-                }\n-                else if (typeof b === 'string') {\n-                    var m = loadAsFileSync(path.resolve(x, b));\n-                    if (m) return m;\n-                }\n-                else if (pkg.main) {\n-                    var m = loadAsFileSync(path.resolve(x, pkg.main));\n-                    if (m) return m;\n-                }\n-            }\n-            \n-            return loadAsFileSync(x + '/index');\n-        }\n-        \n-        function loadNodeModulesSync (x, start) {\n-            var dirs = nodeModulesPathsSync(start);\n-            for (var i = 0; i < dirs.length; i++) {\n-                var dir = dirs[i];\n-                var m = loadAsFileSync(dir + '/' + x);\n",
+					"match": false,
+					"packageHash": "0a89ac6c466e40406ec8dff60c41243a9eea1dee3c1ae72230d431106fd6be83",
+					"size": 17428,
+					"sourceHash": "62fe45e6922259b3038c152629b1a827fe141baa017594a90fe26b8408e00add",
+					"status": "content"
+				},
+				"example/index.html": {
+					"diff": "--- published/example/index.html\n+++ rebuilt/example/index.html\n@@ -2,11 +2,11 @@\n <html>\n <script src=bundle.js></script>\n <body>\n-  <pre>\n-  require('crypto').createHash('sha1').update('abc').digest('hex') == '<span id=ans></span>'\n-  </pre>\n+\t<pre>\n+\t\trequire('crypto').createHash('sha1').update('abc').digest('hex') == '<span id=ans></span>'\n+\t</pre>\n </body>\n <script>\n-  document.getElementById('ans').innerHTML = require('crypto').createHash('sha1').update('abc').digest('hex')\n+\tdocument.getElementById('ans').innerHTML = require('crypto').createHash('sha1').update('abc').digest('hex')\n </script>\n </html>\n",
+					"match": false,
+					"packageHash": "e71e791a5b578b91516d9792d1a6f8716f408ee6def6afc1b68f72c195fccce9",
+					"size": 317,
+					"sourceHash": "9b1d227739c8e8b6709dc990ecfe1e9322ddea65453e49ccff14bf20c3da15e3",
+					"status": "content"
+				},
+				"example/test.js": {
+					"diff": "--- published/example/test.js\n+++ rebuilt/example/test.js\n@@ -1,4 +1,6 @@\n-var crypto = require('crypto')\n-var abc = crypto.createHash('sha1').update('abc').digest('hex')\n-console.log(abc)\n-//require('hello').inlineCall().call2()\n+'use strict';\n+\n+var crypto = require('crypto');\n+var abc = crypto.createHash('sha1').update('abc').digest('hex');\n+console.log(abc);\n+// require('hello').inlineCall().call2()\n",
+					"match": false,
+					"packageHash": "700821384f213970b578b3167dd7ce906e61ba9177d8510a4e6e0fecd6ddaaf4",
+					"size": 152,
+					"sourceHash": "265588643396e491a7bcab37f43a25a86eb2c598658770d8f657e9b2b0f405fb",
+					"status": "content"
+				},
+				"helpers.js": {
+					"match": false,
+					"packageHash": "c1012e0409c914f43381ade151ba269dff574101957b61c7ac9ac2d6416c4abb",
+					"size": 969,
+					"status": "missing-in-source"
+				},
+				"index.js": {
+					"diff": "--- published/index.js\n+++ rebuilt/index.js\n@@ -1,50 +1,103 @@\n-var Buffer = require('buffer').Buffer\n-var rng = require('./rng')\n+'use strict';\n \n-function error () {\n-  var m = [].slice.call(arguments).join(' ')\n-  throw new Error([\n-    m,\n-    'we accept pull requests',\n-    'http://github.com/dominictarr/crypto-browserify'\n-    ].join('\\n'))\n-}\n-\n-exports.createHash = require('./create-hash')\n-\n-exports.createHmac = require('./create-hmac')\n-\n-exports.randomBytes = function(size, callback) {\n-  if (callback && callback.call) {\n-    try {\n-      callback.call(this, undefined, new Buffer(rng(size)))\n-    } catch (err) { callback(err) }\n-  } else {\n-    return new Buffer(rng(size))\n-  }\n-}\n-\n-function each(a, f) {\n-  for(var i in a)\n-    f(a[i], i)\n-}\n-\n-var p = require('./pbkdf2')(exports.createHmac)\n-exports.pbkdf2 = p.pbkdf2\n-exports.pbkdf2Sync = p.pbkdf2Sync\n+// eslint-disable-next-line no-multi-assign\n+exports.randomBytes = exports.rng = exports.pseudoRandomBytes = exports.prng = require('randombytes');\n \n+// eslint-disable-next-line no-multi-assign\n+exports.createHash = exports.Hash = require('create-hash');\n+\n+// eslint-disable-next-line no-multi-assign\n+exports.createHmac = exports.Hmac = require('create-hmac');\n+\n+var algos = require('browserify-sign/algos');\n+var algoKeys = Object.keys(algos);\n+var hashes = [\n+\t'sha1',\n+\t'sha224',\n+\t'sha256',\n+\t'sha384',\n+\t'sha512',\n+\t'md5',\n+\t'rmd160'\n+].concat(algoKeys);\n+\n+exports.getHashes = function () {\n+\treturn hashes;\n+};\n+\n+var p = require('pbkdf2');\n+exports.pbkdf2 = p.pbkdf2;\n+exports.pbkdf2Sync = p.pbkdf2Sync;\n+\n+var aes = require('browserify-cipher');\n+\n+exports.Cipher = aes.Cipher;\n+exports.createCipher = aes.createCipher;\n+exports.Cipheriv = aes.Cipheriv;\n+exports.createCipheriv = aes.createCipheriv;\n+exports.Decipher = aes.Decipher;\n+exports.createDecipher = aes.createDecipher;\n+exports.Decipheriv = aes.Decipheriv;\n+exports.createDecipheriv = aes.createDecipheriv;\n+exports.getCiphers = aes.getCiphers;\n+exports.listCiphers = aes.listCiphers;\n+\n+var dh = require('diffie-hellman');\n+\n+exports.DiffieHellmanGroup = dh.DiffieHellmanGroup;\n+exports.createDiffieHellmanGroup = dh.createDiffieHellmanGroup;\n+exports.getDiffieHellman = dh.getDiffieHellman;\n+exports.createDiffieHellman = dh.createDiffieHellman;\n+exports.DiffieHellman = dh.DiffieHellman;\n+\n+var sign = require('browserify-sign');\n+\n+exports.createSign = sign.createSign;\n+exports.Sign = sign.Sign;\n+exports.createVerify = sign.createVerify;\n+exports.Verify = sign.Verify;\n+\n+exports.createECDH = require('create-ecdh');\n+\n+var publicEncrypt = require('public-encrypt');\n+\n+exports.publicEncrypt = publicEncrypt.publicEncrypt;\n",
+					"match": false,
+					"packageHash": "53ba9b200f965064c4cb7d3ee6c49c946076cce5c307589b160e2219ed3e695e",
+					"size": 1122,
+					"sourceHash": "c22e91a36241e1599f89abd9d89ac885c6b95a489169fbb6a0eca6c6765f281a",
+					"status": "content"
+				},
+				"md5.js": {
+					"match": false,
+					"packageHash": "09a8713339af8dd503e350bd594f16388f2e404521e7463d4920a35be70083e3",
+					"size": 5572,
+					"status": "missing-in-source"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -1,37 +1,54 @@\n {\n-  \"author\": \"Dominic Tarr <dominic.tarr@gmail.com> (dominictarr.com)\",\n-  \"name\": \"crypto-browserify\",\n-  \"description\": \"partial implementation of crypto for the browser\",\n-  \"version\": \"2.1.5\",\n-  \"homepage\": \"https://github.com/dominictarr/crypto-browserify\",\n-  \"repository\": {\n-    \"type\": \"git\",\n-    \"url\": \"git://github.com/dominictarr/crypto-browserify.git\"\n-  },\n-  \"scripts\": {\n-    \"test\": \"set -e; for t in test/*.js; do node $t; done\"\n-  },\n-  \"engines\": {\n-    \"node\": \"*\"\n-  },\n-  \"dependencies\": {\n-    \"sha.js\": \"2.1.1\"\n-  },\n-  \"devDependencies\": {\n-    \"tape\": \"~2.3.2\"\n-  },\n-  \"testling\": {\n-    \"files\": \"test/{create-hash,create-hmac,simple}.js\",\n-    \"browsers\": [\n-      \"ie/8..latest\",\n-      \"chrome/20..latest\",\n-      \"firefox/10..latest\",\n-      \"safari/latest\",\n-      \"opera/11.0..latest\",\n-      \"iphone/6\",\n-      \"ipad/6\"\n-    ]\n-  },\n-  \"optionalDependencies\": {},\n-  \"license\": \"MIT\"\n+\t\"author\": \"Dominic Tarr <dominic.tarr@gmail.com> (dominictarr.com)\",\n+\t\"name\": \"crypto-browserify\",\n+\t\"description\": \"implementation of crypto for the browser\",\n+\t\"version\": \"3.12.1\",\n+\t\"homepage\": \"https://github.com/browserify/crypto-browserify\",\n+\t\"sideEffects\": false,\n+\t\"repository\": {\n+\t\t\"type\": \"git\",\n+\t\t\"url\": \"git://github.com/browserify/crypto-browserify.git\"\n+\t},\n+\t\"scripts\": {\n+\t\t\"lint\": \"eslint --ext=js,mjs .\",\n+\t\t\"pretest\": \"npm run lint\",\n+\t\t\"tests-only\": \"nyc tape 'test/**/*.js'\",\n+\t\t\"test\": \"npm run tests-only\",\n+\t\t\"posttest\": \"npx npm@'>=10.2' audit --production\"\n+\t},\n+\t\"funding\": {\n+\t\t\"url\": \"https://github.com/sponsors/ljharb\"\n+\t},\n+\t\"engines\": {\n+\t\t\"node\": \">= 0.10\"\n+\t},\n+\t\"dependencies\": {\n+\t\t\"browserify-cipher\": \"^1.0.1\",\n+\t\t\"browserify-sign\": \"^4.2.3\",\n+\t\t\"create-ecdh\": \"^4.0.4\",\n+\t\t\"create-hash\": \"^1.2.0\",\n+\t\t\"create-hmac\": \"^1.1.7\",\n+\t\t\"diffie-hellman\": \"^5.0.3\",\n+\t\t\"hash-base\": \"~3.0.4\",\n+\t\t\"inherits\": \"^2.0.4\",\n+\t\t\"pbkdf2\": \"^3.1.2\",\n+\t\t\"public-encrypt\": \"^4.0.3\",\n+\t\t\"randombytes\": \"^2.1.0\",\n+\t\t\"randomfill\": \"^1.0.4\"\n+\t},\n+\t\"devDependencies\": {\n+\t\t\"@ljharb/eslint-config\": \"^21.1.1\",\n+\t\t\"eslint\": \"=8.8.0\",\n+\t\t\"hash-test-vectors\": \"^1.3.2\",\n+\t\t\"nyc\": \"^10.3.2\",\n+\t\t\"object.entries\": \"^1.1.8\",\n+\t\t\"pseudorandombytes\": \"^2.0.0\",\n+\t\t\"safe-buffer\": \"^5.2.1\",\n+\t\t\"semver\": \"^6.3.1\",\n+\t\t\"tape\": \"^5.9.0\"\n+\t},\n+\t\"browser\": {\n+\t\t\"crypto\": false\n+\t},\n+\t\"license\": \"MIT\"\n }\n",
+					"match": false,
+					"packageHash": "930d87f86ed866be915844681fb851eeba362f5c077e08810d839846383a9905",
+					"size": 892,
+					"sourceHash": "74b9d82dc6db5b19493fb47d855d5d26858e85bd16293d34c451203d1f3d1840",
+					"status": "content"
+				},
+				"pbkdf2.js": {
+					"match": false,
+					"packageHash": "735b9b77c3dbc7fc7658e991de4bfd027c1fd1a9e793ff4c215f2831427ad933",
+					"size": 2362,
+					"status": "missing-in-source"
+				},
+				"readme.markdown": {
+					"match": false,
+					"packageHash": "1d93e60cf2838492af709d912bc7b2409d694d9ada217eab7471d0ee364457d7",
+					"size": 1310,
+					"status": "missing-in-source"
+				},
+				"rng.js": {
+					"match": false,
+					"packageHash": "fba6c7ca1dbead60d47bed44bcdc0fbb4d59434e30aecb612b2f297fb98bf135",
+					"size": 766,
+					"status": "missing-in-source"
+				},
+				"test/create-hash.js": {
+					"diff": "--- published/test/create-hash.js\n+++ rebuilt/test/create-hash.js\n@@ -1,32 +1,51 @@\n-var assertSame = require('./util').same\n-var fs = require('fs')\n-var test = require('tape')\n-\n-var algorithms = ['sha1', 'sha256', 'md5'];\n-var encodings = [/*'binary',*/ 'hex', 'base64'];\n-\n-\n-algorithms.forEach(function (algorithm) {\n-    encodings.forEach(function (encoding) {\n-        assertSame(algorithm + ' hash using ' + encoding, function (crypto, cb) {\n-            cb(null, crypto.createHash(algorithm).update('hellø', 'utf-8').digest(encoding));\n-        })\n-\n-        assertSame(algorithm + ' hmac using ' + encoding, function (crypto, cb) {\n-            cb(null, crypto.createHmac(algorithm, 'secret').update('hellø', 'utf-8').digest(encoding))\n-        })\n-    });\n-\n-    assertSame(algorithm + ' with raw binary', function (crypto, cb) {\n-        var seed = 'hellø';\n-        for (var i = 0; i < 1000; i++) {\n-            seed = crypto.createHash(algorithm).update(new Buffer(seed)).digest('binary');\n-        }\n-        cb(null, crypto.createHash(algorithm).update(new Buffer(seed)).digest('hex'));\n-    });\n-\n-    assertSame(algorithm + ' empty string', function (crypto, cb) {\n-        cb(null, crypto.createHash(algorithm).update('').digest('hex'));\n-    });\n-});\n+'use strict';\n \n+var test = require('tape');\n+var satisfies = require('semver').satisfies;\n+\n+var algorithms = ['sha1', 'sha224', 'sha256', 'sha384', 'sha512', 'md5', 'rmd160'];\n+var encodings = ['hex', 'base64']; // FIXME: test binary\n+var vectors = require('hash-test-vectors');\n+\n+function runTest(name, createHash, algorithm) {\n+\tvar isUnsupported = satisfies(process.version, '^17') && (\n+\t\talgorithm === 'rmd160'\n+\t\t|| algorithm === 'hmac(rmd160)'\n+\t);\n+\ttest(\n+\t\tname + ' test ' + algorithm + ' against test vectors',\n+\t\t{ skip: isUnsupported && 'this node version does not support ' + algorithm },\n+\t\tfunction (t) {\n+\t\t\tvectors.forEach(function (obj, i) {\n+\t\t\t\tvar input = new Buffer(obj.input, 'base64');\n+\t\t\t\tvar node = obj[algorithm];\n+\t\t\t\tvar js = createHash(algorithm).update(input).digest('hex');\n+\t\t\t\tt.equal(js, node, algorithm + '(testVector[' + i + ']) == ' + node);\n+\n+\t\t\t\tencodings.forEach(function (encoding) {\n+\t\t\t\t\tvar eInput = new Buffer(obj.input, 'base64').toString(encoding);\n+\t\t\t\t\tvar eNode = obj[algorithm];\n+\t\t\t\t\tvar eJS = createHash(algorithm).update(eInput, encoding).digest('hex');\n+\t\t\t\t\tt.equal(eJS, eNode, algorithm + '(testVector[' + i + '], ' + encoding + ') == ' + eNode);\n+\t\t\t\t});\n+\t\t\t\tinput = new Buffer(obj.input, 'base64');\n+\t\t\t\tnode = obj[algorithm];\n+\t\t\t\tvar hash = createHash(algorithm);\n+\t\t\t\thash.end(input);\n+\t\t\t\tjs = hash.read().toString('hex');\n+\t\t\t\tt.equal(js, node, algorithm + '(testVector[' + i + ']) == ' + node);\n+\t\t\t});\n+\n+\t\t\tt.end();\n+\t\t}\n+\t);\n+}\n+\n+function testLib(name, createHash) {\n+\talgorithms.forEach(function (algorithm) {\n+\t\trunTest(name, createHash, algorithm);\n+\t});\n+}\n+\n+testLib('createHash in crypto-browserify', require('../').createHash);\n+testLib('create-hash/browser', require('create-hash/browser'));\n",
+					"match": false,
+					"packageHash": "a8a253eb2e3f62cb698b91c5770e901e69fd6419811512b11214fe2c5c5021b9",
+					"size": 1159,
+					"sourceHash": "eb35c640e067a4c6b505970fe8d69c587412022cb53489972c86b7e9fa7c56a3",
+					"status": "content"
+				},
+				"test/create-hmac.js": {
+					"diff": "--- published/test/create-hmac.js\n+++ rebuilt/test/create-hmac.js\n@@ -1,36 +1,54 @@\n+'use strict';\n \n-var same = require('./util').same\n-var join = require('./util').join\n-var test = require('tape')\n-\n-var data = require('crypto').pseudoRandomBytes(256)\n-\n-;['sha1', 'sha256', 'md5'].forEach(function (alg) {\n-  console.log('alg', alg)\n-  ;['p455w0rd', 'secretz', 'whatevs', 'such secure, wow', ''].forEach(function (pass) {\n-    same('createHmac('+alg+', ' + JSON.stringify(pass) + ')' , function (crypto, cb) {\n-      var r = crypto\n-        .createHmac(alg, new Buffer(pass, 'ascii'))\n-        .digest('hex')\n-      console.log(r)\n-      cb(null, r)\n-    })\n-  })\n-\n-  for(var i = 8; i < data.length; i += 7)\n-    (function (i) {\n-      var pass = data.slice(0, i)\n-      same('createHmac('+alg+', pseudoRandomBytes('+ i + ')' , function (crypto, cb) {\n-        var r = crypto\n-          .createHmac(alg, pass)\n-          .digest('hex')\n-        console.log(r)\n-        cb(null, r)\n-      })\n-    }(i))\n-\n-\n-})\n+var test = require('tape');\n+var satisfies = require('semver').satisfies;\n \n+var algorithms = ['sha1', 'sha224', 'sha256', 'sha384', 'sha512', 'md5', 'rmd160'];\n+var vectors = require('hash-test-vectors/hmac');\n \n+function testLib(name, createHmac) {\n+\talgorithms.forEach(function (alg) {\n+\t\tvar isUnsupported = satisfies(process.version, '^17') && (\n+\t\t\talg === 'rmd160'\n+\t\t\t|| alg === 'hmac(rmd160)'\n+\t\t);\n+\t\ttest(\n+\t\t\tname + ' hmac(' + alg + ')',\n+\t\t\t{ skip: isUnsupported && 'this node version does not support ' + alg },\n+\t\t\tfunction (t) {\n+\t\t\t\tvectors.forEach(function (input) {\n+\t\t\t\t\tvar output = createHmac(alg, new Buffer(input.key, 'hex'))\n+\t\t\t\t\t\t.update(input.data, 'hex').digest();\n+\n+\t\t\t\t\toutput = input.truncate ? output.slice(0, input.truncate) : output;\n+\t\t\t\t\toutput = output.toString('hex');\n+\t\t\t\t\tt.equal(output, input[alg]);\n+\t\t\t\t});\n+\n+\t\t\t\tt.end();\n+\t\t\t}\n+\t\t);\n+\n+\t\ttest(\n+\t\t\t'hmac(' + alg + ')',\n+\t\t\t{ skip: isUnsupported && 'this node version does not support ' + alg },\n+\t\t\tfunction (t) {\n+\t\t\t\tvectors.forEach(function (input) {\n+\t\t\t\t\tvar hmac = createHmac(alg, new Buffer(input.key, 'hex'));\n+\n+\t\t\t\t\thmac.end(input.data, 'hex');\n+\t\t\t\t\tvar output = hmac.read();\n+\n+\t\t\t\t\toutput = input.truncate ? output.slice(0, input.truncate) : output;\n+\t\t\t\t\toutput = output.toString('hex');\n+\t\t\t\t\tt.equal(output, input[alg]);\n+\t\t\t\t});\n+\n+\t\t\t\tt.end();\n+\t\t\t}\n+\t\t);\n+\t});\n+}\n \n+testLib('createHmac in crypto-browserify', require('../').createHmac);\n+testLib('create-hmac/browser', require('create-hmac/browser'));\n",
+					"match": false,
+					"packageHash": "05a8a637e155a0b21a9377953be0dbfc4a709fd26fbfea4e5fb17630409577ce",
+					"size": 885,
+					"sourceHash": "4e54326f487ecfa3a450a1e43352e9a14f5d8335051c4053425ddc90f550f99c",
+					"status": "content"
+				},
+				"test/node.js": {
+					"match": false,
+					"packageHash": "5b3a47322b66b56e0604495432c94a5786b1584a7fc49342ab83e0a08c42e076",
+					"size": 1637,
+					"status": "missing-in-source"
+				},
+				"test/pbkdf2.js": {
+					"diff": "--- published/test/pbkdf2.js\n+++ rebuilt/test/pbkdf2.js\n@@ -1,12 +1,23 @@\n+'use strict';\n \n-var tape = require('tape')\n-var pbkdf2 = require('../').pbkdf2\n-var crypto = require('crypto')\n+var tape = require('tape');\n+var crypto = require('pbkdf2/browser');\n+\n+var vectors = require('hash-test-vectors/pbkdf2');\n \n tape('pbkdf2', function (t) {\n-  pbkdf2('hello', 'salt', 1000, 20, function (err, key) {\n-    if(err) throw err\n-    t.deepEqual(key.toString('hex'), crypto.pbkdf2Sync('hello', 'salt', 1000, 20).toString('hex'))\n-    t.end()\n-  })\n-})\n+\tvectors.forEach(function (input) {\n+\t\t// skip inputs that will take way too long\n+\t\tif (input.iterations > 10000) { return; }\n+\n+\t\tvar key = crypto.pbkdf2Sync(input.password, input.salt, input.iterations, input.length);\n+\n+\t\tif (key.toString('hex') !== input.sha1) {\n+\t\t\tconsole.log(input);\n+\t\t}\n+\n+\t\tt.equal(key.toString('hex'), input.sha1);\n+\t});\n+\n+\tt.end();\n+});\n",
+					"match": false,
+					"packageHash": "4804818dc1df32616cc544c12769a6904b1a591788f1647f09479302f799f5ab",
+					"size": 324,
+					"sourceHash": "df307ebd21b3935f6b17844bc5259d82f3b1e7c9dd4b966972c126c46478b39b",
+					"status": "content"
+				},
+				"test/random-bytes.js": {
+					"diff": "--- published/test/random-bytes.js\n+++ rebuilt/test/random-bytes.js\n@@ -1,16 +1,65 @@\n-var test = require('tape')\n-var crypto = require('../')\n+'use strict';\n \n-test('randomBytes', function (t) {\n-    t.plan(5);\n-    t.equal(crypto.randomBytes(10).length, 10);\n-    t.ok(crypto.randomBytes(10) instanceof Buffer);\n-    crypto.randomBytes(10, function(ex, bytes) {\n-        t.error(ex);\n-        t.equal(bytes.length, 10);\n-        t.ok(bytes instanceof Buffer);\n-        t.end();\n-  });\n-});\n+var test = require('tape');\n+var crypto = require('../');\n+var randomBytes = require('randombytes');\n+var entries = require('object.entries');\n+\n+var randomBytesFunctions = {\n+\trandomBytes: randomBytes,\n+\tpseudoRandomBytes: crypto.pseudoRandomBytes\n+};\n+\n+// Both randomBytes and pseudoRandomBytes should provide the same interface\n+entries(randomBytesFunctions).forEach(function (entry) {\n+\tvar randomBytesName = entry[0];\n+\tvar randomBytesFn = entry[1];\n+\n+\ttest('get error message', function (t) {\n+\t\ttry {\n+\t\t\tvar b = randomBytesFn(10);\n+\t\t\tt.ok(Buffer.isBuffer(b));\n+\t\t\tt.end();\n+\t\t} catch (err) {\n+\t\t\tt.ok((/not supported/).test(err.message), '\"not supported\" is in error message');\n+\t\t\tt.end();\n+\t\t}\n+\t});\n+\n+\ttest(randomBytesName, function (t) {\n+\t\tt.plan(5);\n+\t\tt.equal(randomBytesFn(10).length, 10);\n+\t\tt.ok(Buffer.isBuffer(randomBytesFn(10)));\n+\t\trandomBytesFn(10, function (ex, bytes) {\n+\t\t\tt.error(ex);\n+\t\t\tt.equal(bytes.length, 10);\n+\t\t\tt.ok(Buffer.isBuffer(bytes));\n+\t\t\tt.end();\n+\t\t});\n+\t});\n+\n+\ttest(randomBytesName + ' seem random', function (t) {\n+\t\tvar L = 1000;\n+\t\tvar buffer = randomBytesFn(L);\n \n+\t\tvar mean = Array.prototype.reduce.call(buffer, function (a, b) { return a + b; }, 0) / L;\n \n+\t\t// test that the random numbers are plausably random.\n+\t\t// Math.random() will pass this, but this will catch\n+\t\t// terrible mistakes such as this blunder:\n+\t\t// https://github.com/browserify/crypto-browserify/commit/3267955e1df7edd1680e52aeede9a89506ed2464#commitcomment-7916835\n+\n+\t\t// this doesn't check that the bytes are in a random *order*\n+\t\t// but it's better than nothing.\n+\n+\t\tvar expected = 256 / 2;\n+\t\tvar smean = Math.sqrt(mean);\n+\n+\t\t// console.log doesn't work right on testling, *grumble grumble*\n+\t\tconsole.log(JSON.stringify([expected - smean, mean, expected + smean]));\n+\t\tt.ok(mean < expected + smean);\n+\t\tt.ok(mean > expected - smean);\n+\n+\t\tt.end();\n+\t});\n+});\n",
+					"match": false,
+					"packageHash": "bd421937ea4fc8d4c748f5b45505d1a6ad6042c1de3c34f224551592f64018fa",
+					"size": 379,
+					"sourceHash": "8ffc64cb39af22529a532187344bfb386da39f7416df090fa438e159b1df91e0",
+					"status": "content"
+				},
+				"test/simple.js": {
+					"match": false,
+					"packageHash": "18ce88c7134b1f1472c3f96b91ad1cd1aced1af2267d57ab57e0be62e9473305",
+					"size": 900,
+					"status": "missing-in-source"
+				},
+				"test/util.js": {
+					"match": false,
+					"packageHash": "442d2d3109d3558f3152aac164392055c6ff9eef2677afa28d755d73c725bc59",
+					"size": 393,
+					"status": "missing-in-source"
+				},
+				".eslintrc": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				".github/FUNDING.yml": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				".github/workflows/node-aught.yml": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				".github/workflows/node-pretest.yml": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				".github/workflows/node-tens.yml": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				".github/workflows/rebase.yml": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				".github/workflows/require-allow-edits.yml": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				".nycrc": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"README.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/aes.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/dh.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/ecdh.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/index.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/node/dh.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/public-encrypt.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/random-fill.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/sign.js": {
+					"match": false,
+					"status": "missing-in-package"
+				}
+			},
+			"summary": {
+				"differentFiles": 10,
+				"matchingFiles": 1,
+				"missingInPackage": 17,
+				"missingInSource": 11,
+				"score": 0.02564102564102564,
+				"totalFiles": 39
+			}
+		}
+	}
+]

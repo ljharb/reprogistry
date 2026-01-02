@@ -1,0 +1,225 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-02T22:50:33.463Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:11.7.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "crypto-browserify@1.0.2",
+			"name": "crypto-browserify",
+			"version": "1.0.2",
+			"location": "https://registry.npmjs.org/crypto-browserify/-/crypto-browserify-1.0.2.tgz",
+			"integrity": "sha512-FHMDx/9Q4eyKyD+Z+lZZ1XyQYMuA0LC1ApyPLtupLAtgDzbyGzPtBVWHlget25MLsyO7X4H6zN4UvALqNG0hnQ==",
+			"publishedAt": "2013-08-07T08:53:41.670Z",
+			"publishedWith": {
+				"node": null,
+				"npm": "1.3.6"
+			}
+		},
+		"source": {
+			"integrity": null,
+			"location": "git://github.com/dominictarr/crypto-browserify.git",
+			"spec": "github:dominictarr/crypto-browserify#HEAD"
+		},
+		"comparisonHash": "8a2a8dcbb729bf3ee9216e490c955701f0ddebe1",
+		"diff": {
+			"files": {
+				".npmignore": {
+					"match": false,
+					"packageHash": "16d30e4462189fb14dd611bdb708c510630c576a1f35b9383e89a4352da36c97",
+					"size": 13,
+					"status": "missing-in-source"
+				},
+				".travis.yml": {
+					"diff": "--- published/.travis.yml\n+++ rebuilt/.travis.yml\n@@ -1,6 +1,18 @@\n+sudo: false\n language: node_js\n-node_js:\n-  - 0.6\n-  - 0.8\n-  - \"0.10\"\n-\n+matrix:\n+  include:\n+      env: TEST_SUITE=browser BROWSER_NAME=ie BROWSER_VERSION=\"10..latest\"\n+    - node_js: '4'\n+      env: TEST_SUITE=browser BROWSER_NAME=chrome BROWSER_VERSION=\"-2..beta\"\n+    - node_js: '4'\n+      env: TEST_SUITE=browser BROWSER_NAME=firefox BROWSER_VERSION=\"-2..latest\"\n+    - node_js: '4'\n+      env: TEST_SUITE=browser BROWSER_NAME=safari BROWSER_VERSION=\"7..latest\"\n+    - node_js: '4'\n+      env: TEST_SUITE=browser BROWSER_NAME=android BROWSER_VERSION=\"5.0..latest\"\n+script: \"npm run-script $TEST_SUITE\"\n+env:\n+  global:\n+  - secure: YHNUDQmx/WiW3gmDcRCfb6KLDeio7Mr5tqPY2kHPdZlBSytsQjNk75ytM4U6Cu8Uk8iEIoj/aFlxiVMpJNA8J4QSUyW/YkbVaIz0+1oywoV0Ht8aRBfZ1jvXfX6789+1Q9c4xaMkYYbJpXSh9JcirsiwmqWd4+IDd7hcESodsDQ=\n+  - secure: Nhj5yejKZxUbtHGZta+GjYWqXGaOZB7ainTkOuGcpXM+OwwjeDpYlTBrwS90Q7hqens7KXVzQM09aDbadpsDCsOo1nyaEigMtomAorZ1UC1CpEoVz1ZuikF9bEhb+/7M9pzuL1fX+Ke9Dx4mPPeb8sf/2SrAu1RqXkSwZV/duAc=\n",
+					"match": false,
+					"packageHash": "3199d276fd9415d622462cdd9ffb6254789800b2ca6a0682fc22afec39d9f775",
+					"size": 55,
+					"sourceHash": "bf898a425f52f0adf86b0fde6881e53f91084d952e8d60388b1e80d58b331246",
+					"status": "content"
+				},
+				"example/bundle.js": {
+					"diff": "--- published/example/bundle.js\n+++ rebuilt/example/bundle.js\n@@ -1,419 +1,409 @@\n+'use strict';\n+\n var require = function (file, cwd) {\n-    var resolved = require.resolve(file, cwd || '/');\n-    var mod = require.modules[resolved];\n-    if (!mod) throw new Error(\n-        'Failed to resolve module ' + file + ', tried ' + resolved\n-    );\n-    var res = mod._cached ? mod._cached : mod();\n-    return res;\n-}\n+\tvar resolved = require.resolve(file, cwd || '/');\n+\tvar mod = require.modules[resolved];\n+\tif (!mod) {\n+\t\tthrow new Error('Failed to resolve module ' + file + ', tried ' + resolved);\n+\t}\n+\tvar res = mod._cached ? mod._cached : mod();\n+\treturn res;\n+};\n \n require.paths = [];\n require.modules = {};\n-require.extensions = [\".js\",\".coffee\"];\n+require.extensions = ['.js', '.coffee'];\n \n require._core = {\n-    'assert': true,\n-    'events': true,\n-    'fs': true,\n-    'path': true,\n-    'vm': true\n+\tassert: true,\n+\tevents: true,\n+\tfs: true,\n+\tpath: true,\n+\tvm: true\n };\n \n require.resolve = (function () {\n-    return function (x, cwd) {\n-        if (!cwd) cwd = '/';\n-        \n-        if (require._core[x]) return x;\n-        var path = require.modules.path();\n-        cwd = path.resolve('/', cwd);\n-        var y = cwd || '/';\n-        \n-        if (x.match(/^(?:\\.\\.?\\/|\\/)/)) {\n-            var m = loadAsFileSync(path.resolve(y, x))\n-                || loadAsDirectorySync(path.resolve(y, x));\n-            if (m) return m;\n-        }\n-        \n-        var n = loadNodeModulesSync(x, y);\n-        if (n) return n;\n-        \n-        throw new Error(\"Cannot find module '\" + x + \"'\");\n-        \n-        function loadAsFileSync (x) {\n-            if (require.modules[x]) {\n-                return x;\n-            }\n-            \n-            for (var i = 0; i < require.extensions.length; i++) {\n-                var ext = require.extensions[i];\n-                if (require.modules[x + ext]) return x + ext;\n-            }\n-        }\n-        \n-        function loadAsDirectorySync (x) {\n-            x = x.replace(/\\/+$/, '');\n-            var pkgfile = x + '/package.json';\n-            if (require.modules[pkgfile]) {\n-                var pkg = require.modules[pkgfile]();\n-                var b = pkg.browserify;\n-                if (typeof b === 'object' && b.main) {\n-                    var m = loadAsFileSync(path.resolve(x, b.main));\n-                    if (m) return m;\n-                }\n-                else if (typeof b === 'string') {\n-                    var m = loadAsFileSync(path.resolve(x, b));\n-                    if (m) return m;\n-                }\n-                else if (pkg.main) {\n-                    var m = loadAsFileSync(path.resolve(x, pkg.main));\n-                    if (m) return m;\n-                }\n-            }\n-            \n-            return loadAsFileSync(x + '/index');\n-        }\n-        \n-        function loadNodeModulesSync (x, start) {\n-            var dirs = nodeModulesPathsSync(start);\n-            for (var i = 0; i < dirs.length; i++) {\n-                var dir = dirs[i];\n-                var m = loadAsFileSync(dir + '/' + x);\n",
+					"match": false,
+					"packageHash": "0a89ac6c466e40406ec8dff60c41243a9eea1dee3c1ae72230d431106fd6be83",
+					"size": 17428,
+					"sourceHash": "62fe45e6922259b3038c152629b1a827fe141baa017594a90fe26b8408e00add",
+					"status": "content"
+				},
+				"example/index.html": {
+					"diff": "--- published/example/index.html\n+++ rebuilt/example/index.html\n@@ -2,11 +2,11 @@\n <html>\n <script src=bundle.js></script>\n <body>\n-  <pre>\n-  require('crypto').createHash('sha1').update('abc').digest('hex') == '<span id=ans></span>'\n-  </pre>\n+\t<pre>\n+\t\trequire('crypto').createHash('sha1').update('abc').digest('hex') == '<span id=ans></span>'\n+\t</pre>\n </body>\n <script>\n-  document.getElementById('ans').innerHTML = require('crypto').createHash('sha1').update('abc').digest('hex')\n+\tdocument.getElementById('ans').innerHTML = require('crypto').createHash('sha1').update('abc').digest('hex')\n </script>\n </html>\n",
+					"match": false,
+					"packageHash": "e71e791a5b578b91516d9792d1a6f8716f408ee6def6afc1b68f72c195fccce9",
+					"size": 317,
+					"sourceHash": "9b1d227739c8e8b6709dc990ecfe1e9322ddea65453e49ccff14bf20c3da15e3",
+					"status": "content"
+				},
+				"example/test.js": {
+					"diff": "--- published/example/test.js\n+++ rebuilt/example/test.js\n@@ -1,4 +1,6 @@\n-var crypto = require('crypto')\n-var abc = crypto.createHash('sha1').update('abc').digest('hex')\n-console.log(abc)\n-//require('hello').inlineCall().call2()\n+'use strict';\n+\n+var crypto = require('crypto');\n+var abc = crypto.createHash('sha1').update('abc').digest('hex');\n+console.log(abc);\n+// require('hello').inlineCall().call2()\n",
+					"match": false,
+					"packageHash": "700821384f213970b578b3167dd7ce906e61ba9177d8510a4e6e0fecd6ddaaf4",
+					"size": 152,
+					"sourceHash": "265588643396e491a7bcab37f43a25a86eb2c598658770d8f657e9b2b0f405fb",
+					"status": "content"
+				},
+				"index.js": {
+					"diff": "--- published/index.js\n+++ rebuilt/index.js\n@@ -1,128 +1,103 @@\n-var Buffer = require('buffer').Buffer\n-var sha = require('./sha')\n-var sha256 = require('./sha256')\n-var rng = require('./rng')\n-var md5 = require('./md5')\n-\n-var algorithms = {\n-  sha1: {\n-    hex: sha.hex_sha1,\n-    base64: sha.b64_sha1,\n-    binary: sha.str_sha1\n-  },\n-  sha256: {\n-    hex: sha256.hex_sha256,\n-    base64: sha256.b64_sha256,\n-    binary: sha256.str_sha256\n-  },\n-  md5: {\n-    hex: md5.hex_md5,\n-    base64: md5.b64_md5,\n-    binary: md5.bin_md5\n-  }\n-}\n-\n-var algorithmsHmac = {\n-  sha1: {\n-    hex: sha.hex_hmac_sha1,\n-    base64: sha.b64_hmac_sha1,\n-    binary: sha.str_hmac_sha1\n-  },\n-  sha256: {\n-    hex: sha256.hex_hmac_sha256,\n-    base64: sha256.b64_hmac_sha256,\n-    binary: sha256.str_hmac_sha256\n-  },\n-  md5: {\n-    hex: md5.hex_hmac_md5,\n-    base64: md5.b64_hmac_md5,\n-    binary: md5.bin_hmac_md5\n-  }\n-}\n-\n-\n-function error () {\n-  var m = [].slice.call(arguments).join(' ')\n-  throw new Error([\n-    m,\n-    'we accept pull requests',\n-    'http://github.com/dominictarr/crypto-browserify'\n-    ].join('\\n'))\n-}\n-\n-exports.createHash = function (alg) {\n-  alg = alg || 'sha1'\n-  if(!algorithms[alg])\n-    error('algorithm:', alg, 'is not yet supported')\n-  var s = ''\n-  var _alg = algorithms[alg]\n-  return {\n-    update: function (data) {\n-      s += data\n-      return this\n-    },\n-    digest: function (enc) {\n-      enc = enc || 'binary'\n-      var fn\n-      if(!(fn = _alg[enc]))\n-        error('encoding:', enc , 'is not yet supported for algorithm', alg)\n-      var r = fn(s)\n-      s = null //not meant to use the hash after you've called digest.\n-      return r\n-    }\n-  }\n-}\n-\n-exports.createHmac = function (alg, key) {\n-  if (!algorithmsHmac[alg])\n-    error('algorithm:', alg, 'is not yet supported')\n-  if (typeof key != 'string')\n-    key = key.toString('binary')\n-  var s = ''\n-  var _alg = algorithmsHmac[alg]\n-  return {\n-    update: function (data) {\n-      s += data\n-      return this\n-    },\n-    digest: function (enc) {\n-      enc = enc || 'binary'\n-      var fn\n-      if (!(fn = _alg[enc]))\n-        error('encoding:', enc, 'is not yet support for algorithm', alg)\n-      var r = fn(key, s)\n-      s = null\n-      return r\n-    }\n-  }\n",
+					"match": false,
+					"packageHash": "87b988c5ef4bbe42a2f19a6bae7bb346d858e32efcfb05e4c702e1a31fba0bd0",
+					"size": 2778,
+					"sourceHash": "c22e91a36241e1599f89abd9d89ac885c6b95a489169fbb6a0eca6c6765f281a",
+					"status": "content"
+				},
+				"md5.js": {
+					"match": false,
+					"packageHash": "eeb57e270657059a97e0db777fca1edcd81f53278f9deb1647447968f0f63064",
+					"size": 9030,
+					"status": "missing-in-source"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -1,34 +1,54 @@\n {\n-  \"author\": \"Dominic Tarr <dominic.tarr@gmail.com> (dominictarr.com)\",\n-  \"name\": \"crypto-browserify\",\n-  \"description\": \"partial implementation of crypto for the browser\",\n-  \"version\": \"1.0.2\",\n-  \"homepage\": \"https://github.com/dominictarr/crypto-browserify\",\n-  \"repository\": {\n-    \"type\": \"git\",\n-    \"url\": \"git://github.com/dominictarr/crypto-browserify.git\"\n-  },\n-  \"scripts\": {\n-    \"test\": \"node test/node.js\"\n-  },\n-  \"engines\": {\n-    \"node\": \"*\"\n-  },\n-  \"dependencies\": {},\n-  \"devDependencies\": {\n-    \"tape\": \"~1.0.4\"\n-  },\n-  \"testling\": {\n-    \"files\": \"test/browser.js\",\n-    \"browsers\": [\n-      \"ie/8..latest\",\n-      \"chrome/20..latest\",\n-      \"firefox/10..latest\",\n-      \"safari/latest\",\n-      \"opera/11.0..latest\",\n-      \"iphone/6\",\n-      \"ipad/6\"\n-    ]\n-  },\n-  \"optionalDependencies\": {}\n+\t\"author\": \"Dominic Tarr <dominic.tarr@gmail.com> (dominictarr.com)\",\n+\t\"name\": \"crypto-browserify\",\n+\t\"description\": \"implementation of crypto for the browser\",\n+\t\"version\": \"3.12.1\",\n+\t\"homepage\": \"https://github.com/browserify/crypto-browserify\",\n+\t\"sideEffects\": false,\n+\t\"repository\": {\n+\t\t\"type\": \"git\",\n+\t\t\"url\": \"git://github.com/browserify/crypto-browserify.git\"\n+\t},\n+\t\"scripts\": {\n+\t\t\"lint\": \"eslint --ext=js,mjs .\",\n+\t\t\"pretest\": \"npm run lint\",\n+\t\t\"tests-only\": \"nyc tape 'test/**/*.js'\",\n+\t\t\"test\": \"npm run tests-only\",\n+\t\t\"posttest\": \"npx npm@'>=10.2' audit --production\"\n+\t},\n+\t\"funding\": {\n+\t\t\"url\": \"https://github.com/sponsors/ljharb\"\n+\t},\n+\t\"engines\": {\n+\t\t\"node\": \">= 0.10\"\n+\t},\n+\t\"dependencies\": {\n+\t\t\"browserify-cipher\": \"^1.0.1\",\n+\t\t\"browserify-sign\": \"^4.2.3\",\n+\t\t\"create-ecdh\": \"^4.0.4\",\n+\t\t\"create-hash\": \"^1.2.0\",\n+\t\t\"create-hmac\": \"^1.1.7\",\n+\t\t\"diffie-hellman\": \"^5.0.3\",\n+\t\t\"hash-base\": \"~3.0.4\",\n+\t\t\"inherits\": \"^2.0.4\",\n+\t\t\"pbkdf2\": \"^3.1.2\",\n+\t\t\"public-encrypt\": \"^4.0.3\",\n+\t\t\"randombytes\": \"^2.1.0\",\n+\t\t\"randomfill\": \"^1.0.4\"\n+\t},\n+\t\"devDependencies\": {\n+\t\t\"@ljharb/eslint-config\": \"^21.1.1\",\n+\t\t\"eslint\": \"=8.8.0\",\n+\t\t\"hash-test-vectors\": \"^1.3.2\",\n+\t\t\"nyc\": \"^10.3.2\",\n+\t\t\"object.entries\": \"^1.1.8\",\n+\t\t\"pseudorandombytes\": \"^2.0.0\",\n+\t\t\"safe-buffer\": \"^5.2.1\",\n+\t\t\"semver\": \"^6.3.1\",\n+\t\t\"tape\": \"^5.9.0\"\n+\t},\n+\t\"browser\": {\n+\t\t\"crypto\": false\n+\t},\n+\t\"license\": \"MIT\"\n }\n",
+					"match": false,
+					"packageHash": "2104466c0b84dba84d7b35abff66df97b55a7ffa29c6ad7b0cc73ca6d3e02f37",
+					"size": 795,
+					"sourceHash": "74b9d82dc6db5b19493fb47d855d5d26858e85bd16293d34c451203d1f3d1840",
+					"status": "content"
+				},
+				"readme.markdown": {
+					"match": false,
+					"packageHash": "ce9d0314a5f05763e9dc09b3fe505c86c233360d1e14b14a42c6393fa97d8d44",
+					"size": 850,
+					"status": "missing-in-source"
+				},
+				"rng.js": {
+					"match": false,
+					"packageHash": "90e9730e601a5eea0a0e2fe5c35d0aba1547d1680bab16802746769850a92234",
+					"size": 861,
+					"status": "missing-in-source"
+				},
+				"sha.js": {
+					"match": false,
+					"packageHash": "7d3a317b9b08c8dcc899c953b8fbac4e56b0f4c21e73e301fef8255e7e36879b",
+					"size": 5759,
+					"status": "missing-in-source"
+				},
+				"sha256.js": {
+					"match": false,
+					"packageHash": "2b638fe18f755a3b6be7d17a92508d1757531b2007db44ea276cc181048920e1",
+					"size": 6412,
+					"status": "missing-in-source"
+				},
+				"test/browser.js": {
+					"match": false,
+					"packageHash": "7051b1ff15add5109b1602490c2867ff29c0d33f845e57fdfac75d80db8b039b",
+					"size": 4066,
+					"status": "missing-in-source"
+				},
+				"test/node.js": {
+					"match": false,
+					"packageHash": "f20d7c5ec1e356fb697db95af8ec385f904d263a5d735cf515325ca8212b0fbc",
+					"size": 1737,
+					"status": "missing-in-source"
+				},
+				".eslintrc": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				".github/FUNDING.yml": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				".github/workflows/node-aught.yml": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				".github/workflows/node-pretest.yml": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				".github/workflows/node-tens.yml": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				".github/workflows/rebase.yml": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				".github/workflows/require-allow-edits.yml": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				".nycrc": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"LICENSE": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"README.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/aes.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/create-hash.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/create-hmac.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/dh.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/ecdh.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/index.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/node/dh.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/pbkdf2.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/public-encrypt.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/random-bytes.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/random-fill.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/sign.js": {
+					"match": false,
+					"status": "missing-in-package"
+				}
+			},
+			"summary": {
+				"differentFiles": 6,
+				"matchingFiles": 0,
+				"missingInPackage": 22,
+				"missingInSource": 8,
+				"score": 0,
+				"totalFiles": 36
+			}
+		}
+	}
+]

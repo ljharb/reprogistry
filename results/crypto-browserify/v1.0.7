@@ -1,0 +1,1433 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-02T22:50:29.728Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:11.7.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "crypto-browserify@1.0.7",
+			"name": "crypto-browserify",
+			"version": "1.0.7",
+			"location": "https://registry.npmjs.org/crypto-browserify/-/crypto-browserify-1.0.7.tgz",
+			"integrity": "sha512-y26dYmoMjh+vC6vqbnVMquQokmzPjN2kWlYUm027Bfqc3emuvub6RE5OgpGF7avcyk9ZE8cpeqZ4jU+jk0oOVA==",
+			"publishedAt": "2013-11-19T16:53:09.308Z",
+			"publishedWith": {
+				"node": null,
+				"npm": "1.3.11"
+			}
+		},
+		"source": {
+			"integrity": null,
+			"location": "git://github.com/dominictarr/crypto-browserify.git",
+			"spec": "github:dominictarr/crypto-browserify#HEAD"
+		},
+		"comparisonHash": "8a2a8dcbb729bf3ee9216e490c955701f0ddebe1",
+		"diff": {
+			"files": {
+				".npmignore": {
+					"match": false,
+					"packageHash": "16d30e4462189fb14dd611bdb708c510630c576a1f35b9383e89a4352da36c97",
+					"size": 13,
+					"status": "missing-in-source"
+				},
+				".travis.yml": {
+					"diff": "--- published/.travis.yml\n+++ rebuilt/.travis.yml\n@@ -1,5 +1,18 @@\n+sudo: false\n language: node_js\n-node_js:\n-  - 0.8\n-  - \"0.10\"\n-\n+matrix:\n+  include:\n+      env: TEST_SUITE=browser BROWSER_NAME=ie BROWSER_VERSION=\"10..latest\"\n+    - node_js: '4'\n+      env: TEST_SUITE=browser BROWSER_NAME=chrome BROWSER_VERSION=\"-2..beta\"\n+    - node_js: '4'\n+      env: TEST_SUITE=browser BROWSER_NAME=firefox BROWSER_VERSION=\"-2..latest\"\n+    - node_js: '4'\n+      env: TEST_SUITE=browser BROWSER_NAME=safari BROWSER_VERSION=\"7..latest\"\n+    - node_js: '4'\n+      env: TEST_SUITE=browser BROWSER_NAME=android BROWSER_VERSION=\"5.0..latest\"\n+script: \"npm run-script $TEST_SUITE\"\n+env:\n+  global:\n+  - secure: YHNUDQmx/WiW3gmDcRCfb6KLDeio7Mr5tqPY2kHPdZlBSytsQjNk75ytM4U6Cu8Uk8iEIoj/aFlxiVMpJNA8J4QSUyW/YkbVaIz0+1oywoV0Ht8aRBfZ1jvXfX6789+1Q9c4xaMkYYbJpXSh9JcirsiwmqWd4+IDd7hcESodsDQ=\n+  - secure: Nhj5yejKZxUbtHGZta+GjYWqXGaOZB7ainTkOuGcpXM+OwwjeDpYlTBrwS90Q7hqens7KXVzQM09aDbadpsDCsOo1nyaEigMtomAorZ1UC1CpEoVz1ZuikF9bEhb+/7M9pzuL1fX+Ke9Dx4mPPeb8sf/2SrAu1RqXkSwZV/duAc=\n",
+					"match": false,
+					"packageHash": "f1cc9566528aab31e32c45c0c80658934ec974a61ddcf5d4e33bb23ce1f83bff",
+					"size": 47,
+					"sourceHash": "bf898a425f52f0adf86b0fde6881e53f91084d952e8d60388b1e80d58b331246",
+					"status": "content"
+				},
+				"example/bundle.js": {
+					"diff": "--- published/example/bundle.js\n+++ rebuilt/example/bundle.js\n@@ -1,419 +1,409 @@\n+'use strict';\n+\n var require = function (file, cwd) {\n-    var resolved = require.resolve(file, cwd || '/');\n-    var mod = require.modules[resolved];\n-    if (!mod) throw new Error(\n-        'Failed to resolve module ' + file + ', tried ' + resolved\n-    );\n-    var res = mod._cached ? mod._cached : mod();\n-    return res;\n-}\n+\tvar resolved = require.resolve(file, cwd || '/');\n+\tvar mod = require.modules[resolved];\n+\tif (!mod) {\n+\t\tthrow new Error('Failed to resolve module ' + file + ', tried ' + resolved);\n+\t}\n+\tvar res = mod._cached ? mod._cached : mod();\n+\treturn res;\n+};\n \n require.paths = [];\n require.modules = {};\n-require.extensions = [\".js\",\".coffee\"];\n+require.extensions = ['.js', '.coffee'];\n \n require._core = {\n-    'assert': true,\n-    'events': true,\n-    'fs': true,\n-    'path': true,\n-    'vm': true\n+\tassert: true,\n+\tevents: true,\n+\tfs: true,\n+\tpath: true,\n+\tvm: true\n };\n \n require.resolve = (function () {\n-    return function (x, cwd) {\n-        if (!cwd) cwd = '/';\n-        \n-        if (require._core[x]) return x;\n-        var path = require.modules.path();\n-        cwd = path.resolve('/', cwd);\n-        var y = cwd || '/';\n-        \n-        if (x.match(/^(?:\\.\\.?\\/|\\/)/)) {\n-            var m = loadAsFileSync(path.resolve(y, x))\n-                || loadAsDirectorySync(path.resolve(y, x));\n-            if (m) return m;\n-        }\n-        \n-        var n = loadNodeModulesSync(x, y);\n-        if (n) return n;\n-        \n-        throw new Error(\"Cannot find module '\" + x + \"'\");\n-        \n-        function loadAsFileSync (x) {\n-            if (require.modules[x]) {\n-                return x;\n-            }\n-            \n-            for (var i = 0; i < require.extensions.length; i++) {\n-                var ext = require.extensions[i];\n-                if (require.modules[x + ext]) return x + ext;\n-            }\n-        }\n-        \n-        function loadAsDirectorySync (x) {\n-            x = x.replace(/\\/+$/, '');\n-            var pkgfile = x + '/package.json';\n-            if (require.modules[pkgfile]) {\n-                var pkg = require.modules[pkgfile]();\n-                var b = pkg.browserify;\n-                if (typeof b === 'object' && b.main) {\n-                    var m = loadAsFileSync(path.resolve(x, b.main));\n-                    if (m) return m;\n-                }\n-                else if (typeof b === 'string') {\n-                    var m = loadAsFileSync(path.resolve(x, b));\n-                    if (m) return m;\n-                }\n-                else if (pkg.main) {\n-                    var m = loadAsFileSync(path.resolve(x, pkg.main));\n-                    if (m) return m;\n-                }\n-            }\n-            \n-            return loadAsFileSync(x + '/index');\n-        }\n-        \n-        function loadNodeModulesSync (x, start) {\n-            var dirs = nodeModulesPathsSync(start);\n-            for (var i = 0; i < dirs.length; i++) {\n-                var dir = dirs[i];\n-                var m = loadAsFileSync(dir + '/' + x);\n",
+					"match": false,
+					"packageHash": "0a89ac6c466e40406ec8dff60c41243a9eea1dee3c1ae72230d431106fd6be83",
+					"size": 17428,
+					"sourceHash": "62fe45e6922259b3038c152629b1a827fe141baa017594a90fe26b8408e00add",
+					"status": "content"
+				},
+				"example/index.html": {
+					"diff": "--- published/example/index.html\n+++ rebuilt/example/index.html\n@@ -2,11 +2,11 @@\n <html>\n <script src=bundle.js></script>\n <body>\n-  <pre>\n-  require('crypto').createHash('sha1').update('abc').digest('hex') == '<span id=ans></span>'\n-  </pre>\n+\t<pre>\n+\t\trequire('crypto').createHash('sha1').update('abc').digest('hex') == '<span id=ans></span>'\n+\t</pre>\n </body>\n <script>\n-  document.getElementById('ans').innerHTML = require('crypto').createHash('sha1').update('abc').digest('hex')\n+\tdocument.getElementById('ans').innerHTML = require('crypto').createHash('sha1').update('abc').digest('hex')\n </script>\n </html>\n",
+					"match": false,
+					"packageHash": "e71e791a5b578b91516d9792d1a6f8716f408ee6def6afc1b68f72c195fccce9",
+					"size": 317,
+					"sourceHash": "9b1d227739c8e8b6709dc990ecfe1e9322ddea65453e49ccff14bf20c3da15e3",
+					"status": "content"
+				},
+				"example/test.js": {
+					"diff": "--- published/example/test.js\n+++ rebuilt/example/test.js\n@@ -1,4 +1,6 @@\n-var crypto = require('crypto')\n-var abc = crypto.createHash('sha1').update('abc').digest('hex')\n-console.log(abc)\n-//require('hello').inlineCall().call2()\n+'use strict';\n+\n+var crypto = require('crypto');\n+var abc = crypto.createHash('sha1').update('abc').digest('hex');\n+console.log(abc);\n+// require('hello').inlineCall().call2()\n",
+					"match": false,
+					"packageHash": "700821384f213970b578b3167dd7ce906e61ba9177d8510a4e6e0fecd6ddaaf4",
+					"size": 152,
+					"sourceHash": "265588643396e491a7bcab37f43a25a86eb2c598658770d8f657e9b2b0f405fb",
+					"status": "content"
+				},
+				"helpers.js": {
+					"match": false,
+					"packageHash": "c1012e0409c914f43381ade151ba269dff574101957b61c7ac9ac2d6416c4abb",
+					"size": 969,
+					"status": "missing-in-source"
+				},
+				"index.js": {
+					"diff": "--- published/index.js\n+++ rebuilt/index.js\n@@ -1,97 +1,103 @@\n-var Buffer = require('buffer').Buffer\n-var sha = require('./sha')\n-var sha256 = require('./sha256')\n-var rng = require('./rng')\n-var md5 = require('./md5')\n-\n-var algorithms = {\n-  sha1: sha,\n-  sha256: sha256,\n-  md5: md5\n-}\n-\n-var blocksize = 64\n-var zeroBuffer = new Buffer(blocksize); zeroBuffer.fill(0)\n-function hmac(fn, key, data) {\n-  if(!Buffer.isBuffer(key)) key = new Buffer(key)\n-  if(!Buffer.isBuffer(data)) data = new Buffer(data)\n-\n-  if(key.length > blocksize) {\n-    key = fn(key)\n-  } else if(key.length < blocksize) {\n-    key = Buffer.concat([key, zeroBuffer], blocksize)\n-  }\n-\n-  var ipad = new Buffer(blocksize), opad = new Buffer(blocksize)\n-  for(var i = 0; i < blocksize; i++) {\n-    ipad[i] = key[i] ^ 0x36\n-    opad[i] = key[i] ^ 0x5C\n-  }\n-\n-  var hash = fn(Buffer.concat([ipad, data]))\n-  return fn(Buffer.concat([opad, hash]))\n-}\n-\n-function hash(alg, key) {\n-  alg = alg || 'sha1'\n-  var fn = algorithms[alg]\n-  var bufs = []\n-  var length = 0\n-  if(!fn) error('algorithm:', alg, 'is not yet supported')\n-  return {\n-    update: function (data) {\n-      if(!Buffer.isBuffer(data)) data = new Buffer(data)\n-        \n-      bufs.push(data)\n-      length += data.length\n-      return this\n-    },\n-    digest: function (enc) {\n-      var buf = Buffer.concat(bufs)\n-      var r = key ? hmac(fn, key, buf) : fn(buf)\n-      bufs = null\n-      return enc ? r.toString(enc) : r\n-    }\n-  }\n-}\n-\n-function error () {\n-  var m = [].slice.call(arguments).join(' ')\n-  throw new Error([\n-    m,\n-    'we accept pull requests',\n-    'http://github.com/dominictarr/crypto-browserify'\n-    ].join('\\n'))\n-}\n-\n-exports.createHash = function (alg) { return hash(alg) }\n-exports.createHmac = function (alg, key) { return hash(alg, key) }\n-exports.randomBytes = function(size, callback) {\n-  if (callback && callback.call) {\n-    try {\n-      callback.call(this, undefined, new Buffer(rng(size)))\n-    } catch (err) { callback(err) }\n-  } else {\n-    return new Buffer(rng(size))\n-  }\n-}\n-\n-function each(a, f) {\n-  for(var i in a)\n-    f(a[i], i)\n-}\n+'use strict';\n+\n+// eslint-disable-next-line no-multi-assign\n+exports.randomBytes = exports.rng = exports.pseudoRandomBytes = exports.prng = require('randombytes');\n+\n+// eslint-disable-next-line no-multi-assign\n+exports.createHash = exports.Hash = require('create-hash');\n+\n+// eslint-disable-next-line no-multi-assign\n+exports.createHmac = exports.Hmac = require('create-hmac');\n+\n+var algos = require('browserify-sign/algos');\n+var algoKeys = Object.keys(algos);\n+var hashes = [\n+\t'sha1',\n",
+					"match": false,
+					"packageHash": "5f4e81e9f779cf1a7a86aa8e035570d8c1ec79772894ecbd61064eb3467cf495",
+					"size": 2349,
+					"sourceHash": "c22e91a36241e1599f89abd9d89ac885c6b95a489169fbb6a0eca6c6765f281a",
+					"status": "content"
+				},
+				"md5.js": {
+					"match": false,
+					"packageHash": "09a8713339af8dd503e350bd594f16388f2e404521e7463d4920a35be70083e3",
+					"size": 5735,
+					"status": "missing-in-source"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -1,38 +1,54 @@\n {\n-  \"author\": \"Dominic Tarr <dominic.tarr@gmail.com> (dominictarr.com)\",\n-  \"name\": \"crypto-browserify\",\n-  \"description\": \"partial implementation of crypto for the browser\",\n-  \"version\": \"1.0.7\",\n-  \"homepage\": \"https://github.com/dominictarr/crypto-browserify\",\n-  \"repository\": {\n-    \"type\": \"git\",\n-    \"url\": \"git://github.com/dominictarr/crypto-browserify.git\"\n-  },\n-  \"scripts\": {\n-    \"test\": \"node test/node.js\"\n-  },\n-  \"engines\": {\n-    \"node\": \"*\"\n-  },\n-  \"dependencies\": {},\n-  \"devDependencies\": {\n-    \"tape\": \"~1.0.4\"\n-  },\n-  \"testling\": {\n-    \"files\": \"test/browser.js\",\n-    \"browsers\": [\n-      \"ie/8..latest\",\n-      \"chrome/20..latest\",\n-      \"firefox/10..latest\",\n-      \"safari/latest\",\n-      \"opera/11.0..latest\",\n-      \"iphone/6\",\n-      \"ipad/6\"\n-    ]\n-  },\n-  \"browserify\": {\n-    \"transform\": [\"brfs\"]\n-  },\n-  \"optionalDependencies\": {},\n-  \"license\": \"MIT\"\n+\t\"author\": \"Dominic Tarr <dominic.tarr@gmail.com> (dominictarr.com)\",\n+\t\"name\": \"crypto-browserify\",\n+\t\"description\": \"implementation of crypto for the browser\",\n+\t\"version\": \"3.12.1\",\n+\t\"homepage\": \"https://github.com/browserify/crypto-browserify\",\n+\t\"sideEffects\": false,\n+\t\"repository\": {\n+\t\t\"type\": \"git\",\n+\t\t\"url\": \"git://github.com/browserify/crypto-browserify.git\"\n+\t},\n+\t\"scripts\": {\n+\t\t\"lint\": \"eslint --ext=js,mjs .\",\n+\t\t\"pretest\": \"npm run lint\",\n+\t\t\"tests-only\": \"nyc tape 'test/**/*.js'\",\n+\t\t\"test\": \"npm run tests-only\",\n+\t\t\"posttest\": \"npx npm@'>=10.2' audit --production\"\n+\t},\n+\t\"funding\": {\n+\t\t\"url\": \"https://github.com/sponsors/ljharb\"\n+\t},\n+\t\"engines\": {\n+\t\t\"node\": \">= 0.10\"\n+\t},\n+\t\"dependencies\": {\n+\t\t\"browserify-cipher\": \"^1.0.1\",\n+\t\t\"browserify-sign\": \"^4.2.3\",\n+\t\t\"create-ecdh\": \"^4.0.4\",\n+\t\t\"create-hash\": \"^1.2.0\",\n+\t\t\"create-hmac\": \"^1.1.7\",\n+\t\t\"diffie-hellman\": \"^5.0.3\",\n+\t\t\"hash-base\": \"~3.0.4\",\n+\t\t\"inherits\": \"^2.0.4\",\n+\t\t\"pbkdf2\": \"^3.1.2\",\n+\t\t\"public-encrypt\": \"^4.0.3\",\n+\t\t\"randombytes\": \"^2.1.0\",\n+\t\t\"randomfill\": \"^1.0.4\"\n+\t},\n+\t\"devDependencies\": {\n+\t\t\"@ljharb/eslint-config\": \"^21.1.1\",\n+\t\t\"eslint\": \"=8.8.0\",\n+\t\t\"hash-test-vectors\": \"^1.3.2\",\n+\t\t\"nyc\": \"^10.3.2\",\n+\t\t\"object.entries\": \"^1.1.8\",\n+\t\t\"pseudorandombytes\": \"^2.0.0\",\n+\t\t\"safe-buffer\": \"^5.2.1\",\n+\t\t\"semver\": \"^6.3.1\",\n+\t\t\"tape\": \"^5.9.0\"\n+\t},\n+\t\"browser\": {\n+\t\t\"crypto\": false\n+\t},\n+\t\"license\": \"MIT\"\n }\n",
+					"match": false,
+					"packageHash": "69258e0df335583e4a985b8ce932359cc1d2ccf87186c49861be4e96772089bf",
+					"size": 864,
+					"sourceHash": "74b9d82dc6db5b19493fb47d855d5d26858e85bd16293d34c451203d1f3d1840",
+					"status": "content"
+				},
+				"readme.markdown": {
+					"match": false,
+					"packageHash": "ce9d0314a5f05763e9dc09b3fe505c86c233360d1e14b14a42c6393fa97d8d44",
+					"size": 850,
+					"status": "missing-in-source"
+				},
+				"rng.js": {
+					"match": false,
+					"packageHash": "90e9730e601a5eea0a0e2fe5c35d0aba1547d1680bab16802746769850a92234",
+					"size": 861,
+					"status": "missing-in-source"
+				},
+				"sha.js": {
+					"match": false,
+					"packageHash": "c0a10ece8aa3bde77354a38af148861049d11a8516f9815914428e8c6a8b1396",
+					"size": 2340,
+					"status": "missing-in-source"
+				},
+				"sha256.js": {
+					"match": false,
+					"packageHash": "6b2b109994b570be56fab9e168c131a7fc82052e616fbc9c582cfe0661b0b9b3",
+					"size": 3048,
+					"status": "missing-in-source"
+				},
+				"test/browser.js": {
+					"match": false,
+					"packageHash": "7051b1ff15add5109b1602490c2867ff29c0d33f845e57fdfac75d80db8b039b",
+					"size": 4066,
+					"status": "missing-in-source"
+				},
+				"test/node.js": {
+					"match": false,
+					"packageHash": "58e4945fc4e5f95ab42c07afeb6263310d6bd1dfb5d4f38d62d228d775cd9537",
+					"size": 2561,
+					"status": "missing-in-source"
+				},
+				"test/simple.js": {
+					"match": false,
+					"packageHash": "6e2b69ed27163c07c935f5ad0b722a9df44a47e4a2e13f5b43e43c99a56f9e88",
+					"size": 850,
+					"status": "missing-in-source"
+				},
+				"test/vectors/Readme.txt": {
+					"match": false,
+					"packageHash": "ebc2018c7f98411b447ef7616e54d610309ef5d9c9c445ef6922375147ce83a5",
+					"size": 1064,
+					"status": "missing-in-source"
+				},
+				"test/vectors/byte-hashes.md5": {
+					"match": false,
+					"packageHash": "361e88f772df8ad0691263c8dfc71b6f90b7ec0748f7c863db2d36263900a656",
+					"size": 6468,
+					"status": "missing-in-source"
+				},
+				"test/vectors/byte-hashes.sha1": {
+					"match": false,
+					"packageHash": "0b1dfd0f24b7e121c3e320b4cf04ddd799399fd1084e0bdeb3e1aa37dd08054f",
+					"size": 8232,
+					"status": "missing-in-source"
+				},
+				"test/vectors/byte-hashes.sha256": {
+					"match": false,
+					"packageHash": "567387af284604ef510706ffd51c2b3ffc23a9c338200dd6c81d63e5eabf7ed4",
+					"size": 12740,
+					"status": "missing-in-source"
+				},
+				"test/vectors/byte0000.dat": {
+					"match": false,
+					"packageHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+					"size": 0,
+					"status": "missing-in-source"
+				},
+				"test/vectors/byte0001.dat": {
+					"match": false,
+					"packageHash": "09fc96082d34c2dfc1295d92073b5ea1dc8ef8da95f14dfded011ffb96d3e54b",
+					"size": 1,
+					"status": "missing-in-source"
+				},
+				"test/vectors/byte0002.dat": {
+					"match": false,
+					"packageHash": "7db8d3f2747c98228b5997c6ee386f6f062d8517043635e21603faa24bd5087e",
+					"size": 2,
+					"status": "missing-in-source"
+				},
+				"test/vectors/byte0003.dat": {
+					"match": false,
+					"packageHash": "8542c36593b864316d479f50cbedf24cde0a5af69dcb265d72747d4ec344f51b",
+					"size": 3,
+					"status": "missing-in-source"
+				},
+				"test/vectors/byte0004.dat": {
+					"match": false,
+					"packageHash": "873b6948e487507f0ee1365d8351ff599fc3f04dac73f5cd230bbfb6b807d994",
+					"size": 4,
+					"status": "missing-in-source"
+				},
+				"test/vectors/byte0005.dat": {
+					"match": false,
+					"packageHash": "164216ea279c28d83731aaf91bc8d099a844fe31a5f724c8d956efe273f46306",
+					"size": 5,
+					"status": "missing-in-source"
+				},
+				"test/vectors/byte0006.dat": {
+					"match": false,
+					"packageHash": "92905b1352fd247c341a4125b8c80ac2596c13c34888c5d7dd6019c0006d810c",
+					"size": 6,
+					"status": "missing-in-source"
+				},
+				"test/vectors/byte0007.dat": {
+					"match": false,
+					"packageHash": "53b97cb3de34aa3e82c17fd98b2f25957bf56389f444a3dd78faeb0f58f3c8b3",
+					"size": 7,
+					"status": "missing-in-source"
+				},
+				"test/vectors/byte0008.dat": {
+					"match": false,
+					"packageHash": "4632cfeda8637c5d3a42006d0ac037728beaad5a8cee61a05e78488d829dd519",
+					"size": 8,
+					"status": "missing-in-source"
+				},
+				"test/vectors/byte0009.dat": {
+					"match": false,
+					"packageHash": "64d44e3a77ceb27e35550726f5a7073c1d7a8e658d6598b3f400c05e91cf4eb1",
+					"size": 9,
+					"status": "missing-in-source"
+				},
+				"test/vectors/byte0010.dat": {
+					"match": false,
+					"packageHash": "87574390294ef6d212b6d8c44ebd5c88e932036dadd0b827c6cb25cd120bfdf6",
+					"size": 10,
+					"status": "missing-in-source"
+				},
+				"test/vectors/byte0011.dat": {
+					"match": false,
+					"packageHash": "afe90242f095e967523c12333b0093d4e532a0db0f27dcc25d44d23ffb62094b",
+					"size": 11,
+					"status": "missing-in-source"
+				},
+				"test/vectors/byte0012.dat": {
+					"match": false,
+					"packageHash": "4b3a0b90618914e2d2b096809af33cd81e3716880b7832e19927c6fa2e6b3fef",
+					"size": 12,
+					"status": "missing-in-source"
+				},
+				"test/vectors/byte0013.dat": {
+					"match": false,
+					"packageHash": "0160eab04d1ca926222ef93ab18318f9c70bad377ec656b629fbddaa1bba7ed5",
+					"size": 13,
+					"status": "missing-in-source"
+				},
+				"test/vectors/byte0014.dat": {
+					"match": false,
+					"packageHash": "569d045d7249e11a957efe38303cd381e050c8f9e9647d576ea1b0fa6b81fd4a",
+					"size": 14,
+					"status": "missing-in-source"
+				},
+				"test/vectors/byte0015.dat": {
+					"match": false,
+					"packageHash": "76c977fdc97261cd0956ce1319476d314bc57d8691c7884cd0a7ff3cf825c31f",
+					"size": 15,
+					"status": "missing-in-source"
+				},
+				"test/vectors/byte0016.dat": {
+					"match": false,
+					"packageHash": "f10c26637ea8ca2d0898fa661f087f13f174fe0ca1c91862ce3b6127c3430f51",
+					"size": 16,
+					"status": "missing-in-source"
+				},
+				"test/vectors/byte0017.dat": {
+					"match": false,
+					"packageHash": "679b95521601c0ba63ce882046abd7a8cdb8e78d5c0ee9f38c21dc47ca846195",
+					"size": 17,
+					"status": "missing-in-source"
+				},
+				"test/vectors/byte0018.dat": {
+					"match": false,
+					"packageHash": "af369f2162152e43847b4d0c595dcf2d27059563909425f37928bc01090f2f34",
+					"size": 18,
+					"status": "missing-in-source"
+				},
+				"test/vectors/byte0019.dat": {
+					"match": false,
+					"packageHash": "7e1f6f080a60c402bb9c39578f75afc148a0746c656ca243f75038b82304bdf5",
+					"size": 19,
+					"status": "missing-in-source"
+				},
+				"test/vectors/byte0020.dat": {
+					"match": false,
+					"packageHash": "8d6df02738597d95e2eb9e870d4177339728d9ab8b8d61aa96f0b6d1b5ad6efd",
+					"size": 20,
+					"status": "missing-in-source"
+				},
+				"test/vectors/byte0021.dat": {
+					"match": false,
+					"packageHash": "d0a9699291dead3f6fba3b648c28537a04caea4b96b145802c06125a17c3faba",
+					"size": 21,
+					"status": "missing-in-source"
+				},
+				"test/vectors/byte0022.dat": {
+					"match": false,
+					"packageHash": "d504026213b322cbcb0dbadd6a1fc6c708825019da9bac7aec973f750cbf2d3d",
+					"size": 22,
+					"status": "missing-in-source"
+				},
+				"test/vectors/byte0023.dat": {
+					"match": false,
+					"packageHash": "66c1a2578b41c3a200296e85d4d30a1876f8ca5cb941ffb1420e04d8e37149a5",
+					"size": 23,
+					"status": "missing-in-source"
+				},
+				"test/vectors/byte0024.dat": {
+					"match": false,
+					"packageHash": "b8a87b047350912e4861e4aab7d1046d5372797ecea81d187f8e2c117db535dd",
+					"size": 24,
+					"status": "missing-in-source"
+				},
+				"test/vectors/byte0025.dat": {
+					"match": false,
+					"packageHash": "8d2b52d4d4074d471d037cdf9eeb13c18ef9ce4949fce00d106ef0880f2db5ed",
+					"size": 25,
+					"status": "missing-in-source"
+				},
+				"test/vectors/byte0026.dat": {
+					"match": false,
+					"packageHash": "3d182e9928b2433c94255452170e59e3f4cca3dd29ea2e9b01e94e89da595393",
+					"size": 26,
+					"status": "missing-in-source"
+				},
+				"test/vectors/byte0027.dat": {
+					"match": false,
+					"packageHash": "17c3f5d88ed7f3f62be0e28913357d65916389c1633db8fb62b92e14230d3611",
+					"size": 27,
+					"status": "missing-in-source"
+				},
+				"test/vectors/byte0028.dat": {
+					"match": false,
+					"packageHash": "93788128441c894247bd9ccd6fc8af146c0ee76cdbe4e1c5a8dfa81dd0c338b4",
+					"size": 28,
+					"status": "missing-in-source"
+				},
+				"test/vectors/byte0029.dat": {
+					"match": false,
+					"packageHash": "c7855ac54d2c5767273eec327efe39fdb3bad74121bdd8d2065484268727539e",
+					"size": 29,
+					"status": "missing-in-source"
+				},
+				"test/vectors/byte0030.dat": {
+					"match": false,
+					"packageHash": "d1e1f2aca9cfe8c6460f576661190a8008705ef13207c4c7200a2d6b0605f519",
+					"size": 30,
+					"status": "missing-in-source"
+				},
+				"test/vectors/byte0031.dat": {
+					"match": false,
+					"packageHash": "b1843454b0258016558abdbd899319c1fd12d03e0c3d9e882da03de9cb981777",
+					"size": 31,
+					"status": "missing-in-source"
+				},
+				"test/vectors/byte0032.dat": {
+					"match": false,
+					"packageHash": "2834dcb6957b97fdde61b532d151ee4482bface8714fe36cd072b4783765901d",
+					"size": 32,
+					"status": "missing-in-source"
+				},
+				"test/vectors/byte0033.dat": {
+					"match": false,
+					"packageHash": "47d61de59879013f64eb78fa8f6c8b906f7d25b8e1c3ca888f32421749c0d042",
+					"size": 33,
+					"status": "missing-in-source"
+				},
+				"test/vectors/byte0034.dat": {
+					"match": false,
+					"packageHash": "855fc59aa873328501ab0b1ce9c60a7d5582662c725605ebe02b64a13e34b3bc",
+					"size": 34,
+					"status": "missing-in-source"
+				},
+				"test/vectors/byte0035.dat": {
+					"match": false,
+					"packageHash": "e05939e8ff4ed77a11522dde249a74841c54970d984e0bb6f77ac64f1fa313b0",
+					"size": 35,
+					"status": "missing-in-source"
+				},
+				"test/vectors/byte0036.dat": {
+					"match": false,
+					"packageHash": "078778fed0e382da5d7dd36f585e1f1aa9b92d4caf20b85c0f6dd346de8d3998",
+					"size": 36,
+					"status": "missing-in-source"
+				},
+				"test/vectors/byte0037.dat": {
+					"match": false,
+					"packageHash": "263140810ae46430e19ac1a4a98b6204b63031b282ecb28594bd837268104308",
+					"size": 37,
+					"status": "missing-in-source"
+				},
+				"test/vectors/byte0038.dat": {
+					"match": false,
+					"packageHash": "ed39f65ea0e6cd8fb39bc5d94a1554dfd0002733e01618161d58a7b7dc8be834",
+					"size": 38,
+					"status": "missing-in-source"
+				},
+				"test/vectors/byte0039.dat": {
+					"match": false,
+					"packageHash": "89830272d1fd54040f9329a39c7f491f15eea851095e0bd2d0bb412baeda7445",
+					"size": 39,
+					"status": "missing-in-source"
+				},
+				"test/vectors/byte0040.dat": {
+					"match": false,
+					"packageHash": "c9b63e8ac2e87494f98c9ece5d74f4540090c286166efdaedc6d59a0f623e5f8",
+					"size": 40,
+					"status": "missing-in-source"
+				},
+				"test/vectors/byte0041.dat": {
+					"match": false,
+					"packageHash": "509e6b7dacb70bfa62f3964eba990b9c576fd2485c1040fefc8eab5f07269f4d",
+					"size": 41,
+					"status": "missing-in-source"
+				},
+				"test/vectors/byte0042.dat": {
+					"match": false,
+					"packageHash": "8bb7546f64ce1cab770407de791ab25f7bfbac3e071810310ee674c2824e59ac",
+					"size": 42,
+					"status": "missing-in-source"
+				},
+				"test/vectors/byte0043.dat": {
+					"match": false,
+					"packageHash": "ac5bf3cad821e7ad8b2ed7bbfbaaa5e7abb30606afd8ed5d6a18a0d0eba343d3",
+					"size": 43,
+					"status": "missing-in-source"
+				},
+				"test/vectors/byte0044.dat": {
+					"match": false,
+					"packageHash": "f7995f433d17bee25f44c918de82eb147b3bfef24045ff8fb17ffedf559e06b7",
+					"size": 44,
+					"status": "missing-in-source"
+				},
+				"test/vectors/byte0045.dat": {
+					"match": false,
+					"packageHash": "2c465ddc53e88894a2279e30b9e6feb064c66b15dcf5a38722f5c92d65a84bab",
+					"size": 45,
+					"status": "missing-in-source"
+				},
+				"test/vectors/byte0046.dat": {
+					"match": false,
+					"packageHash": "b0ced82dc52c4f9b1dec098a80a23a4a711f3a8c9c3684f0761b0e8a29ba560a",
+					"size": 46,
+					"status": "missing-in-source"
+				},
+				"test/vectors/byte0047.dat": {
+					"match": false,
+					"packageHash": "f8dce75572495bc241288c07246acf7a157d462a9c01d1491618f073e57f47e2",
+					"size": 47,
+					"status": "missing-in-source"
+				},
+				"test/vectors/byte0048.dat": {
+					"match": false,
+					"packageHash": "46d89d780f178334d19e02c41d5af2e265e2190896dce94822b99c19adc3ff6f",
+					"size": 48,
+					"status": "missing-in-source"
+				},
+				"test/vectors/byte0049.dat": {
+					"match": false,
+					"packageHash": "968954bafff8e2a118d3aedffc6283b30efddbac0af2245195c2a32a665a5d54",
+					"size": 49,
+					"status": "missing-in-source"
+				},
+				"test/vectors/byte0050.dat": {
+					"match": false,
+					"packageHash": "33f78a8a6adc466fed41020fa799aa537cc1c1bb4e938c06a1baec97f7b3c26c",
+					"size": 50,
+					"status": "missing-in-source"
+				},
+				"test/vectors/byte0051.dat": {
+					"match": false,
+					"packageHash": "5f7f49d1c307363de95d450b558275f8d5a6780ee47246268e6729f7733e535a",
+					"size": 51,
+					"status": "missing-in-source"
+				},
+				"test/vectors/byte0052.dat": {
+					"match": false,
+					"packageHash": "9f126c6e07ed2744cef5de1f468b2ed1c51a13ec3c8351935b9656458a3dc40f",
+					"size": 52,
+					"status": "missing-in-source"
+				},
+				"test/vectors/byte0053.dat": {
+					"match": false,
+					"packageHash": "b8e3d23621cb02bcae060bdf5b6b7db1f024651f98ec63766c20b7883bc033d2",
+					"size": 53,
+					"status": "missing-in-source"
+				},
+				"test/vectors/byte0054.dat": {
+					"match": false,
+					"packageHash": "689c608602d5e5d37a0285eeb5006d97addd7c2b8e006770fad588eff621c971",
+					"size": 54,
+					"status": "missing-in-source"
+				},
+				"test/vectors/byte0055.dat": {
+					"match": false,
+					"packageHash": "17c6f0073c4f92d5eedda57ca2506aa6002695c6b7bf12e4dbf4dd1a7fbceb08",
+					"size": 55,
+					"status": "missing-in-source"
+				},
+				"test/vectors/byte0056.dat": {
+					"match": false,
+					"packageHash": "504472bf96d0a3da1098dacacac48886d1ab92929187de95c7f42eab9907801d",
+					"size": 56,
+					"status": "missing-in-source"
+				},
+				"test/vectors/byte0057.dat": {
+					"match": false,
+					"packageHash": "ad3a49ab7ad5b69182301d9ef971feab72f770f4d9f60f6db308ffea746db005",
+					"size": 57,
+					"status": "missing-in-source"
+				},
+				"test/vectors/byte0058.dat": {
+					"match": false,
+					"packageHash": "5cdcb342f26857e8db5ac97a89da6197759adf384ab241a8112795241983238f",
+					"size": 58,
+					"status": "missing-in-source"
+				},
+				"test/vectors/byte0059.dat": {
+					"match": false,
+					"packageHash": "4ec9883c8ad72131c79f14e4f1e75042a61100a5bc290fc344ee3c2adc99c143",
+					"size": 59,
+					"status": "missing-in-source"
+				},
+				"test/vectors/byte0060.dat": {
+					"match": false,
+					"packageHash": "375c64eb3361f34b4d89078fa95d082c74bced92436aa3d50031839375d6473e",
+					"size": 60,
+					"status": "missing-in-source"
+				},
+				"test/vectors/byte0061.dat": {
+					"match": false,
+					"packageHash": "8a0a36538da941bea6c614b2c038424588d8d2505039f70cbff291d4f0f9f6a1",
+					"size": 61,
+					"status": "missing-in-source"
+				},
+				"test/vectors/byte0062.dat": {
+					"match": false,
+					"packageHash": "a4dd6338174ebeda6a25b88d754fa5b95cad27902eb0bc8321b76db62efb1abc",
+					"size": 62,
+					"status": "missing-in-source"
+				},
+				"test/vectors/byte0063.dat": {
+					"match": false,
+					"packageHash": "a644092a1de8e05e17908ce565d55fcf39e30585565d96bf1c13eeb9f3401803",
+					"size": 63,
+					"status": "missing-in-source"
+				},
+				"test/vectors/byte0064.dat": {
+					"match": false,
+					"packageHash": "7697b1435a5bdc094038469fc5268615cbe94641b2165bee62466426ab414c97",
+					"size": 64,
+					"status": "missing-in-source"
+				},
+				"test/vectors/byte0065.dat": {
+					"match": false,
+					"packageHash": "62f249a85b14b477e764e63e9821d3f44dd2c745293f3586eff976266311a39f",
+					"size": 65,
+					"status": "missing-in-source"
+				},
+				"test/vectors/byte0066.dat": {
+					"match": false,
+					"packageHash": "eb2c75aa7330a6589d09f58231d1218e4124ba49b7b0c5245a76a5101d136449",
+					"size": 66,
+					"status": "missing-in-source"
+				},
+				"test/vectors/byte0067.dat": {
+					"match": false,
+					"packageHash": "90c096f9852990cf0fcfbd36ffeb577b4d106d66e9c7a18abdc6f7a3b1ddbab1",
+					"size": 67,
+					"status": "missing-in-source"
+				},
+				"test/vectors/byte0068.dat": {
+					"match": false,
+					"packageHash": "327b0e47ba3bc200579ac67ac38968e0df655e2d22ffe3adf238f7ac9029a1de",
+					"size": 68,
+					"status": "missing-in-source"
+				},
+				"test/vectors/byte0069.dat": {
+					"match": false,
+					"packageHash": "bdf4ef8fcafbe13b772ca217eef56a316210e71f69cd943433087c68d9a67bb9",
+					"size": 69,
+					"status": "missing-in-source"
+				},
+				"test/vectors/byte0070.dat": {
+					"match": false,
+					"packageHash": "72c955a5adaf9e49d565342b41b36ee5ab9b5a394d003b804e4e361a46bda571",
+					"size": 70,
+					"status": "missing-in-source"
+				},
+				"test/vectors/byte0071.dat": {
+					"match": false,
+					"packageHash": "cbd287d6a6707e2cdc8e63a29f758facbdab375bb252183d3af877dea8d25260",
+					"size": 71,
+					"status": "missing-in-source"
+				},
+				"test/vectors/byte0072.dat": {
+					"match": false,
+					"packageHash": "7aa856fd19741a16ec634b1f653cfd5ac224278652e0b0a2903e274be20a048f",
+					"size": 72,
+					"status": "missing-in-source"
+				},
+				"test/vectors/byte0073.dat": {
+					"match": false,
+					"packageHash": "8410cdb01c659f05741fd29469d0dbb0251b4fd8e708abeec4a879047fba7c37",
+					"size": 73,
+					"status": "missing-in-source"
+				},
+				"test/vectors/byte0074.dat": {
+					"match": false,
+					"packageHash": "b5f811baf9c441d04f010f76bcd7eae80c5bb249a40ce37436f0a0296849b8ab",
+					"size": 74,
+					"status": "missing-in-source"
+				},
+				"test/vectors/byte0075.dat": {
+					"match": false,
+					"packageHash": "9be38d9ac8a9c30e8a5e86e3ede291b23bb381ee41dc662421e394f6b8b9881e",
+					"size": 75,
+					"status": "missing-in-source"
+				},
+				"test/vectors/byte0076.dat": {
+					"match": false,
+					"packageHash": "ef45cac2d6f325a523c40a989f5554e152f8d65cbd22d35824d1f28378658432",
+					"size": 76,
+					"status": "missing-in-source"
+				},
+				"test/vectors/byte0077.dat": {
+					"match": false,
+					"packageHash": "8e3d126f3a316e0ec49741a3ae6215e29c4acaee364272b7087d9b766579e00c",
+					"size": 77,
+					"status": "missing-in-source"
+				},
+				"test/vectors/byte0078.dat": {
+					"match": false,
+					"packageHash": "a43ee360b1dc90c573bef4145e1d4557166d7cce6ea1ed33e0cbd909643c3621",
+					"size": 78,
+					"status": "missing-in-source"
+				},
+				"test/vectors/byte0079.dat": {
+					"match": false,
+					"packageHash": "5396745f9645dad55b732efde57de49c2ae40624fee192579014dc2b79d814d5",
+					"size": 79,
+					"status": "missing-in-source"
+				},
+				"test/vectors/byte0080.dat": {
+					"match": false,
+					"packageHash": "b617be050dedb47be64d82dc19e3d84b6799b5bada18944df5417759a85e445e",
+					"size": 80,
+					"status": "missing-in-source"
+				},
+				"test/vectors/byte0081.dat": {
+					"match": false,
+					"packageHash": "17d5520a82dd7c945de6a92200d036cd95bb16330f0f95df802d23e90c8e5c2c",
+					"size": 81,
+					"status": "missing-in-source"
+				},
+				"test/vectors/byte0082.dat": {
+					"match": false,
+					"packageHash": "b71e5a677801057ec719ae2655732720644bc8f999a8698876c92e4323d4ae0f",
+					"size": 82,
+					"status": "missing-in-source"
+				},
+				"test/vectors/byte0083.dat": {
+					"match": false,
+					"packageHash": "80c6a41efdfe452d1ad6f3b0d5eb31b962c332a9bb7e4f7ee6f4aaa18a3b81d4",
+					"size": 83,
+					"status": "missing-in-source"
+				},
+				"test/vectors/byte0084.dat": {
+					"match": false,
+					"packageHash": "32ae8512b486d4523ca7a630556758655a5cff12aa5cfcb8dc5e65b21a257f4a",
+					"size": 84,
+					"status": "missing-in-source"
+				},
+				"test/vectors/byte0085.dat": {
+					"match": false,
+					"packageHash": "0f14c68ffe8c26e9d2ecdd5ea8027b6549b3e8742023ffbdc7547227cc27ec2c",
+					"size": 85,
+					"status": "missing-in-source"
+				},
+				"test/vectors/byte0086.dat": {
+					"match": false,
+					"packageHash": "85dff510ebd3f1fa617a2273ed67ef5abe4774cfe95657fe380e75b25090664d",
+					"size": 86,
+					"status": "missing-in-source"
+				},
+				"test/vectors/byte0087.dat": {
+					"match": false,
+					"packageHash": "7a852eb3b59ad350c9d47adf1ce0812d06866cca8e1f2c65c893e7952a62eea4",
+					"size": 87,
+					"status": "missing-in-source"
+				},
+				"test/vectors/byte0088.dat": {
+					"match": false,
+					"packageHash": "49cfe8b6302a2d45b866a26c4940d777df4f588ebe1bafeb275a8a03a1eeb0aa",
+					"size": 88,
+					"status": "missing-in-source"
+				},
+				"test/vectors/byte0089.dat": {
+					"match": false,
+					"packageHash": "e6e49ebcd83acd3a9ec0b100e26c4d82388eb9378ecfcbf967a31c4951ad0c01",
+					"size": 89,
+					"status": "missing-in-source"
+				},
+				"test/vectors/byte0090.dat": {
+					"match": false,
+					"packageHash": "9edf4d38cdd6e73e857f1ec91132499e7f930d2cdee6b3583a8f062ff7e9d848",
+					"size": 90,
+					"status": "missing-in-source"
+				},
+				"test/vectors/byte0091.dat": {
+					"match": false,
+					"packageHash": "768dbebcd6aa66337810b7457964c63322904e9242229e5d98b808799f7f4cd4",
+					"size": 91,
+					"status": "missing-in-source"
+				},
+				"test/vectors/byte0092.dat": {
+					"match": false,
+					"packageHash": "867a5ab42d15f9843d67438db495a8a581eddd39c3753f3d203225b60eaa9a3e",
+					"size": 92,
+					"status": "missing-in-source"
+				},
+				"test/vectors/byte0093.dat": {
+					"match": false,
+					"packageHash": "d7acd8d042b8c6802f6d9262055a6e296f3254674745f18cd1b21244e1acb9f0",
+					"size": 93,
+					"status": "missing-in-source"
+				},
+				"test/vectors/byte0094.dat": {
+					"match": false,
+					"packageHash": "fe781c4d49e73ca9f82389b6d58f3def857cffe624acfb6a2a5a8e9559623f37",
+					"size": 94,
+					"status": "missing-in-source"
+				},
+				"test/vectors/byte0095.dat": {
+					"match": false,
+					"packageHash": "96fb72ddb440bb1f00dbafc97768f9890effcc172fcc395de4f2a19318c46c86",
+					"size": 95,
+					"status": "missing-in-source"
+				},
+				"test/vectors/byte0096.dat": {
+					"match": false,
+					"packageHash": "b63555a77fefcadecfa88a770e70f1d51d46ae68fc672ad4770804495eb1b867",
+					"size": 96,
+					"status": "missing-in-source"
+				},
+				"test/vectors/byte0097.dat": {
+					"match": false,
+					"packageHash": "161d1a609fdeb2fa425761bf0b751dfd25e7a0a02995920921f99f63331b76d9",
+					"size": 97,
+					"status": "missing-in-source"
+				},
+				"test/vectors/byte0098.dat": {
+					"match": false,
+					"packageHash": "c80931a1263d7f192937eea3e453006b19525ed981314ec3fd561d256e8e135d",
+					"size": 98,
+					"status": "missing-in-source"
+				},
+				"test/vectors/byte0099.dat": {
+					"match": false,
+					"packageHash": "a3b6ba9a5cba6071a99b1a43454053bfc3e6d1338ccf0063d5d71247a6b57566",
+					"size": 99,
+					"status": "missing-in-source"
+				},
+				"test/vectors/byte0100.dat": {
+					"match": false,
+					"packageHash": "7d057dc07ed5a7c11590262a0a18c8cd614a029ca12fe08bfedc87307b5f65b9",
+					"size": 100,
+					"status": "missing-in-source"
+				},
+				"test/vectors/byte0101.dat": {
+					"match": false,
+					"packageHash": "0b7744d3394c04618e6376cd450cc3fc81586493ab5081a9b3b155938d98563c",
+					"size": 101,
+					"status": "missing-in-source"
+				},
+				"test/vectors/byte0102.dat": {
+					"match": false,
+					"packageHash": "e8d1ea7154ec53c175761311295f69037865db32ec22976b6ddb981d226760ad",
+					"size": 102,
+					"status": "missing-in-source"
+				},
+				"test/vectors/byte0103.dat": {
+					"match": false,
+					"packageHash": "40aa287bdf661317439fa5ffa77cc9fa9ca3df504aae74b0ba83b2fbebbaac83",
+					"size": 103,
+					"status": "missing-in-source"
+				},
+				"test/vectors/byte0104.dat": {
+					"match": false,
+					"packageHash": "ee2e8fb7206e2e8fdae91afcc3e903d534b304069f232c68f53407cfc6d0bbae",
+					"size": 104,
+					"status": "missing-in-source"
+				},
+				"test/vectors/byte0105.dat": {
+					"match": false,
+					"packageHash": "b940c011eaef2b772ba03659581d525e0b6148f9c59cb7120db55ce18bf6d695",
+					"size": 105,
+					"status": "missing-in-source"
+				},
+				"test/vectors/byte0106.dat": {
+					"match": false,
+					"packageHash": "9574545ba02bd75bb1dcf038884bf9d7892bc017215308f01ebba7932c014a62",
+					"size": 106,
+					"status": "missing-in-source"
+				},
+				"test/vectors/byte0107.dat": {
+					"match": false,
+					"packageHash": "da685c53ddf810225507141759e3c74ffeaa1c5eecbe150386a83027e7014077",
+					"size": 107,
+					"status": "missing-in-source"
+				},
+				"test/vectors/byte0108.dat": {
+					"match": false,
+					"packageHash": "5c0769369e4fb9f9d9e599612923554fb2f1e6d87eaeed283f6106845b66b532",
+					"size": 108,
+					"status": "missing-in-source"
+				},
+				"test/vectors/byte0109.dat": {
+					"match": false,
+					"packageHash": "19056a3d33ebe1b84a100c27fc72d0265ceeb9c573d7942a4d44983238d34ea7",
+					"size": 109,
+					"status": "missing-in-source"
+				},
+				"test/vectors/byte0110.dat": {
+					"match": false,
+					"packageHash": "8a5e6e6cae30d4283fd70af96d9c53d8ea45ca48892d313981fe208b1384f0dc",
+					"size": 110,
+					"status": "missing-in-source"
+				},
+				"test/vectors/byte0111.dat": {
+					"match": false,
+					"packageHash": "880992dadfeccb31f289522214209eb87f41fea5fd3155ab274e9a6fdc6f9f64",
+					"size": 111,
+					"status": "missing-in-source"
+				},
+				"test/vectors/byte0112.dat": {
+					"match": false,
+					"packageHash": "ea7a2b0e780fc6dc8843643a2bc18a17226a1bb3d9e1467cf0be2201decce2c7",
+					"size": 112,
+					"status": "missing-in-source"
+				},
+				"test/vectors/byte0113.dat": {
+					"match": false,
+					"packageHash": "2077395cd7562dd5e9965ea620cedf32c805f50f748c4ee6e82af960c5ce2d66",
+					"size": 113,
+					"status": "missing-in-source"
+				},
+				"test/vectors/byte0114.dat": {
+					"match": false,
+					"packageHash": "2dbdc632baa5d0831808518beb80e3737de5bbec3dd0438e75dd30b2ea7fbb90",
+					"size": 114,
+					"status": "missing-in-source"
+				},
+				"test/vectors/byte0115.dat": {
+					"match": false,
+					"packageHash": "ced4cf34982e0abbef40e876659544c4ed01f1975351490984aaa429fef321b0",
+					"size": 115,
+					"status": "missing-in-source"
+				},
+				"test/vectors/byte0116.dat": {
+					"match": false,
+					"packageHash": "69339b4534eecca329ef2af397ede2a882d7e315a871dd2b781b8e0f4277ee66",
+					"size": 116,
+					"status": "missing-in-source"
+				},
+				"test/vectors/byte0117.dat": {
+					"match": false,
+					"packageHash": "79cfbb9b52e573e22cd3427ec258d69e2d19fd27de15df96ca9006ccebe7b58e",
+					"size": 117,
+					"status": "missing-in-source"
+				},
+				"test/vectors/byte0118.dat": {
+					"match": false,
+					"packageHash": "1203d54626871bccfa8abb8bbd740b9af3c7266bc8490a210074d7f2b0806ae8",
+					"size": 118,
+					"status": "missing-in-source"
+				},
+				"test/vectors/byte0119.dat": {
+					"match": false,
+					"packageHash": "0c15140d3b5e4b180b0b1517a51fa08f82458c02185ef2bc59fae37543ef9011",
+					"size": 119,
+					"status": "missing-in-source"
+				},
+				"test/vectors/byte0120.dat": {
+					"match": false,
+					"packageHash": "ab71b18daceecc7c8fde7cf5f77eacf118262d760bcd383dd7bfa2170895d518",
+					"size": 120,
+					"status": "missing-in-source"
+				},
+				"test/vectors/byte0121.dat": {
+					"match": false,
+					"packageHash": "fa3174d3432fe38241a34a8387811b54c3d0f183468cef5cd6d3fb325b270b66",
+					"size": 121,
+					"status": "missing-in-source"
+				},
+				"test/vectors/byte0122.dat": {
+					"match": false,
+					"packageHash": "c13fd9ed22d33aa45f73748782e4dbb835d180dc0662e160c0a6c445c76f0c72",
+					"size": 122,
+					"status": "missing-in-source"
+				},
+				"test/vectors/byte0123.dat": {
+					"match": false,
+					"packageHash": "b88a842dc14c41c2b5bd74e48fdd2bd0d43cfeea1eb9b154bebfc4f03d8a102d",
+					"size": 123,
+					"status": "missing-in-source"
+				},
+				"test/vectors/byte0124.dat": {
+					"match": false,
+					"packageHash": "45ba1056e49828a0385b0b5f9e4933905973f15b2713fee1c1755e2a7a3e8d79",
+					"size": 124,
+					"status": "missing-in-source"
+				},
+				"test/vectors/byte0125.dat": {
+					"match": false,
+					"packageHash": "a0d7d4fda9435ef292b761aed2c9fea576519437a824e96150a4324dcc757605",
+					"size": 125,
+					"status": "missing-in-source"
+				},
+				"test/vectors/byte0126.dat": {
+					"match": false,
+					"packageHash": "7906439843a1c1758c232182eaa66d5e6bd5ad2fbc0157fdc5438e1038966dc4",
+					"size": 126,
+					"status": "missing-in-source"
+				},
+				"test/vectors/byte0127.dat": {
+					"match": false,
+					"packageHash": "35e5a6c17906646cf15c2bed4884129b5134eb2b411400e4d8797126f51a4cb7",
+					"size": 127,
+					"status": "missing-in-source"
+				},
+				"test/vectors/byte0128.dat": {
+					"match": false,
+					"packageHash": "d19ddbd98476519a07cd8917b95eb609e5b50e8088ad68cd7426e8139d5bffc2",
+					"size": 128,
+					"status": "missing-in-source"
+				},
+				"test/vectors/byte0129.dat": {
+					"match": false,
+					"packageHash": "cafea6a1183ca8934867692684194ce9903b375a8036c4c5deb8fb379c3423cb",
+					"size": 129,
+					"status": "missing-in-source"
+				},
+				"test/vectors/byte0130.dat": {
+					"match": false,
+					"packageHash": "7e4734ce7e22a515bfe60e296640dec121a089f75034240408fe7be2ed9e5c87",
+					"size": 257,
+					"status": "missing-in-source"
+				},
+				"test/vectors/byte0131.dat": {
+					"match": false,
+					"packageHash": "b09436c29cc3823c434a4689bb67a73a49164bd23ab40c4e04ed99320fd138d2",
+					"size": 385,
+					"status": "missing-in-source"
+				},
+				"test/vectors/byte0132.dat": {
+					"match": false,
+					"packageHash": "d6752f5e2738cbaa2e154b749216babc990297af411dfa2b66c9f942480ff4b9",
+					"size": 513,
+					"status": "missing-in-source"
+				},
+				"test/vectors/byte0133.dat": {
+					"match": false,
+					"packageHash": "0f0cc4994a2a88f58cc38afdf61ff43952473c437d235cec426139c8f43ffb5a",
+					"size": 641,
+					"status": "missing-in-source"
+				},
+				"test/vectors/byte0134.dat": {
+					"match": false,
+					"packageHash": "eb9dd875ecf9ec930b1482b8a50c337d48b31590f99cdfb80bbdd160ad4fb49b",
+					"size": 769,
+					"status": "missing-in-source"
+				},
+				"test/vectors/byte0135.dat": {
+					"match": false,
+					"packageHash": "ec7435c1c8e3eb1de2871cdc797bff6969b863e5b9fb005b3a7af4ff96680c63",
+					"size": 897,
+					"status": "missing-in-source"
+				},
+				"test/vectors/byte0136.dat": {
+					"match": false,
+					"packageHash": "e5afd502015d80bb43ab7f92f138b35ce5fafa980c5fba78412ffcfa281f9d8d",
+					"size": 1025,
+					"status": "missing-in-source"
+				},
+				"test/vectors/byte0137.dat": {
+					"match": false,
+					"packageHash": "14e7975021e84497b4daf367f6861c79820308883c4e1254c038a7458a3f2913",
+					"size": 1153,
+					"status": "missing-in-source"
+				},
+				"test/vectors/byte0138.dat": {
+					"match": false,
+					"packageHash": "bcefd79629a6d7a8afbf0c8ccfc2c5889f627989e71c3a212d900e3015e460fa",
+					"size": 1281,
+					"status": "missing-in-source"
+				},
+				"test/vectors/byte0139.dat": {
+					"match": false,
+					"packageHash": "74661206cb19ec00619e1fcdcae443486adfa69a564672c9ee9f48f8ea35d5b2",
+					"size": 1409,
+					"status": "missing-in-source"
+				},
+				"test/vectors/byte0140.dat": {
+					"match": false,
+					"packageHash": "341bf4dff841088f3b902c2471b67b49498bda5c045e9befd58af93ade0a8df8",
+					"size": 1537,
+					"status": "missing-in-source"
+				},
+				"test/vectors/byte0141.dat": {
+					"match": false,
+					"packageHash": "e5239ecec9ea7737f614ebab502df1248c0a9a0183fc70441fd9ac88040846ce",
+					"size": 1665,
+					"status": "missing-in-source"
+				},
+				"test/vectors/byte0142.dat": {
+					"match": false,
+					"packageHash": "58e09b4047770bc998b86a4191b7a11eec6fc65bd5e5d0fb6f30d4b7ee0cd683",
+					"size": 1793,
+					"status": "missing-in-source"
+				},
+				"test/vectors/byte0143.dat": {
+					"match": false,
+					"packageHash": "9e01666f3284aec585338d0b452aa1712b9d1392c4a265a2ecfc9dc4cadd002b",
+					"size": 1921,
+					"status": "missing-in-source"
+				},
+				"test/vectors/byte0144.dat": {
+					"match": false,
+					"packageHash": "33aa52b6be6991965ae18124232f108ec7b400528e848e5d8a8d7cf75783ee19",
+					"size": 2049,
+					"status": "missing-in-source"
+				},
+				"test/vectors/byte0145.dat": {
+					"match": false,
+					"packageHash": "f854ce37a0821dee06b616d2e86383271c91e09328f884dfef2107712d267601",
+					"size": 2177,
+					"status": "missing-in-source"
+				},
+				"test/vectors/byte0146.dat": {
+					"match": false,
+					"packageHash": "a58035c4921e7114b97fde8d4cf04224971d49fc6b23ed5d61a29e133684c809",
+					"size": 2305,
+					"status": "missing-in-source"
+				},
+				"test/vectors/byte0147.dat": {
+					"match": false,
+					"packageHash": "4d8963b832c44bab059a206f162890fff4eafd71e535a03609a67fe3c31de9e3",
+					"size": 2433,
+					"status": "missing-in-source"
+				},
+				"test/vectors/byte0148.dat": {
+					"match": false,
+					"packageHash": "6ebf98b52fc3c4e77257d176b47d10729baeec4066a9bc78a89d7d02af7ab2cf",
+					"size": 2561,
+					"status": "missing-in-source"
+				},
+				"test/vectors/byte0149.dat": {
+					"match": false,
+					"packageHash": "366cd811c075198d1749db7075c4c333b6f347b64e44b3744ef28a3957a0feb1",
+					"size": 2689,
+					"status": "missing-in-source"
+				},
+				"test/vectors/byte0150.dat": {
+					"match": false,
+					"packageHash": "712157d7d59011c4bf1ee690217f4b0f855816e9bbee6b6aff277b9645340c9a",
+					"size": 2817,
+					"status": "missing-in-source"
+				},
+				"test/vectors/byte0151.dat": {
+					"match": false,
+					"packageHash": "1dc0a697f2a7c1da301b256e6822879f212beb56fbc7fe1b8e877ccd964c132a",
+					"size": 2945,
+					"status": "missing-in-source"
+				},
+				"test/vectors/byte0152.dat": {
+					"match": false,
+					"packageHash": "6fb0514a46f06be4bc3798ae82fa6cf14103926f1969b3d70910a9c5d9589e58",
+					"size": 3073,
+					"status": "missing-in-source"
+				},
+				"test/vectors/byte0153.dat": {
+					"match": false,
+					"packageHash": "9731a6c8ef6c4d601781f231e5b17c0a5194495d5b01b27aefbb4cd857c0c7d1",
+					"size": 3201,
+					"status": "missing-in-source"
+				},
+				"test/vectors/byte0154.dat": {
+					"match": false,
+					"packageHash": "b18a49b7c4114fb94d16ffdce1e1677e6bde99bba443936af10cbedca6eeaf2a",
+					"size": 3329,
+					"status": "missing-in-source"
+				},
+				"test/vectors/byte0155.dat": {
+					"match": false,
+					"packageHash": "ce197d61ddae42c8b8447aa698b3e7e5d51d9f0cd2034bc64f1a9d1b2b18e3cd",
+					"size": 3457,
+					"status": "missing-in-source"
+				},
+				"test/vectors/byte0156.dat": {
+					"match": false,
+					"packageHash": "7d9a3aebb470990abb92303f0c2ce5d6c38f9a2198d8f1ae8ab7fbbbf007cc7d",
+					"size": 3585,
+					"status": "missing-in-source"
+				},
+				"test/vectors/byte0157.dat": {
+					"match": false,
+					"packageHash": "e52d8c79b31f45d4894e0948089da5fc236d33dd79a80d2304043e8c234cf88c",
+					"size": 3713,
+					"status": "missing-in-source"
+				},
+				"test/vectors/byte0158.dat": {
+					"match": false,
+					"packageHash": "b1870cae9e54cbe8ddd74782c98f6c9ec6eeb835e2765252530d71779685d4ea",
+					"size": 3841,
+					"status": "missing-in-source"
+				},
+				"test/vectors/byte0159.dat": {
+					"match": false,
+					"packageHash": "69850fe71261572f61d56863a7dc12aeda7931225d0eafb5b7b45aef7b6c8586",
+					"size": 3969,
+					"status": "missing-in-source"
+				},
+				"test/vectors/byte0160.dat": {
+					"match": false,
+					"packageHash": "18fdfb38e4f516734cef5de8cba84a54a17cdaf13228621dfcd806c5e822eccd",
+					"size": 4097,
+					"status": "missing-in-source"
+				},
+				"test/vectors/byte0161.dat": {
+					"match": false,
+					"packageHash": "9db6e6591134181c2c19bbc57f24e11ea161165cde584e1f58c4df2fb5ee8c88",
+					"size": 4225,
+					"status": "missing-in-source"
+				},
+				"test/vectors/byte0162.dat": {
+					"match": false,
+					"packageHash": "86eafcaf23edfef66753d664eaa7813b5a16d1abc01a95f74ae88a02e42cadfb",
+					"size": 4353,
+					"status": "missing-in-source"
+				},
+				"test/vectors/byte0163.dat": {
+					"match": false,
+					"packageHash": "7be29e433c7e17875c71eea08d10ada5a17eea25ead94d41cb1711e8fd204c06",
+					"size": 4481,
+					"status": "missing-in-source"
+				},
+				"test/vectors/byte0164.dat": {
+					"match": false,
+					"packageHash": "c1f98aac0cfc98f30c3fa13fb8011b2a1d553e6c03edb8e2a35f47574237fc64",
+					"size": 4609,
+					"status": "missing-in-source"
+				},
+				"test/vectors/byte0165.dat": {
+					"match": false,
+					"packageHash": "981571f9393463f49cd5352c024a8998d7b139bc8aec7a512101edb18a7e0954",
+					"size": 4737,
+					"status": "missing-in-source"
+				},
+				"test/vectors/byte0166.dat": {
+					"match": false,
+					"packageHash": "8628162a5c9d34c94e60027175f819e98a356832a3d3898a7f11b95e171e2a73",
+					"size": 4865,
+					"status": "missing-in-source"
+				},
+				"test/vectors/byte0167.dat": {
+					"match": false,
+					"packageHash": "1c4530860ec79ab73b141a7e64b0de775192a002fa2f3832b6c24972797d5161",
+					"size": 4993,
+					"status": "missing-in-source"
+				},
+				"test/vectors/byte0168.dat": {
+					"match": false,
+					"packageHash": "d97097c16c4d0cf169e61cde78e807cd318b8938992066bfe4e266e14146fbba",
+					"size": 5121,
+					"status": "missing-in-source"
+				},
+				"test/vectors/byte0169.dat": {
+					"match": false,
+					"packageHash": "3a18179cf693d234a8aa913b7362505533b414d60bf7eaf02427157759defaba",
+					"size": 5249,
+					"status": "missing-in-source"
+				},
+				"test/vectors/byte0170.dat": {
+					"match": false,
+					"packageHash": "8ee61f98cea2659f5ab9d8ec444de3b3e843ab02baa7806e96230a64dee93774",
+					"size": 5377,
+					"status": "missing-in-source"
+				},
+				"test/vectors/byte0171.dat": {
+					"match": false,
+					"packageHash": "bc69420ce99aa58de5d5c9ae32c3528b02546347e8f85dca651187142bc2a40b",
+					"size": 5505,
+					"status": "missing-in-source"
+				},
+				"test/vectors/byte0172.dat": {
+					"match": false,
+					"packageHash": "79b2d4da202168d2c6f7dbff6dba414f71e405731a287a23b58af903f9b1c770",
+					"size": 5633,
+					"status": "missing-in-source"
+				},
+				"test/vectors/byte0173.dat": {
+					"match": false,
+					"packageHash": "068c65431e6010461cd77e3d2859fbc978857d1195dc1506ab1b5c9344e1099f",
+					"size": 5761,
+					"status": "missing-in-source"
+				},
+				"test/vectors/byte0174.dat": {
+					"match": false,
+					"packageHash": "918a1d14de8c5fa363fb3137cf5014020646a1a2235f78ef3ed0d034c74f5761",
+					"size": 5889,
+					"status": "missing-in-source"
+				},
+				"test/vectors/byte0175.dat": {
+					"match": false,
+					"packageHash": "ef88b649d012178186dcf0244835232b5b7392e0c1f8f141f5107e9ead559e74",
+					"size": 6017,
+					"status": "missing-in-source"
+				},
+				"test/vectors/byte0176.dat": {
+					"match": false,
+					"packageHash": "326f14fc54954b73d704935b213dc797311f7c8fcd88c238c8ab767286dc3f94",
+					"size": 6145,
+					"status": "missing-in-source"
+				},
+				"test/vectors/byte0177.dat": {
+					"match": false,
+					"packageHash": "0087e37129b9a2d58b0987a218a3c1be67cb1e08142cbcf889aa617ca3e4640d",
+					"size": 6273,
+					"status": "missing-in-source"
+				},
+				"test/vectors/byte0178.dat": {
+					"match": false,
+					"packageHash": "93294033c9de9361a3c6cc0df539e2e459f6d2babbbc0623859e18af0d0ccf4e",
+					"size": 6401,
+					"status": "missing-in-source"
+				},
+				"test/vectors/byte0179.dat": {
+					"match": false,
+					"packageHash": "49640215294d9263bc464538c3c29e42edea637d1427c2f04ebcd828d6fcb480",
+					"size": 6529,
+					"status": "missing-in-source"
+				},
+				"test/vectors/byte0180.dat": {
+					"match": false,
+					"packageHash": "ce5cfa5b3b0485805cf5bcc8c24594a6b6fec9249698d317ce20bc84d857eafe",
+					"size": 6657,
+					"status": "missing-in-source"
+				},
+				"test/vectors/byte0181.dat": {
+					"match": false,
+					"packageHash": "c9ac43870e02c7b36bb1e7ba3ce2e234507c0076f8a77494f268777edf5ebffc",
+					"size": 6785,
+					"status": "missing-in-source"
+				},
+				"test/vectors/byte0182.dat": {
+					"match": false,
+					"packageHash": "30eb195e3aad4c288af76c66e26c6096f5f7de1b56b43d638ab7119d73cfd214",
+					"size": 6913,
+					"status": "missing-in-source"
+				},
+				"test/vectors/byte0183.dat": {
+					"match": false,
+					"packageHash": "338225e3b94025d2b327d72ed3d763a66856e1d1ebcb632bc4d8752000ad9966",
+					"size": 7041,
+					"status": "missing-in-source"
+				},
+				"test/vectors/byte0184.dat": {
+					"match": false,
+					"packageHash": "69b6cc0729b2d2877d46a08f3c251ae18f043949a33797c3027668b23c969d68",
+					"size": 7169,
+					"status": "missing-in-source"
+				},
+				"test/vectors/byte0185.dat": {
+					"match": false,
+					"packageHash": "3d35c10650a2da8413a2a11b8e7fb891af5da3a9763584caa6cd71bbe68de6ba",
+					"size": 7297,
+					"status": "missing-in-source"
+				},
+				"test/vectors/byte0186.dat": {
+					"match": false,
+					"packageHash": "baf3bcf323f3e5b91649eeb5f1be977a8bd91915a66297a22fdb1a906d1a7e53",
+					"size": 7425,
+					"status": "missing-in-source"
+				},
+				"test/vectors/byte0187.dat": {
+					"match": false,
+					"packageHash": "7fd9b3abc4684e6f8ee591bbac5a36c5060bb09ef7899690416e5300cc14fcd3",
+					"size": 7553,
+					"status": "missing-in-source"
+				},
+				"test/vectors/byte0188.dat": {
+					"match": false,
+					"packageHash": "429e454c0cd5d874d7887f8f8def3390a6e54af783c102af6bc3c75c62f3661f",
+					"size": 7681,
+					"status": "missing-in-source"
+				},
+				"test/vectors/byte0189.dat": {
+					"match": false,
+					"packageHash": "0987d19048e10b925bcf394dfffcf259fc1a15e403673a80bfd4e7fd4f43cef0",
+					"size": 7809,
+					"status": "missing-in-source"
+				},
+				"test/vectors/byte0190.dat": {
+					"match": false,
+					"packageHash": "fc774a081d9c93d52bb6a8d99a06ccd7bf32a10154d302524b8c5c5dc1b2969f",
+					"size": 7937,
+					"status": "missing-in-source"
+				},
+				"test/vectors/byte0191.dat": {
+					"match": false,
+					"packageHash": "6c6afa35f1aad6301dfde6c4ababe2da47d92033a9a41e84ca6f00e5eb29bc60",
+					"size": 8065,
+					"status": "missing-in-source"
+				},
+				"test/vectors/byte0192.dat": {
+					"match": false,
+					"packageHash": "1e858dd15069f54478023c4d8518cd5aa814fb15c9eb8df45c44efbb050587ed",
+					"size": 8193,
+					"status": "missing-in-source"
+				},
+				"test/vectors/byte0193.dat": {
+					"match": false,
+					"packageHash": "5d73820315ebd00f0e419a7fe418ff109664add82a68387daffff4239a2c1b23",
+					"size": 8321,
+					"status": "missing-in-source"
+				},
+				"test/vectors/byte0194.dat": {
+					"match": false,
+					"packageHash": "f7f4721be31524d014bacf105b06bacc4bdb953bc04d5a048e1fd4ddc395667e",
+					"size": 8449,
+					"status": "missing-in-source"
+				},
+				"test/vectors/byte0195.dat": {
+					"match": false,
+					"packageHash": "426cbfa5a10024c4f5deae9146222146c2d75a5bf13e8215c04d7dd17f455743",
+					"size": 8577,
+					"status": "missing-in-source"
+				},
+				".eslintrc": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				".github/FUNDING.yml": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				".github/workflows/node-aught.yml": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				".github/workflows/node-pretest.yml": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				".github/workflows/node-tens.yml": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				".github/workflows/rebase.yml": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				".github/workflows/require-allow-edits.yml": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				".nycrc": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"README.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/aes.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/create-hash.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/create-hmac.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/dh.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/ecdh.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/index.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/node/dh.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/pbkdf2.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/public-encrypt.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/random-bytes.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/random-fill.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/sign.js": {
+					"match": false,
+					"status": "missing-in-package"
+				}
+			},
+			"summary": {
+				"differentFiles": 6,
+				"matchingFiles": 1,
+				"missingInPackage": 21,
+				"missingInSource": 210,
+				"score": 0.004201680672268907,
+				"totalFiles": 238
+			}
+		}
+	}
+]
