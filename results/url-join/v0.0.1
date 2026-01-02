@@ -1,0 +1,85 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-02T09:14:14.131Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:11.7.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "url-join@0.0.1",
+			"name": "url-join",
+			"version": "0.0.1",
+			"location": "https://registry.npmjs.org/url-join/-/url-join-0.0.1.tgz",
+			"integrity": "sha512-H6dnQ/yPAAVzMQRvEvyz01hhfQL5qRWSEt7BX8t9DqnPw9BjMb64fjIRq76Uvf1hkHp+mTZvEVJ5guXOT0Xqaw==",
+			"publishedAt": "2013-01-29T15:47:55.916Z",
+			"publishedWith": {
+				"node": null,
+				"npm": "1.1.69"
+			}
+		},
+		"source": {
+			"integrity": "sha512-Ns18G2Yt5cbXpOk/ZT/O9XBub5XZtoX6U6GAVVFF87oDU2W5oj+ehJtPRi2TO5jywI5WAjSaKRJ/HXW6VY0c0Q==",
+			"location": "git://github.com/jfromaniello/url-join.git",
+			"spec": "github:jfromaniello/url-join#HEAD"
+		},
+		"comparisonHash": "8a2a8dcbb729bf3ee9216e490c955701f0ddebe1",
+		"diff": {
+			"files": {
+				".npmignore": {
+					"match": false,
+					"packageHash": "989455fdc81a4124b743976561bec8d7721ea334c4af19a6bee7c998dc6aa7f6",
+					"size": 20,
+					"status": "missing-in-source"
+				},
+				"README.md": {
+					"diff": "--- published/README.md\n+++ rebuilt/README.md\n@@ -1,27 +1,76 @@\n-Join all arguments together and normalize the resulting url.\n+Join all arguments together and normalize the resulting URL.\n \n ## Install\n \n-~~~\n+```bash\n npm install url-join\n-~~~\n+```\n+\n+If you want to use it directly in a browser use a CDN like [Skypack](https://www.skypack.dev/view/url-join).\n \n ## Usage\n \n-~~~javascript\n-var urljoin = require('url-join');\n+```javascript\n+import urlJoin from 'url-join';\n+\n+const fullUrl = urlJoin('http://www.google.com', 'a', '/b/cd', '?foo=123', '&bar=456', '#heading-1');\n+\n+console.log(fullUrl.toString()); // 'http://www.google.com/a/b/cd?foo=123&bar=456#heading-1'\n+```\n+\n+## You might not need this library\n+\n+This library was originally created before the [URL API](https://developer.mozilla.org/en-US/docs/Web/API/URL_API) was standardized and widely available in popular runtimes such as browsers and Node.js. Depending on your use-case you might want to consider using the standardized API over this library.\n+\n+### In the Browser\n+\n+For example, the equivalent code for the above example would look as follows when using the URL API:\n+\n+```javascript\n+const fullUrl = new URL('http://www.google.com');\n+\n+fullUrl.pathname = '/a/b/cd';\n+fullUrl.searchParams.append('foo', '123');\n+fullUrl.searchParams.append('bar', '456');\n+fullUrl.hash = 'heading-1';\n+\n+console.log(fullUrl.toString()); // 'http://www.google.com/a/b/cd?foo=123&bar=456#heading-1'\n+```\n+\n+### Joining paths\n+\n+This library provides the missing piece for the URL API, joining multiple paths together:\n+\n+```javascript\n+import urlJoin from 'url-join';\n+\n+const fullUrl = new URL('http://www.google.com');\n+\n+fullUrl.pathname = urlJoin('a', '/b/cd');\n+\n+console.log(fullUrl.toString()); // 'http://www.google.com/a/b/cd'\n+```\n+\n+### In Node.js\n+\n+If you are using Node.js, the `path/posix` module can join paths in a way that is compatible with URL pathnames:\n+\n+```javascript\n+import { join as joinPath } from 'node:path/posix';\n+\n+const fullUrl = new URL('http://www.google.com');\n \n-var fullUrl = urljoin('http://www.google.com', 'a', '/b/cd', '?foo=123');\n+fullUrl.pathname = joinPath('a', '/b/cd');\n \n-console.log(fullUrl);\n+console.log(fullUrl.toString()); // 'http://www.google.com/a/b/cd'\n+```\n \n-\\\\will print:\n+### Caveats of URL API\n \n-'http://www.google.com/a/b/cd?foo=123'\n-~~~\n+There are a couple of caveats to take into account when utilizing the standard APIs. Firstly, a `URL` must always include a complete and valid base, which means specifying the scheme and domain name (e.g. http://example.com).\n \n-This works similar to [path.join](http://nodejs.org/api/path.html#path_path_join_path1_path2) but you shouldn't use ```path.join``` for urls since it will work different depending of the operative systems but also doesn't work for some cases.\n+Secondly, it is not possible to join together and normalize the path of a URL. You must do this manually by joining your paths and then assigning the pathname property.\n \n ## License\n \n-MIT\n\\ No newline at end of file\n+MIT\n",
+					"match": false,
+					"packageHash": "992b9028d277ce01c00e923d0818d1dfa49e9b41f3fe5ef5a326a6e6aa4eb36b",
+					"size": 580,
+					"sourceHash": "7a81c025f1f3627a40414e88c8b6825ebf0ab7e5d98cac603b174ee8cc30c666",
+					"status": "content"
+				},
+				"lib/url-join.js": {
+					"diff": "--- published/lib/url-join.js\n+++ rebuilt/lib/url-join.js\n@@ -1,12 +1,91 @@\n-function normalize (str) {\n-  return str\n-          .replace(/[\\/]+/g, '/')\n-          .replace(/\\/\\?/g, '?')\n-          .replace(/\\/\\#/g, '#')\n-          .replace(/\\:\\//g, '://');\n+function normalize (strArray) {\n+  const resultArray = [];\n+  if (strArray.length === 0) { return ''; }\n+\n+  // Filter out any empty string values.\n+  strArray = strArray.filter((part) => part !== '');\n+\n+  if (typeof strArray[0] !== 'string') {\n+    throw new TypeError('Url must be a string. Received ' + strArray[0]);\n+  }\n+\n+  // If the first part is a plain protocol, we combine it with the next part.\n+  if (strArray[0].match(/^[^/:]+:\\/*$/) && strArray.length > 1) {\n+    strArray[0] = strArray.shift() + strArray[0];\n+  }\n+\n+  // If the first part is a leading slash, we combine it with the next part.\n+  if (strArray[0] === '/' && strArray.length > 1) {\n+    strArray[0] = strArray.shift() + strArray[0];\n+  }\n+\n+  // There must be two or three slashes in the file protocol, two slashes in anything else.\n+  if (strArray[0].match(/^file:\\/\\/\\//)) {\n+    strArray[0] = strArray[0].replace(/^([^/:]+):\\/*/, '$1:///');\n+  } else if (!strArray[0].match(/^\\[.*:.*\\]/)) {\n+    // If the first part is not an IPv6 host, we replace the protocol.\n+    strArray[0] = strArray[0].replace(/^([^/:]+):\\/*/, '$1://');\n+  }\n+\n+  for (let i = 0; i < strArray.length; i++) {\n+    let component = strArray[i];\n+\n+    if (typeof component !== 'string') {\n+      throw new TypeError('Url must be a string. Received ' + component);\n+    }\n+\n+    if (i > 0) {\n+      // Removing the starting slashes for each component but the first.\n+      component = component.replace(/^[\\/]+/, '');\n+    }\n+    if (i < strArray.length - 1) {\n+      // Removing the ending slashes for each component but the last.\n+      component = component.replace(/[\\/]+$/, '');\n+    } else {\n+      // For the last component we will combine multiple slashes to a single one.\n+      component = component.replace(/[\\/]+$/, '/');\n+    }\n+\n+    if (component === '') { continue; }\n+\n+    resultArray.push(component);\n+  }\n+\n+  let str = '';\n+\n+  for (let i = 0; i < resultArray.length; i++) {\n+    const part = resultArray[i];\n+\n+    // Do not add a slash if this is the first part.\n+    if (i === 0) {\n+      str += part;\n+      continue;\n+    }\n+\n+    const prevPart = resultArray[i - 1]\n+\n+    // Do not add a slash if the previous part ends with start of the query param or hash.\n+    if (prevPart && prevPart.endsWith('?') || prevPart.endsWith('#')) {\n+      str += part;\n+      continue;\n+    }\n+\n+    str += '/' + part;\n+  }\n+  // Each input component is now separated by a single slash except the possible first plain protocol part.\n+\n+  // remove trailing slash before parameters or hash\n+  str = str.replace(/\\/(\\?|&|#[^!])/g, '$1');\n+\n+  // replace ? and & in parameters with &\n+  const [beforeHash, afterHash] = str.split('#');\n+  const parts = beforeHash.split(/(?:\\?|&)+/).filter(Boolean);\n+  str = parts.shift() + (parts.length > 0 ? '?': '') + parts.join('&') + (afterHash && afterHash.length > 0 ? '#' + afterHash : '');\n+\n+  return str;\n }\n \n-module.exports = function () {\n-  var joined = [].slice.call(arguments, 0).join('/');\n-  return normalize(joined);\n-};\n",
+					"match": false,
+					"packageHash": "b840f3e659fecfcda497eab969c13b4afcd63ad260dcff3e2364cea87bb7016c",
+					"size": 294,
+					"sourceHash": "f72c171afe4a1a57ac30d01b38d724201deeed2a8d4e524a2d2a94ff62fa22d7",
+					"status": "content"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -1,14 +1,24 @@\n {\n   \"name\": \"url-join\",\n-  \"version\": \"0.0.1\",\n+  \"version\": \"5.0.0\",\n   \"description\": \"Join urls and normalize as in path.join.\",\n-  \"main\": \"lib/url-join.js\",\n+  \"type\": \"module\",\n+  \"main\": \"./lib/url-join.js\",\n+  \"exports\": \"./lib/url-join.js\",\n+  \"types\": \"./lib/url-join.d.ts\",\n+  \"sideEffects\": false,\n+  \"engines\": {\n+    \"node\": \"^12.20.0 || ^14.13.1 || >=16.0.0\"\n+  },\n   \"scripts\": {\n-    \"test\": \"mocha --require should\"\n+    \"test\": \"node --test\"\n   },\n+  \"files\": [\n+    \"lib\"\n+  ],\n   \"repository\": {\n     \"type\": \"git\",\n-    \"url\":  \"git://github.com/jfromaniello/url-join.git\"\n+    \"url\": \"git://github.com/jfromaniello/url-join.git\"\n   },\n   \"keywords\": [\n     \"url\",\n@@ -17,7 +27,6 @@\n   \"author\": \"José F. Romaniello <jfromaniello@gmail.com> (http://joseoncode.com)\",\n   \"license\": \"MIT\",\n   \"devDependencies\": {\n-    \"should\": \"~1.2.1\",\n-    \"mocha\": \"~1.8.1\"\n+    \"conventional-changelog\": \"^7.1.1\"\n   }\n }\n",
+					"match": false,
+					"packageHash": "248f74afe48365247f63d4e96b6bd17626d476ee835bd9451bfb8644c08815a0",
+					"size": 514,
+					"sourceHash": "2326599ac56987e47b85a9b01fa214938e878c05155b6c6c6f08703bf58bf4b6",
+					"status": "content"
+				},
+				"test/tests.js": {
+					"match": false,
+					"packageHash": "6a0b1c6cc17459d27a6b8081e9238a0d6e4b2e6690d9b9a363eabac020ff017d",
+					"size": 835,
+					"status": "missing-in-source"
+				},
+				"LICENSE": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/url-join.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				}
+			},
+			"summary": {
+				"differentFiles": 3,
+				"matchingFiles": 0,
+				"missingInPackage": 2,
+				"missingInSource": 2,
+				"score": 0,
+				"totalFiles": 7
+			}
+		}
+	}
+]
