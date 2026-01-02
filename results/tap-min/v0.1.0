@@ -1,0 +1,75 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-02T05:59:45.864Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:11.7.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "tap-min@0.1.0",
+			"name": "tap-min",
+			"version": "0.1.0",
+			"location": "https://registry.npmjs.org/tap-min/-/tap-min-0.1.0.tgz",
+			"integrity": "sha512-YHev+/W19xN0DMx7qA/UeHqazO7gRmmXUqnpjQ827YbVKNsSuRHX0onnFHQiaKOePIXzHinzEfFJy0AZS+oR0g==",
+			"publishedAt": "2014-03-31T18:35:00.046Z",
+			"publishedWith": {
+				"node": null,
+				"npm": "1.4.3"
+			}
+		},
+		"source": {
+			"integrity": null,
+			"location": "https://github.com/gummesson/tap-min.git",
+			"spec": "github:gummesson/tap-min#HEAD"
+		},
+		"comparisonHash": "8a2a8dcbb729bf3ee9216e490c955701f0ddebe1",
+		"diff": {
+			"files": {
+				".npmignore": {
+					"match": false,
+					"packageHash": "65e5963e9e433ac121e19618568af37db500795b6a9fd70ed3915c4c7dd64e93",
+					"size": 45,
+					"status": "missing-in-source"
+				},
+				"README.md": {
+					"diff": "--- published/README.md\n+++ rebuilt/README.md\n@@ -13,7 +13,7 @@\n \n ~~~ text\n tape test/*.js | tap-min\n-node test.js | ./node_modules/tap-min/bin/tap-min\n+node test.js | tap-min\n ~~~\n \n ## Output\n",
+					"match": false,
+					"packageHash": "a4722ee99993ed7a9e219396087d407e82b9908c703492d88b645ae6decedd3d",
+					"size": 1419,
+					"sourceHash": "254912aa72657c15cb6bebb2450c58ce6f274e9242fd65806b86c512b647913f",
+					"status": "content"
+				},
+				"bin/tap-min": {
+					"diff": "--- published/bin/tap-min\n+++ rebuilt/bin/tap-min\n@@ -1,66 +1,12 @@\n #!/usr/bin/env node\n \n-/* Modules */\n+var tapmin = require('../')\n+var stream = tapmin()\n \n-var parser    = require('tap-parser');\n-var through   = require('through2');\n-var duplexer  = require('duplexer');\n-var hirestime = require('hirestime');\n-var prettyms  = require('pretty-ms');\n-var chalk     = require('chalk');\n-\n-var tap = parser();\n-var out = through();\n-var dup = duplexer(tap, out);\n-\n-/* Helpers */\n-\n-function output(str) {\n-  out.push('  ' + str);\n-  out.push('\\n');\n-}\n-\n-function format(total, time) {\n-  var word = (total > 1) ? 'tests' : 'test';\n-  return total + ' ' + word + ' complete (' + time + ')';\n-}\n-\n-/* Parser */\n-\n-var timer   = hirestime();\n-var errors  = [];\n-var current = null;\n-\n-tap.on('comment', function(res) {\n-  current = '\\n' + '  ' + res;\n-});\n-\n-tap.on('assert', function(res) {\n-  var assert = current + ' ' + res.name;\n-  if (!res.ok) { errors.push(chalk.white(assert)); }\n-});\n-\n-tap.on('extra', function(res) {\n-  if (res !== '') { errors.push(chalk.gray(res)); }\n-});\n-\n-tap.on('results', function(res) {\n-  var count = res.asserts.length;\n-  var time  = prettyms(timer());\n-  out.push('\\n');\n-  if (errors.length) {\n-    output(chalk.red(format(count, time)));\n-    errors.forEach(function(error) {\n-      output(error);\n-    });\n-  } else {\n-    output(chalk.green(format(count, time)));\n-  }\n-  out.push('\\n');\n-});\n-\n-/* Output */\n-\n-process.stdin.pipe(dup).pipe(process.stdout);\n-\n-// vim:filetype=javascript\n+process.stdin\n+  .pipe(stream)\n+  .pipe(process.stdout)\n+\n+process.on('exit', function() {\n+  if (stream.errors.length) process.exit(1)\n+})\n",
+					"match": false,
+					"packageHash": "9ccc619fdb2dfd336a587ff35d3ff5df9607f32727e2b1481641674edcee3306",
+					"size": 1347,
+					"sourceHash": "5aa789e1a8f14bb4bdc7cd090b762081f46d9bde849e82f0656c74db38e6271b",
+					"status": "content"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -1,6 +1,6 @@\n {\n   \"name\": \"tap-min\",\n-  \"version\": \"0.1.0\",\n+  \"version\": \"1.1.0\",\n   \"description\": \"Minimal TAP output formatter.\",\n   \"bin\": {\n     \"tap-min\": \"bin/tap-min\"\n@@ -26,14 +26,14 @@\n   },\n   \"homepage\": \"https://github.com/gummesson/tap-min\",\n   \"devDependencies\": {\n-    \"tape\": \"^2.12.1\"\n+    \"tape\": \"^3.5.0\"\n   },\n   \"dependencies\": {\n-    \"tap-parser\": \"^0.4.3\",\n-    \"through2\": \"^0.4.1\",\n+    \"tap-parser\": \"^0.7.0\",\n+    \"through2\": \"^0.6.3\",\n     \"duplexer\": \"^0.1.1\",\n-    \"hirestime\": \"^0.2.4\",\n-    \"pretty-ms\": \"^0.1.0\",\n-    \"chalk\": \"^0.4.0\"\n+    \"hirestime\": \"^1.0.1\",\n+    \"pretty-ms\": \"^1.0.0\",\n+    \"chalk\": \"^0.5.1\"\n   }\n }\n",
+					"match": false,
+					"packageHash": "6d4011bdda427511be1787a218b2ace24478a28c75848c5ea6b5e4de04bd3bf2",
+					"size": 775,
+					"sourceHash": "361e855f17d8f2aa2e41e822e46102865a8070a598ec25633833a07b09b46c74",
+					"status": "content"
+				},
+				"index.js": {
+					"match": false,
+					"status": "missing-in-package"
+				}
+			},
+			"summary": {
+				"differentFiles": 3,
+				"matchingFiles": 0,
+				"missingInPackage": 1,
+				"missingInSource": 1,
+				"score": 0,
+				"totalFiles": 5
+			}
+		}
+	}
+]
