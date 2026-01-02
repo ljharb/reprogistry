@@ -8,6 +8,34 @@ import { pipeline } from 'node:stream/promises';
 import { compare as semverCompare } from 'semver';
 
 import { compareDirectories, filterNonMatching } from './compare.mjs';
+
+/**
+ * Rewrite workspace: protocol dependencies to use * instead.
+ * This allows npm to install monorepo packages that use yarn/pnpm workspaces.
+ *
+ * @param {string} packageDir - Directory containing package.json
+ */
+async function rewriteWorkspaceDeps(packageDir) {
+	const pkgPath = path.join(packageDir, 'package.json');
+	const pkgJson = JSON.parse(await readFile(pkgPath, 'utf8'));
+	let modified = false;
+
+	for (const depType of ['dependencies', 'devDependencies', 'peerDependencies', 'optionalDependencies']) {
+		const deps = pkgJson[depType];
+		if (deps) {
+			for (const [name, version] of Object.entries(deps)) {
+				if (typeof version === 'string' && version.startsWith('workspace:')) {
+					deps[name] = '*';
+					modified = true;
+				}
+			}
+		}
+	}
+
+	if (modified) {
+		await writeFile(pkgPath, JSON.stringify(pkgJson, null, 2));
+	}
+}
 import normalizeGitUrl from './normalize-git-url.mjs';
 import COMPARISON_HASH from './comparison-hash.mjs';
 import reproduce from './reproduce.js';
@@ -136,6 +164,7 @@ async function performComparison(result) {
 		 * Use --ignore-scripts to avoid postinstall failures from old native deps
 		 * Use --force to ignore platform checks (e.g., darwin-only packages on linux)
 		 */
+		await rewriteWorkspaceDeps(packageDir);
 		execSync(`cd "${packageDir}" && npm install --ignore-scripts --legacy-peer-deps --force`, { stdio: 'pipe' });
 		const packOutput = execSync(
 			`cd "${packageDir}" && npm pack --pack-destination "${tempDir}"`,

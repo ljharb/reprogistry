@@ -20,6 +20,38 @@ var pkg = require('../package.json');
 // npm >= 5.0.0 supports --before flag for time-based dependency resolution
 var NPM_BEFORE_VERSION = '5.0.0';
 
+/**
+ * Rewrite workspace: protocol dependencies to use * instead.
+ * This allows npm to install monorepo packages that use yarn/pnpm workspaces.
+ *
+ * @param {string} packageDir - Directory containing package.json
+ */
+function rewriteWorkspaceDeps(packageDir) {
+	var pkgPath = path.join(packageDir, 'package.json');
+	var pkgJson = JSON.parse(fs.readFileSync(pkgPath, 'utf8'));
+	var modified = false;
+	var depTypes = ['dependencies', 'devDependencies', 'peerDependencies', 'optionalDependencies'];
+
+	for (var i = 0; i < depTypes.length; i++) {
+		var deps = pkgJson[depTypes[i]];
+		if (deps) {
+			for (var name in deps) {
+				if (Object.prototype.hasOwnProperty.call(deps, name)) {
+					var version = deps[name];
+					if (typeof version === 'string' && version.indexOf('workspace:') === 0) {
+						deps[name] = '*';
+						modified = true;
+					}
+				}
+			}
+		}
+	}
+
+	if (modified) {
+		fs.writeFileSync(pkgPath, JSON.stringify(pkgJson, null, 2));
+	}
+}
+
 // Minimum Node.js version that can be installed via nvm in GitHub Actions
 var MIN_NODE_VERSION = '0.8.0';
 
@@ -351,6 +383,7 @@ module.exports = async function reproduce(spec, opts) {
 
 			var packageDir = repo.directory ? path.join(repoCacheDir, repo.directory) : repoCacheDir;
 
+			rewriteWorkspaceDeps(packageDir);
 			npmInstall(packageDir, {
 				before: publishTime,
 				nodeVersion: installedNodeVersion,
