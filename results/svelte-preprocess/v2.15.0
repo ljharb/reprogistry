@@ -1,0 +1,187 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-02T05:50:42.954Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:6.9.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "svelte-preprocess@2.15.0",
+			"name": "svelte-preprocess",
+			"version": "2.15.0",
+			"location": "https://registry.npmjs.org/svelte-preprocess/-/svelte-preprocess-2.15.0.tgz",
+			"integrity": "sha512-3NjxG8rwKKdo0cBTJruclYG0d89scX/aHwX8NeQiCjfGIft6Py+qzoKXC7+6PUX6rC9cZdIPXeGRb4wJOMNgRA==",
+			"publishedAt": "2019-07-20T23:01:55.839Z",
+			"publishedWith": {
+				"node": "10.16.0",
+				"npm": "6.9.0"
+			}
+		},
+		"source": {
+			"integrity": null,
+			"location": "git+https://github.com/kaisermann/svelte-preprocess.git",
+			"spec": "github:kaisermann/svelte-preprocess#b5ed94bf708460e24dc5b123dc08d4801582bea6"
+		},
+		"comparisonHash": "8a2a8dcbb729bf3ee9216e490c955701f0ddebe1",
+		"diff": {
+			"files": {
+				"CHANGELOG.md": {
+					"match": false,
+					"packageHash": "9e5a256ae39c225f5187df0c08661534c943250873576b5d8f2412cda0b8bd71",
+					"size": 16365,
+					"status": "missing-in-source"
+				},
+				"README.md": {
+					"diff": "--- published/README.md\n+++ rebuilt/README.md\n@@ -1,48 +1,69 @@\n # Svelte Preprocess\n \n-> A [Svelte](https://svelte.dev) preprocessor wrapper with support for: PostCSS, SCSS, Less, Stylus, Coffeescript, TypeScript and Pug.\n+> A [Svelte](https://svelte.dev) preprocessor with sensible defaults and support for: PostCSS, SCSS, Less, Stylus, CoffeeScript, TypeScript, Pug and much more.\n \n-<!-- @import \"[TOC]\" {cmd=\"toc\" depthFrom=2 depthTo=3 orderedList=false} -->\n-<!-- code_chunk_output -->\n-\n-- [Installation](#installation)\n+<p>\n+  <a href=\"https://www.npmjs.com/package/svelte-preprocess\">\n+    <img src=\"https://img.shields.io/npm/v/svelte-preprocess.svg\" alt=\"npm version\">\n+  </a>\n+\n+  <a href=\"https://github.com/sveltejs/svelte-preprocess/blob/master/LICENSE\">\n+    <img src=\"https://img.shields.io/npm/l/svelte-preprocess.svg\" alt=\"license\">\n+  </a>\n+\n+  <a href=\"https://github.com/sveltejs/svelte-preprocess/actions?query=workflow%3ACI\">\n+    <img src=\"https://github.com/sveltejs/svelte-preprocess/workflows/CI/badge.svg\" alt=\"action-CI\">\n+  </a>\n+</p>\n+\n+- [What is it?](#what-is-it)\n+- [Getting Started](docs/getting-started.md)\n+- [Usage](docs/usage.md)\n+- [Migration Guide](docs/migration-guide.md)\n+- [Preprocessing](docs/preprocessing.md)\n+  - [Preprocessors](docs/preprocessing.md#preprocessors)\n - [Features](#features)\n-  - [Template tag support](#template-tag-support)\n-  - [External files support](#external-files-support)\n-  - [Global style support](#global-style-support)\n-  - [Preprocessors support](#preprocessors-support)\n-- [Usage](#usage)\n-  - [Auto Preprocessing](#auto-preprocessing)\n-  - [Standalone processors](#standalone-processors)\n-  - [With `rollup-plugin-svelte`](#with-rollup-plugin-svelte)\n-  - [With `svelte-loader`](#with-svelte-loader)\n-  - [With Sapper](#with-sapperhttpssappersveltedev)\n-  - [With Svelte VS Code](#with-svelte-vs-codehttpsmarketplacevisualstudiocomitemsitemnamejamesbirtlessvelte-vscode)\n-- [Limitations](#limitations)\n-  - [`typescript`](#typescript)\n-  - [`pug`](#pug)\n-\n-<!-- /code_chunk_output -->\n-\n-## Installation\n-\n-`npm install --save-dev svelte-preprocess`\n-\n-The preprocessor module installation is up to the developer.\n-\n-- `postcss`: `npm install --save-dev postcss`\n-- `coffeescript`: `npm install --save-dev coffeescript`\n-- `typescript`: `npm install --save-dev typescript`\n-- `less`: `npm install --save-dev less`\n-- `sass`: `npm install --save-dev node-sass`\n-- `pug`: `npm install --save-dev pug`\n-- `stylus`: `npm install --save-dev stylus`\n+  - [Template tag](#template-tag)\n+  - [External files](#external-files)\n+  - [Global style](#global-style)\n+  - [Modern JavaScript syntax](#modern-javascript-syntax)\n+  - [Replace values](#replace-values)\n+  - [Built-in support for commonly used languages](#built-in-support-for-commonly-used-languages)\n+\n+## What is it?\n+\n+`Svelte`'s own parser understands only JavaScript, CSS and its HTML-like syntax. To make it possible to write components in other languages, such as TypeScript or SCSS, `Svelte` provides the [preprocess API](https://svelte.dev/docs#compile-time-svelte-preprocess), which allows to easily transform the content of your `markup` and your `style`/`script` tags.\n+\n+Writing your own preprocessor for, i.e SCSS is easy enough, but it can be cumbersome to have to always configure multiple preprocessors for the languages you'll be using.\n+\n+`svelte-preprocess` is a custom svelte preprocessor that acts as a facilitator to use other languages with Svelte, providing multiple features, sensible defaults and a less noisy development experience.\n+\n+It is recommended to use with `svelte.config.js` file, located at the project root. For other usage, please refer to [usage documentation](#usage-documentation).\n+\n+```js\n+import { sveltePreprocess } from 'svelte-preprocess';\n+\n+const config = {\n+  preprocess: sveltePreprocess({ ... })\n+}\n+\n+export default config;\n+```\n+\n+## When to use it?\n+\n+Historically, `svelte-preprocess` was the go-to option whenever you had a language other than JS/HTML/CSS used inside your Svelte files. Today, depending on your setup, you may no longer need it:\n+\n+- If you're using Svelte 5 and are only using type features of TypeScript (i.e. things that just \"go away\" after transpiling to JS), you don't need any preprocessor, Svelte handles this natively\n+- If you're using Vite and are using TypeScript or common CSS preprocessors (PostCSS, SCSS, Less, ...), use the preprocessor that comes with vite-plugin-svelte instead\n+\n+If these cases don't apply to you, use `svelte-preprocess`.\n \n ## Features\n",
+					"match": false,
+					"packageHash": "da599cec4b5b344862597f5fb1ca9faba7d93b8be7e97ffc7198271a4551ccb8",
+					"size": 9491,
+					"sourceHash": "69a5c956cf7fa3c87b0fd922277d0146008b245640f60a0e6784996e189c5bf9",
+					"status": "content"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -1,15 +1,24 @@\n {\n   \"name\": \"svelte-preprocess\",\n-  \"version\": \"2.15.0\",\n+  \"version\": \"6.0.3\",\n   \"license\": \"MIT\",\n-  \"main\": \"src/index.js\",\n-  \"types\": \"src/index.d.ts\",\n-  \"description\": \"A Svelte preprocessor wrapper with baked in support for common used preprocessors\",\n+  \"main\": \"dist/index.js\",\n+  \"types\": \"dist/index.d.ts\",\n+  \"type\": \"commonjs\",\n+  \"exports\": {\n+    \".\": {\n+      \"types\": \"./dist/index.d.ts\",\n+      \"default\": \"./dist/index.js\"\n+    },\n+    \"./package.json\": \"./package.json\"\n+  },\n+  \"description\": \"A Svelte preprocessor wrapper with baked-in support for commonly used preprocessors\",\n   \"author\": \"Christian Kaisermann <christian@kaisermann.me>\",\n-  \"repository\": \"https://github.com/kaisermann/svelte-preprocess\",\n+  \"repository\": \"https://github.com/sveltejs/svelte-preprocess\",\n   \"keywords\": [\n     \"svelte\",\n     \"preprocess\",\n+    \"typescript\",\n     \"less\",\n     \"stylus\",\n     \"sass\",\n@@ -17,57 +26,107 @@\n     \"pug\",\n     \"coffeescript\"\n   ],\n+  \"engines\": {\n+    \"node\": \">= 18.0.0\"\n+  },\n+  \"packageManager\": \"pnpm@9.3.0\",\n+  \"volta\": {\n+    \"node\": \"20.10.0\"\n+  },\n   \"files\": [\n-    \"src/\"\n+    \"dist/\"\n   ],\n   \"scripts\": {\n-    \"test\": \"jest --no-cache --verbose\",\n-    \"test:watch\": \"jest --no-cache --verbose --watchAll\",\n-    \"lint\": \"eslint \\\"src/**/*.js\\\"\",\n-    \"format\": \"prettier --loglevel silent --write \\\"src/**/*.js\\\" && eslint --fix \\\"src/**/*.js\\\"\",\n-    \"prepublishOnly\": \"npm run format && npm run test\",\n-    \"postinstall\": \"node -e \\\"console.log('\\\\u001b[36m\\\\u001b[1m[svelte-preprocess] Don\\\\'t forget to install the preprocessors packages that will be used: \\\\u001b[22m\\\\u001b[39m\\\\u001b[34mnode-sass/sass, stylus, less, postcss, coffesscript, pug, etc...\\\\u001b[0m')\\\"\",\n-    \"version\": \"auto-changelog -p && git add CHANGELOG.md\"\n-  },\n-  \"auto-changelog\": {\n-    \"template\": \"keepachangelog\"\n-  },\n-  \"jest\": {\n-    \"collectCoverage\": true,\n-    \"collectCoverageFrom\": [\n-      \"<rootDir>/src/**/*.js\",\n-      \"!**/node_modules/**\"\n+    \"prebuild\": \"node scripts.js rmrf ./dist\",\n+    \"build\": \"tsc --build tsconfig.build.json\",\n+    \"dev\": \"pnpm build -w\",\n+    \"test\": \"vitest run\",\n+    \"lint\": \"eslint --ext js,ts .\",\n+    \"format\": \"prettier --write \\\"**/*.{ts,js,json}\\\"\",\n+    \"postinstall\": \"echo \\\"[svelte-preprocess] Don't forget to install the preprocessors packages that will be used: sass, stylus, less, postcss & postcss-load-config, coffeescript, pug, etc...\\\"\",\n+    \"version\": \"conventional-changelog -p angular -i CHANGELOG.md -s -r 1 && git add CHANGELOG.md\",\n+    \"patch\": \"npm version patch -m 'chore(release): %s'\",\n+    \"minor\": \"npm version minor -m 'chore(release): %s'\",\n+    \"major\": \"npm version major -m 'chore(release): %s'\",\n+    \"prepublishOnly\": \"pnpm test && pnpm build\"\n+  },\n+  \"commitlint\": {\n+    \"extends\": [\n+      \"@commitlint/config-conventional\"\n     ]\n   },\n   \"devDependencies\": {\n-    \"auto-changelog\": \"^1.11.0\",\n-    \"autoprefixer\": \"^9.4.7\",\n-    \"coffeescript\": \"^2.3.2\",\n-    \"eslint\": \"^5.13.0\",\n-    \"eslint-config-prettier\": \"^4.0.0\",\n-    \"eslint-config-standard\": \"^12.0.0\",\n-    \"eslint-plugin-import\": \"^2.16.0\",\n-    \"eslint-plugin-node\": \"^8.0.1\",\n-    \"eslint-plugin-prettier\": \"^3.0.1\",\n-    \"eslint-plugin-promise\": \"^4.0.1\",\n-    \"eslint-plugin-standard\": \"^4.0.0\",\n-    \"jest\": \"^24.1.0\",\n-    \"less\": \"^3.9.0\",\n-    \"node-sass\": \"^4.12.0\",\n-    \"postcss\": \"^7.0.14\",\n-    \"postcss-easy-import\": \"^3.0.0\",\n-    \"prettier\": \"^1.16.4\",\n",
+					"match": false,
+					"packageHash": "ab4c4cbb86dec85d55c0b05012a160bfae07299d5816a142296f35d289196da4",
+					"size": 2237,
+					"sourceHash": "74073a0438e1f6ea9003740b261b74cbb74ea2633010100b722041939e526491",
+					"status": "content"
+				},
+				"src/autoProcess.js": {
+					"match": false,
+					"packageHash": "043aac34a245d60dea29d44f3f09d3a67ac7ea9f26a48cf6c96833d7ef148d88",
+					"size": 4407,
+					"status": "missing-in-source"
+				},
+				"src/index.d.ts": {
+					"match": false,
+					"packageHash": "c27300b5912d4710fc0e08dfbf0e3a17bf03fbbdac688390f328e361907c5f2d",
+					"size": 618,
+					"status": "missing-in-source"
+				},
+				"src/index.js": {
+					"match": false,
+					"packageHash": "20b6965ce7df478ff70f00acda87d5bc1d76fa4e36f00b81ebd17d5df0d0f18b",
+					"size": 872,
+					"status": "missing-in-source"
+				},
+				"src/processors/coffeescript.js": {
+					"match": false,
+					"packageHash": "426aed02e1f10af32d6ba15805cf654cabb2ead04c5d38265d5bf4abf58e078a",
+					"size": 543,
+					"status": "missing-in-source"
+				},
+				"src/processors/globalStyle.js": {
+					"match": false,
+					"packageHash": "5714491c1398d8264949a6e175cf78ce88852a4f5250491bde3f51c98f1cd395",
+					"size": 277,
+					"status": "missing-in-source"
+				},
+				"src/processors/less.js": {
+					"match": false,
+					"packageHash": "9439f5e166a3034bbef0437dc273c85aaaf5525384f30ef92d56e8ce3476565b",
+					"size": 519,
+					"status": "missing-in-source"
+				},
+				"src/processors/postcss.js": {
+					"match": false,
+					"packageHash": "79db0e390735564e6efeb6449265f5d049e03eb198aa35161e5c1d961c271f6a",
+					"size": 616,
+					"status": "missing-in-source"
+				},
+				"src/processors/pug.js": {
+					"match": false,
+					"packageHash": "e05cecb34354e3afaadd33227e09773c2830b018a6877737ab5fe8113007e236",
+					"size": 183,
+					"status": "missing-in-source"
+				},
+				"src/processors/scss.js": {
+					"match": false,
+					"packageHash": "c93328a9282e908c8b7962d6990102feb63e28256a4f93a0e653662e45e27ea6",
+					"size": 702,
+					"status": "missing-in-source"
+				},
+				"src/processors/stylus.js": {
+					"match": false,
+					"packageHash": "e82b4faf2a5787295d71deef82a310ff9e7218d07f5a830090cb1deeff7519e8",
+					"size": 627,
+					"status": "missing-in-source"
+				},
+				"src/processors/typescript.js": {
+					"match": false,
+					"packageHash": "ca4f9ea1a4359195fcf2b54ef4066ddbc5d2587aff0571f2a385b8f46d5acf64",
+					"size": 538,
+					"status": "missing-in-source"
+				},
+				"src/transformers/coffeescript.js": {
+					"match": false,
+					"packageHash": "94806e6720515d548cd97c046db3ee0106ce7592198841eecc6b2ffad7bfbe26",
+					"size": 254,
+					"status": "missing-in-source"
+				},
+				"src/transformers/globalStyle.js": {
+					"match": false,
+					"packageHash": "7d5ad7354e2cba5669acb21909b4f5e6761553007d19758596ea5879dc3b9f5e",
+					"size": 546,
+					"status": "missing-in-source"
+				},
+				"src/transformers/less.js": {
+					"match": false,
+					"packageHash": "4184ebc08f37afa6d29e6c49f06006156bc24a4fb784732e1bb422072c00c41e",
+					"size": 289,
+					"status": "missing-in-source"
+				},
+				"src/transformers/postcss.js": {
+					"match": false,
+					"packageHash": "25cb39f86ce288197cb75e866ed631b7bf3da83ba9a78a5ecf8526130b70e4c5",
+					"size": 1244,
+					"status": "missing-in-source"
+				},
+				"src/transformers/pug.js": {
+					"match": false,
+					"packageHash": "c167d5f0b9c77df3d86be072b3166c7e0123b6be641fd5328341a128d5fbf8cd",
+					"size": 723,
+					"status": "missing-in-source"
+				},
+				"src/transformers/scss.js": {
+					"match": false,
+					"packageHash": "0bfe37638fb77b1555d602def83e4fa6f927e5cdeff153356a7ce63d22fd3453",
+					"size": 705,
+					"status": "missing-in-source"
+				},
+				"src/transformers/stylus.js": {
+					"match": false,
+					"packageHash": "3ba786f1f375c301371aecc2e41b41b31a4c3778f168219a2d2ce4900ee98b6e",
+					"size": 581,
+					"status": "missing-in-source"
+				},
+				"src/transformers/typescript.js": {
+					"match": false,
+					"packageHash": "4c40bc5c40e353b15ab46cd5cca8de3e10b666c5e0caccf185d407751c8f47ee",
+					"size": 5881,
+					"status": "missing-in-source"
+				},
+				"src/utils.js": {
+					"match": false,
+					"packageHash": "90d31af9c737f4a4bd99008764efc6dd4034295c443b8542e5967ab649d7e444",
+					"size": 2959,
+					"status": "missing-in-source"
+				},
+				"LICENSE": {
+					"match": false,
+					"status": "missing-in-package"
+				}
+			},
+			"summary": {
+				"differentFiles": 2,
+				"matchingFiles": 0,
+				"missingInPackage": 1,
+				"missingInSource": 21,
+				"score": 0,
+				"totalFiles": 24
+			}
+		}
+	}
+]
