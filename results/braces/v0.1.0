@@ -1,0 +1,183 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-02T21:40:06.979Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:11.7.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "braces@0.1.0",
+			"name": "braces",
+			"version": "0.1.0",
+			"location": "https://registry.npmjs.org/braces/-/braces-0.1.0.tgz",
+			"integrity": "sha512-59/QQZW1FIbvnxuRWTNaulRIvblwjvGKwz88r/HJIN1TE0N12M2pbRNZpYUWuE7DAyl8C2ucWeX9M7DYWnZVpg==",
+			"publishedAt": "2014-10-20T16:26:32.656Z",
+			"publishedWith": {
+				"node": null,
+				"npm": "1.4.9"
+			}
+		},
+		"source": {
+			"integrity": null,
+			"location": "git://github.com/jonschlinkert/braces.git",
+			"spec": "github:jonschlinkert/braces#HEAD"
+		},
+		"comparisonHash": "8a2a8dcbb729bf3ee9216e490c955701f0ddebe1",
+		"diff": {
+			"files": {
+				".gitattributes": {
+					"match": false,
+					"packageHash": "c697329350b4e95aab826aafb5cf438e2e0b60506912f740918a9e9b82dae864",
+					"size": 237,
+					"status": "missing-in-source"
+				},
+				".jshintrc": {
+					"match": false,
+					"packageHash": "8f52842b8676ec34b46e82d7a7d51327ddc692f60f9b0a325bf60655078fdd10",
+					"size": 379,
+					"status": "missing-in-source"
+				},
+				".npmignore": {
+					"match": false,
+					"packageHash": "de7fa51b20e07f4c3a92dd315095ab16ccbbc6ea100e325649b9394429ae56f7",
+					"size": 507,
+					"status": "missing-in-source"
+				},
+				".travis.yml": {
+					"match": false,
+					"packageHash": "4a2b861f1ccaf3e56388b7af075088fc8d6d0a60d1622470eb851dae5363074f",
+					"size": 37,
+					"status": "missing-in-source"
+				},
+				".verbrc.md": {
+					"match": false,
+					"packageHash": "b409afc23c3ac845acb22af2e4632e9b6cec2adb0e1e80bc33a8f2586a11e764",
+					"size": 1625,
+					"status": "missing-in-source"
+				},
+				"LICENSE-MIT": {
+					"match": false,
+					"packageHash": "5bf88c23e05c40530f2015cf49e9331f9f54010ce552a5a3b50684b71158c4ac",
+					"size": 1073,
+					"status": "missing-in-source"
+				},
+				"README.md": {
+					"diff": "--- published/README.md\n+++ rebuilt/README.md\n@@ -1,95 +1,586 @@\n-# braces [![NPM version](https://badge.fury.io/js/braces.svg)](http://badge.fury.io/js/braces)\n+# braces [![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=W8YFZ425KND68) [![NPM version](https://img.shields.io/npm/v/braces.svg?style=flat)](https://www.npmjs.com/package/braces) [![NPM monthly downloads](https://img.shields.io/npm/dm/braces.svg?style=flat)](https://npmjs.org/package/braces) [![NPM total downloads](https://img.shields.io/npm/dt/braces.svg?style=flat)](https://npmjs.org/package/braces) \n \n-> Fast brace expansion.\n+> Bash-like brace expansion, implemented in JavaScript. Safer than other brace expansion libs, with complete support for the Bash 4.3 braces specification, without sacrificing speed.\n \n-## Benchmarks\n+Please consider following this project's author, [Jon Schlinkert](https://github.com/jonschlinkert), and consider starring the project to show your :heart: and support.\n \n-```bash\n-node benchmark\n+## Install\n+\n+Install with [npm](https://www.npmjs.com/):\n+\n+```sh\n+$ npm install --save braces\n+```\n+\n+## v3.0.0 Released!!\n+\n+See the [changelog](CHANGELOG.md) for details.\n+\n+## Why use braces?\n+\n+Brace patterns make globs more powerful by adding the ability to match specific ranges and sequences of characters.\n+\n+- **Accurate** - complete support for the [Bash 4.3 Brace Expansion](www.gnu.org/software/bash/) specification (passes all of the Bash braces tests)\n+- **[fast and performant](#benchmarks)** - Starts fast, runs fast and [scales well](#performance) as patterns increase in complexity.\n+- **Organized code base** - The parser and compiler are easy to maintain and update when edge cases crop up.\n+- **Well-tested** - Thousands of test assertions, and passes all of the Bash, minimatch, and [brace-expansion](https://github.com/juliangruber/brace-expansion) unit tests (as of the date this was written).\n+- **Safer** - You shouldn't have to worry about users defining aggressive or malicious brace patterns that can break your application. Braces takes measures to prevent malicious regex that can be used for DDoS attacks (see [catastrophic backtracking](https://www.regular-expressions.info/catastrophic.html)).\n+- [Supports lists](#lists) - (aka \"sets\") `a/{b,c}/d` => `['a/b/d', 'a/c/d']`\n+- [Supports sequences](#sequences) - (aka \"ranges\") `{01..03}` => `['01', '02', '03']`\n+- [Supports steps](#steps) - (aka \"increments\") `{2..10..2}` => `['2', '4', '6', '8', '10']`\n+- [Supports escaping](#escaping) - To prevent evaluation of special characters.\n+\n+## Usage\n+\n+The main export is a function that takes one or more brace `patterns` and `options`.\n+\n+```js\n+const braces = require('braces');\n+// braces(patterns[, options]);\n+\n+console.log(braces(['{01..05}', '{a..e}']));\n+//=> ['(0[1-5])', '([a-e])']\n+\n+console.log(braces(['{01..05}', '{a..e}'], { expand: true }));\n+//=> ['01', '02', '03', '04', '05', 'a', 'b', 'c', 'd', 'e']\n+```\n+\n+### Brace Expansion vs. Compilation\n+\n+By default, brace patterns are compiled into strings that are optimized for creating regular expressions and matching.\n+\n+**Compiled**\n+\n+```js\n+console.log(braces('a/{x,y,z}/b'));\n+//=> ['a/(x|y|z)/b']\n+console.log(braces(['a/{01..20}/b', 'a/{1..5}/b']));\n+//=> [ 'a/(0[1-9]|1[0-9]|20)/b', 'a/([1-5])/b' ]\n+```\n+\n+**Expanded**\n+\n+Enable brace expansion by setting the `expand` option to true, or by using [braces.expand()](#expand) (returns an array similar to what you'd expect from Bash, or `echo {1..5}`, or [minimatch](https://github.com/isaacs/minimatch)):\n+\n+```js\n+console.log(braces('a/{x,y,z}/b', { expand: true }));\n+//=> ['a/x/b', 'a/y/b', 'a/z/b']\n+\n+console.log(braces.expand('{01..10}'));\n+//=> ['01','02','03','04','05','06','07','08','09','10']\n+```\n+\n+### Lists\n+\n+Expand lists (like Bash \"sets\"):\n+\n+```js\n+console.log(braces('a/{foo,bar,baz}/*.js'));\n+//=> ['a/(foo|bar|baz)/*.js']\n+\n+console.log(braces.expand('a/{foo,bar,baz}/*.js'));\n+//=> ['a/foo/*.js', 'a/bar/*.js', 'a/baz/*.js']\n+```\n+\n+### Sequences\n+\n+Expand ranges of characters (like Bash \"sequences\"):\n+\n+```js\n+console.log(braces.expand('{1..3}')); // ['1', '2', '3']\n+console.log(braces.expand('a/{1..3}/b')); // ['a/1/b', 'a/2/b', 'a/3/b']\n+console.log(braces('{a..c}', { expand: true })); // ['a', 'b', 'c']\n",
+					"match": false,
+					"packageHash": "53d259477ae2e9d27caee63ad46f92192c7913eb6aec6b9194ac0bad6daee989",
+					"size": 1997,
+					"sourceHash": "91be80d5fe97f99dc56e479765d93cc5c40fecd7af8a2ef6265ab41cf1aad17a",
+					"status": "content"
+				},
+				"benchmark/fixtures/expand-basic.js": {
+					"match": false,
+					"packageHash": "0df0b2c978ec3b0334bee64705915cc1addce9262117410156fc3ffd68129410",
+					"size": 36,
+					"status": "missing-in-source"
+				},
+				"benchmark/fixtures/expand-nested.js": {
+					"match": false,
+					"packageHash": "d37aac7ba1b74d58900367c7136c0007a8fa901fd723863dc8d114a52873b3fd",
+					"size": 37,
+					"status": "missing-in-source"
+				},
+				"benchmark/fixtures/expand-range.js": {
+					"match": false,
+					"packageHash": "2aa674c5e73ef20dec0763eb9fbbe2c7d164592f81af9ae2352022247f9629b0",
+					"size": 37,
+					"status": "missing-in-source"
+				},
+				"benchmark/index.js": {
+					"match": false,
+					"packageHash": "34d534c8f0c50cd52a9c18a2f41c222dc111edfcab3e4a2cc716180102fb6654",
+					"size": 175,
+					"status": "missing-in-source"
+				},
+				"benchmark/libs/brace-expansion.js": {
+					"match": false,
+					"packageHash": "cf3393eb36072e3d585efd166910be760de346b281d6327ac2fd7f09f31db360",
+					"size": 71,
+					"status": "missing-in-source"
+				},
+				"benchmark/libs/braces.js": {
+					"match": false,
+					"packageHash": "91820f94cc36dc3bd69900e71ee177476db0188b14fd636baf551dff9c4a50e5",
+					"size": 68,
+					"status": "missing-in-source"
+				},
+				"benchmark/libs/minimatch.js": {
+					"match": false,
+					"packageHash": "498bf7e5258d63ae1a913f553a303d58d4c9b7e0ee4ee32f7475a907a493fe87",
+					"size": 50,
+					"status": "missing-in-source"
+				},
+				"benchmark/libs/pathname-expansion.js": {
+					"match": false,
+					"packageHash": "e1cbbec977ee462aef28854e32d7a9210416626d63baa9aad36d4729883e95f3",
+					"size": 1818,
+					"status": "missing-in-source"
+				},
+				"index.js": {
+					"diff": "--- published/index.js\n+++ rebuilt/index.js\n@@ -1,84 +1,170 @@\n-/*!\n- * braces <https://github.com/jonschlinkert/braces>\n+'use strict';\n+\n+const stringify = require('./lib/stringify');\n+const compile = require('./lib/compile');\n+const expand = require('./lib/expand');\n+const parse = require('./lib/parse');\n+\n+/**\n+ * Expand the given pattern or create a regex-compatible string.\n  *\n- * Copyright (c) 2014 Jon Schlinkert, contributors.\n- * Licensed under the MIT license.\n+ * ```js\n+ * const braces = require('braces');\n+ * console.log(braces('{a,b,c}', { compile: true })); //=> ['(a|b|c)']\n+ * console.log(braces('{a,b,c}')); //=> ['a', 'b', 'c']\n+ * ```\n+ * @param {String} `str`\n+ * @param {Object} `options`\n+ * @return {String}\n+ * @api public\n  */\n \n-'use strict';\n+const braces = (input, options = {}) => {\n+  let output = [];\n+\n+  if (Array.isArray(input)) {\n+    for (const pattern of input) {\n+      const result = braces.create(pattern, options);\n+      if (Array.isArray(result)) {\n+        output.push(...result);\n+      } else {\n+        output.push(result);\n+      }\n+    }\n+  } else {\n+    output = [].concat(braces.create(input, options));\n+  }\n+\n+  if (options && options.expand === true && options.nodupes === true) {\n+    output = [...new Set(output)];\n+  }\n+  return output;\n+};\n \n /**\n- * Module dependencies\n+ * Parse the given `str` with the given `options`.\n+ *\n+ * ```js\n+ * // braces.parse(pattern, [, options]);\n+ * const ast = braces.parse('a/{b,c}/d');\n+ * console.log(ast);\n+ * ```\n+ * @param {String} pattern Brace pattern to parse\n+ * @param {Object} options\n+ * @return {Object} Returns an AST\n+ * @api public\n  */\n \n-var expand = require('expand-range');\n+braces.parse = (input, options = {}) => parse(input, options);\n \n /**\n- * Expose `braces`\n+ * Creates a braces string from an AST, or an AST node.\n+ *\n+ * ```js\n+ * const braces = require('braces');\n+ * let ast = braces.parse('foo/{a,b}/bar');\n+ * console.log(stringify(ast.nodes[2])); //=> '{a,b}'\n+ * ```\n+ * @param {String} `input` Brace pattern or AST.\n+ * @param {Object} `options`\n+ * @return {Array} Returns an array of expanded values.\n+ * @api public\n  */\n \n-module.exports = function (str, fn) {\n-  return braces(str, fn);\n+braces.stringify = (input, options = {}) => {\n+  if (typeof input === 'string') {\n+    return stringify(braces.parse(input, options), options);\n+  }\n+  return stringify(input, options);\n };\n \n /**\n- * Expand `{foo,bar}` or `{1..5}` braces in the\n- * give `string`.\n+ * Compiles a brace pattern into a regex-compatible, optimized string.\n+ * This method is called by the main [braces](#braces) function by default.\n  *\n- * @param  {String} `str`\n",
+					"match": false,
+					"packageHash": "30ecbfa8328fa76a2dd4ca9028bc8f062dcc1e1e54e6f37d0b47d355e475babb",
+					"size": 1450,
+					"sourceHash": "332ea07c7b006361aad12aa994ca75dc1db8e8382b884909e2f38f10b85c88a4",
+					"status": "content"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -1,60 +1,77 @@\n {\n   \"name\": \"braces\",\n-  \"description\": \"Faster brace expansion for file paths.\",\n-  \"version\": \"0.1.0\",\n-  \"homepage\": \"https://github.com/jonschlinkert/braces\",\n-  \"author\": {\n-    \"name\": \"Jon Schlinkert\",\n-    \"url\": \"https://github.com/jonschlinkert\"\n-  },\n-  \"repository\": {\n-    \"type\": \"git\",\n-    \"url\": \"git://github.com/jonschlinkert/braces.git\"\n-  },\n+  \"description\": \"Bash-like brace expansion, implemented in JavaScript. Safer than other brace expansion libs, with complete support for the Bash 4.3 braces specification, without sacrificing speed.\",\n+  \"version\": \"3.0.3\",\n+  \"homepage\": \"https://github.com/micromatch/braces\",\n+  \"author\": \"Jon Schlinkert (https://github.com/jonschlinkert)\",\n+  \"contributors\": [\n+    \"Brian Woodward (https://twitter.com/doowb)\",\n+    \"Elan Shanker (https://github.com/es128)\",\n+    \"Eugene Sharygin (https://github.com/eush77)\",\n+    \"hemanth.hm (http://h3manth.com)\",\n+    \"Jon Schlinkert (http://twitter.com/jonschlinkert)\"\n+  ],\n+  \"repository\": \"micromatch/braces\",\n   \"bugs\": {\n-    \"url\": \"https://github.com/jonschlinkert/braces/issues\"\n+    \"url\": \"https://github.com/micromatch/braces/issues\"\n   },\n-  \"licenses\": [\n-    {\n-      \"type\": \"MIT\",\n-      \"url\": \"https://github.com/jonschlinkert/braces/blob/master/LICENSE-MIT\"\n-    }\n+  \"license\": \"MIT\",\n+  \"files\": [\n+    \"index.js\",\n+    \"lib\"\n   ],\n   \"main\": \"index.js\",\n   \"engines\": {\n-    \"node\": \">=0.10.0\"\n+    \"node\": \">=8.3\"\n   },\n   \"scripts\": {\n-    \"test\": \"mocha -R spec\"\n+    \"test\": \"mocha -r ./test/mocha-initialization.js\",\n+    \"benchmark\": \"node benchmark\"\n+  },\n+  \"dependencies\": {\n+    \"fill-range\": \"^7.1.1\"\n   },\n   \"devDependencies\": {\n-    \"benchmarked\": \"^0.1.1\",\n-    \"brace-expansion\": \"0.0.0\",\n-    \"lodash\": \"^2.4.1\",\n-    \"minimatch\": \"^1.0.0\",\n-    \"mocha\": \"*\",\n-    \"should\": \"^4.1.0\",\n-    \"verb\": \">= 0.2.6\",\n-    \"verb-tag-jscomments\": \">= 0.2.0\"\n+    \"ansi-colors\": \"^3.2.4\",\n+    \"bash-path\": \"^2.0.1\",\n+    \"gulp-format-md\": \"^2.0.0\",\n+    \"mocha\": \"^6.1.1\"\n   },\n   \"keywords\": [\n     \"alpha\",\n     \"alphabetical\",\n     \"bash\",\n     \"brace\",\n+    \"braces\",\n     \"expand\",\n     \"expansion\",\n+    \"filepath\",\n+    \"fill\",\n+    \"fs\",\n     \"glob\",\n+    \"globbing\",\n+    \"letter\",\n     \"match\",\n     \"matches\",\n     \"matching\",\n     \"number\",\n     \"numerical\",\n+    \"path\",\n     \"range\",\n     \"ranges\",\n     \"sh\"\n   ],\n-  \"dependencies\": {\n-    \"expand-range\": \"^0.1.0\"\n+  \"verb\": {\n+    \"toc\": false,\n+    \"layout\": \"default\",\n+    \"tasks\": [\n+      \"readme\"\n",
+					"match": false,
+					"packageHash": "61ebbc68ba82cbd24cdb6274f393e2b54b456e57fefc0dc140ed662545414565",
+					"size": 1207,
+					"sourceHash": "ec972f5f2da53d9bacb0fd6152b16f6ef768a00b7724909702abd8a92f886cca",
+					"status": "content"
+				},
+				"test.js": {
+					"match": false,
+					"packageHash": "105fa0da85f62e005058b439c68f2cb8a3795b185e5aa2c18a48f12f3524072c",
+					"size": 3756,
+					"status": "missing-in-source"
+				},
+				"LICENSE": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/compile.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/constants.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/expand.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/parse.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/stringify.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/utils.js": {
+					"match": false,
+					"status": "missing-in-package"
+				}
+			},
+			"summary": {
+				"differentFiles": 3,
+				"matchingFiles": 0,
+				"missingInPackage": 7,
+				"missingInSource": 15,
+				"score": 0,
+				"totalFiles": 25
+			}
+		}
+	}
+]
