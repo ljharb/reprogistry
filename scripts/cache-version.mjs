@@ -36,6 +36,58 @@ async function rewriteWorkspaceDeps(packageDir) {
 		await writeFile(pkgPath, JSON.stringify(pkgJson, null, 2));
 	}
 }
+
+/**
+ * Remove a dependency from package.json (checks all dep types).
+ *
+ * @param {string} packageDir - Directory containing package.json
+ * @param {string} depName - Name of the dependency to remove
+ */
+async function removeDep(packageDir, depName) {
+	const pkgPath = path.join(packageDir, 'package.json');
+	const pkgJson = JSON.parse(await readFile(pkgPath, 'utf8'));
+
+	for (const depType of ['dependencies', 'devDependencies', 'peerDependencies', 'optionalDependencies']) {
+		if (pkgJson[depType] && pkgJson[depType][depName]) {
+			delete pkgJson[depType][depName];
+		}
+	}
+
+	await writeFile(pkgPath, JSON.stringify(pkgJson, null, 2));
+}
+
+/**
+ * Install dependencies with retry logic for missing packages.
+ * If a dep fails with ETARGET (unpublished), remove it and retry.
+ *
+ * @param {string} packageDir - Directory containing package.json
+ * @param {number} maxRetries - Maximum number of retries
+ */
+async function installWithRetry(packageDir, maxRetries = 5) {
+	const installCmd = `cd "${packageDir}" && npm install --ignore-scripts --legacy-peer-deps --force`;
+
+	for (let attempt = 0; attempt <= maxRetries; attempt++) {
+		try {
+			execSync(installCmd, { stdio: 'pipe' });
+			return; // Success
+		} catch (err) {
+			const stderr = /** @type {Error & { stderr?: Buffer }} */ (err).stderr?.toString() || '';
+			const stdout = /** @type {Error & { stdout?: Buffer }} */ (err).stdout?.toString() || '';
+			const output = stderr + stdout;
+
+			// Check for ETARGET/notarget error with a specific package
+			const match = output.match(/No matching version found for ([^\s@]+@[^\s]+)/);
+			if (match && attempt < maxRetries) {
+				const failedDep = match[1].split('@')[0];
+				console.log(`  -> Removing unpublished dep: ${failedDep}`);
+				await removeDep(packageDir, failedDep);
+				continue; // Retry
+			}
+
+			throw err; // Re-throw if not ETARGET or max retries reached
+		}
+	}
+}
 import normalizeGitUrl from './normalize-git-url.mjs';
 import COMPARISON_HASH from './comparison-hash.mjs';
 import reproduce from './reproduce.js';
@@ -165,7 +217,7 @@ async function performComparison(result) {
 		 * Use --force to ignore platform checks (e.g., darwin-only packages on linux)
 		 */
 		await rewriteWorkspaceDeps(packageDir);
-		execSync(`cd "${packageDir}" && npm install --ignore-scripts --legacy-peer-deps --force`, { stdio: 'pipe' });
+		await installWithRetry(packageDir);
 		const packOutput = execSync(
 			`cd "${packageDir}" && npm pack --pack-destination "${tempDir}"`,
 			{ env: { ...process.env, PATH: `${packageDir}/node_modules/.bin:${process.env.PATH}` }, stdio: 'pipe' },
