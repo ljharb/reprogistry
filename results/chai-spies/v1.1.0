@@ -1,0 +1,57 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-02T22:00:03.030Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:9.8.1",
+		"reproduced": false,
+		"attested": true,
+		"package": {
+			"spec": "chai-spies@1.1.0",
+			"name": "chai-spies",
+			"version": "1.1.0",
+			"location": "https://registry.npmjs.org/chai-spies/-/chai-spies-1.1.0.tgz",
+			"integrity": "sha512-ikaUhQvQWchRYj2K54itFp3nrcxaFRpSDQxDlRzSn9aWgu9Pi7lD8yFxTso4WnQ39+WZ69oB/qOvqp+isJIIWA==",
+			"publishedAt": "2023-10-31T12:11:20.433Z",
+			"publishedWith": {
+				"node": "18.18.2",
+				"npm": "10.2.1"
+			}
+		},
+		"source": {
+			"integrity": "sha512-LX7JaEMbYQ/r4+KBZbu4qn4xHfe515qPEfY5YeB7SDe2J/ZizwF/1OrstI8KwMC3pZdXXp05mly/FL/NjxeUiQ==",
+			"location": "git://github.com/chaijs/chai-spies.git",
+			"spec": "github:chaijs/chai-spies#a0b206cfa8bb6cfcf59d622d214e555ad9d8646a"
+		},
+		"comparisonHash": "8a2a8dcbb729bf3ee9216e490c955701f0ddebe1",
+		"diff": {
+			"files": {
+				"chai-spies.js": {
+					"diff": "--- published/chai-spies.js\n+++ rebuilt/chai-spies.js\n@@ -111,31 +111,28 @@\n      */\n \n     Sandbox.prototype.restore = function (object, methods) {\n-      var exitAfter = 0, restored = 0;\n+      var hasFilter = Boolean(object && methods);\n       var sandbox = this;\n \n-      if (methods) {\n-        if (!Array.isArray(methods)) {\n-          methods = [methods];\n-        }\n-        exitAfter = methods.length;\n+      if (methods && !Array.isArray(methods)) {\n+        methods = [methods];\n       }\n \n       Object.keys(this[STATE_KEY]).some(function (spyId) {\n         var spy = sandbox[STATE_KEY][spyId];\n         var tracked = spy.__spy.tracked;\n-        var shouldRestoreThisObject = !object || object === tracked.object;\n-        var shouldRestoreThisMethod = !methods || methods.indexOf(tracked.methodName) !== -1;\n+        var isObjectSpied = !object || object === tracked.object;\n+        var isMethodSpied = !methods || methods.indexOf(tracked.methodName) !== -1;\n+\n+        delete sandbox[STATE_KEY][spyId];\n \n-        // this wouldn't work if we could provide a method without providing an object\n-        if (!shouldRestoreThisObject || !shouldRestoreThisMethod) {\n+        if (!isObjectSpied && !isMethodSpied) {\n           return false;\n         }\n \n-        delete sandbox[STATE_KEY][spyId];\n         sandbox.restoreTrackedObject(spy);\n \n-        if (++restored === exitAfter) {\n+        if (hasFilter) {\n           return true;\n         }\n       });\n",
+					"match": false,
+					"packageHash": "38156f514e52945802e007d9dede38c5840ec630102d217d0dcb92d9c7de49e2",
+					"size": 21990,
+					"sourceHash": "2325ea9f149bc7b443a9ce16a6b77e111c1dcdbc44dbcd5c6513fd526f96df8f",
+					"status": "content"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -12,7 +12,7 @@\n     \"stubs\",\n     \"mocks\"\n   ],\n-  \"version\": \"1.1.0\",\n+  \"version\": \"1.0.0\",\n   \"license\": \"MIT\",\n   \"repository\": {\n     \"type\": \"git\",\n",
+					"match": false,
+					"packageHash": "aa4c902d447505468c4584dce34ece28a23db1b8a4f702f692e665ee96cf1df7",
+					"size": 880,
+					"sourceHash": "1bf8a8ef726a51f3fb7fa4395a6f75e775288f7ddf3e13a9d3b96f8093827cce",
+					"status": "content"
+				}
+			},
+			"summary": {
+				"differentFiles": 2,
+				"matchingFiles": 13,
+				"missingInPackage": 0,
+				"missingInSource": 0,
+				"score": 0.8666666666666667,
+				"totalFiles": 15
+			}
+		}
+	}
+]
