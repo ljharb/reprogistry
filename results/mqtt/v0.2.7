@@ -1,0 +1,729 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-03T11:59:08.341Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:11.7.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "mqtt@0.2.7",
+			"name": "mqtt",
+			"version": "0.2.7",
+			"location": "https://registry.npmjs.org/mqtt/-/mqtt-0.2.7.tgz",
+			"integrity": "sha512-sfpR0pVTom72T/+Szre6P54vGweoDHnWxk8w1XJ2mm4nDsn0lkkuUH+AAI03GNo69ovk007u0aFoHZqMR4Nr+A==",
+			"publishedAt": "2013-05-09T18:48:38.216Z",
+			"publishedWith": {
+				"node": null,
+				"npm": "1.2.18"
+			}
+		},
+		"source": {
+			"integrity": null,
+			"location": "git://github.com/adamvr/MQTT.js.git",
+			"spec": "github:adamvr/MQTT.js#HEAD"
+		},
+		"comparisonHash": "8a2a8dcbb729bf3ee9216e490c955701f0ddebe1",
+		"diff": {
+			"files": {
+				"..travis.yml.un~": {
+					"match": false,
+					"packageHash": "485e2d573419dae3c25674abea0abddb1ad4d37badbf4e267c527265df04c29a",
+					"size": 1817,
+					"status": "missing-in-source"
+				},
+				".npmignore": {
+					"match": false,
+					"packageHash": "518ab09fdd2e24ab78eb30bde4c278d401196d99712d9ba50b08898e0ad3a63c",
+					"size": 21,
+					"status": "missing-in-source"
+				},
+				".package.json.un~": {
+					"match": false,
+					"packageHash": "db67961497e74fd7179ac91ca78056f8de43dec418f615e65752deb4d62a8dc5",
+					"size": 7684,
+					"status": "missing-in-source"
+				},
+				".travis.yml": {
+					"match": false,
+					"packageHash": "b6d8fbd12ac1971de9d087d58070e2d5d80f262b2e2404a16664cfbd5ebd2cb9",
+					"size": 44,
+					"status": "missing-in-source"
+				},
+				"LICENSE": {
+					"match": false,
+					"packageHash": "fa7c93c7f6f587eea84add0e6e7779ec5693c8a354a06327e22174cbf14bd9c6",
+					"size": 1056,
+					"status": "missing-in-source"
+				},
+				"README.md": {
+					"diff": "--- published/README.md\n+++ rebuilt/README.md\n@@ -1,94 +1,977 @@\n-# mqtt.js [![Build Status](https://travis-ci.org/adamvr/MQTT.js.png)](https://travis-ci.org/adamvr/MQTT.js)\n+# ![mqtt.js](https://raw.githubusercontent.com/mqttjs/MQTT.js/137ee0e3940c1f01049a30248c70f24dc6e6f829/MQTT.js.png)\n \n-## Important note for existing users\n+![Github Test Status](https://github.com/mqttjs/MQTT.js/workflows/MQTT.js%20CI/badge.svg) [![codecov](https://codecov.io/gh/mqttjs/MQTT.js/branch/master/graph/badge.svg)](https://codecov.io/gh/mqttjs/MQTT.js)\n \n-v0.2.0 has brough some API breaking changes to mqtt.js. Please\n-consult the [migration guide](http://github.com/adamvr/MQTT.js/wiki/migration) for information\n-or open an issue if you need any help.\n+[![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://github.com/mqttjs/MQTT.js/graphs/commit-activity)\n+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/mqttjs/MQTT.js/pulls)\n \n-## Introduction\n+[![node](https://img.shields.io/node/v/mqtt.svg) ![npm](https://img.shields.io/npm/v/mqtt.svg?logo=npm)](https://www.npmjs.com/package/mqtt)\n+[![NPM Downloads](https://img.shields.io/npm/dm/mqtt.svg)](https://npm-compare.com/mqtt/#timeRange=THREE_YEARS)\n \n-mqtt.js is a library for the MQTT protocol, written in javascript.\n+MQTT.js is a client library for the [MQTT](http://mqtt.org/) protocol, written\n+in JavaScript for node.js and the browser.\n \n+## Table of Contents\n+\n+- [Upgrade notes](#notes)\n+- [Installation](#install)\n+- [Example](#example)\n+- [React Native](#react-native)\n+- [Import Styles](#example)\n+- [Command Line Tools](#cli)\n+- [API](#api)\n+- [Browser](#browser)\n+- [About QoS](#qos)\n+- [TypeScript](#typescript)\n+- [Weapp and Ali support](#weapp-alipay)\n+- [Contributing](#contributing)\n+- [Sponsor](#sponsor)\n+- [License](#license)\n+\n+MQTT.js is an OPEN Open Source Project, see the [Contributing](#contributing) section to find out what this means.\n+\n+[![JavaScript Style\n+Guide](https://cdn.rawgit.com/feross/standard/master/badge.svg)](https://github.com/feross/standard)\n+\n+<a name=\"notes\"></a>\n+\n+## Important notes for existing users\n+\n+**v5.0.0** (07/2023)\n+\n+- Removes support for all end of life node versions (v12 and v14), and now supports node v18 and v20.\n+- Completely rewritten in Typescript 🚀.\n+- When creating `MqttClient` instance `new` is now required.\n+\n+**v4.0.0** (Released 04/2020) removes support for all end of life node versions, and now supports node v12 and v14. It also adds improvements to\n+debug logging, along with some feature additions.\n+\n+As a **breaking change**, by default a error handler is built into the MQTT.js client, so if any\n+errors are emitted and the user has not created an event handler on the client for errors, the client will\n+not break as a result of unhandled errors. Additionally, typical TLS errors like `ECONNREFUSED`, `ECONNRESET` have been\n+added to a list of TLS errors that will be emitted from the MQTT.js client, and so can be handled as connection errors.\n+\n+**v3.0.0** adds support for MQTT 5, support for node v10.x, and many fixes to improve reliability.\n+\n+**Note:** MQTT v5 support is experimental as it has not been implemented by brokers yet.\n+\n+**v2.0.0** removes support for node v0.8, v0.10 and v0.12, and it is 3x faster in sending\n+packets. It also removes all the deprecated functionality in v1.0.0,\n+mainly `mqtt.createConnection` and `mqtt.Server`. From v2.0.0,\n+subscriptions are restored upon reconnection if `clean: true`.\n+v1.x.x is now in _LTS_, and it will keep being supported as long as\n+there are v0.8, v0.10 and v0.12 users.\n+\n+As a **breaking change**, the `encoding` option in the old client is\n+removed, and now everything is UTF-8 with the exception of the\n+`password` in the CONNECT message and `payload` in the PUBLISH message,\n+which are `Buffer`.\n+\n+Another **breaking change** is that MQTT.js now defaults to MQTT v3.1.1,\n+so to support old brokers, please read the [client options doc](#client).\n+\n+**v1.0.0** improves the overall architecture of the project, which is now\n+split into three components: MQTT.js keeps the Client,\n+[mqtt-connection](http://npm.im/mqtt-connection) includes the barebone\n+Connection code for server-side usage, and [mqtt-packet](http://npm.im/mqtt-packet)\n+includes the protocol parser and generator. The new Client improves\n+performance by a 30% factor, embeds Websocket support\n+([MOWS](http://npm.im/mows) is now deprecated), and it has a better\n+support for QoS 1 and 2. The previous API is still supported but\n+deprecated, as such, it is not documented in this README.\n+\n+<a name=\"install\"></a>\n \n ## Installation\n \n-    npm install mqtt\n+```sh\n+npm install mqtt --save\n+```\n",
+					"match": false,
+					"packageHash": "bcd5ffddb6f29e595e87524e1ba4ea8f0271db986ef0158342c64452a90a3978",
+					"size": 2290,
+					"sourceHash": "da3dd017b1d42878c9951e5317d0ecd7d70ff698e5c8e8ec2d12cc744c970735",
+					"status": "content"
+				},
+				"bin/mqtt_pub": {
+					"match": false,
+					"packageHash": "a89065a86516528aa04ed87a9308c6b0f9bab3a02eac5a74f8123b2cfb2f7d30",
+					"size": 365,
+					"status": "missing-in-source"
+				},
+				"bin/mqtt_sub": {
+					"match": false,
+					"packageHash": "687140ab1e7dbf0dc075f13916113bb9975dbe8c0b9554ad16b0c871517fd02a",
+					"size": 395,
+					"status": "missing-in-source"
+				},
+				"examples/client/client_test.js": {
+					"match": false,
+					"packageHash": "75e80ba05beccf12c7a8075093a6280d6840de29f0951355a17a1ccd9122be41",
+					"size": 962,
+					"status": "missing-in-source"
+				},
+				"examples/client/evict.js": {
+					"match": false,
+					"packageHash": "24c753e288b5e8ff32f4d2c705176db77a30bb474475bf3d00a791c13f1c000f",
+					"size": 363,
+					"status": "missing-in-source"
+				},
+				"examples/client/tls-client.js": {
+					"match": false,
+					"packageHash": "a556bf23c2855c4edc9dc3c25e9b2182c58fad11e75fbc62913d671592b36f12",
+					"size": 434,
+					"status": "missing-in-source"
+				},
+				"examples/server/broadcast.js": {
+					"match": false,
+					"packageHash": "533ab0da5dc01b547265d82d116521f852dee33a7c84fd1abad0d080e9e69a21",
+					"size": 1200,
+					"status": "missing-in-source"
+				},
+				"examples/server/orig.js": {
+					"match": false,
+					"packageHash": "338bd69550517623e63571cce9126aeffe9d836465901ce0ad16da33fa232af4",
+					"size": 1672,
+					"status": "missing-in-source"
+				},
+				"examples/server/redis.js": {
+					"match": false,
+					"packageHash": "777a838b0875e10bb84afecf239786c5d2fe224243faef926a3168812df52845",
+					"size": 1298,
+					"status": "missing-in-source"
+				},
+				"examples/server/tls.js": {
+					"match": false,
+					"packageHash": "e34427ce226bec6b1f7b81bed7ef4f6f961e824341002e84d8fe1ad873c3c475",
+					"size": 1217,
+					"status": "missing-in-source"
+				},
+				"index.js": {
+					"match": false,
+					"packageHash": "fc5659320621222fd048f4ded5252afe24ad9e071e8a5973dce53312e9987a6d",
+					"size": 40,
+					"status": "missing-in-source"
+				},
+				"lib/.connection.js.un~": {
+					"match": false,
+					"packageHash": "59256d141a59112a50fe061f7e3bcb73a2edeec1777186acb2effffb59aa1717",
+					"size": 8234,
+					"status": "missing-in-source"
+				},
+				"lib/.parse.js.un~": {
+					"match": false,
+					"packageHash": "29a8c99a95ead69c5f784c67d9eebf9e3f7ba83670b8ae28ae1d175579096d6e",
+					"size": 8179,
+					"status": "missing-in-source"
+				},
+				"lib/client.js": {
+					"match": false,
+					"packageHash": "2bb65b71cbe16d1e296f955f9b3b9ff2bd0ec49caebc8d1e1299e25fe9351297",
+					"size": 8868,
+					"status": "missing-in-source"
+				},
+				"lib/connection.js": {
+					"match": false,
+					"packageHash": "2b2af0b449aad0c4af5b950f0bf5aff146f3b17be213cd55617b1c8b7470f4f8",
+					"size": 2720,
+					"status": "missing-in-source"
+				},
+				"lib/generate.js": {
+					"match": false,
+					"packageHash": "dcba6c4ed988f8d4322fa10f6e4022a7bb2973738bcc1ecffe8b8e8e4488920f",
+					"size": 12430,
+					"status": "missing-in-source"
+				},
+				"lib/mqtt.js": {
+					"match": false,
+					"packageHash": "bb09ba8bf1edcafbe33ff77a9ea8def9e3bca1a47efcff9a8f79a7713c29b199",
+					"size": 4237,
+					"status": "missing-in-source"
+				},
+				"lib/parse.js": {
+					"match": false,
+					"packageHash": "fb344caf4d361afd2245c82f8f64ee55a2936be98b04bdc6e050440dfcab8ae3",
+					"size": 6382,
+					"status": "missing-in-source"
+				},
+				"lib/protocol.js": {
+					"match": false,
+					"packageHash": "6db5ae82e82ff48e0147beb4e92421d3770e90bc61584a6d20f38f1a25db087e",
+					"size": 1103,
+					"status": "missing-in-source"
+				},
+				"lib/server.js": {
+					"match": false,
+					"packageHash": "e9b1f0d12339ba23c4e9b086c85e42b53717f9cb7cbe7a29e45dac117d00e65f",
+					"size": 1757,
+					"status": "missing-in-source"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -1,10 +1,13 @@\n {\n-  \"author\": \"Adam Rudd <adam.rudd@uqconnect.edu.au>\",\n   \"name\": \"mqtt\",\n   \"description\": \"A library for the MQTT protocol\",\n-  \"version\": \"0.2.7\",\n+  \"version\": \"5.14.1\",\n   \"contributors\": [\n-    \"Matteo Collina <matteo.collina@gmail.com> (https://github.com/mcollina)\"\n+    \"Adam Rudd <adamvrr@gmail.com>\",\n+    \"Matteo Collina <matteo.collina@gmail.com> (https://github.com/mcollina)\",\n+    \"Siarhei Buntsevich <scarry0506@gmail.com> (https://github.com/scarry1992)\",\n+    \"Yoseph Maguire <yomaguir@microsoft.com> (https://github.com/YoDaMa)\",\n+    \"Daniel Lando <daniel.sorridi@gmail.com> (https://github.com/robertsLando)\"\n   ],\n   \"keywords\": [\n     \"mqtt\",\n@@ -12,26 +15,138 @@\n     \"publish\",\n     \"subscribe\"\n   ],\n+  \"license\": \"MIT\",\n   \"repository\": {\n     \"type\": \"git\",\n-    \"url\": \"git://github.com/adamvr/MQTT.js.git\"\n+    \"url\": \"git://github.com/mqttjs/MQTT.js.git\"\n+  },\n+  \"main\": \"./build/index.js\",\n+  \"module\": \"./dist/mqtt.esm.js\",\n+  \"bin\": {\n+    \"mqtt_pub\": \"./build/bin/pub.js\",\n+    \"mqtt_sub\": \"./build/bin/sub.js\",\n+    \"mqtt\": \"./build/bin/mqtt.js\"\n+  },\n+  \"files\": [\n+    \"dist/\",\n+    \"CONTRIBUTING.md\",\n+    \"LICENSE.md\",\n+    \"help/\",\n+    \"build/\"\n+  ],\n+  \"exports\": {\n+    \".\": {\n+      \"react-native\": \"./dist/mqtt.esm.js\",\n+      \"browser\": {\n+        \"import\": \"./dist/mqtt.esm.js\",\n+        \"default\": \"./dist/mqtt.min.js\"\n+      },\n+      \"default\": \"./build/index.js\"\n+    },\n+    \"./package.json\": \"./package.json\",\n+    \"./*.map\": \"./build/*.js.map\",\n+    \"./dist/*\": \"./dist/*.js\",\n+    \"./*\": \"./build/*.js\"\n+  },\n+  \"types\": \"build/index.d.ts\",\n+  \"typesVersions\": {\n+    \"*\": {\n+      \"*\": [\n+        \"./build/index.d.ts\"\n+      ]\n+    }\n   },\n-  \"main\": \"index.js\",\n   \"scripts\": {\n-    \"test\": \"mocha\"\n+    \"lint\": \"eslint --ext .ts .\",\n+    \"lint-fix\": \"eslint --fix --ext .ts .\",\n+    \"build:ts\": \"rimraf build/ && tsc -p tsconfig.build.json\",\n+    \"build:browser\": \"node esbuild.js\",\n+    \"build\": \"npm run build:ts && npm run build:browser\",\n+    \"prepare\": \"npm run build\",\n+    \"unit-test:node\": \"node -r esbuild-register --test-concurrency 4 --test-reporter=junit --test-reporter-destination=junit.xml --test-reporter=spec --test-reporter-destination=stdout --test test/node/*.ts \",\n+    \"unit-test:browser\": \"wtr\",\n+    \"test:node\": \"node_modules/.bin/nyc npm run unit-test:node\",\n+    \"test:browser\": \"npm run build && npm run unit-test:browser\",\n+    \"test\": \"npm run test:node\",\n+    \"changelog\": \"conventional-changelog -p angular -i CHANGELOG.md -s && git add CHANGELOG.md\",\n+    \"changelog-init\": \"conventional-changelog -p angular -i CHANGELOG.md -s -r 0\",\n+    \"release\": \"read -p 'GITHUB_TOKEN: ' GITHUB_TOKEN && export GITHUB_TOKEN=$GITHUB_TOKEN && release-it\"\n   },\n-  \"bin\": {\n-    \"mqtt_pub\": \"./bin/mqtt_pub\",\n-    \"mqtt_sub\": \"./bin/mqtt_sub\"\n+  \"publishConfig\": {\n+    \"provenance\": true\n   },\n+  \"pre-commit\": [\n+    \"lint\"\n+  ],\n   \"engines\": {\n-    \"node\": \">=0.8.6\"\n+    \"node\": \">=16.0.0\"\n+  },\n+  \"browser\": {\n+    \"./mqtt.js\": \"./dist/mqtt.js\",\n+    \"fs\": false,\n+    \"tls\": false,\n",
+					"match": false,
+					"packageHash": "82ac404fb080e9a420615f3d46cb944dcae123bd5f7c9d391444a4febaf8280d",
+					"size": 740,
+					"sourceHash": "3c82be4fca1c2714fbd102e74d7ad4863098e63508233511d493717ba4e01b85",
+					"status": "content"
+				},
+				"test/.connection.parse.js.un~": {
+					"match": false,
+					"packageHash": "fc018188d77ff092b4639a1f58ebf477941c4623259b5ec63717fda9b1dbbd7c",
+					"size": 16517,
+					"status": "missing-in-source"
+				},
+				"test/client.js": {
+					"match": false,
+					"packageHash": "11744bd329078a3887112a8c69924972498e718f27ee7cbb5287b703c9c4a507",
+					"size": 14428,
+					"status": "missing-in-source"
+				},
+				"test/connection.js": {
+					"match": false,
+					"packageHash": "8d5e01755c436e8f0bb28eb307124fa2c34e68bf628bbff7182e672be3b199ed",
+					"size": 224,
+					"status": "missing-in-source"
+				},
+				"test/connection.parse.js": {
+					"match": false,
+					"packageHash": "c8b5bae4c90926043f99df0bac372c4fa91a705da127fe6644ca9b8d084392b5",
+					"size": 12838,
+					"status": "missing-in-source"
+				},
+				"test/connection.transmit.js": {
+					"match": false,
+					"packageHash": "23bd2e7efee2eaed97519326b418a21fee6dce1a04f3e815ed6f2e8f57b7930b",
+					"size": 24442,
+					"status": "missing-in-source"
+				},
+				"test/helpers/private-csr.pem": {
+					"match": false,
+					"packageHash": "acc16c68f398866c2e3fb8c197ad9e984410e39f8c154dfd365810a92c95b520",
+					"size": 956,
+					"status": "missing-in-source"
+				},
+				"test/helpers/private-key.pem": {
+					"match": false,
+					"packageHash": "f056a098f6d61822b465aedfec69e65e6e1cd32bd1466bb33021d0b5842e323b",
+					"size": 1679,
+					"status": "missing-in-source"
+				},
+				"test/helpers/public-cert.pem": {
+					"match": false,
+					"packageHash": "ed0869dcd7fd4f933d450325c5be7901cf405bd36034231cb0a4eeaf9474ccc8",
+					"size": 1111,
+					"status": "missing-in-source"
+				},
+				"test/helpers/public-key.pem": {
+					"match": false,
+					"packageHash": "472faa28ca2c2d0ff3d615a9ddf92dffe227b771086b94900c4b5f2ca730758d",
+					"size": 451,
+					"status": "missing-in-source"
+				},
+				"test/helpers/server.js": {
+					"match": false,
+					"packageHash": "7c70821192a5d95bbf0ba247e46664941a87408dac8929bd4064555be565bb3f",
+					"size": 1439,
+					"status": "missing-in-source"
+				},
+				"test/mqtt.js": {
+					"match": false,
+					"packageHash": "d6a5ac9c532d96939a277a85e57996d317be1bb5ea528336de7e7344471caf4b",
+					"size": 2462,
+					"status": "missing-in-source"
+				},
+				"test/old/connection.test.js": {
+					"match": false,
+					"packageHash": "56f8ad1ba9fb91259582f8d628413d7536b3c345d9bf9a500dba322a70d1c89a",
+					"size": 1322,
+					"status": "missing-in-source"
+				},
+				"test/old/mqtt.client.test.js": {
+					"match": false,
+					"packageHash": "755f335e784e6b7520bc02af3a30e2d2990d29306bd598a95b204a5c2c312494",
+					"size": 946,
+					"status": "missing-in-source"
+				},
+				"test/old/qos.test.js": {
+					"match": false,
+					"packageHash": "02ccbdb00ea17be6c0a138842fefe82dd261df92054a9a4964fb13042f898a8e",
+					"size": 1554,
+					"status": "missing-in-source"
+				},
+				"test/old/smoke.test.js": {
+					"match": false,
+					"packageHash": "fe80a7d51c5fc1e05988ed030ef615e9f442d7cc092dc7fd580dbf9c86d691e7",
+					"size": 696,
+					"status": "missing-in-source"
+				},
+				"test/old/tester.js": {
+					"match": false,
+					"packageHash": "689b0bf43349c5260459ea27d638997a61bb3abd07a9189228064fa5e2ca4553",
+					"size": 680,
+					"status": "missing-in-source"
+				},
+				"test/old/tls.test.js": {
+					"match": false,
+					"packageHash": "02050e770b95a183389140935446e7effb5a03c8dc39f730511f3b033f023b44",
+					"size": 861,
+					"status": "missing-in-source"
+				},
+				"test/old/transmit.json": {
+					"match": false,
+					"packageHash": "ee623d1e436170ac35e3f6285b8f71971e3f4633f382540526e93b370a953ed4",
+					"size": 8390,
+					"status": "missing-in-source"
+				},
+				"test/server.js": {
+					"match": false,
+					"packageHash": "3840cca67b7fced86678f58e6f535c77bdfad1ac9f070e106feb3b6e986f430d",
+					"size": 797,
+					"status": "missing-in-source"
+				},
+				"test/util.js": {
+					"match": false,
+					"packageHash": "20f5bf2883a667bfed179f0427c5c91e2be2ac8b79571fb283f38ad36e8a92b5",
+					"size": 601,
+					"status": "missing-in-source"
+				},
+				"CONTRIBUTING.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"LICENSE.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"build/bin/mqtt.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"build/bin/mqtt.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"build/bin/mqtt.js.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"build/bin/pub.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"build/bin/pub.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"build/bin/pub.js.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"build/bin/sub.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"build/bin/sub.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"build/bin/sub.js.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"build/index.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"build/index.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"build/index.js.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"build/lib/BufferedDuplex.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"build/lib/BufferedDuplex.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"build/lib/BufferedDuplex.js.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"build/lib/KeepaliveManager.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"build/lib/KeepaliveManager.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"build/lib/KeepaliveManager.js.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"build/lib/TypedEmitter.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"build/lib/TypedEmitter.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"build/lib/TypedEmitter.js.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"build/lib/client.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"build/lib/client.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"build/lib/client.js.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"build/lib/connect/ali.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"build/lib/connect/ali.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"build/lib/connect/ali.js.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"build/lib/connect/index.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"build/lib/connect/index.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"build/lib/connect/index.js.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"build/lib/connect/socks.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"build/lib/connect/socks.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"build/lib/connect/socks.js.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"build/lib/connect/tcp.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"build/lib/connect/tcp.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"build/lib/connect/tcp.js.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"build/lib/connect/tls.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"build/lib/connect/tls.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"build/lib/connect/tls.js.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"build/lib/connect/ws.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"build/lib/connect/ws.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"build/lib/connect/ws.js.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"build/lib/connect/wx.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"build/lib/connect/wx.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"build/lib/connect/wx.js.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"build/lib/default-message-id-provider.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"build/lib/default-message-id-provider.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"build/lib/default-message-id-provider.js.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"build/lib/get-timer.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"build/lib/get-timer.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"build/lib/get-timer.js.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"build/lib/handlers/ack.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"build/lib/handlers/ack.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"build/lib/handlers/ack.js.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"build/lib/handlers/auth.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"build/lib/handlers/auth.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"build/lib/handlers/auth.js.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"build/lib/handlers/connack.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"build/lib/handlers/connack.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"build/lib/handlers/connack.js.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"build/lib/handlers/index.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"build/lib/handlers/index.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"build/lib/handlers/index.js.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"build/lib/handlers/publish.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"build/lib/handlers/publish.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"build/lib/handlers/publish.js.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"build/lib/handlers/pubrel.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"build/lib/handlers/pubrel.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"build/lib/handlers/pubrel.js.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"build/lib/is-browser.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"build/lib/is-browser.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"build/lib/is-browser.js.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"build/lib/shared.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"build/lib/shared.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"build/lib/shared.js.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"build/lib/store.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"build/lib/store.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"build/lib/store.js.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"build/lib/topic-alias-recv.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"build/lib/topic-alias-recv.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"build/lib/topic-alias-recv.js.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"build/lib/topic-alias-send.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"build/lib/topic-alias-send.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"build/lib/topic-alias-send.js.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"build/lib/unique-message-id-provider.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"build/lib/unique-message-id-provider.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"build/lib/unique-message-id-provider.js.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"build/lib/validations.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"build/lib/validations.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"build/lib/validations.js.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"build/mqtt.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"build/mqtt.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"build/mqtt.js.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"build/tsconfig.build.tsbuildinfo": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"dist/mqtt.esm.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"dist/mqtt.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"dist/mqtt.min.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"help/help.txt": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"help/publish.txt": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"help/subscribe.txt": {
+					"match": false,
+					"status": "missing-in-package"
+				}
+			},
+			"summary": {
+				"differentFiles": 2,
+				"matchingFiles": 0,
+				"missingInPackage": 102,
+				"missingInSource": 44,
+				"score": 0,
+				"totalFiles": 148
+			}
+		}
+	}
+]
