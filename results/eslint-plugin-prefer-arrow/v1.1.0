@@ -1,0 +1,83 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-03T03:16:08.759Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:3.10.10",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "eslint-plugin-prefer-arrow@1.1.0",
+			"name": "eslint-plugin-prefer-arrow",
+			"version": "1.1.0",
+			"location": "https://registry.npmjs.org/eslint-plugin-prefer-arrow/-/eslint-plugin-prefer-arrow-1.1.0.tgz",
+			"integrity": "sha512-g4+RFOty8kuaS51aASIsvlpsMqaiWcdwJ+91JZMb3vH9y5s8ilgz3qyObOad+cxm2rkOOwUCQYBlceDpiF775g==",
+			"publishedAt": "2017-05-16T20:11:17.743Z",
+			"publishedWith": {
+				"node": "6.9.5",
+				"npm": "3.10.10"
+			}
+		},
+		"source": {
+			"integrity": null,
+			"location": "git+https://github.com/TristonJ/eslint-plugin-prefer-arrow.git",
+			"spec": "github:TristonJ/eslint-plugin-prefer-arrow#af41ba1fac4c16c8cd37d232b8443bdc8d91afa3"
+		},
+		"comparisonHash": "8a2a8dcbb729bf3ee9216e490c955701f0ddebe1",
+		"diff": {
+			"files": {
+				".npmignore": {
+					"match": false,
+					"packageHash": "16d30e4462189fb14dd611bdb708c510630c576a1f35b9383e89a4352da36c97",
+					"size": 13,
+					"status": "missing-in-source"
+				},
+				"README.md": {
+					"diff": "--- published/README.md\n+++ rebuilt/README.md\n@@ -1,5 +1,9 @@\n # eslint-plugin-prefer-arrow\n-ESLint plugin to prefer arrow functions. By default, the plugin allows usage of `function` as a member of an Object's prototype, but this can be changed with the property `disallowPrototype`. Alternatively, with the `singleReturnOnly` option, this plugin only reports functions where converting to an arrow function would dramatically simplify the code.\n+ESLint plugin to prefer arrow functions. By default, the plugin allows usage of `function` as a member of an Object's prototype, but this can be changed with the property `disallowPrototype`. Functions referencing `this` will also be allowed. Alternatively, with the `singleReturnOnly` option, this plugin only reports functions where converting to an arrow function would dramatically simplify the code.\n+\n+Class methods will not produce errors unless the `classPropertiesAllowed` flag is set.\n+\n+This plugin will automatically fix your code using ESLint's `--fix` option, as long as you use the `singleReturnOnly` option.\n \n # Installation\n \n@@ -17,17 +21,26 @@\n \"plugins\": [\n   \"prefer-arrow\"\n ],\n-\"rules\": [\n+\"rules\": {\n   \"prefer-arrow/prefer-arrow-functions\": [\n-     \"warn\",\n-     {\n-       \"disallowPrototype\": true,\n-       \"singleReturnOnly\": false\n-     }\n-   ]\n-]\n+    \"warn\",\n+    {\n+      \"disallowPrototype\": true,\n+      \"singleReturnOnly\": false,\n+      \"classPropertiesAllowed\": false\n+    }\n+  ]\n+}\n ```\n # Configuration\n  * `disallowPrototype`: If set to true, the plugin will warn if `function` is used anytime. Otherwise, the plugin allows usage of `function` if it is a member of an Object's prototype.\n  * `singleReturnOnly`: If set to true, the plugin will only warn for `function` declarations which *only* contain a return statement. These often look much better when declared as arrow functions without braces. Works well in conjunction with ESLint's built-in [arrow-body-style](http://eslint.org/docs/rules/arrow-body-style) set to `as-needed`.\n- \n+ * `classPropertiesAllowed`: If set to true, the plugin will warn about functions which could be replaced with arrow functions defined as [class instance fields](https://github.com/jeffmo/es-class-static-properties-and-fields). Enable if you're using Babel's [transform-class-properties](https://babeljs.io/docs/plugins/transform-class-properties/) plugin.\n+ * `allowStandaloneDeclarations`: If set to true, the plugin will ignore top-level function declarations (the plugin will still warn about \"inner\" functions, for example, function declarations inside other functions).\n+\n+# Autofixing\n+\n+To autofix your code, simply run ESLint with the `--fix` option. Note that this only works when the `singleReturnOnly` option is set to true.\n+```bash\n+eslint --fix src\n+```\n",
+					"match": false,
+					"packageHash": "47894317c840fb8671963afa5e767bcd93723b1950681694d4e00906886c964a",
+					"size": 1431,
+					"sourceHash": "d49ec5ef231f94cda765f9a87a3a75f2808256f739a826c9bed939da3b2d8a36",
+					"status": "content"
+				},
+				"lib/rules/prefer-arrow-functions.js": {
+					"diff": "--- published/lib/rules/prefer-arrow-functions.js\n+++ rebuilt/lib/rules/prefer-arrow-functions.js\n@@ -2,7 +2,6 @@\n  * @fileoverview Rule to prefer arrow functions over plain functions\n  * @author Triston Jones\n  */\n-\n 'use strict';\n \n module.exports = {\n@@ -21,17 +20,21 @@\n         },\n         singleReturnOnly: {\n           type: 'boolean'\n+        },\n+        classPropertiesAllowed: {\n+          type: 'boolean'\n+        },\n+        allowStandaloneDeclarations: {\n+          type: 'boolean'\n         }\n       },\n       additionalProperties: false\n     }]\n   },\n-  create: function(context) {\n-    return {\n-      'FunctionDeclaration:exit': (node) => inspectNode(node, context),\n-      'FunctionExpression:exit': (node) => inspectNode(node, context)\n-    };\n-  }\n+  create: context => ({\n+    'FunctionDeclaration:exit': (node) => inspectNode(node, context),\n+    'FunctionExpression:exit': (node) => inspectNode(node, context)\n+  })\n }\n \n const isPrototypeAssignment = (node) => {\n@@ -40,7 +43,7 @@\n   while(parent) {\n     switch(parent.type) {\n       case 'MemberExpression':\n-        if(parent.property && parent.property.name === 'prototype') \n+        if(parent.property && parent.property.name === 'prototype')\n           return true;\n         parent = parent.object;\n         break;\n@@ -51,7 +54,7 @@\n       case 'ObjectExpression':\n         parent = parent.parent;\n         break;\n-      default: \n+      default:\n         return false;\n     }\n   }\n@@ -64,21 +67,230 @@\n   return parent && parent.kind === 'constructor';\n }\n \n+const containsThis = (node) => {\n+  if (typeof node !== 'object' || node === null) return false;\n+  if (node.type === 'FunctionDeclaration') return false;\n+  if (node.type === 'FunctionExpression') return false;\n+  if (node.type === 'ThisExpression') return true;\n+  return Object.keys(node).some(field => {\n+    if (field === 'parent') {\n+      return false;\n+    }\n+    else if (Array.isArray(node[field])) {\n+      return node[field].some(containsThis);\n+    }\n+    return containsThis(node[field]);\n+  });\n+}\n+\n const isNamed = (node) =>\n   node.type === 'FunctionDeclaration' && node.id && node.id.name;\n \n+const functionOnlyContainsReturnStatement = node =>\n+  node.body.body.length === 1 && node.body.body[0].type === 'ReturnStatement';\n+\n+const isNamedDefaultExport = node =>\n+  node.id && node.id.name && node.parent.type === 'ExportDefaultDeclaration';\n+\n+const isClassMethod = node => node.parent.type === 'MethodDefinition';\n+\n+const isGeneratorFunction = node => node.generator === true;\n+\n+const isGetterOrSetter = node => node.parent.kind === 'set' || node.parent.kind === 'get';\n+\n+const isCommonJSModuleProp = (node, name = 'module') => \n+  node &&\n+  node.type === 'MemberExpression' &&\n+  node.object &&\n+  node.object.type === 'Identifier' &&\n+  node.object.name === name;\n+\n+const isModuleExport = node =>\n+  node.parent.type === 'AssignmentExpression' &&\n",
+					"match": false,
+					"packageHash": "f0294023c45faf50e07685d4c32713e9e90299f147e01edca3e536e476e6b565",
+					"size": 2163,
+					"sourceHash": "bcbac39e01f6ecc61e19d3f76a7eb51902edf48ebfd69c397e28382a6bdef6f2",
+					"status": "content"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -1,6 +1,6 @@\n {\n   \"name\": \"eslint-plugin-prefer-arrow\",\n-  \"version\": \"1.1.0\",\n+  \"version\": \"1.2.3\",\n   \"description\": \"Prefer arrow functions in most cases\",\n   \"main\": \"index.js\",\n   \"scripts\": {\n@@ -13,11 +13,14 @@\n   \"author\": \"Triston Jones <contact@tristonjones.com>\",\n   \"license\": \"MIT\",\n   \"peerDependencies\": {\n-    \"eslint\": \"^2.0.0 || ^3.0.0\"\n+    \"eslint\": \">=2.0.0\"\n   },\n   \"devDependencies\": {\n-    \"eslint\": \"^2.0.0 || ^3.0.0\",\n-    \"mocha\": \"^3.4.1\"\n+    \"@typescript-eslint/parser\": \"^2.4.0\",\n+    \"babel-eslint\": \"^10.0.3\",\n+    \"eslint\": \">=2.0.0 <7.0.0\",\n+    \"mocha\": \"^3.4.1\",\n+    \"typescript\": \"^3.6.4\"\n   },\n   \"keywords\": [\n     \"eslint\",\n",
+					"match": false,
+					"packageHash": "e8f77bbfaa0d2c248321fd0f6569f90743da82fe7e927d093051516b50bd3f31",
+					"size": 601,
+					"sourceHash": "45e5e175cc5ba2136446884f87401aa97e21895a4df1edf58bf0735bd9447482",
+					"status": "content"
+				},
+				"test/lib/rules/prefer-arrow-functions.js": {
+					"diff": "--- published/test/lib/rules/prefer-arrow-functions.js\n+++ rebuilt/test/lib/rules/prefer-arrow-functions.js\n@@ -5,7 +5,11 @@\n \n 'use strict';\n \n-const singleReturnOnly = code => ({code, options: [{singleReturnOnly: true}]});\n+const singleReturnOnly = (code, extraRuleOptions) => ({\n+  code,\n+  options: [Object.assign({singleReturnOnly: true}, extraRuleOptions)],\n+  parserOptions: {sourceType: 'module'}\n+});\n \n var rule = require('../../../lib/rules/prefer-arrow-functions'),\n     RuleTester = require('eslint').RuleTester;\n@@ -23,29 +27,259 @@\n     'var foo = (...args) => args',\n     'class obj {constructor(foo){this.foo = foo;}}; obj.prototype.func = function() {};',\n     'class obj {constructor(foo){this.foo = foo;}}; obj.prototype = {func: function() {}};',\n+    'var foo = function() { return this.bar; };',\n+    'function * testGenerator() { return yield 1; }',\n+    'const foo = { get bar() { return \"test\"; } }',\n+    'const foo = { set bar(xyz) {} }',\n+    'class foo { get bar() { return \"test\"; } }',\n+    'class foo { set bar(xyz) { } }',\n+    'class foo { bar() { return \"test\" } }',\n+    'function foo() { return () => this; }',\n+    'function foo() { return (bar = this) => bar; }',\n+    'function foo(bar = this) { return bar; }',\n+    'const foo = function () { return () => this; }',\n+    'const foo = function () { return (bar = this) => bar; }',\n+    'const foo = function (bar = this) { return bar; }',\n+    ...[\n+      'var foo = (bar) => {return bar();}',\n+      'function foo(bar) {bar()}',\n+      'var x = function foo(bar) {bar()}',\n+      'var x = function(bar) {bar()}',\n+      'function foo(bar) {/* yo */ bar()}',\n+      'function foo() {}',\n+      'function foo(bar) {bar(); return bar()}',\n+      'class MyClass { foo(bar) {bar(); return bar()} }',\n+      'var MyClass = { foo(bar) {bar(); return bar()} }',\n+      'export default function xyz() { return 3; }',\n+      'class MyClass { render(a, b) { return 3; } }'\n+    ].map(singleReturnOnly),\n     ...[\n-        'var foo = (bar) => {return bar();}',\n-        'function foo(bar) {bar()}',\n-        'var x = function foo(bar) {bar()}',\n-        'var x = function(bar) {bar()}',\n-        'function foo(bar) {/* yo */ bar()}',\n-        'function foo() {}',\n-        'function foo(bar) {bar(); return bar()}',\n-    ].map(singleReturnOnly)\n+      'const foo = async bar => bar;',\n+      'const foo = async bar => await Promise.resolve(2);',\n+      'const foo = async (a, b) => { return await Promise.resolve(2); }',\n+      'class MyClass { async foo(bar) { return bar; } }',\n+    ].map(code => ({ code, parserOptions: { ecmaVersion: 2017 } })),\n+\n+    // Valid tests for \"allowStandaloneDeclarations\" option\n+    {code: 'function foo() { return \"bar\"; }', options: [{ allowStandaloneDeclarations: true }]},\n+    {code: 'function * fooGen() { return yield \"bar\"; }', options: [{ allowStandaloneDeclarations: true }]},\n+    {code: 'async function foo() { return await \"bar\"; }', options: [{ allowStandaloneDeclarations: true }], parserOptions: { ecmaVersion: 2017 }},\n+    {code: 'function foo() { return () => \"bar\"; }', options: [{ allowStandaloneDeclarations: true }]},\n+    {code: 'module.exports = function() { return \"bar\"; }',  options: [{ allowStandaloneDeclarations: true }]},\n+    {code: 'module.exports.foo = function() { return \"bar\"; }',  options: [{ allowStandaloneDeclarations: true }]},\n+    {code: 'exports.foo = function() { return \"bar\"; }',  options: [{ allowStandaloneDeclarations: true }]},\n+    {\n+      code: 'export function foo() { return \"bar\"; }',\n+      options: [{ allowStandaloneDeclarations: true }],\n+      parserOptions: { sourceType: 'module'},\n+    },\n+    {\n+      code: 'export default function() { return \"bar\"; }',\n+      options: [{ allowStandaloneDeclarations: true }],\n+      parserOptions: { sourceType: 'module'},\n+    },\n+    {\n+      code: 'export default function foo() { return \"bar\"; }',\n+      options: [{ allowStandaloneDeclarations: true }],\n+      parserOptions: { sourceType: 'module'},\n+    },\n+    {\n+      // Make sure \"allowStandaloneDeclarations\" works with typescript\n+      code: 'function foo(a: string): string { return `bar ${a}`;}',\n+      options: [{ allowStandaloneDeclarations: true }],\n+      parser: require.resolve('@typescript-eslint/parser')\n+    },\n+\n+    {\n+      code: 'class MyClass { constructor() { this.x = 0; } add = (y) => { this.x += y; }; }',\n+      options: [{ classPropertiesAllowed: true }],\n+      parser: require.resolve('babel-eslint')\n+    }\n   ],\n   invalid: [\n     {code: 'function foo() { return \"Hello!\"; }', errors: ['Use const or class constructors instead of named functions']},\n     {code: 'function foo() { return arguments; }', errors: ['Use const or class constructors instead of named functions']},\n+    {code: 'function foo() { return function () { return this; }; }', errors: ['Use const or class constructors instead of named functions']},\n",
+					"match": false,
+					"packageHash": "103ccca9eb8bc5a020f426f3c120de9d1aaa6f9b31d75010bbb344b891cee4d6",
+					"size": 2446,
+					"sourceHash": "75c6fd42e7dd91a4179755a30badc2dba17640e0795d9edc57f85bf36e78ab22",
+					"status": "content"
+				},
+				"LICENSE": {
+					"match": false,
+					"status": "missing-in-package"
+				}
+			},
+			"summary": {
+				"differentFiles": 4,
+				"matchingFiles": 1,
+				"missingInPackage": 1,
+				"missingInSource": 1,
+				"score": 0.14285714285714285,
+				"totalFiles": 7
+			}
+		}
+	}
+]
