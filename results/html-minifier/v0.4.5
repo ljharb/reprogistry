@@ -1,0 +1,49 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-03T08:11:51.775Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:2.15.11",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "html-minifier@0.4.5",
+			"name": "html-minifier",
+			"version": "0.4.5",
+			"location": "https://registry.npmjs.org/html-minifier/-/html-minifier-0.4.5.tgz",
+			"integrity": "sha512-tOPGFGeSixCalEQUvHnB0IHLFFtqZMSgDDPGAcRT3lmIQMtqMe1j2EMcY3aiod51C9KoxeyhLP/iYrx0YWbvJg==",
+			"publishedAt": "2011-08-08T22:54:04.206Z",
+			"publishedWith": {
+				"node": "v0.4.10",
+				"npm": "1.0.22"
+			}
+		},
+		"source": {
+			"integrity": null,
+			"location": "git://github.com/kangax/html-minifier.git",
+			"spec": "github:kangax/html-minifier#v0.4.5"
+		},
+		"comparisonHash": "8a2a8dcbb729bf3ee9216e490c955701f0ddebe1",
+		"diff": {
+			"files": {
+				"src/htmlminifier.js": {
+					"diff": "--- published/src/htmlminifier.js\n+++ rebuilt/src/htmlminifier.js\n@@ -251,33 +251,58 @@\n     \n     return (' ' + attrFragment);\n   }\n+\n+\n+  function setDefaultTesters(options) {\n+\n+    var defaultTesters = ['canCollapseWhitespace','canTrimWhitespace'];\n+\n+    for (var i = 0, len = defaultTesters.length; i < len; i++) {\n+      if (!options[defaultTesters[i]]) {\n+        options[defaultTesters[i]] = function() {\n+          return false;\n+        }\n+      }\n+    }\n+  }\n   \n   function minify(value, options) {\n     \n     options = options || { };\n     value = trimWhitespace(value);\n+    setDefaultTesters(options);\n     \n     var results = [ ],\n         buffer = [ ],\n         currentChars = '',\n         currentTag = '',\n+        currentAttrs = [],\n         stackNoTrimWhitespace = [],\n         stackNoCollapseWhitespace = [],\n         lint = options.lint,\n         t = new Date()\n+\n+    function _canCollapseWhitespace(tag, attrs) {\n+      return canCollapseWhitespace(tag) || options.canTrimWhitespace(tag, attrs);\n+    }\n+\n+    function _canTrimWhitespace(tag, attrs) {\n+      return canTrimWhitespace(tag) || options.canTrimWhitespace(tag, attrs);\n+    }\n     \n     HTMLParser(value, {\n       start: function( tag, attrs, unary ) {\n         tag = tag.toLowerCase();\n         currentTag = tag;\n         currentChars = '';\n+        currentAttrs = attrs;\n         \n         // set whitespace flags for nested tags (eg. <code> within a <pre>)\n         if (options.collapseWhitespace) {\n-          if (!canTrimWhitespace(tag)) {\n+          if (!_canTrimWhitespace(tag, attrs)) {\n             stackNoTrimWhitespace.push(tag);\n           }\n-          if (!canCollapseWhitespace(tag)) {\n+          if (!_canCollapseWhitespace(tag, attrs)) {\n             stackNoCollapseWhitespace.push(tag);\n           }\n         }\n@@ -335,10 +360,10 @@\n           }\n         }\n         if (options.collapseWhitespace) {\n-          if (!stackNoTrimWhitespace.length && canTrimWhitespace(currentTag)) {\n+          if (!stackNoTrimWhitespace.length && _canTrimWhitespace(currentTag, currentAttrs)) {\n             text = trimWhitespace(text);\n           }\n-          if (!stackNoCollapseWhitespace.length && canCollapseWhitespace(currentTag)) {\n+          if (!stackNoCollapseWhitespace.length && _canCollapseWhitespace(currentTag, currentAttrs)) {\n             text = collapseWhitespace(text);\n           }\n         }\n",
+					"match": false,
+					"packageHash": "a2cec8210a144262474959eeaca3bed43f7e4a7c44f8e842a35ceee81856f30c",
+					"size": 11415,
+					"sourceHash": "bf5c387446dd382850301a16f1adaf3468ee35e83925b4932645968ffbd837fd",
+					"status": "content"
+				}
+			},
+			"summary": {
+				"differentFiles": 1,
+				"matchingFiles": 14,
+				"missingInPackage": 0,
+				"missingInSource": 0,
+				"score": 0.9333333333333333,
+				"totalFiles": 15
+			}
+		}
+	}
+]
