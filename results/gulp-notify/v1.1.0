@@ -1,0 +1,63 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-03T07:27:30.202Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:11.7.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "gulp-notify@1.1.0",
+			"name": "gulp-notify",
+			"version": "1.1.0",
+			"location": "https://registry.npmjs.org/gulp-notify/-/gulp-notify-1.1.0.tgz",
+			"integrity": "sha512-LZvy9mg/QiFZvHaKKkicRbH+1WrNbfj6oIWWinep+dXsWG0/rmVTS6H11HbaArdnUnHuGvs/Fc+yBqmKkZbEIQ==",
+			"publishedAt": "2014-03-07T22:29:42.418Z",
+			"publishedWith": {
+				"node": null,
+				"npm": "1.4.4"
+			}
+		},
+		"source": {
+			"integrity": "sha512-dSMJu1465VHHWlZCgEoDfBYV5+hoTfNIeKhnMyxT3gfrZKJvOHbTfQEXWKdZWCsN0zEP1e+0RU2OIOZTd8sitg==",
+			"location": "git://github.com/mikaelbr/gulp-notify.git",
+			"spec": "github:mikaelbr/gulp-notify#v1.1.0"
+		},
+		"comparisonHash": "8a2a8dcbb729bf3ee9216e490c955701f0ddebe1",
+		"diff": {
+			"files": {
+				".npmignore": {
+					"match": false,
+					"packageHash": "7a1caa8db41b0628652d5aea4647e7ea425f823dbc50704b52797a18d78bca05",
+					"size": 30,
+					"status": "missing-in-source"
+				},
+				"lib/report.js": {
+					"diff": "--- published/lib/report.js\n+++ rebuilt/lib/report.js\n@@ -31,10 +31,6 @@\n     message = options(object);\n   }\n \n-  if (typeof options === \"string\") {\n-    message = options;\n-  }\n-\n   if (typeof options === \"object\") {\n     if (typeof options.title === \"function\") {\n       title = options.title(object);\n@@ -47,31 +43,35 @@\n     } else {\n       message = options.message || message;\n     }\n-  } else {\n-    options = {};\n+  }\n+\n+  if (typeof options === \"string\") {\n+    message = options;\n   }\n \n   if (object instanceof Error) {\n     var titleTemplate = template(title);\n     var messageTemplate = template(message);\n-    options.title = titleTemplate({\n-      error: object,\n-      options: templateOptions\n-    });\n-    options.message = messageTemplate({\n-      error: object,\n-      options: templateOptions\n-    });\n-  } else {\n-    options.title = gutil.template(title, {\n+    return {\n+      title: titleTemplate({\n+        error: object,\n+        options: templateOptions\n+      }),\n+      message: messageTemplate({\n+        error: object,\n+        options: templateOptions\n+      })\n+    };\n+  }\n+\n+  return {\n+    title: gutil.template(title, {\n       file: object,\n       options: templateOptions\n-    });\n-    options.message = gutil.template(message, {\n+    }),\n+    message: gutil.template(message, {\n       file: object,\n       options: templateOptions\n-    });\n-  }\n-  \n-  return options;\n+    })\n+  };\n }\n",
+					"match": false,
+					"packageHash": "5c0f089551d79396958cee89497adfc23308d3a16eab6880917882be86e8e7e7",
+					"size": 2093,
+					"sourceHash": "6c119756bb984a565c6fdbb16fee59eb1bf7f957faf34030ab133de686249993",
+					"status": "content"
+				},
+				"test/main.js": {
+					"diff": "--- published/test/main.js\n+++ rebuilt/test/main.js\n@@ -76,37 +76,6 @@\n       instream.pipe(outstream);\n     });\n \n-    it('should call notifier with extra options untouched', function(done) {\n-      var testString = \"this is a test\";\n-      var testIcon = \"face-cool\";\n-\n-      var mockedNotify = notify.withReporter(mockGenerator(function (opts) {\n-        should.exist(opts);\n-        should.exist(opts.icon);\n-        should.exist(opts.message);\n-        String(opts.icon).should.equal(testIcon);\n-        String(opts.message).should.equal(testString);\n-      }));\n-\n-      var instream = gulp.src(join(__dirname, \"./fixtures/*.txt\")),\n-          outstream = mockedNotify({\n-            message: testString,\n-            icon: testIcon\n-          });\n-\n-      outstream.on('data', function(file) {\n-        should.exist(file);\n-        should.exist(file.path);\n-        should.exist(file.contents);\n-      });\n-\n-      outstream.on('end', function() {\n-        done();\n-      });\n-\n-      instream.pipe(outstream);\n-    });\n-\n     it('should emit error when sub-module returns error', function(done) {\n       var mockedNotify = notify.withReporter(function (options, callback) {\n         callback(new Error(testString));\n",
+					"match": false,
+					"packageHash": "098f2d576bdb7ced57cb3406ad4096a1c96441c6b67899b28449dad1d0b6ba6b",
+					"size": 17764,
+					"sourceHash": "1925b0e5f9a1c1cb9e8069b3aac1530ca15eae9476bc0f0810db8be6fc7b0427",
+					"status": "content"
+				}
+			},
+			"summary": {
+				"differentFiles": 2,
+				"matchingFiles": 15,
+				"missingInPackage": 0,
+				"missingInSource": 1,
+				"score": 0.8333333333333334,
+				"totalFiles": 18
+			}
+		}
+	}
+]
