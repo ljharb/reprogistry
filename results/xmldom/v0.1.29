@@ -1,0 +1,83 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-03T21:35:24.891Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:6.13.4",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "xmldom@0.1.29",
+			"name": "xmldom",
+			"version": "0.1.29",
+			"location": "https://registry.npmjs.org/xmldom/-/xmldom-0.1.29.tgz",
+			"integrity": "sha512-BoY9MWe3mSF13nuVxZHwJrY42Z8apHhkUvi6lJiez1pnGqZgL/HhAbkpaFqRj5ynlETzIYJdBXsrCMW69uSooA==",
+			"publishedAt": "2019-12-19T22:26:29.525Z",
+			"publishedWith": {
+				"node": "12.14.0",
+				"npm": "6.13.4"
+			}
+		},
+		"source": {
+			"integrity": "sha512-cWRh2TXK9XP7QIFb8gz7u21ZNUrrFc3jPv0vmr8iKuOL4cEYuv2v+8J9upN1RhUl9mN3P8bxU3FnTUZGE6OzWw==",
+			"location": "git://github.com/jindw/xmldom.git",
+			"spec": "github:jindw/xmldom#226be66a785fd6ccc11ccdd14bd32fa4c9f65780"
+		},
+		"comparisonHash": "8a2a8dcbb729bf3ee9216e490c955701f0ddebe1",
+		"diff": {
+			"files": {
+				"changelog": {
+					"match": false,
+					"packageHash": "b3ec7e471711bfd054d756a17f025e91b4c9f95fbce9bf4625e4b3bc9d883fa7",
+					"size": 496,
+					"status": "missing-in-source"
+				},
+				"dom-parser.js": {
+					"diff": "--- published/dom-parser.js\n+++ rebuilt/dom-parser.js\n@@ -1,251 +1,252 @@\n-function DOMParser(options){\r\n-\tthis.options = options ||{locator:{}};\r\n-\t\r\n-}\r\n-DOMParser.prototype.parseFromString = function(source,mimeType){\r\n-\tvar options = this.options;\r\n-\tvar sax =  new XMLReader();\r\n-\tvar domBuilder = options.domBuilder || new DOMHandler();//contentHandler and LexicalHandler\r\n-\tvar errorHandler = options.errorHandler;\r\n-\tvar locator = options.locator;\r\n-\tvar defaultNSMap = options.xmlns||{};\r\n-\tvar entityMap = {'lt':'<','gt':'>','amp':'&','quot':'\"','apos':\"'\"}\r\n-\tif(locator){\r\n-\t\tdomBuilder.setDocumentLocator(locator)\r\n-\t}\r\n-\t\r\n-\tsax.errorHandler = buildErrorHandler(errorHandler,domBuilder,locator);\r\n-\tsax.domBuilder = options.domBuilder || domBuilder;\r\n-\tif(/\\/x?html?$/.test(mimeType)){\r\n-\t\tentityMap.nbsp = '\\xa0';\r\n-\t\tentityMap.copy = '\\xa9';\r\n-\t\tdefaultNSMap['']= 'http://www.w3.org/1999/xhtml';\r\n-\t}\r\n-\tdefaultNSMap.xml = defaultNSMap.xml || 'http://www.w3.org/XML/1998/namespace';\r\n-\tif(source){\r\n-\t\tsax.parse(source,defaultNSMap,entityMap);\r\n-\t}else{\r\n-\t\tsax.errorHandler.error(\"invalid doc source\");\r\n-\t}\r\n-\treturn domBuilder.doc;\r\n-}\r\n-function buildErrorHandler(errorImpl,domBuilder,locator){\r\n-\tif(!errorImpl){\r\n-\t\tif(domBuilder instanceof DOMHandler){\r\n-\t\t\treturn domBuilder;\r\n-\t\t}\r\n-\t\terrorImpl = domBuilder ;\r\n-\t}\r\n-\tvar errorHandler = {}\r\n-\tvar isCallback = errorImpl instanceof Function;\r\n-\tlocator = locator||{}\r\n-\tfunction build(key){\r\n-\t\tvar fn = errorImpl[key];\r\n-\t\tif(!fn && isCallback){\r\n-\t\t\tfn = errorImpl.length == 2?function(msg){errorImpl(key,msg)}:errorImpl;\r\n-\t\t}\r\n-\t\terrorHandler[key] = fn && function(msg){\r\n-\t\t\tfn('[xmldom '+key+']\\t'+msg+_locator(locator));\r\n-\t\t}||function(){};\r\n-\t}\r\n-\tbuild('warning');\r\n-\tbuild('error');\r\n-\tbuild('fatalError');\r\n-\treturn errorHandler;\r\n-}\r\n-\r\n-//console.log('#\\n\\n\\n\\n\\n\\n\\n####')\r\n-/**\r\n- * +ContentHandler+ErrorHandler\r\n- * +LexicalHandler+EntityResolver2\r\n- * -DeclHandler-DTDHandler \r\n- * \r\n- * DefaultHandler:EntityResolver, DTDHandler, ContentHandler, ErrorHandler\r\n- * DefaultHandler2:DefaultHandler,LexicalHandler, DeclHandler, EntityResolver2\r\n- * @link http://www.saxproject.org/apidoc/org/xml/sax/helpers/DefaultHandler.html\r\n- */\r\n-function DOMHandler() {\r\n-    this.cdata = false;\r\n-}\r\n-function position(locator,node){\r\n-\tnode.lineNumber = locator.lineNumber;\r\n-\tnode.columnNumber = locator.columnNumber;\r\n-}\r\n-/**\r\n- * @see org.xml.sax.ContentHandler#startDocument\r\n- * @link http://www.saxproject.org/apidoc/org/xml/sax/ContentHandler.html\r\n- */ \r\n-DOMHandler.prototype = {\r\n-\tstartDocument : function() {\r\n-    \tthis.doc = new DOMImplementation().createDocument(null, null, null);\r\n-    \tif (this.locator) {\r\n-        \tthis.doc.documentURI = this.locator.systemId;\r\n-    \t}\r\n-\t},\r\n-\tstartElement:function(namespaceURI, localName, qName, attrs) {\r\n-\t\tvar doc = this.doc;\r\n-\t    var el = doc.createElementNS(namespaceURI, qName||localName);\r\n-\t    var len = attrs.length;\r\n-\t    appendElement(this, el);\r\n-\t    this.currentElement = el;\r\n-\t    \r\n-\t\tthis.locator && position(this.locator,el)\r\n-\t    for (var i = 0 ; i < len; i++) {\r\n-\t        var namespaceURI = attrs.getURI(i);\r\n-\t        var value = attrs.getValue(i);\r\n-\t        var qName = attrs.getQName(i);\r\n-\t\t\tvar attr = doc.createAttributeNS(namespaceURI, qName);\r\n",
+					"match": false,
+					"packageHash": "66e8fb72e1ff33f0c4c8298e7941669ca213d3fb65f1f45707bc9e834d57a8a3",
+					"size": 8345,
+					"sourceHash": "3c7f09b4121857dc3fecbee8ebdb34f7e4f6c05ebdbceb284089e4b78fb90f63",
+					"status": "content"
+				},
+				"dom.js": {
+					"diff": "--- published/dom.js\n+++ rebuilt/dom.js\n@@ -16,10 +16,6 @@\n  */\n function _extends(Class,Super){\n \tvar pt = Class.prototype;\n-\tif(Object.create){\n-\t\tvar ppt = Object.create(Super.prototype)\n-\t\tpt.__proto__ = ppt;\n-\t}\n \tif(!(pt instanceof Super)){\n \t\tfunction t(){};\n \t\tt.prototype = Super.prototype;\n@@ -916,7 +912,7 @@\n Node.prototype.toString = nodeSerializeToString;\n function nodeSerializeToString(isHtml,nodeFilter){\n \tvar buf = [];\n-\tvar refNode = this.nodeType == 9?this.documentElement:this;\n+\tvar refNode = this.nodeType == 9 && this.documentElement || this;\n \tvar prefix = refNode.prefix;\n \tvar uri = refNode.namespaceURI;\n \t\n",
+					"match": false,
+					"packageHash": "f2316559fddc73d3f70f742df724839fa67a9620d44b4fdd88164859f814d719",
+					"size": 34247,
+					"sourceHash": "de81451474fb91b68bd77ffe3945ad70c8ba3d7206fe46a3488ddb1c8939c8a8",
+					"status": "content"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -1,22 +1,22 @@\n-{\r\n-  \"name\": \"xmldom\",\r\n-  \"version\": \"0.1.29\",\r\n-  \"description\": \"A W3C Standard XML DOM(Level2 CORE) implementation and parser(DOMParser/XMLSerializer).\",\r\n-  \"keywords\": [\"w3c\",\"dom\",\"xml\",\"parser\",\"javascript\",\"DOMParser\",\"XMLSerializer\"],\r\n-  \"author\": \"jindw <jindw@xidea.org> (http://www.xidea.org)\",\r\n-  \"homepage\": \"https://github.com/jindw/xmldom\",\r\n-  \"repository\": {\"type\": \"git\",\"url\": \"git://github.com/jindw/xmldom.git\"},\r\n-  \"main\": \"./dom-parser.js\",\r\n-  \"scripts\" : { \"test\": \"proof platform win32 && proof test */*/*.t.js || t/test\" },\r\n-  \"engines\": {\"node\": \">=0.1\"},\r\n-  \"dependencies\": {},\r\n-  \"devDependencies\": { \"proof\": \"0.0.28\" },\r\n-  \"maintainers\": [{\"name\": \"jindw\",\"email\": \"jindw@xidea.org\",\"url\": \"http://www.xidea.org\"}],\r\n-  \"contributors\": [\r\n-    {\"name\" : \"Yaron Naveh\",\"email\" : \"yaronn01@gmail.com\",\"web\" : \"http://webservices20.blogspot.com/\"},\r\n-    {\"name\" : \"Harutyun Amirjanyan\",\"email\" : \"amirjanyan@gmail.com\",\"web\" : \"https://github.com/nightwing\"},\r\n-    {\"name\" : \"Alan Gutierrez\",\"email\" : \"alan@prettyrobots.com\",\"web\" : \"http://www.prettyrobots.com/\"}\r\n-  ],\r\n-  \"bugs\": {\"email\": \"jindw@xidea.org\",\"url\": \"http://github.com/jindw/xmldom/issues\"},\r\n-  \"license\": \"(LGPL-2.0 or MIT)\"\r\n-}\r\n+{\n+  \"name\": \"xmldom-alpha\",\n+  \"version\": \"0.1.28\",\n+  \"description\": \"A W3C Standard XML DOM(Level2 CORE) implementation and parser(DOMParser/XMLSerializer).\",\n+  \"keywords\": [\"w3c\",\"dom\",\"xml\",\"parser\",\"javascript\",\"DOMParser\",\"XMLSerializer\"],\n+  \"author\": \"jindw <jindw@xidea.org> (http://www.xidea.org)\",\n+  \"homepage\": \"https://github.com/jindw/xmldom\",\n+  \"repository\": {\"type\": \"git\",\"url\": \"git://github.com/jindw/xmldom.git\"},\n+  \"main\": \"./dom-parser.js\",\n+  \"scripts\" : { \"test\": \"proof platform win32 && proof test */*/*.t.js || t/test\" },\n+  \"engines\": {\"node\": \">=0.1\"},\n+  \"dependencies\": {},\n+  \"devDependencies\": { \"proof\": \"0.0.28\" },\n+  \"maintainers\": [{\"name\": \"jindw\",\"email\": \"jindw@xidea.org\",\"url\": \"http://www.xidea.org\"}],\n+  \"contributors\": [\n+    {\"name\" : \"Yaron Naveh\",\"email\" : \"yaronn01@gmail.com\",\"web\" : \"http://webservices20.blogspot.com/\"},\n+    {\"name\" : \"Harutyun Amirjanyan\",\"email\" : \"amirjanyan@gmail.com\",\"web\" : \"https://github.com/nightwing\"},\n+    {\"name\" : \"Alan Gutierrez\",\"email\" : \"alan@prettyrobots.com\",\"web\" : \"http://www.prettyrobots.com/\"}\n+  ],\n+  \"bugs\": {\"email\": \"jindw@xidea.org\",\"url\": \"http://github.com/jindw/xmldom/issues\"},\n+  \"license\": \"(LGPL-2.0 or MIT)\"\n+}\n",
+					"match": false,
+					"packageHash": "8fbed08ac860054601f2135b130b99ea519ba281348ef16b999f1ceeae48172e",
+					"size": 1222,
+					"sourceHash": "a43a6cd934712c7079d2f5a537b81435b0a86f88bcea206fd41589aa71be2c5f",
+					"status": "content"
+				},
+				"sax.js": {
+					"diff": "--- published/sax.js\n+++ rebuilt/sax.js\n@@ -1,633 +1,616 @@\n-//[4]   \tNameStartChar\t   ::=   \t\":\" | [A-Z] | \"_\" | [a-z] | [#xC0-#xD6] | [#xD8-#xF6] | [#xF8-#x2FF] | [#x370-#x37D] | [#x37F-#x1FFF] | [#x200C-#x200D] | [#x2070-#x218F] | [#x2C00-#x2FEF] | [#x3001-#xD7FF] | [#xF900-#xFDCF] | [#xFDF0-#xFFFD] | [#x10000-#xEFFFF]\r\n-//[4a]   \tNameChar\t   ::=   \tNameStartChar | \"-\" | \".\" | [0-9] | #xB7 | [#x0300-#x036F] | [#x203F-#x2040]\r\n-//[5]   \tName\t   ::=   \tNameStartChar (NameChar)*\r\n-var nameStartChar = /[A-Z_a-z\\xC0-\\xD6\\xD8-\\xF6\\u00F8-\\u02FF\\u0370-\\u037D\\u037F-\\u1FFF\\u200C-\\u200D\\u2070-\\u218F\\u2C00-\\u2FEF\\u3001-\\uD7FF\\uF900-\\uFDCF\\uFDF0-\\uFFFD]///\\u10000-\\uEFFFF\r\n-var nameChar = new RegExp(\"[\\\\-\\\\.0-9\"+nameStartChar.source.slice(1,-1)+\"\\\\u00B7\\\\u0300-\\\\u036F\\\\u203F-\\\\u2040]\");\r\n-var tagNamePattern = new RegExp('^'+nameStartChar.source+nameChar.source+'*(?:\\:'+nameStartChar.source+nameChar.source+'*)?$');\r\n-//var tagNamePattern = /^[a-zA-Z_][\\w\\-\\.]*(?:\\:[a-zA-Z_][\\w\\-\\.]*)?$/\r\n-//var handlers = 'resolveEntity,getExternalSubset,characters,endDocument,endElement,endPrefixMapping,ignorableWhitespace,processingInstruction,setDocumentLocator,skippedEntity,startDocument,startElement,startPrefixMapping,notationDecl,unparsedEntityDecl,error,fatalError,warning,attributeDecl,elementDecl,externalEntityDecl,internalEntityDecl,comment,endCDATA,endDTD,endEntity,startCDATA,startDTD,startEntity'.split(',')\r\n-\r\n-//S_TAG,\tS_ATTR,\tS_EQ,\tS_ATTR_NOQUOT_VALUE\r\n-//S_ATTR_SPACE,\tS_ATTR_END,\tS_TAG_SPACE, S_TAG_CLOSE\r\n-var S_TAG = 0;//tag name offerring\r\n-var S_ATTR = 1;//attr name offerring \r\n-var S_ATTR_SPACE=2;//attr name end and space offer\r\n-var S_EQ = 3;//=space?\r\n-var S_ATTR_NOQUOT_VALUE = 4;//attr value(no quot value only)\r\n-var S_ATTR_END = 5;//attr value end and no space(quot end)\r\n-var S_TAG_SPACE = 6;//(attr value end || tag end ) && (space offer)\r\n-var S_TAG_CLOSE = 7;//closed el<el />\r\n-\r\n-function XMLReader(){\r\n-\t\r\n-}\r\n-\r\n-XMLReader.prototype = {\r\n-\tparse:function(source,defaultNSMap,entityMap){\r\n-\t\tvar domBuilder = this.domBuilder;\r\n-\t\tdomBuilder.startDocument();\r\n-\t\t_copy(defaultNSMap ,defaultNSMap = {})\r\n-\t\tparse(source,defaultNSMap,entityMap,\r\n-\t\t\t\tdomBuilder,this.errorHandler);\r\n-\t\tdomBuilder.endDocument();\r\n-\t}\r\n-}\r\n-function parse(source,defaultNSMapCopy,entityMap,domBuilder,errorHandler){\r\n-\tfunction fixedFromCharCode(code) {\r\n-\t\t// String.prototype.fromCharCode does not supports\r\n-\t\t// > 2 bytes unicode chars directly\r\n-\t\tif (code > 0xffff) {\r\n-\t\t\tcode -= 0x10000;\r\n-\t\t\tvar surrogate1 = 0xd800 + (code >> 10)\r\n-\t\t\t\t, surrogate2 = 0xdc00 + (code & 0x3ff);\r\n-\r\n-\t\t\treturn String.fromCharCode(surrogate1, surrogate2);\r\n-\t\t} else {\r\n-\t\t\treturn String.fromCharCode(code);\r\n-\t\t}\r\n-\t}\r\n-\tfunction entityReplacer(a){\r\n-\t\tvar k = a.slice(1,-1);\r\n-\t\tif(k in entityMap){\r\n-\t\t\treturn entityMap[k]; \r\n-\t\t}else if(k.charAt(0) === '#'){\r\n-\t\t\treturn fixedFromCharCode(parseInt(k.substr(1).replace('x','0x')))\r\n-\t\t}else{\r\n-\t\t\terrorHandler.error('entity not found:'+a);\r\n-\t\t\treturn a;\r\n-\t\t}\r\n-\t}\r\n-\tfunction appendText(end){//has some bugs\r\n-\t\tif(end>start){\r\n-\t\t\tvar xt = source.substring(start,end).replace(/&#?\\w+;/g,entityReplacer);\r\n-\t\t\tlocator&&position(start);\r\n-\t\t\tdomBuilder.characters(xt,0,end-start);\r\n-\t\t\tstart = end\r\n-\t\t}\r\n-\t}\r\n-\tfunction position(p,m){\r\n-\t\twhile(p>=lineEnd && (m = linePattern.exec(source))){\r\n-\t\t\tlineStart = m.index;\r\n-\t\t\tlineEnd = lineStart + m[0].length;\r\n-\t\t\tlocator.lineNumber++;\r\n-\t\t\t//console.log('line++:',locator,startPos,endPos)\r\n-\t\t}\r\n-\t\tlocator.columnNumber = p-lineStart+1;\r\n-\t}\r\n-\tvar lineStart = 0;\r\n-\tvar lineEnd = 0;\r\n-\tvar linePattern = /.*(?:\\r\\n?|\\n)|.*$/g\r\n-\tvar locator = domBuilder.locator;\r\n-\t\r\n-\tvar parseStack = [{currentNSMap:defaultNSMapCopy}]\r\n-\tvar closeMap = {};\r\n-\tvar start = 0;\r\n-\twhile(true){\r\n-\t\ttry{\r\n-\t\t\tvar tagStart = source.indexOf('<',start);\r\n-\t\t\tif(tagStart<0){\r\n-\t\t\t\tif(!source.substr(start).match(/^\\s*$/)){\r\n-\t\t\t\t\tvar doc = domBuilder.doc;\r\n-\t    \t\t\tvar text = doc.createTextNode(source.substr(start));\r\n-\t    \t\t\tdoc.appendChild(text);\r\n-\t    \t\t\tdomBuilder.currentElement = text;\r\n-\t\t\t\t}\r\n-\t\t\t\treturn;\r\n-\t\t\t}\r\n-\t\t\tif(tagStart>start){\r\n",
+					"match": false,
+					"packageHash": "60667db728aaced46b99656d96be959f098a3d8e0f911af3189d7e2807324c83",
+					"size": 19321,
+					"sourceHash": "4da4c6f3278bd20e757fe9c0ededd12c82abea24470b3079caf4aaa27fe9f76a",
+					"status": "content"
+				},
+				"entities.js": {
+					"match": false,
+					"status": "missing-in-package"
+				}
+			},
+			"summary": {
+				"differentFiles": 4,
+				"matchingFiles": 5,
+				"missingInPackage": 1,
+				"missingInSource": 1,
+				"score": 0.45454545454545453,
+				"totalFiles": 11
+			}
+		}
+	}
+]
