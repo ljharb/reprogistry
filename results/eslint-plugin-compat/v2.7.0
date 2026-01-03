@@ -1,0 +1,117 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-03T01:23:33.745Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:11.7.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "eslint-plugin-compat@2.7.0",
+			"name": "eslint-plugin-compat",
+			"version": "2.7.0",
+			"location": "https://registry.npmjs.org/eslint-plugin-compat/-/eslint-plugin-compat-2.7.0.tgz",
+			"integrity": "sha512-3J4Ic1WS+SgF1smUOc62fdf7Cnrdsg0GNwKmGVPziPtWdrc2vV5Oq2ut4kG6SM5DJcxOoz/sWJIN7rkcsWh60Q==",
+			"publishedAt": "2019-02-08T04:20:03.790Z",
+			"publishedWith": {
+				"node": null,
+				"npm": null
+			}
+		},
+		"source": {
+			"integrity": "sha512-VnjTUxSLfDEVhRvSsNvZeql2QbDMGyZSMI0TJmlhFGBN7AX2um3rR89luUDTL/59obiO/6IZ0Wk1ksc8czqP0w==",
+			"location": "git+https://github.com/amilajack/eslint-plugin-compat.git",
+			"spec": "github:amilajack/eslint-plugin-compat#HEAD"
+		},
+		"comparisonHash": "8a2a8dcbb729bf3ee9216e490c955701f0ddebe1",
+		"diff": {
+			"files": {
+				"CHANGELOG.md": {
+					"match": false,
+					"packageHash": "8f6cfe0f4f8c33a09f8e983089b6d920e19fa3313ee643aed6426cf9c6301758",
+					"size": 853,
+					"status": "missing-in-source"
+				},
+				"README.md": {
+					"diff": "--- published/README.md\n+++ rebuilt/README.md\n@@ -1,89 +1,173 @@\n-eslint-plugin-compat\n-=====================\n-[![Build Status](https://travis-ci.org/amilajack/eslint-plugin-compat.svg?branch=master)](https://travis-ci.org/amilajack/eslint-plugin-compat)\n+# eslint-plugin-compat\n+\n+[![Test](https://github.com/amilajack/eslint-plugin-compat/actions/workflows/test.yml/badge.svg)](https://github.com/amilajack/eslint-plugin-compat/actions/workflows/test.yml)\n+[![Financial Contributors on Open Collective](https://opencollective.com/eslint-plugin-compat/all/badge.svg?label=financial+contributors)](https://opencollective.com/eslint-plugin-compat)\n [![NPM version](https://badge.fury.io/js/eslint-plugin-compat.svg)](http://badge.fury.io/js/eslint-plugin-compat)\n-[![Dependency Status](https://img.shields.io/david/amilajack/eslint-plugin-compat.svg)](https://david-dm.org/amilajack/eslint-plugin-compat)\n [![npm](https://img.shields.io/npm/dm/eslint-plugin-compat.svg)](https://npm-stat.com/charts.html?package=eslint-plugin-compat)\n+[![Backers on Open Collective](https://opencollective.com/eslint-plugin-compat/backers/badge.svg)](#backers)\n+[![Sponsors on Open Collective](https://opencollective.com/eslint-plugin-compat/sponsors/badge.svg)](#sponsors)\n+\n+Lint the browser compatibility of your code\n \n-![demo of plugin usage](https://raw.githubusercontent.com/amilajack/eslint-plugin-compat/master/img/eslint-plugin-compat-demo.gif)\n+![demo of plugin usage](https://raw.githubusercontent.com/amilajack/eslint-plugin-compat/main/img/eslint-plugin-compat-demo.gif)\n \n-## Road Map\n+## Setup\n \n-See the [Road Map](https://github.com/amilajack/eslint-plugin-compat/wiki) for the details.\n+### 1. Install\n \n-## Installation\n ```bash\n-npm install --save-dev eslint-plugin-compat\n+npm install eslint-plugin-compat\n ```\n \n-Add `\"compat\"` to `.eslintrc` `\"plugins\"` section, add `\"browser\": true` to `\"env\"`, then configure the `\"compat/compat\"` rule.\n+### 2. Update ESLint Config\n+\n+#### New Config (`eslint.config.mjs`)\n \n-If you use **typescript**, see [typescript-eslint](https://github.com/typescript-eslint/typescript-eslint).\n ```js\n-// .eslintrc\n+import compat from \"eslint-plugin-compat\";\n+\n+export default [compat.configs[\"flat/recommended\"]];\n+```\n+\n+#### Legacy Config (`.eslintrc.json`)\n+\n+```jsonc\n {\n-  // ...\n+  \"plugins\": [\"compat\"],\n+  \"extends\": [\"plugin:compat/recommended\"],\n   \"env\": {\n-    \"browser\": true\n+    \"browser\": true,\n   },\n-  \"plugins\": [\"compat\"],\n-  \"rules\": {\n-    // ...\n-    \"compat/compat\": \"error\"\n-  }\n+  // ...\n }\n ```\n \n-Alternatively, you can use the `recommended` configuration which will do this for you, with the `\"compat/compat\"` rule reporting errors (as in the snippet above).\n-```js\n-// .eslintrc\n+### 3. Configure Target Browsers\n+\n+Browser targets are configured using [browserslist](https://github.com/browserslist/browserslist). You can configure browser targets in your `package.json`:\n+\n+#### `package.json`\n+\n+```jsonc\n {\n-  \"extends\": [\"plugin:compat/recommended\"]\n+  // ...\n+  \"browserslist\": [\"defaults\"],\n }\n ```\n \n-## Idea\n+If no configuration is found, browserslist [defaults to](https://github.com/browserslist/browserslist#queries) `\"> 0.5%, last 2 versions, Firefox ESR, not dead\"`.\n \n-**Default**\n-```\n- 22:  navigator.serviceWorker\n-                ^^^^^^^^^^^^^ `ServiceWorker` is not supported in IE 11, Edge 15\n-                               and Safari 8 😢\n-```\n+See [browserslist/browserslist](https://github.com/browserslist/browserslist) for more details.\n \n-## Targeting Browsers\n-`eslint-plugin-compat` uses the browserslist configuration in `package.json`\n+## Adding Polyfills\n \n-See [ai/browserslist](https://github.com/ai/browserslist) for configuration. Here's some examples:\n+Add polyfills to the settings section of your eslint config. Append the name of the object and the property if one exists. Here are some examples:\n",
+					"match": false,
+					"packageHash": "fefc3ec506478a38b4bae3a87cb9a80f3017253436fc7dd1d0351a3206164255",
+					"size": 3114,
+					"sourceHash": "788da6a28ab7b889d1b8a2c058e24a055618f49369dd0f04238cb87b9f622e9c",
+					"status": "content"
+				},
+				"lib/Lint.js": {
+					"match": false,
+					"packageHash": "f1f5b43461d2f88a1441e9503560772caad7ca69965a76a6d10277fdee8c785f",
+					"size": 1207,
+					"status": "missing-in-source"
+				},
+				"lib/LintTypes.js": {
+					"match": false,
+					"packageHash": "5ecf2f4d83e6260dabd6ec48e76d8ddebccf956563f34072221bf960d3b8c255",
+					"size": 13,
+					"status": "missing-in-source"
+				},
+				"lib/Versioning.js": {
+					"match": false,
+					"packageHash": "fe09fa7ccd05ae28069ea1fd29868bcb91ec8b2dab4e65a744edb770bd3bf8bf",
+					"size": 1940,
+					"status": "missing-in-source"
+				},
+				"lib/config/recommended.js": {
+					"match": false,
+					"packageHash": "3eb9cc74494c223a5af6a0f4e9d89860f8db0ac648fd9772f39e857c714a9f4e",
+					"size": 252,
+					"status": "missing-in-source"
+				},
+				"lib/index.js": {
+					"match": false,
+					"packageHash": "ae2a2879cdadc7839a68be1c7fb5233a5d4089143a865686f29c0baaefb0d29f",
+					"size": 1050,
+					"status": "missing-in-source"
+				},
+				"lib/providers/CanIUseProvider.js": {
+					"match": false,
+					"packageHash": "1130aa11e8470ed8694a35dd6e140ea09caf076fdd8c0aa2b39e9813439bc762",
+					"size": 5402,
+					"status": "missing-in-source"
+				},
+				"lib/providers/KangaxProvider.js": {
+					"match": false,
+					"packageHash": "e6300b9da42eae12bfafb1cc2b7f13c01b7ff6feb5ad3145d1edc04371c4e8b6",
+					"size": 221,
+					"status": "missing-in-source"
+				},
+				"lib/providers/index.js": {
+					"match": false,
+					"packageHash": "28032de880b7b9168c1662abab1a2167a9b4328f681092ef6eac1c22ad90078f",
+					"size": 516,
+					"status": "missing-in-source"
+				},
+				"lib/rules/compat.js": {
+					"match": false,
+					"packageHash": "6f480fb2660a5ba0feb32b14780e001fa340ce3a86ddb1fe3c73e64346626168",
+					"size": 2065,
+					"status": "missing-in-source"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -1,12 +1,7 @@\n {\n   \"name\": \"eslint-plugin-compat\",\n-  \"version\": \"2.7.0\",\n+  \"version\": \"6.0.2\",\n   \"description\": \"Lint browser compatibility of API used\",\n-  \"main\": \"lib/index.js\",\n-  \"repository\": {\n-    \"type\": \"git\",\n-    \"url\": \"git+https://github.com/amilajack/eslint-plugin-compat.git\"\n-  },\n   \"keywords\": [\n     \"eslint\",\n     \"browser\",\n@@ -16,58 +11,117 @@\n     \"caniuse\",\n     \"kangax\"\n   ],\n-  \"author\": \"Amila Welihinda\",\n-  \"license\": \"MIT\",\n+  \"homepage\": \"https://github.com/amilajack/eslint-plugin-compat#readme\",\n   \"bugs\": {\n     \"url\": \"https://github.com/amilajack/eslint-plugin-compat/issues\"\n   },\n+  \"repository\": {\n+    \"type\": \"git\",\n+    \"url\": \"git+https://github.com/amilajack/eslint-plugin-compat.git\"\n+  },\n+  \"license\": \"MIT\",\n+  \"author\": \"Amila Welihinda\",\n+  \"contributors\": [\n+    \"Amila Welihinda <amilajack@gmail.com> (https://github.com/amilajack)\",\n+    \"John Tran <jptran318@gmail.com> (https://github.com/jooohhn)\"\n+  ],\n+  \"main\": \"./lib/cjs/src/index.js\",\n+  \"types\": \"./lib/cjs/src/index.d.ts\",\n+  \"exports\": {\n+    \".\": {\n+      \"import\": {\n+        \"types\": \"./lib/esm/src/index.d.ts\",\n+        \"default\": \"./lib/esm/src/index.js\"\n+      },\n+      \"require\": {\n+        \"types\": \"./lib/cjs/src/index.d.ts\",\n+        \"default\": \"./lib/cjs/src/index.js\"\n+      }\n+    }\n+  },\n   \"files\": [\n     \"lib\"\n   ],\n-  \"homepage\": \"https://github.com/amilajack/eslint-plugin-compat#readme\",\n   \"scripts\": {\n-    \"build\": \"cross-env NODE_ENV=production rm -rf lib && babel src --out-dir lib\",\n-    \"flow\": \"flow\",\n-    \"flow-typed\": \"flow-typed install --ignoreDeps peer dev\",\n-    \"lint\": \"eslint --cache --format=node_modules/eslint-formatter-pretty .\",\n-    \"spec\": \"jest\",\n-    \"test\": \" yarn lint && yarn build && cross-env NODE_ENV=test yarn spec\",\n-    \"test-all\": \"cross-env NODE_ENV=test yarn lint && yarn flow && yarn spec && yarn build\",\n-    \"version\": \"yarn build\"\n+    \"benchmarks\": \"ts-node-transpile-only test/benchmarks.ts\",\n+    \"build\": \"rm -rf lib && tsc --project tsconfig.build.json && tsc --project tsconfig.esm.json\",\n+    \"lint\": \"eslint .\",\n+    \"prettier\": \"prettier --check .\",\n+    \"prettier:write\": \"prettier --write .\",\n+    \"release\": \"semantic-release\",\n+    \"release:dry-run\": \"semantic-release --dry-run\",\n+    \"spec\": \"jest --testPathIgnorePatterns test/e2e-repo.spec.ts /benchmarks-tmp\",\n+    \"spec:e2e\": \"jest --detectOpenHandles test/e2e-repo.spec.ts\",\n+    \"test\": \"npm run build && npm run lint && npm run spec\",\n+    \"tsc\": \"tsc\",\n+    \"version\": \"npm run build\",\n+    \"prepare\": \"husky\"\n+  },\n+  \"prettier\": {\n+    \"semi\": true,\n+    \"tabWidth\": 2,\n+    \"trailingComma\": \"es5\"\n   },\n   \"jest\": {\n-    \"testEnvironment\": \"node\"\n-  },\n-  \"devDependencies\": {\n-    \"@babel/cli\": \"^7.2.3\",\n-    \"@babel/core\": \"^7.2.2\",\n-    \"@babel/polyfill\": \"^7.2.5\",\n-    \"@babel/preset-env\": \"^7.3.1\",\n-    \"@babel/preset-flow\": \"^7.0.0\",\n-    \"@babel/register\": \"^7.0.0\",\n-    \"babel-core\": \"^7.0.0-bridge\",\n-    \"babel-jest\": \"^24.1.0\",\n-    \"cross-env\": \"^5.2.0\",\n-    \"download-cli\": \"^1.1.1\",\n-    \"eslint\": \"^5.13.0\",\n-    \"eslint-config-bliss\": \"^3.2.0\",\n-    \"eslint-formatter-pretty\": \"^2.1.1\",\n-    \"eslint-plugin-flowtype-errors\": \"^3.6.0\",\n",
+					"match": false,
+					"packageHash": "0e22aa641cfde578c7c147fd80bfd9cc124b30b7924d8782ce855a5a1ef31604",
+					"size": 2013,
+					"sourceHash": "bfd85cc96e29a9a8121a6e6c99298db61dbbf16513d9f9fadd2238be21074c61",
+					"status": "content"
+				}
+			},
+			"summary": {
+				"differentFiles": 2,
+				"matchingFiles": 1,
+				"missingInPackage": 0,
+				"missingInSource": 10,
+				"score": 0.07692307692307693,
+				"totalFiles": 13
+			}
+		}
+	}
+]
