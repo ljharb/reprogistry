@@ -1,0 +1,85 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-03T16:10:41.545Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:11.7.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "requireindex@0.1.8",
+			"name": "requireindex",
+			"version": "0.1.8",
+			"location": "https://registry.npmjs.org/requireindex/-/requireindex-0.1.8.tgz",
+			"integrity": "sha512-UMueW8IUm5z0qJvJASbmWAtoDw38WmCgVn3njcElw9A58/Qbk03jgQCTZy5y/247YnPDcO7W8HovHf956UZe5w==",
+			"publishedAt": "2012-09-05T19:39:56.441Z",
+			"publishedWith": {
+				"node": null,
+				"npm": "1.1.59"
+			}
+		},
+		"source": {
+			"integrity": null,
+			"location": "git://github.com/stephenhandley/requireindex.git",
+			"spec": "github:stephenhandley/requireindex#HEAD"
+		},
+		"comparisonHash": "8a2a8dcbb729bf3ee9216e490c955701f0ddebe1",
+		"diff": {
+			"files": {
+				".travis.yml": {
+					"diff": "--- published/.travis.yml\n+++ rebuilt/.travis.yml\n@@ -1,5 +1,3 @@\n language: node_js\n node_js:\n-  - 0.4\n-  - 0.6\n-  - 0.8\n+  - 0.10\n",
+					"match": false,
+					"packageHash": "f3ee80afc0185b1f84df39c9ba47ae7a17cb1011d04f6c9bf9b904a98ffeedbb",
+					"size": 51,
+					"sourceHash": "5e5329df283badd5487a0556f7cfcedd1f80361915cf246795a475074f64cf81",
+					"status": "content"
+				},
+				"README.md": {
+					"diff": "--- published/README.md\n+++ rebuilt/README.md\n@@ -4,20 +4,20 @@\n \n # Latest Version\n \n-0.1.8\n+1.2.0\n \n # Installation\n ```\n npm install requireindex\n ```\n \n-or in package.json \n+or in package.json\n \n ```json\n {\n   ...\n   \"dependencies\": {\n-    \"requireindex\": \"~0.1.8\"\n+    \"requireindex\": \"1.1.x\"\n   }\n }\n ```\n@@ -40,7 +40,7 @@\n       somemore.js\n   bam.js\n   _private.js\n-  \n+\n ```\n \n The index.js files in [test/lib/](https://github.com/stephenhandley/requireindex/tree/master/test/lib/index.js) and [test/lib/bar/](https://github.com/stephenhandley/requireindex/tree/master/test/lib/bar/index.js) contain:\n@@ -66,25 +66,25 @@\n is:\n \n ```js\n-{ \n-  bam: { \n-    m: [Function], \n-    n: [Function] \n+{\n+  bam: {\n+    m: [Function],\n+    n: [Function]\n   },\n-  bar: { \n+  bar: {\n     f: [Function],\n-    fed: { \n-      again: [Function], \n-      somemore: [Function] \n+    fed: {\n+      again: [Function],\n+      somemore: [Function]\n     },\n-    fing: [Function] \n+    fing: [Function]\n   },\n-  Foo: { \n-    l: [Function], \n-    ls: [Function] \n-  } \n+  Foo: {\n+    l: [Function],\n+    ls: [Function]\n+  }\n }\n ```\n \n-#Build status\n-[![build status](https://secure.travis-ci.org/stephenhandley/requireindex.png)](http://travis-ci.org/stephenhandley/requireindex)\n\\ No newline at end of file\n+# Build status\n+[![build status](https://secure.travis-ci.org/stephenhandley/requireindex.png)](http://travis-ci.org/stephenhandley/requireindex)\n",
+					"match": false,
+					"packageHash": "9c98b67b292696b1665059edb0b682c31f6b937439147fa199ca6f13b46e2c49",
+					"size": 2232,
+					"sourceHash": "ab3a9a53782dce9cd4a1c92912d52453e3a92dc7f4aa1d74fffd12b9ad23aa5b",
+					"status": "content"
+				},
+				"index.js": {
+					"diff": "--- published/index.js\n+++ rebuilt/index.js\n@@ -1,20 +1,27 @@\n-var fs   = require('fs');\n-var path = require('path');\n+var FS   = require('fs');\n+var Path = require('path');\n \n module.exports = function (dir, basenames) {\n   var requires = {};\n-  \n-  if (arguments.length === 1) {\n+\n+  if (arguments.length === 2) {\n+    // if basenames argument is passed, explicitly include those files\n+    basenames.forEach(function (basename) {\n+      var filepath = Path.resolve(Path.join(dir, basename));\n+      requires[basename] = require(filepath);\n+    });\n+\n+  } else if (arguments.length === 1) {\n     // if basenames arguments isn't passed, require all javascript\n     // files (except for those prefixed with _) and all directories\n-    \n-    var files = fs.readdirSync(dir);\n-    \n+\n+    var files = FS.readdirSync(dir);\n+\n     // sort files in lowercase alpha for linux\n     files.sort(function (a,b) {\n       a = a.toLowerCase();\n       b = b.toLowerCase();\n-      \n+\n       if (a < b) {\n         return -1;\n       } else if (b < a) {\n@@ -23,30 +30,31 @@\n         return 0;\n       }\n     });\n-    \n+\n     files.forEach(function (filename) {\n-      // ignore index.js and files prefixed with underscore\n-      if ((filename === 'index.js') || (filename[0] === '_')) { return; }\n-      \n-      var filepath = path.resolve(path.join(dir, filename));\n-      var ext = path.extname(filename);\n-      var stats = fs.statSync(filepath);\n-      \n+      // ignore index.js and files prefixed with underscore and\n+      if ((filename === 'index.js') || (filename[0] === '_') || (filename[0] === '.')) {\n+        return;\n+      }\n+\n+      var filepath = Path.resolve(Path.join(dir, filename));\n+      var ext      = Path.extname(filename);\n+      var stats    = FS.statSync(filepath);\n+\n       // don't require non-javascript files (.txt .md etc.)\n-      if (stats.isFile() && !(ext in require.extensions)) { return; }\n-      \n-      var basename = path.basename(filename, ext);\n-      \n+      var exts = ['.js', '.node', '.json'];\n+      if (stats.isFile() && (exts.indexOf(ext) === -1)) {\n+        return;\n+      }\n+\n+      var basename = Path.basename(filename, ext);\n+\n       requires[basename] = require(filepath);\n     });\n-  \n+\n   } else {\n-    // if basenames argument is passed, explicitly include those files\n-    basenames.forEach(function (basename) {\n-      var filepath = path.resolve(path.join(dir, basename));\n-      requires[basename] = require(filepath);\n-    });\n+    throw new Error(\"Must pass directory as first argument\");\n   }\n-  \n+\n   return requires;\n };\n",
+					"match": false,
+					"packageHash": "f9c0ea732b90aa58575db7b599b77d2baecb199eb813133cf915fd716d0eec0e",
+					"size": 1466,
+					"sourceHash": "0c647d2fb87b40b6f219af9f8a39fe47381c5fdbaa7e9a38e6e618890dca1220",
+					"status": "content"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -1,41 +1,33 @@\n {\n   \"name\": \"requireindex\",\n   \"description\": \"Write minimal node index.js files that require and export siblings by file basename\",\n-  \"version\": \"0.1.8\",\n-  \"license\" : \"MIT\",\n+  \"version\": \"1.2.0\",\n+  \"license\": \"MIT\",\n   \"main\": \"index.js\",\n-  \n   \"repository\": {\n     \"type\": \"git\",\n     \"url\": \"git://github.com/stephenhandley/requireindex.git\"\n   },\n-  \n   \"scripts\": {\n     \"test\": \"node test/test.js\"\n   },\n-  \n   \"keywords\": [\n-    \"require\", \n-    \"index\", \n+    \"require\",\n+    \"index\",\n     \"index.js\"\n   ],\n-  \n-  \"directories\" : {\n-    \"lib\" : \".\",\n-    \"test\" : \"test\"\n-  },\n-  \n-  \"bugs\": { \n-    \"url\" : \"http://github.com/stephenhandley/requireindex/issues\"\n-  },\n-  \n-  \"engines\" : {\n-    \"node\" : \">=0.4.0\"\n-  },\n-  \n-  \"author\": {\n-    \"name\": \"Stephen Handley\",\n-    \"email\": \"stephen.handley@gmail.com\",\n-    \"url\": \"http://person.sh\"\n-  }\n-}\n\\ No newline at end of file\n+  \"directories\": {\n+    \"test\": \"test\"\n+  },\n+  \"bugs\": {\n+    \"url\": \"http://github.com/stephenhandley/requireindex/issues\"\n+  },\n+  \"engines\": {\n+    \"node\": \">=0.10.5\"\n+  },\n+  \"devDependencies\": {\n+    \"asserts\": \"4.0.x\"\n+  },\n+  \"author\": \"Stephen Handley <stephen.handley@gmail.com> (http://person.sh)\",\n+  \"homepage\": \"https://github.com/stephenhandley/requireindex\"\n+}\n",
+					"match": false,
+					"packageHash": "b1934c92e6bf9962e8a67c160fe8368b7a7724227635ec50d118df42a53e62e8",
+					"size": 753,
+					"sourceHash": "aceca7810702172ab082e1437c95bb4f6a027607e6bb3534bd67c28235d77313",
+					"status": "content"
+				},
+				"test/test.js": {
+					"diff": "--- published/test/test.js\n+++ rebuilt/test/test.js\n@@ -1,35 +1,43 @@\n-var assert = require('assert');\n+var Assert = require('assert');\n+var Asserts = require('asserts');\n \n-var lib = require('./lib');\n+Asserts(function () {\n+  var lib = require('./lib');\n \n-try {\n-  var expectations = {\n-    \"ok\": lib.bam.m,\n-    \"yea\": lib.bar.f,\n-    \"definitely\": lib.bar.fing,\n-    \"yes\": lib.Foo.l,\n-    \"yep\": lib.Foo.ls,\n-    \"ack\": lib.bam.n,\n-    \"again\": lib.bar.fed.again,\n-    \"somemore\": lib.bar.fed.somemore\n+  return {\n+    \"requireindex should\": {\n+      \"properly include files parallel to index.js and maintain structure\": function () {\n+        Asserts.all.equal([\n+          [lib.bam.m,            [], \"ok\"],\n+          [lib.bar.f,            [], \"yea\"],\n+          [lib.bar.fing,         [], 'definitely'],\n+          [lib.Foo.l,            [], 'yes'],\n+          [lib.Foo.ls,           [], 'yep'],\n+          [lib.bam.n,            [], 'ack'],\n+          [lib.bar.fed.again,    [], 'again'],\n+          [lib.bar.fed.somemore, [], 'somemore']\n+        ]);\n+      },\n+\n+      \"ignore _ prefixed files\": function () {\n+        Assert.equal(('_private' in lib), false);\n+      },\n+\n+      \"not include files not mentioned when second array argument is used\": function () {\n+        Assert.equal(('ignored' in lib.bar.fed), false);\n+      },\n+\n+      \"ignore non javascript files\": function () {\n+        Assert.equal(('not_javascript' in lib), false);\n+      },\n+\n+      \"sort files by lowercase alpha of the filename\": function () {\n+        Assert.equal(Object.keys(lib)[0], 'bam');\n+      },\n+      \n+      \"ignore dot files\": function () {\n+        Assert.equal(('.also_private' in lib), false);\n+      },\n+    }\n   };\n-  \n-  var keys = Object.keys(expectations);\n-  keys.forEach(function (expectation) {\n-    assert.equal(expectations[expectation](), expectation);\n-  });\n-    \n-  assert.equal(('_private' in lib), false);\n-  assert.equal(('ignored' in lib.bar.fed), false);\n-  assert.equal(('not_javascript' in lib), false);\n-\n-  assert.equal(Object.keys(lib)[0], 'bam');\n-\n-  console.log(\"All tests passed.\");\n-  \n-} catch (error) {\n-  console.log(\"Test Failed.\");\n-  console.log(\"   Expected: \" + error.expected);\n-  console.log(\"     Actual: \" + error.actual); \n-  console.log(error);\n-}\n\\ No newline at end of file\n+});\n\\ No newline at end of file\n",
+					"match": false,
+					"packageHash": "719bcc5185279e0fce5802d79dc9ab59332073e9880a6143165be918aafc74ed",
+					"size": 860,
+					"sourceHash": "44ccf26ddeb60421df7cc04e4c25e7c95ada1691dfab598a5739951f40699848",
+					"status": "content"
+				},
+				"test/lib/.also_private/private.txt": {
+					"match": false,
+					"status": "missing-in-package"
+				}
+			},
+			"summary": {
+				"differentFiles": 5,
+				"matchingFiles": 12,
+				"missingInPackage": 1,
+				"missingInSource": 0,
+				"score": 0.6666666666666666,
+				"totalFiles": 18
+			}
+		}
+	}
+]

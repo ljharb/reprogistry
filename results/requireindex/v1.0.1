@@ -1,0 +1,83 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-03T16:10:47.855Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:11.7.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "requireindex@1.0.1",
+			"name": "requireindex",
+			"version": "1.0.1",
+			"location": "https://registry.npmjs.org/requireindex/-/requireindex-1.0.1.tgz",
+			"integrity": "sha512-HFEksLNIL+U8nv0KkgqeN1/fyCQNc6cnEhuLN11L15I7CEWLwSRkLusqHC3NZTbGnIm5iFj5FgIjhJT61xU4cw==",
+			"publishedAt": "2013-05-01T03:25:57.135Z",
+			"publishedWith": {
+				"node": null,
+				"npm": "1.2.18"
+			}
+		},
+		"source": {
+			"integrity": "sha512-UWlseqruD1EQe01Y3xoewk+BKdF8zxpWyDTLafStU78FSNX4Yv8E6bhKBwG+MfyO+9y1EU83DSlpa4vPJuX+oQ==",
+			"location": "git://github.com/stephenhandley/requireindex.git",
+			"spec": "github:stephenhandley/requireindex#HEAD"
+		},
+		"comparisonHash": "8a2a8dcbb729bf3ee9216e490c955701f0ddebe1",
+		"diff": {
+			"files": {
+				".npmignore": {
+					"match": false,
+					"packageHash": "dba27c31aad935787bb275c3e5e4e957708f15386de599eff1db476022cd7e4c",
+					"size": 12,
+					"status": "missing-in-source"
+				},
+				"README.md": {
+					"diff": "--- published/README.md\n+++ rebuilt/README.md\n@@ -4,7 +4,7 @@\n \n # Latest Version\n \n-1.0.1\n+1.2.0\n \n # Installation\n ```\n@@ -17,7 +17,7 @@\n {\n   ...\n   \"dependencies\": {\n-    \"requireindex\": \"1.0.x\"\n+    \"requireindex\": \"1.1.x\"\n   }\n }\n ```\n@@ -86,5 +86,5 @@\n }\n ```\n \n-#Build status\n-[![build status](https://secure.travis-ci.org/stephenhandley/requireindex.png)](http://travis-ci.org/stephenhandley/requireindex)\n\\ No newline at end of file\n+# Build status\n+[![build status](https://secure.travis-ci.org/stephenhandley/requireindex.png)](http://travis-ci.org/stephenhandley/requireindex)\n",
+					"match": false,
+					"packageHash": "490dd5d28c66d84e1e9abbad0eac7954e7a683484bd14840e4d975731f5a8d42",
+					"size": 2215,
+					"sourceHash": "ab3a9a53782dce9cd4a1c92912d52453e3a92dc7f4aa1d74fffd12b9ad23aa5b",
+					"status": "content"
+				},
+				"index.js": {
+					"diff": "--- published/index.js\n+++ rebuilt/index.js\n@@ -32,15 +32,20 @@\n     });\n \n     files.forEach(function (filename) {\n-      // ignore index.js and files prefixed with underscore\n-      if ((filename === 'index.js') || (filename[0] === '_')) { return; }\n+      // ignore index.js and files prefixed with underscore and\n+      if ((filename === 'index.js') || (filename[0] === '_') || (filename[0] === '.')) {\n+        return;\n+      }\n \n       var filepath = Path.resolve(Path.join(dir, filename));\n-      var ext = Path.extname(filename);\n-      var stats = FS.statSync(filepath);\n+      var ext      = Path.extname(filename);\n+      var stats    = FS.statSync(filepath);\n \n       // don't require non-javascript files (.txt .md etc.)\n-      if (stats.isFile() && !(ext in require.extensions)) { return; }\n+      var exts = ['.js', '.node', '.json'];\n+      if (stats.isFile() && (exts.indexOf(ext) === -1)) {\n+        return;\n+      }\n \n       var basename = Path.basename(filename, ext);\n \n",
+					"match": false,
+					"packageHash": "2a7619c0c36e86f6d2e2f3bb6489dab206b0b6cea44530c705967e87e6273393",
+					"size": 1520,
+					"sourceHash": "0c647d2fb87b40b6f219af9f8a39fe47381c5fdbaa7e9a38e6e618890dca1220",
+					"status": "content"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -1,45 +1,33 @@\n {\n   \"name\": \"requireindex\",\n   \"description\": \"Write minimal node index.js files that require and export siblings by file basename\",\n-  \"version\": \"1.0.1\",\n-  \"license\" : \"MIT\",\n+  \"version\": \"1.2.0\",\n+  \"license\": \"MIT\",\n   \"main\": \"index.js\",\n-\n   \"repository\": {\n     \"type\": \"git\",\n     \"url\": \"git://github.com/stephenhandley/requireindex.git\"\n   },\n-\n   \"scripts\": {\n     \"test\": \"node test/test.js\"\n   },\n-\n   \"keywords\": [\n     \"require\",\n     \"index\",\n     \"index.js\"\n   ],\n-\n-  \"directories\" : {\n-    \"lib\" : \".\",\n-    \"test\" : \"test\"\n+  \"directories\": {\n+    \"test\": \"test\"\n   },\n-\n   \"bugs\": {\n-    \"url\" : \"http://github.com/stephenhandley/requireindex/issues\"\n+    \"url\": \"http://github.com/stephenhandley/requireindex/issues\"\n   },\n-\n-  \"engines\" : {\n-    \"node\" : \">=0.10.5\"\n+  \"engines\": {\n+    \"node\": \">=0.10.5\"\n   },\n-\n   \"devDependencies\": {\n     \"asserts\": \"4.0.x\"\n   },\n-\n-  \"author\": {\n-    \"name\": \"Stephen Handley\",\n-    \"email\": \"stephen.handley@gmail.com\",\n-    \"url\": \"http://person.sh\"\n-  }\n-}\n\\ No newline at end of file\n+  \"author\": \"Stephen Handley <stephen.handley@gmail.com> (http://person.sh)\",\n+  \"homepage\": \"https://github.com/stephenhandley/requireindex\"\n+}\n",
+					"match": false,
+					"packageHash": "af82e15db6a93e74519c4f708090a35d2fca1d4e5583ec32fc7b849697e053fd",
+					"size": 789,
+					"sourceHash": "aceca7810702172ab082e1437c95bb4f6a027607e6bb3534bd67c28235d77313",
+					"status": "content"
+				},
+				"test/test.js": {
+					"diff": "--- published/test/test.js\n+++ rebuilt/test/test.js\n@@ -34,6 +34,10 @@\n       \"sort files by lowercase alpha of the filename\": function () {\n         Assert.equal(Object.keys(lib)[0], 'bam');\n       },\n+      \n+      \"ignore dot files\": function () {\n+        Assert.equal(('.also_private' in lib), false);\n+      },\n     }\n   };\n });\n\\ No newline at end of file\n",
+					"match": false,
+					"packageHash": "578c87b6858c76c8541165e6ca40d8a10a880ad867fc822dc4d22d11e512765f",
+					"size": 1195,
+					"sourceHash": "44ccf26ddeb60421df7cc04e4c25e7c95ada1691dfab598a5739951f40699848",
+					"status": "content"
+				},
+				"test/lib/.also_private/private.txt": {
+					"match": false,
+					"status": "missing-in-package"
+				}
+			},
+			"summary": {
+				"differentFiles": 4,
+				"matchingFiles": 13,
+				"missingInPackage": 1,
+				"missingInSource": 1,
+				"score": 0.6842105263157895,
+				"totalFiles": 19
+			}
+		}
+	}
+]

@@ -1,0 +1,109 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-03T16:09:12.331Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:2.15.11",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "requireindex@0.1.0",
+			"name": "requireindex",
+			"version": "0.1.0",
+			"location": "https://registry.npmjs.org/requireindex/-/requireindex-0.1.0.tgz",
+			"integrity": "sha512-0IT5tlyCKH4wAezo/IW1NHqKG6R2daXzBMGaNAIRgdek8klkVVkGBPfJBQsPiJ5fi4InuqXN+Aqhw3UdwwVgug==",
+			"publishedAt": "2012-05-04T01:20:32.152Z",
+			"publishedWith": {
+				"node": "v0.6.15",
+				"npm": "1.1.2"
+			}
+		},
+		"source": {
+			"integrity": null,
+			"location": "git://github.com/stephenhandley/requireindex.git",
+			"spec": "github:stephenhandley/requireindex#HEAD"
+		},
+		"comparisonHash": "8a2a8dcbb729bf3ee9216e490c955701f0ddebe1",
+		"diff": {
+			"files": {
+				"README.md": {
+					"diff": "--- published/README.md\n+++ rebuilt/README.md\n@@ -1,14 +1,29 @@\n # Description\n \n-Write minimal node index.js/index.coffee files that require and export all their siblings by file basename\n+Write minimal node index.js files that require and export siblings by file basename\n+\n+# Latest Version\n+\n+1.2.0\n \n # Installation\n ```\n npm install requireindex\n ```\n \n+or in package.json\n+\n+```json\n+{\n+  ...\n+  \"dependencies\": {\n+    \"requireindex\": \"1.1.x\"\n+  }\n+}\n+```\n+\n # Usage\n-Check the test directory for example usage. The directory tree looks like: \n+Check the [test directory](https://github.com/stephenhandley/requireindex/tree/master/test) for example usage. The [test/lib](https://github.com/stephenhandley/requireindex/tree/master/test/lib) looks like:\n \n ```\n lib/\n@@ -18,38 +33,58 @@\n     index.js\n     f.js\n     fing.js\n+    fed/\n+      again.js\n+      ignored.js\n+      index.js\n+      somemore.js\n   bam.js\n   _private.js\n-  \n+\n ```\n \n-The index.js files look like this:\n+The index.js files in [test/lib/](https://github.com/stephenhandley/requireindex/tree/master/test/lib/index.js) and [test/lib/bar/](https://github.com/stephenhandley/requireindex/tree/master/test/lib/bar/index.js) contain:\n \n ```js\n-module.exports = require('requireindex')(__dirname)\n+module.exports = require('requireindex')(__dirname);\n ```\n \n-and the result of\n+and the index.js file in [test/lib/bar/fed/](https://github.com/stephenhandley/requireindex/tree/master/test/lib/bar/fed/index.js) contains:\n \n+```js\n+module.exports = require('requireindex')(__dirname, ['again', 'somemore']);\n ```\n-require('lib')\n-```\n \n-is this:\n+The optional second argument allows you to explicitly specify the required files using their basename. In this example [test/lib/bar/fed/ignored.js](https://github.com/stephenhandley/requireindex/tree/master/test/lib/bar/fed/ignored.js) is not included as a public module. The other way to make a module/file private without the need for explicitly naming all the other included files is to prefix the filename with an underscore, as demonstrated by [test/lib/_private.js](https://github.com/stephenhandley/requireindex/tree/master/test/lib/_private.js) which is not exported.\n+\n+So, with these index.js files, the result of\n \n+```js\n+require('lib');\n ```\n+\n+is:\n+\n+```js\n {\n-  bam: { \n+  bam: {\n     m: [Function],\n     n: [Function]\n   },\n-  bar: { \n+  bar: {\n     f: [Function],\n-    fing: [Function] \n+    fed: {\n+      again: [Function],\n+      somemore: [Function]\n+    },\n+    fing: [Function]\n   },\n-  Foo: { \n-    l: [Function], \n-    ls: [Function] \n-  } \n+  Foo: {\n+    l: [Function],\n",
+					"match": false,
+					"packageHash": "f45597fe6e7cd53b01084bf3d854c3c853c595cf5aaa9a1c0f72cb584f41aa7f",
+					"size": 684,
+					"sourceHash": "ab3a9a53782dce9cd4a1c92912d52453e3a92dc7f4aa1d74fffd12b9ad23aa5b",
+					"status": "content"
+				},
+				"index.js": {
+					"diff": "--- published/index.js\n+++ rebuilt/index.js\n@@ -1,30 +1,60 @@\n-var fs   = require('fs'),\n-    path = require('path');\n+var FS   = require('fs');\n+var Path = require('path');\n \n-module.exports = function(dir, basenames) {\n+module.exports = function (dir, basenames) {\n   var requires = {};\n-  \n-  if (arguments.length == 1) {  \n-    fs.readdirSync(dir).forEach(function(filename) {\n-  \n-      if ((filename === 'index.js') ||\n-          (filename === 'index.coffee') ||\n-          (filename[0] === '_')) { \n-        return; \n+\n+  if (arguments.length === 2) {\n+    // if basenames argument is passed, explicitly include those files\n+    basenames.forEach(function (basename) {\n+      var filepath = Path.resolve(Path.join(dir, basename));\n+      requires[basename] = require(filepath);\n+    });\n+\n+  } else if (arguments.length === 1) {\n+    // if basenames arguments isn't passed, require all javascript\n+    // files (except for those prefixed with _) and all directories\n+\n+    var files = FS.readdirSync(dir);\n+\n+    // sort files in lowercase alpha for linux\n+    files.sort(function (a,b) {\n+      a = a.toLowerCase();\n+      b = b.toLowerCase();\n+\n+      if (a < b) {\n+        return -1;\n+      } else if (b < a) {\n+        return 1;\n+      } else {\n+        return 0;\n       }\n-    \n-      filename = path.basename(filename, path.extname(filename));\n-      var filepath = path.join(dir, filename);\n-    \n-      requires[filename] = require(filepath);\n     });\n-  \n-  } else {\n-    basenames.forEach(function(basename) {\n-      var filepath = path.join(dir, basename)\n+\n+    files.forEach(function (filename) {\n+      // ignore index.js and files prefixed with underscore and\n+      if ((filename === 'index.js') || (filename[0] === '_') || (filename[0] === '.')) {\n+        return;\n+      }\n+\n+      var filepath = Path.resolve(Path.join(dir, filename));\n+      var ext      = Path.extname(filename);\n+      var stats    = FS.statSync(filepath);\n+\n+      // don't require non-javascript files (.txt .md etc.)\n+      var exts = ['.js', '.node', '.json'];\n+      if (stats.isFile() && (exts.indexOf(ext) === -1)) {\n+        return;\n+      }\n+\n+      var basename = Path.basename(filename, ext);\n+\n       requires[basename] = require(filepath);\n     });\n+\n+  } else {\n+    throw new Error(\"Must pass directory as first argument\");\n   }\n-  \n+\n   return requires;\n-};\n\\ No newline at end of file\n+};\n",
+					"match": false,
+					"packageHash": "e6d31a0019b64a563e3f472b0ba675617276afe5cab227b0e572fb5eeaeebd8e",
+					"size": 717,
+					"sourceHash": "0c647d2fb87b40b6f219af9f8a39fe47381c5fdbaa7e9a38e6e618890dca1220",
+					"status": "content"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -1,41 +1,33 @@\n {\n   \"name\": \"requireindex\",\n-  \n-  \"description\": \"Write minimal node index.js/index.coffee files that require and export all their siblings by file basename\",\n-  \n-  \"version\": \"0.1.0\",\n-  \n-  \"license\" : \"MIT\",\n-  \n+  \"description\": \"Write minimal node index.js files that require and export siblings by file basename\",\n+  \"version\": \"1.2.0\",\n+  \"license\": \"MIT\",\n+  \"main\": \"index.js\",\n   \"repository\": {\n     \"type\": \"git\",\n     \"url\": \"git://github.com/stephenhandley/requireindex.git\"\n   },\n-  \n-  \"main\": \"index.js\",\n-  \n+  \"scripts\": {\n+    \"test\": \"node test/test.js\"\n+  },\n   \"keywords\": [\n-    \"require\", \n-    \"index\", \n+    \"require\",\n+    \"index\",\n     \"index.js\"\n   ],\n-  \n-  \"directories\" : {\n-    \"lib\" : \".\",\n-    \"test\" : \"test\"\n-  },\n-  \n-  \"bugs\": { \n-    \"url\" : \"http://github.com/stephenhandley/requireindex/issues\"\n-  },\n-  \n-  \"engines\" : {\n-    \"node\" : \">=0.4.0\"\n-  },\n-  \n-  \"author\": {\n-    \"name\": \"Stephen Handley\",\n-    \"email\": \"stephen.handley@gmail.com\",\n-    \"url\": \"http://person.sh\"\n-  }\n-}\n\\ No newline at end of file\n+  \"directories\": {\n+    \"test\": \"test\"\n+  },\n+  \"bugs\": {\n+    \"url\": \"http://github.com/stephenhandley/requireindex/issues\"\n+  },\n+  \"engines\": {\n+    \"node\": \">=0.10.5\"\n+  },\n+  \"devDependencies\": {\n+    \"asserts\": \"4.0.x\"\n+  },\n+  \"author\": \"Stephen Handley <stephen.handley@gmail.com> (http://person.sh)\",\n+  \"homepage\": \"https://github.com/stephenhandley/requireindex\"\n+}\n",
+					"match": false,
+					"packageHash": "53468f37f89bb0f605ba6315e1e6ad75dcaa6149be27409e713a33633dc13066",
+					"size": 733,
+					"sourceHash": "aceca7810702172ab082e1437c95bb4f6a027607e6bb3534bd67c28235d77313",
+					"status": "content"
+				},
+				"test/lib/bar/fed/index.js": {
+					"diff": "--- published/test/lib/bar/fed/index.js\n+++ rebuilt/test/lib/bar/fed/index.js\n@@ -1 +1 @@\n-module.exports = require('../../../../index')(__dirname, ['again', 'somemore'])\n\\ No newline at end of file\n+module.exports = require('../../../../')(__dirname, ['again', 'somemore'])\n\\ No newline at end of file\n",
+					"match": false,
+					"packageHash": "d7641c21de7bb9c19ccd365c5b2d6cb713de15d53ebbd5057541a6579361afe6",
+					"size": 79,
+					"sourceHash": "8760773fcf794d0541abbc97fe807cde687cd4163231fb2b6538a91db8e90e55",
+					"status": "content"
+				},
+				"test/lib/bar/index.js": {
+					"diff": "--- published/test/lib/bar/index.js\n+++ rebuilt/test/lib/bar/index.js\n@@ -1 +1 @@\n-module.exports = require('../../../index')(__dirname)\n\\ No newline at end of file\n+module.exports = require('../../../')(__dirname)\n\\ No newline at end of file\n",
+					"match": false,
+					"packageHash": "48b44007efff0046f69b102902a5f7d5d9449f5e8d245ae6f19aff298821eda2",
+					"size": 53,
+					"sourceHash": "0d9d80cfc5ca7b7f0d26a68cc696b042035d323b7ab9ea38703c9163f297814d",
+					"status": "content"
+				},
+				"test/lib/index.js": {
+					"diff": "--- published/test/lib/index.js\n+++ rebuilt/test/lib/index.js\n@@ -1 +1 @@\n-module.exports = require('../../index')(__dirname)\n\\ No newline at end of file\n+module.exports = require('../../')(__dirname)\n\\ No newline at end of file\n",
+					"match": false,
+					"packageHash": "28e40aa6bdd6580fc5abc3413e20c63c7c3973f934de4c0338b037cb942e4747",
+					"size": 50,
+					"sourceHash": "54162bc91faa16348f3bef943771bc62e3ce815b4d990494b3b337fd7ab2492f",
+					"status": "content"
+				},
+				"test/test.js": {
+					"diff": "--- published/test/test.js\n+++ rebuilt/test/test.js\n@@ -1,31 +1,43 @@\n-var assert = require('assert')\n+var Assert = require('assert');\n+var Asserts = require('asserts');\n \n-var lib = require('./lib')\n+Asserts(function () {\n+  var lib = require('./lib');\n \n-try {\n-  var expectations = {\n-    \"ok\": lib.bam.m,\n-    \"yea\": lib.bar.f,\n-    \"definitely\": lib.bar.fing,\n-    \"yes\": lib.Foo.l,\n-    \"yep\": lib.Foo.ls,\n-    \"ack\": lib.bam.n,\n-    \"again\": lib.bar.fed.again,\n-    \"somemore\": lib.bar.fed.somemore\n-  }\n-  \n-  var keys = Object.keys(expectations)\n-  keys.forEach(function(expectation) {\n-    assert.equal(expectations[expectation](), expectation);\n-  })\n-  \n-  assert.equal(('_private' in lib), false);\n-  assert.equal(('ignored' in lib.bar.fed), false);\n-  \n-  console.log(\"All tests passed.\");\n-  \n-} catch (error) {\n-  console.log(\"Test Failed.\");\n-  console.log(\"   Expected: \" + error.expected);\n-  console.log(\"     Actual: \" + error.actual); \n-}\n\\ No newline at end of file\n+  return {\n+    \"requireindex should\": {\n+      \"properly include files parallel to index.js and maintain structure\": function () {\n+        Asserts.all.equal([\n+          [lib.bam.m,            [], \"ok\"],\n+          [lib.bar.f,            [], \"yea\"],\n+          [lib.bar.fing,         [], 'definitely'],\n+          [lib.Foo.l,            [], 'yes'],\n+          [lib.Foo.ls,           [], 'yep'],\n+          [lib.bam.n,            [], 'ack'],\n+          [lib.bar.fed.again,    [], 'again'],\n+          [lib.bar.fed.somemore, [], 'somemore']\n+        ]);\n+      },\n+\n+      \"ignore _ prefixed files\": function () {\n+        Assert.equal(('_private' in lib), false);\n+      },\n+\n+      \"not include files not mentioned when second array argument is used\": function () {\n+        Assert.equal(('ignored' in lib.bar.fed), false);\n+      },\n+\n+      \"ignore non javascript files\": function () {\n+        Assert.equal(('not_javascript' in lib), false);\n+      },\n+\n+      \"sort files by lowercase alpha of the filename\": function () {\n+        Assert.equal(Object.keys(lib)[0], 'bam');\n+      },\n+      \n+      \"ignore dot files\": function () {\n+        Assert.equal(('.also_private' in lib), false);\n+      },\n+    }\n+  };\n+});\n\\ No newline at end of file\n",
+					"match": false,
+					"packageHash": "cbb5f522f36164837110bb3c29f8df5d63028df1b14e0815f3c8a066c2c4cb57",
+					"size": 737,
+					"sourceHash": "44ccf26ddeb60421df7cc04e4c25e7c95ada1691dfab598a5739951f40699848",
+					"status": "content"
+				},
+				".travis.yml": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/lib/.also_private/private.txt": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/lib/not_javascript.txt": {
+					"match": false,
+					"status": "missing-in-package"
+				}
+			},
+			"summary": {
+				"differentFiles": 7,
+				"matchingFiles": 8,
+				"missingInPackage": 3,
+				"missingInSource": 0,
+				"score": 0.4444444444444444,
+				"totalFiles": 18
+			}
+		}
+	}
+]
