@@ -1,0 +1,111 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-03T12:36:02.472Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:11.7.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "normalize-path@0.1.0",
+			"name": "normalize-path",
+			"version": "0.1.0",
+			"location": "https://registry.npmjs.org/normalize-path/-/normalize-path-0.1.0.tgz",
+			"integrity": "sha512-QOuJ/3QnlwNVP3UzISGsIh283WX+rKI87jodo+jkAmN7XAdwoHgpRc9MxjyMjV4lEPx610plRH24jcKO6gOuzg==",
+			"publishedAt": "2014-06-26T01:32:19.923Z",
+			"publishedWith": {
+				"node": null,
+				"npm": "1.4.9"
+			}
+		},
+		"source": {
+			"integrity": null,
+			"location": "git://github.com/jonschlinkert/normalize-path.git",
+			"spec": "github:jonschlinkert/normalize-path#HEAD"
+		},
+		"comparisonHash": "8a2a8dcbb729bf3ee9216e490c955701f0ddebe1",
+		"diff": {
+			"files": {
+				".gitattributes": {
+					"match": false,
+					"packageHash": "c697329350b4e95aab826aafb5cf438e2e0b60506912f740918a9e9b82dae864",
+					"size": 237,
+					"status": "missing-in-source"
+				},
+				".jshintrc": {
+					"match": false,
+					"packageHash": "f8a6ac3c3eca9fb7d2ef224f95ddc9976f91ce01cadc7809fa151ddd97524f5d",
+					"size": 342,
+					"status": "missing-in-source"
+				},
+				".npmignore": {
+					"match": false,
+					"packageHash": "5f8f9ffa080b2266027c1d85e848ffdf01c1f9b3b23782e322e41dc761e8e89f",
+					"size": 541,
+					"status": "missing-in-source"
+				},
+				".verbrc.md": {
+					"match": false,
+					"packageHash": "a85d3771b09091b4b51882f80e06314c32c62213d804941416ada7b05faf436f",
+					"size": 336,
+					"status": "missing-in-source"
+				},
+				"LICENSE-MIT": {
+					"match": false,
+					"packageHash": "0f214480e948c1d463e1d06d03ee95485ee3f9e2b03faba66dfecb99b232f907",
+					"size": 1059,
+					"status": "missing-in-source"
+				},
+				"README.md": {
+					"diff": "--- published/README.md\n+++ rebuilt/README.md\n@@ -1,33 +1,127 @@\n-# normalize-path [![NPM version](https://badge.fury.io/js/normalize-path.png)](http://badge.fury.io/js/normalize-path)\n+# normalize-path [![NPM version](https://img.shields.io/npm/v/normalize-path.svg?style=flat)](https://www.npmjs.com/package/normalize-path) [![NPM monthly downloads](https://img.shields.io/npm/dm/normalize-path.svg?style=flat)](https://npmjs.org/package/normalize-path) [![NPM total downloads](https://img.shields.io/npm/dt/normalize-path.svg?style=flat)](https://npmjs.org/package/normalize-path) [![Linux Build Status](https://img.shields.io/travis/jonschlinkert/normalize-path.svg?style=flat&label=Travis)](https://travis-ci.org/jonschlinkert/normalize-path)\n \n-> Normalize file path slashes to be unix-like forward slashes, regardless of OS (since in reality Windows doesn't care about slash direction anyway). Also condenses repeat slashes to a single slash and removes and trailing slashes.\n+> Normalize slashes in a file path to be posix/unix-like forward slashes. Also condenses repeat slashes to a single slash and removes and trailing slashes, unless disabled.\n+\n+Please consider following this project's author, [Jon Schlinkert](https://github.com/jonschlinkert), and consider starring the project to show your :heart: and support.\n \n ## Install\n-Install with [npm](npmjs.org):\n \n-```bash\n-npm i normalize-path --save-dev\n+Install with [npm](https://www.npmjs.com/):\n+\n+```sh\n+$ npm install --save normalize-path\n ```\n \n ## Usage\n \n ```js\n-var normalize = require('normalize-path');\n-console.log(normalize('\\\\foo\\\\bar\\\\baz\\\\'));\n-//=> '//foo/bar/baz'\n+const normalize = require('normalize-path');\n+\n+console.log(normalize('\\\\foo\\\\bar\\\\baz\\\\')); \n+//=> '/foo/bar/baz'\n+```\n+\n+**win32 namespaces**\n+\n+```js\n+console.log(normalize('\\\\\\\\?\\\\UNC\\\\Server01\\\\user\\\\docs\\\\Letter.txt')); \n+//=> '//?/UNC/Server01/user/docs/Letter.txt'\n+\n+console.log(normalize('\\\\\\\\.\\\\CdRomX')); \n+//=> '//./CdRomX'\n ```\n \n-## Author\n+**Consecutive slashes**\n+\n+Condenses multiple consecutive forward slashes (except for leading slashes in win32 namespaces) to a single slash.\n+\n+```js\n+console.log(normalize('.//foo//bar///////baz/')); \n+//=> './foo/bar/baz'\n+```\n+\n+### Trailing slashes\n+\n+By default trailing slashes are removed. Pass `false` as the last argument to disable this behavior and _**keep** trailing slashes_:\n+\n+```js\n+console.log(normalize('foo\\\\bar\\\\baz\\\\', false)); //=> 'foo/bar/baz/'\n+console.log(normalize('./foo/bar/baz/', false)); //=> './foo/bar/baz/'\n+```\n+\n+## Release history\n+\n+### v3.0\n+\n+No breaking changes in this release.\n+\n+* a check was added to ensure that [win32 namespaces](https://msdn.microsoft.com/library/windows/desktop/aa365247(v=vs.85).aspx#namespaces) are handled properly by win32 `path.parse()` after a path has been normalized by this library.\n+* a minor optimization was made to simplify how the trailing separator was handled\n+\n+## About\n+\n+<details>\n+<summary><strong>Contributing</strong></summary>\n+\n+Pull requests and stars are always welcome. For bugs and feature requests, [please create an issue](../../issues/new).\n+\n+</details>\n+\n+<details>\n+<summary><strong>Running Tests</strong></summary>\n+\n+Running and reviewing unit tests is a great way to get familiarized with a library and its API. You can install dependencies and run tests with the following command:\n+\n+```sh\n+$ npm install && npm test\n+```\n+\n+</details>\n+\n+<details>\n+<summary><strong>Building docs</strong></summary>\n+\n+_(This project's readme.md is generated by [verb](https://github.com/verbose/verb-generate-readme), please don't edit the readme directly. Any changes to the readme must be made in the [.verb.md](.verb.md) readme template.)_\n+\n+To generate the readme, run the following command:\n+\n+```sh\n",
+					"match": false,
+					"packageHash": "d461c57dccade94d28c68ceff40fb8aa05a158816ae1e14fa0611e51ad855805",
+					"size": 918,
+					"sourceHash": "af3e56f394e970e17051724817e0b8b0c6b98f3376681cf48973180074a9e83b",
+					"status": "content"
+				},
+				"index.js": {
+					"diff": "--- published/index.js\n+++ rebuilt/index.js\n@@ -1,17 +1,35 @@\n /*!\n- * normalize-path\n- * https://github.com/jonschlinkert/normalize-path\n+ * normalize-path <https://github.com/jonschlinkert/normalize-path>\n  *\n- * Copyright (c) 2014 Jon Schlinkert, contributors.\n- * Licensed under the MIT License\n+ * Copyright (c) 2014-2018, Jon Schlinkert.\n+ * Released under the MIT License.\n  */\n \n-'use strict';\n+module.exports = function(path, stripTrailing) {\n+  if (typeof path !== 'string') {\n+    throw new TypeError('expected path to be a string');\n+  }\n \n-var path = require('path');\n+  if (path === '\\\\' || path === '/') return '/';\n \n-module.exports = function(filepath) {\n-  return path.normalize(filepath)\n-    .replace(/[\\\\\\/]/g, '/')\n-    .replace(/\\/$/g, '');\n-};\n\\ No newline at end of file\n+  var len = path.length;\n+  if (len <= 1) return path;\n+\n+  // ensure that win32 namespaces has two leading slashes, so that the path is\n+  // handled properly by the win32 version of path.parse() after being normalized\n+  // https://msdn.microsoft.com/library/windows/desktop/aa365247(v=vs.85).aspx#namespaces\n+  var prefix = '';\n+  if (len > 4 && path[3] === '\\\\') {\n+    var ch = path[2];\n+    if ((ch === '?' || ch === '.') && path.slice(0, 2) === '\\\\\\\\') {\n+      path = path.slice(2);\n+      prefix = '//';\n+    }\n+  }\n+\n+  var segs = path.split(/[/\\\\]+/);\n+  if (stripTrailing !== false && segs[segs.length - 1] === '') {\n+    segs.pop();\n+  }\n+  return prefix + segs.join('/');\n+};\n",
+					"match": false,
+					"packageHash": "95aedde58275aff517edc50656b7fdd7a62cb97f5ca97b6f7fa1399b35090179",
+					"size": 340,
+					"sourceHash": "202cf63677ddcac13e71d66d2e98c8f07aad10789845ade028e5be755b7abf3a",
+					"status": "content"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -1,42 +1,77 @@\n {\n   \"name\": \"normalize-path\",\n-  \"description\": \"Normalize file path slashes to be unix-like forward slashes, regardless of OS (since in reality Windows doesn't care about slash direction anyway). Also condenses repeat slashes to a single slash and removes and trailing slashes.\",\n-  \"version\": \"0.1.0\",\n+  \"description\": \"Normalize slashes in a file path to be posix/unix-like forward slashes. Also condenses repeat slashes to a single slash and removes and trailing slashes, unless disabled.\",\n+  \"version\": \"3.0.0\",\n   \"homepage\": \"https://github.com/jonschlinkert/normalize-path\",\n-  \"author\": {\n-    \"name\": \"Jon Schlinkert\",\n-    \"url\": \"https://github.com/jonschlinkert\"\n-  },\n-  \"repository\": {\n-    \"type\": \"git\",\n-    \"url\": \"git://github.com/jonschlinkert/normalize-path.git\"\n-  },\n+  \"author\": \"Jon Schlinkert (https://github.com/jonschlinkert)\",\n+  \"contributors\": [\n+    \"Blaine Bublitz (https://twitter.com/BlaineBublitz)\",\n+    \"Jon Schlinkert (http://twitter.com/jonschlinkert)\"\n+  ],\n+  \"repository\": \"jonschlinkert/normalize-path\",\n   \"bugs\": {\n     \"url\": \"https://github.com/jonschlinkert/normalize-path/issues\"\n   },\n-  \"licenses\": [\n-    {\n-      \"type\": \"MIT\",\n-      \"url\": \"https://github.com/jonschlinkert/normalize-path/blob/master/LICENSE-MIT\"\n-    }\n-  ],\n-  \"keywords\": [\n-    \"normalize\",\n-    \"path\",\n-    \"filepath\",\n-    \"slash\",\n-    \"slashes\"\n+  \"license\": \"MIT\",\n+  \"files\": [\n+    \"index.js\"\n   ],\n   \"main\": \"index.js\",\n   \"engines\": {\n     \"node\": \">=0.10.0\"\n   },\n   \"scripts\": {\n-    \"test\": \"mocha -R spec\"\n+    \"test\": \"mocha\"\n   },\n   \"devDependencies\": {\n-    \"verb\": \"~0.2.6\",\n-    \"chai\": \"~1.9.1\",\n-    \"mocha\": \"*\"\n+    \"gulp-format-md\": \"^1.0.0\",\n+    \"minimist\": \"^1.2.0\",\n+    \"mocha\": \"^3.5.3\"\n+  },\n+  \"keywords\": [\n+    \"absolute\",\n+    \"backslash\",\n+    \"delimiter\",\n+    \"file\",\n+    \"file-path\",\n+    \"filepath\",\n+    \"fix\",\n+    \"forward\",\n+    \"fp\",\n+    \"fs\",\n+    \"normalize\",\n+    \"path\",\n+    \"relative\",\n+    \"separator\",\n+    \"slash\",\n+    \"slashes\",\n+    \"trailing\",\n+    \"unix\",\n+    \"urix\"\n+  ],\n+  \"verb\": {\n+    \"toc\": false,\n+    \"layout\": \"default\",\n+    \"tasks\": [\n+      \"readme\"\n+    ],\n+    \"plugins\": [\n+      \"gulp-format-md\"\n+    ],\n+    \"related\": {\n+      \"description\": \"Other useful path-related libraries:\",\n+      \"list\": [\n+        \"contains-path\",\n+        \"is-absolute\",\n+        \"is-relative\",\n+        \"parse-filepath\",\n+        \"path-ends-with\",\n+        \"path-ends-with\",\n+        \"unixify\"\n+      ]\n",
+					"match": false,
+					"packageHash": "072397bb6601070618b61b36ebbb3d8230295711ad922eedae1dcb23e14c76cd",
+					"size": 1089,
+					"sourceHash": "284ea445a01a454ab1235a08101445fe16592303167090815f4a75b54d6fba04",
+					"status": "content"
+				},
+				"test/mocha.opts": {
+					"match": false,
+					"packageHash": "a8efe1dfc3f1e6f0beed86ab3c092020887e83a533e365e7a3585fe918e106cc",
+					"size": 15,
+					"status": "missing-in-source"
+				},
+				"test/test.js": {
+					"match": false,
+					"packageHash": "18f4292804365e09b4d5f93371ab161183515c7712671dbb343a8cfe48b2f145",
+					"size": 1838,
+					"status": "missing-in-source"
+				},
+				"LICENSE": {
+					"match": false,
+					"status": "missing-in-package"
+				}
+			},
+			"summary": {
+				"differentFiles": 3,
+				"matchingFiles": 0,
+				"missingInPackage": 1,
+				"missingInSource": 7,
+				"score": 0,
+				"totalFiles": 11
+			}
+		}
+	}
+]

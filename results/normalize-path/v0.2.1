@@ -1,0 +1,249 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-03T12:35:54.810Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:11.7.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "normalize-path@0.2.1",
+			"name": "normalize-path",
+			"version": "0.2.1",
+			"location": "https://registry.npmjs.org/normalize-path/-/normalize-path-0.2.1.tgz",
+			"integrity": "sha512-2/yUi2t3d4gHMGaQJygv0WAUl/8l2WCS1YiztwloTo/ns3JdBWf9KANdC8689nvUnEh55MdKXOaiyRRcPUu5Ng==",
+			"publishedAt": "2014-10-19T01:19:01.698Z",
+			"publishedWith": {
+				"node": null,
+				"npm": "1.4.9"
+			}
+		},
+		"source": {
+			"integrity": null,
+			"location": "git://github.com/jonschlinkert/normalize-path.git",
+			"spec": "github:jonschlinkert/normalize-path#HEAD"
+		},
+		"comparisonHash": "8a2a8dcbb729bf3ee9216e490c955701f0ddebe1",
+		"diff": {
+			"files": {
+				".gitattributes": {
+					"match": false,
+					"packageHash": "c697329350b4e95aab826aafb5cf438e2e0b60506912f740918a9e9b82dae864",
+					"size": 237,
+					"status": "missing-in-source"
+				},
+				".jshintrc": {
+					"match": false,
+					"packageHash": "f8a6ac3c3eca9fb7d2ef224f95ddc9976f91ce01cadc7809fa151ddd97524f5d",
+					"size": 342,
+					"status": "missing-in-source"
+				},
+				".npmignore": {
+					"match": false,
+					"packageHash": "5f8f9ffa080b2266027c1d85e848ffdf01c1f9b3b23782e322e41dc761e8e89f",
+					"size": 541,
+					"status": "missing-in-source"
+				},
+				".verbrc.md": {
+					"match": false,
+					"packageHash": "9ebd2cc351423b98f4f84a075f5b0603d71d8198dd5856e3266e8d009776a890",
+					"size": 807,
+					"status": "missing-in-source"
+				},
+				"LICENSE-MIT": {
+					"match": false,
+					"packageHash": "0f214480e948c1d463e1d06d03ee95485ee3f9e2b03faba66dfecb99b232f907",
+					"size": 1059,
+					"status": "missing-in-source"
+				},
+				"README.md": {
+					"diff": "--- published/README.md\n+++ rebuilt/README.md\n@@ -1,56 +1,127 @@\n-# normalize-path [![NPM version](https://badge.fury.io/js/normalize-path.svg)](http://badge.fury.io/js/normalize-path)\n+# normalize-path [![NPM version](https://img.shields.io/npm/v/normalize-path.svg?style=flat)](https://www.npmjs.com/package/normalize-path) [![NPM monthly downloads](https://img.shields.io/npm/dm/normalize-path.svg?style=flat)](https://npmjs.org/package/normalize-path) [![NPM total downloads](https://img.shields.io/npm/dt/normalize-path.svg?style=flat)](https://npmjs.org/package/normalize-path) [![Linux Build Status](https://img.shields.io/travis/jonschlinkert/normalize-path.svg?style=flat&label=Travis)](https://travis-ci.org/jonschlinkert/normalize-path)\n \n-> Normalize file path slashes to be unix-like forward slashes. Also condenses repeat slashes to a single slash and removes and trailing slashes.\n+> Normalize slashes in a file path to be posix/unix-like forward slashes. Also condenses repeat slashes to a single slash and removes and trailing slashes, unless disabled.\n \n-## Install\n-#### Install with [npm](npmjs.org)\n+Please consider following this project's author, [Jon Schlinkert](https://github.com/jonschlinkert), and consider starring the project to show your :heart: and support.\n \n-```bash\n-npm i normalize-path --save\n-```\n+## Install\n \n-## Run tests\n+Install with [npm](https://www.npmjs.com/):\n \n-```bash\n-npm test\n+```sh\n+$ npm install --save normalize-path\n ```\n \n ## Usage\n \n ```js\n-var normalize = require('normalize-path');\n+const normalize = require('normalize-path');\n \n-console.log(normalize('\\\\foo\\\\bar\\\\baz\\\\'));\n+console.log(normalize('\\\\foo\\\\bar\\\\baz\\\\')); \n //=> '/foo/bar/baz'\n+```\n+\n+**win32 namespaces**\n \n-console.log(normalize('./foo/bar/baz'));\n-//=> 'foo/bar/baz'\n+```js\n+console.log(normalize('\\\\\\\\?\\\\UNC\\\\Server01\\\\user\\\\docs\\\\Letter.txt')); \n+//=> '//?/UNC/Server01/user/docs/Letter.txt'\n+\n+console.log(normalize('\\\\\\\\.\\\\CdRomX')); \n+//=> '//./CdRomX'\n ```\n \n-Pass `false` as the last argument to **not** strip trailing slashes:\n+**Consecutive slashes**\n+\n+Condenses multiple consecutive forward slashes (except for leading slashes in win32 namespaces) to a single slash.\n \n ```js\n-console.log(normalize('./foo/bar/baz/', false));\n-//=> 'foo/bar/baz/'\n+console.log(normalize('.//foo//bar///////baz/')); \n+//=> './foo/bar/baz'\n+```\n+\n+### Trailing slashes\n+\n+By default trailing slashes are removed. Pass `false` as the last argument to disable this behavior and _**keep** trailing slashes_:\n+\n+```js\n+console.log(normalize('foo\\\\bar\\\\baz\\\\', false)); //=> 'foo/bar/baz/'\n+console.log(normalize('./foo/bar/baz/', false)); //=> './foo/bar/baz/'\n+```\n+\n+## Release history\n+\n+### v3.0\n+\n+No breaking changes in this release.\n+\n+* a check was added to ensure that [win32 namespaces](https://msdn.microsoft.com/library/windows/desktop/aa365247(v=vs.85).aspx#namespaces) are handled properly by win32 `path.parse()` after a path has been normalized by this library.\n+* a minor optimization was made to simplify how the trailing separator was handled\n+\n+## About\n \n-console.log(normalize('foo\\\\bar\\\\baz\\\\', false));\n-//=> 'foo/bar/baz/'\n+<details>\n+<summary><strong>Contributing</strong></summary>\n+\n+Pull requests and stars are always welcome. For bugs and feature requests, [please create an issue](../../issues/new).\n+\n+</details>\n+\n+<details>\n+<summary><strong>Running Tests</strong></summary>\n+\n+Running and reviewing unit tests is a great way to get familiarized with a library and its API. You can install dependencies and run tests with the following command:\n+\n+```sh\n+$ npm install && npm test\n ```\n \n",
+					"match": false,
+					"packageHash": "7b537db395c9d08fe01201ded438976d4b574b81408f4138809da0d6edefce64",
+					"size": 1326,
+					"sourceHash": "af3e56f394e970e17051724817e0b8b0c6b98f3376681cf48973180074a9e83b",
+					"status": "content"
+				},
+				"benchmark/code/no-regex.js": {
+					"match": false,
+					"packageHash": "2f1e56f1d2aae2d3f02f2ce0b5928cd4cd286910a5fef6022bbc9f0124170329",
+					"size": 709,
+					"status": "missing-in-source"
+				},
+				"benchmark/code/node-path.js": {
+					"match": false,
+					"packageHash": "958fc517cee4257e50b9b751436596e4c443bfbce07e81cf4a66c9e97376e354",
+					"size": 211,
+					"status": "missing-in-source"
+				},
+				"benchmark/code/regex.js": {
+					"match": false,
+					"packageHash": "78d2c5101bc900d80e497c833a4a03add92eca7d291e89d99f767ad51a521a6c",
+					"size": 225,
+					"status": "missing-in-source"
+				},
+				"benchmark/fixtures/path-0.js": {
+					"match": false,
+					"packageHash": "cc2c53b8ab4a1a0b3f902406b63f85dc1a5b89be2d1ce1ee7991f07bbd71721c",
+					"size": 83,
+					"status": "missing-in-source"
+				},
+				"benchmark/fixtures/path-1.js": {
+					"match": false,
+					"packageHash": "11c68dcf013e3d675e120bbd332156dc94d15d87a8312b0962a0c86a98785f34",
+					"size": 85,
+					"status": "missing-in-source"
+				},
+				"benchmark/fixtures/path-10.js": {
+					"match": false,
+					"packageHash": "2f161d7f8b836839ac6572c5b834c8f24087554b0b718e56d66c2d6513f945d7",
+					"size": 101,
+					"status": "missing-in-source"
+				},
+				"benchmark/fixtures/path-11.js": {
+					"match": false,
+					"packageHash": "de55b1a1818c927d197d20c086bab4d33d52fcca328e58d1de0e70a9688e5eb9",
+					"size": 93,
+					"status": "missing-in-source"
+				},
+				"benchmark/fixtures/path-12.js": {
+					"match": false,
+					"packageHash": "39811ef1ec4dcff16a7e846725f52745ed47cde99e0dd36fb1d58d599ef1d7f1",
+					"size": 76,
+					"status": "missing-in-source"
+				},
+				"benchmark/fixtures/path-13.js": {
+					"match": false,
+					"packageHash": "689cd2a8f1f644f1d8bff5fa742cd7e4a5cce4c7f17b5381dad4b228629b093f",
+					"size": 115,
+					"status": "missing-in-source"
+				},
+				"benchmark/fixtures/path-14.js": {
+					"match": false,
+					"packageHash": "ded16f0881f0b93585de1c15fe4159eab7c96348b3674e51081672dd2a959e74",
+					"size": 127,
+					"status": "missing-in-source"
+				},
+				"benchmark/fixtures/path-15.js": {
+					"match": false,
+					"packageHash": "f098c7aa3c1c8b97a47ff5ffebc9c8570667e08608e73c954ab537934bf61b2e",
+					"size": 106,
+					"status": "missing-in-source"
+				},
+				"benchmark/fixtures/path-16.js": {
+					"match": false,
+					"packageHash": "5c3db0e42f41b6ec3fc129489ad3f7504d7c0e6a3003c268a9b7e2367c8edfbe",
+					"size": 149,
+					"status": "missing-in-source"
+				},
+				"benchmark/fixtures/path-17.js": {
+					"match": false,
+					"packageHash": "c6249bb1170f8aa9d90749376dd781b756a6d0aa14e56e497f5f596c0e853e85",
+					"size": 60,
+					"status": "missing-in-source"
+				},
+				"benchmark/fixtures/path-18.js": {
+					"match": false,
+					"packageHash": "38c154093689a5d1d03feb754f591979117a4c16f5144466a25e4e0b36e0c1b3",
+					"size": 81,
+					"status": "missing-in-source"
+				},
+				"benchmark/fixtures/path-2.js": {
+					"match": false,
+					"packageHash": "572369414a57bc24cf1da0bf215518154e9785431fbdb4530b1732e845e45a9f",
+					"size": 81,
+					"status": "missing-in-source"
+				},
+				"benchmark/fixtures/path-3.js": {
+					"match": false,
+					"packageHash": "e37b90c949f12e8969b1ab019b60b1252ad3022fc0c0e742b6448ddd01e4ee8c",
+					"size": 83,
+					"status": "missing-in-source"
+				},
+				"benchmark/fixtures/path-4.js": {
+					"match": false,
+					"packageHash": "d2568def1ba61d0d8f19988693e66fe3ed52ab3f18b8e3ce2491b47c21014285",
+					"size": 76,
+					"status": "missing-in-source"
+				},
+				"benchmark/fixtures/path-5.js": {
+					"match": false,
+					"packageHash": "1032858570b49126a0a81902f59ba0b3a3e358e3023130dafbe28364e27d260a",
+					"size": 78,
+					"status": "missing-in-source"
+				},
+				"benchmark/fixtures/path-6.js": {
+					"match": false,
+					"packageHash": "040c89975c6ff95f79bdbe2d4c5aa373925231beff53c8be064f23f9908c8f8d",
+					"size": 82,
+					"status": "missing-in-source"
+				},
+				"benchmark/fixtures/path-7.js": {
+					"match": false,
+					"packageHash": "e2b20938e5d9f9704ecfc0a3a16338e74385c52a29067db47841b1da91a300d7",
+					"size": 84,
+					"status": "missing-in-source"
+				},
+				"benchmark/fixtures/path-8.js": {
+					"match": false,
+					"packageHash": "6e23f956b1e11abf0c5104f1aefeabebb36eb1c5f911e16fc5a69b7af7b1f4fe",
+					"size": 77,
+					"status": "missing-in-source"
+				},
+				"benchmark/fixtures/path-9.js": {
+					"match": false,
+					"packageHash": "5f57bfe0e243749c6a637d91219abb7098bcd6f33c8679ba912c2f7a21df411b",
+					"size": 78,
+					"status": "missing-in-source"
+				},
+				"benchmark/index.js": {
+					"match": false,
+					"packageHash": "cc4718e16f25bd3bf31e5758650845a3b6a773dd59b1ac453740108d3b318b60",
+					"size": 177,
+					"status": "missing-in-source"
+				},
+				"bower.json": {
+					"match": false,
+					"packageHash": "0c0adfcf7146d474b949f47def5f687fec1ddc4ccea4b25a2386c85dfe670fff",
+					"size": 84,
+					"status": "missing-in-source"
+				},
+				"index.js": {
+					"diff": "--- published/index.js\n+++ rebuilt/index.js\n@@ -1,20 +1,35 @@\n /*!\n  * normalize-path <https://github.com/jonschlinkert/normalize-path>\n  *\n- * Copyright (c) 2014 Jon Schlinkert, contributors.\n- * Licensed under the MIT License\n+ * Copyright (c) 2014-2018, Jon Schlinkert.\n+ * Released under the MIT License.\n  */\n \n-'use strict';\n+module.exports = function(path, stripTrailing) {\n+  if (typeof path !== 'string') {\n+    throw new TypeError('expected path to be a string');\n+  }\n+\n+  if (path === '\\\\' || path === '/') return '/';\n \n-module.exports = function(filepath, strip) {\n-  filepath = filepath\n-    .replace(/[\\\\\\/]+/g, '/')\n-    .replace(/^\\.[\\\\\\/]/g, '')\n-    .toLowerCase();\n+  var len = path.length;\n+  if (len <= 1) return path;\n+\n+  // ensure that win32 namespaces has two leading slashes, so that the path is\n+  // handled properly by the win32 version of path.parse() after being normalized\n+  // https://msdn.microsoft.com/library/windows/desktop/aa365247(v=vs.85).aspx#namespaces\n+  var prefix = '';\n+  if (len > 4 && path[3] === '\\\\') {\n+    var ch = path[2];\n+    if ((ch === '?' || ch === '.') && path.slice(0, 2) === '\\\\\\\\') {\n+      path = path.slice(2);\n+      prefix = '//';\n+    }\n+  }\n \n-  if (strip !== false) {\n-    return filepath.replace(/\\/$/g, '')\n+  var segs = path.split(/[/\\\\]+/);\n+  if (stripTrailing !== false && segs[segs.length - 1] === '') {\n+    segs.pop();\n   }\n-  return filepath;\n+  return prefix + segs.join('/');\n };\n",
+					"match": false,
+					"packageHash": "852dd49ca45653a7b71a92978ff01ed9224a2062c244b7f16fdeab07e012b5af",
+					"size": 421,
+					"sourceHash": "202cf63677ddcac13e71d66d2e98c8f07aad10789845ade028e5be755b7abf3a",
+					"status": "content"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -1,47 +1,77 @@\n {\n   \"name\": \"normalize-path\",\n-  \"description\": \"Normalize file path slashes to be unix-like forward slashes. Also condenses repeat slashes to a single slash and removes and trailing slashes.\",\n-  \"version\": \"0.2.1\",\n+  \"description\": \"Normalize slashes in a file path to be posix/unix-like forward slashes. Also condenses repeat slashes to a single slash and removes and trailing slashes, unless disabled.\",\n+  \"version\": \"3.0.0\",\n   \"homepage\": \"https://github.com/jonschlinkert/normalize-path\",\n-  \"author\": {\n-    \"name\": \"Jon Schlinkert\",\n-    \"url\": \"https://github.com/jonschlinkert\"\n-  },\n-  \"repository\": {\n-    \"type\": \"git\",\n-    \"url\": \"git://github.com/jonschlinkert/normalize-path.git\"\n-  },\n+  \"author\": \"Jon Schlinkert (https://github.com/jonschlinkert)\",\n+  \"contributors\": [\n+    \"Blaine Bublitz (https://twitter.com/BlaineBublitz)\",\n+    \"Jon Schlinkert (http://twitter.com/jonschlinkert)\"\n+  ],\n+  \"repository\": \"jonschlinkert/normalize-path\",\n   \"bugs\": {\n     \"url\": \"https://github.com/jonschlinkert/normalize-path/issues\"\n   },\n-  \"licenses\": [\n-    {\n-      \"type\": \"MIT\",\n-      \"url\": \"https://github.com/jonschlinkert/normalize-path/blob/master/LICENSE-MIT\"\n-    }\n+  \"license\": \"MIT\",\n+  \"files\": [\n+    \"index.js\"\n   ],\n+  \"main\": \"index.js\",\n+  \"engines\": {\n+    \"node\": \">=0.10.0\"\n+  },\n+  \"scripts\": {\n+    \"test\": \"mocha\"\n+  },\n+  \"devDependencies\": {\n+    \"gulp-format-md\": \"^1.0.0\",\n+    \"minimist\": \"^1.2.0\",\n+    \"mocha\": \"^3.5.3\"\n+  },\n   \"keywords\": [\n+    \"absolute\",\n+    \"backslash\",\n+    \"delimiter\",\n     \"file\",\n+    \"file-path\",\n     \"filepath\",\n+    \"fix\",\n+    \"forward\",\n     \"fp\",\n+    \"fs\",\n     \"normalize\",\n     \"path\",\n+    \"relative\",\n+    \"separator\",\n     \"slash\",\n     \"slashes\",\n     \"trailing\",\n-    \"unix\"\n+    \"unix\",\n+    \"urix\"\n   ],\n-  \"main\": \"index.js\",\n-  \"engines\": {\n-    \"node\": \">=0.10.0\"\n-  },\n-  \"scripts\": {\n-    \"test\": \"mocha -R spec\"\n-  },\n-  \"devDependencies\": {\n-    \"benchmarked\": \"^0.1.1\",\n-    \"mocha\": \"*\",\n-    \"should\": \"^4.0.4\",\n-    \"verb\": \"^0.2.15\"\n+  \"verb\": {\n+    \"toc\": false,\n+    \"layout\": \"default\",\n+    \"tasks\": [\n+      \"readme\"\n+    ],\n+    \"plugins\": [\n+      \"gulp-format-md\"\n+    ],\n+    \"related\": {\n+      \"description\": \"Other useful path-related libraries:\",\n+      \"list\": [\n+        \"contains-path\",\n+        \"is-absolute\",\n+        \"is-relative\",\n+        \"parse-filepath\",\n+        \"path-ends-with\",\n+        \"path-ends-with\",\n",
+					"match": false,
+					"packageHash": "8ff9b9bf2f2c428f0dd603612df21f33b0ca425f8bf9c64f1ba55aeaf029a688",
+					"size": 1083,
+					"sourceHash": "284ea445a01a454ab1235a08101445fe16592303167090815f4a75b54d6fba04",
+					"status": "content"
+				},
+				"test.js": {
+					"match": false,
+					"packageHash": "cadef01b644a55d6f0d4583e56dfc094d0ae18ff630244c774931c95465dd55f",
+					"size": 3317,
+					"status": "missing-in-source"
+				},
+				"LICENSE": {
+					"match": false,
+					"status": "missing-in-package"
+				}
+			},
+			"summary": {
+				"differentFiles": 3,
+				"matchingFiles": 0,
+				"missingInPackage": 1,
+				"missingInSource": 30,
+				"score": 0,
+				"totalFiles": 34
+			}
+		}
+	}
+]
