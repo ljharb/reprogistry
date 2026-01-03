@@ -1,0 +1,529 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-03T18:20:40.634Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:3.10.8",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "svg-sprite-loader@0.1.1",
+			"name": "svg-sprite-loader",
+			"version": "0.1.1",
+			"location": "https://registry.npmjs.org/svg-sprite-loader/-/svg-sprite-loader-0.1.1.tgz",
+			"integrity": "sha512-NdAuVv5AaaSkmegBsotXARyMAnNJ2K4VmQX+kkmSzXHF00K5dF8DQc1/GOhgpsx8XD/nMym6EgZM90kbt6ajFA==",
+			"publishedAt": "2016-12-09T15:48:29.206Z",
+			"publishedWith": {
+				"node": "6.9.1",
+				"npm": "3.10.9"
+			}
+		},
+		"source": {
+			"integrity": null,
+			"location": "git+https://github.com/kisenka/webpack-svg-sprite-loader.git",
+			"spec": "github:kisenka/webpack-svg-sprite-loader#98c51b016d7952edc5a48f528ffad7fb74f51e7d"
+		},
+		"comparisonHash": "8a2a8dcbb729bf3ee9216e490c955701f0ddebe1",
+		"diff": {
+			"files": {
+				"LICENSE": {
+					"diff": "--- published/LICENSE\n+++ rebuilt/LICENSE\n@@ -1,6 +1,6 @@\n The MIT License (MIT)\n \n-Copyright (c) 2015 kisenka\n+Copyright (c) 2017 Stas Kurilov (kisenka)\n \n Permission is hereby granted, free of charge, to any person obtaining a copy\n of this software and associated documentation files (the \"Software\"), to deal\n@@ -19,4 +19,3 @@\n LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,\n OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE\n SOFTWARE.\n-\n",
+					"match": false,
+					"packageHash": "6d752d6f8e5cd2b90c57247b4feb2dc85cb6b2b0c442777583f9a95de987aed5",
+					"size": 1075,
+					"sourceHash": "9ee0c2e28798ade09a5a29c2649c8f98733f42b038855bd8e8a0a7496f99fa4b",
+					"status": "content"
+				},
+				"README.md": {
+					"diff": "--- published/README.md\n+++ rebuilt/README.md\n@@ -1,137 +1,323 @@\n-# Webpack SVG sprite loader\n+[![obsolete JetBrains project](https://jb.gg/badges/obsolete.svg)](https://confluence.jetbrains.com/display/ALL/JetBrains+on+GitHub)\n \n-It's like [style-loader](https://github.com/webpack/style-loader) but for SVG:\n+# SVG sprite loader\n+[![NPM version][version-img]][versions-img] [![Build status][ci-img]][ci-url] [![Documentation score][docs-coverage-img]][docs-coverage-url] [![Dependencies status][deps-img]][deps-url] [![Dev dependencies status][dev-deps-img]][dev-deps-url] [![NPM downloads][downloads-img]][npm-url]\n \n-- Creates a single SVG sprite from a set of images.\n-- Raster images support (PNG, JPG and GIF).\n-- Custom sprite implementation support.\n+Webpack loader for creating SVG sprites.\n \n-## How it works\n+> :tada: 2.0 is out, please read the [migration guide & overview](2.0.md).\n \n-When you require an image, loader transforms it to SVG symbol and add it to the array in special [sprite](lib/web/sprite.js) class.\n-When browser event `DOMContentLoaded` fires sprite will be rendered and injected as first child of `document.body`.\n-Require statement e.g. `require('svg-sprite!./image.svg')` returns a symbol id, so you can reference it later\n-in `<svg><use xlink:href=\"#id\"/></svg>`. Raster images  will be inlined (base64) and wrapped with an `<image>` tag.\n-Files like `image@2x.png` will be transformed with proper scale.\n-\n-### Custom sprite implementation\n-\n-By default sprite renders when `DOMContentLoaded` event fires and injects as first child in `document.body`.\n-If you need custom behavior, use `spriteModule` config option to specify module path of your sprite implementation.\n-You can extend a default [`lib/web/sprite.js`](lib/web/sprite.js), or create your own.\n-In the latter case you only need to implement the `add` method that accepts the symbol data as a string.\n+> :warning: For old v0.x versions see [the README in the v0 branch](https://github.com/JetBrains/svg-sprite-loader/blob/v0/README.md).\n+\n+## Table of contents\n+\n+- [Why it's cool](#why-its-cool)\n+- [Installation](#installation)\n+- [Configuration](#configuration)\n+  - [`symbolId`](#symbol-id)\n+  - [`symbolRegExp`](#symbol-regexp)\n+  - [`esModule`](#es-module)\n+  - [Runtime configuration](#runtime-configuration)\n+    - [`spriteModule`](#sprite-module)\n+    - [`symbolModule`](#symbol-module)\n+    - [`runtimeGenerator`](#runtime-generator)\n+    - [`runtimeCompat`](#runtime-compat) (deprecated)\n+    - [`runtimeOptions`](#runtime-options)\n+  - [Extract configuration](#extract-configuration)\n+    - [`extract`](#extract)\n+    - [`spriteFilename`](#sprite-filename)\n+    - [`publicPath`](#public-path)\n+    - [`outputPath`](#output-path)\n+    - [`plainSprite`](#plain-sprite)\n+    - [`spriteAttrs`](#sprite-attrs)\n+- [Examples](#examples)\n+- [Contributing guidelines](#contributing-guidelines)\n+- [License](#license)\n+- [Credits](#credits)\n+\n+## Why it's cool\n+\n+- **Minimum initial configuration**. Most of the options are configured automatically.\n+- **Runtime for browser**. Sprites are rendered and injected in pages automatically, you just refer to images via `<svg><use xlink:href=\"#id\"></use></svg>`.\n+- **Isomorphic runtime for node/browser**. Can render sprites on server or in browser manually.\n+- **Customizable**. Write/extend runtime module to implement custom sprite behaviour. Write/extend runtime generator to produce your own runtime, e.g. React component configured with imported symbol.\n+- **External sprite file** is generated for images imported from css/scss/sass/less/styl/html ([SVG stacking technique](https://css-tricks.com/svg-fragment-identifiers-work/#article-header-id-4)).\n \n ## Installation\n \n ```bash\n-npm install svg-sprite-loader --save-dev\n+npm install svg-sprite-loader -D\n+# via yarn\n+yarn add svg-sprite-loader -D\n ```\n \n-## Example config\n+## Configuration\n+\n ```js\n-module.exports = {\n-  module: {\n-    loaders: [{\n-      test: /\\.svg$/,\n-      loader: 'svg-sprite?' + JSON.stringify({\n-        name: '[name]_[hash]',\n-        prefixize: true,\n-        spriteModule: 'utils/my-custom-sprite'\n-      })\n-    }]\n-  }\n-};\n+// webpack 1\n+{\n+  test: /\\.svg$/,\n+  loader: 'svg-sprite-loader',\n+  query: { ... }\n+}\n+\n+// webpack 1 multiple loaders\n+{\n",
+					"match": false,
+					"packageHash": "fa274b6e4b82670ba5ef551ec12e8f97aa11aba73676c756aa392b07a8054c77",
+					"size": 4134,
+					"sourceHash": "43a158430d26280081720092bca907671212e2dc6174e6b7a93f542ae05057a9",
+					"status": "content"
+				},
+				"config.js": {
+					"match": false,
+					"packageHash": "7582dbaa524544ade24f14ac46ebaaad664f50f196500079c110c8e51cfbc02f",
+					"size": 799,
+					"status": "missing-in-source"
+				},
+				"index.js": {
+					"match": false,
+					"packageHash": "5af66cf19a11cd6d5628633217e90ca70a8377bc5d8a6eef98beaae01ee69f43",
+					"size": 2425,
+					"status": "missing-in-source"
+				},
+				"lib/extract-svg-plugin.js": {
+					"match": false,
+					"packageHash": "d732a0d9cbb80e8d2fe66e172f6c0e831ffffa4234aeb9383cc04721ec1c8a65",
+					"size": 779,
+					"status": "missing-in-source"
+				},
+				"lib/processings/index.js": {
+					"match": false,
+					"packageHash": "e3b48e0ab2f2e7bece39c0ca780da7cf5713b622621176757f4a82d8232dc3e4",
+					"size": 111,
+					"status": "missing-in-source"
+				},
+				"lib/processings/prefixize.js": {
+					"match": false,
+					"packageHash": "3b749a4754fdd654d2420ee13add7962dfda78a061a3ccc7866babbae8f1eaca",
+					"size": 1823,
+					"status": "missing-in-source"
+				},
+				"lib/processings/raster-image-to-svg.js": {
+					"match": false,
+					"packageHash": "aa834b413b19c5cf5bb16a757c01da675a826630b6b60c2ffd3c991036598953",
+					"size": 850,
+					"status": "missing-in-source"
+				},
+				"lib/server-side-sprite.js": {
+					"match": false,
+					"packageHash": "3789c29400dee33e8be709c55786620f585d883bf6d0c013215dcf527f4d575f",
+					"size": 574,
+					"status": "missing-in-source"
+				},
+				"lib/svg-document.js": {
+					"match": false,
+					"packageHash": "d94dd26a2cf58f7504063fa5dc3ab3dc4590c5a08e585c88141454efa707dd78",
+					"size": 2094,
+					"status": "missing-in-source"
+				},
+				"lib/utils.js": {
+					"match": false,
+					"packageHash": "408ef0676cdfd341b4474a281cb376c7a3f2e5c3e65cf6c0f38e4cd782301d91",
+					"size": 797,
+					"status": "missing-in-source"
+				},
+				"lib/web/angular-base-workaround.js": {
+					"match": false,
+					"packageHash": "27f36dca7991a145642973b322e5565ccb5acf7b134d233ed672e29b601ad04a",
+					"size": 472,
+					"status": "missing-in-source"
+				},
+				"lib/web/global-sprite.js": {
+					"match": false,
+					"packageHash": "e31a6bf6e7cf668ff00faa846d9a8c7e58ed5dcde1d481db0f3c58980365bb39",
+					"size": 325,
+					"status": "missing-in-source"
+				},
+				"lib/web/sprite.js": {
+					"match": false,
+					"packageHash": "23f4864e03f9f0edabf528e045da7732a9596185048ac414393b55b4c24af304",
+					"size": 6749,
+					"status": "missing-in-source"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -1,38 +1,108 @@\n {\n   \"name\": \"svg-sprite-loader\",\n-  \"version\": \"0.1.1\",\n-  \"description\": \"SVG sprite webpack loader\",\n-  \"main\": \"index.js\",\n-  \"scripts\": {\n-    \"test\": \"echo \\\"Error: no test specified\\\" && exit 1\"\n-  },\n-  \"repository\": {\n-    \"type\": \"git\",\n-    \"url\": \"git+https://github.com/kisenka/webpack-svg-sprite-loader.git\"\n-  },\n+  \"version\": \"6.0.11\",\n+  \"description\": \"Webpack loader for creating SVG sprites\",\n   \"keywords\": [\n-    \"webpack\",\n+    \"svg\",\n     \"sprite\",\n-    \"svg\"\n+    \"svg sprite\",\n+    \"svg stack\",\n+    \"webpack\",\n+    \"webpack2\",\n+    \"webpack3\",\n+    \"webpack loader\",\n+    \"webpack plugin\"\n   ],\n+  \"homepage\": \"https://github.com/JetBrains/svg-sprite-loader#readme\",\n+  \"bugs\": \"https://github.com/JetBrains/svg-sprite-loader/issues\",\n+  \"license\": \"MIT\",\n+  \"author\": \"kisenka\",\n+  \"repository\": \"JetBrains/svg-sprite-loader\",\n+  \"main\": \"lib/loader.js\",\n   \"files\": [\n-    \"lib/\",\n-    \"index.js\",\n-    \"config.js\",\n+    \"examples/**\",\n+    \"lib/**\",\n+    \"runtime/*.js\",\n+    \"plugin.js\",\n     \"README.md\",\n     \"LICENSE\"\n   ],\n-  \"author\": \"kisenka\",\n-  \"license\": \"MIT\",\n-  \"bugs\": {\n-    \"url\": \"https://github.com/kisenka/webpack-svg-sprite-loader/issues\"\n+  \"engines\": {\n+    \"node\": \">=6\"\n   },\n-  \"homepage\": \"https://github.com/kisenka/webpack-svg-sprite-loader#readme\",\n   \"dependencies\": {\n-    \"cheerio\": \"^0.19.0\",\n-    \"extend\": \"^3.0.0\",\n-    \"image-size\": \"^0.3.5\",\n-    \"loader-utils\": \"^0.2.11\",\n-    \"sniffr\": \"1.1.4\"\n+    \"bluebird\": \"^3.5.0\",\n+    \"deepmerge\": \"1.3.2\",\n+    \"domready\": \"1.0.8\",\n+    \"escape-string-regexp\": \"1.0.5\",\n+    \"loader-utils\": \"^1.1.0\",\n+    \"svg-baker\": \"^1.5.0\",\n+    \"svg-baker-runtime\": \"^1.4.7\",\n+    \"url-slug\": \"2.0.0\"\n+  },\n+  \"devDependencies\": {\n+    \"babel-core\": \"^6.24.1\",\n+    \"babel-loader\": \"^6.4.1\",\n+    \"babel-plugin-transform-object-rest-spread\": \"6.23.0\",\n+    \"babel-preset-es2015\": \"^6.24.0\",\n+    \"babel-preset-react\": \"6.24.1\",\n+    \"chai\": \"^3.5.0\",\n+    \"ci-publish\": \"^1.3.1\",\n+    \"codeclimate-test-reporter\": \"0.4.1\",\n+    \"commitizen\": \"2.9.6\",\n+    \"css-loader\": \"^0.28.0\",\n+    \"cz-customizable\": \"^5.0.0\",\n+    \"eslint-config-airbnb-base\": \"^11.1.2\",\n+    \"eslint-plugin-import\": \"^2.2.0\",\n+    \"glob\": \"7.1.1\",\n+    \"husky\": \"^0.13.3\",\n+    \"istanbul\": \"^0.4.5\",\n+    \"memory-fs\": \"^0.4.1\",\n+    \"minimist\": \"^1.2.0\",\n+    \"mocha\": \"^7.0.0\",\n+    \"nyc\": \"^10.3.2\",\n+    \"pascal-case\": \"2.0.1\",\n+    \"react\": \"15.5.4\",\n+    \"react-dom\": \"15.5.4\",\n+    \"rollup\": \"^0.41.6\",\n+    \"rollup-plugin-buble\": \"^0.15.0\",\n+    \"rollup-plugin-commonjs\": \"^8.0.2\",\n+    \"rollup-plugin-node-resolve\": \"^3.0.0\",\n+    \"shelljs\": \"0.7.7\",\n+    \"standard-version\": \"4.0.0\",\n",
+					"match": false,
+					"packageHash": "12beea2ae3ec8f94b64bf552362772a4dd2054e8c6b62d00fb0a38d792624c6e",
+					"size": 838,
+					"sourceHash": "33133f19fa6779ee0fd829cf5eba11610e1d20e4cb1d6fc775d6217d19783c5e",
+					"status": "content"
+				},
+				"examples/assets/facebook.svg": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"examples/assets/twitter.svg": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"examples/assets/wikipedia.svg": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"examples/base-webpack.config.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"examples/browser-sprite/README.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"examples/browser-sprite/build/main.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"examples/browser-sprite/build/sprite.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"examples/browser-sprite/demo.html": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"examples/browser-sprite/main.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"examples/browser-sprite/webpack.config.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"examples/browser-sprite-extract-mode/README.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"examples/browser-sprite-extract-mode/build/main.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"examples/browser-sprite-extract-mode/build/sprite.svg": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"examples/browser-sprite-extract-mode/build/static/sprite.svg": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"examples/browser-sprite-extract-mode/demo.html": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"examples/browser-sprite-extract-mode/main.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"examples/browser-sprite-extract-mode/webpack.config.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"examples/browser-sprite-with-dll/build/dll-manifest.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"examples/browser-sprite-with-dll/build/dll.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"examples/browser-sprite-with-dll/build/main.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"examples/browser-sprite-with-dll/demo.html": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"examples/browser-sprite-with-dll/dll.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"examples/browser-sprite-with-dll/main.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"examples/browser-sprite-with-dll/webpack.config.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"examples/browser-sprite-with-dll/webpack.dll.config.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"examples/browser-sprite-with-dll-extract-mode/build/dll-manifest.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"examples/browser-sprite-with-dll-extract-mode/build/dll.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"examples/browser-sprite-with-dll-extract-mode/build/dll.svg": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"examples/browser-sprite-with-dll-extract-mode/build/main.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"examples/browser-sprite-with-dll-extract-mode/build/sprite.svg": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"examples/browser-sprite-with-dll-extract-mode/demo.html": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"examples/browser-sprite-with-dll-extract-mode/dll.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"examples/browser-sprite-with-dll-extract-mode/main.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"examples/browser-sprite-with-dll-extract-mode/webpack.config.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"examples/browser-sprite-with-dll-extract-mode/webpack.dll.config.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"examples/custom-runtime-generator/README.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"examples/custom-runtime-generator/build/main.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"examples/custom-runtime-generator/demo.html": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"examples/custom-runtime-generator/icon.jsx": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"examples/custom-runtime-generator/main.jsx": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"examples/custom-runtime-generator/svg-to-icon-component-runtime-generator.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"examples/custom-runtime-generator/webpack.config.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"examples/custom-runtime-generator-extract-mode/build/main.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"examples/custom-runtime-generator-extract-mode/build/sprite.svg": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"examples/custom-runtime-generator-extract-mode/demo.html": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"examples/custom-runtime-generator-extract-mode/extracting-runtime-generator.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"examples/custom-runtime-generator-extract-mode/main.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"examples/custom-runtime-generator-extract-mode/webpack.config.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"examples/extract-mode/README.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"examples/extract-mode/build/main.css": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"examples/extract-mode/build/main.html": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"examples/extract-mode/build/main.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"examples/extract-mode/build/sprite-10a171.svg": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"examples/extract-mode/build/sprite-de3584.svg": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"examples/extract-mode/main.css": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"examples/extract-mode/main.html": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"examples/extract-mode/main.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"examples/extract-mode/webpack.config.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"examples/interop-with-html-webpack-plugin/README.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"examples/interop-with-html-webpack-plugin/build/index.html": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"examples/interop-with-html-webpack-plugin/build/main.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"examples/interop-with-html-webpack-plugin/build/sprite.svg": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"examples/interop-with-html-webpack-plugin/main.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"examples/interop-with-html-webpack-plugin/template.ejs": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"examples/interop-with-html-webpack-plugin/webpack.config.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"examples/server-side-rendering/README.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"examples/server-side-rendering/build/index.html": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"examples/server-side-rendering/build/main.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"examples/server-side-rendering/main.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"examples/server-side-rendering/webpack.config.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/config.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/configurator.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/exceptions.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/loader.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/plugin.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/runtime-generator.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/utils/generate-export.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/utils/generate-import.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/utils/generate-sprite-placeholder.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/utils/get-all-modules.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/utils/get-loader-options.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/utils/get-matched-rule-4.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/utils/get-matched-rule-5.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/utils/get-matched-rule.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/utils/get-module-chunk.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/utils/index.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/utils/interpolate.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/utils/is-module-should-be-extracted.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/utils/is-webpack-1.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/utils/mapped-list.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/utils/normalize-rule.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/utils/replace-in-module-source.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/utils/replace-sprite-placeholder.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/utils/stringify-symbol.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/utils/stringify.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"plugin.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"runtime/browser-sprite.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"runtime/sprite.js": {
+					"match": false,
+					"status": "missing-in-package"
+				}
+			},
+			"summary": {
+				"differentFiles": 3,
+				"matchingFiles": 0,
+				"missingInPackage": 98,
+				"missingInSource": 12,
+				"score": 0,
+				"totalFiles": 113
+			}
+		}
+	}
+]
