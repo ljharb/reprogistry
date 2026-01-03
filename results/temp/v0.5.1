@@ -1,0 +1,103 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-03T19:28:37.878Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:11.7.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "temp@0.5.1",
+			"name": "temp",
+			"version": "0.5.1",
+			"location": "https://registry.npmjs.org/temp/-/temp-0.5.1.tgz",
+			"integrity": "sha512-Gwc1QWGkf3f3d0y8wNyC9uvVqAsmVdUMPzdiLJDNVAHhlxZmSWlvVZAk1LmZcBuYcmhvJ0oHDVHksghU3VI/0w==",
+			"publishedAt": "2013-06-30T05:34:31.247Z",
+			"publishedWith": {
+				"node": null,
+				"npm": "1.2.0"
+			}
+		},
+		"source": {
+			"integrity": "sha512-AIbpi2rg3iicF4F3bsSk0Yz0aJxLz6vLTAErgkc2VixoVA8ps8vNUjkJI9aQwVKiz6a4cYcaU6GDxe6syoR9uQ==",
+			"location": "git://github.com/bruce/node-temp.git",
+			"spec": "github:bruce/node-temp#HEAD"
+		},
+		"comparisonHash": "8a2a8dcbb729bf3ee9216e490c955701f0ddebe1",
+		"diff": {
+			"files": {
+				".npmignore": {
+					"match": false,
+					"packageHash": "1d8db9c378a10fee6421975728ebdfe58eb5c2b9d48b599bc5155bfdbfeb786c",
+					"size": 33,
+					"status": "missing-in-source"
+				},
+				"LICENSE": {
+					"diff": "--- published/LICENSE\n+++ rebuilt/LICENSE\n@@ -1,20 +1,20 @@\n-Copyright (c) 2009 Bruce Williams\n+The MIT License (MIT)\n \n-Permission is hereby granted, free of charge, to any person obtaining\n-a copy of this software and associated documentation files (the\n-\"Software\"), to deal in the Software without restriction, including\n-without limitation the rights to use, copy, modify, merge, publish,\n-distribute, sublicense, and/or sell copies of the Software, and to\n-permit persons to whom the Software is furnished to do so, subject to\n-the following conditions:\n+Copyright (c) 2010-2014 Bruce Williams\n \n-The above copyright notice and this permission notice shall be\n-included in all copies or substantial portions of the Software.\n+Permission is hereby granted, free of charge, to any person obtaining a copy of\n+this software and associated documentation files (the \"Software\"), to deal in\n+the Software without restriction, including without limitation the rights to\n+use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of\n+the Software, and to permit persons to whom the Software is furnished to do so,\n+subject to the following conditions:\n \n-THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND,\n-EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF\n-MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND\n-NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE\n-LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION\n-OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION\n-WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.\n+The above copyright notice and this permission notice shall be included in all\n+copies or substantial portions of the Software.\n+\n+THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR\n+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS\n+FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR\n+COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER\n+IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN\n+CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.\n",
+					"match": false,
+					"packageHash": "d49a3ee8b9bf922b1ede8e501c0bdf0069fa8cdb6f5b1dd7a680fdb46cb424ec",
+					"size": 1058,
+					"sourceHash": "63053a2fc2b06fe2138fa128ab29c487e28e38be8a7b9c16a4ef7209e945c0b0",
+					"status": "content"
+				},
+				"README.md": {
+					"diff": "--- published/README.md\n+++ rebuilt/README.md\n@@ -1,12 +1,34 @@\n-node-temp -- temporary files and directories for node.js\n-========================================================\n+![Image of node-temp logo](https://raw.githubusercontent.com/bruce/node-temp/master/media/A5.jpg)\n+=========\n+\n+Temporary files, directories, and streams for Node.js.\n \n Handles generating a unique file/directory name under the appropriate\n system temporary directory, changing the file to an appropriate mode,\n-and supports automatic removal.\n+and supports automatic removal (if asked)\n \n `temp` has a similar API to the `fs` module.\n \n+Node.js Compatibility\n+---------------------\n+\n+Supports v6.0.0+.\n+\n+[![Build Status](https://travis-ci.org/bruce/node-temp.png)](https://travis-ci.org/bruce/node-temp)\n+\n+Please let me know if you have problems running it on a later version of Node.js or\n+have platform-specific problems.\n+\n+Installation\n+------------\n+\n+Install it using [npm](http://github.com/isaacs/npm):\n+\n+    $ npm install temp\n+\n+Or get it directly from:\n+http://github.com/bruce/node-temp\n+\n Synopsis\n --------\n \n@@ -14,10 +36,12 @@\n directories with `mkdir` and `mkdirSync`, or you can get a unique name\n in the system temporary directory with `path`.\n \n+See the [API section](https://github.com/bruce/node-temp#API) for more details on the API of `temp`.\n+\n Working copies of the following examples can be found under the\n `examples` directory.\n \n-### Temporary Files\n+### Temporary Files (`open` and `openSync`)\n \n To create a temporary file use `open` or `openSync`, passing\n them an optional prefix, suffix, or both (see below for details on\n@@ -33,7 +57,7 @@\n In this example we write to a temporary file and call out to `grep` and\n `wc -l` to determine the number of time `foo` occurs in the text.  The\n temporary file is chmod'd `0600` and cleaned up automatically when the\n-process at exit:\n+process at exit (because `temp.track()` is called):\n \n ```javascript\n var temp = require('temp'),\n@@ -41,21 +65,71 @@\n     util  = require('util'),\n     exec = require('child_process').exec;\n \n+// Automatically track and cleanup files at exit\n+temp.track();\n+\n // Fake data\n var myData = \"foo\\nbar\\nfoo\\nbaz\";\n \n // Process the data (note: error handling omitted)\n temp.open('myprefix', function(err, info) {\n-  fs.write(info.fd, myData);\n-  fs.close(info.fd, function(err) {\n-    exec(\"grep foo '\" + info.path + \"' | wc -l\", function(err, stdout) {\n-      util.puts(stdout.trim());\n+  if (!err) {\n+    fs.write(info.fd, myData, (err) => {\n+\t\tconsole.log(err);\n+\t});\n+    fs.close(info.fd, function(err) {\n+      exec(\"grep foo '\" + info.path + \"' | wc -l\", function(err, stdout) {\n+        util.puts(stdout.trim());\n+      });\n     });\n-  });\n+  }\n });\n ```\n \n-### Temporary Directories\n+### Want Cleanup? Make sure you ask for it. (`track`)\n+\n+As noted in the example above, if you want temp to track the files and\n+directories it creates and handle removing those files and directories\n+on exit, you must call `track()`. The `track()` function is chainable,\n+and it's recommended that you call it when requiring the module.\n",
+					"match": false,
+					"packageHash": "d49e54d9454466f2f8ce58a12f77dd5616505dc5e283d5e83e8032d024d951b9",
+					"size": 5634,
+					"sourceHash": "42af0846275aaece3a7669ef5725afa5015235b1eeea4b7cd21f925c535f135d",
+					"status": "content"
+				},
+				"examples/grepcount.js": {
+					"match": false,
+					"packageHash": "9a1cb7e8044bd4fbd891589e8019beb74e86093c2df8d805460a412fa5ef4292",
+					"size": 472,
+					"status": "missing-in-source"
+				},
+				"examples/pdfcreator.js": {
+					"match": false,
+					"packageHash": "6feba8676bd597fa5e7f8eb532032d9319ce32b56bde3aedc462dbae935284cb",
+					"size": 653,
+					"status": "missing-in-source"
+				},
+				"lib/temp.js": {
+					"diff": "--- published/lib/temp.js\n+++ rebuilt/lib/temp.js\n@@ -1,26 +1,58 @@\n-var fs   = require('fs'),\n-    os   = require('os'),\n-    path = require('path'),\n-    cnst = require('constants');\n-\n-/* HELPERS */\n+let fs   = require('fs');\n+let path = require('path');\n+let cnst = require('constants');\n+\n+let os         = require('os');\n+let rimraf     = require('rimraf');\n+let mkdirp     = require('mkdirp');\n+let osTmpdir   = require('os').tmpdir();\n+\n+const rimrafSync = rimraf.sync;\n+\n+//== helpers\n+//\n+let dir = path.resolve(os.tmpdir());\n+\n+let RDWR_EXCL = cnst.O_CREAT | cnst.O_TRUNC | cnst.O_RDWR | cnst.O_EXCL;\n+\n+let promisify = function(callback) {\n+  if (typeof callback === 'function') {\n+    return [undefined, callback];\n+  }\n \n-var RDWR_EXCL = cnst.O_CREAT | cnst.O_TRUNC | cnst.O_RDWR | cnst.O_EXCL;\n+  var promiseCallback;\n+  var promise = new Promise(function(resolve, reject) {\n+    promiseCallback = function() {\n+      var args = Array.from(arguments);\n+      var err = args.shift();\n+\n+      process.nextTick(function() {\n+        if (err) {\n+          reject(err);\n+        } else if (args.length === 1) {\n+          resolve(args[0]);\n+        } else {\n+          resolve(args);\n+        }\n+      });\n+    };\n+  });\n \n-var environmentVariables = ['TMPDIR', 'TMP', 'TEMP'];\n+  return [promise, promiseCallback];\n+};\n \n var generateName = function(rawAffixes, defaultPrefix) {\n   var affixes = parseAffixes(rawAffixes, defaultPrefix);\n   var now = new Date();\n   var name = [affixes.prefix,\n-              now.getYear(), now.getMonth(), now.getDate(),\n+              now.getFullYear(), now.getMonth(), now.getDate(),\n               '-',\n               process.pid,\n               '-',\n               (Math.random() * 0x100000000 + 1).toString(36),\n               affixes.suffix].join('');\n-  return path.join(exports.dir, name);\n-}\n+  return path.join(affixes.dir || dir, name);\n+};\n \n var parseAffixes = function(rawAffixes, defaultPrefix) {\n   var affixes = {prefix: null, suffix: null};\n@@ -31,121 +63,264 @@\n       break;\n     case 'object':\n       affixes = rawAffixes;\n-      break\n+      break;\n     default:\n-      throw(\"Unknown affix declaration: \" + affixes);\n+      throw new Error(\"Unknown affix declaration: \" + affixes);\n     }\n   } else {\n     affixes.prefix = defaultPrefix;\n   }\n   return affixes;\n-}\n-\n-/* EXIT HANDLERS */\n+};\n \n-/*\n+/* -------------------------------------------------------------------------\n+ * Don't forget to call track() if you want file tracking and exit handlers!\n+ * -------------------------------------------------------------------------\n  * When any temp file or directory is created, it is added to filesToDelete\n  * or dirsToDelete. The first time any temp file is created, a listener is\n  * added to remove all temp files and directories at exit.\n  */\n+var tracking = false;\n",
+					"match": false,
+					"packageHash": "9a422ca9ebcf5ee7b43b38e2de7ccbe59593caaa5a02793e315638ba623840d2",
+					"size": 3761,
+					"sourceHash": "ab00e9972ccbd639a4558519f40ad6839cb2c616b3da6cb9c12dea2828c6c9c9",
+					"status": "content"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -10,21 +10,40 @@\n     \"tmpdir\",\n     \"security\"\n   ],\n-  \"version\": \"0.5.1\",\n-  \"author\": \"Bruce Williams <bruce@codefluency.com>\",\n+  \"version\": \"0.9.4\",\n+  \"author\": \"Bruce Williams <brwcodes@gmail.com>\",\n+  \"license\": \"MIT\",\n   \"directories\": {\n     \"lib\": \"lib\"\n   },\n-  \"engines\": [\n-    \"node >=0.8.0\"\n-  ],\n+  \"engines\": {\n+    \"node\": \">=6.0.0\"\n+  },\n   \"main\": \"./lib/temp\",\n   \"dependencies\": {\n-    \"rimraf\": \"~2.1.4\"\n+    \"rimraf\": \"~2.6.2\",\n+    \"mkdirp\": \"^0.5.1\"\n+  },\n+  \"keywords\": [\n+    \"temporary\",\n+    \"tmp\",\n+    \"temp\",\n+    \"tempdir\",\n+    \"tempfile\",\n+    \"tmpdir\",\n+    \"tmpfile\"\n+  ],\n+  \"files\": [\n+    \"lib\"\n+  ],\n+  \"devDependencies\": {\n+    \"mocha\": \"6.2.3\"\n   },\n-  \"devDependencies\": {},\n   \"repository\": {\n     \"type\": \"git\",\n     \"url\": \"git://github.com/bruce/node-temp.git\"\n+  },\n+  \"scripts\": {\n+    \"test\": \"mocha test/temp-test.js\"\n   }\n }\n",
+					"match": false,
+					"packageHash": "2e9408ffada7917cccb8b2ff656e43a1cc073b08f3f02c3ba73d783ca1d90cdc",
+					"size": 539,
+					"sourceHash": "d26998b8c650d2917e65bcd5397b53b30a22c5a96e44d75e5a2fbf254680def0",
+					"status": "content"
+				},
+				"temp-0.5.1.tgz": {
+					"match": false,
+					"packageHash": "43306c19fb16ace0989ac4dd64617f084ea497ae45de4ddbea0e24d54079dcc1",
+					"size": 5112,
+					"status": "missing-in-source"
+				},
+				"test/temp-test.js": {
+					"match": false,
+					"packageHash": "78ee3da012f20b0a7ee9b99585ca8dac073544d9317422f7be3c2c4b315944de",
+					"size": 2430,
+					"status": "missing-in-source"
+				}
+			},
+			"summary": {
+				"differentFiles": 4,
+				"matchingFiles": 0,
+				"missingInPackage": 0,
+				"missingInSource": 5,
+				"score": 0,
+				"totalFiles": 9
+			}
+		}
+	}
+]
