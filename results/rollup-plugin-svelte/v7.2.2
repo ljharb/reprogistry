@@ -1,0 +1,57 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-03T17:18:09.768Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:10.1.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "rollup-plugin-svelte@7.2.2",
+			"name": "rollup-plugin-svelte",
+			"version": "7.2.2",
+			"location": "https://registry.npmjs.org/rollup-plugin-svelte/-/rollup-plugin-svelte-7.2.2.tgz",
+			"integrity": "sha512-hgnIblTRewaBEVQD6N0Q43o+y6q1TmDRhBjaEzQCi50bs8TXqjc+d1zFZyE8tsfgcfNHZQzclh4RxlFUB85H8Q==",
+			"publishedAt": "2024-06-06T09:02:39.239Z",
+			"publishedWith": {
+				"node": "20.8.1",
+				"npm": "10.1.0"
+			}
+		},
+		"source": {
+			"integrity": "sha512-EqV9hur7Ubzp+qEwEJg90fOxwpe7jDF4Drp/bTfEcuKsJ7Ws1VytmGZW32uUZbb1u5M3zKptZ29M91cLv5jtnw==",
+			"location": "git+https://github.com/sveltejs/rollup-plugin-svelte.git",
+			"spec": "github:sveltejs/rollup-plugin-svelte#1e0136011b7f08c3b74b352345dd0ac95b20fea6"
+		},
+		"comparisonHash": "8a2a8dcbb729bf3ee9216e490c955701f0ddebe1",
+		"diff": {
+			"files": {
+				"index.js": {
+					"diff": "--- published/index.js\n+++ rebuilt/index.js\n@@ -1,196 +1,194 @@\n-const path = require('path');\r\n-const fs = require('fs');\r\n-const { resolve } = require('resolve.exports');\r\n-const { createFilter } = require('@rollup/pluginutils');\r\n-const svelte = require('svelte/compiler');\r\n-\r\n-const PREFIX = '[rollup-plugin-svelte]';\r\n-\r\n-const majorVersion = Number(svelte.VERSION.split('.')[0]);\r\n-\r\n-const plugin_options = new Set([\r\n-\t'emitCss',\r\n-\t'exclude',\r\n-\t'extensions',\r\n-\t'include',\r\n-\t'onwarn',\r\n-\t'preprocess',\r\n-]);\r\n-\r\n-const svelte_module_regex = /\\.svelte(\\.[^./\\\\]+)*\\.(js|ts)$/;\r\n-\r\n-let warned = false;\r\n-\r\n-/**\r\n- * @param [options] {Partial<import('.').Options>}\r\n- * @returns {import('rollup').Plugin}\r\n- */\r\n-module.exports = function (options = {}) {\r\n-\tconst { compilerOptions = {}, ...rest } = options;\r\n-\tconst extensions = rest.extensions || ['.svelte'];\r\n-\tconst filter = createFilter(rest.include, rest.exclude);\r\n-\r\n-\tif (majorVersion === 3) {\r\n-\t\tcompilerOptions.format = 'esm';\r\n-\t}\r\n-\r\n-\tfor (const key in rest) {\r\n-\t\tif (plugin_options.has(key)) continue;\r\n-\t\tconsole.warn(\r\n-\t\t\t`${PREFIX} Unknown \"${key}\" option. Please use \"compilerOptions\" for any Svelte compiler configuration.`\r\n-\t\t);\r\n-\t}\r\n-\r\n-\t// [filename]:[chunk]\r\n-\tconst cache_emit = new Map();\r\n-\tconst { onwarn, emitCss = true } = rest;\r\n-\r\n-\tif (emitCss) {\r\n-\t\tconst cssOptionValue = majorVersion > 3 ? 'external' : false;\r\n-\t\tif (compilerOptions.css) {\r\n-\t\t\tconsole.warn(\r\n-\t\t\t\t`${PREFIX} Forcing \\`\"compilerOptions.css\": ${\r\n-\t\t\t\t\ttypeof cssOptionValue === 'string' ? `\"${cssOptionValue}\"` : cssOptionValue\r\n-\t\t\t\t}\\` because \"emitCss\" was truthy.`\r\n-\t\t\t);\r\n-\t\t}\r\n-\t\tcompilerOptions.css = cssOptionValue;\r\n-\t}\r\n-\r\n-\treturn {\r\n-\t\tname: 'svelte',\r\n-\r\n-\t\t/**\r\n-\t\t * Resolve an import's full filepath.\r\n-\t\t */\r\n-\t\tasync resolveId(importee, importer, options) {\r\n-\t\t\tif (cache_emit.has(importee)) return importee;\r\n-\t\t\tif (!importer || importee[0] === '.' || importee[0] === '\\0' || path.isAbsolute(importee))\r\n-\t\t\t\treturn null;\r\n-\r\n-\t\t\t// if this is a bare import, see if there's a valid pkg.svelte\r\n-\t\t\tconst parts = importee.split('/');\r\n-\r\n-\t\t\tlet name = parts.shift();\r\n-\t\t\tif (name && name[0] === '@') {\r\n-\t\t\t\tname += `/${parts.shift()}`;\r\n-\t\t\t}\r\n-\r\n-\t\t\tconst entry = parts.join('/') || '.';\r\n-\r\n-\t\t\tlet pkg;\r\n-\t\t\tlet dir;\r\n-\r\n-\t\t\tlet search_dir = importer;\r\n-\t\t\twhile (search_dir !== (search_dir = path.dirname(search_dir))) {\r\n-\t\t\t\tdir = path.join(search_dir, 'node_modules', name);\r\n-\t\t\t\tconst file = path.join(dir, 'package.json');\r\n-\t\t\t\tif (fs.existsSync(file)) {\r\n-\t\t\t\t\tpkg = JSON.parse(fs.readFileSync(file, 'utf-8'));\r\n-\t\t\t\t\tbreak;\r\n-\t\t\t\t}\r\n-\t\t\t}\r\n-\r\n-\t\t\tif (!pkg) return;\r\n-\r\n-\t\t\t// resolve pkg.svelte first for backwards compatibility\r\n-\t\t\t// we should resolve it after exports longer-term\r\n",
+					"match": false,
+					"packageHash": "67e74d5120d35ff8810ba50af22890d66569622d45c6f62c6ff6db9f69e1a4e1",
+					"size": 5472,
+					"sourceHash": "6a7318b64af8049ff99f158ed5be938409b699d9515a481205cd9b02c5f3a273",
+					"status": "content"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -1,48 +1,48 @@\n-{\r\n-\t\"version\": \"7.2.2\",\r\n-\t\"name\": \"rollup-plugin-svelte\",\r\n-\t\"description\": \"Compile Svelte components with Rollup\",\r\n-\t\"repository\": \"sveltejs/rollup-plugin-svelte\",\r\n-\t\"types\": \"index.d.ts\",\r\n-\t\"main\": \"index.js\",\r\n-\t\"license\": \"MIT\",\r\n-\t\"bugs\": {\r\n-\t\t\"url\": \"https://github.com/sveltejs/rollup-plugin-svelte/issues\"\r\n-\t},\r\n-\t\"files\": [\r\n-\t\t\"index.js\",\r\n-\t\t\"index.d.ts\",\r\n-\t\t\"README.md\",\r\n-\t\t\"LICENSE\"\r\n-\t],\r\n-\t\"author\": \"Rich Harris\",\r\n-\t\"scripts\": {\r\n-\t\t\"lint\": \"eslint index.js\",\r\n-\t\t\"test\": \"node test/index.js\",\r\n-\t\t\"prepublishOnly\": \"npm run lint && npm test\"\r\n-\t},\r\n-\t\"engines\": {\r\n-\t\t\"node\": \">=10\"\r\n-\t},\r\n-\t\"dependencies\": {\r\n-\t\t\"@rollup/pluginutils\": \"^4.1.0\",\r\n-\t\t\"resolve.exports\": \"^2.0.0\"\r\n-\t},\r\n-\t\"peerDependencies\": {\r\n-\t\t\"rollup\": \">=2.0.0\",\r\n-\t\t\"svelte\": \">=3.5.0\"\r\n-\t},\r\n-\t\"devDependencies\": {\r\n-\t\t\"eslint\": \"^7.14.0\",\r\n-\t\t\"eslint-config-prettier\": \"^8.8.0\",\r\n-\t\t\"rollup\": \"^2.33.3\",\r\n-\t\t\"sander\": \"^0.6.0\",\r\n-\t\t\"source-map\": \"^0.7.3\",\r\n-\t\t\"svelte\": \"^4.0.0\",\r\n-\t\t\"uvu\": \"^0.4.1\"\r\n-\t},\r\n-\t\"keywords\": [\r\n-\t\t\"svelte\",\r\n-\t\t\"rollup\"\r\n-\t]\r\n-}\r\n+{\n+\t\"version\": \"7.2.1\",\n+\t\"name\": \"rollup-plugin-svelte\",\n+\t\"description\": \"Compile Svelte components with Rollup\",\n+\t\"repository\": \"sveltejs/rollup-plugin-svelte\",\n+\t\"types\": \"index.d.ts\",\n+\t\"main\": \"index.js\",\n+\t\"license\": \"MIT\",\n+\t\"bugs\": {\n+\t\t\"url\": \"https://github.com/sveltejs/rollup-plugin-svelte/issues\"\n+\t},\n+\t\"files\": [\n+\t\t\"index.js\",\n+\t\t\"index.d.ts\",\n+\t\t\"README.md\",\n+\t\t\"LICENSE\"\n+\t],\n+\t\"author\": \"Rich Harris\",\n+\t\"scripts\": {\n+\t\t\"lint\": \"eslint index.js\",\n+\t\t\"test\": \"node test/index.js\",\n+\t\t\"prepublishOnly\": \"npm run lint && npm test\"\n+\t},\n+\t\"engines\": {\n+\t\t\"node\": \">=10\"\n+\t},\n+\t\"dependencies\": {\n+\t\t\"@rollup/pluginutils\": \"^4.1.0\",\n+\t\t\"resolve.exports\": \"^2.0.0\"\n+\t},\n+\t\"peerDependencies\": {\n+\t\t\"rollup\": \">=2.0.0\",\n+\t\t\"svelte\": \">=3.5.0\"\n+\t},\n+\t\"devDependencies\": {\n+\t\t\"eslint\": \"^7.14.0\",\n+\t\t\"eslint-config-prettier\": \"^8.8.0\",\n+\t\t\"rollup\": \"^2.33.3\",\n+\t\t\"sander\": \"^0.6.0\",\n+\t\t\"source-map\": \"^0.7.3\",\n+\t\t\"svelte\": \"^4.0.0\",\n+\t\t\"uvu\": \"^0.4.1\"\n+\t},\n+\t\"keywords\": [\n+\t\t\"svelte\",\n+\t\t\"rollup\"\n+\t]\n+}\n",
+					"match": false,
+					"packageHash": "b33d887d80bcf14bb6b804223f49fbdf1223d1a1a52b6a612c41222d0686a0e7",
+					"size": 1016,
+					"sourceHash": "5798340e6b9174cfe44d7f920c890e5eb29d39a1713be76b98b67175df82a344",
+					"status": "content"
+				}
+			},
+			"summary": {
+				"differentFiles": 2,
+				"matchingFiles": 3,
+				"missingInPackage": 0,
+				"missingInSource": 0,
+				"score": 0.6,
+				"totalFiles": 5
+			}
+		}
+	}
+]

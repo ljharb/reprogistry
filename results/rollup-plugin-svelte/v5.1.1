@@ -1,0 +1,75 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-03T17:14:44.644Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:6.12.1",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "rollup-plugin-svelte@5.1.1",
+			"name": "rollup-plugin-svelte",
+			"version": "5.1.1",
+			"location": "https://registry.npmjs.org/rollup-plugin-svelte/-/rollup-plugin-svelte-5.1.1.tgz",
+			"integrity": "sha512-wP3CnKHjR4fZUgNm5Iey7eItnxwnH/nAw568WJ8dpMSchBxxZ/DmKSx8e6h8k/B6SwG1wfGvWehadFJHcuFFSw==",
+			"publishedAt": "2019-11-07T21:41:25.149Z",
+			"publishedWith": {
+				"node": "13.1.0",
+				"npm": "6.12.1"
+			}
+		},
+		"source": {
+			"integrity": "sha512-CJZk2QMYXUNhNZk2ywEse6ykLKgajKAdH5Q6Cz6aKaBlt/vfqhbotwwlGnxR1AlL52TSmx+YuRMzuvdMYo217w==",
+			"location": "git+https://github.com/rollup/rollup-plugin-svelte.git",
+			"spec": "github:rollup/rollup-plugin-svelte#ed0a44cb10c498425170c25f4babbd23fa69fd51"
+		},
+		"comparisonHash": "8a2a8dcbb729bf3ee9216e490c955701f0ddebe1",
+		"diff": {
+			"files": {
+				"CHANGELOG.md": {
+					"match": false,
+					"packageHash": "2de15b88dc9199bf02ca52883140cde30f3403a5b8f2aa0e4c073328fe904c95",
+					"size": 3576,
+					"status": "missing-in-source"
+				},
+				"README.md": {
+					"diff": "--- published/README.md\n+++ rebuilt/README.md\n@@ -1,4 +1,6 @@\n-# rollup-plugin-svelte\n+> Undecided yet what bundler to use? We suggest using [SvelteKit](https://kit.svelte.dev) or Vite with [vite-plugin-svelte](https://github.com/sveltejs/vite-plugin-svelte/).\n+\n+# rollup-plugin-svelte [![CI](https://github.com/sveltejs/rollup-plugin-svelte/workflows/CI/badge.svg)](https://github.com/sveltejs/rollup-plugin-svelte/actions)\n \n Compile Svelte components.\n \n@@ -16,8 +18,8 @@\n \n ```js\n // rollup.config.js\n-import * as fs from 'fs';\n import svelte from 'rollup-plugin-svelte';\n+import resolve from '@rollup/plugin-node-resolve';\n \n export default {\n   input: 'src/main.js',\n@@ -27,38 +29,23 @@\n   },\n   plugins: [\n     svelte({\n-      // By default, all .svelte and .html files are compiled\n+      // By default, all \".svelte\" files are compiled\n       extensions: ['.my-custom-extension'],\n \n       // You can restrict which files are compiled\n       // using `include` and `exclude`\n       include: 'src/components/**/*.svelte',\n \n-      // By default, the client-side compiler is used. You\n-      // can also use the server-side rendering compiler\n-      generate: 'ssr',\n-\n       // Optionally, preprocess components with svelte.preprocess:\n-      // https://svelte.dev/docs#svelte_preprocess\n+      // https://svelte.dev/docs#compile-time-svelte-preprocess\n       preprocess: {\n         style: ({ content }) => {\n           return transformStyles(content);\n         }\n       },\n \n-      // Emit CSS as \"files\" for other plugins to process\n-      emitCss: true,\n-\n-      // Extract CSS into a separate file (recommended).\n-      // See note below\n-      css: function (css) {\n-        console.log(css.code); // the concatenated CSS\n-        console.log(css.map); // a sourcemap\n-\n-        // creates `main.css` and `main.css.map` — pass `false`\n-        // as the second argument if you don't want the sourcemap\n-        css.write('public/main.css');\n-      },\n+      // Emit CSS as \"files\" for other plugins to process. default is true\n+      emitCss: false,\n \n       // Warnings are normally passed straight to Rollup. You can\n       // optionally handle them here, for example to squelch\n@@ -69,34 +56,63 @@\n \n         // let Rollup handle all other warnings normally\n         handler(warning);\n+      },\n+\n+      // You can pass any of the Svelte compiler options\n+      compilerOptions: {\n+\n+        // By default, the client-side compiler is used. You\n+        // can also use the server-side rendering compiler\n+        generate: 'ssr',\n+\n+        // ensure that extra attributes are added to head\n+        // elements for hydration (used with generate: 'ssr')\n+        hydratable: true,\n+\n+        // You can optionally set 'customElement' to 'true' to compile\n+        // your components to custom elements (aka web elements)\n+        customElement: false\n       }\n-    })\n+    }),\n+    // see NOTICE below\n+    resolve({\n+      browser: true,\n+      exportConditions: ['svelte'],\n+      extensions: ['.svelte']\n+    }),\n+    // ...\n   ]\n }\n ```\n \n+> **NOTICE:** You will need additional Rollup plugins. <br>Alone, this plugin translates Svelte components into CSS and JavaScript files. <br>You will need to include [`@rollup/plugin-node-resolve`](https://www.npmjs.com/package/@rollup/plugin-node-resolve) – and probably [`@rollup/plugin-commonjs`](https://www.npmjs.com/package/@rollup/plugin-commonjs) – in your Rollup config.\n+\n \n",
+					"match": false,
+					"packageHash": "a05191c0ae17595f4ca935b55ab8eeaaa46aa40f6219c4ac47239544b4174a14",
+					"size": 4676,
+					"sourceHash": "138add8720b4261a5e22653a1b8d1810254f0a603e40a37ea476f6ae16317588",
+					"status": "content"
+				},
+				"index.js": {
+					"diff": "--- published/index.js\n+++ rebuilt/index.js\n@@ -1,338 +1,198 @@\n-const fs = require('fs');\n const path = require('path');\n-const relative = require('require-relative');\n-const { version } = require('svelte/package.json');\n-const { createFilter } = require('rollup-pluginutils');\n-const { encode, decode } = require('sourcemap-codec');\n-\n-const major_version = +version[0];\n-\n-const { compile, preprocess } = major_version >= 3\n-\t? require('svelte/compiler.js')\n-\t: require('svelte');\n-\n-function sanitize(input) {\n-\treturn path\n-\t\t.basename(input)\n-\t\t.replace(path.extname(input), '')\n-\t\t.replace(/[^a-zA-Z_$0-9]+/g, '_')\n-\t\t.replace(/^_/, '')\n-\t\t.replace(/_$/, '')\n-\t\t.replace(/^(\\d)/, '_$1');\n-}\n-\n-function capitalize(str) {\n-\treturn str[0].toUpperCase() + str.slice(1);\n-}\n-\n-const pluginOptions = {\n-\tinclude: true,\n-\texclude: true,\n-\textensions: true,\n-\temitCss: true,\n-\tpreprocess: true,\n-\n-\t// legacy — we might want to remove/change these in a future version\n-\tonwarn: true,\n-\tshared: true\n-};\n-\n-function tryRequire(id) {\n-\ttry {\n-\t\treturn require(id);\n-\t} catch (err) {\n-\t\treturn null;\n-\t}\n-}\n-\n-function tryResolve(pkg, importer) {\n-\ttry {\n-\t\treturn relative.resolve(pkg, importer);\n-\t} catch (err) {\n-\t\tif (err.code === 'MODULE_NOT_FOUND') return null;\n-\t\tthrow err;\n-\t}\n-}\n-\n-function exists(file) {\n-\ttry {\n-\t\tfs.statSync(file);\n-\t\treturn true;\n-\t} catch (err) {\n-\t\tif (err.code === 'ENOENT') return false;\n-\t\tthrow err;\n-\t}\n-}\n-\n-function mkdirp(dir) {\n-\tconst parent = path.dirname(dir);\n-\tif (parent === dir) return;\n-\n-\tmkdirp(parent);\n-\n-\ttry {\n-\t\tfs.mkdirSync(dir);\n-\t} catch (err) {\n-\t\tif (err.code !== 'EEXIST') throw err;\n-\t}\n-}\n-\n-class CssWriter {\n-\tconstructor (code, map, warn) {\n-\t\tthis.code = code;\n-\t\tthis.map = {\n-\t\t\tversion: 3,\n-\t\t\tfile: null,\n-\t\t\tsources: map.sources,\n-\t\t\tsourcesContent: map.sourcesContent,\n-\t\t\tnames: [],\n-\t\t\tmappings: map.mappings\n-\t\t};\n-\t\tthis.warn = warn;\n-\t}\n-\n-\twrite(dest, map) {\n-\t\tdest = path.resolve(dest);\n-\t\tmkdirp(path.dirname(dest));\n-\n",
+					"match": false,
+					"packageHash": "b2ba4cbddd8f2234947ddceb75ce99677cfab8fa725e9bccb40db201bf3fadd9",
+					"size": 8101,
+					"sourceHash": "0f37ccecd2bbbb96b3353856e85c05fc86071686089c11454af214d5ab9e71b2",
+					"status": "content"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -1,45 +1,50 @@\n {\n-  \"name\": \"rollup-plugin-svelte\",\n-  \"version\": \"5.1.1\",\n-  \"description\": \"Compile Svelte components with Rollup\",\n-  \"main\": \"index.js\",\n-  \"files\": [\n-    \"index.js\",\n-    \"README.md\",\n-    \"LICENSE\"\n-  ],\n-  \"scripts\": {\n-    \"test\": \"mocha\",\n-    \"lint\": \"eslint index.js\",\n-    \"prepublishOnly\": \"npm run lint && npm test\"\n-  },\n-  \"repository\": \"rollup/rollup-plugin-svelte\",\n-  \"keywords\": [\n-    \"svelte\",\n-    \"rollup\"\n-  ],\n-  \"author\": \"Rich Harris\",\n-  \"license\": \"MIT\",\n-  \"bugs\": {\n-    \"url\": \"https://github.com/rollup/rollup-plugin-svelte/issues\"\n-  },\n-  \"homepage\": \"https://github.com/rollup/rollup-plugin-svelte#README\",\n-  \"devDependencies\": {\n-    \"eslint\": \"^5.10.0\",\n-    \"locate-character\": \"^2.0.5\",\n-    \"mocha\": \"^5.2.0\",\n-    \"rollup\": \"^0.67.4\",\n-    \"sander\": \"^0.6.0\",\n-    \"source-map\": \"^0.6.1\",\n-    \"svelte\": \"^3.0.0-beta.5\"\n-  },\n-  \"dependencies\": {\n-    \"require-relative\": \"^0.8.7\",\n-    \"rollup-pluginutils\": \"^2.3.3\",\n-    \"sourcemap-codec\": \"^1.4.4\"\n-  },\n-  \"peerDependencies\": {\n-    \"svelte\": \"*\",\n-    \"rollup\": \">=0.60.0\"\n-  }\n+\t\"version\": \"7.2.3\",\n+\t\"name\": \"rollup-plugin-svelte\",\n+\t\"description\": \"Compile Svelte components with Rollup\",\n+\t\"repository\": \"sveltejs/rollup-plugin-svelte\",\n+\t\"types\": \"index.d.ts\",\n+\t\"main\": \"index.js\",\n+\t\"license\": \"MIT\",\n+\t\"bugs\": {\n+\t\t\"url\": \"https://github.com/sveltejs/rollup-plugin-svelte/issues\"\n+\t},\n+\t\"files\": [\n+\t\t\"index.js\",\n+\t\t\"index.d.ts\",\n+\t\t\"README.md\",\n+\t\t\"LICENSE\"\n+\t],\n+\t\"author\": \"Rich Harris\",\n+\t\"scripts\": {\n+\t\t\"lint\": \"eslint index.js\",\n+\t\t\"test\": \"node test/index.js\",\n+\t\t\"prepublishOnly\": \"npm run lint && npm test\"\n+\t},\n+\t\"engines\": {\n+\t\t\"node\": \">=10\"\n+\t},\n+\t\"dependencies\": {\n+\t\t\"@rollup/pluginutils\": \"^4.1.0\",\n+\t\t\"resolve.exports\": \"^2.0.0\"\n+\t},\n+\t\"peerDependencies\": {\n+\t\t\"rollup\": \">=2.0.0\",\n+\t\t\"svelte\": \">=3.5.0\"\n+\t},\n+\t\"devDependencies\": {\n+\t\t\"@eslint/eslintrc\": \"^3.3.3\",\n+\t\t\"@eslint/js\": \"^9.39.1\",\n+\t\t\"eslint\": \"^9.39.1\",\n+\t\t\"eslint-config-prettier\": \"^10.1.8\",\n+\t\t\"globals\": \"^16.5.0\",\n+\t\t\"rollup\": \"^2.33.3\",\n+\t\t\"source-map\": \"^0.7.3\",\n+\t\t\"svelte\": \"^4.0.0\",\n+\t\t\"uvu\": \"^0.5.6\"\n+\t},\n+\t\"keywords\": [\n+\t\t\"svelte\",\n+\t\t\"rollup\"\n+\t]\n }\n",
+					"match": false,
+					"packageHash": "44a87dfbb122956bc9ed32ce182a2109597e4a860d1de727852806995703fc24",
+					"size": 1039,
+					"sourceHash": "154e945fb10a1a6978748d82fbc71cfebdedda658b82ef95b413e96df61057f5",
+					"status": "content"
+				},
+				"index.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				}
+			},
+			"summary": {
+				"differentFiles": 3,
+				"matchingFiles": 1,
+				"missingInPackage": 1,
+				"missingInSource": 1,
+				"score": 0.16666666666666666,
+				"totalFiles": 6
+			}
+		}
+	}
+]
