@@ -1,0 +1,137 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-03T20:09:46.450Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:6.14.5",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "tsc@2.0.3",
+			"name": "tsc",
+			"version": "2.0.3",
+			"location": "https://registry.npmjs.org/tsc/-/tsc-2.0.3.tgz",
+			"integrity": "sha512-SN+9zBUtrpUcOpaUO7GjkEHgWtf22c7FKbKCA4e858eEM7Qz86rRDpgOU2lBIDf0fLCsEg65ms899UMUIB2+Ow==",
+			"publishedAt": "2021-05-07T11:46:12.180Z",
+			"publishedWith": {
+				"node": "14.5.0",
+				"npm": "6.14.5"
+			}
+		},
+		"source": {
+			"integrity": "sha512-+hvt77/etDza74z3ib6+w3iag3wzgHNFw4tHFw9dJ+hy2N1iv9qG+ITAdpeIvz8FzDiyh9jFpwqEeUpMcXlFXQ==",
+			"location": "git+https://github.com/basarat/tsc.git",
+			"spec": "github:basarat/tsc#1ca50987d5ec775030a0b066c264331ddd1451c3"
+		},
+		"comparisonHash": "8a2a8dcbb729bf3ee9216e490c955701f0ddebe1",
+		"diff": {
+			"files": {
+				"CONTRIBUTING.md": {
+					"diff": "--- published/CONTRIBUTING.md\n+++ rebuilt/CONTRIBUTING.md\n@@ -1,3 +1,24 @@\n # Release\n \n-`npm publish`\n+## Quickly\n+\n+Quick workflow (runs `prepare` and `release`): \n+\n+```sh\n+quick.sh\n+```\n+\n+## Manually\n+\n+```sh\n+prepare.sh\n+```\n+\n+Manual verification here ... then:\n+\n+```sh\n+release.sh\n+```\n+\n+# Inspiration \n+https://github.com/Arnavion/typescript-github\n\\ No newline at end of file\n",
+					"match": false,
+					"packageHash": "ebeef7d1e660016b1d5fce3cbafc28dd535a05e5b158b9446e1ba004cdb4b21d",
+					"size": 25,
+					"sourceHash": "fa8e20a581988966650765d6813bf8ae35f1fff6ed67716572b6326e1f9f7d75",
+					"status": "content"
+				},
+				"README.md": {
+					"diff": "--- published/README.md\n+++ rebuilt/README.md\n@@ -1,3 +1 @@\n-## DEPRECATED. \n-\n-Use [`typescript`](https://www.npmjs.com/package/typescript) to get access to the `tsc` CLI command.\n+DEPRECATED. Use `ntypescript` [https://www.npmjs.com/package/ntypescript](https://www.npmjs.com/package/ntypescript) as it follows a simple `original` -> `noriginal` name transform for `require` as well as globals `tsc` & `tsserver`.\n",
+					"match": false,
+					"packageHash": "7752b5823dc7702bbe6d53d784251dfc7b8f013b05d2a734d63ada05dc60cfcd",
+					"size": 118,
+					"sourceHash": "d3613be6610934afacbf0357213bded4410a1dad0838f6a11899962feb81c59f",
+					"status": "content"
+				},
+				"bin/tsc.js": {
+					"diff": "--- published/bin/tsc.js\n+++ rebuilt/bin/tsc.js\n@@ -1,47 +1,27744 @@\n-// @ts-check\n+/*! *****************************************************************************\n+Copyright (c) Microsoft Corporation. All rights reserved. \n+Licensed under the Apache License, Version 2.0 (the \"License\"); you may not use\n+this file except in compliance with the License. You may obtain a copy of the\n+License at http://www.apache.org/licenses/LICENSE-2.0  \n+ \n+THIS CODE IS PROVIDED ON AN *AS IS* BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY\n+KIND, EITHER EXPRESS OR IMPLIED, INCLUDING WITHOUT LIMITATION ANY IMPLIED\n+WARRANTIES OR CONDITIONS OF TITLE, FITNESS FOR A PARTICULAR PURPOSE, \n+MERCHANTABLITY OR NON-INFRINGEMENT. \n+ \n+See the Apache Version 2.0 License for specific language governing permissions\n+and limitations under the License.\n+***************************************************************************** */\n \n-// https://stackoverflow.com/questions/9781218/how-to-change-node-jss-console-font-color\n-const colours = {\n-    reset: \"\\x1b[0m\",\n-    bright: \"\\x1b[1m\",\n-    dim: \"\\x1b[2m\",\n-    underscore: \"\\x1b[4m\",\n-    blink: \"\\x1b[5m\",\n-    reverse: \"\\x1b[7m\",\n-    hidden: \"\\x1b[8m\",\n-    \n-    fg: {\n-        black: \"\\x1b[30m\",\n-        red: \"\\x1b[31m\",\n-        green: \"\\x1b[32m\",\n-        yellow: \"\\x1b[33m\",\n-        blue: \"\\x1b[34m\",\n-        magenta: \"\\x1b[35m\",\n-        cyan: \"\\x1b[36m\",\n-        white: \"\\x1b[37m\",\n-        crimson: \"\\x1b[38m\" // Scarlet\n-    },\n-    bg: {\n-        black: \"\\x1b[40m\",\n-        red: \"\\x1b[41m\",\n-        green: \"\\x1b[42m\",\n-        yellow: \"\\x1b[43m\",\n-        blue: \"\\x1b[44m\",\n-        magenta: \"\\x1b[45m\",\n-        cyan: \"\\x1b[46m\",\n-        white: \"\\x1b[47m\",\n-        crimson: \"\\x1b[48m\"\n+var ts;\n+(function (ts) {\n+    (function (ExitStatus) {\n+        ExitStatus[ExitStatus[\"Success\"] = 0] = \"Success\";\n+        ExitStatus[ExitStatus[\"DiagnosticsPresent_OutputsSkipped\"] = 1] = \"DiagnosticsPresent_OutputsSkipped\";\n+        ExitStatus[ExitStatus[\"DiagnosticsPresent_OutputsGenerated\"] = 2] = \"DiagnosticsPresent_OutputsGenerated\";\n+    })(ts.ExitStatus || (ts.ExitStatus = {}));\n+    var ExitStatus = ts.ExitStatus;\n+    (function (DiagnosticCategory) {\n+        DiagnosticCategory[DiagnosticCategory[\"Warning\"] = 0] = \"Warning\";\n+        DiagnosticCategory[DiagnosticCategory[\"Error\"] = 1] = \"Error\";\n+        DiagnosticCategory[DiagnosticCategory[\"Message\"] = 2] = \"Message\";\n+    })(ts.DiagnosticCategory || (ts.DiagnosticCategory = {}));\n+    var DiagnosticCategory = ts.DiagnosticCategory;\n+})(ts || (ts = {}));\n+/// <reference path=\"types.ts\"/>\n+var ts;\n+(function (ts) {\n+    function createFileMap(getCanonicalFileName) {\n+        var files = {};\n+        return {\n+            get: get,\n+            set: set,\n+            contains: contains,\n+            remove: remove,\n+            forEachValue: forEachValueInMap\n+        };\n+        function set(fileName, value) {\n+            files[normalizeKey(fileName)] = value;\n+        }\n+        function get(fileName) {\n+            return files[normalizeKey(fileName)];\n+        }\n+        function contains(fileName) {\n+            return hasProperty(files, normalizeKey(fileName));\n+        }\n+        function remove(fileName) {\n+            var key = normalizeKey(fileName);\n+            delete files[key];\n+        }\n+        function forEachValueInMap(f) {\n+            forEachValue(files, f);\n+        }\n+        function normalizeKey(key) {\n+            return getCanonicalFileName(normalizeSlashes(key));\n+        }\n     }\n-};\n-\n-\n",
+					"match": false,
+					"packageHash": "4c80e52298e9ffc836e6223e4a8e16a4caa08ae9f32fb0a319a1643d68b6af38",
+					"size": 1585,
+					"sourceHash": "be57c64c2f01d1a9c2472136ae1b751e51456d84d02cd92825ae2f55a907f3e1",
+					"status": "content"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -1,10 +1,14 @@\n {\n   \"name\": \"tsc\",\n-  \"version\": \"2.0.3\",\n-  \"description\": \"A deprecated release of the TypeScript compiler\",\n-  \"main\": \"./bin/tsc.js\",\n+  \"version\": \"1.20150623.0+f2044a901165a2a97813772353b57dd9ed4796ca\",\n+  \"description\": \"Latest code from microsoft/typescript packaged and released\",\n+  \"main\": \"./bin/typescript.js\",\n   \"bin\": {\n-    \"tsc\": \"./bin/tsc\"\n+    \"tsc\": \"./bin/tsc\",\n+    \"tsserver\": \"./bin/tsserver\"\n+  },\n+  \"typescript\": {\n+    \"definition\": \"./bin/typescript.d.ts\"\n   },\n   \"repository\": {\n     \"type\": \"git\",\n",
+					"match": false,
+					"packageHash": "9bbce0d32d78992b8e5e6c6ae993999ad9df6f7a63d734476d62ffa455582219",
+					"size": 486,
+					"sourceHash": "010de558fef2a7df4b1069564a53fbfa35f29cf148320b02947a8fee5980f8a3",
+					"status": "content"
+				},
+				"bin/lib.core.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"bin/lib.core.es6.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"bin/lib.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"bin/lib.dom.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"bin/lib.es6.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"bin/lib.scriptHost.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"bin/lib.webworker.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"bin/tsserver": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"bin/tsserver.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"bin/typescript.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"bin/typescript.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"bin/typescriptServices.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"bin/typescriptServices.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"prepare.sh": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"quick.sh": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"release.sh": {
+					"match": false,
+					"status": "missing-in-package"
+				}
+			},
+			"summary": {
+				"differentFiles": 4,
+				"matchingFiles": 1,
+				"missingInPackage": 16,
+				"missingInSource": 0,
+				"score": 0.047619047619047616,
+				"totalFiles": 21
+			}
+		}
+	}
+]
