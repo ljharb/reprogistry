@@ -1,0 +1,189 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-03T16:01:38.560Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:3.3.12",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "redux-logger@2.0.5",
+			"name": "redux-logger",
+			"version": "2.0.5",
+			"location": "https://registry.npmjs.org/redux-logger/-/redux-logger-2.0.5.tgz",
+			"integrity": "sha512-dvaqQ6dcXiA1c8Jbdhk5eSj5CIoWhcrf7EsTo68v0F1tg7gfX+6i3XAWsHrkCR3cGCZmqkk9FDLHsiEckDcPqw==",
+			"publishedAt": "2015-12-06T15:14:19.976Z",
+			"publishedWith": {
+				"node": "5.1.0",
+				"npm": "3.3.12"
+			}
+		},
+		"source": {
+			"integrity": null,
+			"location": "git+https://github.com/fcomb/redux-logger.git",
+			"spec": "github:fcomb/redux-logger#4253d616dc250f3a8444d1de74575a4236d32487"
+		},
+		"comparisonHash": "8a2a8dcbb729bf3ee9216e490c955701f0ddebe1",
+		"diff": {
+			"files": {
+				"dist/index.js": {
+					"diff": "--- published/dist/index.js\n+++ rebuilt/dist/index.js\n@@ -73,9 +73,6 @@\n \tvar pad = function pad(num, maxLength) {\n \t  return repeat(\"0\", maxLength - num.toString().length) + num;\n \t};\n-\tvar formatTime = function formatTime(time) {\n-\t  return \" @ \" + pad(time.getHours(), 2) + \":\" + pad(time.getMinutes(), 2) + \":\" + pad(time.getSeconds(), 2) + \".\" + pad(time.getMilliseconds(), 3);\n-\t};\n \n \t// Use the new performance api to get better precision if available\n \tvar timer = typeof performance !== \"undefined\" && typeof performance.now === \"function\" ? performance : Date;\n@@ -91,7 +88,7 @@\n \t * @property {boolean} options.predicate - condition which resolves logger behavior\n \t * @property {bool} options.duration - print duration of each action?\n \t * @property {bool} options.timestamp - print timestamp with each action?\n-\t * @property {function} options.stateTransformer - transform state before print\n+\t * @property {function} options.transformer - transform state before print\n \t * @property {function} options.actionTransformer - transform action before print\n \t */\n \n@@ -102,42 +99,27 @@\n \t    var getState = _ref.getState;\n \t    return function (next) {\n \t      return function (action) {\n-\t        var _options$level = options.level;\n-\t        var level = _options$level === undefined ? \"log\" : _options$level;\n-\t        var _options$logger = options.logger;\n-\t        var logger = _options$logger === undefined ? window.console : _options$logger;\n+\t        var level = options.level;\n+\t        var logger = options.logger;\n \t        var collapsed = options.collapsed;\n \t        var predicate = options.predicate;\n \t        var _options$duration = options.duration;\n \t        var duration = _options$duration === undefined ? false : _options$duration;\n \t        var _options$timestamp = options.timestamp;\n \t        var timestamp = _options$timestamp === undefined ? true : _options$timestamp;\n-\t        var transformer = options.transformer;\n-\t        var _options$stateTransfo = options.stateTransformer;\n-\t        var // deprecated\n-\t        stateTransformer = _options$stateTransfo === undefined ? function (state) {\n+\t        var _options$transformer = options.transformer;\n+\t        var transformer = _options$transformer === undefined ? function (state) {\n \t          return state;\n-\t        } : _options$stateTransfo;\n-\t        var _options$actionTransf = options.actionTransformer;\n-\t        var actionTransformer = _options$actionTransf === undefined ? function (actn) {\n+\t        } : _options$transformer;\n+\t        var _options$actionTransformer = options.actionTransformer;\n+\t        var actionTransformer = _options$actionTransformer === undefined ? function (actn) {\n \t          return actn;\n-\t        } : _options$actionTransf;\n-\t        var _options$colors = options.colors;\n-\t        var colors = _options$colors === undefined ? {\n-\t          prevState: function prevState() {\n-\t            return \"#9E9E9E\";\n-\t          },\n-\t          action: function action() {\n-\t            return \"#03A9F4\";\n-\t          },\n-\t          nextState: function nextState() {\n-\t            return \"#4CAF50\";\n-\t          }\n-\t        } : _options$colors;\n+\t        } : _options$actionTransformer;\n \n-\t        // exit if console undefined\n+\t        var console = logger || window.console;\n \n-\t        if (typeof logger === \"undefined\") {\n+\t        // exit if console undefined\n+\t        if (typeof console === \"undefined\") {\n \t          return next(action);\n \t        }\n \n@@ -146,59 +128,55 @@\n \t          return next(action);\n \t        }\n \n-\t        if (transformer) {\n-\t          console.error(\"Option 'transformer' is deprecated, use stateTransformer instead\");\n-\t        }\n-\n \t        var started = timer.now();\n-\t        var prevState = stateTransformer(getState());\n+\t        var prevState = transformer(getState());\n \n+\t        var returnValue = next(action);\n \t        var took = timer.now() - started;\n-\t        var nextState = stateTransformer(getState());\n+\n+\t        var nextState = transformer(getState());\n \n \t        // formatters\n \t        var time = new Date();\n \t        var isCollapsed = typeof collapsed === \"function\" ? collapsed(getState, action) : collapsed;\n \n-\t        var formattedTime = formatTime(time);\n+\t        var formattedTime = timestamp ? \" @ \" + pad(time.getHours(), 2) + \":\" + pad(time.getMinutes(), 2) + \":\" + pad(time.getSeconds(), 2) + \".\" + pad(time.getMilliseconds(), 3) : \"\";\n+\t        var formattedDuration = duration ? \" in \" + took.toFixed(2) + \" ms\" : \"\";\n",
+					"match": false,
+					"packageHash": "1346bb1b694597d379c3001e130dc8faaeaaff5fb942c75253d73a694eedbe5f",
+					"size": 7126,
+					"sourceHash": "593ab0a4c2216ce3a9af650d1c540b313612156fef8135e00486028cfce7dfeb",
+					"status": "content"
+				},
+				"dist/index.min.js": {
+					"diff": "--- published/dist/index.min.js\n+++ rebuilt/dist/index.min.js\n@@ -1 +1 @@\n-!function(e,t){\"object\"==typeof exports&&\"object\"==typeof module?module.exports=t():\"function\"==typeof define&&define.amd?define([],t):\"object\"==typeof exports?exports.reduxLogger=t():e.reduxLogger=t()}(this,function(){return function(e){function t(o){if(n[o])return n[o].exports;var r=n[o]={exports:{},id:o,loaded:!1};return e[o].call(r.exports,r,r.exports,t),r.loaded=!0,r.exports}var n={};return t.m=e,t.c=n,t.p=\"\",t(0)}([function(e,t,n){n(1),e.exports=n(1)},function(e,t){\"use strict\";function n(){var e=arguments.length<=0||void 0===arguments[0]?{}:arguments[0];return function(t){var n=t.getState;return function(t){return function(o){var r=e.level,c=void 0===r?\"log\":r,a=e.logger,f=void 0===a?window.console:a,d=e.collapsed,s=e.predicate,p=e.duration,l=void 0===p?!1:p,g=e.timestamp,v=void 0===g?!0:g,m=e.transformer,x=e.stateTransformer,y=void 0===x?function(e){return e}:x,w=e.actionTransformer,h=void 0===w?function(e){return e}:w,b=e.colors,S=void 0===b?{prevState:function(){return\"#9E9E9E\"},action:function(){return\"#03A9F4\"},nextState:function(){return\"#4CAF50\"}}:b;if(\"undefined\"==typeof f)return t(o);if(\"function\"==typeof s&&!s(n,o))return t(o);m&&console.error(\"Option 'transformer' is deprecated, use stateTransformer instead\");var j=u.now(),E=y(n()),A=u.now()-j,F=y(n()),M=new Date,T=\"function\"==typeof d?d(n,o):d,C=i(M),D=h(o),L=\"action \"+D.type+(v&&C)+(l&&\" in \"+A.toFixed(2)+\" ms\");try{T?f.groupCollapsed(L):f.group(L)}catch(O){f.log(L)}S?(f[c](\"%c prev state\",\"color: \"+S.prevState(n,o)+\"; font-weight: bold\",E),f[c](\"%c action\",\"color: \"+S.action(n,o)+\"; font-weight: bold\",D),f[c](\"%c next state\",\"color: \"+S.nextState(n,o)+\"; font-weight: bold\",F)):(f[c](\"prev state\",E),f[c](\"action\",D),f[c](\"next state\",F));try{f.groupEnd()}catch(O){f.log(\"—— log end ——\")}return t(o)}}}}Object.defineProperty(t,\"__esModule\",{value:!0});var o=function(e,t){return new Array(t+1).join(e)},r=function(e,t){return o(\"0\",t-e.toString().length)+e},i=function(e){return\" @ \"+r(e.getHours(),2)+\":\"+r(e.getMinutes(),2)+\":\"+r(e.getSeconds(),2)+\".\"+r(e.getMilliseconds(),3)},u=\"undefined\"!=typeof performance&&\"function\"==typeof performance.now?performance:Date;t[\"default\"]=n}])});\n\\ No newline at end of file\n+!function(e,t){\"object\"==typeof exports&&\"object\"==typeof module?module.exports=t():\"function\"==typeof define&&define.amd?define([],t):\"object\"==typeof exports?exports.reduxLogger=t():e.reduxLogger=t()}(this,function(){return function(e){function t(n){if(o[n])return o[n].exports;var r=o[n]={exports:{},id:n,loaded:!1};return e[n].call(r.exports,r,r.exports,t),r.loaded=!0,r.exports}var o={};return t.m=e,t.c=o,t.p=\"\",t(0)}([function(e,t,o){o(1),e.exports=o(1)},function(e,t){\"use strict\";function o(){var e=arguments.length<=0||void 0===arguments[0]?{}:arguments[0];return function(t){var o=t.getState;return function(t){return function(n){var c=e.level,u=e.logger,f=e.collapsed,a=e.predicate,d=e.duration,l=void 0===d?!1:d,p=e.timestamp,s=void 0===p?!0:p,g=e.transformer,v=void 0===g?function(e){return e}:g,x=e.actionTransformer,m=void 0===x?function(e){return e}:x,y=u||window.console;if(\"undefined\"==typeof y)return t(n);if(\"function\"==typeof a&&!a(o,n))return t(n);var w=i.now(),h=v(o()),b=t(n),E=i.now()-w,j=v(o()),A=new Date,F=\"function\"==typeof f?f(o,n):f,C=s?\" @ \"+r(A.getHours(),2)+\":\"+r(A.getMinutes(),2)+\":\"+r(A.getSeconds(),2)+\".\"+r(A.getMilliseconds(),3):\"\",M=l?\" in \"+E.toFixed(2)+\" ms\":\"\",S=m(n),D=\"action \"+S.type+C+M,L=F?y.groupCollapsed:y.group;try{L.call(y,D)}catch(_){y.log(D)}c?(y[c](\"%c prev state\",\"color: #9E9E9E; font-weight: bold\",h),y[c](\"%c action\",\"color: #03A9F4; font-weight: bold\",S),y[c](\"%c next state\",\"color: #4CAF50; font-weight: bold\",j)):(y.log(\"%c prev state\",\"color: #9E9E9E; font-weight: bold\",h),y.log(\"%c action\",\"color: #03A9F4; font-weight: bold\",S),y.log(\"%c next state\",\"color: #4CAF50; font-weight: bold\",j));try{y.groupEnd()}catch(_){y.log(\"—— log end ——\")}return b}}}}Object.defineProperty(t,\"__esModule\",{value:!0});var n=function(e,t){return new Array(t+1).join(e)},r=function(e,t){return n(\"0\",t-e.toString().length)+e},i=\"undefined\"!=typeof performance&&\"function\"==typeof performance.now?performance:Date;t[\"default\"]=o,e.exports=t[\"default\"]}])});\n\\ No newline at end of file\n",
+					"match": false,
+					"packageHash": "d4ec19338190fdf50bf9403e3ec0284ebf290e500c3f66a5d325a5bf5d5648d8",
+					"size": 2193,
+					"sourceHash": "c1c7c3b68ce0e5b2311ec59387b738a115d81947475c0f9175439fe3491e00dc",
+					"status": "content"
+				},
+				"lib/index.js": {
+					"diff": "--- published/lib/index.js\n+++ rebuilt/lib/index.js\n@@ -9,9 +9,6 @@\n var pad = function pad(num, maxLength) {\n   return repeat(\"0\", maxLength - num.toString().length) + num;\n };\n-var formatTime = function formatTime(time) {\n-  return \" @ \" + pad(time.getHours(), 2) + \":\" + pad(time.getMinutes(), 2) + \":\" + pad(time.getSeconds(), 2) + \".\" + pad(time.getMilliseconds(), 3);\n-};\n \n // Use the new performance api to get better precision if available\n var timer = typeof performance !== \"undefined\" && typeof performance.now === \"function\" ? performance : Date;\n@@ -27,7 +24,7 @@\n  * @property {boolean} options.predicate - condition which resolves logger behavior\n  * @property {bool} options.duration - print duration of each action?\n  * @property {bool} options.timestamp - print timestamp with each action?\n- * @property {function} options.stateTransformer - transform state before print\n+ * @property {function} options.transformer - transform state before print\n  * @property {function} options.actionTransformer - transform action before print\n  */\n \n@@ -38,42 +35,27 @@\n     var getState = _ref.getState;\n     return function (next) {\n       return function (action) {\n-        var _options$level = options.level;\n-        var level = _options$level === undefined ? \"log\" : _options$level;\n-        var _options$logger = options.logger;\n-        var logger = _options$logger === undefined ? window.console : _options$logger;\n+        var level = options.level;\n+        var logger = options.logger;\n         var collapsed = options.collapsed;\n         var predicate = options.predicate;\n         var _options$duration = options.duration;\n         var duration = _options$duration === undefined ? false : _options$duration;\n         var _options$timestamp = options.timestamp;\n         var timestamp = _options$timestamp === undefined ? true : _options$timestamp;\n-        var transformer = options.transformer;\n-        var _options$stateTransfo = options.stateTransformer;\n-        var // deprecated\n-        stateTransformer = _options$stateTransfo === undefined ? function (state) {\n+        var _options$transformer = options.transformer;\n+        var transformer = _options$transformer === undefined ? function (state) {\n           return state;\n-        } : _options$stateTransfo;\n-        var _options$actionTransf = options.actionTransformer;\n-        var actionTransformer = _options$actionTransf === undefined ? function (actn) {\n+        } : _options$transformer;\n+        var _options$actionTransformer = options.actionTransformer;\n+        var actionTransformer = _options$actionTransformer === undefined ? function (actn) {\n           return actn;\n-        } : _options$actionTransf;\n-        var _options$colors = options.colors;\n-        var colors = _options$colors === undefined ? {\n-          prevState: function prevState() {\n-            return \"#9E9E9E\";\n-          },\n-          action: function action() {\n-            return \"#03A9F4\";\n-          },\n-          nextState: function nextState() {\n-            return \"#4CAF50\";\n-          }\n-        } : _options$colors;\n+        } : _options$actionTransformer;\n \n-        // exit if console undefined\n+        var console = logger || window.console;\n \n-        if (typeof logger === \"undefined\") {\n+        // exit if console undefined\n+        if (typeof console === \"undefined\") {\n           return next(action);\n         }\n \n@@ -82,56 +64,52 @@\n           return next(action);\n         }\n \n-        if (transformer) {\n-          console.error(\"Option 'transformer' is deprecated, use stateTransformer instead\");\n-        }\n-\n         var started = timer.now();\n-        var prevState = stateTransformer(getState());\n+        var prevState = transformer(getState());\n \n+        var returnValue = next(action);\n         var took = timer.now() - started;\n-        var nextState = stateTransformer(getState());\n+\n+        var nextState = transformer(getState());\n \n         // formatters\n         var time = new Date();\n         var isCollapsed = typeof collapsed === \"function\" ? collapsed(getState, action) : collapsed;\n \n-        var formattedTime = formatTime(time);\n+        var formattedTime = timestamp ? \" @ \" + pad(time.getHours(), 2) + \":\" + pad(time.getMinutes(), 2) + \":\" + pad(time.getSeconds(), 2) + \".\" + pad(time.getMilliseconds(), 3) : \"\";\n+        var formattedDuration = duration ? \" in \" + took.toFixed(2) + \" ms\" : \"\";\n",
+					"match": false,
+					"packageHash": "35845efb18bede009dfe291b2075dc1a4e4d5c91aba8f5739ae86c4538985880",
+					"size": 5099,
+					"sourceHash": "b16a016a5c4549770263c039225d3445d973da77773c3234b6a0749203593843",
+					"status": "content"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -1,23 +1,18 @@\n {\n   \"name\": \"redux-logger\",\n-  \"version\": \"2.0.5\",\n+  \"version\": \"2.0.4\",\n   \"description\": \"Logger for redux\",\n   \"main\": \"lib/index.js\",\n   \"scripts\": {\n-    \"lint\": \"$(npm bin)/eslint src\",\n+    \"lint\": \"eslint src\",\n     \"test\": \"npm run lint\",\n-    \"clean\": \"$(npm bin)/rimraf dist lib\",\n-    \"build:lib\": \"$(npm bin)/babel src --out-dir lib\",\n-    \"build:umd\": \"LIBRARY_NAME=reduxLogger NODE_ENV=development $(npm bin)/webpack src/index.js dist/index.js --config webpack.build.js\",\n-    \"build:umd:min\": \"LIBRARY_NAME=reduxLogger NODE_ENV=production $(npm bin)/webpack -p src/index.js dist/index.min.js --config webpack.build.js\",\n+    \"clean\": \"rimraf build\",\n+    \"build:lib\": \"babel src --out-dir lib\",\n+    \"build:umd\": \"LIBRARY_NAME=reduxLogger webpack src/index.js dist/index.js --config webpack.config.production.js\",\n+    \"build:umd:min\": \"LIBRARY_NAME=reduxLogger webpack -p src/index.js dist/index.min.js --config webpack.config.development.js\",\n     \"build\": \"npm run build:lib && npm run build:umd && npm run build:umd:min\",\n     \"prepublish\": \"npm run clean && npm run test && npm run build\"\n   },\n-  \"files\": [\n-    \"dist\",\n-    \"lib\",\n-    \"src\"\n-  ],\n   \"repository\": {\n     \"type\": \"git\",\n     \"url\": \"git+https://github.com/fcomb/redux-logger.git\"\n@@ -36,14 +31,15 @@\n   },\n   \"homepage\": \"https://github.com/fcomb/redux-logger#readme\",\n   \"devDependencies\": {\n-    \"@dtrussia/eslint-config-dtrussia\": \"1.0.3\",\n-    \"babel-cli\": \"6.3.13\",\n-    \"babel-core\": \"6.3.13\",\n-    \"babel-loader\": \"6.2.0\",\n-    \"babel-preset-es2015\": \"6.3.13\",\n-    \"babel-preset-react\": \"6.3.13\",\n-    \"babel-preset-stage-0\": \"6.3.13\",\n-    \"rimraf\": \"2.4.4\",\n-    \"webpack\": \"1.12.9\"\n+    \"babel\": \"5.8.29\",\n+    \"babel-core\": \"5.8.33\",\n+    \"babel-eslint\": \"4.1.3\",\n+    \"babel-loader\": \"5.3.3\",\n+    \"babel-plugin-react-transform\": \"1.1.1\",\n+    \"eslint\": \"1.8.0\",\n+    \"eslint-config-airbnb\": \"0.1.0\",\n+    \"eslint-plugin-react\": \"3.6.3\",\n+    \"rimraf\": \"2.4.3\",\n+    \"webpack\": \"1.12.2\"\n   }\n }\n",
+					"match": false,
+					"packageHash": "19f811722cb52ed13cedcae6c92b79bdf1e23f2d7a93bed71c30e6a9ab5c1c0d",
+					"size": 1516,
+					"sourceHash": "677da541f4b35f2edce213c731ff47b71c228bed2839441f4b0bc129a0fdad69",
+					"status": "content"
+				},
+				"src/index.js": {
+					"diff": "--- published/src/index.js\n+++ rebuilt/src/index.js\n@@ -1,6 +1,5 @@\n const repeat = (str, times) => (new Array(times + 1)).join(str);\n const pad = (num, maxLength) => repeat(`0`, maxLength - num.toString().length) + num;\n-const formatTime = (time) => ` @ ${pad(time.getHours(), 2)}:${pad(time.getMinutes(), 2)}:${pad(time.getSeconds(), 2)}.${pad(time.getMilliseconds(), 3)}`;\n \n // Use the new performance api to get better precision if available\n const timer = typeof performance !== `undefined` && typeof performance.now === `function` ? performance : Date;\n@@ -16,31 +15,27 @@\n  * @property {boolean} options.predicate - condition which resolves logger behavior\n  * @property {bool} options.duration - print duration of each action?\n  * @property {bool} options.timestamp - print timestamp with each action?\n- * @property {function} options.stateTransformer - transform state before print\n+ * @property {function} options.transformer - transform state before print\n  * @property {function} options.actionTransformer - transform action before print\n  */\n \n function createLogger(options = {}) {\n   return ({ getState }) => (next) => (action) => {\n     const {\n-      level = `log`,\n-      logger = window.console,\n+      level,\n+      logger,\n       collapsed,\n       predicate,\n       duration = false,\n       timestamp = true,\n-      transformer, // deprecated\n-      stateTransformer = state => state,\n+      transformer = state => state,\n       actionTransformer = actn => actn,\n-      colors = {\n-        prevState: () => `#9E9E9E`,\n-        action: () => `#03A9F4`,\n-        nextState: () => `#4CAF50`,\n-      },\n     } = options;\n \n+    const console = logger || window.console;\n+\n     // exit if console undefined\n-    if (typeof logger === `undefined`) {\n+    if (typeof console === `undefined`) {\n       return next(action);\n     }\n \n@@ -49,53 +44,48 @@\n       return next(action);\n     }\n \n-    if (transformer) {\n-      console.error(`Option 'transformer' is deprecated, use stateTransformer instead`);\n-    }\n-\n     const started = timer.now();\n-    const prevState = stateTransformer(getState());\n+    const prevState = transformer(getState());\n \n+    const returnValue = next(action);\n     const took = timer.now() - started;\n-    const nextState = stateTransformer(getState());\n+\n+    const nextState = transformer(getState());\n \n     // formatters\n     const time = new Date();\n     const isCollapsed = (typeof collapsed === `function`) ? collapsed(getState, action) : collapsed;\n \n-    const formattedTime = formatTime(time);\n+    const formattedTime = timestamp ? ` @ ${pad(time.getHours(), 2)}:${pad(time.getMinutes(), 2)}:${pad(time.getSeconds(), 2)}.${pad(time.getMilliseconds(), 3)}` : ``;\n+    const formattedDuration = duration ? ` in ${took.toFixed(2)} ms` : ``;\n     const formattedAction = actionTransformer(action);\n-\n-    const title = `action ${formattedAction.type}${timestamp && formattedTime}${duration && ` in ${took.toFixed(2)} ms`}`;\n+    const message = `action ${formattedAction.type}${formattedTime}${formattedDuration}`;\n+    const startMessage = isCollapsed ? console.groupCollapsed : console.group;\n \n     // render\n     try {\n-      if (isCollapsed) {\n-        logger.groupCollapsed(title);\n-      } else {\n-        logger.group(title);\n-      }\n+      startMessage.call(console, message);\n     } catch (e) {\n-      logger.log(title);\n+      console.log(message);\n     }\n \n-    if (colors) {\n-      logger[level](`%c prev state`, `color: ${colors.prevState(getState, action)}; font-weight: bold`, prevState);\n-      logger[level](`%c action`, `color: ${colors.action(getState, action)}; font-weight: bold`, formattedAction);\n-      logger[level](`%c next state`, `color: ${colors.nextState(getState, action)}; font-weight: bold`, nextState);\n+    if (level) {\n+      console[level](`%c prev state`, `color: #9E9E9E; font-weight: bold`, prevState);\n+      console[level](`%c action`, `color: #03A9F4; font-weight: bold`, formattedAction);\n+      console[level](`%c next state`, `color: #4CAF50; font-weight: bold`, nextState);\n",
+					"match": false,
+					"packageHash": "c6d8a00f4d2e00f688ad34c8aa48abd6826e3ef3ef2af11a159bfee76a965040",
+					"size": 3505,
+					"sourceHash": "3d1ef7e68c3e8c73886d3edcb4d0f778099610668205f6b3491f8cf033e166dd",
+					"status": "content"
+				},
+				".babelrc": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				".eslintignore": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				".eslintrc": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				".travis.yml": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"examples/basic/.babelrc": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"examples/basic/.eslintignore": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"examples/basic/.eslintrc": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"examples/basic/actions/auth.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"examples/basic/actions/properties.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"examples/basic/app.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"examples/basic/constants/auth.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"examples/basic/constants/properties.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"examples/basic/containers/example.jsx": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"examples/basic/containers/root.jsx": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"examples/basic/index.production.tpl": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"examples/basic/package.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"examples/basic/reducers/auth.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"examples/basic/reducers/index.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"examples/basic/reducers/properties.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"examples/basic/styles/default.scss": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"examples/basic/webpack.config.dev.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"examples/basic/webpack.config.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"examples/basic/webpack.config.production.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"examples/basic/webpack.server.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"webpack.config.development.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"webpack.config.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"webpack.config.production.js": {
+					"match": false,
+					"status": "missing-in-package"
+				}
+			},
+			"summary": {
+				"differentFiles": 5,
+				"matchingFiles": 1,
+				"missingInPackage": 27,
+				"missingInSource": 0,
+				"score": 0.030303030303030304,
+				"totalFiles": 33
+			}
+		}
+	}
+]

@@ -1,0 +1,113 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-03T16:07:20.767Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:3.10.9",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "redux-logger@2.9.0",
+			"name": "redux-logger",
+			"version": "2.9.0",
+			"location": "https://registry.npmjs.org/redux-logger/-/redux-logger-2.9.0.tgz",
+			"integrity": "sha512-1GDYbxd4EJaigm7SBqJU9WhutMNPj8rp9pGwCkEldZC85iuS1o0uuT5AuPGK8bUrLThkiyd42xIIxPIfCbSGRw==",
+			"publishedAt": "2017-03-21T11:47:48.023Z",
+			"publishedWith": {
+				"node": "7.2.0",
+				"npm": "4.4.1"
+			}
+		},
+		"source": {
+			"integrity": null,
+			"location": "git+https://github.com/theaqua/redux-logger.git",
+			"spec": "github:theaqua/redux-logger#d5adea2731eb3e3b7452dd6a40895d8fbd1743ab"
+		},
+		"comparisonHash": "8a2a8dcbb729bf3ee9216e490c955701f0ddebe1",
+		"diff": {
+			"files": {
+				"CHANGELOG.md": {
+					"match": false,
+					"packageHash": "d4105e6aec549982f0068bc5a0b5aeb0c1f7865ca564c7d8d77f7ce0e6778412",
+					"size": 81,
+					"status": "missing-in-source"
+				},
+				"README.md": {
+					"diff": "--- published/README.md\n+++ rebuilt/README.md\n@@ -8,7 +8,7 @@\n ## Table of contents\n * [Install](#install)\n * [Usage](#usage)\n-* [Options](#options)\n+* [API](#api)\n * [Recipes](#recipes)\n   * [Log only in development](#log-only-in-development)\n   * [Log everything except actions with certain type](#log-everything-except-actions-with-certain-type)\n@@ -25,59 +25,49 @@\n ## Usage\n ```javascript\n import { applyMiddleware, createStore } from 'redux';\n+import thunk from 'redux-thunk';\n+import promise from 'redux-promise';\n+import createLogger from 'redux-logger';\n \n-// Logger with default options\n-import { logger } from 'redux-logger'\n+const logger = createLogger();\n const store = createStore(\n   reducer,\n-  applyMiddleware(logger)\n-)\n+  applyMiddleware(thunk, promise, logger)\n+);\n \n // Note passing middleware as the third argument requires redux@>=3.1.0\n ```\n+Logger **must be** the last middleware in chain, otherwise it will log thunk and promise, not actual actions ([#20](https://github.com/evgenyrodionov/redux-logger/issues/20)).\n \n-Or you can create your own logger with custom [options](https://github.com/evgenyrodionov/redux-logger#options):\n-```javascript\n-import { applyMiddleware, createStore } from 'redux';\n-import createLogger from 'redux-logger'\n+## API\n \n-const logger = createLogger({\n-  // ...options\n-});\n+`redux-logger` exposes single constructor function for creating logger middleware.  \n \n-const store = createStore(\n-  reducer,\n-  applyMiddleware(logger)\n-);\n+```\n+createLogger(options?: Object) => LoggerMiddleware\n ```\n \n-Note: logger **must be** the last middleware in chain, otherwise it will log thunk and promise, not actual actions ([#20](https://github.com/evgenyrodionov/redux-logger/issues/20)).\n-\n-## Options\n+### Options\n ```javascript\n {\n-  predicate, // if specified this function will be called before each action is processed with this middleware.\n-  collapsed, // takes a Boolean or optionally a Function that receives `getState` function for accessing current store state and `action` object as parameters. Returns `true` if the log group should be collapsed, `false` otherwise.\n-  duration = false: Boolean, // print the duration of each action?\n-  timestamp = true: Boolean, // print the timestamp with each action?\n-\n   level = 'log': 'log' | 'console' | 'warn' | 'error' | 'info', // console's level\n-  colors: ColorsObject, // colors for title, prev state, action and next state: https://github.com/evgenyrodionov/redux-logger/blob/master/src/defaults.js#L12-L18\n-  titleFormatter, // Format the title used when logging actions.\n-\n+  duration = false: Boolean, // Print the duration of each action?\n+  timestamp = true: Boolean, // Print the timestamp with each action?\n+  colors: ColorsObject, // Object with color getters. See the ColorsObject interface.\n+  logger = console: LoggerObject, // Implementation of the `console` API.\n+  logErrors = true: Boolean, // Should the logger catch, log, and re-throw errors?\n+  collapsed, // Takes a boolean or optionally a function that receives `getState` function for accessing current store state and `action` object as parameters. Returns `true` if the log group should be collapsed, `false` otherwise.\n+  predicate, // If specified this function will be called before each action is processed with this middleware.\n   stateTransformer, // Transform state before print. Eg. convert Immutable object to plain JSON.\n-  actionTransformer, // Transform action before print. Eg. convert Immutable object to plain JSON.\n-  errorTransformer, // Transform error before print. Eg. convert Immutable object to plain JSON.\n-\n-  logger = console: LoggerObject, // implementation of the `console` API.\n-  logErrors = true: Boolean, // should the logger catch, log, and re-throw errors?\n-\n-  diff = false: Boolean, // (alpha) show diff between states?\n-  diffPredicate // (alpha) filter function for showing states diff, similar to `predicate`\n+  actionTransformer, // Transform state before print. Eg. convert Immutable object to plain JSON.\n+  errorTransformer, // Transform state before print. Eg. convert Immutable object to plain JSON.\n+  titleFormatter, // Format the title used when logging actions.\n+  diff = false: Boolean, // Show diff between states.\n+  diffPredicate // Filter function for showing states diff.'\n }\n ```\n \n-### Options description\n+### Options\n \n #### __level (String | Function | Object)__\n Level of `console`. `warn`, `error`, `info` or [else](https://developer.mozilla.org/en/docs/Web/API/console).\n@@ -176,7 +166,8 @@\n const middlewares = [thunk];\n \n if (process.env.NODE_ENV === `development`) {\n",
+					"match": false,
+					"packageHash": "fd1c081055d4ab3152463fd5d20a54391c7fcfaf3c63f2d6b4619f8389cd68a8",
+					"size": 9262,
+					"sourceHash": "d493ed22bfa14db975630eaa59a98af4e4afd729323e3c7f6e471c3c093530c4",
+					"status": "content"
+				},
+				"dist/index.js": {
+					"match": false,
+					"packageHash": "a8acd5e4f6825815198efc07867a4f8cacf46caa40972a3b7b6bb8f14f55b989",
+					"size": 28352,
+					"status": "missing-in-source"
+				},
+				"dist/index.min.js": {
+					"match": false,
+					"packageHash": "06f718f28308fd378b48a140c155e724c5ea46578816c5a209562ea1e9aebe24",
+					"size": 11015,
+					"status": "missing-in-source"
+				},
+				"lib/core.js": {
+					"match": false,
+					"packageHash": "dd573a2ba15323b95871947a25dd1d7bec3cfbc560f8230ed6500d1c1b8a7cf5",
+					"size": 4887,
+					"status": "missing-in-source"
+				},
+				"lib/defaults.js": {
+					"match": false,
+					"packageHash": "819de47b5db49ccb6c1ae46f1e630d00e10e97d76e69fb0b90e44e1554420f80",
+					"size": 949,
+					"status": "missing-in-source"
+				},
+				"lib/diff.js": {
+					"match": false,
+					"packageHash": "829c3d027263f3746dbc8f024a360b0792bad4138c11a8f34107654fedae589b",
+					"size": 2069,
+					"status": "missing-in-source"
+				},
+				"lib/helpers.js": {
+					"match": false,
+					"packageHash": "b025f4314cb1b0de85c48c271e986a648599b9659387f84b3a7016a62f58a8af",
+					"size": 741,
+					"status": "missing-in-source"
+				},
+				"lib/index.js": {
+					"match": false,
+					"packageHash": "549ccecb95ff3c0f767268ae9a0415a1d8acf4edb5e5b12ac87601ae12030362",
+					"size": 4848,
+					"status": "missing-in-source"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -1,6 +1,6 @@\n {\n   \"name\": \"redux-logger\",\n-  \"version\": \"2.9.0\",\n+  \"version\": \"2.8.2\",\n   \"description\": \"Logger for Redux\",\n   \"main\": \"lib/index.js\",\n   \"scripts\": {\n",
+					"match": false,
+					"packageHash": "3531b53a75c7ad4a6cc0281c72a6e6ca6bfc328e8378bbf554554a732e7dec7d",
+					"size": 2736,
+					"sourceHash": "1a6f171308534b61553cf00175b62d4b54b68f5dd8bb9f7ff0e763455d0154b5",
+					"status": "content"
+				},
+				"src/index.js": {
+					"diff": "--- published/src/index.js\n+++ rebuilt/src/index.js\n@@ -49,28 +49,15 @@\n   // Detect if 'createLogger' was passed directly to 'applyMiddleware'.\n   if (options.getState && options.dispatch) {\n     // eslint-disable-next-line no-console\n-    console.error(`[redux-logger] redux-logger not installed. Make sure to pass logger instance as middleware:\n-\n-// Logger with default options\n-import { logger } from 'redux-logger'\n-const store = createStore(\n-  reducer,\n-  applyMiddleware(logger)\n-)\n+    console.error(`redux-logger not installed. Make sure to pass logger instance as middleware:\n \n+import createLogger from 'redux-logger';\n \n-// Or you can create your own logger with custom options http://bit.ly/redux-logger-options\n-import createLogger from 'redux-logger'\n-\n-const logger = createLogger({\n-  // ...options\n-});\n-\n+const logger = createLogger();\n const store = createStore(\n   reducer,\n   applyMiddleware(logger)\n-)\n-`);\n+);`);\n \n     return () => next => action => next(action);\n   }\n@@ -115,11 +102,4 @@\n   };\n }\n \n-const defaultLogger = createLogger();\n-\n-export {\n-  defaults,\n-  defaultLogger as logger,\n-};\n-\n export default createLogger;\n",
+					"match": false,
+					"packageHash": "fe8a26b353a88e86df7d89b1d56c73386406e66771517bbe2b048ce111f93845",
+					"size": 3556,
+					"sourceHash": "51f7719fca0a59c73cd12d95ea1070df3e3bc7651e1c3d07541c846efb5513b7",
+					"status": "content"
+				}
+			},
+			"summary": {
+				"differentFiles": 3,
+				"matchingFiles": 5,
+				"missingInPackage": 0,
+				"missingInSource": 8,
+				"score": 0.3125,
+				"totalFiles": 16
+			}
+		}
+	}
+]
