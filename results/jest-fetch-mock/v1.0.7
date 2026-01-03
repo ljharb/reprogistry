@@ -1,0 +1,115 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-03T09:51:20.255Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:3.10.3",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "jest-fetch-mock@1.0.7",
+			"name": "jest-fetch-mock",
+			"version": "1.0.7",
+			"location": "https://registry.npmjs.org/jest-fetch-mock/-/jest-fetch-mock-1.0.7.tgz",
+			"integrity": "sha512-+c7X1igkGIt4OxAb176d8jAxh29Thhkpr66P0vW7MDBKU3BXcxI7aBp67ZGklFVAFJRCeaDLzb2Rj3jTnig/5A==",
+			"publishedAt": "2017-02-01T07:29:16.443Z",
+			"publishedWith": {
+				"node": "6.3.1",
+				"npm": "3.10.3"
+			}
+		},
+		"source": {
+			"integrity": null,
+			"location": "git+https://github.com/jefflau/jest-fetch-mock.git",
+			"spec": "github:jefflau/jest-fetch-mock#5461e7d4a10b07dfe7eb27bea966d2c13c6ca70d"
+		},
+		"comparisonHash": "8a2a8dcbb729bf3ee9216e490c955701f0ddebe1",
+		"diff": {
+			"files": {
+				".npmignore": {
+					"match": false,
+					"packageHash": "7c12a77f46e042412273b579d497f70d7ba24c3892a295b393a06c84fc4921c3",
+					"size": 27,
+					"status": "missing-in-source"
+				},
+				"README.md": {
+					"diff": "--- published/README.md\n+++ rebuilt/README.md\n@@ -1,8 +1,31 @@\n # Jest Fetch Mock\n \n-Fetch is the new way to do HTTP requests in the browser, and it can be used in other environments such as React Native. Jest Fetch Mock allows you to easily mock your `fetch` calls and return the response you need to fake the HTTP requests. It's easy to setup and you don't need a library like `nock` to get goin and it uses Jest's built-in support for mocking under the surface. It currently supports the mocking of the go-to polyfill for fetch, [`whatwg-fetch`](https://github.com/github/fetch)\n+![npm downloads](https://img.shields.io/npm/dw/jest-fetch-mock)\n+![Node.js CI](https://github.com/jefflau/jest-fetch-mock/workflows/Node.js%20CI/badge.svg)\n \n-## Setup and Installation\n+Fetch is the canonical way to do HTTP requests in the browser, and it can be used in other environments such as React Native. Jest Fetch Mock allows you to easily mock your `fetch` calls and return the response you need to fake the HTTP requests. It's easy to setup and you don't need a library like `nock` to get going and it uses Jest's built-in support for mocking under the surface. This means that any of the `jest.fn()` methods are also available. For more information on the jest mock API, check their docs [here](https://facebook.github.io/jest/docs/en/mock-functions.html)\n+\n+It currently supports the mocking with the [`cross-fetch`](https://www.npmjs.com/package/cross-fetch) polyfill, so it supports Node.js and any browser-like runtime.\n+\n+## Contents\n+\n+- [Usage](#usage)\n+  - [Installation and Setup](#package-installation)\n+  - [Using with Create-React-App](#using-with-create-react-app)\n+- [API](#api)\n+- [Examples](#examples)\n+  - [Simple mock and assert](#simple-mock-and-assert)\n+  - [Mocking all fetches](#mocking-all-fetches)\n+  - [Mocking a failed fetch](#mocking-a-failed-fetch)\n+  - [Mocking multiple fetches with different responses](#mocking-multiple-fetches-with-different-responses)\n+  - [Mocking multiple fetches with `fetch.mockResponses`](#mocking-multiple-fetches-with-fetchmockresponses)\n+  - [Reset mocks between tests with `fetch.resetMocks`](#reset-mocks-between-tests-with-fetchresetmocks)\n+  - [Using `fetch.mock` to inspect the mock state of each fetch call](#using-fetchmock-to-inspect-the-mock-state-of-each-fetch-call)\n+  - [Using functions to mock slow servers](#using-functions-to-mock-slow-servers)\n+\n+## Usage\n+\n+### Package Installation\n \n To setup your fetch mock you need to do the following things:\n \n@@ -10,119 +33,498 @@\n $ npm install --save-dev jest-fetch-mock\n ```\n \n-Create a setupJest file to setup the mock or add this to an existing setupFile:\n+Create a `setupJest` file to setup the mock or add this to an existing `setupFile`. :\n+\n+### To setup for all tests\n \n ```js\n-//setupJest.js\n-global.fetch = require('jest-fetch-mock');\n+//setupJest.js or similar file\n+require('jest-fetch-mock').enableMocks()\n ```\n \n-Add the setupFile to your jest config in package.json:\n+Add the setupFile to your jest config in `package.json`:\n \n ```JSON\n \"jest\": {\n   \"automock\": false,\n+  \"resetMocks\": false,\n   \"setupFiles\": [\n     \"./setupJest.js\"\n   ]\n }\n ```\n \n-##API\n+With this done, you'll have `fetch` and `fetchMock` available on the global scope. Fetch will be used as usual by your code and you'll use `fetchMock` in your tests\n+\n+Note: the `resetMocks` Jest configuration default was changed from `false` to `true` in Jest 4.0.1.  Therefore the Jest configuration of setting it to `false` is required if the `setupJest.js` is what calls \"enableMocks()\" (i.e. in the above suggested setup) otherwise you will need to call \"enableMocks()\" in a \"beforeEach\" block.\n+\n+#### Default not mocked\n+\n+If you would like to have the 'fetchMock' available in all tests but not enabled then add `fetchMock.dontMock()` after the `...enableMocks()` line in `setupJest.js`:\n+\n+```js\n+// adds the 'fetchMock' global variable and rewires 'fetch' global to call 'fetchMock' instead of the real implementation\n+require('jest-fetch-mock').enableMocks()\n+// changes default behavior of fetchMock to use the real 'fetch' implementation and not mock responses\n+fetchMock.dontMock()\n+```\n+\n+If you want a single test file to return to the default behavior of mocking all responses, add the following to the\n+test file:\n+\n+```js\n+beforeEach(() => {\n+  // if you have an existing `beforeEach` just add the following line to it\n+  fetchMock.doMock()\n+})\n+```\n+\n+To enable mocking for a specific URL only:\n+\n+```js\n+beforeEach(() => {\n+  // if you have an existing `beforeEach` just add the following lines to it\n+  fetchMock.mockIf(/^https?:\\/\\/example.com.*$/, async (req) => {\n+    if (req.url.endsWith('/path1')) {\n+      return 'some response body'\n+    } else if (req.url.endsWith('/path2')) {\n",
+					"match": false,
+					"packageHash": "3756684acc145dca086cd75417dc853049ae9a2f494e2a407f5c0e73917bad00",
+					"size": 6079,
+					"sourceHash": "2d0b77b0bb08cc9cb098f614362c6dc77723f5c60b62fa575b45cf066741ec01",
+					"status": "content"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -1,10 +1,13 @@\n {\n   \"name\": \"jest-fetch-mock\",\n-  \"version\": \"1.0.7\",\n+  \"version\": \"3.1.0\",\n   \"description\": \"fetch mock for jest\",\n   \"main\": \"src/index.js\",\n+  \"types\": \"types\",\n   \"scripts\": {\n-    \"test\": \"echo \\\"Error: no test specified\\\" && exit 1\"\n+    \"test\": \"jest && yarn tsc && yarn lint\",\n+    \"lint\": \"eslint .\",\n+    \"tsc\": \"tsc\"\n   },\n   \"repository\": {\n     \"type\": \"git\",\n@@ -22,6 +25,46 @@\n   },\n   \"homepage\": \"https://github.com/jefflau/jest-fetch-mock#readme\",\n   \"dependencies\": {\n-    \"whatwg-fetch\": \"1.0.0\"\n+    \"cross-fetch\": \"^3.1.8\",\n+    \"domexception\": \"^4.0.0\",\n+    \"promise-polyfill\": \"^8.3.0\"\n+  },\n+  \"devDependencies\": {\n+    \"@types/jest\": \"^29.5.12\",\n+    \"@types/node\": \"^20.11.27\",\n+    \"@typescript-eslint/eslint-plugin\": \"^7.2.0\",\n+    \"@typescript-eslint/parser\": \"^7.2.0\",\n+    \"eslint\": \"^8.57.0\",\n+    \"jest\": \"^29.7.0\",\n+    \"prettier\": \"^3.2.5\",\n+    \"regenerator-runtime\": \"^0.14.1\",\n+    \"typescript\": \"^5.4.2\"\n+  },\n+  \"prettier\": {\n+    \"semi\": false,\n+    \"arrowParens\": \"always\",\n+    \"editor.formatOnSave\": true,\n+    \"singleQuote\": true,\n+    \"trailingComma\": \"es5\",\n+    \"overrides\": [\n+      {\n+        \"files\": \"**/*.ts\",\n+        \"options\": {\n+          \"semi\": true,\n+          \"tabWidth\": 4,\n+          \"singleQuote\": false,\n+          \"printWidth\": 125\n+        }\n+      }\n+    ]\n+  },\n+  \"jest\": {\n+    \"automock\": false,\n+    \"testPathIgnorePatterns\": [\n+      \"types\"\n+    ],\n+    \"setupFiles\": [\n+      \"./setupJest.js\"\n+    ]\n   }\n }\n",
+					"match": false,
+					"packageHash": "1820d053be243b475a11169037215331ee901f162f51c4486145a80100bc2191",
+					"size": 647,
+					"sourceHash": "8b743fdef09380161f0636e3252c3c51fae399eb0e0126f3853834ff737f6d59",
+					"status": "content"
+				},
+				"src/index.js": {
+					"diff": "--- published/src/index.js\n+++ rebuilt/src/index.js\n@@ -1,63 +1,277 @@\n-/**\n- * Copyright 2004-present Facebook. All Rights Reserved.\n- *\n- * Implements basic mock for the fetch interface use `whatwg-fetch` polyfill.\n- *\n- * See https://fetch.spec.whatwg.org/\n- */\n+const crossFetch = require('cross-fetch')\n+global.fetch = crossFetch\n+global.Response = crossFetch.Response\n+global.Headers = crossFetch.Headers\n+global.Request = crossFetch.Request\n+\n+if (typeof Promise === 'undefined') {\n+  Promise = require('promise-polyfill')\n+} else if (!('finally' in Promise) || typeof Promise.finally === 'undefined') {\n+  Promise.finally = require('promise-polyfill').finally\n+}\n \n-const { Response, Headers, Request } = require('whatwg-fetch');\n+if (typeof DOMException === 'undefined') {\n+  DOMException = require('domexception')\n+}\n \n-const ActualResponse = Response;\n+const ActualResponse = Response\n \n-function ResponseWrapper(body, init) {\n+function responseWrapper(body, init) {\n   if (\n+    body &&\n     typeof body.constructor === 'function' &&\n     body.constructor.__isFallback\n   ) {\n-    const response = new ActualResponse(null, init);\n-    response.body = body;\n+    const response = new ActualResponse(null, init)\n+    response.body = body\n \n-    const actualClone = response.clone;\n+    const actualClone = response.clone\n     response.clone = () => {\n-      const clone = actualClone.call(response);\n-      const [body1, body2] = body.tee();\n-      response.body = body1;\n-      clone.body = body2;\n-      return clone;\n-    };\n-\n-    return response;\n-  }\n-\n-  return new ActualResponse(body, init);\n-}\n-\n-const fetch = jest.fn();\n-fetch.Headers = Headers;\n-fetch.Response = ResponseWrapper;\n-fetch.Request = Request;\n-fetch.mockResponse = (body, init) => {\n-  fetch.mockImplementation(\n-    () => Promise.resolve(new ResponseWrapper(body, init))\n-  );\n-};\n-\n-fetch.mockResponseOnce = (body, init) => {\n-  fetch.mockImplementationOnce(\n-    () => Promise.resolve(new ResponseWrapper(body, init))\n-  );\n-};\n+      const clone = actualClone.call(response)\n+      const [body1, body2] = body.tee()\n+      response.body = body1\n+      clone.body = body2\n+      return clone\n+    }\n+\n+    return response\n+  }\n+\n+  return new ActualResponse(body, init)\n+}\n+\n+function responseInit(resp, init) {\n+  if (typeof resp.init === 'object') {\n+    return resp.init\n+  } else {\n+    init = Object.assign({}, init || {})\n+    for (const field of ['status', 'statusText', 'headers', 'url']) {\n+      if (field in resp) {\n+        init[field] = resp[field]\n+      }\n+    }\n+    return init\n+  }\n+}\n+\n",
+					"match": false,
+					"packageHash": "b922b3e2bffa6e0ffd0ed25d7ac4518bbf31e9b341b980d7ad851128efa1cf5e",
+					"size": 1481,
+					"sourceHash": "4052a62778d7b37b495d8b66848428dcf9c017f1dde7ce31421b8b29d852176e",
+					"status": "content"
+				},
+				".editorconfig": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				".eslintrc.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				".github/workflows/nodejs.yml": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				".github/workflows/publish.yml": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				".prettierignore": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"LICENSE.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"setupJest.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"tsconfig.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"types/index.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"types/test.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"types/tsconfig.json": {
+					"match": false,
+					"status": "missing-in-package"
+				}
+			},
+			"summary": {
+				"differentFiles": 3,
+				"matchingFiles": 0,
+				"missingInPackage": 11,
+				"missingInSource": 1,
+				"score": 0,
+				"totalFiles": 15
+			}
+		}
+	}
+]

@@ -1,0 +1,191 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-03T09:57:47.410Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:11.7.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "jest-fetch-mock@3.0.3",
+			"name": "jest-fetch-mock",
+			"version": "3.0.3",
+			"location": "https://registry.npmjs.org/jest-fetch-mock/-/jest-fetch-mock-3.0.3.tgz",
+			"integrity": "sha512-Ux1nWprtLrdrH4XwE7O7InRY6psIi3GOsqNESJgMJ+M5cv4A8Lh7SN9d2V2kKRZ8ebAfcd1LNyZguAOb6JiDqw==",
+			"publishedAt": "2020-03-10T07:26:52.917Z",
+			"publishedWith": {
+				"node": null,
+				"npm": null
+			}
+		},
+		"source": {
+			"integrity": null,
+			"location": "git+https://github.com/jefflau/jest-fetch-mock.git",
+			"spec": "github:jefflau/jest-fetch-mock#HEAD"
+		},
+		"comparisonHash": "8a2a8dcbb729bf3ee9216e490c955701f0ddebe1",
+		"diff": {
+			"files": {
+				".github/workflows/nodejs.yml": {
+					"diff": "--- published/.github/workflows/nodejs.yml\n+++ rebuilt/.github/workflows/nodejs.yml\n@@ -1,13 +1,13 @@\n # This workflow will do a clean install of node dependencies, build the source code and run tests across different versions of node\n+# then publish the resulting package to NPM js\n # For more information see: https://help.github.com/actions/language-and-framework-guides/using-nodejs-with-github-actions\n \n name: Node.js CI\n \n on:\n   push:\n-    branches: [ master ]\n   pull_request:\n-    branches: [ master ]\n+      branches: [ master ]\n \n jobs:\n   build:\n@@ -16,12 +16,12 @@\n \n     strategy:\n       matrix:\n-        node-version: [10.x, 12.x]\n+        node-version: [16.x, 18.x, 20.x]\n \n     steps:\n-    - uses: actions/checkout@v2\n+    - uses: actions/checkout@v4\n     - name: Use Node.js ${{ matrix.node-version }}\n-      uses: actions/setup-node@v1\n+      uses: actions/setup-node@v4\n       with:\n         node-version: ${{ matrix.node-version }}\n     - run: npm install\n",
+					"match": false,
+					"packageHash": "ec689ea16a8f74542dd501bc27c267e382e8b919c77ef2e5fd33bc8b4e6f1881",
+					"size": 721,
+					"sourceHash": "a825d4d2ceb4da5014dae4c29960183bf88ddda0e9e304d8fc471ff60fad8c6d",
+					"status": "content"
+				},
+				"README.md": {
+					"diff": "--- published/README.md\n+++ rebuilt/README.md\n@@ -1,5 +1,8 @@\n # Jest Fetch Mock\n \n+![npm downloads](https://img.shields.io/npm/dw/jest-fetch-mock)\n+![Node.js CI](https://github.com/jefflau/jest-fetch-mock/workflows/Node.js%20CI/badge.svg)\n+\n Fetch is the canonical way to do HTTP requests in the browser, and it can be used in other environments such as React Native. Jest Fetch Mock allows you to easily mock your `fetch` calls and return the response you need to fake the HTTP requests. It's easy to setup and you don't need a library like `nock` to get going and it uses Jest's built-in support for mocking under the surface. This means that any of the `jest.fn()` methods are also available. For more information on the jest mock API, check their docs [here](https://facebook.github.io/jest/docs/en/mock-functions.html)\n \n It currently supports the mocking with the [`cross-fetch`](https://www.npmjs.com/package/cross-fetch) polyfill, so it supports Node.js and any browser-like runtime.\n@@ -7,7 +10,7 @@\n ## Contents\n \n - [Usage](#usage)\n-  - [Installation and Setup](#installation-and-setup)\n+  - [Installation and Setup](#package-installation)\n   - [Using with Create-React-App](#using-with-create-react-app)\n - [API](#api)\n - [Examples](#examples)\n@@ -44,6 +47,7 @@\n ```JSON\n \"jest\": {\n   \"automock\": false,\n+  \"resetMocks\": false,\n   \"setupFiles\": [\n     \"./setupJest.js\"\n   ]\n@@ -52,64 +56,75 @@\n \n With this done, you'll have `fetch` and `fetchMock` available on the global scope. Fetch will be used as usual by your code and you'll use `fetchMock` in your tests\n \n+Note: the `resetMocks` Jest configuration default was changed from `false` to `true` in Jest 4.0.1.  Therefore the Jest configuration of setting it to `false` is required if the `setupJest.js` is what calls \"enableMocks()\" (i.e. in the above suggested setup) otherwise you will need to call \"enableMocks()\" in a \"beforeEach\" block.\n+\n #### Default not mocked\n \n If you would like to have the 'fetchMock' available in all tests but not enabled then add `fetchMock.dontMock()` after the `...enableMocks()` line in `setupJest.js`:\n+\n ```js\n // adds the 'fetchMock' global variable and rewires 'fetch' global to call 'fetchMock' instead of the real implementation\n require('jest-fetch-mock').enableMocks()\n // changes default behavior of fetchMock to use the real 'fetch' implementation and not mock responses\n-fetchMock.dontMock() \n+fetchMock.dontMock()\n ```\n+\n If you want a single test file to return to the default behavior of mocking all responses, add the following to the\n test file:\n+\n ```js\n-beforeEach(() => { // if you have an existing `beforeEach` just add the following line to it\n+beforeEach(() => {\n+  // if you have an existing `beforeEach` just add the following line to it\n   fetchMock.doMock()\n })\n ```\n \n To enable mocking for a specific URL only:\n+\n ```js\n-beforeEach(() => { // if you have an existing `beforeEach` just add the following lines to it\n-  fetchMock.mockIf(/^https?:\\/\\/example.com.*$/, req => {\n-      if (req.url.endsWith(\"/path1\")) {\n-        return \"some response body\"\n-      } else if (req.url.endsWith(\"/path2\")) {\n-        return {\n-          body: \"another response body\",\n-          headers: {\n-            \"X-Some-Response-Header\": \"Some header value\"\n-          } \n-        }\n-      } else {\n-        return {\n-          status: 404,\n-          body: \"Not Found\"\n+beforeEach(() => {\n+  // if you have an existing `beforeEach` just add the following lines to it\n+  fetchMock.mockIf(/^https?:\\/\\/example.com.*$/, async (req) => {\n+    if (req.url.endsWith('/path1')) {\n+      return 'some response body'\n+    } else if (req.url.endsWith('/path2')) {\n+      return {\n+        body: 'another response body',\n+        headers: {\n+          'X-Some-Response-Header': 'Some header value'\n         }\n       }\n+    } else {\n+      return {\n+        status: 404,\n+        body: 'Not Found'\n+      }\n+    }\n   })\n })\n ```\n \n If you have changed the default behavior to use the real implementation, you can guarantee the next call to fetch\n will be mocked by using the `mockOnce` function:\n+\n",
+					"match": false,
+					"packageHash": "de328621e4914bd25c8ae95968a01e7fa7ea37b08ac96a634a3dccbbf09087c9",
+					"size": 40318,
+					"sourceHash": "2d0b77b0bb08cc9cb098f614362c6dc77723f5c60b62fa575b45cf066741ec01",
+					"status": "content"
+				},
+				"coverage/clover.xml": {
+					"match": false,
+					"packageHash": "5dd7c352664b9ab75c577aacea32ee7547c7c0ddfbc80a337c74a21b66b58de3",
+					"size": 1253,
+					"status": "missing-in-source"
+				},
+				"coverage/coverage-final.json": {
+					"match": false,
+					"packageHash": "f2c7f0a41ec77ca4cd052a3002a6d2fa64555cc6bd6fdf16b15c07af78345f78",
+					"size": 3415,
+					"status": "missing-in-source"
+				},
+				"coverage/lcov-report/api.js.html": {
+					"match": false,
+					"packageHash": "7209914b86fed51de10c41fca43bb250825ceb799d3895c8c9ca0a074f144a19",
+					"size": 5583,
+					"status": "missing-in-source"
+				},
+				"coverage/lcov-report/base.css": {
+					"match": false,
+					"packageHash": "214d49c3ae52b90514906fffc7e8a0f811e158460b8316ebe99523d62b9a215d",
+					"size": 5324,
+					"status": "missing-in-source"
+				},
+				"coverage/lcov-report/block-navigation.js": {
+					"match": false,
+					"packageHash": "f0f12111afc37f6bd3fcad65eb73a5b27b3e622f3ab17fc34465eab13cf065b1",
+					"size": 1902,
+					"status": "missing-in-source"
+				},
+				"coverage/lcov-report/index.html": {
+					"match": false,
+					"packageHash": "c630e2b7015e3f226ee148520616db9df1acb4eb0c2e9b717423841b28c53b1a",
+					"size": 3725,
+					"status": "missing-in-source"
+				},
+				"coverage/lcov-report/prettify.css": {
+					"match": false,
+					"packageHash": "ea3fe433f9450698ca8a230271688e7aeec12f99c8a7ef6c94379abb38f27823",
+					"size": 676,
+					"status": "missing-in-source"
+				},
+				"coverage/lcov-report/prettify.js": {
+					"match": false,
+					"packageHash": "67126b6cd4d1b2305f8c8fa5974971ebe90ab2b0f6e209ba2f1c6e4af05f0207",
+					"size": 17569,
+					"status": "missing-in-source"
+				},
+				"coverage/lcov-report/sort-arrow-sprite.png": {
+					"match": false,
+					"packageHash": "cc0509bb6793ce64f35b199d39fea7bada13ecc2d395a43957d0d8aae4f05864",
+					"size": 209,
+					"status": "missing-in-source"
+				},
+				"coverage/lcov-report/sorter.js": {
+					"match": false,
+					"packageHash": "a2e1ee8eb42ae6152ffb680f1f3419cf4a189412b4ffc663252492d47a968914",
+					"size": 5174,
+					"status": "missing-in-source"
+				},
+				"coverage/lcov.info": {
+					"match": false,
+					"packageHash": "b9be855f8f73c408a785d07e22a029100dc9d5897e484e61a5adad00e141aa24",
+					"size": 557,
+					"status": "missing-in-source"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -1,12 +1,12 @@\n {\n   \"name\": \"jest-fetch-mock\",\n-  \"version\": \"3.0.3\",\n+  \"version\": \"3.1.0\",\n   \"description\": \"fetch mock for jest\",\n   \"main\": \"src/index.js\",\n   \"types\": \"types\",\n   \"scripts\": {\n-    \"test\": \"jest && yarn tsc && yarn dtslint\",\n-    \"dtslint\": \"dtslint types\",\n+    \"test\": \"jest && yarn tsc && yarn lint\",\n+    \"lint\": \"eslint .\",\n     \"tsc\": \"tsc\"\n   },\n   \"repository\": {\n@@ -25,22 +25,27 @@\n   },\n   \"homepage\": \"https://github.com/jefflau/jest-fetch-mock#readme\",\n   \"dependencies\": {\n-    \"cross-fetch\": \"^3.0.4\",\n-    \"promise-polyfill\": \"^8.1.3\"\n+    \"cross-fetch\": \"^3.1.8\",\n+    \"domexception\": \"^4.0.0\",\n+    \"promise-polyfill\": \"^8.3.0\"\n   },\n   \"devDependencies\": {\n-    \"@types/jest\": \"^23.3.14\",\n-    \"@types/node\": \"^10.17.8\",\n-    \"dtslint\": \"^2.0.2\",\n-    \"jest\": \"^23.6.0\",\n-    \"prettier\": \"^1.19.1\",\n-    \"regenerator-runtime\": \"^0.13.3\",\n-    \"typescript\": \"^3.7.3\"\n+    \"@types/jest\": \"^29.5.12\",\n+    \"@types/node\": \"^20.11.27\",\n+    \"@typescript-eslint/eslint-plugin\": \"^7.2.0\",\n+    \"@typescript-eslint/parser\": \"^7.2.0\",\n+    \"eslint\": \"^8.57.0\",\n+    \"jest\": \"^29.7.0\",\n+    \"prettier\": \"^3.2.5\",\n+    \"regenerator-runtime\": \"^0.14.1\",\n+    \"typescript\": \"^5.4.2\"\n   },\n   \"prettier\": {\n     \"semi\": false,\n+    \"arrowParens\": \"always\",\n     \"editor.formatOnSave\": true,\n     \"singleQuote\": true,\n+    \"trailingComma\": \"es5\",\n     \"overrides\": [\n       {\n         \"files\": \"**/*.ts\",\n@@ -48,7 +53,7 @@\n           \"semi\": true,\n           \"tabWidth\": 4,\n           \"singleQuote\": false,\n-          \"printWidth\": 120\n+          \"printWidth\": 125\n         }\n       }\n     ]\n",
+					"match": false,
+					"packageHash": "bae5592df0e190f34fe535c5c565bab60c45444686714786424ae76c04085a84",
+					"size": 1419,
+					"sourceHash": "8b743fdef09380161f0636e3252c3c51fae399eb0e0126f3853834ff737f6d59",
+					"status": "content"
+				},
+				"setupJest.js": {
+					"diff": "--- published/setupJest.js\n+++ rebuilt/setupJest.js\n@@ -1 +1 @@\n-global.fetch = require('jest-fetch-mock')\n+require('jest-fetch-mock').enableMocks()\n",
+					"match": false,
+					"packageHash": "dfbcee4d11a79f8e4c6a2e951f80a8d22f6c6290c814f363c2f3ba22f5c49efc",
+					"size": 42,
+					"sourceHash": "1948f99203eb7c93087b3112997083f7b7c19e50a3b27edf89cd2fcd08ee5e78",
+					"status": "content"
+				},
+				"src/index.js": {
+					"diff": "--- published/src/index.js\n+++ rebuilt/src/index.js\n@@ -4,12 +4,16 @@\n global.Headers = crossFetch.Headers\n global.Request = crossFetch.Request\n \n-if (!Promise) {\n+if (typeof Promise === 'undefined') {\n   Promise = require('promise-polyfill')\n-} else if (!Promise.finally) {\n+} else if (!('finally' in Promise) || typeof Promise.finally === 'undefined') {\n   Promise.finally = require('promise-polyfill').finally\n }\n \n+if (typeof DOMException === 'undefined') {\n+  DOMException = require('domexception')\n+}\n+\n const ActualResponse = Response\n \n function responseWrapper(body, init) {\n@@ -53,9 +57,9 @@\n function requestMatches(urlOrPredicate) {\n   const predicate =\n     urlOrPredicate instanceof RegExp\n-      ? input => urlOrPredicate.test(input.url)\n+      ? (input) => urlOrPredicate.test(input.url)\n       : typeof urlOrPredicate === 'string'\n-      ? input => input.url === urlOrPredicate\n+      ? (input) => input.url === urlOrPredicate\n       : urlOrPredicate\n   return (input, reqInit) => {\n     const req = normalizeRequest(input, reqInit)\n@@ -65,7 +69,7 @@\n \n function requestNotMatches(urlOrPredicate) {\n   const matches = requestMatches(urlOrPredicate)\n-  return input => {\n+  return (input) => {\n     const result = matches(input)\n     return [!result[0], result[1]]\n   }\n@@ -77,7 +81,7 @@\n   }\n }\n \n-const isFn = unknown => typeof unknown === 'function'\n+const isFn = (unknown) => typeof unknown === 'function'\n \n const isMocking = jest.fn(staticMatches(true))\n \n@@ -92,11 +96,13 @@\n   return Promise.reject(abortError())\n }\n \n+const toPromise = (val) => (val instanceof Promise ? val : Promise.resolve(val))\n+\n const normalizeResponse = (bodyOrFunction, init) => (input, reqInit) => {\n   const [mocked, request] = isMocking(input, reqInit)\n   return mocked\n     ? isFn(bodyOrFunction)\n-      ? bodyOrFunction(request).then(resp => {\n+      ? toPromise(bodyOrFunction(request)).then((resp) => {\n           if (request.signal && request.signal.aborted) {\n             abort()\n           }\n@@ -125,12 +131,17 @@\n       abort()\n     }\n     return new Request(input, reqInit)\n+  } else if (typeof input.toString === 'function') {\n+    if (reqInit && reqInit.signal && reqInit.signal.aborted) {\n+      abort()\n+    }\n+    return new Request(input.toString(), reqInit)\n   } else {\n     throw new TypeError('Unable to parse input as string or Request')\n   }\n }\n \n-const normalizeError = errorOrFunction =>\n+const normalizeError = (errorOrFunction) =>\n   isFn(errorOrFunction)\n     ? errorOrFunction\n     : () => Promise.reject(errorOrFunction)\n@@ -142,7 +153,7 @@\n fetch.mockResponse = (bodyOrFunction, init) =>\n   fetch.mockImplementation(normalizeResponse(bodyOrFunction, init))\n \n-fetch.mockReject = errorOrFunction =>\n+fetch.mockReject = (errorOrFunction) =>\n   fetch.mockImplementation(normalizeError(errorOrFunction))\n \n fetch.mockAbort = () => fetch.mockImplementation(abortAsync)\n@@ -155,11 +166,11 @@\n \n fetch.once = mockResponseOnce\n \n-fetch.mockRejectOnce = errorOrFunction =>\n+fetch.mockRejectOnce = (errorOrFunction) =>\n",
+					"match": false,
+					"packageHash": "b8166acf88f10e293b9685ce705e228f941ef3f43fb2fd66a7ae0995cabe34d8",
+					"size": 6780,
+					"sourceHash": "4052a62778d7b37b495d8b66848428dcf9c017f1dde7ce31421b8b29d852176e",
+					"status": "content"
+				},
+				"tsconfig.json": {
+					"diff": "--- published/tsconfig.json\n+++ rebuilt/tsconfig.json\n@@ -1,6 +1,7 @@\n {\n   \"extends\": \"./types/tsconfig.json\",\n   \"compilerOptions\": {\n+    \"target\": \"ES2015\",\n     \"baseUrl\": \".\",\n     \"rootDir\": \"./types\",\n     \"paths\": {\n@@ -9,4 +10,4 @@\n       ]\n     }\n   }\n-}\n\\ No newline at end of file\n+}\n",
+					"match": false,
+					"packageHash": "c67825d7bd2a05de8e2ac13e1ea7e033e29770e4e9194159fa7d0f11f6f81f6d",
+					"size": 183,
+					"sourceHash": "d4c6f34a7c35cc084837729ce221605beba9995e97d18262c0153f804b40eb72",
+					"status": "content"
+				},
+				"types/index.d.ts": {
+					"diff": "--- published/types/index.d.ts\n+++ rebuilt/types/index.d.ts\n@@ -1,4 +1,5 @@\n // TypeScript Version: 3.0\n+/// <reference lib=\"dom\" />\n import Global = NodeJS.Global;\n import \"jest\";\n \n@@ -18,7 +19,7 @@\n \n export interface FetchMock\n     extends jest.MockInstance<Promise<Response>, [string | Request | undefined, RequestInit | undefined]> {\n-    (input?: string | Request, init?: RequestInit): Promise<Response>;\n+    (input: string | Request, init?: RequestInit): Promise<Response>;\n \n     // Response mocking\n     mockResponse(fn: MockResponseInitFunction): FetchMock;\n@@ -86,6 +87,8 @@\n     statusText?: string;\n     headers?: string[][] | { [key: string]: string }; // HeadersInit\n     url?: string;\n+    /** Set >= 1 to have redirected return true. Only applicable to Node.js */\n+    counter?: number;\n }\n \n export interface MockResponseInit extends MockParams {\n@@ -96,7 +99,7 @@\n export type ErrorOrFunction = Error | ((...args: any[]) => Promise<any>);\n export type UrlOrPredicate = string | RegExp | ((input: Request) => boolean);\n \n-export type MockResponseInitFunction = (request: Request) => Promise<MockResponseInit | string>;\n+export type MockResponseInitFunction = (request: Request) => MockResponseInit | string | Promise<MockResponseInit | string>;\n \n // alias of fetchMock.enableMocks() for ES6 import syntax to not clash with other libraries\n export function enableFetchMocks(): void;\n",
+					"match": false,
+					"packageHash": "e30d786b0d39127634ca6c7a65b108e63fad652d3937a4b8a4e15b21ad26da62",
+					"size": 4197,
+					"sourceHash": "f573eb4ea7338e53b940b3dc57d8910c0c4b057357b650c5ecf2d136da8e1fb7",
+					"status": "content"
+				},
+				"types/test.ts": {
+					"diff": "--- published/types/test.ts\n+++ rebuilt/types/test.ts\n@@ -39,7 +39,9 @@\n fetchMock.mockResponses(someAsyncHandler);\n fetchMock.mockResponses([JSON.stringify({foo: \"bar\"}), {status: 200}]);\n fetchMock.mockResponses(\n+    someSyncHandler,\n     someAsyncHandler,\n+    someSyncStringHandler,\n     someAsyncStringHandler,\n     [JSON.stringify({foo: \"bar\"}), {status: 200}]\n );\n@@ -88,7 +90,18 @@\n     };\n }\n \n+function someSyncHandler(): MockResponseInit {\n+    return {\n+        status: 200,\n+        body: someSyncStringHandler()\n+    };\n+}\n+\n async function someAsyncStringHandler(): Promise<string> {\n+    return Promise.resolve(someSyncStringHandler());\n+}\n+\n+function someSyncStringHandler(): string {\n     return JSON.stringify({foo: \"bar\"});\n }\n \n",
+					"match": false,
+					"packageHash": "e9f92b1713b5210c434708466b98db038bb4d1440729ef5d45508ec7d77281f3",
+					"size": 3155,
+					"sourceHash": "cc900e35433959b30f8a6734d8e634068982a4412c39403322de340b4790b847",
+					"status": "content"
+				},
+				"types/tsconfig.json": {
+					"diff": "--- published/types/tsconfig.json\n+++ rebuilt/types/tsconfig.json\n@@ -2,8 +2,7 @@\n   \"compilerOptions\": {\n     \"module\": \"commonjs\",\n     \"lib\": [\n-      \"es2015\",\n-      \"dom\"\n+      \"es2015\"\n     ],\n     \"baseUrl\": \".\",\n     \"paths\": {\n@@ -18,4 +17,4 @@\n     \"noEmit\": true,\n     \"forceConsistentCasingInFileNames\": true\n   }\n-}\n\\ No newline at end of file\n+}\n",
+					"match": false,
+					"packageHash": "485e7f936a47cbc18fad78baf6ba6d0ed19b6d96c93225e1984de66a586f989c",
+					"size": 376,
+					"sourceHash": "211dbe82da33f56363af0c8f0af0fda6fbc9ea6ee732eb3abd82db5619f0c69f",
+					"status": "content"
+				},
+				".editorconfig": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				".eslintrc.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				".github/workflows/publish.yml": {
+					"match": false,
+					"status": "missing-in-package"
+				}
+			},
+			"summary": {
+				"differentFiles": 9,
+				"matchingFiles": 2,
+				"missingInPackage": 3,
+				"missingInSource": 11,
+				"score": 0.08,
+				"totalFiles": 25
+			}
+		}
+	}
+]
