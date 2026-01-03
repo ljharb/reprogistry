@@ -1,0 +1,111 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-03T08:39:14.774Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:11.7.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "ignore@2.2.10",
+			"name": "ignore",
+			"version": "2.2.10",
+			"location": "https://registry.npmjs.org/ignore/-/ignore-2.2.10.tgz",
+			"integrity": "sha512-xYPoDtdIfCQrfXnEkUSs43zbWBbVumFTWE47a8eP2KvoKcL6R5ml4w6F2ZraQ/Za1TKRfEOITn4hcsoTTlvBDA==",
+			"publishedAt": "2014-02-08T16:19:30.511Z",
+			"publishedWith": {
+				"node": null,
+				"npm": "1.3.22"
+			}
+		},
+		"source": {
+			"integrity": null,
+			"location": "git@github.com:kaelzhang/node-ignore.git",
+			"spec": "github:kaelzhang/node-ignore#HEAD"
+		},
+		"comparisonHash": "8a2a8dcbb729bf3ee9216e490c955701f0ddebe1",
+		"diff": {
+			"files": {
+				".npmignore": {
+					"match": false,
+					"packageHash": "0a4a571fddaa788fc4993c75573311a24096e085883733a933f386e717ebece1",
+					"size": 434,
+					"status": "missing-in-source"
+				},
+				".travis.yml": {
+					"match": false,
+					"packageHash": "4dd4202f0a9f2f3ab2cb9d429bff92b5c3cf3f4de1f3567d8a49339244bccd66",
+					"size": 95,
+					"status": "missing-in-source"
+				},
+				"Makefile": {
+					"match": false,
+					"packageHash": "5505c6017f26996ad21d47564e01c16bda2e6f61ddf68b3e20d992e098a80597",
+					"size": 115,
+					"status": "missing-in-source"
+				},
+				"README.md": {
+					"diff": "--- published/README.md\n+++ rebuilt/README.md\n@@ -1,103 +1,179 @@\n-# ignore [![NPM version](https://badge.fury.io/js/ignore.png)](http://badge.fury.io/js/ignore) [![Build Status](https://travis-ci.org/kaelzhang/node-ignore.png?branch=master)](https://travis-ci.org/kaelzhang/node-ignore) [![Dependency Status](https://gemnasium.com/kaelzhang/node-ignore.png)](https://gemnasium.com/kaelzhang/node-ignore)\n+| Linux / MacOS / Windows | Coverage | Downloads |\n+| ----------------------- | -------- | --------- |\n+| [![build][bb]][bl]      | [![coverage][cb]][cl] | [![downloads][db]][dl] |\n \n-`ignore` is a manager and filter according to the .gitignore [spec](http://git-scm.com/docs/gitignore).\n+[bb]: https://github.com/kaelzhang/node-ignore/actions/workflows/nodejs.yml/badge.svg\n+[bl]: https://github.com/kaelzhang/node-ignore/actions/workflows/nodejs.yml\n \n-# Installation\n+[cb]: https://codecov.io/gh/kaelzhang/node-ignore/branch/master/graph/badge.svg\n+[cl]: https://codecov.io/gh/kaelzhang/node-ignore\n \n-\tnpm install ignore --save\n-\t\n-# Usage\n+[db]: http://img.shields.io/npm/dm/ignore.svg\n+[dl]: https://www.npmjs.org/package/ignore\n \n-```js\n-var ignore = require('ignore');\n-var ig = ignore(options).addPattern(['.abc/*', '!.abc/d/']);\n-```\n+# ignore\n \n-## Filter the given paths\n+`ignore` is a manager, filter and parser which implemented in pure JavaScript according to the [.gitignore spec 2.22.1](http://git-scm.com/docs/gitignore).\n \n-```js\n-var paths = [\n-    '.abc/a.js',    // filtered out\n-    '.abc/d/e.js'   // included\n-];\n+`ignore` is used by eslint, gitbook and [many others](https://www.npmjs.com/browse/depended/ignore).\n+\n+Pay **ATTENTION** that [`minimatch`](https://www.npmjs.org/package/minimatch) (which used by `fstream-ignore`) does not follow the gitignore spec.\n+\n+To filter filenames according to a .gitignore file, I recommend this npm package, `ignore`.\n+\n+To parse an `.npmignore` file, you should use `minimatch`, because an `.npmignore` file is parsed by npm using `minimatch` and it does not work in the .gitignore way.\n+\n+### Tested on\n+\n+`ignore` is fully tested, and has more than **five hundreds** of unit tests.\n \n-ig.filter(paths); // ['.abc/d/e.js']\n+- Linux + Node: `0.8` - `7.x`\n+- Windows + Node: `0.10` - `7.x`, node < `0.10` is not tested due to the lack of support of appveyor.\n+\n+Actually, `ignore` does not rely on any versions of node specially.\n+\n+Since `4.0.0`, ignore will no longer support `node < 6` by default, to use in node < 6, `require('ignore/legacy')`. For details, see [CHANGELOG](https://github.com/kaelzhang/node-ignore/blob/master/CHANGELOG.md).\n+\n+## Table Of Main Contents\n+\n+- [Usage](#usage)\n+- [`Pathname` Conventions](#pathname-conventions)\n+- See Also:\n+  - [`glob-gitignore`](https://www.npmjs.com/package/glob-gitignore) matches files using patterns and filters them according to gitignore rules.\n+- [Upgrade Guide](#upgrade-guide)\n+\n+## Install\n+\n+```sh\n+npm i ignore\n ```\n \n-## As the filter function\n+## Usage\n \n ```js\n-paths.filter(ig.createFilter()); // ['.abc/d/e.js']\n+import ignore from 'ignore'\n+const ig = ignore().add(['.abc/*', '!.abc/d/'])\n ```\n \n-## With ignore files\n-\n-For most cases, we'd better use only one ignore file. We could use `ignore.select` to select the first existing file.\n+### Filter the given paths\n \n ```js\n-ignore().addIgnoreFile(\n-\tignore.select([\n-\t\t'.xxxignore',\n-\t\t'.gitignore',\n-\t\t'.ignore'\n-\t])\n-);\n+const paths = [\n+  '.abc/a.js',    // filtered out\n+  '.abc/d/e.js'   // included\n+]\n+\n+ig.filter(paths)        // ['.abc/d/e.js']\n+ig.ignores('.abc/a.js') // true\n ```\n",
+					"match": false,
+					"packageHash": "0b77a313140532e9a122b4cf1d081d5df6d5c82a8a504c70dbe7af213e20bd8f",
+					"size": 4420,
+					"sourceHash": "31b0578325859f88fa2089e88da94cd25a18866bbe2374af8231c26d8b6a087d",
+					"status": "content"
+				},
+				"index.js": {
+					"diff": "--- published/index.js\n+++ rebuilt/index.js\n@@ -1,362 +1,784 @@\n-'use strict';\n-\n-module.exports = ignore;\n-ignore.Ignore = Ignore;\n+// A simple implementation of make-array\n+function makeArray (subject) {\n+  return Array.isArray(subject)\n+    ? subject\n+    : [subject]\n+}\n \n-var EE        = require('events').EventEmitter;\n-var node_util = require('util');\n-var node_fs   = require('fs');\n-\n-function ignore (options){\n-    return new Ignore(options);\n-}\n-\n-var exists = node_fs.existsSync ?\n-    function (file) {\n-        return node_fs.existsSync(file);\n-    } :\n-\n-    // if node <= 0.6, there's no fs.existsSync method.\n-    function (file) {\n-        try {\n-            node_fs.statSync(file);\n-            return true;\n-        } catch(e) {\n-            return false;\n-        }\n-    };\n-\n-// Select the first existing file of the file list\n-ignore.select = function (files) {\n-    var selected;\n-\n-    files.some(function (file) {\n-        if( exists(file) ){\n-            selected = file;\n-            return true;\n-        }\n-    });\n-\n-    return selected;\n-};\n-\n-\n-// @param {Object} options\n-// - ignore: {Array}\n-// - twoGlobstars: {boolean=false} enable pattern `'**'` (two consecutive asterisks), default to `false`.\n-//      If false, ignore patterns with two globstars will be omitted\n-// - matchCase: {boolean=} case sensitive.\n-//      By default, git is case-insensitive\n-function Ignore (options){\n-    options = options || {};\n-\n-    this.options = options;\n-    this._patterns = [];\n-    this._rules = [];\n-    this._ignoreFiles = [];\n-\n-    options.ignore = options.ignore || [\n-        // Some files or directories which we should ignore for most cases.\n-        '.git',\n-        '.svn',\n-        '.DS_Store'\n-    ];\n-\n-    this.addPattern(options.ignore);\n-}\n-\n-// Events:\n-// 'warn': , \n-//      will warn when encounter '`**`' (two consecutive asterisks)\n-//      which is not compatible with all platforms (not works on Mac OS for example)\n-node_util.inherits(Ignore, EE);\n+const UNDEFINED = undefined\n+const EMPTY = ''\n+const SPACE = ' '\n+const ESCAPE = '\\\\'\n+const REGEX_TEST_BLANK_LINE = /^\\s+$/\n+const REGEX_INVALID_TRAILING_BACKSLASH = /(?:[^\\\\]|^)\\\\$/\n+const REGEX_REPLACE_LEADING_EXCAPED_EXCLAMATION = /^\\\\!/\n+const REGEX_REPLACE_LEADING_EXCAPED_HASH = /^\\\\#/\n+const REGEX_SPLITALL_CRLF = /\\r?\\n/g\n+\n+// Invalid:\n+// - /foo,\n+// - ./foo,\n+// - ../foo,\n+// - .\n+// - ..\n+// Valid:\n+// - .foo\n+const REGEX_TEST_INVALID_PATH = /^\\.{0,2}\\/|^\\.{1,2}$/\n",
+					"match": false,
+					"packageHash": "5217d62c2dd58a14103ff88116a8e02068833d338b4755e185ee3859961b5609",
+					"size": 9004,
+					"sourceHash": "56e047fefe8e36a8a1529b31e2992314006372bd271703d9d62ba4b5d5777340",
+					"status": "content"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -1,10 +1,43 @@\n {\n   \"name\": \"ignore\",\n-  \"version\": \"2.2.10\",\n-  \"description\": \"Ignore is a manager and filter for .gitignore rules.\",\n-  \"main\": \"index.js\",\n+  \"version\": \"7.0.5\",\n+  \"description\": \"Ignore is a manager and filter for .gitignore rules, the one used by eslint, gitbook and many others.\",\n+  \"types\": \"index.d.ts\",\n+  \"files\": [\n+    \"legacy.js\",\n+    \"index.js\",\n+    \"index.d.ts\",\n+    \"LICENSE-MIT\"\n+  ],\n   \"scripts\": {\n-    \"test\": \"mocha\"\n+    \"prepublishOnly\": \"npm run build\",\n+    \"build\": \"babel -o legacy.js index.js\",\n+\n+    \"==================== linting ======================\": \"\",\n+    \"lint\": \"eslint .\",\n+\n+    \"===================== import ======================\": \"\",\n+    \"ts\": \"npm run test:ts && npm run test:16\",\n+    \"test:ts\": \"ts-node ./test/import/simple.ts\",\n+    \"test:16\": \"npm run test:ts:16 && npm run test:cjs:16 && npm run test:mjs:16\",\n+    \"test:ts:16\": \"ts-node --compilerOptions '{\\\"moduleResolution\\\": \\\"Node16\\\", \\\"module\\\": \\\"Node16\\\"}' ./test/import/simple.ts && tsc ./test/import/simple.ts --lib ES6 --moduleResolution Node16 --module Node16 && node ./test/import/simple.js\",\n+    \"test:cjs:16\": \"ts-node --compilerOptions '{\\\"moduleResolution\\\": \\\"Node16\\\", \\\"module\\\": \\\"Node16\\\"}' ./test/import/simple.cjs\",\n+    \"test:mjs:16\": \"ts-node --compilerOptions '{\\\"moduleResolution\\\": \\\"Node16\\\", \\\"module\\\": \\\"Node16\\\"}' ./test/import/simple.mjs && babel -o ./test/import/simple-mjs.js ./test/import/simple.mjs && node ./test/import/simple-mjs.js\",\n+\n+    \"===================== cases =======================\": \"\",\n+    \"test:cases\": \"npm run tap test/*.test.js -- --coverage\",\n+    \"tap\": \"tap --reporter classic\",\n+\n+    \"===================== debug =======================\": \"\",\n+    \"test:git\": \"npm run tap test/git-check-ignore.test.js\",\n+    \"test:ignore\": \"npm run tap test/ignore.test.js\",\n+    \"test:ignore:only\": \"IGNORE_ONLY_IGNORES=1 npm run tap test/ignore.test.js\",\n+    \"test:others\": \"npm run tap test/others.test.js\",\n+    \"test:no-coverage\": \"npm run tap test/*.test.js -- --no-check-coverage\",\n+\n+    \"test\": \"npm run lint && npm run ts && npm run build && npm run test:cases\",\n+    \"test:win32\": \"IGNORE_TEST_WIN32=1 npm run test\",\n+    \"report\": \"tap --coverage-report=html\"\n   },\n   \"repository\": {\n     \"type\": \"git\",\n@@ -14,11 +47,15 @@\n     \"ignore\",\n     \".gitignore\",\n     \"gitignore\",\n+    \"npmignore\",\n     \"rules\",\n     \"manager\",\n     \"filter\",\n     \"regexp\",\n     \"regex\",\n+    \"fnmatch\",\n+    \"glob\",\n+    \"asterisks\",\n     \"regular-expression\"\n   ],\n   \"author\": \"kael\",\n@@ -26,9 +63,25 @@\n   \"bugs\": {\n     \"url\": \"https://github.com/kaelzhang/node-ignore/issues\"\n   },\n-  \"dependencies\": {},\n   \"devDependencies\": {\n-    \"chai\": \"~1.7.2\",\n-    \"mocha\": \"~1.13.0\"\n+    \"@babel/cli\": \"^7.22.9\",\n+    \"@babel/core\": \"^7.22.9\",\n+    \"@babel/preset-env\": \"^7.22.9\",\n+    \"@typescript-eslint/eslint-plugin\": \"^8.19.1\",\n+    \"debug\": \"^4.3.4\",\n+    \"eslint\": \"^8.46.0\",\n+    \"eslint-config-ostai\": \"^3.0.0\",\n+    \"eslint-plugin-import\": \"^2.28.0\",\n+    \"mkdirp\": \"^3.0.1\",\n+    \"pre-suf\": \"^1.1.1\",\n+    \"rimraf\": \"^6.0.1\",\n+    \"spawn-sync\": \"^2.0.0\",\n+    \"tap\": \"^16.3.9\",\n+    \"tmp\": \"0.2.3\",\n+    \"ts-node\": \"^10.9.2\",\n+    \"typescript\": \"^5.6.2\"\n+  },\n+  \"engines\": {\n+    \"node\": \">= 4\"\n   }\n }\n",
+					"match": false,
+					"packageHash": "e5f719be97405b1e79a105deb498544f5d607c71eb4f8f4b62f864cb1f043699",
+					"size": 654,
+					"sourceHash": "9aea50de5a5f199b29b8f6d5e3c46ffac58958dd4d4f525bfde14214ad39417f",
+					"status": "content"
+				},
+				"test/fixtures/.aignore": {
+					"match": false,
+					"packageHash": "e5f6701a86722a5588e3f084267f3c48512e6826c3c0e647f38b14605a354421",
+					"size": 18,
+					"status": "missing-in-source"
+				},
+				"test/fixtures/.fakeignore": {
+					"match": false,
+					"packageHash": "8e1e8b4bf38b15d259db366717244e4b065be7955c035ecd4babbeb061de8531",
+					"size": 27,
+					"status": "missing-in-source"
+				},
+				"test/fixtures/.ignore-issue-2": {
+					"match": false,
+					"packageHash": "624831c3d6aa8c92bb93a31b6ef7288788df353e0303d5276f1e4e6988065dc5",
+					"size": 652,
+					"status": "missing-in-source"
+				},
+				"test/ignore.js": {
+					"match": false,
+					"packageHash": "5a155abc407f2640b8d20ddaca903d6029cfcfd3385adb7305033c6dbbb03baf",
+					"size": 10024,
+					"status": "missing-in-source"
+				},
+				"index.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				}
+			},
+			"summary": {
+				"differentFiles": 3,
+				"matchingFiles": 1,
+				"missingInPackage": 1,
+				"missingInSource": 7,
+				"score": 0.08333333333333333,
+				"totalFiles": 12
+			}
+		}
+	}
+]
