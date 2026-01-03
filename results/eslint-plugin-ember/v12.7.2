@@ -1,0 +1,65 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-03T03:22:11.664Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:10.8.2",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "eslint-plugin-ember@12.7.2",
+			"name": "eslint-plugin-ember",
+			"version": "12.7.2",
+			"location": "https://registry.npmjs.org/eslint-plugin-ember/-/eslint-plugin-ember-12.7.2.tgz",
+			"integrity": "sha512-zioOmp3alJHNoN0hd3LVgLOTsfRLvm2ZgEyf7WQ9RIVeieKETiUMGQFffSNzj/T96+1EIGomSq1MWhg1P3At+g==",
+			"publishedAt": "2025-08-22T13:42:34.463Z",
+			"publishedWith": {
+				"node": "18.20.8",
+				"npm": "10.8.2"
+			}
+		},
+		"source": {
+			"integrity": null,
+			"location": "git+https://github.com/ember-cli/eslint-plugin-ember.git",
+			"spec": "github:ember-cli/eslint-plugin-ember#HEAD"
+		},
+		"comparisonHash": "8a2a8dcbb729bf3ee9216e490c955701f0ddebe1",
+		"diff": {
+			"files": {
+				"lib/rules/no-array-prototype-extensions.js": {
+					"diff": "--- published/lib/rules/no-array-prototype-extensions.js\n+++ rebuilt/lib/rules/no-array-prototype-extensions.js\n@@ -90,6 +90,14 @@\n ]);\n \n /**\n+ * Ignore these function calls using RegExps.\n+ */\n+const KNOWN_NON_ARRAY_FUNCTION_CALLS_REGEXP = new Set([\n+  // ember-cli-mirage\n+  /\\.server\\.schema\\.(.*)\\.findBy\\(\\)/,\n+]);\n+\n+/**\n  * Ignore objects of these names.\n  */\n const KNOWN_NON_ARRAY_OBJECTS = new Set([\n@@ -692,6 +700,13 @@\n           return;\n         }\n \n+        for (const expression of KNOWN_NON_ARRAY_FUNCTION_CALLS_REGEXP) {\n+          // Ignore any known non-array function calls matching a regular expression to reduce false positives.\n+          if (expression.test(name)) {\n+            return;\n+          }\n+        }\n+\n         for (const functionName of FN_NAMES_TO_KNOWN_NON_ARRAY_WORDS.keys()) {\n           const words = FN_NAMES_TO_KNOWN_NON_ARRAY_WORDS.get(functionName);\n           if (\n",
+					"match": false,
+					"packageHash": "62076b2658c21f3877007d4924ec70141c3772cd50b7d531dbc692da03dfbd56",
+					"size": 28754,
+					"sourceHash": "e6764b160b30ae8e2c8b856616527c05c6798be403b1b9828a86d1b10f400381",
+					"status": "content"
+				},
+				"lib/rules/no-empty-glimmer-component-classes.js": {
+					"diff": "--- published/lib/rules/no-empty-glimmer-component-classes.js\n+++ rebuilt/lib/rules/no-empty-glimmer-component-classes.js\n@@ -40,6 +40,7 @@\n         } else if (\n           node.body.body.length === 1 &&\n           node.body.body[0].type === 'GlimmerTemplate' &&\n+          !node.decorators?.length &&\n           !subClassHasTypeDefinition\n         ) {\n           context.report({ node, message: ERROR_MESSAGE_TEMPLATE_TAG });\n",
+					"match": false,
+					"packageHash": "53d339bdf443ef0ffefee096c54fde7e2c8d28451df888334124271160e29de8",
+					"size": 1588,
+					"sourceHash": "e06a1b043ef919229120d8366bde4182b724ec25b02f1c9e66fa84324dc19ab2",
+					"status": "content"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -1,6 +1,6 @@\n {\n   \"name\": \"eslint-plugin-ember\",\n-  \"version\": \"12.7.2\",\n+  \"version\": \"12.7.5\",\n   \"description\": \"ESLint plugin for Ember.js apps\",\n   \"keywords\": [\n     \"eslint\",\n@@ -36,6 +36,26 @@\n   \"files\": [\n     \"lib\"\n   ],\n+  \"scripts\": {\n+    \"lint\": \"npm-run-all --continue-on-error --aggregate-output --parallel \\\"lint:!(fix)\\\"\",\n+    \"lint:docs\": \"markdownlint \\\"**/*.md\\\"\",\n+    \"lint:docs:fix\": \"pnpm lint:docs --fix\",\n+    \"lint:eslint-docs\": \"pnpm update:eslint-docs --check\",\n+    \"lint:eslint-docs:fix\": \"npm-run-all \\\"update:eslint-docs\\\"\",\n+    \"lint:fix\": \"npm-run-all \\\"lint:*:fix\\\"\",\n+    \"lint:js\": \"eslint .\",\n+    \"lint:js:fix\": \"pnpm lint:js --fix\",\n+    \"lint:package-json\": \"npmPkgJsonLint .\",\n+    \"lint:package-json-sorting\": \"sort-package-json --check\",\n+    \"lint:package-json-sorting:fix\": \"sort-package-json package.json\",\n+    \"lint:remote\": \"eslint-remote-tester\",\n+    \"start\": \"pnpm test:watch\",\n+    \"test\": \"vitest run\",\n+    \"test:coverage\": \"vitest --coverage\",\n+    \"test:watch\": \"vitest\",\n+    \"update\": \"node ./scripts/update-rules.js && node ./scripts/list-jquery-methods.js && npm-run-all update:eslint-docs\",\n+    \"update:eslint-docs\": \"eslint-doc-generator\"\n+  },\n   \"dependencies\": {\n     \"@ember-data/rfc395-data\": \"^0.0.4\",\n     \"css-tree\": \"^3.0.1\",\n@@ -59,7 +79,7 @@\n     \"@typescript-eslint/parser\": \"^8.11.0\",\n     \"@vitest/coverage-v8\": \"^2.1.3\",\n     \"eslint\": \"^8.55.0\",\n-    \"eslint-config-prettier\": \"^9.0.0\",\n+    \"eslint-config-prettier\": \"^10.1.8\",\n     \"eslint-doc-generator\": \"^2.1.2\",\n     \"eslint-plugin-eslint-comments\": \"^3.2.0\",\n     \"eslint-plugin-eslint-plugin\": \"^5.1.1\",\n@@ -70,18 +90,18 @@\n     \"eslint-plugin-prettier\": \"^5.0.1\",\n     \"eslint-plugin-unicorn\": \"^51.0.0\",\n     \"eslint-remote-tester\": \"^3.0.1\",\n-    \"globals\": \"^14.0.0\",\n+    \"globals\": \"^16.4.0\",\n     \"jquery\": \"^3.7.1\",\n     \"jsdom\": \"^24.0.0\",\n     \"markdownlint-cli\": \"^0.42.0\",\n     \"npm-package-json-lint\": \"^7.0.0\",\n     \"npm-run-all\": \"^4.1.5\",\n     \"prettier\": \"^3.0.3\",\n-    \"release-plan\": \"^0.11.0\",\n+    \"release-plan\": \"^0.17.0\",\n     \"sort-package-json\": \"^2.6.0\",\n     \"typescript\": \"^5.2.2\",\n     \"typescript-eslint\": \"^8.7.0\",\n-    \"vite\": \"^6.0.11\",\n+    \"vite\": \"^7.1.12\",\n     \"vitest\": \"^2.1.3\"\n   },\n   \"peerDependencies\": {\n@@ -93,6 +113,7 @@\n       \"optional\": true\n     }\n   },\n+  \"packageManager\": \"pnpm@9.12.2\",\n   \"engines\": {\n     \"node\": \"18.* || 20.* || >= 21\"\n   },\n@@ -102,25 +123,5 @@\n   },\n   \"publishConfig\": {\n     \"registry\": \"https://registry.npmjs.org\"\n-  },\n-  \"scripts\": {\n-    \"lint\": \"npm-run-all --continue-on-error --aggregate-output --parallel \\\"lint:!(fix)\\\"\",\n-    \"lint:docs\": \"markdownlint \\\"**/*.md\\\"\",\n-    \"lint:docs:fix\": \"pnpm lint:docs --fix\",\n-    \"lint:eslint-docs\": \"pnpm update:eslint-docs --check\",\n-    \"lint:eslint-docs:fix\": \"npm-run-all \\\"update:eslint-docs\\\"\",\n-    \"lint:fix\": \"npm-run-all \\\"lint:*:fix\\\"\",\n-    \"lint:js\": \"eslint .\",\n-    \"lint:js:fix\": \"pnpm lint:js --fix\",\n-    \"lint:package-json\": \"npmPkgJsonLint .\",\n-    \"lint:package-json-sorting\": \"sort-package-json --check\",\n-    \"lint:package-json-sorting:fix\": \"sort-package-json package.json\",\n-    \"lint:remote\": \"eslint-remote-tester\",\n-    \"start\": \"pnpm test:watch\",\n-    \"test\": \"vitest run\",\n-    \"test:coverage\": \"vitest --coverage\",\n-    \"test:watch\": \"vitest\",\n-    \"update\": \"node ./scripts/update-rules.js && node ./scripts/list-jquery-methods.js && npm-run-all update:eslint-docs\",\n-    \"update:eslint-docs\": \"eslint-doc-generator\"\n",
+					"match": false,
+					"packageHash": "466e3907c2d23c5d20c9928202f0588068e4b4b25eda016c058ce7c8bc8a57e2",
+					"size": 3742,
+					"sourceHash": "cb8df77d73770926b485a82c8b651af13ba67bc2f9db85a0eada13a4d7deac45",
+					"status": "content"
+				}
+			},
+			"summary": {
+				"differentFiles": 3,
+				"matchingFiles": 128,
+				"missingInPackage": 0,
+				"missingInSource": 0,
+				"score": 0.9770992366412213,
+				"totalFiles": 131
+			}
+		}
+	}
+]

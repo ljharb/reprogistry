@@ -1,0 +1,101 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-03T03:21:43.473Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:10.8.2",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "eslint-plugin-ember@12.6.0",
+			"name": "eslint-plugin-ember",
+			"version": "12.6.0",
+			"location": "https://registry.npmjs.org/eslint-plugin-ember/-/eslint-plugin-ember-12.6.0.tgz",
+			"integrity": "sha512-axb6l5iUwW08mjSWDY+/aVUG4PS7kJTM+gXOSP1ev9aVy5bphaVJ3yFCSd81BPvqiD8IkCa+K9R6pwhsfLtnfA==",
+			"publishedAt": "2025-07-12T18:15:07.863Z",
+			"publishedWith": {
+				"node": "18.20.8",
+				"npm": "10.8.2"
+			}
+		},
+		"source": {
+			"integrity": null,
+			"location": "git+https://github.com/ember-cli/eslint-plugin-ember.git",
+			"spec": "github:ember-cli/eslint-plugin-ember#HEAD"
+		},
+		"comparisonHash": "8a2a8dcbb729bf3ee9216e490c955701f0ddebe1",
+		"diff": {
+			"files": {
+				"README.md": {
+					"diff": "--- published/README.md\n+++ rebuilt/README.md\n@@ -180,6 +180,7 @@\n | :------------------------------------------------------------------------- | :----------------------------------------------------------------------------------------------------------------------------------- | :- | :- | :- |\n | [no-attrs-in-components](docs/rules/no-attrs-in-components.md)             | disallow usage of `this.attrs` in components                                                                                         | ✅  |    |    |\n | [no-attrs-snapshot](docs/rules/no-attrs-snapshot.md)                       | disallow use of attrs snapshot in the `didReceiveAttrs` and `didUpdateAttrs` component hooks                                         | ✅  |    |    |\n+| [no-builtin-form-components](docs/rules/no-builtin-form-components.md)     | disallow usage of built-in form components                                                                                           |    |    |    |\n | [no-classic-components](docs/rules/no-classic-components.md)               | enforce using Glimmer components                                                                                                     | ✅  |    |    |\n | [no-component-lifecycle-hooks](docs/rules/no-component-lifecycle-hooks.md) | disallow usage of \"classic\" ember component lifecycle hooks. Render modifiers or custom functional modifiers should be used instead. | ✅  |    |    |\n | [no-on-calls-in-components](docs/rules/no-on-calls-in-components.md)       | disallow usage of `on` to call lifecycle hooks in components                                                                         | ✅  |    |    |\n",
+					"match": false,
+					"packageHash": "9afdf1ae2f8ec47c2cd153ead5828702befccfdf70a67dae7bf31669df91a68c",
+					"size": 33236,
+					"sourceHash": "07e75245fef6b0f0c788b3611b7113e910faaade1297d9f5a8acfa578d4374d4",
+					"status": "content"
+				},
+				"lib/rules/no-array-prototype-extensions.js": {
+					"diff": "--- published/lib/rules/no-array-prototype-extensions.js\n+++ rebuilt/lib/rules/no-array-prototype-extensions.js\n@@ -50,7 +50,7 @@\n   'removeObject',\n   'removeObjects',\n   'reverseObjects',\n-  'setObject',\n+  'setObjects',\n   'shiftObject',\n   'unshiftObject',\n   'unshiftObjects',\n@@ -90,6 +90,14 @@\n ]);\n \n /**\n+ * Ignore these function calls using RegExps.\n+ */\n+const KNOWN_NON_ARRAY_FUNCTION_CALLS_REGEXP = new Set([\n+  // ember-cli-mirage\n+  /\\.server\\.schema\\.(.*)\\.findBy\\(\\)/,\n+]);\n+\n+/**\n  * Ignore objects of these names.\n  */\n const KNOWN_NON_ARRAY_OBJECTS = new Set([\n@@ -692,6 +700,13 @@\n           return;\n         }\n \n+        for (const expression of KNOWN_NON_ARRAY_FUNCTION_CALLS_REGEXP) {\n+          // Ignore any known non-array function calls matching a regular expression to reduce false positives.\n+          if (expression.test(name)) {\n+            return;\n+          }\n+        }\n+\n         for (const functionName of FN_NAMES_TO_KNOWN_NON_ARRAY_WORDS.keys()) {\n           const words = FN_NAMES_TO_KNOWN_NON_ARRAY_WORDS.get(functionName);\n           if (\n",
+					"match": false,
+					"packageHash": "fbd1022c33ab84819b647c4472aea4a7c25ddcdbb457b9867d52a5dbf16ee4fa",
+					"size": 28753,
+					"sourceHash": "e6764b160b30ae8e2c8b856616527c05c6798be403b1b9828a86d1b10f400381",
+					"status": "content"
+				},
+				"lib/rules/no-assignment-of-untracked-properties-used-in-tracking-contexts.js": {
+					"diff": "--- published/lib/rules/no-assignment-of-untracked-properties-used-in-tracking-contexts.js\n+++ rebuilt/lib/rules/no-assignment-of-untracked-properties-used-in-tracking-contexts.js\n@@ -137,6 +137,7 @@\n                             minimum: 1,\n                           },\n                         },\n+                        additionalProperties: false,\n                       },\n                       objects: {\n                         type: 'object',\n",
+					"match": false,
+					"packageHash": "a184805afd6321de20b5ef0a38f9bdc04bf91f9fe1894415fef3f59986bbb37b",
+					"size": 12178,
+					"sourceHash": "532ef73406e57a7b311cc483d42880fab8c3ddd8ed24e1f26f6b5ac42912f474",
+					"status": "content"
+				},
+				"lib/rules/no-empty-glimmer-component-classes.js": {
+					"diff": "--- published/lib/rules/no-empty-glimmer-component-classes.js\n+++ rebuilt/lib/rules/no-empty-glimmer-component-classes.js\n@@ -40,6 +40,7 @@\n         } else if (\n           node.body.body.length === 1 &&\n           node.body.body[0].type === 'GlimmerTemplate' &&\n+          !node.decorators?.length &&\n           !subClassHasTypeDefinition\n         ) {\n           context.report({ node, message: ERROR_MESSAGE_TEMPLATE_TAG });\n",
+					"match": false,
+					"packageHash": "53d339bdf443ef0ffefee096c54fde7e2c8d28451df888334124271160e29de8",
+					"size": 1588,
+					"sourceHash": "e06a1b043ef919229120d8366bde4182b724ec25b02f1c9e66fa84324dc19ab2",
+					"status": "content"
+				},
+				"lib/rules/no-runloop.js": {
+					"diff": "--- published/lib/rules/no-runloop.js\n+++ rebuilt/lib/rules/no-runloop.js\n@@ -76,6 +76,11 @@\n     const allowList = context.options[0]?.allowList ?? [];\n     // Maps local names to imported names of imports\n     const localToImportedNameMap = new Map();\n+    let namespaceImportName;\n+\n+    const isDisallowed = function (fn) {\n+      return EMBER_RUNLOOP_FUNCTIONS.includes(fn) && !allowList.includes(fn);\n+    };\n \n     /**\n      * Reports a node with usage of a disallowed runloop function\n@@ -109,38 +114,50 @@\n               if (EMBER_RUNLOOP_FUNCTIONS.includes(importedName)) {\n                 localToImportedNameMap.set(spec.local.name, importedName);\n               }\n+            } else if (spec.type === 'ImportNamespaceSpecifier') {\n+              namespaceImportName = spec.local.name;\n             }\n           }\n         }\n       },\n \n       CallExpression(node) {\n+        const callee = node.callee;\n+\n         // Examples: run(...), later(...)\n-        if (node.callee.type === 'Identifier') {\n-          const name = node.callee.name;\n-          const runloopFn = localToImportedNameMap.get(name);\n-          const isNotAllowed = runloopFn && !allowList.includes(runloopFn);\n-          if (isNotAllowed) {\n-            report(node, runloopFn, name);\n+        if (callee.type === 'Identifier') {\n+          const localName = callee.name;\n+          const runloopFn = localToImportedNameMap.get(localName);\n+\n+          if (runloopFn && isDisallowed(runloopFn)) {\n+            report(node, runloopFn, localName);\n           }\n+\n+          return;\n         }\n \n-        // runloop functions (aside from run itself) can chain onto `run`, so we need to check for this\n-        // Examples: run.later(...), run.schedule(...)\n-        if (node.callee.type === 'MemberExpression' && node.callee.object?.type === 'Identifier') {\n-          const objectName = node.callee.object.name;\n-          const objectRunloopFn = localToImportedNameMap.get(objectName);\n-\n-          if (objectRunloopFn === 'run' && node.callee.property?.type === 'Identifier') {\n-            const runloopFn = node.callee.property.name;\n-\n-            if (\n-              EMBER_RUNLOOP_FUNCTIONS.includes(runloopFn) &&\n-              runloopFn !== 'run' &&\n-              !allowList.includes(runloopFn)\n-            ) {\n-              report(node, runloopFn, `${objectName}.${runloopFn}`);\n-            }\n+        if (\n+          callee.type === 'MemberExpression' &&\n+          callee.object.type === 'Identifier' &&\n+          callee.property.type === 'Identifier'\n+        ) {\n+          const objectName = callee.object.name;\n+          const methodName = callee.property.name;\n+\n+          // runloop functions (aside from run itself) can chain onto `run`, so we need to check for this\n+          // Examples: run.later(...), run.schedule(...)\n+          if (\n+            localToImportedNameMap.get(objectName) === 'run' &&\n+            isDisallowed(methodName) &&\n+            methodName !== 'run'\n+          ) {\n+            report(node, methodName, `${objectName}.${methodName}`);\n+            return;\n+          }\n+\n+          // Example: `import * as runloop from '@ember/runloop'` -> `runloop.later(...)`\n+          if (objectName === namespaceImportName && isDisallowed(methodName)) {\n+            report(node, methodName, `${objectName}.${methodName}`);\n           }\n         }\n       },\n",
+					"match": false,
+					"packageHash": "d64a2f0ae00597e63c77cacb08c1979c54e96a2792fbe9f0e93de273d4ce9d3f",
+					"size": 4887,
+					"sourceHash": "f00eeaad7240731ea70ff26918407d6dfff71c477a70c802575b80dee8549ea3",
+					"status": "content"
+				},
+				"lib/rules/no-side-effects.js": {
+					"diff": "--- published/lib/rules/no-side-effects.js\n+++ rebuilt/lib/rules/no-side-effects.js\n@@ -164,6 +164,7 @@\n               'Whether the rule should check plain (non-computed) getters in native classes for side effects.',\n           },\n         },\n+        additionalProperties: false,\n       },\n     ],\n   },\n",
+					"match": false,
+					"packageHash": "93e725c4f76636da7992a83fc049b94ad8e8265b8d9d8120b6f5bcb6e1321c7a",
+					"size": 8798,
+					"sourceHash": "b8c9dbfeecf2a2442a3ab33fe931f86d2129aa2b20f245fbc00fbb30b08052d1",
+					"status": "content"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -1,6 +1,6 @@\n {\n   \"name\": \"eslint-plugin-ember\",\n-  \"version\": \"12.6.0\",\n+  \"version\": \"12.7.5\",\n   \"description\": \"ESLint plugin for Ember.js apps\",\n   \"keywords\": [\n     \"eslint\",\n@@ -36,6 +36,26 @@\n   \"files\": [\n     \"lib\"\n   ],\n+  \"scripts\": {\n+    \"lint\": \"npm-run-all --continue-on-error --aggregate-output --parallel \\\"lint:!(fix)\\\"\",\n+    \"lint:docs\": \"markdownlint \\\"**/*.md\\\"\",\n+    \"lint:docs:fix\": \"pnpm lint:docs --fix\",\n+    \"lint:eslint-docs\": \"pnpm update:eslint-docs --check\",\n+    \"lint:eslint-docs:fix\": \"npm-run-all \\\"update:eslint-docs\\\"\",\n+    \"lint:fix\": \"npm-run-all \\\"lint:*:fix\\\"\",\n+    \"lint:js\": \"eslint .\",\n+    \"lint:js:fix\": \"pnpm lint:js --fix\",\n+    \"lint:package-json\": \"npmPkgJsonLint .\",\n+    \"lint:package-json-sorting\": \"sort-package-json --check\",\n+    \"lint:package-json-sorting:fix\": \"sort-package-json package.json\",\n+    \"lint:remote\": \"eslint-remote-tester\",\n+    \"start\": \"pnpm test:watch\",\n+    \"test\": \"vitest run\",\n+    \"test:coverage\": \"vitest --coverage\",\n+    \"test:watch\": \"vitest\",\n+    \"update\": \"node ./scripts/update-rules.js && node ./scripts/list-jquery-methods.js && npm-run-all update:eslint-docs\",\n+    \"update:eslint-docs\": \"eslint-doc-generator\"\n+  },\n   \"dependencies\": {\n     \"@ember-data/rfc395-data\": \"^0.0.4\",\n     \"css-tree\": \"^3.0.1\",\n@@ -59,7 +79,7 @@\n     \"@typescript-eslint/parser\": \"^8.11.0\",\n     \"@vitest/coverage-v8\": \"^2.1.3\",\n     \"eslint\": \"^8.55.0\",\n-    \"eslint-config-prettier\": \"^9.0.0\",\n+    \"eslint-config-prettier\": \"^10.1.8\",\n     \"eslint-doc-generator\": \"^2.1.2\",\n     \"eslint-plugin-eslint-comments\": \"^3.2.0\",\n     \"eslint-plugin-eslint-plugin\": \"^5.1.1\",\n@@ -70,18 +90,18 @@\n     \"eslint-plugin-prettier\": \"^5.0.1\",\n     \"eslint-plugin-unicorn\": \"^51.0.0\",\n     \"eslint-remote-tester\": \"^3.0.1\",\n-    \"globals\": \"^14.0.0\",\n+    \"globals\": \"^16.4.0\",\n     \"jquery\": \"^3.7.1\",\n     \"jsdom\": \"^24.0.0\",\n     \"markdownlint-cli\": \"^0.42.0\",\n     \"npm-package-json-lint\": \"^7.0.0\",\n     \"npm-run-all\": \"^4.1.5\",\n     \"prettier\": \"^3.0.3\",\n-    \"release-plan\": \"^0.11.0\",\n+    \"release-plan\": \"^0.17.0\",\n     \"sort-package-json\": \"^2.6.0\",\n     \"typescript\": \"^5.2.2\",\n     \"typescript-eslint\": \"^8.7.0\",\n-    \"vite\": \"^6.0.11\",\n+    \"vite\": \"^7.1.12\",\n     \"vitest\": \"^2.1.3\"\n   },\n   \"peerDependencies\": {\n@@ -93,6 +113,7 @@\n       \"optional\": true\n     }\n   },\n+  \"packageManager\": \"pnpm@9.12.2\",\n   \"engines\": {\n     \"node\": \"18.* || 20.* || >= 21\"\n   },\n@@ -102,25 +123,5 @@\n   },\n   \"publishConfig\": {\n     \"registry\": \"https://registry.npmjs.org\"\n-  },\n-  \"scripts\": {\n-    \"lint\": \"npm-run-all --continue-on-error --aggregate-output --parallel \\\"lint:!(fix)\\\"\",\n-    \"lint:docs\": \"markdownlint \\\"**/*.md\\\"\",\n-    \"lint:docs:fix\": \"pnpm lint:docs --fix\",\n-    \"lint:eslint-docs\": \"pnpm update:eslint-docs --check\",\n-    \"lint:eslint-docs:fix\": \"npm-run-all \\\"update:eslint-docs\\\"\",\n-    \"lint:fix\": \"npm-run-all \\\"lint:*:fix\\\"\",\n-    \"lint:js\": \"eslint .\",\n-    \"lint:js:fix\": \"pnpm lint:js --fix\",\n-    \"lint:package-json\": \"npmPkgJsonLint .\",\n-    \"lint:package-json-sorting\": \"sort-package-json --check\",\n-    \"lint:package-json-sorting:fix\": \"sort-package-json package.json\",\n-    \"lint:remote\": \"eslint-remote-tester\",\n-    \"start\": \"pnpm test:watch\",\n-    \"test\": \"vitest run\",\n-    \"test:coverage\": \"vitest --coverage\",\n-    \"test:watch\": \"vitest\",\n-    \"update\": \"node ./scripts/update-rules.js && node ./scripts/list-jquery-methods.js && npm-run-all update:eslint-docs\",\n-    \"update:eslint-docs\": \"eslint-doc-generator\"\n",
+					"match": false,
+					"packageHash": "129916e2595d71898c92f9295ed5b2e49ce6db15b6c4bcdd474ffc8032b5caa9",
+					"size": 3742,
+					"sourceHash": "cb8df77d73770926b485a82c8b651af13ba67bc2f9db85a0eada13a4d7deac45",
+					"status": "content"
+				},
+				"lib/rules/no-builtin-form-components.js": {
+					"match": false,
+					"status": "missing-in-package"
+				}
+			},
+			"summary": {
+				"differentFiles": 7,
+				"matchingFiles": 123,
+				"missingInPackage": 1,
+				"missingInSource": 0,
+				"score": 0.9389312977099237,
+				"totalFiles": 131
+			}
+		}
+	}
+]
