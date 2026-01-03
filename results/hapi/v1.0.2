@@ -1,0 +1,61 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-03T07:56:36.642Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:11.7.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "hapi@1.0.2",
+			"name": "hapi",
+			"version": "1.0.2",
+			"location": "https://registry.npmjs.org/hapi/-/hapi-1.0.2.tgz",
+			"integrity": "sha512-mIpiid02u5LVx29EATjatwX/TP83uIjb/GCHt3Znrv2/jXLSrp6e0vkC/MXQl+MBStN82c5aaejp8AQ3mGtWRQ==",
+			"publishedAt": "2013-05-03T07:26:10.444Z",
+			"publishedWith": {
+				"node": null,
+				"npm": "1.2.19"
+			}
+		},
+		"source": {
+			"integrity": "sha512-NQdIsGX2KwnXar+E9zihGR47+x6kA+4pSCGdwrkojNPTXwAFgq/7aOL01B8Ada0RRHbPdSQl23XsSfY35v/daw==",
+			"location": "git://github.com/spumko/hapi",
+			"spec": "github:spumko/hapi#v1.0.2"
+		},
+		"comparisonHash": "8a2a8dcbb729bf3ee9216e490c955701f0ddebe1",
+		"diff": {
+			"files": {
+				".npmignore": {
+					"match": false,
+					"packageHash": "cad92a1adfbbfd3a3e9b76063b14472e6574b8577e1cb5a009dd14f741d65bc9",
+					"size": 191,
+					"status": "missing-in-source"
+				},
+				"lib/multipart.js": {
+					"match": false,
+					"packageHash": "ac0fce230034f2a3dbad210ce710b4309700a8e5e2d1f5de8cab01c8c5631933",
+					"size": 6375,
+					"status": "missing-in-source"
+				},
+				"lib/payload.js": {
+					"diff": "--- published/lib/payload.js\n+++ rebuilt/lib/payload.js\n@@ -2,6 +2,7 @@\n \n var Zlib = require('zlib');\n var Querystring = require('querystring');\n+var Formidable = require('formidable');\n var Boom = require('boom');\n var Utils = require('./utils');\n \n@@ -16,19 +17,19 @@\n \n // Read and parse body\n \n-exports.read = function (request, next) {\r\n+exports.read = function (request, next) {\n \n     if (request.method === 'get' ||\n-        request.method === 'head') {\r\n+        request.method === 'head') {\n \n-        return next();\r\n+        return next();\n     }\n \n     // Levels are: 'stream', 'raw', 'parse'\n \n     var level = request.route.payload || (request.route.validate.payload || request.method === 'post' || request.method === 'put' ? 'parse' : 'stream');\n-    if (level === 'stream') {\r\n-        return next();\r\n+    if (level === 'stream') {\n+        return next();\n     }\n \n     // Check content size\n@@ -36,229 +37,209 @@\n     var req = request.raw.req;\n     var contentLength = req.headers['content-length'];\n     if (contentLength &&\n-        parseInt(contentLength, 10) > request.server.settings.payload.maxBytes) {\r\n+        parseInt(contentLength, 10) > request.server.settings.payload.maxBytes) {\n \n-        return next(Boom.badRequest('Payload content length greater than maximum allowed: ' + request.server.settings.payload.maxBytes));\r\n+        return next(Boom.badRequest('Payload content length greater than maximum allowed: ' + request.server.settings.payload.maxBytes));\n+    }\n+\n+    var clientTimeout = request.server.settings.timeout.client;\n+    var clientTimeoutId = null;\n+\n+    if (clientTimeout) {\n+        clientTimeout -= Date.now() - request._timestamp;\n+        clientTimeoutId = setTimeout(function () {\n+\n+            finish(Boom.clientTimeout('Client is taking too long to send request'));\n+        }, clientTimeout);\n     }\n \n     // Return only once from events\n \n     var isBailed = false;\n-    var finish = function (err) {\r\n+    var finish = function (err) {\n \n-        if (!isBailed) {\r\n+        if (!isBailed) {\n             clearTimeout(clientTimeoutId);\n             isBailed = true;\n-            return next(err);\r\n-        }\r\n+            return next(err);\n+        }\n     };\n \n-    // Setup client timeout\n-\n-    var clientTimeout = request.server.settings.timeout.client;\n-    var clientTimeoutId = null;\n-\n-    if (clientTimeout) {\r\n-        clientTimeout -= Date.now() - request._timestamp;\n-        clientTimeoutId = setTimeout(function () {\r\n-\n-            finish(Boom.clientTimeout('Client is taking too long to send request'));\r\n-        }, clientTimeout);\r\n-    }\n-\n     // Read incoming body\n \n-    req.on('close', function () {\r\n+    req.on('close', function () {\n \n-        return finish(Boom.internal('Request closed before finished reading'));\r\n+        return finish(Boom.internal('Request closed before finished reading'));\n     });\n \n-    req.on('error', function (err) {\r\n+    req.on('error', function (err) {\n \n-        return finish(Boom.internal('Request error before finished reading: ' + err));\r\n+        return finish(Boom.internal('Request error before finished reading: ' + err));\n",
+					"match": false,
+					"packageHash": "a165ea582e5d71c89e212132aca3aec9e22ee724783a4141a748557ba497e941",
+					"size": 6841,
+					"sourceHash": "f4ef393afbba51e9cf610d4c947a1dc8322d7a20811fbf81c62fd52fd8f1db16",
+					"status": "content"
+				}
+			},
+			"summary": {
+				"differentFiles": 1,
+				"matchingFiles": 171,
+				"missingInPackage": 0,
+				"missingInSource": 2,
+				"score": 0.9827586206896551,
+				"totalFiles": 174
+			}
+		}
+	}
+]
