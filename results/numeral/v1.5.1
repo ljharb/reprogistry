@@ -1,0 +1,1171 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-03T12:59:51.909Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:11.7.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "numeral@1.5.1",
+			"name": "numeral",
+			"version": "1.5.1",
+			"location": "https://registry.npmjs.org/numeral/-/numeral-1.5.1.tgz",
+			"integrity": "sha512-PdcJ6hIed/Wd+/DoqfRLX+V+ruqefqyzql8JClRCUnR3/PExJqL85JTwsd1GcGbeba2SwC+7gGN72kVbasrAnQ==",
+			"publishedAt": "2013-09-11T06:44:34.076Z",
+			"publishedWith": {
+				"node": null,
+				"npm": "1.2.18"
+			}
+		},
+		"source": {
+			"integrity": null,
+			"location": "https://github.com/adamwdraper/Numeral-js",
+			"spec": "github:adamwdraper/Numeral-js#HEAD"
+		},
+		"comparisonHash": "8a2a8dcbb729bf3ee9216e490c955701f0ddebe1",
+		"diff": {
+			"files": {
+				".npmignore": {
+					"match": false,
+					"packageHash": "508de879bf425d42ebe597c891b4988795e35f57c933c157968cdbcc96e5940a",
+					"size": 61,
+					"status": "missing-in-source"
+				},
+				".travis.yml": {
+					"diff": "--- published/.travis.yml\n+++ rebuilt/.travis.yml\n@@ -1,7 +1,7 @@\n language: node_js\n node_js:\n-    - \"0.10\"\n-    - \"0.8\"\n+    - \"node\"\n+    - \"4\"\n before_script:\n   - npm install -g grunt-cli\n-script: grunt travis --verbose\n\\ No newline at end of file\n+script: grunt travis --verbose\n",
+					"match": false,
+					"packageHash": "73cff56f6018bf7deb6858a840a77c107d31449d589e767ab9376577c83102e3",
+					"size": 126,
+					"sourceHash": "51c5f9023827982dcf42a9a6b43120472b04e182f16387a3006293ebb1645f0a",
+					"status": "content"
+				},
+				"Gruntfile.js": {
+					"diff": "--- published/Gruntfile.js\n+++ rebuilt/Gruntfile.js\n@@ -1,50 +1,138 @@\n-var fs = require('fs');\n-\n module.exports = function(grunt) {\n \n-    var minifiedFiles = {\n-            'min/numeral.min.js' : [\n-                'numeral.js'\n-            ],\n-            'min/languages.min.js': [\n-                'languages.js'\n-            ]\n-        };\n+    var compileType = function() {\n+            var type = this.data.type;\n+            var template = grunt.file.read('templates/types.js');\n+            var anon = grunt.file.read('templates/anon.js');\n+            var files =  grunt.file.expand([\n+                'src/' + type + '/*.js'\n+            ]);\n+            var regexp = /\\}\\(this, function \\(numeral\\) \\{\\s([\\s\\S]+)(?:\\s\\}\\)\\);)/;\n+            var content = '';\n+            var file;\n+            var i;\n \n-    // all the lang files need to be added manually\n-    fs.readdirSync('./languages').forEach(function (path) {\n-        var file = path.slice(0, -3),\n-            destination = 'min/languages/' + file + '.min.js',\n-            src = ['languages/' + path];\n+            for (i = 0; i < files.length; i++) {\n+                file = grunt.file.read(files[i]);\n \n-        minifiedFiles[destination] = src;\n-    });\n+                content += '\\n' + grunt.template.process(anon, {\n+                    data: {\n+                        content: file.match(regexp)[1]\n+                    }\n+                }) + '\\n';\n+            }\n+\n+            grunt.file.write('temp/' + type + '.js', content);\n+\n+            if (type === 'locales') {\n+                grunt.file.write('locales.js', grunt.template.process(template, {\n+                    data: {\n+                        type: type,\n+                        content: content\n+                    }\n+                }));\n+            }\n+        },\n+        compileNumeral = function() {\n+            var regexp = /([\\s])return numeral;(?:\\s\\}\\)\\);)/;\n+            var numeral = grunt.file.read('src/numeral.js');\n+            var formats = grunt.file.read('temp/formats.js');\n+            var index = numeral.indexOf('return numeral;');\n+\n+            numeral = numeral.substr(0, index) + '\\n' + formats + numeral.substr(index);\n+\n+            grunt.file.write('numeral.js', numeral);\n+        };\n+\n+    require('load-grunt-tasks')(grunt);\n \n     grunt.initConfig({\n-        nodeunit : {\n-            all : ['tests/**/*.js']\n+        mochaTest : {\n+            all: [\n+                'tests/numeral.js',\n+                'tests/formats/*.js',\n+                'tests/locales/*.js'\n+            ]\n+        },\n+        karma: {\n+            options: {\n+                files: [\n+                    'numeral.js',\n+                    'locales.js',\n+                    'tests/numeral.js',\n+                    'tests/formats/*.js',\n+                    'tests/locales/*.js'\n+                ],\n+                frameworks: [\n+                    'mocha',\n+                    'chai'\n+                ],\n+                singleRun: true,\n+                autoWatch: false\n+            },\n+            local: {\n+                browsers: [\n+                    'Chrome',\n+                    'Firefox'\n+                ]\n+            },\n",
+					"match": false,
+					"packageHash": "f4fc54e5816904cf9b8ce662d868951d160d7061b85f410f08459d91623c4de0",
+					"size": 2122,
+					"sourceHash": "d454cd70d17b1e86149d8c22ee499de9a3347482c6251f6d1adfceec098433c3",
+					"status": "content"
+				},
+				"LICENSE": {
+					"diff": "--- published/LICENSE\n+++ rebuilt/LICENSE\n@@ -1,4 +1,4 @@\n-Copyright (c) 2012 Adam Draper\n+Copyright (c) 2016 Adam Draper\n \n Permission is hereby granted, free of charge, to any person\n obtaining a copy of this software and associated documentation\n@@ -19,4 +19,4 @@\n HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,\n WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING\n FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR\n-OTHER DEALINGS IN THE SOFTWARE.\n\\ No newline at end of file\n+OTHER DEALINGS IN THE SOFTWARE.\n",
+					"match": false,
+					"packageHash": "b356c548c4f7fb32f5e86a8c888ef0521f998dfe92dc75e954252f03170617d2",
+					"size": 1054,
+					"sourceHash": "036926dbd26f6493cf15a4ee737e4554cf738adc9bc5b89a4c05d4e1baf62f25",
+					"status": "content"
+				},
+				"README.md": {
+					"diff": "--- published/README.md\n+++ rebuilt/README.md\n@@ -7,14 +7,21 @@\n \n # Travis Build Status\n \n-Master [![Build Status](https://api.travis-ci.org/adamwdraper/Numeral-js.png)](https://travis-ci.org/adamwdraper/Numeral-js)\n+Master [![Build Status](https://api.travis-ci.org/adamwdraper/Numeral-js.svg)](https://travis-ci.org/adamwdraper/Numeral-js)\n \n-Develop [![Build Status](https://travis-ci.org/adamwdraper/Numeral-js.png?branch=develop)](https://travis-ci.org/adamwdraper/Numeral-js)\n+Develop [![Build Status](https://travis-ci.org/adamwdraper/Numeral-js.svg?branch=develop)](https://travis-ci.org/adamwdraper/Numeral-js)\n \n+# NPM\n+\n+[![NPM](https://nodei.co/npm/numeral.svg?downloads=true)](https://nodei.co/npm/numeral/)\n+\n+#CDNJS\n+\n+[![CDNJS](https://img.shields.io/cdnjs/v/numeral.js.svg)](https://cdnjs.com/libraries/numeral.js)\n \n # Contributing\n \n-Please submit all pull requests to the `develop` branch.\n+#### Important: Please create your branch from and submit pull requests to the `develop` branch.  All pull requests must include the appropriate tests.\n \n 1. Fork the library\n \n@@ -22,26 +29,125 @@\n \n 3. Run `npm install` to install dependencies\n \n-4. Add your tests to the files in `/tests`\n+4. Create a new branch from `develop`\n+\n+5. Add your tests to the files in `/tests`\n+\n+6. To test your tests, run `grunt`\n+\n+7. When all your tests are passing, run `grunt dist` to compile and minify all files\n+\n+8. Submit a pull request to the `develop` branch.\n \n-5. To test your tests, run `grunt test`\n \n-6. When all your tests are passing, run `grunt release` to minify all files\n+### Formats\n \n-7. Submit a pull request.\n+Formats now exist in their own files and act more or less as plugins. Check out the [bytes format](https://github.com/adamwdraper/Numeral-js/blob/master/src/formats/bytes.js) for an example of how to create one.\n \n \n-### Languages \n+### Locales\n \n-When naming language files use the [ISO 639-1 language codes](http://en.wikipedia.org/wiki/List_of_ISO_639-1_codes) supplemented by [ISO 3166-1](http://en.wikipedia.org/wiki/ISO_3166-1_alpha-2) country codes when necessary.\n+When naming locale files use the [ISO 639-1 language codes](http://en.wikipedia.org/wiki/List_of_ISO_639-1_codes) supplemented by [ISO 3166-1](http://en.wikipedia.org/wiki/ISO_3166-1_alpha-2) country codes when necessary.\n \n-### Language translations will not be merged without unit tests.\n+### Locale translations will not be merged without unit tests.\n \n-See [the english unit tests](https://github.com/adamwdraper/Numeral-js/blob/master/tests/languages/en-gb.js) for an example.\n+See [the english unit tests](https://github.com/adamwdraper/Numeral-js/blob/master/tests/locales/en-gb.js) for an example.\n \n \n # Changelog\n \n+### 2.0.6\n+\n+Bug fix: Multi letter currency symbols and spacing\n+\n+Added: Formatting of numbers with leading zeros\n+\n+New format: Basic Point\n+\n+Option: Added `scalePercentBy100` (default: true) option to turn on/off scaling percentages\n+\n+### 2.0.4\n+\n+Bug fix: Incorrect abbreviations for values rounded up [#187](https://github.com/adamwdraper/Numeral-js/issues/187)\n+\n+Bug fix: Signed currency is inconsistent [#89](https://github.com/adamwdraper/Numeral-js/issues/89)\n+\n+### 2.0.2\n+\n+Bug fix: Updated module definitions\n+\n+### 2.0.1\n+\n+Bug fix: Fixed regression for webpack/browserify/rollup\n+\n+### 2.0.0\n+\n+2.0.0 brings a lot of breaking changes and a reorganization of the repo, but also simplifies the api as well as the creating of custom formats.\n+\n+Breaking change / Feature: All formats are now separate files.  This makes it easy to create custom formats, and will also allow for custom builds with only certain formats.  (Note: The built numeral.js still contains all formats in the repo).\n+\n+Breaking change / Feature: All formats and locales are now loaded using `numeral.register(type, name, {})`\n+\n+Breaking change: All `language` now renamed to `locale` and standardized to all lowercase filenames\n+\n",
+					"match": false,
+					"packageHash": "8692eef6a32ccec62e5e0adb1fab3ce69503ca828d01c110ad0c32d0ecdf9705",
+					"size": 4968,
+					"sourceHash": "ca0c9b2bbf5d7f842d1ab8143a00c92a31ac77f800d7158b82b437d926ed4c8b",
+					"status": "content"
+				},
+				"bower.json": {
+					"diff": "--- published/bower.json\n+++ rebuilt/bower.json\n@@ -1,7 +1,7 @@\n {\n   \"name\": \"numeral\",\n   \"repo\": \"adamwdraper/Numeral-js\",\n-  \"version\": \"1.5.1\",\n+  \"version\": \"2.0.6\",\n   \"description\": \"Format and manipulate numbers.\",\n   \"keywords\": [\n     \"numeral\",\n@@ -13,4 +13,4 @@\n   ],\n   \"scripts\": [ \"numeral.js\" ],\n   \"main\": \"numeral.js\"\n-}\n\\ No newline at end of file\n+}\n",
+					"match": false,
+					"packageHash": "ec5bcb274199f08694228aa1c3a31f43414726ab7ae1eb386da43d36472c5266",
+					"size": 293,
+					"sourceHash": "ac4f86e18cb7d9efe391284b5197100df3543ae176ed43f786158d04cc8cea84",
+					"status": "content"
+				},
+				"component.json": {
+					"diff": "--- published/component.json\n+++ rebuilt/component.json\n@@ -1,7 +1,7 @@\n {\n   \"name\": \"numeral\",\n   \"repo\": \"adamwdraper/Numeral-js\",\n-  \"version\": \"1.5.1\",\n+  \"version\": \"2.0.6\",\n   \"description\": \"Format and manipulate numbers.\",\n   \"keywords\": [\n     \"numeral\",\n",
+					"match": false,
+					"packageHash": "21f82d13fd84a91e70d41ccc05d9f0cc5f305252cfc2358e874dac673666d11c",
+					"size": 294,
+					"sourceHash": "ac4f86e18cb7d9efe391284b5197100df3543ae176ed43f786158d04cc8cea84",
+					"status": "content"
+				},
+				"languages/be-nl.js": {
+					"match": false,
+					"packageHash": "efc1f018ab52782a8ec9aa97f57efea5d65689cf296a6c96d57b04442c5a2542",
+					"size": 951,
+					"status": "missing-in-source"
+				},
+				"languages/cs.js": {
+					"match": false,
+					"packageHash": "5aef229181dc06aea9dbce6b036d004f8c6510aba05c55ac0ed9397a20a588fe",
+					"size": 801,
+					"status": "missing-in-source"
+				},
+				"languages/da-dk.js": {
+					"match": false,
+					"packageHash": "7d6091aea93e7585c7604cb5a0f8742cff9f431a6e7d0ec24bfefa6df4d2780d",
+					"size": 815,
+					"status": "missing-in-source"
+				},
+				"languages/de-ch.js": {
+					"match": false,
+					"packageHash": "d6ec1ab9aff8985d7f0111c163b60d2c34cc698daf83879d00490c5e7deeb673",
+					"size": 875,
+					"status": "missing-in-source"
+				},
+				"languages/de.js": {
+					"match": false,
+					"packageHash": "f1b0db056d6d812571d9b9fc0265c97ad11ea2ec3e055a5bb597d7c03010d242",
+					"size": 851,
+					"status": "missing-in-source"
+				},
+				"languages/en-gb.js": {
+					"match": false,
+					"packageHash": "7251980232e76403f06080e971880b4016145e6e7cb218425eef96565eac4ff3",
+					"size": 987,
+					"status": "missing-in-source"
+				},
+				"languages/es-ES.js": {
+					"match": false,
+					"packageHash": "c72c20e733d8a96657393242d6ae2e523d85cfd63ac4b1fa0b669b2ff686c101",
+					"size": 1036,
+					"status": "missing-in-source"
+				},
+				"languages/es.js": {
+					"match": false,
+					"packageHash": "13949affef7b075c0d1cbb1917fb7bbf17bf766ffd886b572254ee9e4d610dde",
+					"size": 977,
+					"status": "missing-in-source"
+				},
+				"languages/fi.js": {
+					"match": false,
+					"packageHash": "4921ee9252aa8995758ecd4a11258512bfea95c7c0b63e4128a28bde8ad37d4b",
+					"size": 793,
+					"status": "missing-in-source"
+				},
+				"languages/fr-ch.js": {
+					"match": false,
+					"packageHash": "3d686ffe05fb8b10e1a2e90dc114d56c9cccbe93d87bfd8a9def470dbb1f1f79",
+					"size": 826,
+					"status": "missing-in-source"
+				},
+				"languages/fr.js": {
+					"match": false,
+					"packageHash": "fbbe417ebf86d4b78c5ad18747110ae260d5c3195b138d3d278fc20660f8d7ec",
+					"size": 818,
+					"status": "missing-in-source"
+				},
+				"languages/it.js": {
+					"match": false,
+					"packageHash": "669d27c897b65ccf86450ae6f0408779592c09ec51de4ccf1ed10545de365af8",
+					"size": 802,
+					"status": "missing-in-source"
+				},
+				"languages/ja.js": {
+					"match": false,
+					"packageHash": "6b8ac548956d3172e5775cabb718ddbcd3e19097fd6763d1718e5dc46df10ecd",
+					"size": 798,
+					"status": "missing-in-source"
+				},
+				"languages/pl.js": {
+					"match": false,
+					"packageHash": "4f93dcce82d75b224f748b23debd5926451d4659fc12cbfced54a516fe89b2d9",
+					"size": 807,
+					"status": "missing-in-source"
+				},
+				"languages/pt-br.js": {
+					"match": false,
+					"packageHash": "a042e22bd4d78c3b2a27e33f04b47fe676a835433d1751e4b695c60caeca2b17",
+					"size": 826,
+					"status": "missing-in-source"
+				},
+				"languages/pt-pt.js": {
+					"match": false,
+					"packageHash": "3d98c9ea6e91261e6d8549e167c3de43dca49243056a1565a328717918bf1c34",
+					"size": 807,
+					"status": "missing-in-source"
+				},
+				"languages/ru-UA.js": {
+					"match": false,
+					"packageHash": "123bdcf5f11a4287d28bd37652eaba6571c016a7ee9b89889e26c916307d36b4",
+					"size": 988,
+					"status": "missing-in-source"
+				},
+				"languages/ru.js": {
+					"match": false,
+					"packageHash": "e467ef0b6f2e261d83a981494ac551ddd95570cb5dc3722a0afca8a12d270b16",
+					"size": 976,
+					"status": "missing-in-source"
+				},
+				"languages/th.js": {
+					"match": false,
+					"packageHash": "1abcde7fd25855e071139adaaf4010ed43e2066d7817a7ba96779f8dfbacd149",
+					"size": 859,
+					"status": "missing-in-source"
+				},
+				"languages/tr.js": {
+					"match": false,
+					"packageHash": "e03dc17027925880f4c087ac402a8984ad1d2c11a7d188750f314813deb63269",
+					"size": 1764,
+					"status": "missing-in-source"
+				},
+				"languages/uk-UA.js": {
+					"match": false,
+					"packageHash": "ae0de77a2fbdcb5c7fe9793df88cbae55389acfce4dbd5211de3448a3c6f2e8c",
+					"size": 1028,
+					"status": "missing-in-source"
+				},
+				"languages.js": {
+					"match": false,
+					"packageHash": "f7d8e5792893cb09fdd1f1ed64d6fe3b4bc2c8d479831cb7603c43507f758486",
+					"size": 19405,
+					"status": "missing-in-source"
+				},
+				"min/languages/be-nl.min.js": {
+					"match": false,
+					"packageHash": "69b6d67e536c977263faa92d049372916dd2d3aa6919802f3ae35c17ee097291",
+					"size": 539,
+					"status": "missing-in-source"
+				},
+				"min/languages/cs.min.js": {
+					"match": false,
+					"packageHash": "5fbbbccf6081a854ed98f64b6c17834bbf61d77ee751db68769d8a7bf79f2f41",
+					"size": 480,
+					"status": "missing-in-source"
+				},
+				"min/languages/da-dk.min.js": {
+					"match": false,
+					"packageHash": "e7f0aec2bb112650cbafe267ebe7e49bce2ca01d633240403707b69a7af4fbc9",
+					"size": 489,
+					"status": "missing-in-source"
+				},
+				"min/languages/de-ch.min.js": {
+					"match": false,
+					"packageHash": "9542234d73ce1d4e183b885c7eed6b881deab3d05278c930a1b272b89437cf18",
+					"size": 548,
+					"status": "missing-in-source"
+				},
+				"min/languages/de.min.js": {
+					"match": false,
+					"packageHash": "494e98560173effe0231b05a57f574ea2e34a419ee0135b543252c381e5a69d1",
+					"size": 525,
+					"status": "missing-in-source"
+				},
+				"min/languages/en-gb.min.js": {
+					"match": false,
+					"packageHash": "e5582edb018db83ebb4b2cca50b3f59898df86fc5b41fd2ed292994d061d15b6",
+					"size": 551,
+					"status": "missing-in-source"
+				},
+				"min/languages/es-ES.min.js": {
+					"match": false,
+					"packageHash": "6177352c1788795840a49770a73318594950d750ce622dd2fa67eec66a5f72b0",
+					"size": 553,
+					"status": "missing-in-source"
+				},
+				"min/languages/es.min.js": {
+					"match": false,
+					"packageHash": "578e746c1addbc5360c2741b4ab7fdb8c3b25662f1c1296da4a8c013e1c68e47",
+					"size": 545,
+					"status": "missing-in-source"
+				},
+				"min/languages/fi.min.js": {
+					"match": false,
+					"packageHash": "47e16c5e83adfc102a65361a991d9e71ad8b2d3c4b3c678deb691985365f49db",
+					"size": 466,
+					"status": "missing-in-source"
+				},
+				"min/languages/fr-ch.min.js": {
+					"match": false,
+					"packageHash": "32345df477d61e2cd60ae54a449f226b5b80ffa0aaeda752ce6adfca86512a90",
+					"size": 488,
+					"status": "missing-in-source"
+				},
+				"min/languages/fr.min.js": {
+					"match": false,
+					"packageHash": "48cc652fa9e45d8a53e1b2dce68a5f770c2ed75a596d78e0f99ae078691b3d21",
+					"size": 482,
+					"status": "missing-in-source"
+				},
+				"min/languages/it.min.js": {
+					"match": false,
+					"packageHash": "d3acfdd0ba0b7c4a8806da15412cb198701f0b5c0f18af6ff60645104acf6a76",
+					"size": 476,
+					"status": "missing-in-source"
+				},
+				"min/languages/ja.min.js": {
+					"match": false,
+					"packageHash": "b1b20d09a083448197a41a7559cb59b61016f5b5a05367ed1031485c05b4a7b6",
+					"size": 471,
+					"status": "missing-in-source"
+				},
+				"min/languages/pl.min.js": {
+					"match": false,
+					"packageHash": "c4591bd691a78deea570e79d54d1a60cb48edffe13e9e0d4dfb5a26571b8365b",
+					"size": 481,
+					"status": "missing-in-source"
+				},
+				"min/languages/pt-br.min.js": {
+					"match": false,
+					"packageHash": "f1ffd065498746ac9ed57aee17b7cace27ed183896d8afbfdb5b73eb52f89121",
+					"size": 500,
+					"status": "missing-in-source"
+				},
+				"min/languages/pt-pt.min.js": {
+					"match": false,
+					"packageHash": "8ca86bd951c3c44334279da17ef5e4fc855c04c9d0b5fa8121c9ce9ec6a42090",
+					"size": 479,
+					"status": "missing-in-source"
+				},
+				"min/languages/ru-UA.min.js": {
+					"match": false,
+					"packageHash": "0a661061a130b0a830eb5853aff387eb7161d370bb51cddf4ea1f38f7223b470",
+					"size": 354,
+					"status": "missing-in-source"
+				},
+				"min/languages/ru.min.js": {
+					"match": false,
+					"packageHash": "5ea36fb9086d5b8bdee581f743accbccfa31328fd9764a8d0c3376e86bd5956b",
+					"size": 492,
+					"status": "missing-in-source"
+				},
+				"min/languages/th.min.js": {
+					"match": false,
+					"packageHash": "692e3cc98ec0fc102a9bf890149ddb4789033317359c8d2a8852ea8266c60498",
+					"size": 532,
+					"status": "missing-in-source"
+				},
+				"min/languages/tr.min.js": {
+					"match": false,
+					"packageHash": "01532057c40b6a00281b01fb51fad86334d5bc4b1eced35fb35c4abbc82b1805",
+					"size": 855,
+					"status": "missing-in-source"
+				},
+				"min/languages/uk-UA.min.js": {
+					"match": false,
+					"packageHash": "069dd00a42fa4dc6959f82ba69da760792f26a752186c99aed2d62e37bd886a7",
+					"size": 365,
+					"status": "missing-in-source"
+				},
+				"min/languages.min.js": {
+					"match": false,
+					"packageHash": "00dd5e23c67379929fdb04e456bd38e1069350292f135115ef53a809d3170a31",
+					"size": 10651,
+					"status": "missing-in-source"
+				},
+				"min/numeral.min.js": {
+					"diff": "--- published/min/numeral.min.js\n+++ rebuilt/min/numeral.min.js\n@@ -1,8 +1,8 @@\n-/*!\n+/*! @preserve\n  * numeral.js\n- * version : 1.5.1\n+ * version : 2.0.6\n  * author : Adam Draper\n  * license : MIT\n  * http://adamwdraper.github.com/Numeral-js/\n  */\n-(function(){function a(a){this._value=a}function b(a,b,c){var d,e,f=Math.pow(10,b);return e=(Math.round(a*f)/f).toFixed(b),c&&(d=new RegExp(\"0{1,\"+c+\"}$\"),e=e.replace(d,\"\")),e}function c(a,b){var c;return c=b.indexOf(\"$\")>-1?e(a,b):b.indexOf(\"%\")>-1?f(a,b):b.indexOf(\":\")>-1?g(a,b):i(a._value,b)}function d(a,b){var c,d,e,f,g,i=b,j=[\"KB\",\"MB\",\"GB\",\"TB\",\"PB\",\"EB\",\"ZB\",\"YB\"],k=!1;if(b.indexOf(\":\")>-1)a._value=h(b);else if(b===o)a._value=0;else{for(\".\"!==m[n].delimiters.decimal&&(b=b.replace(/\\./g,\"\").replace(m[n].delimiters.decimal,\".\")),c=new RegExp(\"[^a-zA-Z]\"+m[n].abbreviations.thousand+\"(?:\\\\)|(\\\\\"+m[n].currency.symbol+\")?(?:\\\\))?)?$\"),d=new RegExp(\"[^a-zA-Z]\"+m[n].abbreviations.million+\"(?:\\\\)|(\\\\\"+m[n].currency.symbol+\")?(?:\\\\))?)?$\"),e=new RegExp(\"[^a-zA-Z]\"+m[n].abbreviations.billion+\"(?:\\\\)|(\\\\\"+m[n].currency.symbol+\")?(?:\\\\))?)?$\"),f=new RegExp(\"[^a-zA-Z]\"+m[n].abbreviations.trillion+\"(?:\\\\)|(\\\\\"+m[n].currency.symbol+\")?(?:\\\\))?)?$\"),g=0;g<=j.length&&!(k=b.indexOf(j[g])>-1?Math.pow(1024,g+1):!1);g++);a._value=(k?k:1)*(i.match(c)?Math.pow(10,3):1)*(i.match(d)?Math.pow(10,6):1)*(i.match(e)?Math.pow(10,9):1)*(i.match(f)?Math.pow(10,12):1)*(b.indexOf(\"%\")>-1?.01:1)*((b.split(\"-\").length+Math.min(b.split(\"(\").length-1,b.split(\")\").length-1))%2?1:-1)*Number(b.replace(/[^0-9\\.]+/g,\"\")),a._value=k?Math.ceil(a._value):a._value}return a._value}function e(a,b){var c,d=b.indexOf(\"$\")<=1?!0:!1,e=\"\";return b.indexOf(\" $\")>-1?(e=\" \",b=b.replace(\" $\",\"\")):b.indexOf(\"$ \")>-1?(e=\" \",b=b.replace(\"$ \",\"\")):b=b.replace(\"$\",\"\"),c=i(a._value,b),d?c.indexOf(\"(\")>-1||c.indexOf(\"-\")>-1?(c=c.split(\"\"),c.splice(1,0,m[n].currency.symbol+e),c=c.join(\"\")):c=m[n].currency.symbol+e+c:c.indexOf(\")\")>-1?(c=c.split(\"\"),c.splice(-1,0,e+m[n].currency.symbol),c=c.join(\"\")):c=c+e+m[n].currency.symbol,c}function f(a,b){var c,d=\"\",e=100*a._value;return b.indexOf(\" %\")>-1?(d=\" \",b=b.replace(\" %\",\"\")):b=b.replace(\"%\",\"\"),c=i(e,b),c.indexOf(\")\")>-1?(c=c.split(\"\"),c.splice(-1,0,d+\"%\"),c=c.join(\"\")):c=c+d+\"%\",c}function g(a){var b=Math.floor(a._value/60/60),c=Math.floor((a._value-60*60*b)/60),d=Math.round(a._value-60*60*b-60*c);return b+\":\"+(10>c?\"0\"+c:c)+\":\"+(10>d?\"0\"+d:d)}function h(a){var b=a.split(\":\"),c=0;return 3===b.length?(c+=60*60*Number(b[0]),c+=60*Number(b[1]),c+=Number(b[2])):2===b.length&&(c+=60*Number(b[0]),c+=Number(b[1])),Number(c)}function i(a,c){var d,e,f,g,h,i,j=!1,k=!1,l=!1,p=\"\",q=\"\",r=\"\",s=Math.abs(a),t=[\"B\",\"KB\",\"MB\",\"GB\",\"TB\",\"PB\",\"EB\",\"ZB\",\"YB\"],u=\"\",v=!1;if(0===a&&null!==o)return o;if(c.indexOf(\"(\")>-1?(j=!0,c=c.slice(1,-1)):c.indexOf(\"+\")>-1&&(k=!0,c=c.replace(/\\+/g,\"\")),c.indexOf(\"a\")>-1&&(c.indexOf(\" a\")>-1?(p=\" \",c=c.replace(\" a\",\"\")):c=c.replace(\"a\",\"\"),s>=Math.pow(10,12)?(p+=m[n].abbreviations.trillion,a/=Math.pow(10,12)):s<Math.pow(10,12)&&s>=Math.pow(10,9)?(p+=m[n].abbreviations.billion,a/=Math.pow(10,9)):s<Math.pow(10,9)&&s>=Math.pow(10,6)?(p+=m[n].abbreviations.million,a/=Math.pow(10,6)):s<Math.pow(10,6)&&s>=Math.pow(10,3)&&(p+=m[n].abbreviations.thousand,a/=Math.pow(10,3))),c.indexOf(\"b\")>-1)for(c.indexOf(\" b\")>-1?(q=\" \",c=c.replace(\" b\",\"\")):c=c.replace(\"b\",\"\"),f=0;f<=t.length;f++)if(d=Math.pow(1024,f),e=Math.pow(1024,f+1),a>=d&&e>a){q+=t[f],d>0&&(a/=d);break}return c.indexOf(\"o\")>-1&&(c.indexOf(\" o\")>-1?(r=\" \",c=c.replace(\" o\",\"\")):c=c.replace(\"o\",\"\"),r+=m[n].ordinal(a)),c.indexOf(\"[.]\")>-1&&(l=!0,c=c.replace(\"[.]\",\".\")),g=a.toString().split(\".\")[0],h=c.split(\".\")[1],i=c.indexOf(\",\"),h?(h.indexOf(\"[\")>-1?(h=h.replace(\"]\",\"\"),h=h.split(\"[\"),u=b(a,h[0].length+h[1].length,h[1].length)):u=b(a,h.length),g=u.split(\".\")[0],u=u.split(\".\")[1].length?m[n].delimiters.decimal+u.split(\".\")[1]:\"\",l&&0===Number(u.slice(1))&&(u=\"\")):g=b(a,null),g.indexOf(\"-\")>-1&&(g=g.slice(1),v=!0),i>-1&&(g=g.toString().replace(/(\\d)(?=(\\d{3})+(?!\\d))/g,\"$1\"+m[n].delimiters.thousands)),0===c.indexOf(\".\")&&(g=\"\"),(j&&v?\"(\":\"\")+(!j&&v?\"-\":\"\")+(!v&&k?\"+\":\"\")+g+u+(r?r:\"\")+(p?p:\"\")+(q?q:\"\")+(j&&v?\")\":\"\")}function j(a,b){m[a]=b}var k,l=\"1.5.1\",m={},n=\"en\",o=null,p=\"0,0\",q=\"undefined\"!=typeof module&&module.exports;k=function(b){return k.isNumeral(b)?b=b.value():0===b||\"undefined\"==typeof b?b=0:Number(b)||(b=k.fn.unformat(b)),new a(Number(b))},k.version=l,k.isNumeral=function(b){return b instanceof a},k.language=function(a,b){if(!a)return n;if(a&&!b){if(!m[a])throw new Error(\"Unknown language : \"+a);n=a}return(b||!m[a])&&j(a,b),k},k.language(\"en\",{delimiters:{thousands:\",\",decimal:\".\"},abbreviations:{thousand:\"k\",million:\"m\",billion:\"b\",trillion:\"t\"},ordinal:function(a){var b=a%10;return 1===~~(a%100/10)?\"th\":1===b?\"st\":2===b?\"nd\":3===b?\"rd\":\"th\"},currency:{symbol:\"$\"}}),k.zeroFormat=function(a){o=\"string\"==typeof a?a:null},k.defaultFormat=function(a){p=\"string\"==typeof a?a:\"0.0\"},k.fn=a.prototype={clone:function(){return k(this)},format:function(a){return c(this,a?a:p)},unformat:function(a){return d(this,a?a:p)},value:function(){return this._value},valueOf:function(){return this._value},set:function(a){return this._value=Number(a),this},add:function(a){return this._value=this._value+Number(a),this},subtract:function(a){return this._value=this._value-Number(a),this},multiply:function(a){return this._value=this._value*Number(a),this},divide:function(a){return this._value=this._value/Number(a),this},difference:function(a){var b=this._value-Number(a);return 0>b&&(b=-b),b}},q&&(module.exports=k),\"undefined\"==typeof ender&&(this.numeral=k),\"function\"==typeof define&&define.amd&&define([],function(){return k})}).call(this);\n\\ No newline at end of file\n+!function(a,b){\"function\"==typeof define&&define.amd?define(b):\"object\"==typeof module&&module.exports?module.exports=b():a.numeral=b()}(this,function(){function a(a,b){this._input=a,this._value=b}var b,c,d=\"2.0.6\",e={},f={},g={currentLocale:\"en\",zeroFormat:null,nullFormat:null,defaultFormat:\"0,0\",scalePercentBy100:!0},h={currentLocale:g.currentLocale,zeroFormat:g.zeroFormat,nullFormat:g.nullFormat,defaultFormat:g.defaultFormat,scalePercentBy100:g.scalePercentBy100};return b=function(d){var f,g,i,j;if(b.isNumeral(d))f=d.value();else if(0===d||\"undefined\"==typeof d)f=0;else if(null===d||c.isNaN(d))f=null;else if(\"string\"==typeof d)if(h.zeroFormat&&d===h.zeroFormat)f=0;else if(h.nullFormat&&d===h.nullFormat||!d.replace(/[^0-9]+/g,\"\").length)f=null;else{for(g in e)if(j=\"function\"==typeof e[g].regexps.unformat?e[g].regexps.unformat():e[g].regexps.unformat,j&&d.match(j)){i=e[g].unformat;break}i=i||b._.stringToNumber,f=i(d)}else f=Number(d)||null;return new a(d,f)},b.version=d,b.isNumeral=function(b){return b instanceof a},b._=c={numberToFormat:function(a,c,d){var e,g,h,i,j,k,l,m=f[b.options.currentLocale],n=!1,o=!1,p=0,q=\"\",r=1e12,s=1e9,t=1e6,u=1e3,v=\"\",w=!1;if(a=a||0,g=Math.abs(a),b._.includes(c,\"(\")?(n=!0,c=c.replace(/[\\(|\\)]/g,\"\")):(b._.includes(c,\"+\")||b._.includes(c,\"-\"))&&(j=b._.includes(c,\"+\")?c.indexOf(\"+\"):0>a?c.indexOf(\"-\"):-1,c=c.replace(/[\\+|\\-]/g,\"\")),b._.includes(c,\"a\")&&(e=c.match(/a(k|m|b|t)?/),e=e?e[1]:!1,b._.includes(c,\" a\")&&(q=\" \"),c=c.replace(new RegExp(q+\"a[kmbt]?\"),\"\"),g>=r&&!e||\"t\"===e?(q+=m.abbreviations.trillion,a/=r):r>g&&g>=s&&!e||\"b\"===e?(q+=m.abbreviations.billion,a/=s):s>g&&g>=t&&!e||\"m\"===e?(q+=m.abbreviations.million,a/=t):(t>g&&g>=u&&!e||\"k\"===e)&&(q+=m.abbreviations.thousand,a/=u)),b._.includes(c,\"[.]\")&&(o=!0,c=c.replace(\"[.]\",\".\")),h=a.toString().split(\".\")[0],i=c.split(\".\")[1],k=c.indexOf(\",\"),p=(c.split(\".\")[0].split(\",\")[0].match(/0/g)||[]).length,i?(b._.includes(i,\"[\")?(i=i.replace(\"]\",\"\"),i=i.split(\"[\"),v=b._.toFixed(a,i[0].length+i[1].length,d,i[1].length)):v=b._.toFixed(a,i.length,d),h=v.split(\".\")[0],v=b._.includes(v,\".\")?m.delimiters.decimal+v.split(\".\")[1]:\"\",o&&0===Number(v.slice(1))&&(v=\"\")):h=b._.toFixed(a,0,d),q&&!e&&Number(h)>=1e3&&q!==m.abbreviations.trillion)switch(h=String(Number(h)/1e3),q){case m.abbreviations.thousand:q=m.abbreviations.million;break;case m.abbreviations.million:q=m.abbreviations.billion;break;case m.abbreviations.billion:q=m.abbreviations.trillion}if(b._.includes(h,\"-\")&&(h=h.slice(1),w=!0),h.length<p)for(var x=p-h.length;x>0;x--)h=\"0\"+h;return k>-1&&(h=h.toString().replace(/(\\d)(?=(\\d{3})+(?!\\d))/g,\"$1\"+m.delimiters.thousands)),0===c.indexOf(\".\")&&(h=\"\"),l=h+v+(q?q:\"\"),n?l=(n&&w?\"(\":\"\")+l+(n&&w?\")\":\"\"):j>=0?l=0===j?(w?\"-\":\"+\")+l:l+(w?\"-\":\"+\"):w&&(l=\"-\"+l),l},stringToNumber:function(a){var b,c,d,e=f[h.currentLocale],g=a,i={thousand:3,million:6,billion:9,trillion:12};if(h.zeroFormat&&a===h.zeroFormat)c=0;else if(h.nullFormat&&a===h.nullFormat||!a.replace(/[^0-9]+/g,\"\").length)c=null;else{c=1,\".\"!==e.delimiters.decimal&&(a=a.replace(/\\./g,\"\").replace(e.delimiters.decimal,\".\"));for(b in i)if(d=new RegExp(\"[^a-zA-Z]\"+e.abbreviations[b]+\"(?:\\\\)|(\\\\\"+e.currency.symbol+\")?(?:\\\\))?)?$\"),g.match(d)){c*=Math.pow(10,i[b]);break}c*=(a.split(\"-\").length+Math.min(a.split(\"(\").length-1,a.split(\")\").length-1))%2?1:-1,a=a.replace(/[^0-9\\.]+/g,\"\"),c*=Number(a)}return c},isNaN:function(a){return\"number\"==typeof a&&isNaN(a)},includes:function(a,b){return-1!==a.indexOf(b)},insert:function(a,b,c){return a.slice(0,c)+b+a.slice(c)},reduce:function(a,b){if(null===this)throw new TypeError(\"Array.prototype.reduce called on null or undefined\");if(\"function\"!=typeof b)throw new TypeError(b+\" is not a function\");var c,d=Object(a),e=d.length>>>0,f=0;if(3===arguments.length)c=arguments[2];else{for(;e>f&&!(f in d);)f++;if(f>=e)throw new TypeError(\"Reduce of empty array with no initial value\");c=d[f++]}for(;e>f;f++)f in d&&(c=b(c,d[f],f,d));return c},multiplier:function(a){var b=a.toString().split(\".\");return b.length<2?1:Math.pow(10,b[1].length)},correctionFactor:function(){var a=Array.prototype.slice.call(arguments);return a.reduce(function(a,b){var d=c.multiplier(b);return a>d?a:d},1)},toFixed:function(a,b,c,d){var e,f,g,h,i=a.toString().split(\".\"),j=b-(d||0);return e=2===i.length?Math.min(Math.max(i[1].length,j),b):j,g=Math.pow(10,e),h=(c(a+\"e+\"+e)/g).toFixed(e),d>b-e&&(f=new RegExp(\"\\\\.?0{1,\"+(d-(b-e))+\"}$\"),h=h.replace(f,\"\")),h}},b.options=h,b.formats=e,b.locales=f,b.locale=function(a){return a&&(h.currentLocale=a.toLowerCase()),h.currentLocale},b.localeData=function(a){if(!a)return f[h.currentLocale];if(a=a.toLowerCase(),!f[a])throw new Error(\"Unknown locale : \"+a);return f[a]},b.reset=function(){for(var a in g)h[a]=g[a]},b.zeroFormat=function(a){h.zeroFormat=\"string\"==typeof a?a:null},b.nullFormat=function(a){h.nullFormat=\"string\"==typeof a?a:null},b.defaultFormat=function(a){h.defaultFormat=\"string\"==typeof a?a:\"0.0\"},b.register=function(a,b,c){if(b=b.toLowerCase(),this[a+\"s\"][b])throw new TypeError(b+\" \"+a+\" already registered.\");return this[a+\"s\"][b]=c,c},b.validate=function(a,c){var d,e,f,g,h,i,j,k;if(\"string\"!=typeof a&&(a+=\"\",console.warn&&console.warn(\"Numeral.js: Value is not string. It has been co-erced to: \",a)),a=a.trim(),a.match(/^\\d+$/))return!0;if(\"\"===a)return!1;try{j=b.localeData(c)}catch(l){j=b.localeData(b.locale())}return f=j.currency.symbol,h=j.abbreviations,d=j.delimiters.decimal,e=\".\"===j.delimiters.thousands?\"\\\\.\":j.delimiters.thousands,k=a.match(/^[^\\d]+/),null!==k&&(a=a.substr(1),k[0]!==f)?!1:(k=a.match(/[^\\d]+$/),null!==k&&(a=a.slice(0,-1),k[0]!==h.thousand&&k[0]!==h.million&&k[0]!==h.billion&&k[0]!==h.trillion)?!1:(i=new RegExp(e+\"{2}\"),a.match(/[^\\d.,]/g)?!1:(g=a.split(d),g.length>2?!1:g.length<2?!!g[0].match(/^\\d+.*\\d$/)&&!g[0].match(i):1===g[0].length?!!g[0].match(/^\\d+$/)&&!g[0].match(i)&&!!g[1].match(/^\\d+$/):!!g[0].match(/^\\d+.*\\d$/)&&!g[0].match(i)&&!!g[1].match(/^\\d+$/))))},b.fn=a.prototype={clone:function(){return b(this)},format:function(a,c){var d,f,g,i=this._value,j=a||h.defaultFormat;if(c=c||Math.round,0===i&&null!==h.zeroFormat)f=h.zeroFormat;else if(null===i&&null!==h.nullFormat)f=h.nullFormat;else{for(d in e)if(j.match(e[d].regexps.format)){g=e[d].format;break}g=g||b._.numberToFormat,f=g(i,j,c)}return f},value:function(){return this._value},input:function(){return this._input},set:function(a){return this._value=Number(a),this},add:function(a){function b(a,b,c,e){return a+Math.round(d*b)}var d=c.correctionFactor.call(null,this._value,a);return this._value=c.reduce([this._value,a],b,0)/d,this},subtract:function(a){function b(a,b,c,e){return a-Math.round(d*b)}var d=c.correctionFactor.call(null,this._value,a);return this._value=c.reduce([a],b,Math.round(this._value*d))/d,this},multiply:function(a){function b(a,b,d,e){var f=c.correctionFactor(a,b);return Math.round(a*f)*Math.round(b*f)/Math.round(f*f)}return this._value=c.reduce([this._value,a],b,1),this},divide:function(a){function b(a,b,d,e){var f=c.correctionFactor(a,b);return Math.round(a*f)/Math.round(b*f)}return this._value=c.reduce([this._value,a],b),this},difference:function(a){return Math.abs(b(this._value).subtract(a).value())}},b.register(\"locale\",\"en\",{delimiters:{thousands:\",\",decimal:\".\"},abbreviations:{thousand:\"k\",million:\"m\",billion:\"b\",trillion:\"t\"},ordinal:function(a){var b=a%10;return 1===~~(a%100/10)?\"th\":1===b?\"st\":2===b?\"nd\":3===b?\"rd\":\"th\"},currency:{symbol:\"$\"}}),function(){b.register(\"format\",\"bps\",{regexps:{format:/(BPS)/,unformat:/(BPS)/},format:function(a,c,d){var e,f=b._.includes(c,\" BPS\")?\" \":\"\";return a=1e4*a,c=c.replace(/\\s?BPS/,\"\"),e=b._.numberToFormat(a,c,d),b._.includes(e,\")\")?(e=e.split(\"\"),e.splice(-1,0,f+\"BPS\"),e=e.join(\"\")):e=e+f+\"BPS\",e},unformat:function(a){return+(1e-4*b._.stringToNumber(a)).toFixed(15)}})}(),function(){var a={base:1e3,suffixes:[\"B\",\"KB\",\"MB\",\"GB\",\"TB\",\"PB\",\"EB\",\"ZB\",\"YB\"]},c={base:1024,suffixes:[\"B\",\"KiB\",\"MiB\",\"GiB\",\"TiB\",\"PiB\",\"EiB\",\"ZiB\",\"YiB\"]},d=a.suffixes.concat(c.suffixes.filter(function(b){return a.suffixes.indexOf(b)<0})),e=d.join(\"|\");e=\"(\"+e.replace(\"B\",\"B(?!PS)\")+\")\",b.register(\"format\",\"bytes\",{regexps:{format:/([0\\s]i?b)/,unformat:new RegExp(e)},format:function(d,e,f){var g,h,i,j,k=b._.includes(e,\"ib\")?c:a,l=b._.includes(e,\" b\")||b._.includes(e,\" ib\")?\" \":\"\";for(e=e.replace(/\\s?i?b/,\"\"),h=0;h<=k.suffixes.length;h++)if(i=Math.pow(k.base,h),j=Math.pow(k.base,h+1),null===d||0===d||d>=i&&j>d){l+=k.suffixes[h],i>0&&(d/=i);break}return g=b._.numberToFormat(d,e,f),g+l},unformat:function(d){var e,f,g=b._.stringToNumber(d);if(g){for(e=a.suffixes.length-1;e>=0;e--){if(b._.includes(d,a.suffixes[e])){f=Math.pow(a.base,e);break}if(b._.includes(d,c.suffixes[e])){f=Math.pow(c.base,e);break}}g*=f||1}return g}})}(),function(){b.register(\"format\",\"currency\",{regexps:{format:/(\\$)/},format:function(a,c,d){var e,f,g,h=b.locales[b.options.currentLocale],i={before:c.match(/^([\\+|\\-|\\(|\\s|\\$]*)/)[0],after:c.match(/([\\+|\\-|\\)|\\s|\\$]*)$/)[0]};for(c=c.replace(/\\s?\\$\\s?/,\"\"),e=b._.numberToFormat(a,c,d),a>=0?(i.before=i.before.replace(/[\\-\\(]/,\"\"),i.after=i.after.replace(/[\\-\\)]/,\"\")):0>a&&!b._.includes(i.before,\"-\")&&!b._.includes(i.before,\"(\")&&(i.before=\"-\"+i.before),g=0;g<i.before.length;g++)switch(f=i.before[g]){case\"$\":e=b._.insert(e,h.currency.symbol,g);break;case\" \":e=b._.insert(e,\" \",g+h.currency.symbol.length-1)}for(g=i.after.length-1;g>=0;g--)switch(f=i.after[g]){case\"$\":e=g===i.after.length-1?e+h.currency.symbol:b._.insert(e,h.currency.symbol,-(i.after.length-(1+g)));break;case\" \":e=g===i.after.length-1?e+\" \":b._.insert(e,\" \",-(i.after.length-(1+g)+h.currency.symbol.length-1))}return e}})}(),function(){b.register(\"format\",\"exponential\",{regexps:{format:/(e\\+|e-)/,unformat:/(e\\+|e-)/},format:function(a,c,d){var e,f=\"number\"!=typeof a||b._.isNaN(a)?\"0e+0\":a.toExponential(),g=f.split(\"e\");return c=c.replace(/e[\\+|\\-]{1}0/,\"\"),e=b._.numberToFormat(Number(g[0]),c,d),e+\"e\"+g[1]},unformat:function(a){function c(a,c,d,e){var f=b._.correctionFactor(a,c),g=a*f*(c*f)/(f*f);return g}var d=b._.includes(a,\"e+\")?a.split(\"e+\"):a.split(\"e-\"),e=Number(d[0]),f=Number(d[1]);return f=b._.includes(a,\"e-\")?f*=-1:f,b._.reduce([e,Math.pow(10,f)],c,1)}})}(),function(){b.register(\"format\",\"ordinal\",{regexps:{format:/(o)/},format:function(a,c,d){var e,f=b.locales[b.options.currentLocale],g=b._.includes(c,\" o\")?\" \":\"\";return c=c.replace(/\\s?o/,\"\"),g+=f.ordinal(a),e=b._.numberToFormat(a,c,d),e+g}})}(),function(){b.register(\"format\",\"percentage\",{regexps:{format:/(%)/,unformat:/(%)/},format:function(a,c,d){var e,f=b._.includes(c,\" %\")?\" \":\"\";return b.options.scalePercentBy100&&(a=100*a),c=c.replace(/\\s?\\%/,\"\"),e=b._.numberToFormat(a,c,d),b._.includes(e,\")\")?(e=e.split(\"\"),e.splice(-1,0,f+\"%\"),e=e.join(\"\")):e=e+f+\"%\",e},unformat:function(a){var c=b._.stringToNumber(a);return b.options.scalePercentBy100?.01*c:c}})}(),function(){b.register(\"format\",\"time\",{regexps:{format:/(:)/,unformat:/(:)/},format:function(a,b,c){var d=Math.floor(a/60/60),e=Math.floor((a-60*d*60)/60),f=Math.round(a-60*d*60-60*e);return d+\":\"+(10>e?\"0\"+e:e)+\":\"+(10>f?\"0\"+f:f)},unformat:function(a){var b=a.split(\":\"),c=0;return 3===b.length?(c+=60*Number(b[0])*60,c+=60*Number(b[1]),c+=Number(b[2])):2===b.length&&(c+=60*Number(b[0]),c+=Number(b[1])),Number(c)}})}(),b});\n\\ No newline at end of file\n",
+					"match": false,
+					"packageHash": "f80ebe3131e5b145399fbcd56c61d718193888cb340133eb2fdb8a98b879ce30",
+					"size": 5606,
+					"sourceHash": "2e51d5239ad46aeb9d33965c65a0fa8473c72ab03b09279f1c79ca82afbf0197",
+					"status": "content"
+				},
+				"numeral.js": {
+					"diff": "--- published/numeral.js\n+++ rebuilt/numeral.js\n@@ -1,419 +1,672 @@\n-/*!\n+/*! @preserve\n  * numeral.js\n- * version : 1.5.1\n+ * version : 2.0.6\n  * author : Adam Draper\n  * license : MIT\n  * http://adamwdraper.github.com/Numeral-js/\n  */\n \n-(function () {\n-\n+(function (global, factory) {\n+    if (typeof define === 'function' && define.amd) {\n+        define(factory);\n+    } else if (typeof module === 'object' && module.exports) {\n+        module.exports = factory();\n+    } else {\n+        global.numeral = factory();\n+    }\n+}(this, function () {\n     /************************************\n-        Constants\n+        Variables\n     ************************************/\n \n     var numeral,\n-        VERSION = '1.5.1',\n-        // internal storage for language config files\n-        languages = {},\n-        currentLanguage = 'en',\n-        zeroFormat = null,\n-        defaultFormat = '0,0',\n-        // check for nodeJS\n-        hasModule = (typeof module !== 'undefined' && module.exports);\n+        _,\n+        VERSION = '2.0.6',\n+        formats = {},\n+        locales = {},\n+        defaults = {\n+            currentLocale: 'en',\n+            zeroFormat: null,\n+            nullFormat: null,\n+            defaultFormat: '0,0',\n+            scalePercentBy100: true\n+        },\n+        options = {\n+            currentLocale: defaults.currentLocale,\n+            zeroFormat: defaults.zeroFormat,\n+            nullFormat: defaults.nullFormat,\n+            defaultFormat: defaults.defaultFormat,\n+            scalePercentBy100: defaults.scalePercentBy100\n+        };\n \n \n     /************************************\n         Constructors\n     ************************************/\n \n-\n     // Numeral prototype object\n-    function Numeral (number) {\n-        this._value = number;\n-    }\n+    function Numeral(input, number) {\n+        this._input = input;\n \n-    /**\n-     * Implementation of toFixed() that treats floats more like decimals\n-     *\n-     * Fixes binary rounding issues (eg. (0.615).toFixed(2) === '0.61') that present\n-     * problems for accounting- and finance-related software.\n-     */\n-    function toFixed (value, precision, optionals) {\n-        var power = Math.pow(10, precision),\n-            optionalsRegExp,\n-            output;\n-\n-        // Multiply up by precision, round accurately, then divide and use native toFixed():\n-        output = (Math.round(value * power) / power).toFixed(precision);\n-\n-        if (optionals) {\n-            optionalsRegExp = new RegExp('0{1,' + optionals + '}$');\n-            output = output.replace(optionalsRegExp, '');\n-        }\n-\n-        return output;\n-    }\n-\n-    /************************************\n-        Formatting\n-    ************************************/\n-\n-    // determine what type of formatting we need to do\n-    function formatNumeral (n, format) {\n-        var output;\n-\n",
+					"match": false,
+					"packageHash": "18a10816e92382d06d22eba9c8e68e601af5c4635c22c544075eaa8a6df63476",
+					"size": 18113,
+					"sourceHash": "0c1f83a646db375f90369bafe327f537905dd893a6c91c022765f1260963f81d",
+					"status": "content"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -1,6 +1,6 @@\n {\n   \"name\": \"numeral\",\n-  \"version\": \"1.5.1\",\n+  \"version\": \"2.0.6\",\n   \"description\": \"Format and manipulate numbers.\",\n   \"homepage\": \"http://numeraljs.com\",\n   \"author\": {\n@@ -27,21 +27,33 @@\n   \"bugs\": {\n     \"url\": \"https://github.com/adamwdraper/Numeral-js/issues\"\n   },\n-  \"licenses\": [\n-    {\n-      \"type\": \"MIT\"\n-    }\n-  ],\n+  \"license\": \"MIT\",\n   \"devDependencies\": {\n-    \"uglify-js\": \"latest\",\n+    \"chai\": \"^3.5.0\",\n     \"grunt\": \"latest\",\n-    \"grunt-contrib-uglify\": \"latest\",\n+    \"grunt-contrib-copy\": \"^1.0.0\",\n     \"grunt-contrib-jshint\": \"latest\",\n-    \"grunt-contrib-nodeunit\": \"~0.1.2\",\n-    \"grunt-contrib-concat\": \"~0.3.0\"\n+    \"grunt-contrib-nodeunit\": \"1.0.0\",\n+    \"grunt-contrib-uglify\": \"latest\",\n+    \"grunt-karma\": \"^2.0.0\",\n+    \"grunt-mocha-test\": \"^0.13.2\",\n+    \"grunt-saucelabs\": \"*\",\n+    \"grunt-string-replace\": \"^1.3.1\",\n+    \"karma\": \"^1.3.0\",\n+    \"karma-chai\": \"^0.1.0\",\n+    \"karma-chrome-launcher\": \"^2.0.0\",\n+    \"karma-firefox-launcher\": \"^1.0.0\",\n+    \"karma-mocha\": \"^1.3.0\",\n+    \"karma-mocha-reporter\": \"^2.2.1\",\n+    \"karma-sauce-launcher\": \"^1.1.0\",\n+    \"load-grunt-tasks\": \"^3.5.2\",\n+    \"mocha\": \"^3.1.2\",\n+    \"uglify-js\": \"latest\"\n+  },\n+  \"scripts\": {\n+    \"test\": \"grunt\"\n   },\n   \"ender\": \"./ender.js\",\n-  \"readme\": \"[Numeral.js](http://numeraljs.com)\\n=======================================================\\n\\nA javascript library for formatting and manipulating numbers.\\n\\n[Website and documentation](http://numeraljs.com)\\n\\nChangelog\\n=========\\n\\n### 1.5.1\\nBug fix: Make sure values aren't changed during formatting### 1.5.0\\nAdd defaultFormat(). numeral().format() uses the default to format if no string is provided\\n\\n.unformat() returns 0 when passed no string\\n\\nAdded languages.js that contains all languages\\n\\nBug fix: Fix bug while unformatting ordinals\\n\\nAdd format option to always show signed value\\n\\nAdded ability to instantiate numeral with a string value of a number\\n### 1.4.9\\nBug fix: Fix bug while unformatting ordinals\\n### 1.4.8\\nBug fix: Throw error if language is not defined\\n### 1.4.7\\nBug fix: Fix typo for trillion\\n### 1.4.6\\nBug fix: remove ' from unformatting regex that was causing an error with fr-ch.js\\n### 1.4.5\\nAdd zeroFormat() function that accepts a string for custom formating of zeros\\n\\nAdd valueOf() function\\n\\nChain functionality to language function\\n\\nMake all minified files have the same .min.js filename ending\\n### 1.4.1\\nBug fix: Bytes not formatting correctly\\n### 1.4.0\\nAdd optional format for all decimals\\n### 1.3.4\\nRemove AMD module id. (This is encouraged by require.js to make the module more portable, and keep it from creating a global)\\n### 1.3.3\\nAMD define() compatibility.\\n### 1.3.2\\nBug fix: Formatting some numbers results in the wrong value. Issue #21\\n### 1.3.1\\nBug fix: Minor fix to unformatting parser\\n### 1.3.0\\nAdd support for spaces before/after $, a, o, b in a format string\\nBug fix: Fix unformat for languages that use '.' in ordinals\\nBug fix: Fix round up floating numbers with no precision correctly.\\nBug fix: Fix currency signs at the end in unformat\\n### 1.2.6\\nAdd support for optional decimal places\\n### 1.2.5\\nAdd support for appending currency symbol\\n### 1.2.4\\nAdd support for humanized filesizes\\n### 1.2.2\\nChanged language definition property 'money' to 'currency'\\n### 1.2.1\\nBug fix: Fix unformatting non-negative abbreviations\\n### 1.2.3\\nBug Fix: Fix unformatting for languages that use '.' as thousands delimiter\\n### 1.2.0\\nAdd localization language support\\n\\nUpdate testing for to include languages\\n### 1.1.0\\nAdd Tests\\n\\nBug fix: Fix difference returning negative values\\n### 1.0.4\\nBug fix: Non negative numbers were displaying as negative when using parentheses\\n### 1.0.3\\nAdd ordinal formatting using 'o' in the format\\n### 1.0.2\\nAdd clone functionality\\n### 1.0.1\\n\\nAdded abbreviations for thousands and millions using 'a' in the format\\n\\n### 1.0.0\\n\\nInitial release\\n\\nAcknowlegements\\n===============\\n\\nNumeral.js, while less complex, was inspired by and heavily borrowed from [Moment.js](http://momentjs.com)\\n\\nLicense\\n=======\\nNumeral.js is freely distributable under the terms of the MIT license.\\nCopyright (c) 2012 Adam Draper\\nPermission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the \\\"Software\\\"), to deal in the Software without restriction, including without limitation the rights to use,copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:\\nThe above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.\\nTHE SOFTWARE IS PROVIDED \\\"AS IS\\\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.\",\n-  \"_id\": \"numeral@1.5.1\",\n+  \"_id\": \"numeral@1.5.4\",\n   \"_from\": \"numeral\"\n }\n",
+					"match": false,
+					"packageHash": "71580c8555887630ef8e058c20a4951e052d33274ad1ed26884ce0558c6f9f57",
+					"size": 4953,
+					"sourceHash": "f04239d614d874aa77edb78f44d76eb85958a50d2b69f014bab4c7a95a088bb9",
+					"status": "content"
+				},
+				"tests/languages/be-nl.js": {
+					"match": false,
+					"packageHash": "2917451a41ac6ddc111e8f2ca06db943716208efd22fced040f771f8b4f30e7e",
+					"size": 2859,
+					"status": "missing-in-source"
+				},
+				"tests/languages/cs.js": {
+					"match": false,
+					"packageHash": "3ab6f6a3023330ca0a421c6c0fa8749a73c0f4d2441f008b314e79be6a9afc8e",
+					"size": 2702,
+					"status": "missing-in-source"
+				},
+				"tests/languages/da-dk.js": {
+					"match": false,
+					"packageHash": "2d2a56a5cc5feb5500954e683b283e38bc96a707c5152c60ee5464debcf8c47c",
+					"size": 2660,
+					"status": "missing-in-source"
+				},
+				"tests/languages/de-ch.js": {
+					"match": false,
+					"packageHash": "c8e549c845089592a7d5e8e767f53254305d76537ec28ed5a394bc3c3c0b6f25",
+					"size": 2650,
+					"status": "missing-in-source"
+				},
+				"tests/languages/de.js": {
+					"match": false,
+					"packageHash": "6f1a4e3aca16ff672849942245663c1a11aa45ee124e099f58a4548a86f71157",
+					"size": 2643,
+					"status": "missing-in-source"
+				},
+				"tests/languages/en-gb.js": {
+					"match": false,
+					"packageHash": "1c55c22b02bc4205e4f1310fcf2e17543c76378ea363eb1c2554585729dc6067",
+					"size": 2654,
+					"status": "missing-in-source"
+				},
+				"tests/languages/en.js": {
+					"match": false,
+					"packageHash": "faf310f02cadfb9f062dfd345a620f51b9e5c256872a1806bea764c4aa73ccfb",
+					"size": 2555,
+					"status": "missing-in-source"
+				},
+				"tests/languages/es-ES.js": {
+					"match": false,
+					"packageHash": "084a70a3d196d1f349322d3c34dc2b6ff3a19d9b8f35a77c8d3cb7b717d775c0",
+					"size": 2659,
+					"status": "missing-in-source"
+				},
+				"tests/languages/es.js": {
+					"match": false,
+					"packageHash": "39fa61390c31aff975526484ab0a219de85a93dacb02f59f88b9c2955ea1b836",
+					"size": 2639,
+					"status": "missing-in-source"
+				},
+				"tests/languages/fi.js": {
+					"match": false,
+					"packageHash": "7e0df96258b0c33ee7b3cf78e91498bb8bc6a98dbf87648170ed4ef89bbe5af6",
+					"size": 2643,
+					"status": "missing-in-source"
+				},
+				"tests/languages/fr-ch.js": {
+					"match": false,
+					"packageHash": "ac4c19c837fd5fe7ee26b1071ae2d3a5dc4954b5d5aea70205f27d35a3555ccd",
+					"size": 2664,
+					"status": "missing-in-source"
+				},
+				"tests/languages/fr.js": {
+					"match": false,
+					"packageHash": "cac43f4ee08d34cc7c555c8bdddaff11970abd5d5d153250884e22abe46a52ff",
+					"size": 2644,
+					"status": "missing-in-source"
+				},
+				"tests/languages/it.js": {
+					"match": false,
+					"packageHash": "534831e1e2eb1bc335eb521ed456a74cbce5de2e1620eac8eeedf8715f3ffd14",
+					"size": 2666,
+					"status": "missing-in-source"
+				},
+				"tests/languages/ja.js": {
+					"match": false,
+					"packageHash": "114235c6ac54305c1203ff0be954fe84f8e625f787858caa847700ccc97b620a",
+					"size": 2660,
+					"status": "missing-in-source"
+				},
+				"tests/languages/pl.js": {
+					"match": false,
+					"packageHash": "8432ce4193df964096da7bb229a9a45b5265b8ae27f9a624e19e9f5d8a969d51",
+					"size": 2698,
+					"status": "missing-in-source"
+				},
+				"tests/languages/pt-br.js": {
+					"match": false,
+					"packageHash": "41e1362a0fb86cfee97f01f7b60427eeb1815ba45d2e8d6b7441ea2c48da380e",
+					"size": 2683,
+					"status": "missing-in-source"
+				},
+				"tests/languages/pt-pt.js": {
+					"match": false,
+					"packageHash": "9b86e4722e254bc8229102a46221e4d75d8c5e93bb6bcbbb276325501815fcce",
+					"size": 2660,
+					"status": "missing-in-source"
+				},
+				"tests/languages/ru-UA.js": {
+					"match": false,
+					"packageHash": "cb4e2bbadff552b5cc90f2304a6771efce6a4472a10754746ea2f1d0525fb928",
+					"size": 2734,
+					"status": "missing-in-source"
+				},
+				"tests/languages/ru.js": {
+					"match": false,
+					"packageHash": "bd3ef97f3c88565b2223a20f80908e9cc1cb5f26d226abc4ae6cc34ec0ff81cd",
+					"size": 2750,
+					"status": "missing-in-source"
+				},
+				"tests/languages/th.js": {
+					"match": false,
+					"packageHash": "99b4fb2be4e1a07b7bd611a956c3ffd1b0054d6e22f3fa713f5f8aa91845d641",
+					"size": 2709,
+					"status": "missing-in-source"
+				},
+				"tests/languages/tr.js": {
+					"match": false,
+					"packageHash": "65da6928d41365db2542aab5deea08450e3d478480248f4986198fb13abd0719",
+					"size": 2712,
+					"status": "missing-in-source"
+				},
+				"tests/languages/uk-UA.js": {
+					"match": false,
+					"packageHash": "9fb98f88ecddb5a1d10944002a7e4e53b2b36f9dd09af000045d35a602cc5426",
+					"size": 2730,
+					"status": "missing-in-source"
+				},
+				"tests/numeral/format.js": {
+					"match": false,
+					"packageHash": "63fa433e31462a152f3a1eaf3563c62a61bbc02e035ef80699b37ef9c998231c",
+					"size": 4593,
+					"status": "missing-in-source"
+				},
+				"tests/numeral/manipulate.js": {
+					"match": false,
+					"packageHash": "becb4579c56bd4028fb681826432f8209dfefbd4245a984550d5ec7943648fbc",
+					"size": 2392,
+					"status": "missing-in-source"
+				},
+				"tests/numeral/misc.js": {
+					"match": false,
+					"packageHash": "5521cbc93b092c9f562fe806427c58fba41d694ad37dc181f1b10a29d39eb0e3",
+					"size": 2192,
+					"status": "missing-in-source"
+				},
+				"tests/numeral/unformat.js": {
+					"match": false,
+					"packageHash": "0b6c60ec07fd42a9b23d26e8c2f949ecdce7ec44c40eaeb3452f8e81d90d9a7c",
+					"size": 2043,
+					"status": "missing-in-source"
+				},
+				"karma-ci.conf.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"locales/bg.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"locales/chs.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"locales/cs.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"locales/da-dk.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"locales/de-ch.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"locales/de.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"locales/en-au.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"locales/en-gb.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"locales/en-za.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"locales/es-es.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"locales/es.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"locales/et.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"locales/fi.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"locales/fr-ca.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"locales/fr-ch.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"locales/fr.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"locales/hu.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"locales/it.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"locales/ja.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"locales/lv.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"locales/nl-be.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"locales/nl-nl.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"locales/no.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"locales/pl.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"locales/pt-br.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"locales/pt-pt.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"locales/ru-ua.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"locales/ru.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"locales/sk.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"locales/sl.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"locales/th.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"locales/tr.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"locales/uk-ua.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"locales/vi.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"locales.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"min/locales/be-nl.min.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"min/locales/bg.min.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"min/locales/chs.min.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"min/locales/cs.min.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"min/locales/da-dk.min.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"min/locales/de-ch.min.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"min/locales/de.min.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"min/locales/en-au.min.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"min/locales/en-gb.min.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"min/locales/en-za.min.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"min/locales/es-es.min.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"min/locales/es.min.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"min/locales/et.min.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"min/locales/fi.min.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"min/locales/fr-ca.min.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"min/locales/fr-ch.min.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"min/locales/fr.min.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"min/locales/hu.min.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"min/locales/it.min.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"min/locales/ja.min.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"min/locales/lv.min.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"min/locales/nl-be.min.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"min/locales/nl-nl.min.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"min/locales/no.min.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"min/locales/pl.min.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"min/locales/pt-br.min.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"min/locales/pt-pt.min.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"min/locales/ru-ua.min.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"min/locales/ru.min.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"min/locales/sk.min.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"min/locales/sl.min.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"min/locales/th.min.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"min/locales/tr.min.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"min/locales/uk-ua.min.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"min/locales/vi.min.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"min/locales.min.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/formats/bps.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/formats/bytes.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/formats/currency.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/formats/exponential.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/formats/ordinal.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/formats/percentage.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/formats/time.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/locales/bg.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/locales/chs.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/locales/cs.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/locales/da-dk.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/locales/de-ch.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/locales/de.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/locales/en-au.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/locales/en-gb.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/locales/en-za.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/locales/es-es.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/locales/es.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/locales/et.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/locales/fi.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/locales/fr-ca.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/locales/fr-ch.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/locales/fr.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/locales/hu.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/locales/it.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/locales/ja.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/locales/lv.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/locales/nl-be.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/locales/nl-nl.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/locales/no.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/locales/pl.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/locales/pt-br.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/locales/pt-pt.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/locales/ru-ua.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/locales/ru.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/locales/sk.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/locales/sl.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/locales/th.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/locales/tr.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/locales/uk-ua.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/locales/vi.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/numeral.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"templates/anon.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"templates/types.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"tests/formats/bps.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"tests/formats/bytes.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"tests/formats/currency.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"tests/formats/exponential.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"tests/formats/ordinal.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"tests/formats/percentage.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"tests/formats/time.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"tests/locales/bg.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"tests/locales/chs.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"tests/locales/cs.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"tests/locales/da-dk.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"tests/locales/de-ch.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"tests/locales/de.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"tests/locales/en-au.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"tests/locales/en-gb.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"tests/locales/en-za.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"tests/locales/es-es.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"tests/locales/es.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"tests/locales/et.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"tests/locales/fi.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"tests/locales/fr-ca.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"tests/locales/fr-ch.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"tests/locales/fr.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"tests/locales/hu.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"tests/locales/it.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"tests/locales/ja.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"tests/locales/lv.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"tests/locales/nl-be.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"tests/locales/nl-nl.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"tests/locales/no.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"tests/locales/pl.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"tests/locales/pt-br.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"tests/locales/pt-pt.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"tests/locales/ru-ua.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"tests/locales/ru.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"tests/locales/sk.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"tests/locales/sl.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"tests/locales/th.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"tests/locales/tr.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"tests/locales/uk-ua.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"tests/locales/vi.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"tests/numeral.js": {
+					"match": false,
+					"status": "missing-in-package"
+				}
+			},
+			"summary": {
+				"differentFiles": 9,
+				"matchingFiles": 0,
+				"missingInPackage": 158,
+				"missingInSource": 71,
+				"score": 0,
+				"totalFiles": 238
+			}
+		}
+	}
+]
