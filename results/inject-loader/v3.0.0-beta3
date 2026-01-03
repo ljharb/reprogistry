@@ -1,0 +1,65 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-03T08:58:10.628Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:3.10.3",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "inject-loader@3.0.0-beta3",
+			"name": "inject-loader",
+			"version": "3.0.0-beta3",
+			"location": "https://registry.npmjs.org/inject-loader/-/inject-loader-3.0.0-beta3.tgz",
+			"integrity": "sha512-p/2wKMS1HZFXNDu7aZKLsc8FJamB4zVdhy/w/Wr4IlPdT8UzvS6F4a8MNpfBMeVufqnBad+XN9SkaFVSEHv5Bw==",
+			"publishedAt": "2017-01-12T02:41:29.508Z",
+			"publishedWith": {
+				"node": "6.7.0",
+				"npm": "3.10.3"
+			}
+		},
+		"source": {
+			"integrity": null,
+			"location": "git+ssh://git@github.com/plasticine/inject-loader.git",
+			"spec": "github:plasticine/inject-loader#df899c4cf05dda9586e7093ec89cafbe97466fef"
+		},
+		"comparisonHash": "8a2a8dcbb729bf3ee9216e490c955701f0ddebe1",
+		"diff": {
+			"files": {
+				"dist/createRequireStringRegex.js": {
+					"diff": "--- published/dist/createRequireStringRegex.js\n+++ rebuilt/dist/createRequireStringRegex.js\n@@ -5,11 +5,41 @@\n });\n exports.default = createRequireStringRegex;\n \n+var _loaderUtils = require('loader-utils');\n+\n+var _loaderUtils2 = _interopRequireDefault(_loaderUtils);\n+\n var _utils = require('./utils');\n \n-var MATCH_ALL_REQUIRE_STATEMENTS = (0, _utils.quoteRegexString)() + '([^\\\\)]+)' + (0, _utils.quoteRegexString)();\n+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }\n \n function createRequireStringRegex() {\n-  var regexArray = ['require\\\\(', MATCH_ALL_REQUIRE_STATEMENTS, '\\\\)'];\n+  var querystring = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : '';\n+\n+  var query = _loaderUtils2.default.parseQuery(querystring);\n+  var regexArray = [];\n+\n+  // if there is no query then replace everything\n+  if (Object.keys(query).length === 0) {\n+    regexArray.push((0, _utils.quoteRegexString)() + '([^\\\\)]+)' + (0, _utils.quoteRegexString)());\n+  } else {\n+    // if there are only negation matches in the query then replace everything\n+    // except them\n+    if ((0, _utils.hasOnlyExcludeFlags)(query)) {\n+      Object.keys(query).forEach(function (key) {\n+        regexArray.push('(?!' + ((0, _utils.quoteRegexString)() + (0, _utils.escapeSlash)(key)) + ')');\n+      });\n+      regexArray.push('([^\\\\)]+)');\n+    } else {\n+      regexArray.push('(' + (0, _utils.quoteRegexString)() + '(');\n+      regexArray.push(Object.keys(query).map(_utils.escapeSlash).join('|'));\n+      regexArray.push(')' + (0, _utils.quoteRegexString)() + ')');\n+    }\n+  }\n+\n+  // Wrap the regex to match `require()`\n+  regexArray.unshift('require\\\\(');\n+  regexArray.push('\\\\)');\n+\n   return new RegExp(regexArray.join(''), 'g');\n-}\n\\ No newline at end of file\n+};\n\\ No newline at end of file\n",
+					"match": false,
+					"packageHash": "4ed4bba656974779e5266a6de43132257e8f2d6eef0eb5ae16490901edffa826",
+					"size": 432,
+					"sourceHash": "aaf1dc186a2f20f389083eccbf64936a3c2e4bfd9bb7a6cf9638a0dbdcd65e35",
+					"status": "content"
+				},
+				"dist/index.js": {
+					"diff": "--- published/dist/index.js\n+++ rebuilt/dist/index.js\n@@ -1,9 +1,5 @@\n 'use strict';\n \n-var _loaderUtils = require('loader-utils');\n-\n-var _loaderUtils2 = _interopRequireDefault(_loaderUtils);\n-\n var _createRequireStringRegex = require('./createRequireStringRegex');\n \n var _createRequireStringRegex2 = _interopRequireDefault(_createRequireStringRegex);\n@@ -15,7 +11,6 @@\n function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }\n \n var __INJECTED_SOURCE_REGEX = new RegExp(/\\$__INJECTED_SOURCE__;/);\n-\n var __WRAPPED_MODULE_DEPENDENCIES_REGEX = new RegExp(/\\$__WRAPPED_MODULE_DEPENDENCIES__;/);\n var __WRAPPED_MODULE_REPLACEMENT = '(__injection(\"$1\") || require(\"$1\"))';\n \n@@ -23,7 +18,6 @@\n   var query = _ref.query,\n       resourcePath = _ref.resourcePath;\n \n-  // const query = loaderUtils.parseQuery(querystring);\n   var requireStringRegex = (0, _createRequireStringRegex2.default)(query);\n   var wrappedModuleDependencies = (0, _getAllModuleDependencies2.default)(source, requireStringRegex);\n   var dependencyInjectedSource = source.replace(requireStringRegex, __WRAPPED_MODULE_REPLACEMENT);\n",
+					"match": false,
+					"packageHash": "80412d940960d5229caafbf54e0b4d97aa5738aa47cc20deddff27438d866864",
+					"size": 3168,
+					"sourceHash": "f67b3bfa180ac0eb3fa2e1760026a0b485b6421103fd21f6f52d8f9cdf9b3c12",
+					"status": "content"
+				},
+				"dist/utils.js": {
+					"diff": "--- published/dist/utils.js\n+++ rebuilt/dist/utils.js\n@@ -3,9 +3,16 @@\n Object.defineProperty(exports, \"__esModule\", {\n   value: true\n });\n+exports.hasOnlyExcludeFlags = hasOnlyExcludeFlags;\n exports.quoteRegexString = quoteRegexString;\n exports.escapeSlash = escapeSlash;\n exports.unescapeQuote = unescapeQuote;\n+function hasOnlyExcludeFlags(query) {\n+  return Object.keys(query).filter(function (k) {\n+    return query[k] === true;\n+  }).length === 0;\n+}\n+\n function quoteRegexString() {\n   return '[\\'|\\\"]{1}';\n }\n",
+					"match": false,
+					"packageHash": "9ffce3e23d275871b1448f494a61d1214ee8d306ab1e0e71c23d2b1a1f7f60d8",
+					"size": 390,
+					"sourceHash": "ddb54ab42e37b722e523906231cb25728484f5a824b8f31d6613625da222d2b7",
+					"status": "content"
+				}
+			},
+			"summary": {
+				"differentFiles": 3,
+				"matchingFiles": 5,
+				"missingInPackage": 0,
+				"missingInSource": 0,
+				"score": 0.625,
+				"totalFiles": 8
+			}
+		}
+	}
+]
