@@ -1,0 +1,95 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-04T15:53:33.156Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:11.7.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "flat@0.2.0",
+			"name": "flat",
+			"version": "0.2.0",
+			"location": "https://registry.npmjs.org/flat/-/flat-0.2.0.tgz",
+			"integrity": "sha512-P5LuKctMrcnkSzdIeget5fdKwVcxN4Gz/tXGflPBY08wH9e6KVBp/U24ZHk0ywdCyEbbViE2cuNU9xWOMsPtcg==",
+			"publishedAt": "2012-11-21T02:18:45.899Z",
+			"publishedWith": {
+				"node": null,
+				"npm": null
+			}
+		},
+		"source": {
+			"integrity": "sha512-fmX52yn20TqfNSmz/bT1NRhCYlJAheFkQkeOKZ3yRnHCD0r4CrbC/geemDuxwXpDx16ByMvq8WCmo4c5lq0fEw==",
+			"location": "git://github.com/hughsk/flat.git",
+			"spec": "github:hughsk/flat#HEAD"
+		},
+		"comparisonHash": "8a2a8dcbb729bf3ee9216e490c955701f0ddebe1",
+		"diff": {
+			"files": {
+				".npmignore": {
+					"match": false,
+					"packageHash": "16d30e4462189fb14dd611bdb708c510630c576a1f35b9383e89a4352da36c97",
+					"size": 13,
+					"status": "missing-in-source"
+				},
+				".travis.yml": {
+					"match": false,
+					"packageHash": "070dffc7dc13bf0be3cefbef8f39ce015537ad397abb812e2cad8f1df9f459e1",
+					"size": 43,
+					"status": "missing-in-source"
+				},
+				"README.md": {
+					"diff": "--- published/README.md\n+++ rebuilt/README.md\n@@ -1,9 +1,9 @@\n-# flat [![Build Status](https://secure.travis-ci.org/hughsk/flat.png?branch=master)](http://travis-ci.org/hughsk/flat)\n+# flat [![Build Status](https://github.com/hughsk/flat/actions/workflows/main.yml/badge.svg)](https://github.com/hughsk/flat/actions/workflows/main.yml)\n \n Take a nested Javascript object and flatten it, or unflatten an object with\n delimited keys.\n \n-## Installion\n+## Installation\n \n ``` bash\n $ npm install flat\n@@ -11,13 +11,13 @@\n \n ## Methods\n \n-### flat.flatten(original, options)\n+### flatten(original, options)\n \n Flattens the object - it'll return an object one level deep, regardless of how\n nested the original object was:\n \n ``` javascript\n-var flatten = require('flat').flatten\n+import { flatten } from 'flat'\n \n flatten({\n     key1: {\n@@ -36,12 +36,12 @@\n // }\n ```\n \n-### flat.flatten(original, options)\n+### unflatten(original, options)\n \n-Flattening is reversible too, you can call `flat.unflatten()` on an object:\n+Flattening is reversible too, you can call `unflatten` on an object:\n \n ``` javascript\n-var unflatten = require('flat').unflatten\n+import { unflatten } from 'flat'\n \n unflatten({\n     'three.levels.deep': 42,\n@@ -72,7 +72,7 @@\n contents. This is disabled by default.\n \n ``` javascript\n-var flatten = require('flat').flatten\n+import { flatten } from 'flat'\n \n flatten({\n     this: [\n@@ -93,4 +93,142 @@\n //         }}\n //     ]\n // }\n-```\n\\ No newline at end of file\n+```\n+\n+### object\n+\n+When enabled, arrays will not be created automatically when calling unflatten, like so:\n+\n+``` javascript\n+unflatten({\n+    'hello.you.0': 'ipsum',\n+    'hello.you.1': 'lorem',\n+    'hello.other.world': 'foo'\n+}, { object: true })\n+\n+// hello: {\n+//     you: {\n+//         0: 'ipsum',\n+//         1: 'lorem',\n+//     },\n+//     other: { world: 'foo' }\n+// }\n+```\n+\n+### overwrite\n+\n+When enabled, existing keys in the unflattened object may be overwritten if they cannot hold a newly encountered nested value:\n+\n+```javascript\n+unflatten({\n+    'TRAVIS': 'true',\n+    'TRAVIS.DIR': '/home/travis/build/kvz/environmental'\n+}, { overwrite: true })\n+\n+// TRAVIS: {\n+//     DIR: '/home/travis/build/kvz/environmental'\n+// }\n+```\n+\n+Without `overwrite` set to `true`, the `TRAVIS` key would already have been set to a string, thus could not accept the nested `DIR` element.\n+\n",
+					"match": false,
+					"packageHash": "11ca9dda97cebccf5da5677670d836c4d6a67db2f2024ff835da1882319410c7",
+					"size": 1666,
+					"sourceHash": "2f3681fff8528fa925cd3bd1eb95188c473acaa6fbfdfd146ea0236b803d26ea",
+					"status": "content"
+				},
+				"index.js": {
+					"diff": "--- published/index.js\n+++ rebuilt/index.js\n@@ -1,65 +1,157 @@\n-var flat = module.exports = {}\n-\n-var flatten = flat.flatten = function (target, opts) {\n-    var output = {}\n-      , opts = opts || {}\n-      , delimiter = opts.delimiter || '.'\n-\n-    function getkey(key, prev) {\n-        return prev ? prev + delimiter + key : key\n-    };\n-\n-    function step(object, prev) {\n-        Object.keys(object).forEach(function(key) {\n-            var isarray = opts.safe && Array.isArray(object[key])\n-              , type = Object.prototype.toString.call(object[key])\n-              , isobject = (type === \"[object Object]\" || type === \"[object Array]\")\n-\n-            if (!isarray && isobject) {\n-                return step(object[key]\n-                    , getkey(key, prev)\n-                )\n-            }\n-\n-            output[getkey(key, prev)] = object[key]\n-        });\n-    };\n-\n-    step(target)\n-\n-    return output\n-};\n-\n-var unflatten = flat.unflatten = function (target, opts) {\n-    if (typeof target !== 'object') return target\n-\n-    var opts = opts || {}\n-      , delimiter = opts.delimiter || '.'\n-\n-    if (opts.safe && Array.isArray(target)) {\n-        return target.map(function(value) {\n-            return unflatten(value, opts);\n-        });\n+function isBuffer (obj) {\n+  return obj &&\n+    obj.constructor &&\n+    (typeof obj.constructor.isBuffer === 'function') &&\n+    obj.constructor.isBuffer(obj)\n+}\n+\n+function keyIdentity (key) {\n+  return key\n+}\n+\n+export function flatten (target, opts) {\n+  opts = opts || {}\n+\n+  const delimiter = opts.delimiter || '.'\n+  const maxDepth = opts.maxDepth\n+  const transformKey = opts.transformKey || keyIdentity\n+  const output = {}\n+\n+  function step (object, prev, currentDepth) {\n+    currentDepth = currentDepth || 1\n+    Object.keys(object).forEach(function (key) {\n+      const value = object[key]\n+      const isarray = opts.safe && Array.isArray(value)\n+      const type = Object.prototype.toString.call(value)\n+      const isbuffer = isBuffer(value)\n+      const isobject = (\n+        type === '[object Object]' ||\n+        type === '[object Array]'\n+      )\n+\n+      const newKey = prev\n+        ? prev + delimiter + transformKey(key)\n+        : transformKey(key)\n+\n+      if (!isarray && !isbuffer && isobject && Object.keys(value).length &&\n+        (!opts.maxDepth || currentDepth < maxDepth)) {\n+        return step(value, newKey, currentDepth + 1)\n+      }\n+\n+      output[newKey] = value\n+    })\n+  }\n+\n+  step(target)\n+\n+  return output\n+}\n+\n+export function unflatten (target, opts) {\n+  opts = opts || {}\n+\n+  const delimiter = opts.delimiter || '.'\n+  const overwrite = opts.overwrite || false\n+  const transformKey = opts.transformKey || keyIdentity\n",
+					"match": false,
+					"packageHash": "f8ab9fdb35dc847b94f89959b3d0162573781de33d72fa1cfe36c8b7ee158ee0",
+					"size": 1654,
+					"sourceHash": "836e4cde4c1fdc9f11bccc15b5ab1f4716ddbeb1e7f06dacbd559ca89ff142e6",
+					"status": "content"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -1,19 +1,33 @@\n {\n   \"name\": \"flat\",\n-  \"version\": \"0.2.0\",\n-  \"main\": \"index.js\",\n+  \"version\": \"6.0.1\",\n+  \"type\": \"module\",\n+  \"bin\": {\n+    \"flat\": \"cli.js\"\n+  },\n+  \"exports\": {\n+    \".\": {\n+      \"types\": \"./index.d.ts\",\n+      \"default\": \"./index.js\"\n+    }\n+  },\n+  \"files\": [\n+    \"cli.js\",\n+    \"index.js\",\n+    \"index.d.ts\"\n+  ],\n+  \"sideEffects\": false,\n+  \"engines\": {\n+    \"node\": \">=18\"\n+  },\n   \"scripts\": {\n-    \"test\": \"node_modules/.bin/mocha -u tdd --reporter spec\"\n+    \"test\": \"node --test && standard cli.js index.js test/test.js\"\n   },\n-  \"license\": \"BSD\",\n+  \"license\": \"BSD-3-Clause\",\n   \"description\": \"Take a nested Javascript object and flatten it, or unflatten an object with delimited keys\",\n   \"devDependencies\": {\n-    \"mocha\": \"~1.6.0\"\n-  },\n-  \"directories\": {\n-    \"test\": \"test\"\n+    \"standard\": \"^17.1.0\"\n   },\n-  \"dependencies\": {},\n   \"repository\": {\n     \"type\": \"git\",\n     \"url\": \"git://github.com/hughsk/flat.git\"\n@@ -27,5 +41,9 @@\n     \"object\",\n     \"nested\"\n   ],\n-  \"author\": \"Hugh Kennedy <hughskennedy@gmail.com> (http://hughskennedy.com)\"\n+  \"author\": \"Hugh Kennedy <hughskennedy@gmail.com> (https://hughsk.io)\",\n+  \"bugs\": {\n+    \"url\": \"https://github.com/hughsk/flat/issues\"\n+  },\n+  \"homepage\": \"https://github.com/hughsk/flat\"\n }\n",
+					"match": false,
+					"packageHash": "c0fcc04c834188bcd758d3875e9105e4c1ba154bdca91af531a69e86c74be850",
+					"size": 676,
+					"sourceHash": "631705fa10ede1a6fdfbac40cfc97ccded01d5d7cee38a18aa3836e48b3755a9",
+					"status": "content"
+				},
+				"test/test.js": {
+					"match": false,
+					"packageHash": "d3aa284edf5b459e430f7f398f787bcfa96ac189052264cef24986b9fda0509c",
+					"size": 6881,
+					"status": "missing-in-source"
+				},
+				"LICENSE": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"cli.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"index.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				}
+			},
+			"summary": {
+				"differentFiles": 3,
+				"matchingFiles": 0,
+				"missingInPackage": 3,
+				"missingInSource": 3,
+				"score": 0,
+				"totalFiles": 9
+			}
+		}
+	}
+]
