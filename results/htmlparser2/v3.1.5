@@ -1,0 +1,549 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-04T18:34:10.630Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:11.7.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "htmlparser2@3.1.5",
+			"name": "htmlparser2",
+			"version": "3.1.5",
+			"location": "https://registry.npmjs.org/htmlparser2/-/htmlparser2-3.1.5.tgz",
+			"integrity": "sha512-tLt8xefUglvXG9RAhbdWl5ynsr49R6Ly/R9/yc5qBjnKEmTPZT77GCvZ2IajpQfqFuxpBytyoU8uXh5n4EP6WQ==",
+			"publishedAt": "2013-07-21T19:02:44.196Z",
+			"publishedWith": {
+				"node": null,
+				"npm": "1.3.2"
+			}
+		},
+		"source": {
+			"integrity": "sha512-2lXRO1ijJmdCVemRVhxrX9a8/OunKIxGxccFRZ5hcp6dSsbQghJyLcF3EXYE9r4B2s2c9DB53yPVI8Hh3qYziQ==",
+			"location": "git://github.com/fb55/htmlparser2.git",
+			"spec": "github:fb55/htmlparser2#HEAD"
+		},
+		"comparisonHash": "8a2a8dcbb729bf3ee9216e490c955701f0ddebe1",
+		"diff": {
+			"files": {
+				".travis.yml": {
+					"match": false,
+					"packageHash": "a91a6439bb8b4ff3c51124b5ec2cad72311baa83401267e9b09d6344b0e2f6cb",
+					"size": 53,
+					"status": "missing-in-source"
+				},
+				"README.md": {
+					"diff": "--- published/README.md\n+++ rebuilt/README.md\n@@ -1,78 +1,171 @@\n-#htmlparser2 [![NPM version](https://badge.fury.io/js/htmlparser2.png)](https://npmjs.org/package/htmlparser2) [![Build Status](https://secure.travis-ci.org/fb55/htmlparser2.png)](http://travis-ci.org/fb55/htmlparser2) [![Dependency Status](https://david-dm.org/fb55/htmlparser2.png)](https://david-dm.org/fb55/htmlparser2)\n+# htmlparser2\n \n-A forgiving HTML/XML/RSS parser written in JS for NodeJS. The parser can handle streams (chunked data) and supports custom handlers for writing custom DOMs/output.\n-\n-##Installing\n-\tnpm install htmlparser2\n-\t\n-A live demo of htmlparser2 is available at http://htmlparser.forbeslindesay.co.uk/\n-\n-##Usage\n-\n-```javascript\n-var htmlparser = require(\"htmlparser2\");\n-var parser = new htmlparser.Parser({\n-\tonopentag: function(name, attribs){\n-\t\tif(name === \"script\" && attribs.type === \"text/javascript\"){\n-\t\t\tconsole.log(\"JS! Hooray!\");\n-\t\t}\n-\t},\n-\tontext: function(text){\n-\t\tconsole.log(\"-->\", text);\n-\t},\n-\tonclosetag: function(tagname){\n-\t\tif(tagname === \"script\"){\n-\t\t\tconsole.log(\"That's it?!\");\n-\t\t}\n-\t}\n+[![NPM version](https://img.shields.io/npm/v/htmlparser2.svg)](https://npmjs.org/package/htmlparser2)\n+[![Downloads](https://img.shields.io/npm/dm/htmlparser2.svg)](https://npmjs.org/package/htmlparser2)\n+[![Node.js CI](https://github.com/fb55/htmlparser2/actions/workflows/nodejs-test.yml/badge.svg)](https://github.com/fb55/htmlparser2/actions/workflows/nodejs-test.yml)\n+[![Coverage](https://img.shields.io/coveralls/fb55/htmlparser2.svg)](https://coveralls.io/r/fb55/htmlparser2)\n+\n+The fast & forgiving HTML/XML parser.\n+\n+_htmlparser2 is [the fastest HTML parser](#performance), and takes some shortcuts to get there. If you need strict HTML spec compliance, have a look at [parse5](https://github.com/inikulin/parse5)._\n+\n+## Installation\n+\n+    npm install htmlparser2\n+\n+A live demo of `htmlparser2` is available [on AST Explorer](https://astexplorer.net/#/2AmVrGuGVJ).\n+\n+## Ecosystem\n+\n+| Name                                                          | Description                                             |\n+| ------------------------------------------------------------- | ------------------------------------------------------- |\n+| [htmlparser2](https://github.com/fb55/htmlparser2)            | Fast & forgiving HTML/XML parser                        |\n+| [domhandler](https://github.com/fb55/domhandler)              | Handler for htmlparser2 that turns documents into a DOM |\n+| [domutils](https://github.com/fb55/domutils)                  | Utilities for working with domhandler's DOM             |\n+| [css-select](https://github.com/fb55/css-select)              | CSS selector engine, compatible with domhandler's DOM   |\n+| [cheerio](https://github.com/cheeriojs/cheerio)               | The jQuery API for domhandler's DOM                     |\n+| [dom-serializer](https://github.com/cheeriojs/dom-serializer) | Serializer for domhandler's DOM                         |\n+\n+## Usage\n+\n+`htmlparser2` itself provides a callback interface that allows consumption of documents with minimal allocations.\n+For a more ergonomic experience, read [Getting a DOM](#getting-a-dom) below.\n+\n+```js\n+import * as htmlparser2 from \"htmlparser2\";\n+\n+const parser = new htmlparser2.Parser({\n+    onopentag(name, attributes) {\n+        /*\n+         * This fires when a new tag is opened.\n+         *\n+         * If you don't need an aggregated `attributes` object,\n+         * have a look at the `onopentagname` and `onattribute` events.\n+         */\n+        if (name === \"script\" && attributes.type === \"text/javascript\") {\n+            console.log(\"JS! Hooray!\");\n+        }\n+    },\n+    ontext(text) {\n+        /*\n+         * Fires whenever a section of text was processed.\n+         *\n+         * Note that this can fire at any point within text and you might\n+         * have to stitch together multiple pieces.\n+         */\n+        console.log(\"-->\", text);\n+    },\n+    onclosetag(tagname) {\n+        /*\n+         * Fires when a tag is closed.\n+         *\n+         * You can rely on this event only firing when you have received an\n+         * equivalent opening tag before. Closing tags without corresponding\n+         * opening tags will be ignored.\n+         */\n+        if (tagname === \"script\") {\n+            console.log(\"That's it?!\");\n+        }\n+    },\n });\n-parser.write(\"Xyz <script type='text/javascript'>var foo = '<<bar>>';< /  script>\");\n",
+					"match": false,
+					"packageHash": "614c7c67d1fa31bad4fc4eeccc6c650f7c35bf484fe3c60e226906e527ad093d",
+					"size": 3153,
+					"sourceHash": "c97a824f6828a5ab0ce874cea9fd560748b188da9bb033dabeb17c04d0ab1131",
+					"status": "content"
+				},
+				"lib/CollectingHandler.js": {
+					"match": false,
+					"packageHash": "9a0bb292ec7d1d0fb3e0d00e39c218bfcd0269ebd49e99c2ee568e6f646d7d16",
+					"size": 1383,
+					"status": "missing-in-source"
+				},
+				"lib/FeedHandler.js": {
+					"match": false,
+					"packageHash": "0b11b2f7493579e341b5263a57b06c4cdb64e98d028ebf4c0b9080c9652f77fb",
+					"size": 2921,
+					"status": "missing-in-source"
+				},
+				"lib/Parser.js": {
+					"match": false,
+					"packageHash": "f3b78683618303546223543c3575090e98059d6e75f16f0c1139cd2761b81e66",
+					"size": 6559,
+					"status": "missing-in-source"
+				},
+				"lib/ProxyHandler.js": {
+					"match": false,
+					"packageHash": "14b90fc1c49401a5023da661a0d53fd8f3c773cd6cb5b999ef087718cdb2fb6e",
+					"size": 674,
+					"status": "missing-in-source"
+				},
+				"lib/Stream.js": {
+					"match": false,
+					"packageHash": "33fb65ea1b77a43a9b72e083e9efeab18167fa30dfe97081724f397468cc4809",
+					"size": 735,
+					"status": "missing-in-source"
+				},
+				"lib/Tokenizer.js": {
+					"match": false,
+					"packageHash": "36d6071c37afd3764d810fe4370edd665e09ca1ccc9146a06cfc0dbb44e11f16",
+					"size": 15270,
+					"status": "missing-in-source"
+				},
+				"lib/WritableStream.js": {
+					"match": false,
+					"packageHash": "68b3521ed4dcd6e5acaeb41b075d0693cb14f29c2cce5a2338b584a21a26ac53",
+					"size": 502,
+					"status": "missing-in-source"
+				},
+				"lib/index.js": {
+					"match": false,
+					"packageHash": "795e21c31e70d85ecf31646950d4b4c13c6f67890b70495b2f0d5b473a475a8f",
+					"size": 2020,
+					"status": "missing-in-source"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -1,33 +1,110 @@\n {\n-\t\"name\": \"htmlparser2\",\n-\t\"description\": \"Fast & forgiving HTML/XML/RSS parser\",\n-\t\"version\": \"3.1.5\",\n-\t\"author\": \"Felix Boehm <me@feedic.com>\",\n-\t\"keywords\": [\"html\", \"parser\", \"streams\", \"xml\", \"dom\", \"rss\", \"feed\", \"atom\"],\n-\t\"contributors\": [\"Chris Winberry <chris@winberry.net>\"],\n-\t\"repository\": {\n-\t\t\"type\": \"git\",\n-\t\t\"url\": \"git://github.com/fb55/htmlparser2.git\"\n-\t},\n-\t\"bugs\": {\n-\t\t\"mail\": \"me@feedic.com\",\n-\t\t\"url\": \"http://github.com/fb55/htmlparser2/issues\"\n-\t},\n-\t\"directories\": {\n-\t\t\"lib\": \"lib/\"\n-\t},\n-\t\"main\": \"lib/index.js\",\n-\t\"scripts\": {\n-\t\t\"test\": \"node tests/00-runtests.js\"\n-\t},\n-\t\"dependencies\": {\n-\t\t\"domhandler\": \"2.0\",\n-\t\t\"domutils\": \"1.1\",\n-\t\t\"domelementtype\": \"1\",\n-\t\t\"readable-stream\": \"1.0\"\n-\t},\n-\t\"licenses\": [{\n-\t\t\"type\": \"MIT\",\n-\t\t\"url\": \"http://github.com/fb55/htmlparser2/raw/master/LICENSE\"\n-\t}]\n+    \"name\": \"htmlparser2\",\n+    \"version\": \"10.0.0\",\n+    \"description\": \"Fast & forgiving HTML/XML parser\",\n+    \"keywords\": [\n+        \"html\",\n+        \"parser\",\n+        \"streams\",\n+        \"xml\",\n+        \"dom\",\n+        \"rss\",\n+        \"feed\",\n+        \"atom\"\n+    ],\n+    \"repository\": {\n+        \"type\": \"git\",\n+        \"url\": \"git://github.com/fb55/htmlparser2.git\"\n+    },\n+    \"funding\": [\n+        \"https://github.com/fb55/htmlparser2?sponsor=1\",\n+        {\n+            \"type\": \"github\",\n+            \"url\": \"https://github.com/sponsors/fb55\"\n+        }\n+    ],\n+    \"license\": \"MIT\",\n+    \"author\": \"Felix Boehm <me@feedic.com>\",\n+    \"sideEffects\": false,\n+    \"type\": \"module\",\n+    \"exports\": {\n+        \".\": {\n+            \"import\": {\n+                \"types\": \"./dist/esm/index.d.ts\",\n+                \"default\": \"./dist/esm/index.js\"\n+            },\n+            \"require\": {\n+                \"types\": \"./dist/commonjs/index.d.ts\",\n+                \"default\": \"./dist/commonjs/index.js\"\n+            }\n+        },\n+        \"./WritableStream\": {\n+            \"import\": {\n+                \"types\": \"./dist/esm/WritableStream.d.ts\",\n+                \"default\": \"./dist/esm/WritableStream.js\"\n+            },\n+            \"require\": {\n+                \"types\": \"./dist/commonjs/WritableStream.d.ts\",\n+                \"default\": \"./dist/commonjs/WritableStream.js\"\n+            }\n+        }\n+    },\n+    \"main\": \"./dist/commonjs/index.js\",\n+    \"module\": \"./dist/esm/index.js\",\n+    \"types\": \"./dist/commonjs/index.d.ts\",\n+    \"files\": [\n+        \"WritableStream.js\",\n+        \"dist\",\n+        \"src\"\n+    ],\n+    \"scripts\": {\n+        \"build\": \"tshy\",\n+        \"format\": \"npm run format:es && npm run format:prettier\",\n+        \"format:es\": \"npm run lint:es -- --fix\",\n+        \"format:prettier\": \"npm run format:prettier:raw -- --write\",\n+        \"format:prettier:raw\": \"prettier '**/*.{ts,md,json,yml}'\",\n+        \"lint\": \"npm run lint:es && npm run lint:ts && npm run lint:prettier\",\n",
+					"match": false,
+					"packageHash": "721f0b2ba63700618ade29aca807ccb40079d4d14621553bab4717e3881614a5",
+					"size": 808,
+					"sourceHash": "d7b82e5ed5ea200d545ec0b49508a4783ab6dd5089e14d91af719c3d11268430",
+					"status": "content"
+				},
+				"tests/00-runtests.js": {
+					"match": false,
+					"packageHash": "bc73ece4716725de6a6db81ae588769cb1c97853fbc684ad20e4de49fe2eddb3",
+					"size": 1019,
+					"status": "missing-in-source"
+				},
+				"tests/01-events.js": {
+					"match": false,
+					"packageHash": "235ea20a5df607f59c61db73769b54adc6853c63600c473d578d0aca05aa7ede",
+					"size": 199,
+					"status": "missing-in-source"
+				},
+				"tests/02-stream.js": {
+					"match": false,
+					"packageHash": "27c7d4fb8d1146cf6272aa0382ea715df5b76ac345236d3a9fbffb7327b3e0e7",
+					"size": 488,
+					"status": "missing-in-source"
+				},
+				"tests/03-feed.js": {
+					"match": false,
+					"packageHash": "d37d9b4acd38bdfef2375625ac6e50429730524b98aff9b8b771a47af8faae66",
+					"size": 482,
+					"status": "missing-in-source"
+				},
+				"tests/99-benchmark.js": {
+					"match": false,
+					"packageHash": "0ec76fd048149331f2d6ea041d9967e671cefee5ad11f95da517232092e85cdf",
+					"size": 659,
+					"status": "missing-in-source"
+				},
+				"tests/Documents/Atom_Example.xml": {
+					"match": false,
+					"packageHash": "f4635fcd478edb0fb50053af2c65875530d5fd920e7d3d0dc13028f7c18e5764",
+					"size": 894,
+					"status": "missing-in-source"
+				},
+				"tests/Documents/Attributes.html": {
+					"match": false,
+					"packageHash": "6873f2f41a4d46d2048451856836a10417814fb62c085f95ef3b5b857b72e86d",
+					"size": 503,
+					"status": "missing-in-source"
+				},
+				"tests/Documents/Basic.html": {
+					"match": false,
+					"packageHash": "19221b44f40f839f87aed9b1a81d52edec3437badc6ff44774ec3fa73a83e394",
+					"size": 76,
+					"status": "missing-in-source"
+				},
+				"tests/Documents/RDF_Example.xml": {
+					"match": false,
+					"packageHash": "205abc09c96784b18b31acd7e59f8cae1da62bd715d8ee8ff031a166a1000872",
+					"size": 3717,
+					"status": "missing-in-source"
+				},
+				"tests/Documents/RSS_Example.xml": {
+					"match": false,
+					"packageHash": "a1490cb37d46dbb142f25c7cf7e18f9e55225fe67ffb055800758f39e5c5523b",
+					"size": 2600,
+					"status": "missing-in-source"
+				},
+				"tests/Events/01-simple.json": {
+					"match": false,
+					"packageHash": "aed0ff3ec3c5f49e0827222d793a92a23878618bc6676306b98f019a713523c4",
+					"size": 588,
+					"status": "missing-in-source"
+				},
+				"tests/Events/02-template.json": {
+					"match": false,
+					"packageHash": "bd010cd88ebdeca0f0ec26b92ffb49efc681d40b895bca526206bad7f14bb990",
+					"size": 925,
+					"status": "missing-in-source"
+				},
+				"tests/Events/03-lowercase_tags.json": {
+					"match": false,
+					"packageHash": "5cf52c72c3a634f65b70ad39e40b6d826998d956854c9903dbe7e9bbe0df8c9d",
+					"size": 629,
+					"status": "missing-in-source"
+				},
+				"tests/Events/04-cdata.json": {
+					"match": false,
+					"packageHash": "aa622a29b911c3e36745959f773df14e48f5e15cf1351c0732cedc34f930a3e1",
+					"size": 634,
+					"status": "missing-in-source"
+				},
+				"tests/Events/05-cdata-special.json": {
+					"match": false,
+					"packageHash": "eba6d2d7836ccdb1df50ef1b17ecf819f54dff6a1e4038afc1245b9c67620769",
+					"size": 564,
+					"status": "missing-in-source"
+				},
+				"tests/Events/06-leading-lt.json": {
+					"match": false,
+					"packageHash": "aaab3ba3c44fb0722895a304c99258ea2220ce65b33a75646e86cc2aee353cb1",
+					"size": 193,
+					"status": "missing-in-source"
+				},
+				"tests/Events/07-self-closing.json": {
+					"match": false,
+					"packageHash": "37d36afb5a4fd549fb37dce5750c69c01599cff7704d7370c9cbf6615982b61f",
+					"size": 764,
+					"status": "missing-in-source"
+				},
+				"tests/Events/08-implicit-close-tags.json": {
+					"match": false,
+					"packageHash": "c2b36fdc605deede3ba7a434c5fead2320b26817279409a2b8cb576d6cbcc845",
+					"size": 2917,
+					"status": "missing-in-source"
+				},
+				"tests/Events/09-attributes.json": {
+					"match": false,
+					"packageHash": "312b8dcddc1636919d0a82f7298d8ace892e7ac10bcc0c7540860059f33fdcdd",
+					"size": 1067,
+					"status": "missing-in-source"
+				},
+				"tests/Events/10-crazy-attrib.json": {
+					"match": false,
+					"packageHash": "8bc36332c75743d9d8759c538333751480aa0f609aa8a9cb251acf9c3a8d7329",
+					"size": 691,
+					"status": "missing-in-source"
+				},
+				"tests/Events/11-script_in_script.json": {
+					"match": false,
+					"packageHash": "676976b77c3e12b85b05e51b9d292c3274d2ce6ad021517e33fdeff3b72abe3e",
+					"size": 796,
+					"status": "missing-in-source"
+				},
+				"tests/Events/12-long-comment-end.json": {
+					"match": false,
+					"packageHash": "46083339f66f7bce3f76a0a8b624999d8f8b215845531500c3319b93bac4e777",
+					"size": 719,
+					"status": "missing-in-source"
+				},
+				"tests/Events/13-long-cdata-end.json": {
+					"match": false,
+					"packageHash": "9e6f462bf963a8042292d0f393548597e542158119877feaa25aa7b5076f8ec4",
+					"size": 792,
+					"status": "missing-in-source"
+				},
+				"tests/Events/14-implicit-open-tags.json": {
+					"match": false,
+					"packageHash": "d2a4751851ced64dbdc37133bc1904fa7671548c3bc5eac5a872a54edbe9b451",
+					"size": 872,
+					"status": "missing-in-source"
+				},
+				"tests/Events/15-lt-whitespace.json": {
+					"match": false,
+					"packageHash": "30e4f497c7b77826afa778b9b74130b4d005d6cb689c753f9345c95fa01d4bff",
+					"size": 213,
+					"status": "missing-in-source"
+				},
+				"tests/Feeds/01-rss.js": {
+					"match": false,
+					"packageHash": "39fa39ef4e10edd6b24e242bbc48febf4c3ad332008c75acba0196345befa9a8",
+					"size": 1959,
+					"status": "missing-in-source"
+				},
+				"tests/Feeds/02-atom.js": {
+					"match": false,
+					"packageHash": "ee7b56023b27fa02e24d605ddafa76a36b3b48e88c1a2ea609bbb342673756c9",
+					"size": 553,
+					"status": "missing-in-source"
+				},
+				"tests/Feeds/03-rdf.js": {
+					"match": false,
+					"packageHash": "21bf08eb30d58c1f676007c001c21215e8c7f89c85ac8b77428af0b23c5bb67e",
+					"size": 1646,
+					"status": "missing-in-source"
+				},
+				"tests/Stream/01-basic.json": {
+					"match": false,
+					"packageHash": "02da1f4adcf8f5920e8b2a877430a384451287875a2cbab14ceba0046556cc1b",
+					"size": 1137,
+					"status": "missing-in-source"
+				},
+				"tests/Stream/02-RSS.json": {
+					"match": false,
+					"packageHash": "a12c203cc3633224ce78f2549aa75c137cf394a4e0271df8f322c99735bdb767",
+					"size": 16197,
+					"status": "missing-in-source"
+				},
+				"tests/Stream/03-Atom.json": {
+					"match": false,
+					"packageHash": "37b1a51f88647b5c023ef4bf84603a06c0c5a54a309ed5920bffd14052171f5f",
+					"size": 9214,
+					"status": "missing-in-source"
+				},
+				"tests/Stream/04-RDF.json": {
+					"match": false,
+					"packageHash": "024005168534fe274d976e234862513faa982c3c6ee5bb739a654f3bd7550eb0",
+					"size": 21964,
+					"status": "missing-in-source"
+				},
+				"tests/Stream/05-Attributes.json": {
+					"match": false,
+					"packageHash": "d026451eb21320e18bdefe2fdf66a4ffbcea8e9a88ee34e0bc7504d1155131a3",
+					"size": 5032,
+					"status": "missing-in-source"
+				},
+				"tests/bench.js": {
+					"match": false,
+					"packageHash": "655499110f744015e90a62dbd8742b60e30d96de1d635f269b9d4917863f6506",
+					"size": 2453,
+					"status": "missing-in-source"
+				},
+				"tests/test-helper.js": {
+					"match": false,
+					"packageHash": "93122109527dee3177365d422d86aa9b89d3adfc80edd2d3b6009e2fe5c23337",
+					"size": 998,
+					"status": "missing-in-source"
+				},
+				"WritableStream.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"dist/commonjs/Parser.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"dist/commonjs/Parser.d.ts.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"dist/commonjs/Parser.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"dist/commonjs/Parser.js.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"dist/commonjs/Tokenizer.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"dist/commonjs/Tokenizer.d.ts.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"dist/commonjs/Tokenizer.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"dist/commonjs/Tokenizer.js.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"dist/commonjs/WritableStream.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"dist/commonjs/WritableStream.d.ts.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"dist/commonjs/WritableStream.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"dist/commonjs/WritableStream.js.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"dist/commonjs/index.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"dist/commonjs/index.d.ts.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"dist/commonjs/index.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"dist/commonjs/index.js.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"dist/commonjs/package.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"dist/esm/Parser.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"dist/esm/Parser.d.ts.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"dist/esm/Parser.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"dist/esm/Parser.js.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"dist/esm/Tokenizer.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"dist/esm/Tokenizer.d.ts.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"dist/esm/Tokenizer.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"dist/esm/Tokenizer.js.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"dist/esm/WritableStream.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"dist/esm/WritableStream.d.ts.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"dist/esm/WritableStream.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"dist/esm/WritableStream.js.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"dist/esm/index.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"dist/esm/index.d.ts.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"dist/esm/index.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"dist/esm/index.js.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"dist/esm/package.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/FeedHandler.spec.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/Parser.events.spec.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/Parser.spec.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/Parser.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/Tokenizer.spec.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/Tokenizer.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/WritableStream.spec.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/WritableStream.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/__fixtures__/Documents/Atom_Example.xml": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/__fixtures__/Documents/Attributes.html": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/__fixtures__/Documents/Basic.html": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/__fixtures__/Documents/RDF_Example.xml": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/__fixtures__/Documents/RSS_Example.xml": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/__fixtures__/Documents/Svg.html": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/__fixtures__/testHelper.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/__snapshots__/FeedHandler.spec.ts.snap": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/__snapshots__/Parser.events.spec.ts.snap": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/__snapshots__/Tokenizer.spec.ts.snap": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/__snapshots__/WritableStream.spec.ts.snap": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/__snapshots__/index.spec.ts.snap": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/index.spec.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/index.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				}
+			},
+			"summary": {
+				"differentFiles": 2,
+				"matchingFiles": 1,
+				"missingInPackage": 57,
+				"missingInSource": 44,
+				"score": 0.009615384615384616,
+				"totalFiles": 104
+			}
+		}
+	}
+]
