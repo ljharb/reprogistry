@@ -1,0 +1,325 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-04T22:51:08.743Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:11.7.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "metalsmith@0.0.0",
+			"name": "metalsmith",
+			"version": "0.0.0",
+			"location": "https://registry.npmjs.org/metalsmith/-/metalsmith-0.0.0.tgz",
+			"integrity": "sha512-UR7GD+abI2OVcI/abM4fJ72o9YyJD4BGD1/Bt9/TWs+fy6M6wShMfuOOghe+pJhJp/kJ7nf7yA1l5myAZ2s5aQ==",
+			"publishedAt": "2014-02-05T05:23:38.888Z",
+			"publishedWith": {
+				"node": null,
+				"npm": "1.3.25"
+			}
+		},
+		"source": {
+			"integrity": "sha512-8jXqJaIlvH1jRePrX2MK4PUwccWyrk7WkCfujGSUEmLaxwgItQgTsYVudhN5wMwHcbKgl8JPPHlTfSJdavo8AQ==",
+			"location": "git://github.com/segmentio/metalsmith.git",
+			"spec": "github:segmentio/metalsmith#HEAD"
+		},
+		"comparisonHash": "8a2a8dcbb729bf3ee9216e490c955701f0ddebe1",
+		"diff": {
+			"files": {
+				".npmignore": {
+					"match": false,
+					"packageHash": "72fd616c170ebc12d6411296ddf2b6ad094d7a41d11e157575cbc0a613c2f7c4",
+					"size": 34,
+					"status": "missing-in-source"
+				},
+				"History.md": {
+					"match": false,
+					"packageHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+					"size": 0,
+					"status": "missing-in-source"
+				},
+				"Makefile": {
+					"match": false,
+					"packageHash": "afbcbc6c6cda0ba744046692d62ceb1db8f3420d407e6818baa4387bbf7afa8a",
+					"size": 119,
+					"status": "missing-in-source"
+				},
+				"Readme.md": {
+					"match": false,
+					"packageHash": "8913890d5b71533d186e166ef9ed8b0d833163efa43c49f4c6c5557d6be39915",
+					"size": 1481,
+					"status": "missing-in-source"
+				},
+				"bin/metalsmith": {
+					"diff": "--- published/bin/metalsmith\n+++ rebuilt/bin/metalsmith\n@@ -1,63 +1,227 @@\n #!/usr/bin/env node\n \n-var exists = require('fs').existsSync;\n-var Metalsmith = require('..');\n-var program = require('commander');\n-var resolve = require('path').resolve;\n+/* eslint-disable no-console */\n \n-/**\n- * Program.\n- */\n+const exists = require('fs').existsSync\n+const readFileSync = require('fs').readFileSync\n+const Metalsmith = require('..')\n+const { pathToFileURL } = require('url')\n+const { Command } = require('commander')\n+const program = new Command()\n+const { resolve, isAbsolute, dirname, extname } = require('path')\n+const { isString, isObject } = require('../lib/helpers')\n+\n+const color = {\n+  error: '\\x1b[31m',\n+  warn: '\\x1b[33m',\n+  info: '\\x1b[36m',\n+  success: '\\x1b[32m',\n+  log: '\\x1b[0m'\n+}\n \n program\n-  .option('-d, --destination', 'set the destination directory')\n-  .option('-s, --source', 'set the source directory')\n-  .option('-c, --config', 'set an alternate config file')\n-  .parse(process.argv);\n+  .name('metalsmith')\n+  .description('Metalsmith CLI')\n+  .version(require('../package.json').version)\n+  .addHelpText('after', `\n+  Examples:\n+\n+  # build from metalsmith.json:\n+  metalsmith\n+\n+  # build from lib/config.json:\n+  metalsmith --config lib/config.json\n+\n+  # override env vars\n+  metalsmith --env NODE_ENV=production TZ=Europe/London\n+\n+  # override DEBUG env var (shortcut)\n+  metalsmith --debug @metalsmith/*\n+  `)\n \n-/**\n- * Settings.\n- */\n+program\n+  .command('build', { isDefault: true })\n+  .description('Run a metalsmith build')\n+  .option('-c, --config <path>', 'configuration file location', 'metalsmith.json')\n+  .option('--env <setting...>', 'Set or override one or more metalsmith environment variables.')\n+  .option('--debug', 'Set or override debug namespaces')\n+  .option('--dry-run', 'Process metalsmith files without outputting to the file system')\n+  .action(buildCommand)\n+\n+program.parse(process.argv)\n+\n+async function buildCommand({ config, ...cliOptions }) {\n+  const dir = process.cwd()\n+  let path = isAbsolute(config) ? config : resolve(dir, config)\n+\n+  // Important addition of 2.5.x. Given local plugins with a relative path are written with __dirname in mind,\n+  // having a config-relative dir path makes sure the CLI runs properly\n+  // when the command is executed from a subfolder or outside of the ms directory\n+  const confRelativeDir = dirname(path)\n+  if (!exists(path)) {\n+    // commander only supports a single default, so we must set default manually here\n+    if (exists(resolve(confRelativeDir, 'metalsmith.js'))) {\n+      path = resolve(confRelativeDir, 'metalsmith.js')\n+    } else {\n+      fatal(`could not find a configuration file '${config}'.`)\n+    }\n+  }\n+\n+  const format = extname(path).slice(1)\n \n-var config = resolve(process.cwd(), program.config || 'metalsmith.json');\n-var json = exists(config) ? require(config) : {};\n-var src = program.source || json.source;\n-var dest = program.destination || json.destination;\n-var data = json.metadata;\n-var plugins = json.plugins;\n+  // avoid ESM dynamic import error with absolute paths on Windows:\n+  // Only URLs with a scheme in: file and data are supported by the default ESM loader. On Windows, absolute paths must be valid file:// URLs.\n+  // cf also https://github.com/nuxt/nuxt/issues/15500#issuecomment-1451619865\n+  path = pathToFileURL(path);\n+\n+  let spec\n",
+					"match": false,
+					"packageHash": "568408a7a13f9f2817f54b117beafbaba5a879a10f45c61a1397209d694a9e29",
+					"size": 1254,
+					"sourceHash": "f808e35a8126e82708c83b4e57713767c3f0ba11222c5d45ba0ba2f01641a464",
+					"status": "content"
+				},
+				"examples/basic/metalsmith.json": {
+					"match": false,
+					"packageHash": "92fc3abe1cf0f921592890f3628d80bdd7e80b29e5e72ac22be8c59de32e00b1",
+					"size": 258,
+					"status": "missing-in-source"
+				},
+				"examples/basic/src/index.md": {
+					"match": false,
+					"packageHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+					"size": 0,
+					"status": "missing-in-source"
+				},
+				"examples/basic/templates/layout.html": {
+					"match": false,
+					"packageHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+					"size": 0,
+					"status": "missing-in-source"
+				},
+				"examples/jekyll/metalsmith.json": {
+					"match": false,
+					"packageHash": "78449962b3cadbadc205d53cfaba528db1178f2df7205ce491cbe6d938b23de8",
+					"size": 411,
+					"status": "missing-in-source"
+				},
+				"examples/wintersmith/metalsmith.json": {
+					"match": false,
+					"packageHash": "b92190dee7cc1e8e410766ec3b8701c6ba3306d40e0fac84e2611be2992043ea",
+					"size": 313,
+					"status": "missing-in-source"
+				},
+				"lib/index.js": {
+					"diff": "--- published/lib/index.js\n+++ rebuilt/lib/index.js\n@@ -1,164 +1,781 @@\n+'use strict'\n \n-var defaults = require('defaults');\n-var each = require('async').each;\n-var front = require('front-matter');\n-var fs = require('fs-extra');\n-var noop = function(){};\n-var path = require('path');\n-var readdir = require('recursive-readdir');\n-var Ware = require('ware');\n+const assert = require('assert')\n+const Mode = require('stat-mode')\n+const path = require('path')\n+const watcher = require('./watcher')\n+\n+const {\n+  readdir,\n+  batchAsync,\n+  isFunction,\n+  outputFile,\n+  stat,\n+  readFile,\n+  writeStream,\n+  rm,\n+  isString,\n+  isBoolean,\n+  isObject,\n+  isNumber,\n+  isUndefined,\n+  match\n+} = require('./helpers')\n+const Matter = require('./matter')\n+const utf8 = require('is-utf8')\n+const Ware = require('ware')\n+const { Debugger, fileLogHandler } = require('./debug')\n+\n+const symbol = {\n+  env: Symbol('env'),\n+  log: Symbol('log'),\n+  watch: Symbol('watch'),\n+  closeWatcher: Symbol('closeWatcher')\n+}\n \n /**\n- * Expose `Metalsmith`.\n+ * Metalsmith representation of the files in `metalsmith.source()`.\n+ * The keys represent the file paths and the values are {@link File} objects\n+ * @typedef {Object.<string, File>} Files\n  */\n \n-module.exports = Metalsmith;\n+/**\n+ * Metalsmith file. Defines `mode`, `stats` and `contents` properties by default, but may be altered by plugins\n+ *\n+ * @typedef File\n+ * @property {Buffer} contents - A NodeJS [buffer](https://nodejs.org/api/buffer.html) that can be `.toString`'ed to obtain its human-readable contents\n+ * @property {import('fs').Stats} stats - A NodeJS [fs.Stats object](https://nodejs.org/api/fs.html#fs_class_fs_stats) object with extra filesystem metadata and methods\n+ * @property {string} mode - Octal permission mode, see https://en.wikipedia.org/wiki/File-system_permissions#Numeric_notation\n+ */\n \n /**\n- * Initialize a new `Metalsmith` builder with a working `dir`.\n+ * A callback to run when the Metalsmith build is done\n  *\n- * @param {String} dir\n+ * @callback BuildCallback\n+ * @param {Error} [error]\n+ * @param {Files} files\n+ * @this {Metalsmith}\n+ *\n+ * @example\n+ * function onBuildEnd(error, files) {\n+ *   if (error) throw error\n+ *   console.log('Build success')\n+ * }\n  */\n \n-function Metalsmith(dir){\n-  if (!(this instanceof Metalsmith)) return new Metalsmith(dir);\n-  this.dir = path.resolve(dir);\n-  this.ware = new Ware();\n-  this.source('src');\n-  this.destination('build');\n-}\n+/**\n+ * A callback to indicate that a plugin's work is done\n+ *\n+ * @callback DoneCallback\n+ * @param {Error} [error]\n+ *\n+ * @example\n+ * function plugin(files, metalsmith, done) {\n+ *   // ..do stuff\n+ *   done()\n+ * }\n+ */\n+\n",
+					"match": false,
+					"packageHash": "1d25ff835728d728a76c931c13aab3100dcb3944027580ee3352b56eee007717",
+					"size": 3338,
+					"sourceHash": "96e1e5832d08b44f0d0168a1a79ac3120a5d63be204cc932739a003541482f7c",
+					"status": "content"
+				},
+				"lib/plugins/drafts.js": {
+					"match": false,
+					"packageHash": "cde0dbc2085a5366c52c7b5e8e741b69fdcb913867c91481f451f082a32f227a",
+					"size": 363,
+					"status": "missing-in-source"
+				},
+				"lib/plugins/indexes.js": {
+					"match": false,
+					"packageHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+					"size": 0,
+					"status": "missing-in-source"
+				},
+				"lib/plugins/markdown.js": {
+					"match": false,
+					"packageHash": "c5ca72e90e0fc2de5986c831ce4cdf4e603cb8702585356fab54e19934fedcfe",
+					"size": 938,
+					"status": "missing-in-source"
+				},
+				"lib/plugins/permalinks.js": {
+					"match": false,
+					"packageHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+					"size": 0,
+					"status": "missing-in-source"
+				},
+				"lib/plugins/templates.js": {
+					"match": false,
+					"packageHash": "2094ca53fc4e28c1b5805214e33f19352d18502f2b055f3753225e76bedd37d6",
+					"size": 957,
+					"status": "missing-in-source"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -1,24 +1,97 @@\n {\n   \"name\": \"metalsmith\",\n+  \"version\": \"2.6.3\",\n   \"description\": \"An extremely simple, pluggable static site generator.\",\n-  \"repository\": \"git://github.com/segmentio/metalsmith.git\",\n-  \"version\": \"0.0.0\",\n+  \"keywords\": [\n+    \"static\",\n+    \"jamstack\",\n+    \"file\",\n+    \"site\",\n+    \"website\",\n+    \"blog\",\n+    \"generator\",\n+    \"markdown\",\n+    \"jekyll\",\n+    \"metalsmith\",\n+    \"yaml\"\n+  ],\n+  \"homepage\": \"https://metalsmith.io\",\n+  \"bugs\": \"https://github.com/metalsmith/metalsmith/issues\",\n+  \"repository\": {\n+    \"type\": \"git\",\n+    \"url\": \"https://github.com/metalsmith/metalsmith.git\"\n+  },\n   \"license\": \"MIT\",\n-  \"main\": \"lib/index.js\",\n+  \"bin\": {\n+    \"metalsmith\": \"bin/metalsmith\"\n+  },\n+  \"directories\": {\n+    \"lib\": \"lib\",\n+    \"test\": \"test\"\n+  },\n+  \"files\": [\n+    \"index.js\",\n+    \"lib/index.js\",\n+    \"lib/debug.js\",\n+    \"lib/helpers.js\",\n+    \"lib/matter.js\",\n+    \"types/index.d.ts\",\n+    \"lib/watcher.js\",\n+    \"metalsmith-migrated-plugins.js\",\n+    \"bin/metalsmith\",\n+    \"CHANGELOG.md\",\n+    \"snapcraft.yaml\"\n+  ],\n+  \"types\": \"types/index.d.ts\",\n+  \"scripts\": {\n+    \"coverage\": \"npm test && c8 report --reporter=text-lcov > coverage.info\",\n+    \"lint:check\": \"eslint --cache --fix-dry-run index.js lib/* bin/* test/*.js\",\n+    \"lint\": \"eslint --fix index.js lib/* bin/* test/*.js\",\n+    \"format:check\": \"prettier --list-different \\\"**/*.{yml,md,js,json}\\\"\",\n+    \"format\": \"prettier --write \\\"**/*.{yml,md,js,json}\\\"\",\n+    \"test\": \"c8 mocha\",\n+    \"test:types\": \"tsc\",\n+    \"release\": \"release-it\",\n+    \"postinstall\": \"node metalsmith-migrated-plugins.js || exit 0\"\n+  },\n+  \"mocha\": {\n+    \"reporter\": \"spec\",\n+    \"slow\": 500,\n+    \"timeout\": 3000\n+  },\n   \"dependencies\": {\n-    \"front-matter\": \"~0.2.0\",\n-    \"consolidate\": \"~0.10.0\",\n-    \"ware\": \"~0.2.1\",\n-    \"recursive-readdir\": \"0.0.2\",\n-    \"async\": \"~0.2.10\",\n-    \"fs-extra\": \"~0.8.1\",\n-    \"defaults\": \"~1.0.0\",\n-    \"marked\": \"~0.3.1\",\n-    \"swig\": \"~1.3.2\"\n+    \"chokidar\": \"^4.0.1\",\n+    \"commander\": \"^10.0.1\",\n+    \"debug\": \"^4.3.4\",\n+    \"gray-matter\": \"^4.0.3\",\n+    \"is-utf8\": \"~0.2.0\",\n+    \"lodash.clonedeepwith\": \"^4.5.0\",\n+    \"micromatch\": \"^4.0.5\",\n+    \"stat-mode\": \"^1.0.0\",\n+    \"ware\": \"^1.3.0\"\n   },\n   \"devDependencies\": {\n-    \"mocha\": \"1.x\",\n-    \"rimraf\": \"~2.2.6\",\n-    \"fs-readdir-recursive\": \"0.0.1\"\n+    \"@eslint/compat\": \"^1.1.1\",\n+    \"@eslint/eslintrc\": \"^3.1.0\",\n+    \"@eslint/js\": \"^9.11.1\",\n+    \"@metalsmith/drafts\": \"^1.3.0\",\n+    \"@metalsmith/markdown\": \"^1.10.0\",\n+    \"@types/debug\": \"^4.1.12\",\n+    \"@types/micromatch\": \"^4.0.9\",\n+    \"@types/node\": \"^14.14.0\",\n+    \"assert-dir-equal\": \"^1.1.0\",\n",
+					"match": false,
+					"packageHash": "a41af1706b364e8bb8e113669c9b2ff60cfed13d4a3eab4e2542e198e29ac27b",
+					"size": 600,
+					"sourceHash": "0f3c29c669679f9d632905b4a072f6d1a90f4266f33bd8a362ea80956d3fae30",
+					"status": "content"
+				},
+				"test/fixtures/basic/expected/index.md": {
+					"match": false,
+					"packageHash": "230d8358dc8e8890b4c58deeb62912ee2f20357ae92a5cc861b98e68fe31acb5",
+					"size": 4,
+					"status": "missing-in-source"
+				},
+				"test/fixtures/basic/expected/nested/index.md": {
+					"match": false,
+					"packageHash": "3107494ae9730caed3e5afb91b8c8c268d6c0e95c4604b66886a793e066ecc4c",
+					"size": 11,
+					"status": "missing-in-source"
+				},
+				"test/fixtures/basic/src/index.md": {
+					"match": false,
+					"packageHash": "5a1852a6723e421d9d11c2a3468d0ccf8107c34df45417b5d05d5648bcaa8e91",
+					"size": 44,
+					"status": "missing-in-source"
+				},
+				"test/fixtures/basic/src/nested/index.md": {
+					"match": false,
+					"packageHash": "3107494ae9730caed3e5afb91b8c8c268d6c0e95c4604b66886a793e066ecc4c",
+					"size": 11,
+					"status": "missing-in-source"
+				},
+				"test/fixtures/basic-plugin/expected/one.md": {
+					"match": false,
+					"packageHash": "7692c3ad3540bb803c020b3aee66cd8887123234ea0c6e7143c0add73ff431ed",
+					"size": 3,
+					"status": "missing-in-source"
+				},
+				"test/fixtures/basic-plugin/expected/two.md": {
+					"match": false,
+					"packageHash": "3fc4ccfe745870e2c0d99f71f30ff0656c8dedd41cc1d7d3d376b0dbe685e2f3",
+					"size": 3,
+					"status": "missing-in-source"
+				},
+				"test/fixtures/basic-plugin/src/one.md": {
+					"match": false,
+					"packageHash": "235d444dd9ac5e33a8cd5ae303dd095cc94c7490fba5a8e0f6530aa297203db7",
+					"size": 18,
+					"status": "missing-in-source"
+				},
+				"test/fixtures/basic-plugin/src/two.md": {
+					"match": false,
+					"packageHash": "7a4e7e3f6b0a3f770ef03faeadebfb3e0b57f4b3b705d610e32e553188c4bb7d",
+					"size": 18,
+					"status": "missing-in-source"
+				},
+				"test/fixtures/cli-basic/expected/index.md": {
+					"match": false,
+					"packageHash": "230d8358dc8e8890b4c58deeb62912ee2f20357ae92a5cc861b98e68fe31acb5",
+					"size": 4,
+					"status": "missing-in-source"
+				},
+				"test/fixtures/cli-basic/src/index.md": {
+					"match": false,
+					"packageHash": "230d8358dc8e8890b4c58deeb62912ee2f20357ae92a5cc861b98e68fe31acb5",
+					"size": 4,
+					"status": "missing-in-source"
+				},
+				"test/fixtures/cli-config/config.json": {
+					"match": false,
+					"packageHash": "17ca2ad533dd7236c2c31bab4ac59e6653d44fd012e7a07155eb0ee5c5cca156",
+					"size": 56,
+					"status": "missing-in-source"
+				},
+				"test/fixtures/cli-config/expected/index.md": {
+					"match": false,
+					"packageHash": "230d8358dc8e8890b4c58deeb62912ee2f20357ae92a5cc861b98e68fe31acb5",
+					"size": 4,
+					"status": "missing-in-source"
+				},
+				"test/fixtures/cli-config/source/index.md": {
+					"match": false,
+					"packageHash": "230d8358dc8e8890b4c58deeb62912ee2f20357ae92a5cc861b98e68fe31acb5",
+					"size": 4,
+					"status": "missing-in-source"
+				},
+				"test/fixtures/cli-json/destination/index.md": {
+					"match": false,
+					"packageHash": "230d8358dc8e8890b4c58deeb62912ee2f20357ae92a5cc861b98e68fe31acb5",
+					"size": 4,
+					"status": "missing-in-source"
+				},
+				"test/fixtures/cli-json/expected/index.md": {
+					"match": false,
+					"packageHash": "230d8358dc8e8890b4c58deeb62912ee2f20357ae92a5cc861b98e68fe31acb5",
+					"size": 4,
+					"status": "missing-in-source"
+				},
+				"test/fixtures/cli-json/metalsmith.json": {
+					"match": false,
+					"packageHash": "17ca2ad533dd7236c2c31bab4ac59e6653d44fd012e7a07155eb0ee5c5cca156",
+					"size": 56,
+					"status": "missing-in-source"
+				},
+				"test/fixtures/cli-json/source/index.md": {
+					"match": false,
+					"packageHash": "230d8358dc8e8890b4c58deeb62912ee2f20357ae92a5cc861b98e68fe31acb5",
+					"size": 4,
+					"status": "missing-in-source"
+				},
+				"test/fixtures/cli-templates/expected/index.html": {
+					"match": false,
+					"packageHash": "55a2fa068d92fac18acd1aeb47ae411f44097df0dc5bf655e0a19a792f199683",
+					"size": 69,
+					"status": "missing-in-source"
+				},
+				"test/fixtures/cli-templates/metalsmith.json": {
+					"match": false,
+					"packageHash": "79321912eb46fe6b066bac06e7dfd66fbcded96c0c697c50423195a8cceb8f9c",
+					"size": 113,
+					"status": "missing-in-source"
+				},
+				"test/fixtures/cli-templates/src/index.html": {
+					"match": false,
+					"packageHash": "b3563858a47f51ba4e03ddfdb381f5b06beb88e2078d69b052177b02f6118078",
+					"size": 48,
+					"status": "missing-in-source"
+				},
+				"test/fixtures/cli-templates/templates/layout.html": {
+					"match": false,
+					"packageHash": "6292d0d97d071b655b5715e0f0377deb630dce9fd7ce69aad3f65d90e95429df",
+					"size": 77,
+					"status": "missing-in-source"
+				},
+				"test/index.js": {
+					"match": false,
+					"packageHash": "5fd910c61e9e1e942fe6b9f0539d95b5fa11c37f79af80bab5d5e57856784413",
+					"size": 4998,
+					"status": "missing-in-source"
+				},
+				"CHANGELOG.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"LICENSE": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"README.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"index.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/debug.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/helpers.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/matter.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/watcher.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"metalsmith-migrated-plugins.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"snapcraft.yaml": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"types/index.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				}
+			},
+			"summary": {
+				"differentFiles": 3,
+				"matchingFiles": 0,
+				"missingInPackage": 11,
+				"missingInSource": 36,
+				"score": 0,
+				"totalFiles": 50
+			}
+		}
+	}
+]
