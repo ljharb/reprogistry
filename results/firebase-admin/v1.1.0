@@ -1,0 +1,135 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-04T15:47:22.103Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:11.7.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "firebase-admin@1.1.0",
+			"name": "firebase-admin",
+			"version": "1.1.0",
+			"location": "https://registry.npmjs.org/firebase-admin/-/firebase-admin-1.1.0.tgz",
+			"integrity": "sha512-YoikJFPUm5PFdjK+cayJReRFtSp+4MVGIks+fABwyu03Pqg4fJP0iQ+aBjBHer0PdXLuVwF3T6SLRgs86+Tmsg==",
+			"publishedAt": "2014-08-23T00:04:52.200Z",
+			"publishedWith": {
+				"node": null,
+				"npm": "1.4.3"
+			}
+		},
+		"source": {
+			"integrity": null,
+			"location": "git://github.com/casetext/firebase-admin.git",
+			"spec": "github:casetext/firebase-admin#HEAD"
+		},
+		"comparisonHash": "8a2a8dcbb729bf3ee9216e490c955701f0ddebe1",
+		"diff": {
+			"files": {
+				".npmignore": {
+					"match": false,
+					"packageHash": "16d30e4462189fb14dd611bdb708c510630c576a1f35b9383e89a4352da36c97",
+					"size": 13,
+					"status": "missing-in-source"
+				},
+				"README.md": {
+					"diff": "--- published/README.md\n+++ rebuilt/README.md\n@@ -1,3 +1,8 @@\n+DEPRECATED\n+==========\n+\n+This repo is no longer supported.  The `firebase-admin` package on npm is now published by Google as of v4; the code here has nothing to do with `firebase-admin@4` and no longer works.\n+\n firebase-admin\n ==============\n \n@@ -18,15 +23,14 @@\n ```javascript\n var FirebaseAccount = require('firebase-admin');\n var Firebase = require('firebase');\n-var account = new FirebaseAccount('me@example.com', 'password');\n-account.ready.then(function() {\n-  account.createDatabase('new-instance-name')\n-  .then(function(instance) {\n-    var fb = new Firebase(instance.toString());\n-  })\n-  .catch(function(err) {\n-    console.error('Oops, error creating instance:', err);\n-  });\n+\n+var account = new FirebaseAccount(process.env.FIREBASE_ADMIN_TOKEN);\n+account.createDatabase('new-instance-name')\n+.then(function(instance) {\n+  var fb = new Firebase(instance.toString());\n+})\n+.catch(function(err) {\n+  console.error('Oops, error creating instance:', err);\n });\n ```\n \n",
+					"match": false,
+					"packageHash": "d8c56975d1cf00673f947da9f2b444dfb978bbbeec67b96c83ce962fa2d6324d",
+					"size": 1318,
+					"sourceHash": "cc78dc61559c520bf39c5e2a2549646d98e9d86db486a877283394dda31d59c1",
+					"status": "content"
+				},
+				"account.js": {
+					"diff": "--- published/account.js\n+++ rebuilt/account.js\n@@ -7,46 +7,66 @@\n   Q = require('q'),\n   FirebaseInstance = require('./instance');\n \n+\n /**\n  * Creates a new reference to a Firebase account.\n  * @constructor\n- * @param {String} email The email address associated with the account.\n- * @param {String} password The password for the account.\n- * @property {external:Promise} ready A promise that will resolve when the\n- * account is ready to use and reject if there's a problem logging in.\n+ * @param {String} adminToken The admin token for the account.\n  */\n-function FirebaseAccount(email, password) {\n+function FirebaseAccount(adminToken) {\n \n   var deferred = Q.defer();\n \n   this._dbs = {};\n-\n-  request.get({\n-    url: 'https://admin.firebase.com/account/login',\n-    qs: {\n-      email: email,\n-      password: password\n-    },\n-    json: true\n-  }, function(err, response, body) {\n-    if (err) {\n-      deferred.reject(err);\n-    } else if (response.statusCode !== 200) {\n-      deferred.reject(new Error(response.statusCode));\n-    } else if (body.error) {\n-      deferred.reject(new Error('Firebase error: ' + body.error));\n-    } else if (body.success === false) {\n-      deferred.reject(new Error('Bad credentials or server error.'));\n-    } else {\n-      this.adminToken = body.adminToken;\n-      deferred.resolve(this);\n-    }\n-  }.bind(this));\n-\n-  this.ready = deferred.promise;\n+  this.adminToken = adminToken;\n \n }\n \n+FirebaseAccount.defaultAuthConfig = {\n+  domains: [\n+    'localhost',\n+    '127.0.0.1'\n+  ],\n+  sessionLengthSeconds: 86400,\n+  anonymous: {\n+    'enabled': false\n+  },\n+  facebook: {\n+    'enabled': false,\n+    'key': '',\n+    'secret': ''\n+  },\n+  github: {\n+    'enabled': false,\n+    'key': '',\n+    'secret': ''\n+  },\n+  google: {\n+    'enabled': false,\n+    'key': '',\n+    'secret': ''\n+  },\n+  password: {\n+    'enabled': false,\n+    'emails': {\n+      'password-reset': {\n+        'from': 'no-reply@example.com',\n+        'fromname': '',\n+        'replyto': '',\n+        'subject': '',\n+        'template': 'Hello!\\n\\n' +\n+          'It looks like you\\'ve forgotten your password.\\n\\n' +\n+          'Use the following temporary password within the next 24 hours ' +\n+          'to log in and update your account: %TOKEN%\\n\\nThanks!\\n'\n+      }\n+    }\n+  },\n+  twitter: {\n+    'enabled': false,\n+    'key': '',\n+    'secret': ''\n+  }\n+};\n \n /**\n  * Promises to create a new Firebase instance under the account.\n@@ -189,28 +209,26 @@\n  * there's an error. This instance also has an extra method, tearDown, that\n",
+					"match": false,
+					"packageHash": "f2b6fa5d2ee4b366590e1d69f87e16f757161a78f97c437857910b956a31fa4d",
+					"size": 6202,
+					"sourceHash": "6b3e939d842c55f71fa41ecc0938da78254a5bf25f05feaad192a2f1e9e7b8d8",
+					"status": "content"
+				},
+				"bin/firebase-admin": {
+					"diff": "--- published/bin/firebase-admin\n+++ rebuilt/bin/firebase-admin\n@@ -2,228 +2,98 @@\n \n 'use strict';\n \n-var optometrist = require('optometrist');\n-var FirebaseAccount = require('../account');\n+var optometrist = require('optometrist'),\n+  prompt = require('prompt'),\n+  Q = require('q'),\n+  FirebaseAccount = require('../account'),\n+  program = require('commander'),\n+  chalk = require('chalk'),\n+  pk = require('../package.json');\n+\n+\n+program\n+  .version(pk.version)\n+  .usage('[options] command...')\n+  .option(\n+    '-a, --firebase-admin-token <token>',\n+    'Firebase admin token, if not in FIREBASE_ADMIN_TOKEN'\n+  )\n+  .option(\n+    '-i, --firebase-instance <name>',\n+    'Firebase instance to run command on, if applicable'\n+  )\n+  .parse(process.argv);\n+\n+program.on('--help', function() {\n+  console.log('  Commands:');\n+  console.log('');\n+  console.log('    bootstrap: create new database with random name');\n+  console.log('    create [name]: create new Firebase');\n+  console.log('    delete [name]: remove existing Firebase');\n+  console.log('');\n+\n+  console.log('    rules get [filename=STDOUT]: get security rules');\n+  console.log('    rules set [filename]: set security rules');\n+  console.log('');\n+\n+  console.log('    auth-config get [FILENAME=STDOUT]: get auth configuration');\n+  console.log('    auth-config set [filename]: set auth configuration');\n+  console.log('');\n+\n+  console.log('    token add: add authentication token to this Firebase');\n+  console.log('    token remove [token]: remove auth token from this Firebase');\n+  console.log('');\n+\n+  console.log('    user list: list all Simple Login users');\n+  console.log('    user add [username]: add user to Simple Login');\n+  console.log('    user remove [username]: remove user from Simple Login');\n+  console.log('    user reset [username]: send password reset email');\n+  console.log('');\n+\n+  console.log('  Environment variables firebase-admin will use if defined include:');\n+  console.log('');\n+  console.log('    FIREBASE_ADMIN_TOKEN');\n+  console.log('');\n \n-var schema = {\n-  firebaseUser: {\n-    description: 'Your Firebase API username.',\n-    required: true\n-  },\n-  firebasePass: {\n-    description: 'Your Firebase API password.',\n-    required: true\n-  }\n-};\n-\n-var commandTree = {\n-  create: {\n-    _description: 'Create a new Firebase database.',\n-    _syntax: '[databaseName]',\n-    _action: function(name) {\n-      if (!name) {\n-        printAndExit('Missing argument databaseName');\n-      }\n-\n-      return account.createDatabase(name)\n-      .then(function(db) {\n-        console.log('Done! New URL is', db.toString());\n-      });\n-\n-    }\n-  },\n-  help: {\n-    _syntax: '[command]',\n-    _description: 'Provide help for the given command.',\n-    _action: function() {\n-\n-      if (!arguments[0]) {\n-        printAndExit();\n-      }\n-\n-      var command = '';\n-      var commandObject = commandTree;\n-      Array.prototype.slice.call(arguments, 0).every(function(part) {\n",
+					"match": false,
+					"packageHash": "b8883d7f21bcd3323f08b7912c090380bf9cea63c76e81a3287e8b0fc39beede",
+					"size": 5159,
+					"sourceHash": "cedb7a676e3e307d40ec85888e24cc6c08059504b3c5c98249e48b67b0f5f18c",
+					"status": "content"
+				},
+				"instance.js": {
+					"diff": "--- published/instance.js\n+++ rebuilt/instance.js\n@@ -99,7 +99,7 @@\n   var deferred = Q.defer();\n \n   request.get({\n-    url: 'https://' + this.name + '.firebaseio.com/.settings/secrets.json',\n+    url: 'https://' + this.name + '.firebaseio.com//.settings/secrets.json',\n     qs: {\n       auth: this.personalToken\n     },\n@@ -331,6 +331,235 @@\n \n   return deferred.promise;\n \n+};\n+\n+\n+/**\n+ * Promises to obtain the current authentication configuration for the instance.\n+ * @returns {external:Promise} A promise that resolves with the auth config\n+ * and rejects with an Error if there's an error.\n+ */\n+FirebaseInstance.prototype.getAuthConfig = function() {\n+\n+  var deferred = Q.defer();\n+\n+  request.get({\n+    url: 'https://' + this.name + '.firebaseio.com/.settings/.json',\n+    qs: {\n+      auth: this.personalToken,\n+    },\n+    json: true\n+  }, function(err, response, body) {\n+\n+    if (err) {\n+      deferred.reject(err);\n+    } else if (response.statusCode > 299) {\n+      deferred.reject(new Error(response.statusCode));\n+    } else if (body && body.error) {\n+      deferred.reject(new Error(body.error));\n+    } else {\n+\n+      if (typeof body.authConfig === 'string' && body.authConfig.length === 0) {\n+        deferred.resolve(null);\n+      } else {\n+        deferred.resolve(JSON.parse(body.authConfig));\n+      }\n+\n+    }\n+\n+  }.bind(this));\n+\n+  return deferred.promise;\n+\n+};\n+\n+FirebaseInstance.prototype.setAuthConfig = function(config) {\n+\n+    var deferred = Q.defer();\n+\n+    request.post({\n+      url: 'https://admin.firebase.com/firebase/' + this.name + '/authConfig',\n+      json: true,\n+      body: {\n+        token: this.adminToken,\n+        authConfig: JSON.stringify(config),\n+        _method: 'put'\n+      },\n+    }, function(err, response, body) {\n+      if (err) {\n+        deferred.reject(err);\n+      } else if (response.statusCode > 299) {\n+        deferred.reject(new Error(response.statusCode));\n+      } else if (body && body.error) {\n+        console.log(body.error);\n+        deferred.reject(new Error(body.error));\n+      } else {\n+        deferred.resolve();\n+      }\n+    }.bind(this));\n+\n+    return deferred.promise;\n+\n+};\n+\n+\n+FirebaseInstance.prototype._authMethodCallback = function(deferred, err, resp, body) {\n+\n+  if (err) {\n+    deferred.reject(err);\n+  } else if (resp.statusCode > 299) {\n+    deferred.reject(new Error(resp.statusCode));\n+  } else if (body && body.error) {\n+\n+    var error = new Error(body.error.message);\n+    if (body.error.code) {\n+      error.code = body.error.code;\n+    }\n+    deferred.reject(error);\n",
+					"match": false,
+					"packageHash": "382b98015908c920b88ca190fed5b86f206d87dcc4bc38425d33eeb6c4912e23",
+					"size": 8960,
+					"sourceHash": "b2f3a35ef7b7502f020d411401483cb13412f3362d21c70053c4dda702f522e2",
+					"status": "content"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -1,6 +1,6 @@\n {\n   \"name\": \"firebase-admin\",\n-  \"version\": \"1.1.0\",\n+  \"version\": \"3.0.0\",\n   \"description\": \"Programmatically instantiate and modify Firebase instances.\",\n   \"keywords\": [\n     \"firebase\",\n@@ -24,21 +24,25 @@\n   \"main\": \"account.js\",\n   \"bin\": \"bin/firebase-admin\",\n   \"scripts\": {\n-    \"test\": \"./script/test.bash\",\n+    \"test\": \"mocha --recursive -u bdd -t 30000 -s 2000 -r ./test/setup test/spec\",\n     \"postpublish\": \"./script/postpublish.bash\"\n   },\n   \"dependencies\": {\n-    \"request\": \"^2.37.0\",\n+    \"firebase\": \"^2.0.0\",\n+    \"optometrist\": \"^0.1.3\",\n     \"q\": \"^1.0.1\",\n-    \"firebase\": \"^1.0.17\",\n-    \"optometrist\": \"^0.1.3\"\n+    \"request\": \"^2.37.0\",\n+    \"commander\": \"^2.3.0\",\n+    \"chalk\": \"^0.5.1\",\n+    \"cli-table\": \"^0.3.0\",\n+    \"prompt\": \"^0.2.14\"\n   },\n   \"devDependencies\": {\n-    \"mocha\": \"^1.20.1\",\n     \"chai\": \"^1.9.1\",\n     \"chai-as-promised\": \"^4.1.1\",\n-    \"prompt\": \"^0.2.13\",\n+    \"ink-docstrap\": \"^0.4.12\",\n     \"jsdoc\": \"^3.3.0-alpha9\",\n-    \"ink-docstrap\": \"^0.4.12\"\n+    \"mocha\": \"^1.20.1\",\n+    \"lodash\": \"^2.4.1\"\n   }\n }\n",
+					"match": false,
+					"packageHash": "9109330f2f8432853d97e4a72d77426f1523c77360d3ee4a7a679d9674d5d152",
+					"size": 1071,
+					"sourceHash": "5692a537af2d65b49c1ddf827bfcd90a2a751d1baf55b832541f71511ca8a7ba",
+					"status": "content"
+				},
+				"script/test.bash": {
+					"match": false,
+					"packageHash": "e1d45dc3e1d5db7c6fa89c75739a81e0d29dedc6f1ed9bf3cf1ac8c78eef3479",
+					"size": 138,
+					"status": "missing-in-source"
+				},
+				"test/prep.bash": {
+					"match": false,
+					"packageHash": "5341ed94ca5a34b0ceb016506d184339443cea028be6ef50e6dffbaef9b66c9a",
+					"size": 212,
+					"status": "missing-in-source"
+				},
+				"test/setup.js": {
+					"diff": "--- published/test/setup.js\n+++ rebuilt/test/setup.js\n@@ -5,21 +5,14 @@\n \n global.chai = require('chai');\n global.chai.use(require('chai-as-promised'));\n-global.expect = chai.expect;\n+global.expect = global.chai.expect;\n \n-global.FirebaseAccount = require('../account');\n global.params = {};\n \n-// get username and password for tests\n-\n-var prompt = require('prompt');\n-\n-if (process.env.FIREBASE_USER && process.env.FIREBASE_PASS) {\n-  global.params.firebaseUser = process.env.FIREBASE_USER;\n-  global.params.firebasePassword = process.env.FIREBASE_PASS;\n-} else {\n+if (!process.env.FIREBASE_ADMIN_TOKEN) {\n   console.error(\n-    'You must set process.env.FIREBASE_USER and process.env.FIREBASE_PASS\\n' +\n+    'You must set process.env.FIREBASE_ADMIN_TOKEN\\n' +\n     'before running these tests.'\n   );\n+  process.exit(1);\n }\n",
+					"match": false,
+					"packageHash": "1c5512aa6904940241f6ef1c0ad6f1b9e967856616bccea9884500dba0c46328",
+					"size": 609,
+					"sourceHash": "9cc246b905c2802778b822c611d202ee02d8533839a56af33c6c88993dda5447",
+					"status": "content"
+				},
+				"test/spec/account.js": {
+					"diff": "--- published/test/spec/account.js\n+++ rebuilt/test/spec/account.js\n@@ -3,52 +3,45 @@\n \n var Q = require('q');\n \n-var fbUser = process.env.FIREBASE_USER,\n-  fbPass = process.env.FIREBASE_PASS,\n+var FirebaseAccount = require('../../account.js'),\n   account;\n \n-\n describe('FirebaseAccount', function() {\n \n-  var newDb;\n+  var newDb, token;\n \n   before(function() {\n-\n-    account = new FirebaseAccount(fbUser, fbPass);\n-    return account.ready;\n-\n+    token = process.env.FIREBASE_ADMIN_TOKEN;\n   });\n \n   beforeEach(function() {\n-\n     return Q.delay(500);\n-\n   });\n \n+  describe('defaultAuthConfig', function() {\n \n-  describe('constructor', function() {\n-\n-    describe('given valid credentials', function() {\n-\n-      it('has a \"ready\" promise that resolves when authenticated', function() {\n-\n-        return expect((new FirebaseAccount(fbUser, fbPass)).ready)\n-        .to.be.fulfilled;\n+    it('has a sane default auth configuration cribbed from Firebase', function() {\n \n-      });\n+      expect(FirebaseAccount.defaultAuthConfig)\n+      .to.include.keys([\n+        'domains',\n+        'sessionLengthSeconds',\n+        'anonymous',\n+        'facebook',\n+        'twitter',\n+        'github',\n+        'google',\n+        'password'\n+      ]);\n \n     });\n \n-    describe('given invalid credentials', function() {\n-\n-      it('has a \"ready\" promise that rejects with an error', function() {\n-\n-        return expect(\n-          (new FirebaseAccount('wrong@wrongville.com', 'wrongpass')).ready\n-        ).to.be.rejectedWith(Error);\n+  });\n \n-      });\n+  describe('constructor', function() {\n \n+    it('takes a Firebase admin token', function() {\n+      account = new FirebaseAccount(token);\n     });\n \n   });\n@@ -110,21 +103,19 @@\n     var instancePromise;\n \n     before(function() {\n-      instancePromise = FirebaseAccount.bootstrapInstance(fbUser, fbPass);\n+      instancePromise = FirebaseAccount.bootstrapInstance(token);\n     });\n \n     it('promises to create a new database with a random name immediately', function() {\n-\n       return expect(instancePromise).to.be.fulfilled;\n-\n     });\n \n     it('has a tearDown property that can be used to delete the database', function() {\n \n-      return expect(instancePromise.then(function(instance) {\n+      return instancePromise.then(function(instance) {\n         expect(instance.tearDown).to.be.a('function');\n         return expect(instance.tearDown()).to.be.fulfilled;\n-      })).to.be.fulfilled;\n+      });\n \n     });\n \n",
+					"match": false,
+					"packageHash": "245cfa3f61ee1fd9819feaf1db30edd8e53645e877f756abb0a6ff33071d25a6",
+					"size": 2782,
+					"sourceHash": "01662d5e1316079b2f43585fae31197bba4ce004d94af2cc67223c2b159fc456",
+					"status": "content"
+				},
+				"test/spec/instance.js": {
+					"diff": "--- published/test/spec/instance.js\n+++ rebuilt/test/spec/instance.js\n@@ -1,10 +1,10 @@\n \n 'use strict';\n \n-var Q = require('q');\n+var Q = require('q'),\n+  _ = require('lodash');\n \n-var fbUser = process.env.FIREBASE_USER,\n-  fbPass = process.env.FIREBASE_PASS,\n+var FirebaseAccount = require('../../account.js'),\n   account,\n   instance,\n   authToken;\n@@ -14,31 +14,24 @@\n \n   before(function() {\n \n-    account = new FirebaseAccount(fbUser, fbPass);\n-\n-    return account.ready\n-    .then(function() {\n-\n-      return account.createDatabase(Math.random().toString(36).slice(2))\n-      .then(function(newInstance) {\n-        instance = newInstance;\n-      });\n+    account = new FirebaseAccount(process.env.FIREBASE_ADMIN_TOKEN);\n \n+    return account.createDatabase(Math.random().toString(36).slice(2))\n+    .then(function(newInstance) {\n+      instance = newInstance;\n     });\n+\n   });\n \n   beforeEach(function() {\n-\n     return Q.delay(500);\n-\n   });\n \n   after(function() {\n-\n     return account.deleteDatabase(instance);\n-\n   });\n \n+\n   describe('#getAuthTokens', function() {\n \n     it('promises to get all the valid auth tokens for the instance', function() {\n@@ -134,6 +127,126 @@\n \n       });\n \n+    });\n+\n+  });\n+\n+  describe('authentication', function() {\n+\n+    describe('with a pristine Firebase', function() {\n+\n+      describe('#getAuthConfig', function() {\n+\n+        it('gets the default (null) authConfig object', function() {\n+\n+          return expect(instance.getAuthConfig())\n+          .to.eventually.equal(null);\n+\n+        });\n+\n+      });\n+\n+      describe('#setAuthConfig', function() {\n+\n+        it('sets the authConfig to the supplied configuration object', function() {\n+\n+          var config = _.cloneDeep(FirebaseAccount.defaultAuthConfig);\n+          config.password.enabled = true;\n+          return instance.setAuthConfig(config)\n+          .then(function() {\n+            return Q.delay(1000);\n+          });\n+\n+        });\n+\n+      });\n+\n+    });\n+\n+\n+    describe('with a configured Firebase', function() {\n+\n+      describe('#getAuthConfig', function() {\n+\n+        it('actually returns the current configuration', function() {\n",
+					"match": false,
+					"packageHash": "64cd730392e6da4e5ff66ef8c79d3a09b67ef60a3a149c3ce65a8aebccb03c1f",
+					"size": 2641,
+					"sourceHash": "c142fbeecd4be6a542b38045a84d84cd1f14061f5aa9033dd9662d76fe508251",
+					"status": "content"
+				},
+				"lib/commands/account.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/commands/instance.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/.jshintrc": {
+					"match": false,
+					"status": "missing-in-package"
+				}
+			},
+			"summary": {
+				"differentFiles": 8,
+				"matchingFiles": 5,
+				"missingInPackage": 3,
+				"missingInSource": 3,
+				"score": 0.2631578947368421,
+				"totalFiles": 19
+			}
+		}
+	}
+]
