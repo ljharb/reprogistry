@@ -1,0 +1,151 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-04T09:13:51.263Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:11.7.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "cli-progress@3.2.0",
+			"name": "cli-progress",
+			"version": "3.2.0",
+			"location": "https://registry.npmjs.org/cli-progress/-/cli-progress-3.2.0.tgz",
+			"integrity": "sha512-Py2uQf4b4IcOILOym/Jhpeny+5cz/WYPOhSTkAoAIGPfQEHDBz3k7Ph46vBGX4lRG7Oby2G0D7jnPEQ2LCU8rQ==",
+			"publishedAt": "2019-09-28T11:53:03.710Z",
+			"publishedWith": {
+				"node": null,
+				"npm": null
+			}
+		},
+		"source": {
+			"integrity": null,
+			"location": "https://github.com/AndiDittrich/Node.CLI-Progress.git",
+			"spec": "github:AndiDittrich/Node.CLI-Progress#HEAD"
+		},
+		"comparisonHash": "8a2a8dcbb729bf3ee9216e490c955701f0ddebe1",
+		"diff": {
+			"files": {
+				"CHANGES.md": {
+					"match": false,
+					"packageHash": "24f120b3954926762af75216716dbd7082e66dfa2d520f1246abe831ba0ba7a2",
+					"size": 6384,
+					"status": "missing-in-source"
+				},
+				"LICENSE.md": {
+					"diff": "--- published/LICENSE.md\n+++ rebuilt/LICENSE.md\n@@ -1,6 +1,6 @@\n The MIT License (X11 License)\n \n-Copyright (c) 2015-2019 Andi Dittrich\n+Copyright (c) 2015-2022 Andi Dittrich\n \n Permission is hereby granted, free of charge, to any person\n obtaining a copy of this software and associated documentation\n",
+					"match": false,
+					"packageHash": "0f3aae04502b03dd7540a147b8322e57db5ff4bd00b7e76216cad275c5c740df",
+					"size": 1093,
+					"sourceHash": "b07ea5dc178906810bc4c4c67264857675e6c33be61766bb3e0593866deefa0a",
+					"status": "content"
+				},
+				"README.md": {
+					"diff": "--- published/README.md\n+++ rebuilt/README.md\n@@ -1,6 +1,10 @@\n+[![Build Status](https://travis-ci.org/npkgz/cli-progress.svg?branch=master)](https://travis-ci.org/npkgz/cli-progress)\n+\n+[Single Bar](#single-bar-mode) | [Multi Bar](#multi-bar-mode) | [Options](#options-1) | [Examples](examples/) | [Presets](presets/) | [Events](docs/events.md)\n+\n CLI-Progress\n ============\n-Easy to use Progress-Bar for Command-Line/Terminal Applications\n+easy to use progress-bar for command-line/terminal applications\n \n ![Demo](assets/cli-progress.gif)\n \n@@ -18,7 +22,7 @@\n --------\n \n * **Simple**, **Robust** and **Easy** to use\n-* Full customizable output format (constious placeholders are available)\n+* Full customizable output format (various placeholders are available)\n * Single progressbar mode\n * Multi progessbar mode\n * Custom Bar Characters\n@@ -29,17 +33,19 @@\n * No callbacks required - designed as pure, external controlled UI widget\n * Works in Asynchronous and Synchronous tasks\n * Preset/Theme support\n+* Custom bar formatters (via callback)\n+* Logging during multibar operation\n \n Usage\n ------------\n \n-Multiple examples are available e.g. [example.js](https://github.com/AndiDittrich/Node.CLI-Progress/blob/master/examples/example.js) - just try it `$ node example.js`\n+Multiple examples are available e.g. [example.js](https://github.com/npkgz/cli-progress/blob/master/examples/example.js) - just try it `$ node example.js`\n \n ```js\n-const _cliProgress = require('cli-progress');\n+const cliProgress = require('cli-progress');\n \n // create a new progress bar instance and use shades_classic theme\n-const bar1 = new _cliProgress.SingleBar({}, _cliProgress.Presets.shades_classic);\n+const bar1 = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic);\n \n // start the progress bar with a total value of 200 and start value of 0\n bar1.start(200, 0);\n@@ -59,11 +65,14 @@\n ### Example ###\n \n ```js\n-const _cliProgress = require('cli-progress');\n+const cliProgress = require('cli-progress');\n+\n+// note: you have to install this dependency manually since it's not required by cli-progress\n+const colors = require('ansi-colors');\n \n // create new progress bar\n-const b1 = new _cliProgress.SingleBar({\n-    format: 'CLI Progress |' + _colors.cyan('{bar}') + '| {percentage}% || {value}/{total} Chunks || Speed: {speed}',\n+const b1 = new cliProgress.SingleBar({\n+    format: 'CLI Progress |' + colors.cyan('{bar}') + '| {percentage}% || {value}/{total} Chunks || Speed: {speed}',\n     barCompleteChar: '\\u2588',\n     barIncompleteChar: '\\u2591',\n     hideCursor: true\n@@ -87,9 +96,9 @@\n Initialize a new Progress bar. An instance can be used **multiple** times! it's not required to re-create it!\n \n ```js\n-const _cliProgress = require('cli-progress');\n+const cliProgress = require('cli-progress');\n \n-const <instance> = new _cliProgress.SingleBar(options:object [, preset:object]);\n+const <instance> = new cliProgress.SingleBar(options:object [, preset:object]);\n ```\n \n #### Options ####\n@@ -105,10 +114,13 @@\n \n ### ::update() ###\n \n-Sets the current progress value and optionally the payload with values of custom tokens as a second parameter\n+Sets the current progress value and optionally the payload with values of custom tokens as a second parameter. To update payload only, set currentValue to `null`.\n \n ```js\n-<instance>.update(currentValue:int [, payload:object = {}]);\n+<instance>.update([currentValue:int [, payload:object = {}]]);\n+\n+// update progress without altering value\n+<instance>.update([payload:object = {}]);\n ```\n \n ### ::increment() ###\n@@ -117,6 +129,9 @@\n \n ```js\n <instance>.increment([delta:int [, payload:object = {}]]);\n+\n+// delta=1 assumed\n+<instance>.increment(payload:object = {}]);\n ```\n",
+					"match": false,
+					"packageHash": "95f61df148622d64c6ca882e1c58d31d67dab83b9839a577a7544ee4e33bd0f6",
+					"size": 9600,
+					"sourceHash": "dbeb57ff5bb12943ca632c6d9b1a5d2382a6d8fce3993c77b4a4f9610c25ea0f",
+					"status": "content"
+				},
+				"cli-progress.js": {
+					"diff": "--- published/cli-progress.js\n+++ rebuilt/cli-progress.js\n@@ -1,11 +1,21 @@\n const _SingleBar = require('./lib/single-bar');\n const _MultiBar = require('./lib/multi-bar');\n const _Presets = require('./presets/index');\n+const _Formatter = require('./lib/formatter');\n+const _defaultFormatValue = require('./lib/format-value');\n+const _defaultFormatBar = require('./lib/format-bar');\n+const _defaultFormatTime = require('./lib/format-time');\n \n // sub-module access\n module.exports = {\n     Bar: _SingleBar,\n     SingleBar: _SingleBar,\n     MultiBar: _MultiBar,\n-    Presets: _Presets\n+    Presets: _Presets,\n+    Format: {\n+        Formatter: _Formatter,\n+        BarFormat: _defaultFormatBar,\n+        ValueFormat: _defaultFormatValue,\n+        TimeFormat: _defaultFormatTime\n+    }\n };\n\\ No newline at end of file\n",
+					"match": false,
+					"packageHash": "326e455771dda10e6426b98c04aa5e874afadf29e0f6f1b676d4cf116d5d2454",
+					"size": 277,
+					"sourceHash": "df99c731dfb9014c541e43ff34c6e1748f9b5b03b8ba56d51a26e2465e6b387d",
+					"status": "content"
+				},
+				"lib/eta.js": {
+					"diff": "--- published/lib/eta.js\n+++ rebuilt/lib/eta.js\n@@ -4,7 +4,7 @@\n \n     constructor(length, initTime, initValue){\n         // size of eta buffer\n-        this.etaBufferLength = length || 10;\n+        this.etaBufferLength = length || 100;\n \n         // eta buffer with initial values\n         this.valueBuffer = [initValue];\n@@ -15,9 +15,12 @@\n     }\n \n     // add new values to calculation buffer\n-    push(time, value){\n+    update(time, value, total){\n         this.valueBuffer.push(value);\n         this.timeBuffer.push(time);\n+\n+        // trigger recalculation\n+        this.calculate(total-value);\n     }\n \n     // fetch estimated time\n@@ -52,10 +55,14 @@\n         }else if (!isFinite(eta)){\n             this.eta = 'INF';\n \n-        // > 100k s ?\n-        }else if (eta > 100000){\n+        // > 10M s ? - set upper display limit ~115days (1e7/60/60/24)\n+        }else if (eta > 1e7){\n             this.eta = 'INF';\n \n+        // negative ?\n+        }else if (eta < 0){\n+            this.eta = 0;\n+\n         }else{\n             // assign\n             this.eta = eta;\n",
+					"match": false,
+					"packageHash": "4f3d5e721736c43bc13bde38022994919a076e7edeb6a83c596a22a09525637d",
+					"size": 1769,
+					"sourceHash": "774e1a02fa01df305a569c33fb820922f69305a87ab06e3bc76f8e3606d95f12",
+					"status": "content"
+				},
+				"lib/generic-bar.js": {
+					"diff": "--- published/lib/generic-bar.js\n+++ rebuilt/lib/generic-bar.js\n@@ -1,14 +1,17 @@\n const _ETA = require('./eta');\n-const _stringWidth = require('string-width');\n const _Terminal = require('./terminal');\n+const _formatter = require('./formatter');\n+const _options = require('./options');\n+const _EventEmitter = require('events');\n \n // Progress-Bar constructor\n-module.exports = class GenericBar{\n+module.exports = class GenericBar extends _EventEmitter{\n \n     constructor(options){\n+        super();\n \n-        // store options\n-        this.options = options;\n+        // store options and assign derived ones (instance specific)\n+        this.options = _options.assignDerivedOptions(options);\n \n         // store terminal instance\n         this.terminal = (this.options.terminal) ? this.options.terminal : new _Terminal(this.options.stream);\n@@ -16,6 +19,9 @@\n         // the current bar value\n         this.value = 0;\n \n+        // bar start value (used for progress calculation)\n+        this.startValue = 0;\n+\n         // the end value of the bar\n         this.total = 100;\n \n@@ -25,10 +31,13 @@\n         // start time (used for eta calculation)\n         this.startTime = null;\n \n+        // stop time (used for duration calculation)\n+        this.stopTime = null;\n+\n         // last update time\n         this.lastRedraw = Date.now();\n \n-        // default eta calulator (will be re-create on start)\n+        // default eta calculator (will be re-create on start)\n         this.eta = new _ETA(this.options.etaBufferLength, 0, 0);\n \n         // payload data\n@@ -36,84 +45,42 @@\n \n         // progress bar active ?\n         this.isActive = false;\n+\n+        // use default formatter or custom one ?\n+        this.formatter = (typeof this.options.format === 'function') ? this.options.format : _formatter;\n     }\n \n     // internal render function\n-    render(){\n-        // copy format string\n-        let s = this.options.format;\n-\n-        // calculate the normalized current progress\n-        let progress = (this.value/this.total);\n-\n-        // handle NaN Errors caused by total=0. Set to complete in this case \n-        if (isNaN(progress)){\n-            progress = (this.options && this.options.emptyOnZero) ? 0.0 : 1.0;\n-        }\n-\n-        // limiter\n-        progress = Math.min(Math.max(progress, 0.0), 1.0);\n+    render(forceRendering=false){\n \n-        // generate bar string by stripping the pre-rendered strings\n-        let b = this.options.barCompleteString.substr(0, Math.round(progress*this.options.barsize)) +\n-                this.options.barIncompleteString.substr(0, Math.round((1.0-progress)*this.options.barsize));\n-\n-        // limit the bar-size (can cause n+1 chars in some numerical situation)\n-        b = b.substr(0, this.options.barsize);\n-\n-        // calculate progress in percent\n-        const percentage =  Math.round(progress*100) + '';\n-\n-        // calculate elapsed time\n-        const elapsedTime = Math.round((Date.now() - this.startTime)/1000);\n-        const elapsedTimef = GenericBar.formatTime(elapsedTime, 1);\n-\n-        // calculate eta\n-        const eta = this.eta.getTime();\n-        const etaf = GenericBar.formatTime(eta, 5);\n-\n-        // assign placeholder tokens\n-        s = s.replace(/\\{bar}/gi, b)\n-            .replace(/\\{percentage}/gi, percentage)\n-            .replace(/\\{total}/gi, this.total + '')\n-            .replace(/\\{value}/gi, this.value + '')\n-            .replace(/\\{eta}/gi, eta + '')\n-            .replace(/\\{eta_formatted}/gi, etaf + '')\n",
+					"match": false,
+					"packageHash": "7dd951a2ad65fd6ead743def474cc980c9a057bc579ca82e928b1e583f11f689",
+					"size": 6953,
+					"sourceHash": "b41f063e72f56e375049f1d9fa9b264ec6ec1508217b825ec38820a4e1e20818",
+					"status": "content"
+				},
+				"lib/multi-bar.js": {
+					"diff": "--- published/lib/multi-bar.js\n+++ rebuilt/lib/multi-bar.js\n@@ -1,11 +1,14 @@\n const _Terminal = require('./terminal');\n const _BarElement = require('./generic-bar');\n const _options = require('./options');\n+const _EventEmitter = require('events');\n \n // Progress-Bar constructor\n-module.exports = class MultiBar{\n+module.exports = class MultiBar extends _EventEmitter{\n \n     constructor(options, preset){\n+        super();\n+\n         // list of bars\n         this.bars = [];\n \n@@ -26,21 +29,48 @@\n \n         // update interval\n         this.schedulingRate = (this.terminal.isTTY() ? this.options.throttleTime : this.options.notTTYSchedule);\n+\n+        // logging output buffer\n+        this.loggingBuffer = [];\n+\n+        // callback used for gracefulExit\n+        this.sigintCallback = null;\n     }\n \n     // add a new bar to the stack\n-    create(total, startValue, payload){\n-        // progress updates are only visible in TTY mode!\n-        if (this.options.noTTYOutput === false && this.terminal.isTTY() === false){\n-            return;\n-        }\n-        \n-        // create new bar element\n-        const bar = new _BarElement(this.options);\n+    create(total, startValue, payload, barOptions={}){\n+        // create new bar element and merge global options + overrides\n+        // use the same global terminal instance for all instances\n+        const bar = new _BarElement(Object.assign(\n+            {}, \n+\n+            // global options\n+            this.options, \n+\n+            // terminal instance\n+            {\n+                terminal: this.terminal\n+            },\n+\n+            // overrides\n+            barOptions,\n+        ));\n \n         // store bar\n         this.bars.push(bar);\n \n+        // progress updates are only visible in TTY mode!\n+        if (this.options.noTTYOutput === false && this.terminal.isTTY() === false){\n+            return bar;\n+        }\n+\n+        // add handler to restore cursor settings (stop the bar) on SIGINT/SIGTERM ?\n+        if (this.sigintCallback === null && this.options.gracefulExit){\n+            this.sigintCallback = this.stop.bind(this);\n+            process.once('SIGINT', this.sigintCallback);\n+            process.once('SIGTERM', this.sigintCallback);\n+        }\n+        \n         // multiprogress already active ?\n         if (!this.isActive){\n             // hide the cursor ?\n@@ -48,7 +78,7 @@\n                 this.terminal.cursor(false);\n             }\n \n-            // disable line wrpaping ?\n+            // disable line wrapping ?\n             if (this.options.linewrap === false){\n                 this.terminal.lineWrapping(false);\n             }\n@@ -63,6 +93,9 @@\n         // start progress bar\n         bar.start(total, startValue, payload);\n \n+        // trigger event\n+        this.emit('start');\n+\n         // return new instance\n         return bar;\n     }\n@@ -97,10 +130,26 @@\n             clearTimeout(this.timer);\n             this.timer = null;\n         }\n+\n+        // trigger event\n",
+					"match": false,
+					"packageHash": "9046e547c65819dc4db7157667e92e8bebb94460f780ebc204d5028da272e1ab",
+					"size": 4534,
+					"sourceHash": "699121230686767f37665bdea285e554b49097676f3869d918f9b07d1e5fa83d",
+					"status": "content"
+				},
+				"lib/options.js": {
+					"diff": "--- published/lib/options.js\n+++ rebuilt/lib/options.js\n@@ -1,6 +1,3 @@\n-// global options storage\n-const _options = {};\n-\n // utility to merge defaults\n function mergeOption(v, defaultValue){\n     if (typeof v === 'undefined' || v === null){\n@@ -14,63 +11,100 @@\n     // set global options\n     parse: function parse(rawOptions, preset){\n \n+        // options storage\n+        const options = {};\n+\n         // merge preset\n         const opt = Object.assign({}, preset, rawOptions);\n \n         // the max update rate in fps (redraw will only triggered on value change)\n-        _options.throttleTime = 1000 / (mergeOption(opt.fps, 10));\n+        options.throttleTime = 1000 / (mergeOption(opt.fps, 10));\n \n         // the output stream to write on\n-        _options.stream = mergeOption(opt.stream, process.stderr);\n+        options.stream = mergeOption(opt.stream, process.stderr);\n \n         // external terminal provided ?\n-        _options.terminal = mergeOption(opt.terminal, null);\n+        options.terminal = mergeOption(opt.terminal, null);\n \n         // clear on finish ?\n-        _options.clearOnComplete = mergeOption(opt.clearOnComplete, false);\n+        options.clearOnComplete = mergeOption(opt.clearOnComplete, false);\n \n         // stop on finish ?\n-        _options.stopOnComplete = mergeOption(opt.stopOnComplete, false);\n+        options.stopOnComplete = mergeOption(opt.stopOnComplete, false);\n \n         // size of the progressbar in chars\n-        _options.barsize = mergeOption(opt.barsize, 40);\n+        options.barsize = mergeOption(opt.barsize, 40);\n \n         // position of the progress bar - 'left' (default), 'right' or 'center'\n-        _options.align = mergeOption(opt.align, 'left');\n+        options.align = mergeOption(opt.align, 'left');\n \n         // hide the cursor ?\n-        _options.hideCursor = mergeOption(opt.hideCursor, false);\n+        options.hideCursor = mergeOption(opt.hideCursor, false);\n \n         // disable linewrapping ?\n-        _options.linewrap = mergeOption(opt.linewrap, false);\n+        options.linewrap = mergeOption(opt.linewrap, false);\n \n-        // pre-render bar strings (performance)\n-        _options.barCompleteString = (new Array(_options.barsize + 1 ).join(opt.barCompleteChar || '='));\n-        _options.barIncompleteString = (new Array(_options.barsize + 1 ).join(opt.barIncompleteChar || '-'));\n+        // glue sequence (control chars) between bar elements ?\n+        options.barGlue = mergeOption(opt.barGlue, '');\n+\n+        // bar chars\n+        options.barCompleteChar = mergeOption(opt.barCompleteChar, '=');\n+        options.barIncompleteChar = mergeOption(opt.barIncompleteChar, '-');\n \n         // the bar format\n-        _options.format = mergeOption(opt.format, 'progress [{bar}] {percentage}% | ETA: {eta}s | {value}/{total}');\n+        options.format = mergeOption(opt.format, 'progress [{bar}] {percentage}% | ETA: {eta}s | {value}/{total}');\n+\n+        // external time-format provided ?\n+        options.formatTime = mergeOption(opt.formatTime, null);\n+\n+        // external value-format provided ?\n+        options.formatValue = mergeOption(opt.formatValue, null);\n+\n+        // external bar-format provided ?\n+        options.formatBar = mergeOption(opt.formatBar, null);\n \n         // the number of results to average ETA over\n-        _options.etaBufferLength = mergeOption(opt.etaBuffer, 10);\n+        options.etaBufferLength = mergeOption(opt.etaBuffer, 10);\n+\n+        // automatic eta updates based on fps\n+        options.etaAsynchronousUpdate = mergeOption(opt.etaAsynchronousUpdate, false);\n+\n+        // progress calculation relative to start value ? default start at 0\n+        options.progressCalculationRelative = mergeOption(opt.progressCalculationRelative, false);\n \n         // allow synchronous updates ?\n-        _options.synchronousUpdate = mergeOption(opt.synchronousUpdate, true);\n+        options.synchronousUpdate = mergeOption(opt.synchronousUpdate, true);\n \n         // notty mode\n-        _options.noTTYOutput = mergeOption(opt.noTTYOutput, false);\n+        options.noTTYOutput = mergeOption(opt.noTTYOutput, false);\n \n         // schedule - 2s\n-        _options.notTTYSchedule = mergeOption(opt.notTTYSchedule, 2000);\n+        options.notTTYSchedule = mergeOption(opt.notTTYSchedule, 2000);\n         \n",
+					"match": false,
+					"packageHash": "b610dad6b4f0228109e44a0a612e5d2d858b178ba109d20c95851ea7836c2251",
+					"size": 2490,
+					"sourceHash": "45edd6675d7d652110f83b641dad29b96b8ca9526931424366df5bf69a0cbc4e",
+					"status": "content"
+				},
+				"lib/single-bar.js": {
+					"diff": "--- published/lib/single-bar.js\n+++ rebuilt/lib/single-bar.js\n@@ -17,6 +17,9 @@\n \n         // update interval\n         this.schedulingRate = (this.terminal.isTTY() ? this.options.throttleTime : this.options.notTTYSchedule);\n+\n+        // callback used for gracefulExit\n+        this.sigintCallback = null;\n     }\n \n     // internal render function\n@@ -46,6 +49,13 @@\n         }\n \n         super.update(current, payload);\n+\n+        // trigger synchronous update ?\n+        // check for throttle time \n+        if (this.options.synchronousUpdate && (this.lastRedraw + this.options.throttleTime*2) < Date.now()){\n+            // force update\n+            this.render();\n+        }\n     }\n \n     // start the progress bar\n@@ -55,6 +65,13 @@\n             return;\n         }\n \n+        // add handler to restore cursor settings (stop the bar) on SIGINT/SIGTERM ?\n+        if (this.sigintCallback === null && this.options.gracefulExit){\n+            this.sigintCallback = this.stop.bind(this);\n+            process.once('SIGINT', this.sigintCallback);\n+            process.once('SIGTERM', this.sigintCallback);\n+        }\n+\n         // save current cursor settings\n         this.terminal.cursorSave();\n \n@@ -63,7 +80,7 @@\n             this.terminal.cursor(false);\n         }\n \n-        // disable line wrpaping ?\n+        // disable line wrapping ?\n         if (this.options.linewrap === false){\n             this.terminal.lineWrapping(false);\n         }\n@@ -81,6 +98,13 @@\n         if (!this.timer) {\n             return;\n         }\n+        \n+        // remove sigint listener\n+        if (this.sigintCallback){\n+            process.removeListener('SIGINT', this.sigintCallback);\n+            process.removeListener('SIGTERM', this.sigintCallback);\n+            this.sigintCallback = null;\n+        }\n \n         // trigger final rendering\n         this.render();\n@@ -97,7 +121,7 @@\n             this.terminal.cursor(true);\n         }\n \n-        // re-enable line wrpaping ?\n+        // re-enable line wrapping ?\n         if (this.options.linewrap === false){\n             this.terminal.lineWrapping(true);\n         }\n",
+					"match": false,
+					"packageHash": "251e3640f3922324b3911a24da100ea7833904184bda545d96229bf5ecc5899e",
+					"size": 2971,
+					"sourceHash": "da718699e7dcbde42271144e03183d609201b9f271b7d798bb7e81a009c55d98",
+					"status": "content"
+				},
+				"lib/terminal.js": {
+					"diff": "--- published/lib/terminal.js\n+++ rebuilt/lib/terminal.js\n@@ -120,10 +120,13 @@\n \n     // write content to output stream\n     // @TODO use string-width to strip length\n-    write(s){\n+    write(s, rawWrite=false){\n         // line wrapping enabled ? trim output\n-        if (this.linewrap === true){\n+        // this is just a fallback mechanism in case user enabled line-wrapping via options or set it to auto\n+        if (this.linewrap === true && rawWrite === false){\n             this.stream.write(s.substr(0, this.getWidth()));\n+\n+        // standard behaviour with disabled linewrapping\n         }else{\n             this.stream.write(s);\n         }\n",
+					"match": false,
+					"packageHash": "3a23ba24197ff39a509997201c86b48cdb388c44562179cef496d8ef2e5a4674",
+					"size": 3352,
+					"sourceHash": "0b9b39f24a3438c84eadab7e40c5c57d3f8496552842b7d2df4fedffb4e63514",
+					"status": "content"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -1,6 +1,6 @@\n {\n     \"name\": \"cli-progress\",\n-    \"version\": \"3.2.0\",\n+    \"version\": \"3.12.0\",\n     \"description\": \"easy to use progress-bar for command-line/terminal applications\",\n     \"keywords\": [\n         \"cli\",\n@@ -15,29 +15,31 @@\n         \"utility\",\n         \"widget\"\n     ],\n-    \"homepage\": \"https://github.com/AndiDittrich/Node.CLI-Progress\",\n-    \"bugs\": \"https://github.com/AndiDittrich/Node.CLI-Progress/issues\",\n-    \"repository\": \"AndiDittrich/Node.CLI-Progress\",\n+    \"homepage\": \"https://github.com/npkgz/cli-progress\",\n+    \"bugs\": \"https://github.com/npkgz/cli-progress/issues\",\n+    \"repository\": \"npkgz/cli-progress\",\n     \"files\": [\n         \"cli-progress.js\",\n         \"lib/\",\n         \"presets/\"\n     ],\n     \"scripts\": {\n-        \"test\": \"eslint lib/**.js\"\n+        \"lint\": \"eslint lib/**.js\",\n+        \"pretest\": \"npm run lint\",\n+        \"test\": \"mocha test/**/*.test.js\"\n     },\n     \"engines\": {\n         \"node\": \">=4\"\n     },\n     \"main\": \"./cli-progress.js\",\n-    \"author\": \"Andi Dittrich (https://andidittrich.de)\",\n+    \"author\": \"Andi Dittrich (https://andidittrich.com)\",\n     \"license\": \"MIT\",\n     \"dependencies\": {\n-        \"colors\": \"^1.1.2\",\n-        \"string-width\": \"^2.1.1\"\n+        \"string-width\": \"^4.2.3\"\n     },\n     \"devDependencies\": {\n-        \"eslint\": \"^6.4.0\",\n-        \"eslint-config-aenondynamics\": \"^0.2.0\"\n+        \"eslint\": \"^8.14.0\",\n+        \"eslint-config-aenondynamics\": \"^0.2.0\",\n+        \"mocha\": \"^9.2.2\"\n     }\n }\n",
+					"match": false,
+					"packageHash": "0021961e631ae9730ae4eb673ab4054e0177f131a3535c02d66fed64fed6fb5b",
+					"size": 1061,
+					"sourceHash": "bd9bf87be899d7594b2735e54b7380a7bcb08a34377009769d7980daef33ad80",
+					"status": "content"
+				},
+				"presets/shades-grey.js": {
+					"diff": "--- published/presets/shades-grey.js\n+++ rebuilt/presets/shades-grey.js\n@@ -1,8 +1,7 @@\n-const _colors = require('colors');\n \n // cli-progress legacy style as of 1.x\n module.exports = {\n-    format: _colors.grey(' {bar}') + ' {percentage}% | ETA: {eta}s | {value}/{total}',\n+    format: ' \\u001b[90m{bar}\\u001b[0m {percentage}% | ETA: {eta}s | {value}/{total}',\n     barCompleteChar: '\\u2588',\n     barIncompleteChar: '\\u2591'\n };\n\\ No newline at end of file\n",
+					"match": false,
+					"packageHash": "1b4bd011aefd8234e7184c6bd663864c127220f955cbf4d4eae04615cb0dfc45",
+					"size": 246,
+					"sourceHash": "a2d17554a8f66c753c0b89ebd91b9b96bf497b988dd8c47cc2067cd67266af98",
+					"status": "content"
+				},
+				"lib/format-bar.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/format-time.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/format-value.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/formatter.js": {
+					"match": false,
+					"status": "missing-in-package"
+				}
+			},
+			"summary": {
+				"differentFiles": 11,
+				"matchingFiles": 4,
+				"missingInPackage": 4,
+				"missingInSource": 1,
+				"score": 0.2,
+				"totalFiles": 20
+			}
+		}
+	}
+]
