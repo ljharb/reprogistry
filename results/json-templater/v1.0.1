@@ -1,0 +1,103 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-04T21:05:27.213Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:11.7.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "json-templater@1.0.1",
+			"name": "json-templater",
+			"version": "1.0.1",
+			"location": "https://registry.npmjs.org/json-templater/-/json-templater-1.0.1.tgz",
+			"integrity": "sha512-xy4svPQL/sQPOfBsIGGO0wrZEkh/oTXnmJqoT/dCabxoxQy1Kpa1Yo5gpQvsGGu6v2U2tf92YZVq1P7M1wz4lQ==",
+			"publishedAt": "2014-09-21T02:38:33.544Z",
+			"publishedWith": {
+				"node": null,
+				"npm": "1.4.9"
+			}
+		},
+		"source": {
+			"integrity": null,
+			"location": "https://github.com/lightsofapollo/json-templater.git",
+			"spec": "github:lightsofapollo/json-templater#HEAD"
+		},
+		"comparisonHash": "8a2a8dcbb729bf3ee9216e490c955701f0ddebe1",
+		"diff": {
+			"files": {
+				".npmignore": {
+					"match": false,
+					"packageHash": "ca1838cde9e4cfb493f3ea87a08bf973a9d6102aac688fc8828107d5586042aa",
+					"size": 15,
+					"status": "missing-in-source"
+				},
+				".travis.yml": {
+					"diff": "--- published/.travis.yml\n+++ rebuilt/.travis.yml\n@@ -1,4 +1,5 @@\n language: node_js\n node_js:\n-  - \"0.11\"\n-  - \"0.10\"\n+  - 6 \n+  - 8\n+  - 9\n",
+					"match": false,
+					"packageHash": "ee9fda56f77b68a1333e1d648745bac09376c7748f5568ab810874a4fe6e380c",
+					"size": 49,
+					"sourceHash": "88ecc697e574803aab2741e0a2db063f77923b4620d0d7397457fa673ffcc9b9",
+					"status": "content"
+				},
+				"README.md": {
+					"diff": "--- published/README.md\n+++ rebuilt/README.md\n@@ -38,13 +38,83 @@\n // result\n \n {\n-  magic_key_magic: {\n+  magic_key_key: {\n     key: 'interpolation is nice value'\n   }\n }\n \n ```\n \n+### Custom render\n+\n+You can override default renderer using the third argument in `object` (`json-templater/string` is default):\n+\n+`template.json:`\n+```json\n+{\n+  \"magic\": {\n+    \"key\": \"interpolation is nice {{value}}\"\n+  }\n+}\n+```\n+\n+```js\n+var object = require('json-templater/object');\n+\n+object(\n+  require('./template.json'),\n+  { magic: 'key', value: 'value' },\n+  function (value, data, key) {\n+    return value;\n+  }\n+);\n+\n+// result\n+\n+{\n+  \"magic\": {\n+    \"key\": \"interpolation is nice {{value}}\"\n+  }\n+}\n+```\n+\n+#### key reference\n+\n+Handler function gets three arguments:\n+\n+- `value`: value which is about to be handled\n+- `data`: initial template data object\n+- `key`: key corresponding to the value\n+\n+Using this data some complex logic could be implemented, for instance:\n+\n+```js\n+var object = require('json-templater/object');\n+var string = require('json-templater/string');\n+\n+object(\n+  require('./template.json'),\n+  { magic: 'key', value: 'value' },\n+  function (value, data, key) {\n+    // custom renderer for some special value\n+    if (key === 'specialKey') {\n+      return 'foo';\n+    }\n+    // usual string renderer\n+    return string(value, data);\n+  }\n+);\n+\n+// result\n+\n+{\n+  magic: {\n+    specialKey: \"foo\",\n+    key: \"interpolation is nice value\"\n+  }\n+}\n+```\n+\n ## LICENSE\n \n Copyright (c) 2014 Mozilla Foundation\n",
+					"match": false,
+					"packageHash": "394e5f7e33dbf7624a19d11f27dd0b35742428b33a642ecbf7ae2ce96f6e1d4b",
+					"size": 2176,
+					"sourceHash": "ae99df991aa7bc3b5314d27eeacd73b46fff0a396a6230d79b209031ed813d2d",
+					"status": "content"
+				},
+				"object.js": {
+					"diff": "--- published/object.js\n+++ rebuilt/object.js\n@@ -5,7 +5,7 @@\n   var result = {};\n \n   for (var key in object) {\n-    result[walk(key, handler)] = walk(object[key], handler);\n+    result[walk(key, handler, null)] = walk(object[key], handler, key);\n   }\n \n   return result;\n@@ -13,7 +13,7 @@\n \n function walkArray(array, handler) {\n   return array.map(function(input) {\n-    return walk(input, handler);\n+    return walk(input, handler, null);\n   });\n }\n \n@@ -25,31 +25,29 @@\n \n @param {Object} input object to walk and duplicate.\n @param {Function} handler handler to invoke on string types.\n+@param {?String} [key] key corresponding to input, if the latter is a value in object\n */\n-function walk(input, handler) {\n+function walk(input, handler, key) {\n   switch (typeof input) {\n-    // these types cannot be mutated\n-    case 'boolean':\n-    case 'number':\n-    case 'undefined':\n-      return input;\n-\n     // object is slightly special if null we move on\n     case 'object':\n       if (!input) return input;\n       return walkObject(input, handler);\n \n     case 'string':\n-      return handler(input);\n+      return handler(input, key);\n+    // all other types cannot be mutated\n+    default:\n+      return input;\n   }\n }\n \n function render(object, view, handler) {\n   handler = handler || renderString;\n \n-  return walk(object, function(value) {\n-    return handler(value, view);\n-  });\n+  return walk(object, function(value, key) {\n+    return handler(value, view, key);\n+  }, null);\n }\n \n module.exports = render;\n",
+					"match": false,
+					"packageHash": "8a997371f8c51b6af158630142c581818e2699f840c81df4e81f14bdd581f092",
+					"size": 1290,
+					"sourceHash": "55b7f9dbbf035ad13a45250e708479c1a8841e18c30e0390fbc4b59328f869f1",
+					"status": "content"
+				},
+				"object_test.js": {
+					"diff": "--- published/object_test.js\n+++ rebuilt/object_test.js\n@@ -1,8 +1,9 @@\n suite('object', function() {\n   var subject = require('./object');\n+  var renderString = require('./string');\n   var assert = require('assert');\n \n-  function verify(title, input, output) {\n+  function verify(title, input, output, handler) {\n     test(title, function() {\n       var result = subject.apply(subject, input);\n       assert.deepEqual(output, result);\n@@ -83,4 +84,65 @@\n     [{ xfoo: 1 }, {}],\n     { xfoo: 1 }\n   );\n+\n+  verify(\n+    'nested arrays',\n+    [\n+      '{{some.arrays}}',\n+      { some: { arrays: [1, [2, [{3: 4}]]] } }\n+    ],\n+    [1, [2, [{3: 4}]]]\n+  );\n+\n+  verify(\n+    'nested objects', [\n+      '{{some.object}}',\n+      { some: { object: {3: {4: 5}} } }\n+    ],\n+    {3: {4: 5}}\n+  );\n+\n+  verify(\n+    'nested arrays in objects and objects in arrays',\n+    [\n+      {\n+        'arrays{{some.arrays.0}}': '{{some.arrays}}',\n+        'object{{some.arrays.1.0}}': '{{some.object}}'\n+      }, {\n+        some: {\n+          arrays: [1, [2, [{ 3: 4 }]]],\n+          object: { 3: { 4: 5 }}\n+        }\n+      }\n+    ], {\n+      arrays1: [1, [2, [{ 3: 4 }]]],\n+      object2: { 3: { 4: 5 }}\n+    }\n+  );\n+\n+  verify(\n+    'custom handler',\n+    [\n+      {\n+        foo: 'hello from {{foo}}',\n+        bar: 'hello from {{bar}}'\n+      },\n+      {\n+        foo: 'foo',\n+        bar: 'bar'\n+      },\n+      function(value, view, key) {\n+        // let's render the corresponding value in a different way\n+        if (key === 'foo') {\n+          return value;\n+        }\n+        return renderString(value, view);\n+      }\n+    ],\n+    {\n+      foo: 'hello from {{foo}}',\n+      bar: 'hello from bar'\n+    }\n+  );\n+\n });\n",
+					"match": false,
+					"packageHash": "9de78417dcb7331125df94c02e85ba33307840d8064f063f23640d36852a7682",
+					"size": 1234,
+					"sourceHash": "24417bb36953eefed752e98a834c0e9ef8fc819c08e7cd8f08abd2d8a4fd87f3",
+					"status": "content"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -1,10 +1,11 @@\n {\n   \"name\": \"json-templater\",\n-  \"version\": \"1.0.1\",\n+  \"version\": \"1.2.0\",\n   \"description\": \"Simple json/js object template strings\",\n   \"main\": \"template.js\",\n   \"scripts\": {\n-    \"test\": \"./node_modules/.bin/mocha *_test.js\"\n+    \"test\": \"mocha *_test.js\",\n+    \"bench\": \"node-bench bench/object.js\"\n   },\n   \"repository\": {\n     \"type\": \"git\",\n@@ -25,6 +26,6 @@\n   \"devDependencies\": {\n     \"mocha\": \"~1.18.2\",\n     \"bench\": \"~0.3.5\",\n-    \"mustache\": \"~0.8.1\"\n+    \"mustache\": \"~2.2.1\"\n   }\n }\n",
+					"match": false,
+					"packageHash": "f0609e65bdbbce1d008fb64cfbd7a319680a04119aae57b045cf60897bd48ad5",
+					"size": 706,
+					"sourceHash": "e3f756a65bbe559f576a02bd7d0f1293e35d306191dd57cea4cdbc0d5d810e8d",
+					"status": "content"
+				},
+				"string.js": {
+					"diff": "--- published/string.js\n+++ rebuilt/string.js\n@@ -52,13 +52,21 @@\n function replace(input, view) {\n   // optimization to avoid regex calls (indexOf is strictly faster)\n   if (input.indexOf(TEMPLATE_OPEN) === -1) return input;\n-  return input.replace(REGEX, function(whole, path) {\n+  var result;\n+  var replaced = input.replace(REGEX, function(original, path) {\n     var value = extractValue(path, view);\n-    if (value) {\n-      return value;\n+    if (undefined === value || null === value) {\n+      return original;\n     }\n-    return whole;\n+\n+    if (typeof value === 'object') {\n+      result = value;\n+      return;\n+    }\n+\n+    return value;\n   });\n+  return (undefined !== result) ? result : replaced;\n }\n \n module.exports = replace;\n",
+					"match": false,
+					"packageHash": "9770e591828f1236110009aa2a5dea22f6fc4148a916576f3753bc3cf518b12d",
+					"size": 1428,
+					"sourceHash": "1d1038a5ff806e7777d654c3a53322740fd471e5036f608944c2d43a1e4480ac",
+					"status": "content"
+				},
+				"string_test.js": {
+					"diff": "--- published/string_test.js\n+++ rebuilt/string_test.js\n@@ -36,6 +36,12 @@\n   );\n \n   verify(\n+    'nested token false value',\n+    ['{{foo.bar}}', { foo: { bar: false} }],\n+    'false'\n+  );\n+\n+  verify(\n     'replace in the middle of string',\n     [\n       'foo bar {{baz}} qux',\n",
+					"match": false,
+					"packageHash": "efe36cc10abb2bd463a68a1331d1f9eb52b07fc5ac7d7bf336af0b988a35eab7",
+					"size": 1364,
+					"sourceHash": "8347a49bd54409baede7cae8c589dff62333db30362233df2adcf022f1a78757",
+					"status": "content"
+				}
+			},
+			"summary": {
+				"differentFiles": 7,
+				"matchingFiles": 4,
+				"missingInPackage": 0,
+				"missingInSource": 1,
+				"score": 0.3333333333333333,
+				"totalFiles": 12
+			}
+		}
+	}
+]
