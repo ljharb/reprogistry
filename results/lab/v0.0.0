@@ -1,0 +1,253 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-04T21:48:59.352Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:11.7.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "lab@0.0.0",
+			"name": "lab",
+			"version": "0.0.0",
+			"location": "https://registry.npmjs.org/lab/-/lab-0.0.0.tgz",
+			"integrity": "sha512-CAWfUxcDR/D8OjkbjN404cAe4z/rcukXJ6lVuCdI6U8A2Opyq6ekrge44uakjqjvmvW9nhjLN9xM49R9sUf0WQ==",
+			"publishedAt": "2013-03-07T19:33:43.255Z",
+			"publishedWith": {
+				"node": null,
+				"npm": "1.2.11"
+			}
+		},
+		"source": {
+			"integrity": null,
+			"location": "git://github.com/spumko/lab",
+			"spec": "github:spumko/lab#HEAD"
+		},
+		"comparisonHash": "8a2a8dcbb729bf3ee9216e490c955701f0ddebe1",
+		"diff": {
+			"files": {
+				".npmignore": {
+					"match": false,
+					"packageHash": "5d817dc581151e29c850110c05fc58993754607f0006e01ae89f11d649d95005",
+					"size": 178,
+					"status": "missing-in-source"
+				},
+				".travis.yml": {
+					"match": false,
+					"packageHash": "c6b400fe463927770d01af229d36bdae1a5179db12a0bc90b3be6c48977df358",
+					"size": 37,
+					"status": "missing-in-source"
+				},
+				"LICENSE": {
+					"match": false,
+					"packageHash": "8444780b8f274f47e5c477c074ba413fb54628963d5e7b10792a740e3ce525e1",
+					"size": 1473,
+					"status": "missing-in-source"
+				},
+				"Makefile": {
+					"match": false,
+					"packageHash": "878458e2266113f521ebac12f2e0a9f3d97e808a017dde0c5e83a055c3ba9de9",
+					"size": 439,
+					"status": "missing-in-source"
+				},
+				"README.md": {
+					"diff": "--- published/README.md\n+++ rebuilt/README.md\n@@ -1,6 +1,17 @@\n-<a href=\"https://github.com/spumko\"><img src=\"https://raw.github.com/spumko/spumko/master/images/from.png\" align=\"right\" /></a>\n-![lab Logo](https://raw.github.com/spumko/lab/master/images/lab.png)\n+<a href=\"https://hapi.dev\"><img src=\"https://raw.githubusercontent.com/hapijs/assets/master/images/family.png\" width=\"180px\" align=\"right\" /></a>\n \n-Test utility\n+# @hapi/lab\n \n-[![Build Status](https://secure.travis-ci.org/spumko/lab.png)](http://travis-ci.org/spumko/lab)\n+#### Node test utility.\n+\n+**lab** is part of the **hapi** ecosystem and was designed to work seamlessly with the [hapi web framework](https://hapi.dev) and its other components (but works great on its own or with other frameworks). If you are using a different web framework and find this module useful, check out [hapi](https://hapi.dev) – they work even better together.\n+\n+### Visit the [hapi.dev](https://hapi.dev) Developer Portal for tutorials, documentation, and support\n+\n+## Useful resources\n+\n+- [Documentation and API](https://hapi.dev/family/lab/)\n+- [Version status](https://hapi.dev/resources/status/#lab) (builds, dependencies, node versions, licenses, eol)\n+- [Changelog](https://hapi.dev/family/lab/changelog/)\n+- [Project policies](https://hapi.dev/policies/)\n+- [Free and commercial support options](https://hapi.dev/support/)\n",
+					"match": false,
+					"packageHash": "fee076dcf924ed0a6c3cd69686cff063c66fe833dc6770888d654ad7f1d96a03",
+					"size": 308,
+					"sourceHash": "9abd14c56057861d8df20c00e065e56b75bc3cc7021ba0e7d8c9cad6bde11e3e",
+					"status": "content"
+				},
+				"index.js": {
+					"match": false,
+					"packageHash": "f84b7747688f053b22b9219fb7e8b002ab79187c3802cc62b9b4e1aa0d6cdfd6",
+					"size": 34,
+					"status": "missing-in-source"
+				},
+				"lib/index.js": {
+					"diff": "--- published/lib/index.js\n+++ rebuilt/lib/index.js\n@@ -0,0 +1,282 @@\n+'use strict';\n+\n+const Hoek = require('@hapi/hoek');\n+\n+const Modules = require('./modules');\n+const Runner = require('./runner');\n+\n+\n+const internals = {};\n+\n+\n+exports.report = Runner.report;\n+\n+exports.execute = Runner.execute;\n+\n+exports.assertions = null;                                              // Set by the -a command line option\n+\n+// Inject modules (with lazy loading)\n+\n+for (const module of ['coverage', 'leaks', 'types']) {\n+    Object.defineProperty(exports, module, Object.getOwnPropertyDescriptor(Modules, module));\n+}\n+\n+/*\n+    experiment('Utilities', () => {\n+\n+        experiment('isEven()', () => {\n+\n+            test('returns true on even values', () => {\n+\n+            });\n+        });\n+    });\n+*/\n+\n+\n+exports.script = function (options) {\n+\n+    options = options || {};\n+\n+    global._labScriptRun = true;                                        // Compared by CLI to detect missing exports.lab\n+\n+    const script = {\n+        _current: {\n+            experiments: [],\n+            tests: [],\n+            options: {},\n+            title: 'script'\n+        },\n+        _type: null,                                                    // 'cjs' or 'esm' if known\n+        _titles: [],\n+        _path: [],\n+        _count: 0,\n+        _executionScheduled: false,\n+        _onlyNodes: [],\n+        _cli: options.cli,\n+        _setOnly: function (experiment, test, path) {\n+\n+            this._onlyNodes.push({ experiment, test, path });\n+        }\n+    };\n+\n+    script._root = script._current;\n+\n+    script.experiment = internals.experiment.bind(script);\n+    script.experiment.skip = internals.skip(script, 'experiment');\n+    script.experiment.only = internals.only(script, 'experiment');\n+    script.describe = script.experiment;\n+    script.suite = script.experiment;\n+\n+    script.test = internals.test.bind(script);\n+    script.test.skip = internals.skip(script, 'test');\n+    script.test.only = internals.only(script, 'test');\n+    script.it = script.test;\n+\n+    script.before = internals.before.bind(script);\n+    script.beforeEach = internals.beforeEach.bind(script);\n+    script.after = internals.after.bind(script);\n+    script.afterEach = internals.afterEach.bind(script);\n+\n+    if (exports.assertions) {\n+        script.expect = exports.assertions.expect;\n+        script.fail = exports.assertions.fail;\n+    }\n+\n+    if (options.schedule !== false) {                   // Defaults to true\n+        setImmediate(() => {\n+\n+            if (!script._executionScheduled) {\n+                Runner.report(script, options);         // Schedule automatic execution when used without the CLI\n+            }\n+        });\n+    }\n+\n+    return script;\n+};\n+\n",
+					"match": false,
+					"packageHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+					"size": 0,
+					"sourceHash": "268846a47553d6b39db8dc6b66059355d971aa6438588423f3d30a1b9605c418",
+					"status": "content"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -1,27 +1,66 @@\n {\n-  \"name\": \"lab\",\n-  \"description\": \"Test utility\",\n-  \"version\": \"0.0.0\",\n-  \"author\": \"Eran Hammer <eran@hueniverse.com> (http://hueniverse.com)\",\n-  \"contributors\": [],\n-  \"repository\": \"git://github.com/spumko/lab\",\n-  \"main\": \"index\",\n-  \"keywords\": [\n-    \"test\"\n-  ],\n-  \"engines\": {\n-    \"node\": \"0.8.x\"\n-  },\n-  \"dependencies\": {\n-  },\n-  \"devDependencies\": {\n-  },\n-  \"scripts\": {\n-  },\n-  \"licenses\": [\n-    {\n-      \"type\": \"BSD\",\n-      \"url\": \"http://github.com/spumko/lab/raw/master/LICENSE\"\n-    }\n-  ]\n+    \"name\": \"@hapi/lab\",\n+    \"description\": \"Test utility\",\n+    \"version\": \"26.0.0\",\n+    \"repository\": \"git://github.com/hapijs/lab\",\n+    \"main\": \"lib/index.js\",\n+    \"types\": \"lib/index.d.ts\",\n+    \"engines\": {\n+        \"node\": \">=18\"\n+    },\n+    \"keywords\": [\n+        \"test\",\n+        \"runner\"\n+    ],\n+    \"files\": [\n+        \"bin/lab\",\n+        \"lib\"\n+    ],\n+    \"dependencies\": {\n+        \"@babel/core\": \"^7.16.0\",\n+        \"@babel/eslint-parser\": \"^7.25.1\",\n+        \"@hapi/bossy\": \"^6.0.0\",\n+        \"@hapi/eslint-plugin\": \"^7.0.0\",\n+        \"@hapi/hoek\": \"^11.0.2\",\n+        \"diff\": \"^5.0.0\",\n+        \"eslint\": \"9.x.x\",\n+        \"find-rc\": \"4.x.x\",\n+        \"globby\": \"^11.1.0\",\n+        \"handlebars\": \"4.x.x\",\n+        \"mo-walk\": \"^1.2.0\",\n+        \"seedrandom\": \"3.x.x\",\n+        \"source-map\": \"0.7.x\",\n+        \"source-map-support\": \"0.5.x\",\n+        \"supports-color\": \"^8.1.1\",\n+        \"will-call\": \"1.x.x\"\n+    },\n+    \"peerDependencies\": {\n+        \"@hapi/eslint-plugin\": \"^7.0.0\",\n+        \"typescript\": \">=4.4.0\"\n+    },\n+    \"peerDependenciesMeta\": {\n+        \"typescript\": {\n+            \"optional\": true\n+        }\n+    },\n+    \"devDependencies\": {\n+        \"@hapi/code\": \"^9.0.0\",\n+        \"@hapi/somever\": \"^4.0.0\",\n+        \"@types/eslint\": \"^9.6.0\",\n+        \"@types/node\": \"^18.11.17\",\n+        \"cpr\": \"3.x.x\",\n+        \"lab-event-reporter\": \"1.x.x\",\n+        \"semver\": \"7.x.x\",\n+        \"tsconfig-paths\": \"^4.0.0\",\n+        \"typescript\": \"^4.5.4\",\n+        \"typescript-eslint\": \"^8.1.0\"\n+    },\n+    \"bin\": {\n+        \"lab\": \"./bin/lab\"\n+    },\n+    \"scripts\": {\n+        \"test\": \"node ./bin/_lab -f -L -t 100 -m 10000 --types-test test/index.ts\",\n+        \"test-cov-html\": \"node ./bin/_lab -f -L -r html -m 10000 -o coverage.html\"\n+    },\n+    \"license\": \"BSD-3-Clause\"\n }\n",
+					"match": false,
+					"packageHash": "fc27ae80629b03f68a86f85539de7cd959610bac40950abc3e210149ace11ba0",
+					"size": 498,
+					"sourceHash": "58854502c44e68a605298cc28d725f7599db38d3de93a98144bd6a28f248b714",
+					"status": "content"
+				},
+				"test/index.js": {
+					"match": false,
+					"packageHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+					"size": 0,
+					"status": "missing-in-source"
+				},
+				"LICENSE.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"bin/lab": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/cli.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/index.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/linter/.eslintrc.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/linter/index.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/modules/coverage.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/modules/index.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/modules/leaks.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/modules/lint.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/modules/transform.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/modules/types.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/modules/typescript.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/reporters/clover/report.xml": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/reporters/clover.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/reporters/console.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/reporters/html/partials/cov.html": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/reporters/html/partials/css.html": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/reporters/html/partials/file.html": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/reporters/html/partials/line.html": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/reporters/html/partials/lint-file.html": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/reporters/html/partials/lint.html": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/reporters/html/partials/linting.html": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/reporters/html/partials/menu.html": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/reporters/html/partials/scripts.html": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/reporters/html/partials/tests.html": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/reporters/html/report.html": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/reporters/html.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/reporters/index.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/reporters/json.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/reporters/junit/report.xml": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/reporters/junit.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/reporters/lcov.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/reporters/multiple.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/reporters/tap.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/runner.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/source-map.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/utils.js": {
+					"match": false,
+					"status": "missing-in-package"
+				}
+			},
+			"summary": {
+				"differentFiles": 3,
+				"matchingFiles": 0,
+				"missingInPackage": 38,
+				"missingInSource": 6,
+				"score": 0,
+				"totalFiles": 47
+			}
+		}
+	}
+]
