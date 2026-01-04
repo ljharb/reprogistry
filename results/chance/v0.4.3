@@ -1,0 +1,67 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-04T09:00:53.387Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:11.7.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "chance@0.4.3",
+			"name": "chance",
+			"version": "0.4.3",
+			"location": "https://registry.npmjs.org/chance/-/chance-0.4.3.tgz",
+			"integrity": "sha512-NMrZssEaCS/KBsOyOIp6AcIKlJhESomUveXowQFkrU5kEtVwXnkaxxCtt9h3br+tUEta6IJrDJgksOId+qOFDw==",
+			"publishedAt": "2013-08-10T23:35:57.335Z",
+			"publishedWith": {
+				"node": null,
+				"npm": "1.3.2"
+			}
+		},
+		"source": {
+			"integrity": null,
+			"location": "https://github.com/victorquinn/chancejs.git",
+			"spec": "github:victorquinn/chancejs#0.4.3"
+		},
+		"comparisonHash": "8a2a8dcbb729bf3ee9216e490c955701f0ddebe1",
+		"diff": {
+			"files": {
+				".npmignore": {
+					"match": false,
+					"packageHash": "84fad15a06e4689789b979b54c2d4962847ec8a8919ba6c4a574fd5e4bf2b452",
+					"size": 35,
+					"status": "missing-in-source"
+				},
+				"chance.js": {
+					"diff": "--- published/chance.js\n+++ rebuilt/chance.js\n@@ -5,15 +5,14 @@\n \n (function () {\n \n-    // Constants\n+    // Constructor\n+\n     var MAX_INT = 9007199254740992;\n     var MIN_INT = -MAX_INT;\n     var NUMBERS = '0123456789';\n     var CHARS_LOWER = 'abcdefghijklmnopqrstuvwxyz';\n     var CHARS_UPPER = CHARS_LOWER.toUpperCase();\n     var HEX_POOL  = NUMBERS + \"abcdef\";\n-\n-    // Constructor\n     var Chance = function (seed) {\n         if (seed !== undefined) {\n             // If we were passed a generator rather than a seed, use it.\n@@ -33,26 +32,6 @@\n         }\n     };\n \n-    // Random helper functions\n-    function initOptions(options, defaults) {\n-        options || (options = {});\n-        if (!defaults) {\n-            return options;\n-        }\n-        for (var i in defaults) {\n-            if (typeof options[i] === 'undefined') {\n-                options[i] = defaults[i];\n-            }\n-        }\n-        return options;\n-    }\n-\n-    function testRange(test, errorMessage) {\n-        if (test) {\n-            throw new RangeError(errorMessage);\n-        }\n-    }\n-\n     // -- Basics --\n \n     Chance.prototype.bool = function (options) {\n@@ -68,37 +47,62 @@\n         return this.random() * 100 < options.likelihood;\n     };\n \n-    Chance.prototype.character = function (options) {\n-        options = initOptions(options);\n+    // NOTE the max and min are INCLUDED in the range. So:\n+    //\n+    // chance.natural({min: 1, max: 3});\n+    //\n+    // would return either 1, 2, or 3.\n \n-        var symbols = \"!@#$%^&*()[]\",\n-            letters, pool;\n+    Chance.prototype.natural = function (options) {\n \n-        testRange(\n-            options.alpha && options.symbols,\n-            \"Chance: Cannot specify both alpha and symbols.\"\n-        );\n+        // 9007199254740992 (2^53) is the max integer number in JavaScript\n+        // See: http://vq.io/132sa2j\n+        options = initOptions(options, {min: 0, max: MAX_INT});\n \n+        testRange(options.min > options.max, \"Chance: Min cannot be greater than Max.\");\n \n-        if (options.casing === 'lower') {\n-            letters = CHARS_LOWER;\n-        } else if (options.casing === 'upper') {\n-            letters = CHARS_UPPER;\n-        } else {\n-            letters = CHARS_LOWER + CHARS_UPPER;\n-        }\n+        return Math.floor(this.random() * (options.max - options.min + 1) + options.min);\n+    };\n \n-        if (options.pool) {\n-            pool = options.pool;\n-        } else if (options.alpha) {\n-            pool = letters;\n-        } else if (options.symbols) {\n-            pool = symbols;\n-        } else {\n-            pool = letters + NUMBERS + symbols;\n-        }\n+    Chance.prototype.integer = function (options) {\n+        var num, range;\n \n-        return pool.charAt(this.natural({max: (pool.length - 1)}));\n+        options = initOptions(options, {min : MIN_INT, max : MAX_INT});\n+\n+        // Greatest of absolute value of either max or min so we know we're\n+        // including the entire search domain.\n",
+					"match": false,
+					"packageHash": "30287fc1e18dc00f6164f1d5a174ae439a82ec5f0d57cddae2d105086f20ae53",
+					"size": 41050,
+					"sourceHash": "d0a32715d74c1cdce8ae441070e54eba7a03de1a79f257d3bcc940b694b1be59",
+					"status": "content"
+				},
+				"test/test.helpers.js": {
+					"diff": "--- published/test/test.helpers.js\n+++ rebuilt/test/test.helpers.js\n@@ -15,29 +15,13 @@\n         });\n \n         describe(\"pick()\", function () {\n-            it(\"returns a single element when called without a count argument\", function () {\n+            it(\"returns a single element\", function () {\n                 arr = ['a', 'b', 'c', 'd'];\n                 _(1000).times(function () {\n                     picked = chance.pick(arr);\n                     expect(picked).to.have.length(1);\n                 });\n             });\n-\n-            it(\"returns multiple elements when called with a count argument\", function () {\n-                arr = ['a', 'b', 'c', 'd'];\n-                _(1000).times(function () {\n-                    picked = chance.pick(arr, 3);\n-                    expect(picked).to.have.length(3);\n-                });\n-            });\n-\n-            it(\"doesn't destroy the original array when called with a count argument\", function () {\n-                arr = ['a', 'b', 'c', 'd', 'e', 'f'];\n-                _(1000).times(function () {\n-                    picked = chance.pick(arr, 3);\n-                    expect(arr).to.have.length(6);\n-                });\n-            });\n         });\n \n         describe(\"shuffle()\", function () {\n@@ -45,10 +29,6 @@\n                 arr = ['a', 'b', 'c', 'd', 'e'];\n                 _(1000).times(function () {\n                     expect(chance.shuffle(_.clone(arr))).to.have.length(5);\n-                    expect(chance.shuffle(_.clone(arr))).to.contain('a');\n-                    var arr2 = _.clone(arr);\n-                    chance.shuffle(arr2);\n-                    expect(arr2).to.not.be.empty;\n                 });\n             });\n         });\n",
+					"match": false,
+					"packageHash": "c450a19c87279a6f629003f8c790895dada84ac7a0147cc1ba1094ffa5aee61c",
+					"size": 2170,
+					"sourceHash": "e2b30e7fbbc1e3af615610207466e6ba35340ea67f15e0087393288327b9db8b",
+					"status": "content"
+				},
+				"chance.min.js": {
+					"match": false,
+					"status": "missing-in-package"
+				}
+			},
+			"summary": {
+				"differentFiles": 2,
+				"matchingFiles": 15,
+				"missingInPackage": 1,
+				"missingInSource": 1,
+				"score": 0.7894736842105263,
+				"totalFiles": 19
+			}
+		}
+	}
+]

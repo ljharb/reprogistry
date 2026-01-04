@@ -1,0 +1,91 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-04T09:00:53.572Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:11.7.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "chance@0.3.0",
+			"name": "chance",
+			"version": "0.3.0",
+			"location": "https://registry.npmjs.org/chance/-/chance-0.3.0.tgz",
+			"integrity": "sha512-QDoesurkTotZv2Sqk7QEVc4PaFd8p3iH8RjS+I5KENLGk01k3fnHM9KFjA9O4xCKjaB4WU4EpbO4Qgu8/LiLew==",
+			"publishedAt": "2013-06-24T17:11:17.823Z",
+			"publishedWith": {
+				"node": null,
+				"npm": "1.2.18"
+			}
+		},
+		"source": {
+			"integrity": null,
+			"location": "https://github.com/victorquinn/chancejs.git",
+			"spec": "github:victorquinn/chancejs#0.3.0"
+		},
+		"comparisonHash": "8a2a8dcbb729bf3ee9216e490c955701f0ddebe1",
+		"diff": {
+			"files": {
+				".npmignore": {
+					"match": false,
+					"packageHash": "dba27c31aad935787bb275c3e5e4e957708f15386de599eff1db476022cd7e4c",
+					"size": 12,
+					"status": "missing-in-source"
+				},
+				"chance.js": {
+					"diff": "--- published/chance.js\n+++ rebuilt/chance.js\n@@ -66,31 +66,8 @@\n         var lower = \"abcdefghijklmnopqrstuvwxyz\",\n             upper = \"ABCDEFGHIJKLMNOPQRSTUVWXYZ\",\n             numbers = \"0123456789\",\n-            symbols = \"!@#$%^&*()[]\",\n-            letters, pool;\n-\n-        if (options.alpha && options.symbols) {\n-            throw new RangeError(\"Chance: Cannot specify both alpha and symbols.\");\n-        }\n-\n-\n-        if (options.casing === 'lower') {\n-            letters = lower;\n-        } else if (options.casing === 'upper') {\n-            letters = upper;\n-        } else {\n-            letters = lower + upper;\n-        }\n-\n-        if (options.pool) {\n-            pool = options.pool;\n-        } else if (options.alpha) {\n-            pool = letters;\n-        } else if (options.symbols) {\n-            pool = symbols;\n-        } else {\n-            pool = letters + numbers + symbols;\n-        }\n+            chars = \"!@#$%^&*()\",\n+            pool = options.pool || (lower + upper + numbers + chars);\n \n         return pool.charAt(this.natural({max: (pool.length - 1)}));\n     };\n@@ -108,23 +85,15 @@\n         return text;\n     };\n \n-    // -- End Basics --\n-\n-    // -- Helpers --\n-\n     Chance.prototype.capitalize = function (word) {\n         return word.charAt(0).toUpperCase() + word.substr(1);\n     };\n \n-    Chance.prototype.pick = function (arr) {\n-        return arr[this.natural({max: arr.length - 1})];\n-    };\n-\n-    // -- End Helpers --\n+    // -- End Basics --\n \n     // -- Text --\n \n-    Chance.prototype.name_prefixes = function () {\n+    Chance.prototype.prefixes = function () {\n         return [\n             {name: 'Doctor', abbreviation: 'Dr.'},\n             {name: 'Miss', abbreviation: 'Miss'},\n@@ -133,11 +102,11 @@\n         ];\n     };\n \n-    Chance.prototype.name_prefix = function (options) {\n+    Chance.prototype.prefix = function (options) {\n         options = options || {};\n-        return options.full ?\n-            this.pick(this.name_prefixes()).name :\n-            this.pick(this.name_prefixes()).abbreviation;\n+        return options.abbreviation ?\n+            this.prefixes()[this.natural({max: this.prefixes().length - 1})].abbreviation :\n+            this.prefixes()[this.natural({max: this.prefixes().length - 1})].name;\n     };\n \n     Chance.prototype.name = function (options) {\n@@ -150,7 +119,7 @@\n         if (options.middle) {\n             name = first + ' ' + this.capitalize(this.word()) + ' ' + last;\n         } else if (options.middle_initial) {\n-            name = first + ' ' + this.character({alpha: true, casing: 'upper'}) + '. ' + last;\n+            name = first + ' ' + this.capitalize(this.character('abcdefghijklmnopqrstuvwxyz')) + ' ' + last;\n         } else {\n             name = first + ' ' + last;\n         }\n@@ -287,7 +256,6 @@\n     };\n \n     Chance.prototype.street_suffixes = function () {\n-        // These are the most common suffixes.\n         return [\n             {name: 'Avenue', abbreviation: 'Ave'},\n             {name: 'Boulevard', abbreviation: 'Blvd'},\n@@ -328,7 +296,10 @@\n     };\n \n     Chance.prototype.street_suffix = function (options) {\n-        return this.pick(this.street_suffixes(options));\n",
+					"match": false,
+					"packageHash": "8adb8829c675bd2fc05542b33940c2a16662da668bf4d7049cfef5ec777e5d2a",
+					"size": 22028,
+					"sourceHash": "52ae8e20cf06f8e5cb3383c9f830dc7ee106438e1ba1cdd7784499fc08242c96",
+					"status": "content"
+				},
+				"test/base.js": {
+					"diff": "--- published/test/base.js\n+++ rebuilt/test/base.js\n@@ -24,7 +24,7 @@\n \n require(['mocha', 'chai'], function (mocha, chai) {\n     var assert = chai.assert;\n-    require(['test.basic', 'test.text', 'test.address', 'test.misc', 'test.name', 'test.helpers'], function () {\n+    require(['test.basic', 'test.text', 'test.address', 'test.misc'], function () {\n         mocha.reporter('html');\n \n         // Start runner\n",
+					"match": false,
+					"packageHash": "798f994be76c2985e0df0baa4b498eede3b26ceb4584f5529fbae98037b0616b",
+					"size": 1010,
+					"sourceHash": "7dfbce2623dba5536270588d15545514eb5b7e836a392fd3265cf282bd456897",
+					"status": "content"
+				},
+				"test/test.basic.js": {
+					"diff": "--- published/test/test.basic.js\n+++ rebuilt/test/test.basic.js\n@@ -118,33 +118,6 @@\n                     expect(character).to.match(/[abcde]/);\n                 });\n             });\n-\n-            it(\"allows only alpha\", function () {\n-                _(1000).times(function () {\n-                    character = chance.character({alpha: true});\n-                    expect(character).to.match(/[a-zA-Z]/);\n-                });\n-\n-                expect(function () { chance.character({alpha: true, symbols: true}); }).to.throw(RangeError);\n-            });\n-\n-            it(\"obeys case\", function () {\n-                _(1000).times(function () {\n-                    character = chance.character({alpha: true});\n-                    expect(character).to.match(/[a-zA-Z]/);\n-                });\n-\n-                _(1000).times(function () {\n-                    character = chance.character({alpha: true, casing: 'upper'});\n-                    expect(character).to.match(/[A-Z]/);\n-                });\n-\n-                _(1000).times(function () {\n-                    character = chance.character({alpha: true, casing: 'lower'});\n-                    expect(character).to.match(/[a-z]/);\n-                });\n-            });\n-\n         });\n \n         describe(\"String\", function () {\n",
+					"match": false,
+					"packageHash": "271154963b42471d008a758286c086226157c8cc05f880a66158ff40dd481dc7",
+					"size": 7382,
+					"sourceHash": "c965965972c4abe57bece9929a8ad7f9d07f2ba64078a1734cdf590f15a64398",
+					"status": "content"
+				},
+				"test/test.helpers.js": {
+					"match": false,
+					"packageHash": "a9dd48d6a7895e7408146a6719a2bd51b82a1cd2a62df90ed330e8e2322f3806",
+					"size": 935,
+					"status": "missing-in-source"
+				},
+				"test/test.misc.js": {
+					"diff": "--- published/test/test.misc.js\n+++ rebuilt/test/test.misc.js\n@@ -45,13 +45,6 @@\n                 expect(die).to.be.within(1, 20);\n             });\n         });\n-\n-        it(\"returns a properly bounded d100\", function () {\n-            _(1000).times(function () {\n-                die = chance.d100();\n-                expect(die).to.be.within(1, 100);\n-            });\n-        });\n     });\n \n     describe(\"Guid\", function () {\n",
+					"match": false,
+					"packageHash": "461f9696bfc210af6b29ae0a0a8641251019201159656c65b9a293b85ef97c17",
+					"size": 2030,
+					"sourceHash": "83a34543945108d8235a847a073e63a7302888cf0bd29b91af25fd44cebcf80c",
+					"status": "content"
+				},
+				"test/test.name.js": {
+					"match": false,
+					"packageHash": "422f8b9dddeda1621be268f24028ad2dc17e6a4e4de6753b4be701dc46bfb088",
+					"size": 2067,
+					"status": "missing-in-source"
+				}
+			},
+			"summary": {
+				"differentFiles": 4,
+				"matchingFiles": 6,
+				"missingInPackage": 0,
+				"missingInSource": 3,
+				"score": 0.46153846153846156,
+				"totalFiles": 13
+			}
+		}
+	}
+]
