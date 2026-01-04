@@ -1,0 +1,167 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-04T22:09:43.489Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:11.7.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "long@1.0.0",
+			"name": "long",
+			"version": "1.0.0",
+			"location": "https://registry.npmjs.org/long/-/long-1.0.0.tgz",
+			"integrity": "sha512-REddzSe1UYRJ83q8DwWWlj8cmRyzTl+p3i01QIBOSAgVN6cO5Lky4LYnLPBsUdyjvTdWOr5cZofBqa8trbdBoQ==",
+			"publishedAt": "2013-03-12T13:25:37.003Z",
+			"publishedWith": {
+				"node": null,
+				"npm": "1.2.0"
+			}
+		},
+		"source": {
+			"integrity": "sha512-OxAawl6lErDCKtzXuLju33vHEe6Ffuh3TD2J22KfDHo9OcENILUdBASrTXacbnCfsNjcKvMahaJ2U6zJsw8YCA==",
+			"location": "https://github.com/dcodeIO/Long.js.git",
+			"spec": "github:dcodeIO/Long.js#HEAD"
+		},
+		"comparisonHash": "8a2a8dcbb729bf3ee9216e490c955701f0ddebe1",
+		"diff": {
+			"files": {
+				".npmignore": {
+					"match": false,
+					"packageHash": "7c12a77f46e042412273b579d497f70d7ba24c3892a295b393a06c84fc4921c3",
+					"size": 29,
+					"status": "missing-in-source"
+				},
+				"Long.js": {
+					"match": false,
+					"packageHash": "1f71124abdf94fbf1d823cb5762b789ce601ae610f1e51078660a1de0d0b0e33",
+					"size": 26521,
+					"status": "missing-in-source"
+				},
+				"Long.min.js": {
+					"match": false,
+					"packageHash": "a1fa57c274684064656289da9008662f992f110bd903f3848f7cca44059b7d28",
+					"size": 6452,
+					"status": "missing-in-source"
+				},
+				"NOTICE": {
+					"match": false,
+					"packageHash": "d9cf12b34b0273357a6c15d4ea467066069fca249d248bc4bb81f443de768315",
+					"size": 124,
+					"status": "missing-in-source"
+				},
+				"README.md": {
+					"diff": "--- published/README.md\n+++ rebuilt/README.md\n@@ -1,62 +1,286 @@\n-Long\n-====\n-A Long class for representing a 64-bit two's-complement integer value derived from the [Closure Library](https://code.google.com/p/closure-library/)\n-for stand-alone use.\n-\n-Features\n---------\n-* [CommonJS](http://www.commonjs.org/) compatible\n-* [RequireJS](http://requirejs.org/)/AMD compatible\n-* Shim compatible (include the script, then use var ByteBuffer = dcodeIO.ByteBuffer;)\n-* [node.js](http://nodejs.org) compatible, also available via [npm](https://npmjs.org/package/long)\n-* Fully documented using [jsdoc3](https://github.com/jsdoc3/jsdoc)\n-* Zero production dependencies\n-* Small footprint\n-\n-Usage\n------\n-\n-#### node.js / CommonJS ####\n-\n-Install: `npm install long`\n-\n-```javascript\n-var Long = require(\"Long\");\n-var longVal = new Long(0xFFFFFFFF, 0x7FFFFFFF);\n-console.log(longVal.toString());\n-...\n-```\n+# long.js\n+\n+A Long class for representing a 64 bit two's-complement integer value derived from the [Closure Library](https://github.com/google/closure-library)\n+for stand-alone use and extended with unsigned support.\n+\n+[![Build Status](https://img.shields.io/github/actions/workflow/status/dcodeIO/long.js/test.yml?branch=main&label=test&logo=github)](https://github.com/dcodeIO/long.js/actions/workflows/test.yml) [![Publish Status](https://img.shields.io/github/actions/workflow/status/dcodeIO/long.js/publish.yml?branch=main&label=publish&logo=github)](https://github.com/dcodeIO/long.js/actions/workflows/publish.yml) [![npm](https://img.shields.io/npm/v/long.svg?label=npm&color=007acc&logo=npm)](https://www.npmjs.com/package/long)\n+\n+## Background\n+\n+As of [ECMA-262 5th Edition](http://ecma262-5.com/ELS5_HTML.htm#Section_8.5), \"all the positive and negative integers\n+whose magnitude is no greater than 2<sup>53</sup> are representable in the Number type\", which is \"representing the\n+doubleprecision 64-bit format IEEE 754 values as specified in the IEEE Standard for Binary Floating-Point Arithmetic\".\n+The [maximum safe integer](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number/MAX_SAFE_INTEGER)\n+in JavaScript is 2<sup>53</sup>-1.\n \n-#### RequireJS / AMD ####\n+Example: 2<sup>64</sup>-1 is 1844674407370955**1615** but in JavaScript it evaluates to 1844674407370955**2000**.\n \n-````javascript\n-require([\"path/to/Long.js\"], function(Long) {\n-    var longVal = new Long(0xFFFFFFFF, 0x7FFFFFFF);\n-    console.log(longVal.toString());\n-});\n-````\n+Furthermore, bitwise operators in JavaScript \"deal only with integers in the range −2<sup>31</sup> through\n+2<sup>31</sup>−1, inclusive, or in the range 0 through 2<sup>32</sup>−1, inclusive. These operators accept any value of\n+the Number type but first convert each such value to one of 2<sup>32</sup> integer values.\"\n \n-### Browser / shim ####\n+In some use cases, however, it is required to be able to reliably work with and perform bitwise operations on the full\n+64 bits. This is where long.js comes into play.\n \n-```html\n-<script src=\"//raw.github.com/dcodeIO/Long.js/master/Long.min.js\"></script>\n+## Usage\n+\n+The package exports an ECMAScript module with an UMD fallback.\n+\n+```\n+$> npm install long\n ```\n \n-```javascript\n-var Long = dcodeIO.Long;\n-var longVal = new Long(0xFFFFFFFF, 0x7FFFFFFF);\n-alert(longVal.toString());\n+```js\n+import Long from \"long\";\n+\n+var value = new Long(0xFFFFFFFF, 0x7FFFFFFF);\n+console.log(value.toString());\n+...\n ```\n \n-Documentation\n--------------\n-* [View documentation](http://htmlpreview.github.com/?http://github.com/dcodeIO/Long.js/master/docs/Long.html)\n+Note that mixing ESM and CommonJS is not recommended as it yields different classes, albeit with the same functionality.\n+\n+### Usage with a CDN\n+\n+- From GitHub via [jsDelivr](https://www.jsdelivr.com):<br />\n+  `https://cdn.jsdelivr.net/gh/dcodeIO/long.js@TAG/index.js` (ESM)\n+- From npm via [jsDelivr](https://www.jsdelivr.com):<br />\n+  `https://cdn.jsdelivr.net/npm/long@VERSION/index.js` (ESM)<br />\n+  `https://cdn.jsdelivr.net/npm/long@VERSION/umd/index.js` (UMD)\n+- From npm via [unpkg](https://unpkg.com):<br />\n+  `https://unpkg.com/long@VERSION/index.js` (ESM)<br />\n+  `https://unpkg.com/long@VERSION/umd/index.js` (UMD)\n",
+					"match": false,
+					"packageHash": "3416b3b08374395cdeafb7337dc6bbae6cd4434e422f17ad28c686c4b74965e6",
+					"size": 1617,
+					"sourceHash": "0f8d18d81099b6d07cf2b533b682827d8c4334c91ec76241adba0dd6fd5da2a8",
+					"status": "content"
+				},
+				"docs/Long.html": {
+					"match": false,
+					"packageHash": "e40fdb007424ef2012b3e91d1e4bb48ad801a8c945ad686bfc15f955d7fb0b95",
+					"size": 47679,
+					"status": "missing-in-source"
+				},
+				"docs/index.html": {
+					"match": false,
+					"packageHash": "466fc96e8fd8303ada6e1fdc84df140792d75d3e5d160411fd01664a8e8b1714",
+					"size": 822,
+					"status": "missing-in-source"
+				},
+				"docs/scripts/html5.js": {
+					"match": false,
+					"packageHash": "5abe35274520eae499eaffa38d2eba2ee89f536665b66ece5f2c2d243726a615",
+					"size": 2452,
+					"status": "missing-in-source"
+				},
+				"docs/scripts/prettify/Apache-License-2.0.txt": {
+					"match": false,
+					"packageHash": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+					"size": 11358,
+					"status": "missing-in-source"
+				},
+				"docs/scripts/prettify/lang-css.js": {
+					"match": false,
+					"packageHash": "9b6ac483033b02572714eb4d37ee199185c41008eb2b3f46a00ab0ebce6a20c5",
+					"size": 861,
+					"status": "missing-in-source"
+				},
+				"docs/scripts/prettify/prettify.js": {
+					"match": false,
+					"packageHash": "e2e576e3bc607cd179ff511947010f645d3441a35313aec0dbd06c4437f83b77",
+					"size": 13632,
+					"status": "missing-in-source"
+				},
+				"docs/styles/jsdoc-esoccer.css": {
+					"match": false,
+					"packageHash": "862a51ab311659ae3c5eceb76bd48dfc704c115e866fb9de658f56fdb491fa5f",
+					"size": 4529,
+					"status": "missing-in-source"
+				},
+				"docs/styles/prettify-jsdoc.css": {
+					"match": false,
+					"packageHash": "bca3215630ba8c2438924b78cd97f1cf7bd85b34521f684792804e07c74e966c",
+					"size": 1535,
+					"status": "missing-in-source"
+				},
+				"docs/styles/prettify-tomorrow.css": {
+					"match": false,
+					"packageHash": "168029927c9e8b21409d5659ca11e74eb759f6860b5080d472fa9f14a1e1a76f",
+					"size": 2018,
+					"status": "missing-in-source"
+				},
+				"jsdoc.json": {
+					"match": false,
+					"packageHash": "942cb7456cada46e43eefefd1dfe5c6a695b46bd790d7d0b50cd2518ec484430",
+					"size": 233,
+					"status": "missing-in-source"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -1,28 +1,58 @@\n {\n-    \"name\": \"long\",\n-    \"version\": \"1.0.0\",\n-    \"author\": \"Daniel Wirtz <dcode@dcode.io>\",\n-    \"description\": \"Long.js: A Long class for representing a 64-bit two's-complement integer value derived from the Closure Library.\",\n-    \"main\": \"Long.js\",\n-    \"repository\": {\n-        \"type\": \"git\",\n-        \"url\": \"https://github.com/dcodeIO/Long.js.git\"\n-    },\n-    \"keywords\": [\"math\"],\n-    \"dependencies\": {\n-    },\n-    \"devDependencies\": {\n-        \"nodeunit\": \">=0.7\",\n-        \"closurecompiler\": \">=1.1\"\n-    },\n-    \"license\": \"Apache License, Version 2.0\",\n-    \"engines\": {\n-        \"node\": \">=0.6\"\n-    },\n-    \"scripts\": {\n-        \"make\": \"npm run-script compile && npm test && npm run-script jsdoc\",\n-        \"compile\": \"ccjs Long.js --compilation_level=ADVANCED_OPTIMIZATIONS > Long.min.js\",\n-        \"test\": \"nodeunit tests/suite.js\",\n-        \"jsdoc\": \"jsdoc -c jsdoc.json\"\n+  \"name\": \"long\",\n+  \"version\": \"0.0.0\",\n+  \"author\": \"Daniel Wirtz <dcode@dcode.io>\",\n+  \"description\": \"A Long class for representing a 64-bit two's-complement integer value.\",\n+  \"repository\": {\n+    \"type\": \"git\",\n+    \"url\": \"https://github.com/dcodeIO/long.js.git\"\n+  },\n+  \"bugs\": {\n+    \"url\": \"https://github.com/dcodeIO/long.js/issues\"\n+  },\n+  \"keywords\": [\n+    \"math\",\n+    \"long\",\n+    \"int64\"\n+  ],\n+  \"license\": \"Apache-2.0\",\n+  \"type\": \"module\",\n+  \"main\": \"umd/index.js\",\n+  \"types\": \"umd/index.d.ts\",\n+  \"exports\": {\n+    \".\": {\n+      \"import\": {\n+        \"types\": \"./index.d.ts\",\n+        \"default\": \"./index.js\"\n+      },\n+      \"require\": {\n+        \"types\": \"./umd/index.d.ts\",\n+        \"default\": \"./umd/index.js\"\n+      }\n     }\n+  },\n+  \"scripts\": {\n+    \"build\": \"node scripts/build.js\",\n+    \"lint\": \"prettier --check .\",\n+    \"format\": \"prettier --write .\",\n+    \"test\": \"npm run test:unit && npm run test:typescript\",\n+    \"test:unit\": \"node tests\",\n+    \"test:typescript\": \"tsc --project tests/typescript/tsconfig.esnext.json && tsc --project tests/typescript/tsconfig.nodenext.json && tsc --project tests/typescript/tsconfig.commonjs.json && tsc --project tests/typescript/tsconfig.global.json\"\n+  },\n+  \"files\": [\n+    \"index.js\",\n+    \"index.d.ts\",\n+    \"types.d.ts\",\n+    \"umd/index.js\",\n+    \"umd/index.d.ts\",\n+    \"umd/types.d.ts\",\n+    \"umd/package.json\",\n+    \"LICENSE\",\n+    \"README.md\"\n+  ],\n+  \"devDependencies\": {\n+    \"esm2umd\": \"^0.3.1\",\n+    \"prettier\": \"^3.5.0\",\n+    \"typescript\": \"^5.7.3\"\n+  }\n }\n",
+					"match": false,
+					"packageHash": "dc954ba53baf62a44f6b17d2d755ca94b918528d1077f274c62034b6a03e4fc1",
+					"size": 879,
+					"sourceHash": "00991ce1c654dc48223367dca8085cf796f1c31228e6454adb1d15fb9c24e7ed",
+					"status": "content"
+				},
+				"tests/suite.js": {
+					"match": false,
+					"packageHash": "250846f8e1fcbbca8b6e75aaa9d044c2c9a6f1b55c58ae9adda91594d9420cf3",
+					"size": 898,
+					"status": "missing-in-source"
+				},
+				"index.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"index.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"types.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"umd/index.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"umd/package.json": {
+					"match": false,
+					"status": "missing-in-package"
+				}
+			},
+			"summary": {
+				"differentFiles": 2,
+				"matchingFiles": 1,
+				"missingInPackage": 5,
+				"missingInSource": 15,
+				"score": 0.043478260869565216,
+				"totalFiles": 23
+			}
+		}
+	}
+]
