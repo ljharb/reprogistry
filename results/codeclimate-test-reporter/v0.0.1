@@ -1,0 +1,143 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-04T09:32:36.835Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:11.7.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "codeclimate-test-reporter@0.0.1",
+			"name": "codeclimate-test-reporter",
+			"version": "0.0.1",
+			"location": "https://registry.npmjs.org/codeclimate-test-reporter/-/codeclimate-test-reporter-0.0.1.tgz",
+			"integrity": "sha512-eAiI8Hfc4Pd/EZfNQrCfcENOMCyAZGzsnUKIIF86td/S2F/wyWbTRYGnFiCjxS1qIeVK4lgnoyTWZjY1BOFY6A==",
+			"publishedAt": "2014-04-06T18:15:03.439Z",
+			"publishedWith": {
+				"node": null,
+				"npm": "1.3.14"
+			}
+		},
+		"source": {
+			"integrity": "sha512-/h+Nb0li+oJm52l3XZGHVBn6nhqeH2bu/XOLWNIxejblcuIwHC2DB+k8CDBIJPVIHIlBcqMT9uUm2OHwtr2n/g==",
+			"location": "git://github.com/codeclimate/javascript-test-reporter.git",
+			"spec": "github:codeclimate/javascript-test-reporter#HEAD"
+		},
+		"comparisonHash": "8a2a8dcbb729bf3ee9216e490c955701f0ddebe1",
+		"diff": {
+			"files": {
+				".npmignore": {
+					"match": false,
+					"packageHash": "16d30e4462189fb14dd611bdb708c510630c576a1f35b9383e89a4352da36c97",
+					"size": 13,
+					"status": "missing-in-source"
+				},
+				"bin/codeclimate.js": {
+					"diff": "--- published/bin/codeclimate.js\n+++ rebuilt/bin/codeclimate.js\n@@ -1,7 +1,15 @@\n #!/usr/bin/env node\n \n+var commander = require(\"commander\");\n+var pkg = require(\"../package.json\");\n var Formatter = require(\"../formatter\");\n-var client         = require('../http_client');\n+var client = require('../http_client');\n+\n+commander\n+  .version(pkg.version)\n+  .usage('[options] < <file>')\n+  .option(\"-S, --skip-cert\", \"skips verification of the chain of certificate\")\n+  .parse(process.argv);\n \n process.stdin.resume();\n process.stdin.setEncoding(\"utf8\");\n@@ -9,17 +17,31 @@\n var input = \"\";\n \n process.stdin.on(\"data\", function(chunk) {\n-    input += chunk;\n+  input += chunk;\n });\n \n+var repo_token = process.env.CODECLIMATE_REPO_TOKEN;\n+\n+if(repo_token === undefined || repo_token.trim() === \"\") {\n+  console.error(\"No CODECLIMATE_REPO_TOKEN found. A CODECLIMATE_REPO_TOKEN must be specified as an environment variable.\");\n+  process.exit(1);\n+}\n+\n process.stdin.on(\"end\", function() {\n-  formatter = new Formatter()\n+  var formatter = new Formatter();\n+\n   formatter.format(input, function(err, json) {\n     if (err) {\n-      console.error(\"A problem occurred parsing the lcov data\", err);\n+      console.error(\"A problem occurred parsing the coverage data\", err);\n     } else {\n-      json['repo_token'] = process.env.CODECLIMATE_REPO_TOKEN;\n-      client.postJson(json);\n+      if (process.env.CC_OUTPUT === \"stdout\") {\n+        console.log(json);\n+      } else {\n+        json['repo_token'] = repo_token;\n+        client.postJson(json, {\n+          skip_certificate: commander.skipCert\n+        });\n+      }\n     }\n   });\n });\n",
+					"match": false,
+					"packageHash": "9e66adda9bfbae132e4b0fc3560ef08a3a958d6e917817d0b00be9905f5ab026",
+					"size": 577,
+					"sourceHash": "fcb31246d17b80fce47b5952401023346ecc0fc229ddccf93f8c15bb6483d09d",
+					"status": "content"
+				},
+				"ci_info.js": {
+					"diff": "--- published/ci_info.js\n+++ rebuilt/ci_info.js\n@@ -29,23 +29,54 @@\n         build_url:        env.BUILD_URL,\n         branch:           env.GIT_BRANCH,\n         commit_sha:       env.GIT_COMMIT\n-      }\n+      };\n     } else if (env.TDDIUM) {\n       return {\n         name:             \"tddium\",\n         build_identifier: env.TDDIUM_SESSION_ID,\n         worker_id:        env.TDDIUM_TID\n-      }\n+      };\n+    } else if (env.WERCKER) {\n+      return {\n+        name:               \"wercker\",\n+        build_identifier:   env.WERCKER_BUILD_ID,\n+        build_url:          env.WERCKER_BUILD_URL,\n+        branch:             env.WERCKER_GIT_BRANCH,\n+        commit_sha:         env.WERCKER_GIT_COMMIT\n+      };\n     } else if (env.CI_NAME && env.CI_NAME.match(/codeship/i)) {\n       return {\n         name:             \"codeship\",\n         build_identifier: env.CI_BUILD_NUMBER,\n         build_url:        env.CI_BUILD_URL,\n         branch:           env.CI_BRANCH,\n-        commit_sha:       env.CI_COMMIT_ID,\n-      }\n+        commit_sha:       env.CI_COMMIT_ID\n+      };\n+    } else if (env.APPVEYOR) {\n+      return {\n+        name:             \"appveyor\",\n+        build_identifier: env.APPVEYOR_BUILD_NUMBER,\n+        branch:           env.APPVEYOR_REPO_BRANCH,\n+        commit_sha:       env.APPVEYOR_REPO_COMMIT,\n+        pull_request:     env.APPVEYOR_PULL_REQUEST_NUMBER\n+      };\n+    } else if (env.BUILDKITE) {\n+      return {\n+        name:             \"buildkite\",\n+        build_identifier: env.BUILDKITE_BUILD_ID,\n+        build_url:        env.BUILDKITE_BUILD_URL,\n+        branch:           env.BUILDKITE_BRANCH,\n+        commit_sha:       env.BUILDKITE_COMMIT\n+      };\n+    } else if (env.GITLAB_CI) {\n+      return {\n+        name:             \"gitlab-ci\",\n+        build_identifier: env.CI_BUILD_ID,\n+        branch:           env.CI_BUILD_REF_NAME,\n+        commit_sha:       env.CI_BUILD_REF\n+      };\n     } else {\n       return {};\n     }\n   }\n-}\n+};\n",
+					"match": false,
+					"packageHash": "70c4a4701cf9a50f5d9c0ba8853db3559ea431465fffc41deab955d42d38d5d3",
+					"size": 1472,
+					"sourceHash": "6fa2ffc09da899f5c77f6777510ecde0c5e96f10413b77d70f6c9c71343abd1b",
+					"status": "content"
+				},
+				"formatter.js": {
+					"diff": "--- published/formatter.js\n+++ rebuilt/formatter.js\n@@ -4,6 +4,8 @@\n var pjson = require('./package.json');\n var git  = require(\"./git_info\");\n var ci  = require(\"./ci_info\");\n+var async = require(\"async\");\n+var gocoverParse = require('./gocover_parse');\n \n function Formatter(options) {\n   this.options = options || {};\n@@ -11,58 +13,92 @@\n \n Formatter.prototype.rootDirectory = function() {\n   return this.options.rootDirectory || process.cwd();\n+};\n+\n+Formatter.prototype.parse = function(data, callback) {\n+    if (/^SF:/m.test(data)) {\n+        lcovParse(data, callback);\n+    } else if (/^mode:/.test(data)) {\n+        gocoverParse(data, callback);\n+    } else {\n+        callback(\"Unknown input coverage format\", null);\n+    }\n }\n \n-Formatter.prototype.format = function(lcovData, callback) {\n+Formatter.prototype.format = function(coverageData, callback) {\n   var self = this;\n-  lcovParse(lcovData, function(err, data) {\n-    result = {\n+\n+  self.parse(coverageData, function(parseError, data) {\n+    if (parseError) {\n+      throw parseError;\n+    }\n+\n+    var result = {\n       source_files: self.sourceFiles(data),\n       run_at: Date.now(),\n       partial: false,\n       environment: {\n-        pwd: process.cwd(),\n+        pwd: process.cwd().split(path.sep).join('/'),\n         package_version: pjson.version\n       },\n-      ci_service: ci.getInfo(),\n-      git: self.gitGitInfo()\n-    }\n-    callback(err, result);\n+      ci_service: ci.getInfo()\n+    };\n+    async.parallel({\n+      head: git.head,\n+      branch: git.branch,\n+      committed_at: git.committedAt\n+    },\n+    function(err, results) {\n+      if (err) {\n+        console.error(err.message);\n+      }\n+      result.git = {\n+        head: results.head,\n+        branch: results.branch,\n+        committed_at: results.committed_at\n+      };\n+      return callback(parseError, result);\n+    });\n   });\n-}\n+};\n \n Formatter.prototype.sourceFiles = function(data) {\n   var source_files = [];\n   var self = this;\n   data.forEach(function(elem, index) {\n-    var content = fs.readFileSync(elem.file).toString();\n-    var numLines = content.split(\"\\n\").size\n+    var content;\n+    try {\n+      content = fs.readFileSync(elem.file).toString();\n+    } catch (e) {\n+      if (e.code === 'ENOENT') {\n+        console.log('The file ' + elem.file + ' does not exist and will be skipped.');\n+        content = '';\n+      } else {\n+        throw e;\n+      }\n+    }\n+    var numLines = content.split(\"\\n\").size;\n \n     var coverage = new Array(numLines);\n     coverage.forEach(function(elem, index, arr) {\n       arr[index] = null;\n     });\n     elem.lines.details.forEach(function(lineDetail) {\n-      coverage[lineDetail.line - 1] = lineDetail.hit\n+      coverage[lineDetail.line - 1] = lineDetail.hit;\n     });\n",
+					"match": false,
+					"packageHash": "19517d0e19743a7bfbef3b153a3aada03d16110e7c1ec3abc31a1214d93132b9",
+					"size": 1690,
+					"sourceHash": "4e06f00af8fdc4d467797bb3ced0c792caead08395383099691d17d6baad749d",
+					"status": "content"
+				},
+				"git_info.js": {
+					"diff": "--- published/git_info.js\n+++ rebuilt/git_info.js\n@@ -1,43 +1,69 @@\n-var sh = require('execSync');\n var crypto = require('crypto');\n+var childProcess = require('child_process');\n+\n+function calculateBlobId(content) {\n+  var header  = 'blob ' + content.length + '\\0';\n+  var store   = header + content;\n+  var shasum  = crypto.createHash('sha1');\n+  shasum.update(store);\n+  return shasum.digest(\"hex\");\n+}\n \n module.exports = {\n \n-  head: function() {\n-    return sh.exec(\"git log -1 --pretty=format:'%H'\").stdout;\n+  head: function(cb) {\n+    childProcess.exec(\"git log -1 --pretty=format:%H\", function (error, stdout, stderr) {\n+      return cb(error, stdout);\n+    });\n   },\n \n-  committedAt: function() {\n-    var timestamp = sh.exec(\"git log -1 --pretty=format:'%ct'\").stdout;\n-    timestamp = parseInt(timestamp);\n-    if (isNaN(timestamp) || timestamp == 0) {\n-      return null;\n-    } else {\n-      return timestamp;\n-    }\n+  committedAt: function(cb) {\n+    childProcess.exec(\"git log -1 --pretty=format:%ct\", function (error, stdout, stderr) {\n+      var result = null;\n+      var timestamp = null;\n+      if (stdout) {\n+        timestamp = parseInt(stdout, 10);\n+        if (!isNaN(timestamp) && timestamp !== 0) {\n+          result = timestamp;\n+        }\n+      }\n+      return cb(error, result);\n+    });\n   },\n \n-  branch: function() {\n-    var branches = sh.exec(\"git branch\").stdout.split(\"\\n\");\n-    var returnBranch = null;\n-    branches.forEach(function(val) {\n-      if(val.charAt(0) == \"*\") {\n-        returnBranch = val;\n+  branch: function(cb) {\n+    childProcess.exec(\"git branch\", function (error, stdout, stderr) {\n+      var returnBranch = null;\n+      if (stdout) {\n+        var branches = stdout.split(\"\\n\");\n+        branches.forEach(function(val) {\n+          if(val.charAt(0) === \"*\") {\n+            returnBranch = val;\n+          }\n+        });\n+        if (returnBranch) {\n+          returnBranch = returnBranch.replace(\"* \", \"\");\n+        }\n       }\n+      return cb(error, returnBranch);\n     });\n-    if (returnBranch) {\n-      return returnBranch.replace(\"* \", \"\")\n+  },\n+\n+  calculateBlobId: calculateBlobId,\n+\n+  blobId: function(path, content) {\n+    var stdout, returnBlobId = null;\n+\n+    try {\n+      stdout = childProcess.execSync(\"git hash-object \" + path, { stdio: [0, \"pipe\", \"ignore\"] });\n+    } catch (e) { }\n+\n+    if (stdout) {\n+      returnBlobId = stdout.toString().trim();\n     } else {\n-      return null;\n+      returnBlobId = calculateBlobId(content);\n     }\n-  },\n \n-  calculateBlobId: function(content) {\n-    var header  = 'blob ' + content.length + '\\0';\n-    var store   = header + content;\n-    var shasum  = crypto.createHash('sha1');\n-    shasum.update(store);\n-    return shasum.digest(\"hex\");\n+    return returnBlobId;\n   }\n-\n-}\n",
+					"match": false,
+					"packageHash": "88df22ed1f6b8e14d411ec7e0016bcfc238da6dac35c8030b3d20eb761b68c44",
+					"size": 999,
+					"sourceHash": "37b0e72c04e276f06ea896e263bbcf694c177e047b1665fa08c5d30ac7d821e1",
+					"status": "content"
+				},
+				"http_client.js": {
+					"diff": "--- published/http_client.js\n+++ rebuilt/http_client.js\n@@ -2,7 +2,7 @@\n var url     = require(\"url\");\n var pjson   = require('./package.json');\n \n-var host = process.env.CODECLIMATE_API_HOST || \"https://codeclimate.com\"\n+var host = process.env.CODECLIMATE_API_HOST || \"https://codeclimate.com\";\n \n var options = {\n   url: host + \"/test_reports\",\n@@ -14,27 +14,47 @@\n   timeout: 5000\n };\n \n-var postJson = function(data) {\n+var proxy = process.env.HTTP_PROXY || false;\n \n-  parts = url.parse(options.url)\n+if (proxy) {\n+  options.proxy = proxy;\n+}\n+\n+var postJson = function(data, opts) {\n+  opts = opts || {};\n+\n+  options.rejectUnauthorized = !opts.skip_certificate;\n+\n+  var parts = url.parse(options.url);\n \n   options.body = JSON.stringify(data);\n   console.log(\"Sending test coverage results to \" + parts.host + \" ...\");\n   request(options, function(error, response, body) {\n     if (error) {\n+      if (error.code === 'UNABLE_TO_VERIFY_LEAF_SIGNATURE') {\n+        console.error(\n+          '\\n' +\n+          'It looks like you might be trying to send coverage to an\\n' +\n+          'enterprise version of CodeClimate with a (probably) invalid or\\n' +\n+          'incorrectly configured certificate chain. If you are sure about\\n' +\n+          'where you are sending your data, add the -S/--skip-cert flag and\\n' +\n+          'try again. Run with --help for more info.\\n'\n+        );\n+      }\n+\n       console.error(\"A problem occurred\", error);\n     }\n     if (response) {\n       if (response.statusCode >= 200 && response.statusCode < 300) {\n         console.log(\"Test coverage data sent.\");\n-      } else if (response.statusCode == 401) {\n-        console.log(\"An invalid CODECLIMATE_REPO_TOKEN repo token was specified.\")\n+      } else if (response.statusCode === 401) {\n+        console.log(\"An invalid CODECLIMATE_REPO_TOKEN repo token was specified.\");\n       } else {\n         console.log(\"Status code: \" + response.statusCode);\n       }\n     }\n   });\n \n-}\n+};\n \n module.exports = { postJson: postJson };\n",
+					"match": false,
+					"packageHash": "1eda58423ef6107f2c4bc90e03a0b9feae7f1e90064e4852af61da27fae1dd7d",
+					"size": 1120,
+					"sourceHash": "cb6d30108373f2dc8450e1d8889a15b9ec0cde9f7067e3b254dac4267c89c58e",
+					"status": "content"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -1,26 +1,28 @@\n {\n   \"name\": \"codeclimate-test-reporter\",\n-  \"version\": \"0.0.1\",\n+  \"version\": \"0.5.1\",\n   \"description\": \"Code Climate test reporter client for javascript projects\",\n   \"main\": \"index.js\",\n   \"scripts\": {\n-    \"test\": \"mocha\"\n+    \"test\": \"istanbul cover --report lcov _mocha\"\n   },\n   \"bin\": {\n-    \"codeclimate\": \"./bin/codeclimate.js\"\n+    \"codeclimate-test-reporter\": \"./bin/codeclimate.js\"\n   },\n   \"author\": \"Noah Davis\",\n   \"license\": \"MIT\",\n   \"devDependencies\": {\n-    \"mocha\": \"*\"\n+    \"istanbul\": \"^0.4.3\",\n+    \"mocha\": \"^5.2.0\"\n   },\n   \"engines\": {\n-    \"node\": \">=0.8.6\"\n+    \"node\": \">= 4\"\n   },\n   \"dependencies\": {\n-    \"lcov-parse\": \"0.0.6\",\n-    \"request\": \"~2.34.0\",\n-    \"execSync\": \"~1.0.1-pre\"\n+    \"async\": \"~1.5.2\",\n+    \"commander\": \"2.9.0\",\n+    \"lcov-parse\": \"0.0.10\",\n+    \"request\": \"~2.88.0\"\n   },\n   \"repository\": {\n     \"type\": \"git\",\n@@ -34,5 +36,8 @@\n   \"bugs\": {\n     \"url\": \"https://github.com/codeclimate/javascript-test-reporter/issues\"\n   },\n-  \"homepage\": \"https://github.com/codeclimate/javascript-test-reporter\"\n+  \"homepage\": \"https://github.com/codeclimate/javascript-test-reporter\",\n+  \"contributors\": [\n+    \"Bodhi Philpot <bodhi@theplant.jp> (http://theplant.jp)\"\n+  ]\n }\n",
+					"match": false,
+					"packageHash": "a769f3a6b36f6e0adf97134786bd723111fd42bf56dbb673301cdffa8c054dcf",
+					"size": 851,
+					"sourceHash": "aad35080c6c8a81b35dff7de4412ce864ba18aa906d9376ddeb43ceee44da157",
+					"status": "content"
+				},
+				"test/fixtures/codeclimate-test-coverage-c6052294-7580-4260-8254-3eac32f8f43d.json": {
+					"match": false,
+					"packageHash": "11e4a98eaf164b0a22fa3148266461204e8f2fe0541685f84a6a311ce435f476",
+					"size": 8065,
+					"status": "missing-in-source"
+				},
+				"test/fixtures/lcov.json": {
+					"match": false,
+					"packageHash": "672081edfeb232285ea8bd73f16a3bd7aeb951160d7254cbf9a51956f99cfb13",
+					"size": 4625,
+					"status": "missing-in-source"
+				},
+				"test/test.js": {
+					"diff": "--- published/test/test.js\n+++ rebuilt/test/test.js\n@@ -1,11 +1,14 @@\n var assert = require(\"assert\");\n-var fs = require('fs')\n+var fs = require('fs');\n var Formatter = require('../formatter.js');\n+var CiInfo = require('../ci_info');\n \n describe('JSON', function(){\n \n+  var rootDirectory = \"/Users/noah/p/request\";\n   var lcovFixture = fs.readFileSync('test/fixtures/lcov.info').toString();\n-  var formatter = new Formatter({rootDirectory: \"/Users/noah/p/request\"});\n+  var gocoverFixture = fs.readFileSync('test/fixtures/cover.out').toString();\n+  var formatter = new Formatter({rootDirectory: rootDirectory});\n \n   describe('parse', function() {\n     it(\"should return the correct filenames\", function(done) {\n@@ -13,10 +16,75 @@\n         var names = data.source_files.map(function(elem) {\n           return elem.name;\n         });\n-        expected = [\"lib/cookies.js\", \"lib/copy.js\"]\n+        var expected = [\"lib/cookies.js\", \"lib/copy.js\"];\n         assert.deepEqual(expected, names);\n         done();\n       });\n     });\n   });\n-})\n+\n+  describe('gocover', function() {\n+    it('should return the correct filenames', function(done) {\n+      process.env.GOPATH = rootDirectory; // files will be at $GOPATH/src\n+      formatter.format(gocoverFixture, function(err, data) {\n+        var names = data.source_files.map(function(elem) {\n+          return elem.name;\n+        });\n+        var expected = [\n+          'src/golang.org/x/tools/cmd/cover/cover.go',\n+          'src/golang.org/x/tools/cmd/cover/func.go',\n+          'src/golang.org/x/tools/cmd/cover/html.go'\n+        ];\n+        assert.deepEqual(expected, names);\n+        done();\n+      });\n+    });\n+  });\n+});\n+\n+describe('ci_info', function() {\n+  describe('#getInfo', function() {\n+    var bupenv = Object.keys(process.env);\n+\n+    beforeEach(function(){\n+      delete process.env['TRAVIS'];\n+      delete process.env['CIRCLECI'];\n+    });\n+\n+    afterEach(function(){\n+      for(var pk in process.env) {\n+        if (bupenv.indexOf(pk) < 0) {\n+          delete process.env[pk];\n+        }\n+      }\n+    });\n+\n+    it('should return travis-ci as name if process.env.TRAVIS is set', function() {\n+      process.env.TRAVIS = 'true';\n+\n+      var ci = CiInfo.getInfo();\n+      assert.equal(ci.name, 'travis-ci');\n+    });\n+\n+    it('should return appveyor as name if process.env.APPVEYOR is set', function() {\n+      process.env.APPVEYOR = 'true';\n+\n+      var ci = CiInfo.getInfo();\n+      assert.equal(ci.name, 'appveyor');\n+    });\n+\n+    it('should return buildkite as name if process.env.BUILDKITE is set', function() {\n+      process.env.BUILDKITE = 'true';\n+\n+      var ci = CiInfo.getInfo();\n+      assert.equal(ci.name, 'buildkite');\n+    });\n+\n+    it('should return gitlab-ci as name if process.env.GITLAB_CI is set', function() {\n+      process.env.GITLAB_CI = 'true';\n+\n+      var ci = CiInfo.getInfo();\n+      assert.equal(ci.name, 'gitlab-ci');\n+    });\n+  });\n+});\n",
+					"match": false,
+					"packageHash": "4475fd3f320f649e931af054ce955cf9d5614bb0b0a0071c1a691363ee99c5b0",
+					"size": 673,
+					"sourceHash": "be44e56c26202bf436380ab0bd40430bad9b2f0832b0376468a8d6fb6503664e",
+					"status": "content"
+				},
+				".codeclimate.yml": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				".eslintignore": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				".eslintrc": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				".travis.yml": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"README.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"gocover_parse.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/fixtures/cover.out": {
+					"match": false,
+					"status": "missing-in-package"
+				}
+			},
+			"summary": {
+				"differentFiles": 7,
+				"matchingFiles": 2,
+				"missingInPackage": 7,
+				"missingInSource": 3,
+				"score": 0.10526315789473684,
+				"totalFiles": 19
+			}
+		}
+	}
+]
