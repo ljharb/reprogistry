@@ -1,0 +1,63 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-04T15:41:24.721Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:4.0.5",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "filesize@3.5.2",
+			"name": "filesize",
+			"version": "3.5.2",
+			"location": "https://registry.npmjs.org/filesize/-/filesize-3.5.2.tgz",
+			"integrity": "sha512-ElL/Me2J6PMoQfAdP00AZWBhDDFPwrEyia8tbKjvgKti+AgZU4+lFX/y1mHV4C22iICwDz0A86v33us9IuL+Lw==",
+			"publishedAt": "2017-01-25T00:08:49.191Z",
+			"publishedWith": {
+				"node": "7.4.0",
+				"npm": "4.1.2"
+			}
+		},
+		"source": {
+			"integrity": null,
+			"location": "git://github.com/avoidwork/filesize.js.git",
+			"spec": "github:avoidwork/filesize.js#7bc227ec811ade1a7e2c58e01546893a2ee42b4c"
+		},
+		"comparisonHash": "8a2a8dcbb729bf3ee9216e490c955701f0ddebe1",
+		"diff": {
+			"files": {
+				".npmignore": {
+					"match": false,
+					"packageHash": "b3b1f70496313985083df984a13b25a3a93126ef686501f7c561c5fc77e12a95",
+					"size": 124,
+					"status": "missing-in-source"
+				},
+				"lib/filesize.es6.js": {
+					"diff": "--- published/lib/filesize.es6.js\n+++ rebuilt/lib/filesize.es6.js\n@@ -1,145 +1,145 @@\n-/**\r\n- * filesize\r\n- *\r\n- * @copyright 2017 Jason Mulligan <jason.mulligan@avoidwork.com>\r\n- * @license BSD-3-Clause\r\n- * @version 3.5.2\r\n- */\r\n-(function (global) {\r\n-\tconst b = /^(b|B)$/,\r\n-\t\tsymbol = {\r\n-\t\t\tiec: {\r\n-\t\t\t\tbits: [\"b\", \"Kib\", \"Mib\", \"Gib\", \"Tib\", \"Pib\", \"Eib\", \"Zib\", \"Yib\"],\r\n-\t\t\t\tbytes: [\"B\", \"KiB\", \"MiB\", \"GiB\", \"TiB\", \"PiB\", \"EiB\", \"ZiB\", \"YiB\"]\r\n-\t\t\t},\r\n-\t\t\tjedec: {\r\n-\t\t\t\tbits: [\"b\", \"Kb\", \"Mb\", \"Gb\", \"Tb\", \"Pb\", \"Eb\", \"Zb\", \"Yb\"],\r\n-\t\t\t\tbytes: [\"B\", \"KB\", \"MB\", \"GB\", \"TB\", \"PB\", \"EB\", \"ZB\", \"YB\"]\r\n-\t\t\t}\r\n-\t\t},\r\n-\t\tfullform = {\r\n-\t\t\tiec: [\"\", \"kibi\", \"mebi\", \"gibi\", \"tebi\", \"pebi\", \"exbi\", \"zebi\", \"yobi\"],\r\n-\t\t\tjedec: [\"\", \"kilo\", \"mega\", \"giga\", \"tera\", \"peta\", \"exa\", \"zetta\", \"yotta\"]\r\n-\t\t};\r\n-\r\n-\t/**\r\n-\t * filesize\r\n-\t *\r\n-\t * @method filesize\r\n-\t * @param  {Mixed}   arg        String, Int or Float to transform\r\n-\t * @param  {Object}  descriptor [Optional] Flags\r\n-\t * @return {String}             Readable file size String\r\n-\t */\r\n-\tfunction filesize (arg, descriptor = {}) {\r\n-\t\tlet result = [],\r\n-\t\t\tval = 0,\r\n-\t\t\te, base, bits, ceil, full, neg, num, output, round, unix, spacer, standard, symbols;\r\n-\r\n-\t\tif (isNaN(arg)) {\r\n-\t\t\tthrow new Error(\"Invalid arguments\");\r\n-\t\t}\r\n-\r\n-\t\tbits = descriptor.bits === true;\r\n-\t\tunix = descriptor.unix === true;\r\n-\t\tbase = descriptor.base || 2;\r\n-\t\tround = descriptor.round !== undefined ? descriptor.round : unix ? 1 : 2;\r\n-\t\tspacer = descriptor.spacer !== undefined ? descriptor.spacer : unix ? \"\" : \" \";\r\n-\t\tsymbols = descriptor.symbols || descriptor.suffixes || {};\r\n-\t\tstandard = base === 2 ? descriptor.standard || \"jedec\" : \"jedec\";\r\n-\t\toutput = descriptor.output || \"string\";\r\n-\t\tfull = descriptor.fullform === true;\r\n-\t\te = descriptor.exponent !== undefined ? descriptor.exponent : -1;\r\n-\t\tnum = Number(arg);\r\n-\t\tneg = num < 0;\r\n-\t\tceil = base > 2 ? 1000 : 1024;\r\n-\r\n-\t\t// Flipping a negative number to determine the size\r\n-\t\tif (neg) {\r\n-\t\t\tnum = -num;\r\n-\t\t}\r\n-\r\n-\t\t// Zero is now a special case because bytes divide by 1\r\n-\t\tif (num === 0) {\r\n-\t\t\tresult[0] = 0;\r\n-\t\t\tresult[1] = unix ? \"\" : !bits ? \"B\" : \"b\";\r\n-\t\t} else {\r\n-\t\t\t// Determining the exponent\r\n-\t\t\tif (e === -1 || isNaN(e)) {\r\n-\t\t\t\te = Math.floor(Math.log(num) / Math.log(ceil));\r\n-\r\n-\t\t\t\tif (e < 0) {\r\n-\t\t\t\t\te = 0;\r\n-\t\t\t\t}\r\n-\t\t\t}\r\n-\r\n-\t\t\t// Exceeding supported length, time to reduce & multiply\r\n-\t\t\tif (e > 8) {\r\n-\t\t\t\te = 8;\r\n-\t\t\t}\r\n-\r\n-\t\t\tval = num / (base === 2 ? Math.pow(2, e * 10) : Math.pow(1000, e));\r\n-\r\n-\t\t\tif (bits) {\r\n-\t\t\t\tval = val * 8;\r\n-\r\n-\t\t\t\tif (val >= ceil && e < 8) {\r\n-\t\t\t\t\tval = val / ceil;\r\n-\t\t\t\t\te++;\r\n-\t\t\t\t}\r\n-\t\t\t}\r\n-\r\n-\t\t\tresult[0] = Number(val.toFixed(e > 0 ? round : 0));\r\n-\t\t\tresult[1] = base === 10 && e === 1 ? bits ? \"kb\" : \"kB\" : symbol[standard][bits ? \"bits\" : \"bytes\"][e];\r\n-\r\n-\t\t\tif (unix) {\r\n-\t\t\t\tresult[1] = standard === \"jedec\" ? result[1].charAt(0) : e > 0 ? result[1].replace(/B$/, \"\") : result[1];\r\n-\r\n-\t\t\t\tif (b.test(result[1])) {\r\n",
+					"match": false,
+					"packageHash": "bd0283f4256b1fcd195daff314d5d2b8e054f7082115e8772a3e6e97a9c12f41",
+					"size": 3900,
+					"sourceHash": "423b3359b97f26a60b6fed0aaa85c238ede4cb50d014c0d940122c900692451d",
+					"status": "content"
+				},
+				"lib/filesize.js": {
+					"diff": "--- published/lib/filesize.js\n+++ rebuilt/lib/filesize.js\n@@ -1,11 +1,11 @@\n \"use strict\";\n \n-/**\r\n- * filesize\r\n- *\r\n- * @copyright 2017 Jason Mulligan <jason.mulligan@avoidwork.com>\r\n- * @license BSD-3-Clause\r\n- * @version 3.5.2\r\n+/**\n+ * filesize\n+ *\n+ * @copyright 2017 Jason Mulligan <jason.mulligan@avoidwork.com>\n+ * @license BSD-3-Clause\n+ * @version 3.5.1\n  */\n (function (global) {\n \tvar b = /^(b|B)$/,\n@@ -24,13 +24,13 @@\n \t\tjedec: [\"\", \"kilo\", \"mega\", \"giga\", \"tera\", \"peta\", \"exa\", \"zetta\", \"yotta\"]\n \t};\n \n-\t/**\r\n-  * filesize\r\n-  *\r\n-  * @method filesize\r\n-  * @param  {Mixed}   arg        String, Int or Float to transform\r\n-  * @param  {Object}  descriptor [Optional] Flags\r\n-  * @return {String}             Readable file size String\r\n+\t/**\n+  * filesize\n+  *\n+  * @method filesize\n+  * @param  {Mixed}   arg        String, Int or Float to transform\n+  * @param  {Object}  descriptor [Optional] Flags\n+  * @return {String}             Readable file size String\n   */\n \tfunction filesize(arg) {\n \t\tvar descriptor = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};\n",
+					"match": false,
+					"packageHash": "1f029f0fa1c09fda072ac71d50c67a39198b7eecde7a687e314b3b4c24dd6c89",
+					"size": 4100,
+					"sourceHash": "2d4415f4b9f53c74a7cdfa3bc8f821541309d4c1e3fbff16a6ad0454e5b23792",
+					"status": "content"
+				}
+			},
+			"summary": {
+				"differentFiles": 2,
+				"matchingFiles": 5,
+				"missingInPackage": 0,
+				"missingInSource": 1,
+				"score": 0.625,
+				"totalFiles": 8
+			}
+		}
+	}
+]
