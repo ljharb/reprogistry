@@ -1,0 +1,77 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-04T20:10:29.452Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:11.7.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "jest-pnp-resolver@1.1.0",
+			"name": "jest-pnp-resolver",
+			"version": "1.1.0",
+			"location": "https://registry.npmjs.org/jest-pnp-resolver/-/jest-pnp-resolver-1.1.0.tgz",
+			"integrity": "sha512-/tuTb5um2nQvybL7Scxy6oJF5cbWWawugurVIMnnXhBSlUjNEwKpPeaYT7K/f/EZupmrKfiwQ95f3J7kShAZEA==",
+			"publishedAt": "2019-02-05T20:59:20.433Z",
+			"publishedWith": {
+				"node": null,
+				"npm": null
+			}
+		},
+		"source": {
+			"integrity": "sha512-7j7JsQw9fC5o4etsjqoW8hyNAECivFuaSTwimIuk70dlxG3laH5VqvaokFPuw4AEqEjXe0e26pMsldqfgzT1ZA==",
+			"location": "https://github.com/arcanis/jest-pnp-resolver.git",
+			"spec": "github:arcanis/jest-pnp-resolver#HEAD"
+		},
+		"comparisonHash": "8a2a8dcbb729bf3ee9216e490c955701f0ddebe1",
+		"diff": {
+			"files": {
+				"README.md": {
+					"diff": "--- published/README.md\n+++ rebuilt/README.md\n@@ -13,6 +13,8 @@\n \n ## Usage\n \n+As of `jest@^24.4.0` you don't need to manually add this package anymore. The default resolver will already use PnP.\n+\n Simply add the resolver to your configuration. For example, a minimal `jest.config.js` would be as such:\n \n ```js\n",
+					"match": false,
+					"packageHash": "86d65a9f9acb7e2d55ba23e0834c93512bcb4d79a870a5c3b8a611026e9ac05d",
+					"size": 2039,
+					"sourceHash": "c98cc8dba220103450a22775c64354d8e3786d9b7299912f75c1f7ffdbf00e98",
+					"status": "content"
+				},
+				"index.js": {
+					"diff": "--- published/index.js\n+++ rebuilt/index.js\n@@ -1,41 +1,50 @@\n-\n-let pnp;\n-\n+let globalPnpApi;\n try {\n-  pnp = require(`pnpapi`);\n-} catch (error) {\n-  // not in PnP; not a problem\n+    globalPnpApi = require(`pnpapi`);\n+} catch {\n+    // Just ignore if we don't have a global PnP instance - perhaps\n+    // we'll eventually find one at runtime due to multi-tree\n }\n \n-let defaultResolver;\n-\n-function requireDefaultResolver() {\n-  if (!defaultResolver) {\n-    try {\n-      defaultResolver = require(`jest-resolve/build/defaultResolver`).default;\n-    } catch (error) {\n-      defaultResolver = require(`jest-resolve/build/default_resolver`).default;\n-    }\n-  }\n-\n-  return defaultResolver;\n-}\n+const createRequire = require(`./createRequire`);\n+const getDefaultResolver = require(`./getDefaultResolver`);\n \n module.exports = (request, options) => {\n-  const {basedir, defaultResolver, extensions} = options;\n-\n-  if (pnp) {\n-    const resolution = pnp.resolveRequest(request, `${basedir}/`, {extensions});\n+  const {\n+    basedir,\n+    defaultResolver = getDefaultResolver(),\n+    extensions,\n+  } = options;\n+\n+  if (process.versions.pnp) {\n+    let pnpApi = globalPnpApi;\n+\n+    // While technically it would be more correct to run this code\n+    // everytime (since they file being run *may* belong to a\n+    // different dependency tree than the one owning Jest), in\n+    // practice this doesn't happen anywhere else than on the Jest\n+    // repository itself (in the test env). So in order to preserve\n+    // the performances, we can afford a slight incoherence here.\n+    if (!pnpApi) {\n+      try {\n+        const baseReq = createRequire(`${basedir}/internal.js`);\n+        pnpApi = baseReq(`pnpapi`);\n+      } catch {\n+        // The file isn't part of a PnP dependency tree, so we can\n+        // just use the default Jest resolver.\n+      }\n+    }\n \n-    // When the request is a native module, Jest expects to get the string back unmodified, but pnp returns null instead.\n-    if (resolution === null)\n-      return request;\n+    if (pnpApi) {\n+      const resolution = pnpApi.resolveRequest(request, `${basedir}/`, {extensions});\n \n-    return resolution;\n-  } else {\n-    if (!defaultResolver)\n-      defaultResolver = requireDefaultResolver();\n+      // When the request is a native module, Jest expects to get the string back unmodified, but pnp returns null instead.\n+      if (resolution === null)\n+        return request;\n \n-    return defaultResolver(request, options);\n+      return resolution;\n+    }\n   }\n+\n+  return defaultResolver(request, {...options, allowPnp: false});\n };\n",
+					"match": false,
+					"packageHash": "c077be860b94d57707266b728b347ace4319d920ebe877d389c51e63f4848428",
+					"size": 944,
+					"sourceHash": "3842b13bf30da4d06580e1885d995cce7e437126c75cacc01831f659ddf6f64c",
+					"status": "content"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -1,6 +1,6 @@\n {\n     \"name\": \"jest-pnp-resolver\",\n-    \"version\": \"1.1.0\",\n+    \"version\": \"1.2.2\",\n     \"description\": \"plug'n'play resolver for Webpack\",\n     \"license\": \"MIT\",\n     \"engines\": {\n",
+					"match": false,
+					"packageHash": "a90280fef615271ebb096e7cbb5cc1f535f34b2340b7aba3b22226886912d5b7",
+					"size": 708,
+					"sourceHash": "1709d5d765638ec0c4991d65c92add5598bc42c1c8cdc018e9b7db95047d7c15",
+					"status": "content"
+				},
+				"createRequire.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"getDefaultResolver.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"index.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				}
+			},
+			"summary": {
+				"differentFiles": 3,
+				"matchingFiles": 0,
+				"missingInPackage": 3,
+				"missingInSource": 0,
+				"score": 0,
+				"totalFiles": 6
+			}
+		}
+	}
+]
