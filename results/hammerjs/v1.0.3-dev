@@ -1,0 +1,769 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-04T18:03:20.491Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:11.7.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "hammerjs@1.0.3-dev",
+			"name": "hammerjs",
+			"version": "1.0.3-dev",
+			"location": "https://registry.npmjs.org/hammerjs/-/hammerjs-1.0.3dev.tgz",
+			"integrity": "sha512-g0DbRc3Vx+OfFjyzYqrpcLe1NNEJHIKiEwMWX5/Sr40oVH2TZSVaFgAxs0p+mp5SIg6Oes2uUcP9M9NRn8kgyw==",
+			"publishedAt": "2014-03-13T10:05:42.345Z",
+			"publishedWith": {
+				"node": null,
+				"npm": "1.2.11"
+			}
+		},
+		"source": {
+			"integrity": null,
+			"location": "git://github.com/eightmedia/hammer.js.git",
+			"spec": "github:eightmedia/hammer.js#HEAD"
+		},
+		"comparisonHash": "8a2a8dcbb729bf3ee9216e490c955701f0ddebe1",
+		"diff": {
+			"files": {
+				".npmignore": {
+					"match": false,
+					"packageHash": "d7736eb3e912182ee07cbac642a0866dba803ccde7e08ce3e9d378bfbaa6f696",
+					"size": 140,
+					"status": "missing-in-source"
+				},
+				".travis.yml": {
+					"diff": "--- published/.travis.yml\n+++ rebuilt/.travis.yml\n@@ -1,5 +1,8 @@\n-language: node_js\r\n-node_js:\r\n-  - 0.8\r\n-before_script:\r\n-  - npm install -g grunt-cli\n\\ No newline at end of file\n+language: node_js\n+node_js:\n+  - \"6.3.0\"\n+\n+sudo: false\n+\n+script:\n+  - npm run test\n",
+					"match": false,
+					"packageHash": "8095f828ed898740b6b7da5696c71aa77fb4bf247ba75f6e1993126b06e9c771",
+					"size": 82,
+					"sourceHash": "b40dce52899569422773f7b5b9baa2edbb82b42af55f1ddf35752586a7836b36",
+					"status": "content"
+				},
+				"Gruntfile.coffee": {
+					"match": false,
+					"packageHash": "e282f91b7ff96ec6c3ec1bbda0f58306283f78f42186aeec61293d9b8ce412ee",
+					"size": 2829,
+					"status": "missing-in-source"
+				},
+				"LICENSE": {
+					"match": false,
+					"packageHash": "7f4a28468bcef3bce940be6763558dcbd796b3f664712068fa5515628a8b7f6a",
+					"size": 1093,
+					"status": "missing-in-source"
+				},
+				"README.md": {
+					"diff": "--- published/README.md\n+++ rebuilt/README.md\n@@ -1,36 +1,120 @@\n-# Hammer.js [![Build Status](https://travis-ci.org/EightMedia/hammer.js.png)](https://travis-ci.org/EightMedia/hammer.js/)\r\n-\r\n-### A javascript library for multi-touch gestures\r\n-\r\n-> I told you, homeboy /\r\n-> You *CAN* touch this /\r\n-> Yeah, that's how we living and you know /\r\n-> You *CAN* touch this\r\n-\r\n-\r\n-## Features\r\n-- Detects Tap, DoubleTap, Swipe, Drag, Pinch, and Rotate gestures\r\n-- DOM Events\r\n-- Debug plugins\r\n-- Custom gestures\r\n-- Chainable instance methods\r\n-- jQuery plugin with events delegation (the on/off methods) available\r\n-- IE8 and older compatibility with jQuery plugin\r\n-- AMD support (RequireJS)\r\n-- Unit tests\r\n-\r\n-\r\n-## Getting Started\r\n-See the [Wiki on GitHub](https://github.com/EightMedia/hammer.js/wiki) for documentation.\r\n-\r\n-\r\n-## Contributing\r\n-In lieu of a formal styleguide, take care to maintain the existing coding style.\r\n-Add unit tests for any new or changed functionality. Lint and test your code using grunt.\r\n-Please don't commit the dist versions with your changes, only the changed source files.\r\n-\r\n-\r\n-## Further notes\r\n-Created by [Jorik Tangelder](http://twitter.com/jorikdelaporik) and developed at [Eight Media](http://www.eight.nl/) in Arnhem, the Netherlands.\r\n-\r\n-It's recommend to listen to [this loop](http://soundcloud.com/eightmedia/hammerhammerhammer) while using hammer.js.\r\n+# [hammer.js][hammerjs-url]  [![NPM Version][npm-image]][npm-url]  [![NPM Downloads][downloads-image]][downloads-url]  [![Build Status][travis-image]][travis-url]\n+> A JavaScript library for detecting touch gestures.\n+\n+\n+## Installation\n+### NPM\n+```sh\n+npm install --save hammerjs\n+```\n+\n+**or**\n+\n+### Yarn\n+```sh\n+yarn add hammerjs\n+```\n+\n+**or**\n+\n+### CDN\n+[https://cdnjs.com/libraries/hammer.js/](https://cdnjs.com/libraries/hammer.js/)\n+\n+\n+## Usage\n+hammer.js has a quick start option for gestures it already recognizes.\n+```js\n+// Get a reference to an element.\n+var square = document.querySelector('.square');\n+\n+// Create an instance of Hammer with the reference.\n+var hammer = new Hammer(square);\n+\n+// Subscribe to a quick start event: press, tap, or doubletap.\n+// For a full list of quick start events, read the documentation.\n+hammer.on('press', function(e) {\n+  e.target.classList.toggle('expand');\n+  console.log(\"You're pressing me!\");\n+  console.log(e);\n+});\n+```\n+\n+If you want to recognize your own gestures, such as `tripletap`, then you'll have to use these steps:\n+```js\n+// Get a reference to an element.\n+var square = document.querySelector('.square');\n+\n+// Create a manager to manage the element.\n+var manager = new Hammer.Manager(square);\n+\n+// Create a recognizer.\n+var TripleTap = new Hammer.Tap({\n+  event: 'tripletap',\n+  taps: 3\n+});\n+\n+// Add the recognizer to the manager.\n+manager.add(TripleTap);\n+\n+// Subscribe to the event.\n+manager.on('tripletap', function(e) {\n+  e.target.classList.toggle('expand');\n",
+					"match": false,
+					"packageHash": "d33780a078c7ca9b6418000f7b1654610c25a5f01553b80033e49bd5aaf74e97",
+					"size": 1310,
+					"sourceHash": "f5f65ff913e2b3cb4c02d28101a7be492a7b68619d964a500561799f34e24f75",
+					"status": "content"
+				},
+				"component.json": {
+					"diff": "--- published/component.json\n+++ rebuilt/component.json\n@@ -1,7 +1,8 @@\n-{\r\n-    \"name\": \"hammerjs\",\r\n-    \"version\": \"1.0.3dev\",\r\n-    \"description\": \"A javascript library for multi-touch gestures\",\r\n-    \"keywords\": [\"touch\",\"gestures\"],\r\n-    \"scripts\": [\"dist/hammer.js\"]\r\n-}\n\\ No newline at end of file\n+{\n+    \"name\": \"hammerjs\",\n+    \"version\": \"2.0.6\",\n+    \"main\": \"hammer.js\",\n+    \"scripts\": [\n+      \"hammer.js\"\n+    ]\n+}\n",
+					"match": false,
+					"packageHash": "bfa9e36b526dbe0483d4f9be7eac44ceb28674168ce86dcb91ed1f80b2317669",
+					"size": 200,
+					"sourceHash": "248cd2d564332d153af1c16633eeab693e0a6b90d84d9ffafdf832f4941c9cfc",
+					"status": "content"
+				},
+				"dist/hammer.js": {
+					"match": false,
+					"packageHash": "995b967f1d32fa7b5fe3fc1f3b7db4a7902fce99e201132ef8d52b3afd348526",
+					"size": 42834,
+					"status": "missing-in-source"
+				},
+				"dist/hammer.min.js": {
+					"match": false,
+					"packageHash": "39b1a009d2a6a53c0ae1105cf1cb38aa0c9ab1eb89a0fcb90d02d883fbaac22a",
+					"size": 10967,
+					"status": "missing-in-source"
+				},
+				"dist/jquery.hammer.js": {
+					"match": false,
+					"packageHash": "451cd82c97f149c17bd75dab54dcdf97ed327d31d9772c300af5aba2a70e12df",
+					"size": 45610,
+					"status": "missing-in-source"
+				},
+				"dist/jquery.hammer.min.js": {
+					"match": false,
+					"packageHash": "c8a919d7ae2af899721e99b1118ce2d31ae030c70ef47dc2318d012a1840aa03",
+					"size": 11722,
+					"status": "missing-in-source"
+				},
+				"examples/README.md": {
+					"match": false,
+					"packageHash": "8fc93cf4c7938862980cdf8ded6d33bea57d067af09bfa6cbb0250605752f6cf",
+					"size": 96,
+					"status": "missing-in-source"
+				},
+				"examples/assets/img/arrow.png": {
+					"match": false,
+					"packageHash": "9df6a62079f8f78a53c38e406d0f8e68d4cf235e60f80fba1a7c63761e1d7f8b",
+					"size": 505,
+					"status": "missing-in-source"
+				},
+				"examples/assets/img/monalisa.jpg": {
+					"match": false,
+					"packageHash": "0403529ec3f8ec8ef9900fd6c49b341da6235a07a9a8a44f75e628b93980e07d",
+					"size": 3506068,
+					"status": "missing-in-source"
+				},
+				"examples/assets/img/spinner.png": {
+					"match": false,
+					"packageHash": "3522e97558010db0e795d021a2317bb75f1e3acb9df30444e67dae1f1d63b382",
+					"size": 795,
+					"status": "missing-in-source"
+				},
+				"examples/assets/js/ga.js": {
+					"match": false,
+					"packageHash": "c7e9031ddf7edfaca854b25a84f7730ac65f9f28439d63b1f91d92ac16e81cda",
+					"size": 453,
+					"status": "missing-in-source"
+				},
+				"examples/assets/js/modernizr.js": {
+					"match": false,
+					"packageHash": "7e5b27160483ef43f65a70cdd5079c3c328d9bab007ea30ba7cb52b648925286",
+					"size": 29905,
+					"status": "missing-in-source"
+				},
+				"examples/carousel.html": {
+					"match": false,
+					"packageHash": "bda9c2dd82d8eb841d2736d3aba6e8c729fedc86a5311baf04469d4400db0acc",
+					"size": 8902,
+					"status": "missing-in-source"
+				},
+				"examples/drag.html": {
+					"match": false,
+					"packageHash": "e89a14d87db0c9d69c38eabd87bf1d0604c6868b53c9f7fb7a79c8065e3157cd",
+					"size": 1980,
+					"status": "missing-in-source"
+				},
+				"examples/events.html": {
+					"match": false,
+					"packageHash": "361566f7ad575941134f9a8379f8e6d179ce553954dd9af38dc2d98aba75b6b7",
+					"size": 9733,
+					"status": "missing-in-source"
+				},
+				"examples/fastclick.html": {
+					"match": false,
+					"packageHash": "1c320907bf85005d7be2a2887d2863b88f2dbb8e161f2c752e9ed79e5b8f45d4",
+					"size": 2187,
+					"status": "missing-in-source"
+				},
+				"examples/jquery.html": {
+					"match": false,
+					"packageHash": "1ceec00e9f23bd47c2886077264163e20fe8d7223c4880dfa9d4ba8752b70f08",
+					"size": 3024,
+					"status": "missing-in-source"
+				},
+				"examples/pinchzoom.html": {
+					"match": false,
+					"packageHash": "d7577f9be8f0f602659e6edbcfe7592ac07a13f133c6bf401a388925bee57b2a",
+					"size": 3054,
+					"status": "missing-in-source"
+				},
+				"examples/pull-to-refresh.html": {
+					"match": false,
+					"packageHash": "3e7f933c5eb876a329fc8ac83b81844ec3bd514084c2c9571bc20d0de1a20ea3",
+					"size": 17115,
+					"status": "missing-in-source"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -1,40 +1,76 @@\n-{\r\n-    \"name\": \"hammerjs\",\r\n-    \"title\": \"Hammer.JS\",\r\n-    \"description\": \"A javascript library for multi-touch gestures\",\r\n-    \"version\": \"1.0.3dev\",\r\n-    \"homepage\": \"http://eightmedia.github.com/hammer.js\",\r\n-    \"licenses\": [{\r\n-        \"type\": \"MIT\",\r\n-        \"url\": \"https://github.com/eightmedia/hammer.js/blob/master/LICENSE\"\r\n-    }],\r\n-    \"keywords\": [\"touch\",\"gestures\",\"ender\"],\r\n-    \"author\": {\r\n-        \"name\": \"Jorik Tangelder\",\r\n-        \"email\": \"j.tangelder@gmail.com\"\r\n-    },\r\n-    \"repository\": {\r\n-        \"type\": \"git\",\r\n-        \"url\": \"git://github.com/eightmedia/hammer.js.git\"\r\n-    },\r\n-    \"bugs\": {\r\n-        \"url\": \"https://github.com/eightmedia/hammer.js/issues\"\r\n-    },\r\n-    \"devDependencies\": {\r\n-        \"grunt\": \"0.4.x\",\r\n-        \"grunt-contrib-connect\": \"0.1.x\",\r\n-        \"grunt-contrib-concat\": \"0.1.x\",\r\n-        \"grunt-contrib-uglify\": \"0.1.x\",\r\n-        \"grunt-contrib-jshint\": \"0.1.x\",\r\n-        \"grunt-contrib-watch\": \"0.2.x\",\r\n-        \"grunt-contrib-qunit\": \"0.1.x\",\r\n-        \"grunt-tagrelease\": \"0.1.x\"\r\n-    },\r\n-    \"main\": \"dist/hammer.js\",\r\n-    \"engines\": {\r\n-        \"node\": \">=0.8.0\"\r\n-    },\r\n-    \"scripts\": {\r\n-        \"test\": \"grunt test\"\r\n-    }\r\n-}\n\\ No newline at end of file\n+{\n+  \"name\": \"hammerjs\",\n+  \"title\": \"Hammer.JS\",\n+  \"description\": \"A javascript library for multi-touch gestures\",\n+  \"version\": \"2.0.8\",\n+  \"homepage\": \"http://hammerjs.github.io/\",\n+  \"license\": \"MIT\",\n+  \"keywords\": [\n+    \"touch\",\n+    \"gestures\"\n+  ],\n+  \"author\": {\n+    \"name\": \"Jorik Tangelder\",\n+    \"email\": \"j.tangelder@gmail.com\"\n+  },\n+  \"contributors\": [\n+    {\n+      \"name\": \"Alexander Schmitz\",\n+      \"email\": \"arschmitz@gmail.com\"\n+    },\n+    {\n+      \"name\": \"Chris Thoburn\",\n+      \"email\": \"\"\n+    }\n+  ],\n+  \"repository\": {\n+    \"type\": \"git\",\n+    \"url\": \"git://github.com/hammerjs/hammer.js.git\"\n+  },\n+  \"bugs\": {\n+    \"url\": \"https://github.com/hammerjs/hammer.js/issues\"\n+  },\n+  \"dependencies\": {},\n+  \"devDependencies\": {\n+    \"babel-core\": \"^6.26.3\",\n+    \"babel-plugin-external-helpers\": \"^6.22.0\",\n+    \"babel-preset-env\": \"^1.7.0\",\n+    \"bannerize\": \"^1.0.2\",\n+    \"blanket\": \"^1.2.3\",\n+    \"changelogplease\": \"^1.2.0\",\n+    \"ember-suave\": \"^4.0.0\",\n+    \"git-tags\": \"^0.2.4\",\n+    \"hammer-simulator\": \"git://github.com/hammerjs/simulator#master\",\n+    \"jquery\": \"^3.1.0\",\n+    \"jquery-hammerjs\": \"2.0.x\",\n+    \"jscs\": \"^3.0.7\",\n+    \"jshint\": \"^2.9.2\",\n+    \"jshint-stylish\": \"^2.2.0\",\n+    \"lodash-compat\": \"^3.10.2\",\n+    \"node-qunit-phantomjs\": \"^1.4.0\",\n+    \"qunitjs\": \"^2.0.0\",\n+    \"rollup\": \"^0.59.4\",\n+    \"rollup-plugin-babel\": \"^3.0.4\",\n+    \"run-when-changed\": \"^2.1.0\",\n+    \"serve\": \"^1.4.0\",\n+    \"uglify-js\": \"^3.4.0\"\n",
+					"match": false,
+					"packageHash": "8541657c80bad4a6e2376520266b64235d27aaae72c6705aaeb1645abac28b95",
+					"size": 1182,
+					"sourceHash": "81f448e9d051a54259e02933d8221a1ad64239481917f2e1f4b48a850af2e5ef",
+					"status": "content"
+				},
+				"plugins/hammer.fakemultitouch.js": {
+					"match": false,
+					"packageHash": "c46066504c04696040ddc59bb7641a6baaea7dee31441a6975e1f61a1d7242f6",
+					"size": 2853,
+					"status": "missing-in-source"
+				},
+				"plugins/hammer.showtouches.js": {
+					"match": false,
+					"packageHash": "7a0667c11e2f30c2a2458c657e2e36d954d424149ccae5d2df4462c033b6b7ee",
+					"size": 2352,
+					"status": "missing-in-source"
+				},
+				"plugins/jquery.hammer.js": {
+					"match": false,
+					"packageHash": "09babc47a59887b4770afd92dd13ddba2a76b9c70ec996e81992b30762e65c08",
+					"size": 2772,
+					"status": "missing-in-source"
+				},
+				"src/core.js": {
+					"match": false,
+					"packageHash": "fdcf5d78150c18b5dc7998f4372d1c9aad379dde3f2a9f3789e6f95ae5f8a65a",
+					"size": 1778,
+					"status": "missing-in-source"
+				},
+				"src/detection.js": {
+					"match": false,
+					"packageHash": "15e06d394ac7fd27889c643c4765bc5f4e88e75c5e861e5cb9f2c6af816079d1",
+					"size": 6175,
+					"status": "missing-in-source"
+				},
+				"src/event.js": {
+					"match": false,
+					"packageHash": "b07b8f48f85648ea32f6f29402449a0113f044676e12e7c1c6b15b9db81e7b72",
+					"size": 7330,
+					"status": "missing-in-source"
+				},
+				"src/gestures.js": {
+					"match": false,
+					"packageHash": "d7230382b0fd94e5977899dcc94d8f2533a89dc15ace3f9a631149497864198e",
+					"size": 17051,
+					"status": "missing-in-source"
+				},
+				"src/instance.js": {
+					"match": false,
+					"packageHash": "ebdb223a76d9636db1f9ee197bb5a10dd37f65fc2973929801128e59f65f881d",
+					"size": 2747,
+					"status": "missing-in-source"
+				},
+				"src/intro.js": {
+					"match": false,
+					"packageHash": "ea530cbf7ee765b0ad1fddb719746e2861d12817f1f2cb220ec31f3f7c80f538",
+					"size": 38,
+					"status": "missing-in-source"
+				},
+				"src/outro.js": {
+					"match": false,
+					"packageHash": "0c8dcdc3af70a7229244b1a9cadc60208ff83e2dd193106e3e69b37af8ca6f10",
+					"size": 254,
+					"status": "missing-in-source"
+				},
+				"src/pointerevent.js": {
+					"match": false,
+					"packageHash": "1784b6834529be3d995ccec035f48881ba117572982844595f425af342f8eaf4",
+					"size": 1090,
+					"status": "missing-in-source"
+				},
+				"src/setup.js": {
+					"match": false,
+					"packageHash": "d9c2cd69a523c31da478f376e71e8f2cb2bfc452a7221ede92acdd23a54ec22f",
+					"size": 775,
+					"status": "missing-in-source"
+				},
+				"src/utils.js": {
+					"match": false,
+					"packageHash": "de2236877453a0473138705d0131b4a1123a771ea41b839e090dc264b3398d69",
+					"size": 5369,
+					"status": "missing-in-source"
+				},
+				"tests/gestures.js": {
+					"match": false,
+					"packageHash": "2f36c3c77ebbc44e1dd62684d568d367c6714b631f28f62f71fb92d3e1f92d4e",
+					"size": 5136,
+					"status": "missing-in-source"
+				},
+				"tests/libs/faketouches.js": {
+					"match": false,
+					"packageHash": "e116b951391ea436a0f8c860f62e3314115f00219b39981c678ac57d1fc9c2a5",
+					"size": 10617,
+					"status": "missing-in-source"
+				},
+				"tests/libs/jquery.js": {
+					"match": false,
+					"packageHash": "04be299f67c0376f1f55c5deaba3f488c59a1ab072647b29accf145edd2a5f7e",
+					"size": 92639,
+					"status": "missing-in-source"
+				},
+				"tests/libs/qunit.css": {
+					"match": false,
+					"packageHash": "0024fe81c686e370f60a9ec189d3788d794de5cab8c3da84979dae6f4f840de8",
+					"size": 4915,
+					"status": "missing-in-source"
+				},
+				"tests/libs/qunit.js": {
+					"match": false,
+					"packageHash": "21aab358a50a99b9d1893c5234f13c2e897ea0c7497662c6b6704abf195fab38",
+					"size": 48432,
+					"status": "missing-in-source"
+				},
+				"tests/libs/underscore.js": {
+					"match": false,
+					"packageHash": "27829b1d29e3fb532d761987d4057275d1e9ecdd3eaf4b4c40a29382590b820e",
+					"size": 13450,
+					"status": "missing-in-source"
+				},
+				"tests/mouseevents.html": {
+					"match": false,
+					"packageHash": "ee8cd143778dec6acc38101652e88d77e08b4c146c38b2e57a7c02b7bfddce77",
+					"size": 796,
+					"status": "missing-in-source"
+				},
+				"tests/mousetouchevents.html": {
+					"match": false,
+					"packageHash": "e4c01b3a6d80f912d4b838ca3082ef625681ded4244310799c6c2254bc25f948",
+					"size": 825,
+					"status": "missing-in-source"
+				},
+				"tests/pointerevents_mouse.html": {
+					"match": false,
+					"packageHash": "08c803126a02122c47988507b1921628ac7f6dfacd5f04075915aa222455a8c0",
+					"size": 805,
+					"status": "missing-in-source"
+				},
+				"tests/pointerevents_touch.html": {
+					"match": false,
+					"packageHash": "14a628b89f681d77f4e37456dfdab41d4a6244c5b002b025c310ec1fd6e7a5ec",
+					"size": 805,
+					"status": "missing-in-source"
+				},
+				"tests/touchevents.html": {
+					"match": false,
+					"packageHash": "93330bc669e5028ea7a91b439390e25dac610cb46d1b5f22a82ec0d397170a03",
+					"size": 797,
+					"status": "missing-in-source"
+				},
+				"tests/utils.html": {
+					"match": false,
+					"packageHash": "c2a61e32e05c27823804a507a6a819a51defb491e712efac0f42b4cf6f6a5fb8",
+					"size": 385,
+					"status": "missing-in-source"
+				},
+				"tests/utils.js": {
+					"match": false,
+					"packageHash": "4146681129bcc22c026b1cb3a67f5caa4a3acd5ee29e590f46f642cd136548cd",
+					"size": 549,
+					"status": "missing-in-source"
+				},
+				".bowerrc": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				".editorconfig": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				".jscsrc": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				".jshintrc": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"CHANGELOG.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"CONTRIBUTING.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"LICENSE.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"banner.ejs": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"bower.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"changelog.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"hammer.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"hammer.min.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"hammer.min.js.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"hammer.min.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"rollup.config.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/.babelrc": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/hammer.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/input/mouse.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/input/pointerevent.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/input/singletouch.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/input/touch.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/input/touchmouse.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/inputjs/compute-delta-xy.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/inputjs/compute-input-data.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/inputjs/compute-interval-input-data.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/inputjs/create-input-instance.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/inputjs/get-angle.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/inputjs/get-center.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/inputjs/get-direction.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/inputjs/get-distance.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/inputjs/get-rotation.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/inputjs/get-scale.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/inputjs/get-velocity.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/inputjs/input-constructor.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/inputjs/input-consts.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/inputjs/input-handler.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/inputjs/simple-clone-input-data.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/main.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/manager.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/recognizerjs/direction-str.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/recognizerjs/get-recognizer-by-name-if-manager.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/recognizerjs/recognizer-constructor.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/recognizerjs/recognizer-consts.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/recognizerjs/state-str.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/recognizers/attribute.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/recognizers/pan.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/recognizers/pinch.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/recognizers/press.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/recognizers/rotate.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/recognizers/swipe.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/recognizers/tap.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/touchactionjs/clean-touch-actions.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/touchactionjs/get-touchaction-props.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/touchactionjs/touchaction-Consts.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/touchactionjs/touchaction-constructor.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/utils/add-event-listeners.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/utils/assign.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/utils/bind-fn.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/utils/bool-or-fn.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/utils/deprecate.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/utils/each.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/utils/extend.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/utils/get-window-for-element.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/utils/has-parent.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/utils/if-undefined.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/utils/in-array.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/utils/in-str.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/utils/inherit.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/utils/invoke-array-arg.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/utils/merge.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/utils/prefixed.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/utils/remove-event-listeners.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/utils/set-timeout-context.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/utils/split-str.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/utils/to-array.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/utils/unique-array.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/utils/unique-id.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/utils/utils-consts.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"string-replace.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"tests/manual/assets/style.css": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"tests/manual/compute_touch_action.html": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"tests/manual/input.html": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"tests/manual/log.html": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"tests/manual/multiple.html": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"tests/manual/nested.html": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"tests/manual/simulator-googlemaps.html": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"tests/manual/simulator.html": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"tests/manual/touchaction.html": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"tests/manual/visual.html": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"tests/unit/assets/utils.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"tests/unit/gestures/test_pan.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"tests/unit/gestures/test_pinch.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"tests/unit/gestures/test_swipe.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"tests/unit/index.html": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"tests/unit/test_enable.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"tests/unit/test_events.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"tests/unit/test_gestures.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"tests/unit/test_hammer.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"tests/unit/test_jquery_plugin.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"tests/unit/test_multiple_taps.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"tests/unit/test_nested_gesture_recognizers.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"tests/unit/test_propagation_bubble.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"tests/unit/test_require_failure.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"tests/unit/test_simultaneous_recognition.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"tests/unit/test_utils.js": {
+					"match": false,
+					"status": "missing-in-package"
+				}
+			},
+			"summary": {
+				"differentFiles": 4,
+				"matchingFiles": 0,
+				"missingInPackage": 105,
+				"missingInSource": 46,
+				"score": 0,
+				"totalFiles": 155
+			}
+		}
+	}
+]
