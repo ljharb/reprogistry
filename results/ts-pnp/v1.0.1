@@ -1,0 +1,73 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-05T12:06:00.680Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:11.7.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "ts-pnp@1.0.1",
+			"name": "ts-pnp",
+			"version": "1.0.1",
+			"location": "https://registry.npmjs.org/ts-pnp/-/ts-pnp-1.0.1.tgz",
+			"integrity": "sha512-Zzg9XH0anaqhNSlDRibNC8Kp+B9KNM0uRIpLpGkGyrgRIttA7zZBhotTSEoEyuDrz3QW2LGtu2dxuk34HzIGnQ==",
+			"publishedAt": "2019-02-23T21:00:40.292Z",
+			"publishedWith": {
+				"node": null,
+				"npm": null
+			}
+		},
+		"source": {
+			"integrity": null,
+			"location": "https://github.com/arcanis/ts-pnp.git",
+			"spec": "github:arcanis/ts-pnp#HEAD"
+		},
+		"comparisonHash": "8a2a8dcbb729bf3ee9216e490c955701f0ddebe1",
+		"diff": {
+			"files": {
+				"README.md": {
+					"diff": "--- published/README.md\n+++ rebuilt/README.md\n@@ -13,7 +13,7 @@\n \n ## Usage\n \n-*Note that `ts-pnp` is a low-level package - you shouldn't have to use it unless you're writing a TS compiler host. If you just want to write TypeScript and have it Just Work™, take a look at [`pnp-plugin-webpack`](https://github.com/arcanis/pnp-webpack-plugin#ts-loader-integration) instead.*\n+*Note that `ts-pnp` is a low-level package - you shouldn't have to use it unless you're writing a TS compiler host. If you just want to write TypeScript and have it Just Work™, take a look at [`pnp-webpack-plugin`](https://github.com/arcanis/pnp-webpack-plugin#ts-loader-integration) instead.*\n \n This package exports a function that can be used to implement the [`resolveModuleName` hook from `CompilerHost`](https://github.com/Microsoft/TypeScript/wiki/Using-the-Compiler-API#customizing-module-resolution). It mimics the interface from the one you'd typically use and, as all other PnP plugins, works just fine whether your application is actually running under PnP or not.\n \n@@ -26,13 +26,20 @@\n ): ts.CompilerHost {\n   const compilerHost = {\n     resolveModuleNames,\n+    resolveTypeReferenceDirectives,\n   };\n \n   return compilerHost;\n \n   function resolveModuleNames(moduleNames: string[], containingFile: string) {\n     return moduleNames.map(moduleName => {\n-      return resolveModuleName(moduleName, containingFile, compilerOptions, compilerHost, ts.resolveModuleName);\n+      return resolveModuleName(moduleName, containingFile, compilerOptions, compilerHost, ts.resolveModuleName).resolvedModule;\n+    });\n+  }\n+\n+  function resolveTypeReferenceDirectives(typeDirectiveNames: string[], containingFile: string) {\n+    return typeDirectiveNames.map(typeDirectiveName => {\n+      return resolveModuleName(typeDirectiveName, containingFile, compilerOptions, compilerHost, ts.resolveTypeReferenceDirective).resolvedTypeReferenceDirective;\n     });\n   }\n }\n",
+					"match": false,
+					"packageHash": "29f4aa64ed06fa040560853646a7d6023918367243d00a0ae4e1bdc9309900fc",
+					"size": 3007,
+					"sourceHash": "25b3c797df822b3870c354dbd8c65b4d26aade4753219499306dfc25333779b7",
+					"status": "content"
+				},
+				"index.d.ts": {
+					"diff": "--- published/index.d.ts\n+++ rebuilt/index.d.ts\n@@ -10,6 +10,20 @@\n     moduleName: string,\n     containingFile: string,\n     options: ts.CompilerOptions,\n+    moduleResolutionHost: ts.ResolvedModuleWithFailedLookupLocations,\n+  ) => ts.ResolvedModuleWithFailedLookupLocations,\n+): ts.ResolvedModuleWithFailedLookupLocations;\n+\n+export declare function resolveModuleName(\n+  moduleName: string,\n+  containingFile: string,\n+  options: ts.CompilerOptions,\n+  moduleResolutionHost: ts.ModuleResolutionHost,\n+\n+  realResolveModuleName: (\n+    moduleName: string,\n+    containingFile: string,\n+    options: ts.CompilerOptions,\n     moduleResolutionHost: ts.ModuleResolutionHost,\n-  ) => ts.ResolvedModuleNameWithFallbackLocations,\n-): ts.ResolvedModuleNameWithFallbackLocations;\n+  ) => ts.ResolvedTypeReferenceDirectiveWithFailedLookupLocations,\n+): ts.ResolvedTypeReferenceDirectiveWithFailedLookupLocations;\n",
+					"match": false,
+					"packageHash": "d92ddc98c928ca8cd91314ee1a5c59c381dc76a0a950e4cab0d5ce5754455b08",
+					"size": 468,
+					"sourceHash": "06046d1c6088da31262f36a2238bb22bdc8f196840b15e82ad974ed96ccb9ab6",
+					"status": "content"
+				},
+				"index.js": {
+					"diff": "--- published/index.js\n+++ rebuilt/index.js\n@@ -1,13 +1,5 @@\n-let pnp;\n-\n-try {\n-  pnp = require(`pnpapi`);\n-} catch (error) {\n-  // not in PnP; not a problem\n-}\n-\n function resolveModuleName(request, issuer, compilerOptions, moduleResolutionHost, parentResolver) {\n-  const topLevelLocation = pnp.getPackageInformation(pnp.topLevel).packageLocation;\n+  const pnp = require(`pnpapi`);\n \n   const [, prefix = ``, packageName = ``, rest] = request.match(/^(!(?:.*!)+)?((?!\\.{0,2}\\/)(?:@[^\\/]+\\/)?[^\\/]+)?(.*)/);\n \n@@ -19,13 +11,20 @@\n \n     let unqualified;\n     try {\n-      unqualified = pnp.resolveToUnqualified(typesPackagePath, `${topLevelLocation}/`, {considerBuiltins: false});\n+      unqualified = pnp.resolveToUnqualified(typesPackagePath, issuer, {considerBuiltins: false});\n     } catch (error) {}\n \n     if (unqualified) {\n+      // TypeScript checks whether the directory of the candidate is a directory\n+      // which may cause issues w/ zip loading (since the zip archive is still\n+      // reported as a file). To workaround this we add a trailing slash, which\n+      // causes TypeScript to assume the parent is a directory.\n+      if (moduleResolutionHost.directoryExists && moduleResolutionHost.directoryExists(unqualified))\n+        unqualified += `/`;\n+\n       const finalResolution = parentResolver(unqualified, issuer, compilerOptions, moduleResolutionHost);\n \n-      if (finalResolution.resolvedModule) {\n+      if (finalResolution.resolvedModule || finalResolution.resolvedTypeReferenceDirective) {\n         return finalResolution;\n       } else {\n         failedLookupLocations = failedLookupLocations.concat(finalResolution.failedLookupLocations);\n@@ -43,9 +42,16 @@\n     } catch (error) {}\n \n     if (unqualified) {\n+      // TypeScript checks whether the directory of the candidate is a directory\n+      // which may cause issues w/ zip loading (since the zip archive is still\n+      // reported as a file). To workaround this we add a trailing slash, which\n+      // causes TypeScript to assume the parent is a directory.\n+      if (moduleResolutionHost.directoryExists && moduleResolutionHost.directoryExists(unqualified))\n+        unqualified += `/`;\n+\n       const finalResolution = parentResolver(unqualified, issuer, compilerOptions, moduleResolutionHost);\n \n-      if (finalResolution.resolvedModule) {\n+      if (finalResolution.resolvedModule || finalResolution.resolvedTypeReferenceDirective) {\n         return finalResolution;\n       } else {\n         failedLookupLocations = failedLookupLocations.concat(finalResolution.failedLookupLocations);\n@@ -55,11 +61,12 @@\n \n   return {\n     resolvedModule: undefined,\n+    resolvedTypeReferenceDirective: undefined,\n     failedLookupLocations,\n   };\n }\n \n-module.exports.resolveModuleName = pnp\n+module.exports.resolveModuleName = process.versions.pnp\n   ? resolveModuleName\n   : (moduleName, containingFile, compilerOptions, compilerHost, resolveModuleName) =>\n       resolveModuleName(moduleName, containingFile, compilerOptions, compilerHost);\n",
+					"match": false,
+					"packageHash": "d1cd08fc015afb1b7064d815c981aff352a719d0ca22a99c30cf72281ae85d9d",
+					"size": 2120,
+					"sourceHash": "03c8065e3c85b2f74e1f48a19c96dcdcb5c5636bb6d662022e6174667c7cb6be",
+					"status": "content"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -1,6 +1,6 @@\n {\n     \"name\": \"ts-pnp\",\n-    \"version\": \"1.0.1\",\n+    \"version\": \"1.2.0\",\n     \"description\": \"plug'n'play resolver for TypeScript\",\n     \"license\": \"MIT\",\n     \"engines\": {\n@@ -20,8 +20,8 @@\n         \"plugnplay\",\n         \"pnp\"\n     ],\n-    \"peerDependencies\": {\n-        \"typescript\": \"*\"\n+    \"devDependencies\": {\n+        \"typescript\": \"3.5.3\"\n     },\n     \"peerDependenciesMeta\": {\n         \"typescript\": {\n",
+					"match": false,
+					"packageHash": "84fa5f0897deeaf0043423f52b7737f41d2ade7ae411e8076d3e5800c4939e1c",
+					"size": 669,
+					"sourceHash": "5fc6700592a82c5f6d04b3a7793afacc077d42758c382f7b522c44745627f506",
+					"status": "content"
+				}
+			},
+			"summary": {
+				"differentFiles": 4,
+				"matchingFiles": 0,
+				"missingInPackage": 0,
+				"missingInSource": 0,
+				"score": 0,
+				"totalFiles": 4
+			}
+		}
+	}
+]
