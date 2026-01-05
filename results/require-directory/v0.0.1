@@ -1,0 +1,85 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-05T10:00:00.939Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:2.15.11",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "require-directory@0.0.1",
+			"name": "require-directory",
+			"version": "0.0.1",
+			"location": "https://registry.npmjs.org/require-directory/-/require-directory-0.0.1.tgz",
+			"integrity": "sha512-UB8K8laVN1FTUlf2eZtoFd7k3yrFcyv0LYgbXfCipHryGH/oMyxyT8oMDl3YSS3kBI/LWayU7Wg6mNNuRuTE4A==",
+			"publishedAt": "2011-12-27T00:06:32.027Z",
+			"publishedWith": {
+				"node": "v0.6.6",
+				"npm": "1.0.106"
+			}
+		},
+		"source": {
+			"integrity": null,
+			"location": "git://github.com/troygoode/node-require-directory.git",
+			"spec": "github:troygoode/node-require-directory#HEAD"
+		},
+		"comparisonHash": "8a2a8dcbb729bf3ee9216e490c955701f0ddebe1",
+		"diff": {
+			"files": {
+				".gitignore": {
+					"match": false,
+					"packageHash": "a4e41f0c86438dcbbc3642c1da13a63c6a1a6ceb1070c329f47a502ad84196d1",
+					"size": 14,
+					"status": "missing-in-source"
+				},
+				".npmignore": {
+					"match": false,
+					"packageHash": "d124c6894c2a80edc1bb99c55b2dee5ec47a15521785def454d0172fccbcef8e",
+					"size": 16,
+					"status": "missing-in-source"
+				},
+				"README.markdown": {
+					"diff": "--- published/README.markdown\n+++ rebuilt/README.markdown\n@@ -1,10 +1,16 @@\n # require-directory\n \n-Recursively iterates over specified directory, requiring each file, and returning a nested hash structure containing those libraries.\n+Recursively iterates over specified directory, `require()`'ing each file, and returning a nested hash structure containing those modules.\n+\n+**[Follow me (@troygoode) on Twitter!](https://twitter.com/intent/user?screen_name=troygoode)**\n+\n+[![NPM](https://nodei.co/npm/require-directory.png?downloads=true&stars=true)](https://nodei.co/npm/require-directory/)\n+\n+[![build status](https://secure.travis-ci.org/troygoode/node-require-directory.png)](http://travis-ci.org/troygoode/node-require-directory)\n \n ## How To Use\n \n-### Installation\n+### Installation (via [npm](https://npmjs.org/package/require-directory))\n \n ```bash\n $ npm install require-directory\n@@ -12,24 +18,160 @@\n \n ### Usage\n \n-Given a directory structure like so:\n+A common pattern in node.js is to include an index file which creates a hash of the files in its current directory. Given a directory structure like so:\n \n * app.js\n-* routes/home.js\n-* routes/auth/login.js\n-* routes/auth/logout.js\n-* routes/auth/register.js\n+* routes/\n+  * index.js\n+  * home.js\n+  * auth/\n+    * login.js\n+    * logout.js\n+    * register.js\n+\n+`routes/index.js` uses `require-directory` to build the hash (rather than doing so manually) like so:\n \n ```javascript\n var requireDirectory = require('require-directory');\n-var routes = requireDirectory(module, './routes/');\n+module.exports = requireDirectory(module);\n+```\n+\n+`app.js` references `routes/index.js` like any other module, but it now has a hash/tree of the exports from the `./routes/` directory:\n+\n+```javascript\n+var routes = require('./routes');\n \n // snip\n \n-app.get '/', routes.home;\n-app.get '/register', routes.auth.register;\n-app.get '/login', routes.auth.login;\n-app.get '/logout', routes.auth.logout;\n+app.get('/', routes.home);\n+app.get('/register', routes.auth.register);\n+app.get('/login', routes.auth.login);\n+app.get('/logout', routes.auth.logout);\n+```\n+\n+The `routes` variable above is the equivalent of this:\n+\n+```javascript\n+var routes = {\n+  home: require('routes/home.js'),\n+  auth: {\n+    login: require('routes/auth/login.js'),\n+    logout: require('routes/auth/logout.js'),\n+    register: require('routes/auth/register.js')\n+  }\n+};\n+```\n+\n+*Note that `routes.index` will be `undefined` as you would hope.*\n+\n+### Specifying Another Directory\n+\n+You can specify which directory you want to build a tree of (if it isn't the current directory for whatever reason) by passing it as the second parameter. Not specifying the path (`requireDirectory(module)`) is the equivelant of `requireDirectory(module, __dirname)`:\n+\n+```javascript\n+var requireDirectory = require('require-directory');\n+module.exports = requireDirectory(module, './some/subdirectory');\n+```\n+\n+For example, in the [example in the Usage section](#usage) we could have avoided creating `routes/index.js` and instead changed the first lines of `app.js` to:\n+\n+```javascript\n+var requireDirectory = require('require-directory');\n+var routes = requireDirectory(module, './routes');\n+```\n+\n+## Options\n+\n+You can pass an options hash to `require-directory` as the 2nd parameter (or 3rd if you're passing the path to another directory as the 2nd parameter already). Here are the available options:\n",
+					"match": false,
+					"packageHash": "a3b49bf6afa1111a56382580d28f782e35bee3e1a497feed7d7b0d40427ffb97",
+					"size": 847,
+					"sourceHash": "d7a4d16775302382833c28178effa3388c1df46b7302193c3d6d6ce5c5eecb81",
+					"status": "content"
+				},
+				"index.js": {
+					"diff": "--- published/index.js\n+++ rebuilt/index.js\n@@ -1,16 +1,86 @@\n-var fs = require('fs');\n+'use strict';\n \n-var requireDirectory = function(m, path){\n+var fs = require('fs'),\n+  join = require('path').join,\n+  resolve = require('path').resolve,\n+  dirname = require('path').dirname,\n+  defaultOptions = {\n+    extensions: ['js', 'json', 'coffee'],\n+    recurse: true,\n+    rename: function (name) {\n+      return name;\n+    },\n+    visit: function (obj) {\n+      return obj;\n+    }\n+  };\n+\n+function checkFileInclusion(path, filename, options) {\n+  return (\n+    // verify file has valid extension\n+    (new RegExp('\\\\.(' + options.extensions.join('|') + ')$', 'i').test(filename)) &&\n+\n+    // if options.include is a RegExp, evaluate it and make sure the path passes\n+    !(options.include && options.include instanceof RegExp && !options.include.test(path)) &&\n+\n+    // if options.include is a function, evaluate it and make sure the path passes\n+    !(options.include && typeof options.include === 'function' && !options.include(path, filename)) &&\n+\n+    // if options.exclude is a RegExp, evaluate it and make sure the path doesn't pass\n+    !(options.exclude && options.exclude instanceof RegExp && options.exclude.test(path)) &&\n+\n+    // if options.exclude is a function, evaluate it and make sure the path doesn't pass\n+    !(options.exclude && typeof options.exclude === 'function' && options.exclude(path, filename))\n+  );\n+}\n+\n+function requireDirectory(m, path, options) {\n   var retval = {};\n-  fs.readdirSync(path).forEach(function(filename){\n-    if(fs.statSync(path + filename).isDirectory()){\n-      retval[filename] = requireDirectory(m, path + filename + '/');\n-    }else{\n-      var name = filename.substring(0, filename.lastIndexOf('.'));\n-      retval[name] = m.require(path + filename);\n+\n+  // path is optional\n+  if (path && !options && typeof path !== 'string') {\n+    options = path;\n+    path = null;\n+  }\n+\n+  // default options\n+  options = options || {};\n+  for (var prop in defaultOptions) {\n+    if (typeof options[prop] === 'undefined') {\n+      options[prop] = defaultOptions[prop];\n+    }\n+  }\n+\n+  // if no path was passed in, assume the equivelant of __dirname from caller\n+  // otherwise, resolve path relative to the equivalent of __dirname\n+  path = !path ? dirname(m.filename) : resolve(dirname(m.filename), path);\n+\n+  // get the path of each file in specified directory, append to current tree node, recurse\n+  fs.readdirSync(path).forEach(function (filename) {\n+    var joined = join(path, filename),\n+      files,\n+      key,\n+      obj;\n+\n+    if (fs.statSync(joined).isDirectory() && options.recurse) {\n+      // this node is a directory; recurse\n+      files = requireDirectory(m, joined, options);\n+      // exclude empty directories\n+      if (Object.keys(files).length) {\n+        retval[options.rename(filename, joined, filename)] = files;\n+      }\n+    } else {\n+      if (joined !== m.filename && checkFileInclusion(joined, filename, options)) {\n+        // hash node key shouldn't include file extension\n+        key = filename.substring(0, filename.lastIndexOf('.'));\n+        obj = m.require(joined);\n+        retval[options.rename(key, joined, filename)] = options.visit(obj, joined, filename) || obj;\n+      }\n     }\n   });\n+\n   return retval;\n-};\n+}\n \n module.exports = requireDirectory;\n+module.exports.defaults = defaultOptions;\n",
+					"match": false,
+					"packageHash": "8d46c4bbf7420e1726b34f23208aea945344f137b8dc5b20996998f0d58ffc9c",
+					"size": 453,
+					"sourceHash": "65eaf8b7b519d6ae7be7ea20382d91a117d9c689897897ce4c2ee798e128a2d3",
+					"status": "content"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -1,9 +1,14 @@\n {\n   \"author\": \"Troy Goode <troygoode@gmail.com> (http://github.com/troygoode/)\",\n   \"name\": \"require-directory\",\n-  \"version\": \"0.0.1\",\n-  \"description\": \"Recursively iterates over specified directory, requiring each file, and returning a nested hash structure containing those libraries.\",\n-  \"keywords\": [\"require\", \"directory\", \"library\", \"recursive\"],\n+  \"version\": \"2.1.1\",\n+  \"description\": \"Recursively iterates over specified directory, require()'ing each file, and returning a nested hash structure containing those modules.\",\n+  \"keywords\": [\n+    \"require\",\n+    \"directory\",\n+    \"library\",\n+    \"recursive\"\n+  ],\n   \"homepage\": \"https://github.com/troygoode/node-require-directory/\",\n   \"main\": \"index.js\",\n   \"repository\": {\n@@ -17,20 +22,19 @@\n       \"web\": \"http://github.com/troygoode/\"\n     }\n   ],\n-  \"licenses\": [\n-    {\n-      \"type\": \"MIT\",\n-      \"url\": \"http://www.opensource.org/licenses/mit-license.php\"\n-    }\n-  ],\n+  \"license\": \"MIT\",\n   \"bugs\": {\n     \"url\": \"http://github.com/troygoode/node-require-directory/issues/\"\n   },\n   \"engines\": {\n-    \"node\": \">=0.6.0\"\n+    \"node\": \">=0.10.0\"\n+  },\n+  \"devDependencies\": {\n+    \"jshint\": \"^2.6.0\",\n+    \"mocha\": \"^2.1.0\"\n   },\n-  \"dependencies\": {},\n-  \"devDependencies\": {},\n-  \"scripts\": {},\n-  \"bin\": {}\n+  \"scripts\": {\n+    \"test\": \"mocha\",\n+    \"lint\": \"jshint index.js test/test.js\"\n+  }\n }\n",
+					"match": false,
+					"packageHash": "581e029d5a6b5ea03aa3a2c504e772f130779ee3b44a4683b1f239f52b64e23a",
+					"size": 1029,
+					"sourceHash": "5690bdddd6eb4abd795fa5319df7552279508df9d562d571e3132ddff3045a71",
+					"status": "content"
+				},
+				".jshintrc": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				".travis.yml": {
+					"match": false,
+					"status": "missing-in-package"
+				}
+			},
+			"summary": {
+				"differentFiles": 3,
+				"matchingFiles": 1,
+				"missingInPackage": 2,
+				"missingInSource": 2,
+				"score": 0.125,
+				"totalFiles": 8
+			}
+		}
+	}
+]
