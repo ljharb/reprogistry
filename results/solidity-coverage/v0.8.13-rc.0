@@ -1,0 +1,81 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-05T13:06:54.387Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:10.2.4",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "solidity-coverage@0.8.13-rc.0",
+			"name": "solidity-coverage",
+			"version": "0.8.13-rc.0",
+			"location": "https://registry.npmjs.org/solidity-coverage/-/solidity-coverage-0.8.13-rc.0.tgz",
+			"integrity": "sha512-z/PSxFronFYKsvE8KhAGba+PB4WH+XkJ/BKiWxptxm1xemJTOb9XK4VMQIhSelrvMp43c6Cs2rbC3ndTNmvZoQ==",
+			"publishedAt": "2024-08-29T04:28:57.453Z",
+			"publishedWith": {
+				"node": "20.11.1",
+				"npm": "10.2.4"
+			}
+		},
+		"source": {
+			"integrity": null,
+			"location": "git+https://github.com/sc-forks/solidity-coverage.git",
+			"spec": "github:sc-forks/solidity-coverage#e9b8c408db6cae3f84ccfba7b65eaf23307db90e"
+		},
+		"comparisonHash": "8a2a8dcbb729bf3ee9216e490c955701f0ddebe1",
+		"diff": {
+			"files": {
+				"FUNDING.json": {
+					"diff": "--- published/FUNDING.json\n+++ rebuilt/FUNDING.json\n@@ -3,5 +3,8 @@\n     \"ethereum\": {\n       \"ownedBy\": \"0xaA4c632684180bf781108c84E7a294B483D12053\"\n     }\n+  },\n+  \"opRetro\": {\n+    \"projectId\": \"0x2bb095e1f297c71da8bd4ee15097abad3b99e299fe14cd6aa704df3f36d0ae22\"\n   }\n }\n",
+					"match": false,
+					"packageHash": "86e891f29475ef43d9a3e3bf14d22602298820e43e3bc2e8f402da9c909971cf",
+					"size": 107,
+					"sourceHash": "1217fe0ce8c22914b6d3650646b5bf5bd04fb8c1044796253a7736344bf97179",
+					"status": "content"
+				},
+				"README.md": {
+					"diff": "--- published/README.md\n+++ rebuilt/README.md\n@@ -95,6 +95,7 @@\n | Option <img width=200/>| Type <img width=200/> | Default <img width=1000/> | Description <img width=1000/> |\n | ------ | ---- | ------- | ----------- |\n | skipFiles | *Array* | `[]` | Array of contracts or folders (with paths expressed relative to the `contracts` directory) that should be skipped when doing instrumentation.(ex: `[ \"Routers\", \"Networks/Polygon.sol\"]`) :warning: **RUN THE HARDHAT CLEAN COMMAND AFTER UPDATING THIS**  |\n+| irMinimum | *Boolean* | `false` | Speeds up test execution times when solc is run in `viaIR` mode. If your project successfully compiles while generating coverage with this option turned on (it may not!) it's worth using |\n | modifierWhitelist | *String[]* | `[]` | List of modifier names (ex: `onlyOwner`) to exclude from branch measurement. (Useful for modifiers which prepare something instead of acting as a gate.)) |\n | mocha | *Object* | `{ }` | [Mocha options][3] to merge into existing mocha config. `grep` and `invert` are useful for skipping certain tests under coverage using tags in the test descriptions. [More...][24]|\n | measureStatementCoverage | *boolean* | `true` | Computes statement (in addition to line) coverage. [More...][34] |\n@@ -113,9 +114,9 @@\n | onCompileComplete[<sup>*</sup>][14] | *Function* |  | Hook run *after* compilation completes, *before* tests are run. Useful if you have secondary compilation steps or need to modify built artifacts. [More...][23]|\n | onTestsComplete[<sup>*</sup>][14] | *Function* |  | Hook run *after* the tests complete, *before* Istanbul reports are generated. [More...][23]|\n | onIstanbulComplete[<sup>*</sup>][14] | *Function* |  | Hook run *after* the Istanbul reports are generated, *before* the coverage task completes. Useful if you need to clean resources up. [More...][23]|\n-| **:warning:    DEPRECATED** |  | |  |\n-| configureYulOptimizer | *Boolean* | false | **(Deprecated since 0.8.7)** Setting to `true` should resolve \"stack too deep\" compiler errors in large projects using ABIEncoderV2 |\n-| solcOptimizerDetails | *Object* | `undefined` |**(Deprecated since 0.8.7))** Must be used in combination with `configureYulOptimizer`. Allows you to configure solc's [optimizer details][1001]. Useful if the default remedy for stack-too-deep errors doesn't work in your case (See [FAQ: Running out of stack][1002] ). |\n+| **:warning:    LOW LEVEL** |  | |  |\n+| configureYulOptimizer | *Boolean* | false | Setting to `true` lets you specify optimizer details (see next option). If no details are defined it defaults to turning on the yul optimizer and enabling stack allocation |\n+| solcOptimizerDetails | *Object* | `undefined` |Must be used in combination with `configureYulOptimizer`. Allows you to configure solc's [optimizer details][1001]. (See [FAQ: Running out of stack][1002] ). |\n \n \n [<sup>*</sup> Advanced use][14]\n",
+					"match": false,
+					"packageHash": "ccab21957c65f5683364d20b7ecb7755dae71148b37ee821a1059d69421e4d83",
+					"size": 11165,
+					"sourceHash": "b9408630537e9f4369b5b1c2863578f3469b8555e77e866fe22a6eec1c13aa65",
+					"status": "content"
+				},
+				"lib/api.js": {
+					"diff": "--- published/lib/api.js\n+++ rebuilt/lib/api.js\n@@ -5,6 +5,7 @@\n const istanbul = require('sc-istanbul');\n const assert = require('assert');\n const _ = require('lodash/lang');\n+const { hardforkGte, HardforkName } = require('hardhat/internal/util/hardforks');\n \n const ConfigValidator = require('./validator');\n const Instrumenter = require('./instrumenter');\n@@ -17,7 +18,7 @@\n  * Coverage Runner\n  */\n class API {\n-  constructor(config={}) {\n+  constructor(config={}, hardfork) {\n     this.validator = new ConfigValidator();\n     this.abiUtils = new AbiUtils();\n     this.config = config || {};\n@@ -47,8 +48,11 @@\n     this.skipFiles = config.skipFiles || [];\n \n     this.log = config.log || console.log;\n-    this.gasLimit = 0xffffffffff                // default \"gas sent\" with transactions\n-    this.gasLimitNumber = 0x1fffffffffffff;     // block gas limit for Hardhat\n+    const isEip7825Enabled = hardfork !== undefined && HardforkName.OSAKA !== undefined\n+      ? hardforkGte(hardfork, HardforkName.OSAKA)\n+      : false;\n+    this.gasLimit = isEip7825Enabled ? 2 ** 24 : 0xffffffffff   // default \"gas sent\" with transactions\n+    this.gasLimitNumber = 0x1fffffffffffff;           // block gas limit for Hardhat\n     this.gasPrice = 0x01;\n \n     this.istanbulFolder = config.istanbulFolder || false;\n@@ -56,6 +60,7 @@\n \n     this.viaIR = config.viaIR;\n     this.usingSolcV4 = config.usingSolcV4;\n+    this.irMinimum = config.irMinimum;\n     this.solcOptimizerDetails = config.solcOptimizerDetails;\n \n     this.setLoggingLevel(config.silent);\n",
+					"match": false,
+					"packageHash": "3cef19faf3876e1de19a8122bbfa38d8c489703b90c55e657217a64c56cb22ad",
+					"size": 9444,
+					"sourceHash": "75be6d8f1a02954590a27010957d14342cc9d5cbe9d1084f8d6889b854294e3a",
+					"status": "content"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -1,6 +1,6 @@\n {\n   \"name\": \"solidity-coverage\",\n-  \"version\": \"0.8.13-rc.0\",\n+  \"version\": \"0.8.17\",\n   \"description\": \"Code coverage for Solidity testing\",\n   \"main\": \"plugins/nomiclabs.plugin.js\",\n   \"bin\": {\n@@ -26,7 +26,7 @@\n   \"license\": \"ISC\",\n   \"dependencies\": {\n     \"@ethersproject/abi\": \"^5.0.9\",\n-    \"@solidity-parser/parser\": \"^0.18.0\",\n+    \"@solidity-parser/parser\": \"^0.20.1\",\n     \"chalk\": \"^2.4.2\",\n     \"death\": \"^1.1.0\",\n     \"difflib\": \"^0.2.4\",\n",
+					"match": false,
+					"packageHash": "22ce059436bfd2a95d7b9776747f2b8d636d19c721e6330302becbfbbd799b70",
+					"size": 1970,
+					"sourceHash": "7c6818f1b902493e2882bda85d2d436fc46ee86295965f7b065a4cd968642fab",
+					"status": "content"
+				},
+				"plugins/hardhat.plugin.js": {
+					"diff": "--- published/plugins/hardhat.plugin.js\n+++ rebuilt/plugins/hardhat.plugin.js\n@@ -15,6 +15,7 @@\n // Toggled true for `coverage` task only.\n let measureCoverage = false;\n let configureYulOptimizer = false;\n+let irMinimum = false;\n let instrumentedSources;\n let optimizerDetails;\n \n@@ -26,7 +27,7 @@\n   if (Boolean(process.env.SOLIDITY_COVERAGE)) {\n     const { configureHardhatEVMGas } = require('./resources/nomiclabs.utils');\n     const API = require('./../lib/api');\n-    const api = new API({});\n+    const api = new API({}, config.networks.hardhat.hardfork);\n \n     const hardhatNetworkForCoverage = {};\n     configureHardhatEVMGas(hardhatNetworkForCoverage, api);\n@@ -70,12 +71,22 @@\n \n     // Beginning with v0.8.7, we let the optimizer run if viaIR is true and\n     // instrument using `abi.encode(bytes8 covHash)`. Otherwise turn the optimizer off.\n-    if (!settings.viaIR) settings.optimizer.enabled = false;\n+    if (!settings.viaIR || irMinimum) settings.optimizer.enabled = false;\n \n-    // This sometimes fixed a stack-too-deep bug in ABIEncoderV2 for coverage plugin versions up to 0.8.6\n+    // Almost identical to foundry's irMinimum option - may improve performance for projects compiling with viaIR\n+    // Original discussion at: https://github.com/ethereum/solidity/issues/12533#issuecomment-1013073350\n+    if (irMinimum) {\n+      settings.optimizer.details =  {\n+        yul: true,\n+        yulDetails: {\n+          stackAllocation: true,\n+          optimizerSteps: \"\",\n+        },\n+      }\n+    // LEGACY: This sometimes fixed a stack-too-deep bug in ABIEncoderV2 for coverage plugin versions up to 0.8.6\n     // Although issue should be fixed in 0.8.7, am leaving this option in because it may still be necessary\n     // to configure optimizer details in some cases.\n-    if (configureYulOptimizer) {\n+    } else if (configureYulOptimizer) {\n       if (optimizerDetails === undefined) {\n         settings.optimizer.details = {\n           yul: true,\n@@ -139,9 +150,10 @@\n   try {\n     config = nomiclabsUtils.normalizeConfig(env.config, args);\n     ui = new PluginUI(config.logger.log);\n-    api = new API(utils.loadSolcoverJS(config));\n+    api = new API(utils.loadSolcoverJS(config), config.networks.hardhat.hardfork);\n \n     optimizerDetails = api.solcOptimizerDetails;\n+    irMinimum = api.irMinimum;\n \n     // Catch interrupt signals\n     process.on(\"SIGINT\", nomiclabsUtils.finish.bind(null, config, api, true));\n",
+					"match": false,
+					"packageHash": "6d5a58ca23f99c18c421e6ad7a29f40e4ac2db69e2702f4ccc3b720349769bd8",
+					"size": 9644,
+					"sourceHash": "35db0f14d5fee0dbe0f006160be3750cde3efc8e1e120be05f0cd354cb001bff",
+					"status": "content"
+				}
+			},
+			"summary": {
+				"differentFiles": 5,
+				"matchingFiles": 27,
+				"missingInPackage": 0,
+				"missingInSource": 0,
+				"score": 0.84375,
+				"totalFiles": 32
+			}
+		}
+	}
+]
