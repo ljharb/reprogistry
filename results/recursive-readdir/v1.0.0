@@ -1,0 +1,111 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-05T09:19:11.176Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:11.7.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "recursive-readdir@1.0.0",
+			"name": "recursive-readdir",
+			"version": "1.0.0",
+			"location": "https://registry.npmjs.org/recursive-readdir/-/recursive-readdir-1.0.0.tgz",
+			"integrity": "sha512-scgW20GZRhcXrfBVLxfAFer4BrFWuu7SYAIwJ4RyPcX1cNfsOfKqQwfcUyfn4Uzs8iYGsm+pNjot9s3/xHyhjg==",
+			"publishedAt": "2014-03-15T18:43:01.740Z",
+			"publishedWith": {
+				"node": null,
+				"npm": "1.3.14"
+			}
+		},
+		"source": {
+			"integrity": null,
+			"location": "git://github.com/jergason/recursive-readdir.git",
+			"spec": "github:jergason/recursive-readdir#HEAD"
+		},
+		"comparisonHash": "8a2a8dcbb729bf3ee9216e490c955701f0ddebe1",
+		"diff": {
+			"files": {
+				"README.md": {
+					"diff": "--- published/README.md\n+++ rebuilt/README.md\n@@ -1,22 +1,71 @@\n-#recursive-readdir\n+# recursive-readdir\n \n-A simple Node module for recursively listing all files in a directory,\n-or in any subdirectories.\n+[![Build Status](https://travis-ci.org/jergason/recursive-readdir.svg?branch=master)](https://travis-ci.org/jergason/recursive-readdir)\n \n-It does not list directories themselves.\n+Recursively list all files in a directory and its subdirectories. It does not list the directories themselves.\n \n-##Installation\n+Because it uses fs.readdir, which calls [readdir](http://linux.die.net/man/3/readdir) under the hood\n+on OS X and Linux, the order of files inside directories is [not guaranteed](http://stackoverflow.com/questions/8977441/does-readdir-guarantee-an-order).\n+\n+## Installation\n \n     npm install recursive-readdir\n \n-##Usage\n+## Usage\n+\n+```javascript\n+var recursive = require(\"recursive-readdir\");\n \n+recursive(\"some/path\", function (err, files) {\n+  // `files` is an array of file paths\n+  console.log(files);\n+});\n+```\n+\n+It can also take a list of files to ignore.\n \n ```javascript\n-var recursive-readdir = require('recursive-readdir');\n+var recursive = require(\"recursive-readdir\");\n \n-recursive-readdir('some/path', function (err, files) {\n-  // Files is an array of filename\n+// ignore files named \"foo.cs\" or files that end in \".html\".\n+recursive(\"some/path\", [\"foo.cs\", \"*.html\"], function (err, files) {\n   console.log(files);\n });\n ```\n+\n+You can also pass functions which are called to determine whether or not to\n+ignore a file:\n+\n+```javascript\n+var recursive = require(\"recursive-readdir\");\n+\n+function ignoreFunc(file, stats) {\n+  // `file` is the path to the file, and `stats` is an `fs.Stats`\n+  // object returned from `fs.lstat()`.\n+  return stats.isDirectory() && path.basename(file) == \"test\";\n+}\n+\n+// Ignore files named \"foo.cs\" and descendants of directories named test\n+recursive(\"some/path\", [\"foo.cs\", ignoreFunc], function (err, files) {\n+  console.log(files);\n+});\n+```\n+\n+## Promises\n+You can omit the callback and return a promise instead.\n+\n+```javascript\n+var recursive = require(\"recursive-readdir\");\n+\n+recursive(\"some/path\").then(\n+  function(files) {\n+    console.log(\"files are\", files);\n+  },\n+  function(error) {\n+    console.error(\"something exploded\", error);\n+  }\n+);\n+```\n+\n+The ignore strings support Glob syntax via\n+[minimatch](https://github.com/isaacs/minimatch).\n",
+					"match": false,
+					"packageHash": "131a0399842e35eb24ef4fcc0156985f88cbaab2d256de4ba12664c7805317f1",
+					"size": 410,
+					"sourceHash": "049cb10b6371aae8ae5ad6cf5262d6f1c021f38777f05e688e65aebbf5e582d0",
+					"status": "content"
+				},
+				"index.js": {
+					"diff": "--- published/index.js\n+++ rebuilt/index.js\n@@ -1,46 +1,96 @@\n-var fs = require('fs')\n-var p = require('path')\n+var fs = require(\"fs\");\n+var p = require(\"path\");\n+var minimatch = require(\"minimatch\");\n+\n+function patternMatcher(pattern) {\n+  return function(path, stats) {\n+    var minimatcher = new minimatch.Minimatch(pattern, { matchBase: true });\n+    return (!minimatcher.negate || stats.isFile()) && minimatcher.match(path);\n+  };\n+}\n+\n+function toMatcherFunction(ignoreEntry) {\n+  if (typeof ignoreEntry == \"function\") {\n+    return ignoreEntry;\n+  } else {\n+    return patternMatcher(ignoreEntry);\n+  }\n+}\n \n-// how to know when you are done?\n-function readdir(path, callback) {\n-  var list = []\n+function readdir(path, ignores, callback) {\n+  if (typeof ignores == \"function\") {\n+    callback = ignores;\n+    ignores = [];\n+  }\n+\n+  if (!callback) {\n+    return new Promise(function(resolve, reject) {\n+      readdir(path, ignores || [], function(err, data) {\n+        if (err) {\n+          reject(err);\n+        } else {\n+          resolve(data);\n+        }\n+      });\n+    });\n+  }\n \n-  fs.readdir(path, function (err, files) {\n+  ignores = ignores.map(toMatcherFunction);\n+\n+  var list = [];\n+\n+  fs.readdir(path, function(err, files) {\n     if (err) {\n-      return callback(err)\n+      return callback(err);\n     }\n \n-    var pending = files.length\n+    var pending = files.length;\n     if (!pending) {\n       // we are done, woop woop\n-      return callback(null, list)\n+      return callback(null, list);\n     }\n \n-    files.forEach(function (file) {\n-      fs.stat(p.join(path, file), function (err, stats) {\n-        if (err) {\n-          return callback(err)\n+    files.forEach(function(file) {\n+      var filePath = p.join(path, file);\n+      fs.stat(filePath, function(_err, stats) {\n+        if (_err) {\n+          return callback(_err);\n+        }\n+\n+        if (\n+          ignores.some(function(matcher) {\n+            return matcher(filePath, stats);\n+          })\n+        ) {\n+          pending -= 1;\n+          if (!pending) {\n+            return callback(null, list);\n+          }\n+          return null;\n         }\n \n         if (stats.isDirectory()) {\n-          files = readdir(p.join(path, file), function (err, res) {\n-            list = list.concat(res)\n-            pending -= 1\n+          readdir(filePath, ignores, function(__err, res) {\n+            if (__err) {\n+              return callback(__err);\n+            }\n+\n+            list = list.concat(res);\n+            pending -= 1;\n             if (!pending) {\n-              callback(null, list)\n",
+					"match": false,
+					"packageHash": "f180929d88a098ddcb3a9945408d5c3b41f518796156e59f5560203f2ccbdc77",
+					"size": 977,
+					"sourceHash": "c98a9e98a3d90f4829a53aeed72170716ffeb9150f2c938b28649d1ff1547c72",
+					"status": "content"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -1,14 +1,17 @@\n {\n-  \"author\": \"Jamison Dance <jergason@gmail.com> (http://jamisondance.com/)\",\n+  \"author\": \"Jamison Dance <jergason@gmail.com> (http://jamison.dance.com/)\",\n   \"name\": \"recursive-readdir\",\n   \"description\": \"Get an array of all files in a directory and subdirectories.\",\n   \"license\": \"MIT\",\n-  \"version\": \"1.0.0\",\n+  \"version\": \"2.2.3\",\n   \"repository\": {\n     \"type\": \"git\",\n     \"url\": \"git://github.com/jergason/recursive-readdir.git\"\n   },\n   \"main\": \"./index.js\",\n+  \"files\": [\n+    \"index.js\"\n+  ],\n   \"scripts\": {\n     \"test\": \"mocha test/\"\n   },\n@@ -17,10 +20,12 @@\n     \"lister\"\n   ],\n   \"engines\": {\n-    \"node\": \">=0.6.6\"\n+    \"node\": \">=6.0.0\"\n+  },\n+  \"dependencies\": {\n+    \"minimatch\": \"^3.0.5\"\n   },\n-  \"dependencies\": {},\n   \"devDependencies\": {\n-    \"mocha\": \"~1.14.0\"\n+    \"mocha\": \"6.1.4\"\n   }\n }\n",
+					"match": false,
+					"packageHash": "e59bee2c03fb7d2021c118bf6681d940c7d111dd6773696a7497752a71b7be60",
+					"size": 573,
+					"sourceHash": "754039a629e569e7bc74a0c4b58b860156abc1738bba4fab26ff9bf31a720ea6",
+					"status": "content"
+				},
+				"test/recursive-raddir-test.js": {
+					"match": false,
+					"packageHash": "eae3152ccfc08b132e5b2ff19db21bde366c9c455d33ba4c406622cb6369387c",
+					"size": 576,
+					"status": "missing-in-source"
+				},
+				"test/testdir/a/a": {
+					"match": false,
+					"packageHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+					"size": 0,
+					"status": "missing-in-source"
+				},
+				"test/testdir/a/beans": {
+					"match": false,
+					"packageHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+					"size": 0,
+					"status": "missing-in-source"
+				},
+				"test/testdir/b/123": {
+					"match": false,
+					"packageHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+					"size": 0,
+					"status": "missing-in-source"
+				},
+				"test/testdir/b/b/hurp-durp": {
+					"match": false,
+					"packageHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+					"size": 0,
+					"status": "missing-in-source"
+				},
+				"test/testdir/c.txt": {
+					"match": false,
+					"packageHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+					"size": 0,
+					"status": "missing-in-source"
+				},
+				"test/testdir/d.txt": {
+					"match": false,
+					"packageHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+					"size": 0,
+					"status": "missing-in-source"
+				},
+				"LICENSE": {
+					"match": false,
+					"status": "missing-in-package"
+				}
+			},
+			"summary": {
+				"differentFiles": 3,
+				"matchingFiles": 0,
+				"missingInPackage": 1,
+				"missingInSource": 7,
+				"score": 0,
+				"totalFiles": 11
+			}
+		}
+	}
+]
