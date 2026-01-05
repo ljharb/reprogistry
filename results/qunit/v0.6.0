@@ -1,0 +1,513 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-05T05:42:09.443Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:11.7.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "qunit@0.6.0",
+			"name": "qunit",
+			"version": "0.6.0",
+			"location": "https://registry.npmjs.org/qunit/-/qunit-0.6.0.tgz",
+			"integrity": "sha512-6eqZhGEiUQDPLuSMbdA4PB+If8/w857cbKwl4tP1V7KBLn6pLtAAwAZCkZTPeWD+TyPPSHwcJJMT7m+u6SA1OA==",
+			"publishedAt": "2014-02-25T14:18:13.754Z",
+			"publishedWith": {
+				"node": null,
+				"npm": "1.3.21"
+			}
+		},
+		"source": {
+			"integrity": null,
+			"location": "http://github.com/kof/node-qunit.git",
+			"spec": "github:kof/node-qunit#HEAD"
+		},
+		"comparisonHash": "8a2a8dcbb729bf3ee9216e490c955701f0ddebe1",
+		"diff": {
+			"files": {
+				".gitmodules": {
+					"match": false,
+					"packageHash": "a6aa508e0cbd8526f0695133cefd4e2dd2aeccef2324df7133ea013eb7a1fe8f",
+					"size": 93,
+					"status": "missing-in-source"
+				},
+				".npmignore": {
+					"match": false,
+					"packageHash": "040fcd693c12550488223dfa9cf27c468cb488eed2b6e34b287ea32ae1259aba",
+					"size": 32,
+					"status": "missing-in-source"
+				},
+				"Makefile": {
+					"match": false,
+					"packageHash": "5c35269b7dba8b27a52000529f568a0489eb8756fe76a7d7e832d4417ae06a35",
+					"size": 54,
+					"status": "missing-in-source"
+				},
+				"bin/cli.js": {
+					"diff": "--- published/bin/cli.js\n+++ rebuilt/bin/cli.js\n@@ -20,6 +20,7 @@\n     + '\\n -d, --deps dependency paths - files required before code (space separated)'\n     + '\\n -l, --log logging options, json have to be used'\n     + '\\n --cov create tests coverage report'\n+    + '\\n --timeout max block duration (in ms)'\n     + '\\n -h, --help show this help'\n     + '\\n -v, --version show module version'\n     + '\\n';\n@@ -84,6 +85,9 @@\n         case '--paths':\n             o.paths = args[key];\n             break;\n+        case '--timeout':\n+            o.maxBlockDuration = args[key];\n+            break;\n         case '-v':\n         case '--version':\n             util.print(\n",
+					"match": false,
+					"packageHash": "5c38eefd7f492219c639fca9bb9760aebd7e98a35b39884efe19e8bef1bb5d29",
+					"size": 3246,
+					"sourceHash": "94f15bf40f5572f1f28a2f1601c27c228415bd018a7b3d0eea2736410ceec2e1",
+					"status": "content"
+				},
+				"lib/child.js": {
+					"diff": "--- published/lib/child.js\n+++ rebuilt/lib/child.js\n@@ -1,8 +1,10 @@\n-var QUnit = require('../support/qunit/qunit/qunit.js'),\n+var QUnit = require('qunit'),\n     path = require('path'),\n     _ = require('underscore'),\n     trace = require('tracejs').trace,\n-    coverage = require('./coverage');\n+    coverage = require('./coverage'),\n+    generators = require('./generators'),\n+    co = require('co');\n \n // cycle.js: This file contains two functions, JSON.decycle and JSON.retrocycle,\n // which make it possible to encode cyclical structures and dags in JSON, and to\n@@ -10,14 +12,20 @@\n // http://GOESSNER.net/articles/JsonPath/\n require('../support/json/cycle');\n \n-var options = JSON.parse(process.argv[2]),\n-    currentModule = path.basename(options.code.path, '.js'),\n-    currentTest;\n+var options = JSON.parse(process.argv.pop()),\n+    currentModule = path.basename(options.code.path, '.js');\n+\n+// send ping messages to when child is blocked.\n+// after I sent the first ping, testrunner will start to except the next ping\n+// within maxBlockDuration, otherwise this process will be killed\n+process.send({event: 'ping'});\n+setInterval(function() {\n+    process.send({event: 'ping'});\n+}, Math.floor(options.maxBlockDuration / 2));\n \n process.on('uncaughtException', function(err) {\n     if (QUnit.config.current) {\n-        QUnit.ok(false, 'Test threw unexpected exception: ' + err.message);\n-        QUnit.start();\n+        QUnit.assert.ok(false, 'Test threw unexpected exception: ' + err.message);\n     }\n     process.send({\n         event: 'uncaughtException',\n@@ -28,9 +36,6 @@\n     });\n });\n \n-QUnit.config.autorun = false;\n-QUnit.config.autostart = false;\n-\n // make qunit api global, like it is in the browser\n _.extend(global, QUnit);\n \n@@ -52,8 +57,6 @@\n             _.extend(global, exports);\n         }\n     }\n-\n-    QUnit.start();\n }\n \n /**\n@@ -61,9 +64,6 @@\n  * @param {Object} test\n  */\n QUnit.testStart(function(test) {\n-    // currentTest is undefined while first test is not done yet\n-    currentTest = test.name;\n-\n     // use last module name if no module name defined\n     currentModule = test.module || currentModule;\n });\n@@ -73,7 +73,7 @@\n  * @param {Object} data\n  */\n QUnit.log(function(data) {\n-    data.test = this.config.current.testName;\n+    data.test = QUnit.config.current.testName;\n     data.module = currentModule;\n     process.send({\n         event: 'assertionDone',\n@@ -107,6 +107,31 @@\n     });\n }, 1000));\n \n+var test = QUnit.test;\n+\n+/**\n+ * Support generators.\n+ */\n+global.test = QUnit.test = function(testName, callback) {\n+    var fn;\n+\n+    if (generators.isGeneratorFn(callback)) {\n+        fn = function(assert) {\n+            var done = assert.async();\n+            co.wrap(callback).call(this, assert).then(function() {\n+                done();\n+            }).catch(function (err) {\n+                console.log(err.stack);\n+                done();\n+            });\n",
+					"match": false,
+					"packageHash": "c9ba95635c94dfa8b219d42251010d6d33dad8df09fd06c5838f1247ea923b83",
+					"size": 3239,
+					"sourceHash": "2a32826de40e07c6b8e24034c19413c7a760b66f82b1311d76d0614c1e735aa2",
+					"status": "content"
+				},
+				"lib/coverage.js": {
+					"diff": "--- published/lib/coverage.js\n+++ rebuilt/lib/coverage.js\n@@ -1,15 +1,24 @@\n var path = require('path'),\n-    util = require('util'),\n     _ = require('underscore');\n \n-var istanbul, collector;\n+var istanbul,\n+    collector,\n+    options = {\n+        dir: 'coverage',\n+        reporters: ['lcov', 'json']\n+    };\n \n try {\n     istanbul = require('istanbul');\n-} catch (e) {}\n+} catch (e) {\n+    // Ignore\n+}\n \n-exports.setup = function() {\n+exports.setup = function(opts) {\n     collector = new istanbul.Collector();\n+\n+    _.extend(options, opts);\n+    options.dir = path.resolve(options.dir);\n };\n \n exports.add = function(coverage) {\n@@ -17,7 +26,7 @@\n };\n \n exports.get = function() {\n-    var summaries\n+    var summaries;\n     if (collector) {\n         summaries = [];\n         collector.files().forEach(function(file) {\n@@ -28,48 +37,44 @@\n };\n \n exports.report = function() {\n-    var opts, Report, reports;\n+    var Report, reports;\n \n     if (collector) {\n-        opts = {dir: path.resolve('coverage')};\n         Report = istanbul.Report;\n-        reports = [Report.create('lcov', opts), Report.create('json', opts)];\n+\n+        reports = options.reporters.map(function (report) {\n+            return Report.create(report, options);\n+        });\n+\n         reports.forEach(function(rep) {\n             rep.writeReport(collector, true);\n         });\n     }\n };\n \n-function resolvePaths(files) {\n-    if (Array.isArray(files)) {\n-        return files.map(function (file) {\n-            return file.path;\n-        });\n-    }\n-    return [files.path];\n-}\n-\n-exports.instrument = function(options, callback) {\n-    istanbul.matcherFor({\n-        includes: resolvePaths(options.code),\n-        excludes: resolvePaths(options.tests)\n-    }, function (err, matcher) {\n-        var instrumenter\n+exports.instrument = function(options) {\n+    var matcher, instrumenter;\n \n-        if (err) {\n-            return callback(err)\n+    matcher = function (file) {\n+        var files = options.coverage.files;\n+        if (files) {\n+            files = Array.isArray(files) ? files : [files];\n+            return files.some(function(f) {\n+                if (typeof f === 'string') return file.indexOf(f) === 0;\n+                else throw new Error(\"invalid entry in options.coverage.files: \" + typeof f);\n+            });\n+        } else {\n+            return file === options.code.path;\n         }\n-\n-        instrumenter = new istanbul.Instrumenter();\n-        istanbul.hook.hookRequire(matcher, instrumenter.instrumentSync.bind(instrumenter));\n-        callback();\n-    });\n+    }\n+    instrumenter = new istanbul.Instrumenter();\n",
+					"match": false,
+					"packageHash": "7da654eb6bd288ef41cd81addfb9bd7fda581bbe9db50fc4b5b59a0ce8f3af64",
+					"size": 1892,
+					"sourceHash": "cf70bb3ef198227b3b7a2576a8068403ac683485418ce9fae97c9119cbbf8f0f",
+					"status": "content"
+				},
+				"lib/log.js": {
+					"diff": "--- published/lib/log.js\n+++ rebuilt/lib/log.js\n@@ -90,8 +90,7 @@\n         currentTest, test;\n \n     table = new Table({\n-        head: ['Module', 'Test', 'Assertion', 'Result'],\n-        colWidths: [40, 40, 40, 8]\n+        head: ['Module', 'Test', 'Assertion', 'Result']\n     });\n \n     data.assertions.forEach(function(data) {\n@@ -109,7 +108,7 @@\n             test = currentTest = data.test;\n         }\n \n-        table.push([module, test, data.message, data.result ? 'ok' : 'fail']);\n+        table.push([module, test, data.message || '', data.result ? 'ok' : 'fail']);\n     });\n \n     log('\\nAssertions:\\n' + table.toString());\n@@ -154,8 +153,7 @@\n         currentModule, module;\n \n     table = new Table({\n-        head: ['Module', 'Test', 'Failed', 'Passed', 'Total'],\n-        colWidths: [40, 40, 8, 8, 8]\n+        head: ['Module', 'Test', 'Failed', 'Passed', 'Total']\n     });\n \n     data.tests.forEach(function(data) {\n@@ -173,7 +171,7 @@\n };\n \n // truncate file name\n-function truncfile(code) {\n+function truncFile(code) {\n     if (code && code.length > fileColWidth) {\n         code = '...' + code.slice(code.length - fileColWidth + 3);\n     }\n@@ -181,13 +179,14 @@\n }\n \n print.summary = function() {\n-    var table = new Table({\n-        head: ['File', 'Failed', 'Passed', 'Total', 'Runtime'],\n-        colWidths: [fileColWidth + 2, 10, 10, 10, 10]\n+    var table;\n+\n+    table = new Table({\n+        head: ['File', 'Failed', 'Passed', 'Total', 'Runtime']\n     });\n \n     data.summaries.forEach(function(data) {\n-        table.push([truncfile(data.code), data.failed, data.passed, data.total, data.runtime]);\n+        table.push([truncFile(data.code), data.failed, data.passed, data.total, data.runtime]);\n     });\n \n     log('\\nSummary:\\n' + table.toString());\n@@ -198,8 +197,7 @@\n         data = exports.stats();\n \n     table = new Table({\n-        head: ['Files', 'Tests', 'Assertions', 'Failed', 'Passed', 'Runtime'],\n-        colWidths: [12, 12, 12, 12, 12, 12]\n+        head: ['Files', 'Tests', 'Assertions', 'Failed', 'Passed', 'Runtime']\n     });\n \n     table.push([data.files, data.tests, data.assertions, data.failed,\n@@ -225,15 +223,19 @@\n print.coverage = function() {\n     var table;\n \n-    if (!data.coverages.length) return\n+    if (!data.coverages.length) return;\n \n     table = new Table({\n-        head: ['File', 'Statements', 'Branches', 'Functions', 'Lines'],\n-        colWidths: [fileColWidth + 2, 14, 14, 14, 14]\n+        head: ['File', 'Statements', 'Branches', 'Functions', 'Lines']\n     });\n \n-    data.coverages.forEach(function(data) {\n-        table.push([truncfile(data.code), getMet(data.statements), getMet(data.branches), getMet(data.functions), getMet(data.lines)]);\n+    data.coverages.forEach(function(coverage) {\n+        table.push([\n+            truncFile(coverage.code),\n+            getMet(coverage.statements),\n+            getMet(coverage.branches),\n+            getMet(coverage.functions),\n+            getMet(coverage.lines)]);\n     });\n \n     log('\\nCoverage:\\n' + table.toString());\n@@ -242,12 +244,11 @@\n print.globalCoverage = function() {\n     var coverage, table;\n \n-    if (!data.coverages.length) return\n+    if (!data.coverages.length) return;\n",
+					"match": false,
+					"packageHash": "621e281d15e28ee826d63eebb049ef1e345b747db398a93bacf9b9f512ebfea7",
+					"size": 6712,
+					"sourceHash": "47625802200ce6659dd4d2f567b4dece1e9796542ef964bf6c1c64aa33a252b4",
+					"status": "content"
+				},
+				"lib/testrunner.js": {
+					"diff": "--- published/lib/testrunner.js\n+++ rebuilt/lib/testrunner.js\n@@ -1,10 +1,8 @@\n-var fs = require('fs'),\n-    path = require('path'),\n+var path = require('path'),\n     coverage = require('./coverage'),\n     cp = require('child_process'),\n     _ = require('underscore'),\n-    log = exports.log = require('./log'),\n-    util = require('util');\n+    log = exports.log = require('./log');\n \n var options,\n     noop = function() {};\n@@ -46,7 +44,10 @@\n     deps: null,\n \n     // define namespace your code will be attached to on global['your namespace']\n-    namespace: null\n+    namespace: null,\n+\n+    // max amount of ms child can be blocked, after that we assume running an infinite loop\n+    maxBlockDuration: 2000\n };\n \n /**\n@@ -56,47 +57,62 @@\n  */\n function runOne(opts, callback) {\n     var child;\n+    var pingCheckTimeoutId;\n+    var argv = process.argv.slice();\n \n-    child = cp.fork(\n-        __dirname + '/child.js',\n-        [JSON.stringify(opts)],\n-        {env: process.env}\n-    );\n+    argv.push(JSON.stringify(opts));\n+    child = cp.fork(__dirname + '/child.js', argv, {env: process.env});\n \n     function kill() {\n         process.removeListener('exit', kill);\n         child.kill();\n     }\n \n+    function complete(err, data) {\n+        kill();\n+        clearTimeout(pingCheckTimeoutId);\n+        callback(err, data)\n+    }\n+\n     child.on('message', function(msg) {\n-        if (msg.event === 'assertionDone') {\n-            log.add('assertions', msg.data);\n-        } else if (msg.event === 'testDone') {\n-            log.add('tests', msg.data);\n-        } else if (msg.event === 'done') {\n-            msg.data.code = opts.code.path;\n-            log.add('summaries', msg.data);\n-            if (opts.coverage) {\n-                coverage.add(msg.data.coverage);\n-                msg.data.coverage = coverage.get();\n-                msg.data.coverage.code = msg.data.code;\n-                log.add('coverages', msg.data.coverage);\n-            }\n-            if (opts.log.testing) {\n-                util.print('done');\n-            }\n-            callback(null, msg.data);\n-            kill();\n-        } else if (msg.event === 'uncaughtException') {\n-            callback(_.extend(new Error, msg.data));\n-            kill();\n+        switch (msg.event) {\n+            case 'ping':\n+                clearTimeout(pingCheckTimeoutId);\n+                pingCheckTimeoutId = setTimeout(function() {\n+                    complete(new Error('Process blocked for too long'));\n+                }, opts.maxBlockDuration);\n+                break;\n+            case 'assertionDone':\n+                log.add('assertions', msg.data);\n+                break;\n+            case 'testDone':\n+                log.add('tests', msg.data);\n+                break;\n+            case 'done':\n+                clearTimeout(pingCheckTimeoutId);\n+                msg.data.code = opts.code.path;\n+                log.add('summaries', msg.data);\n+                if (opts.coverage) {\n+                    coverage.add(msg.data.coverage);\n+                    msg.data.coverage = coverage.get();\n+                    msg.data.coverage.code = msg.data.code;\n+                    log.add('coverages', msg.data.coverage);\n+                }\n+                if (opts.log.testing) {\n+                    console.log('done');\n",
+					"match": false,
+					"packageHash": "8e5f287418ebb388e3d26bd820062b9459151bcc1d013fb137dbcf536868030e",
+					"size": 4447,
+					"sourceHash": "53b6be7288d25276c20c6b9295153430ed25cae603f5617a98e94f3c86e1bad3",
+					"status": "content"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -1,40 +1,59 @@\n {\n-    \"name\": \"qunit\",\n-    \"description\": \"QUnit testing framework for nodejs\",\n-    \"version\": \"0.6.0\",\n-    \"author\": \"Oleg Slobodskoi <oleg008@gmail.com>\",\n-    \"contributors\": [\n-        {\"name\": \"Jonathan Buchanan\"},\n-        {\"name\": \"Ashar Voultoiz\"},\n-        {\"name\": \"Drew Fyock\"}\n-    ],\n-    \"repository\": {\n-        \"type\": \"git\",\n-        \"url\": \"http://github.com/kof/node-qunit.git\"\n+  \"name\": \"node-qunit\",\n+  \"description\": \"QUnit testing framework for Node.js\",\n+  \"version\": \"2.0.1\",\n+  \"author\": \"Oleg Slobodskoi <oleg008@gmail.com>\",\n+  \"contributors\": [\n+    {\n+      \"name\": \"Jonathan Buchanan\"\n     },\n-    \"keywords\": [\"TDD\", \"QUnit\", \"unit\", \"testing\", \"tests\", \"async\"],\n-    \"bin\": {\"qunit\": \"./bin/cli.js\"},\n-    \"engines\": {\"node\": \">=0.6.0 < 0.11.0\"},\n-    \"scripts\": {\n-        \"test\": \"make test\"\n+    {\n+      \"name\": \"Ashar Voultoiz\"\n     },\n-   \"dependencies\": {\n-       \"underscore\": \"1.3.3\",\n-       \"argsparser\": \"0.0.6\",\n-       \"cli-table\": \"0.0.2\",\n-       \"tracejs\": \"0.1.4\"\n+    {\n+      \"name\": \"Drew Fyock\"\n     },\n-    \"devDependencies\": {\n-        \"chainer\": \"0.0.5\",\n-        \"timekeeper\": \"0.0.2\"\n-    },\n-    \"optionalDependencies\": {\n-      \"istanbul\": \"0.2.4\"\n-    },\n-    \"licenses\": [\n-        {\n-           \"type\": \"MIT\",\n-           \"url\": \"http: //www.opensource.org/licenses/mit-license.php\"\n-        }\n-    ]\n+    {\n+      \"name\": \"Timo Tijhof\"\n+    }\n+  ],\n+  \"repository\": {\n+    \"type\": \"git\",\n+    \"url\": \"https://github.com/qunitjs/node-qunit.git\"\n+  },\n+  \"license\": \"MIT\",\n+  \"keywords\": [\n+    \"TDD\",\n+    \"QUnit\",\n+    \"unit\",\n+    \"testing\",\n+    \"tests\",\n+    \"async\"\n+  ],\n+  \"bin\": {\n+    \"qunit\": \"./bin/cli.js\"\n+  },\n+  \"engines\": {\n+    \"node\": \">=10\"\n+  },\n+  \"scripts\": {\n+    \"test\": \"node test/testrunner.js && eslint .\",\n+    \"lint\": \"eslint .\"\n+  },\n+  \"dependencies\": {\n+    \"argsparser\": \"^0.0.7\",\n+    \"cli-table\": \"^0.3.1\",\n+    \"co\": \"^4.6.0\",\n+    \"qunit\": \"^2.11.2\",\n+    \"tracejs\": \"^0.1.8\",\n+    \"underscore\": \"^1.11.0\"\n+  },\n+  \"devDependencies\": {\n+    \"chainer\": \"^0.0.5\",\n+    \"eslint\": \"^7.8.1\",\n+    \"timekeeper\": \"^2.0.0\"\n+  },\n+  \"optionalDependencies\": {\n+    \"istanbul\": \"0.4.5\"\n+  }\n }\n",
+					"match": false,
+					"packageHash": "4485c239aff3c3a3eb72642bd6fa98b2d4d6c9425db3be9f04972e6ef6566431",
+					"size": 1042,
+					"sourceHash": "05f65072d52ade9501a0b8f737c048735da5e6a172ec4df9c2dac754f3a43daa",
+					"status": "content"
+				},
+				"readme.md": {
+					"diff": "--- published/readme.md\n+++ rebuilt/readme.md\n@@ -1,34 +1,50 @@\n-## QUnit testing framework for nodejs.\n+[![npm](https://img.shields.io/npm/v/node-qunit.svg?style=flat)](https://www.npmjs.com/package/node-qunit)\n \n-http://qunitjs.com\n+## QUnit testing framework for Node.js\n \n-http://github.com/jquery/qunit\n+https://qunitjs.com\n+\n+https://github.com/qunitjs/qunit\n \n ### Features\n \n - cli\n - testrunner api\n-- test coverage via instanbul\n+- test coverage via istanbul\n - tests inside of one testfile run synchronous, but every testfile runs parallel\n - tests from each file run in its own spawned node process\n - same API for client and server side code (original QUnit is used)\n - the simplest API of the world, especially for asynchronous testing\n - you can write tests in TDD or BDD style depending on your task and test type\n - you can run the same tests in browser if there is no dependencies to node\n+- generators support\n \n ### Installation\n \n-    npm i qunit\n+```bash\n+$ npm i node-qunit\n+```\n+\n+#### Package Name Up to 1.0.0\n+\n+Up until version 1.0.0, this package was published under the name `qunit`. That\n+name is now used by the official QUnit package and CLI, and this package will be\n+published as `node-qunit` from version 1.0.0 onward.\n+\n+Additionally, prior to 1.0.0, the `node-qunit` package was a different project\n+that was deprecated and now lives under the name [`qnit`](https://www.npmjs.com/package/qnit).\n \n ### API\n \n-    http://api.qunitjs.com\n+    https://api.qunitjs.com\n \n #### The only exception\n \n-    // Separate tests into modules.\n-    // Use `QUnit` namespace, because `module` is reserved for node.\n-    QUnit.module(name, lifecycle)\n+```javascript\n+// Separate tests into modules.\n+// Use `QUnit` namespace, because `module` is reserved for node.\n+QUnit.module(name, lifecycle)\n+```\n \n ### Usage\n \n@@ -36,138 +52,147 @@\n \n Read full cli api doc using \"--help\" or \"-h\":\n \n-    $ qunit -h\n+```bash\n+$ qunit -h\n \n-    $ qunit -c ./code.js -t ./tests.js\n+$ qunit -c ./code.js -t ./tests.js\n+```\n \n By default, code and dependencies are added to the global scope. To specify\n requiring them into a namespace object, prefix the path or module name with the\n variable name to be used for the namespace object, followed by a colon:\n \n-    $ qunit -c code:./code.js -d utils:utilmodule -t ./time.js\n+```bash\n+$ qunit -c code:./code.js -d utils:utilmodule -t ./time.js\n+```\n \n #### via api\n \n-    var testrunner = require(\"qunit\");\n-\n-    Defaults:\n-\n-        {\n-            // logging options\n-            log: {\n-\n-                // log assertions overview\n-                assertions: true,\n-\n-                // log expected and actual values for failed tests\n-                errors: true,\n-\n-                // log tests overview\n",
+					"match": false,
+					"packageHash": "291428866f8ddbd907ad73b54ecc54957490750806dca1b8c1ff0a21482cd7a4",
+					"size": 6361,
+					"sourceHash": "319514c3bbf65de44ee363ca6d6b5305a603becefd0744277008a18a90fa431f",
+					"status": "content"
+				},
+				"support/json/cycle.js": {
+					"diff": "--- published/support/json/cycle.js\n+++ rebuilt/support/json/cycle.js\n@@ -116,7 +116,7 @@\n // produces an array containing a single element which is the array itself.\n \n         var px =\n-            /^\\$(?:\\[(?:\\d+|\\\"(?:[^\\\\\\\"\\u0000-\\u001f]|\\\\([\\\\\\\"\\/bfnrt]|u[0-9a-zA-Z]{4}))*\\\")\\])*$/;\n+            /^\\$(?:\\[(?:\\d+|\"(?:[^\\\\\"\\u0000-\\u001f]|\\\\([\\\\\"/bfnrt]|u[0-9a-zA-Z]{4}))*\")\\])*$/;\n \n         (function rez(value) {\n \n@@ -159,4 +159,4 @@\n         }($));\n         return $;\n     };\n-}\n\\ No newline at end of file\n+}\n",
+					"match": false,
+					"packageHash": "0375d24f47d9e4e9256f5e701075a12f2e452a301203da6464d6cb542e517f77",
+					"size": 5798,
+					"sourceHash": "05c393a215591653e5631fed8e00653577146a150a9db20c324ac5a5225842b0",
+					"status": "content"
+				},
+				"support/qunit/.npmignore": {
+					"match": false,
+					"packageHash": "27e035b9acf16efb325a584565b5bd273a6fb34d7b61067bf2d860683503ccd4",
+					"size": 60,
+					"status": "missing-in-source"
+				},
+				"support/qunit/AUTHORS.txt": {
+					"match": false,
+					"packageHash": "00ab24ac8d47e3ecdbea1bcf870b43117c412f2269ff6a78f6f75dff331718ac",
+					"size": 2036,
+					"status": "missing-in-source"
+				},
+				"support/qunit/History.md": {
+					"match": false,
+					"packageHash": "8ac29bf42f71d498ba617f12f9550d363b8913f6cca1818ff7b6b073ab3bfaac",
+					"size": 35117,
+					"status": "missing-in-source"
+				},
+				"support/qunit/README.md": {
+					"match": false,
+					"packageHash": "691b5ecc3a79767592f3272095993dc1334a744a7c07cae9e7710f54a77fad81",
+					"size": 2683,
+					"status": "missing-in-source"
+				},
+				"support/qunit/addons/canvas/README.md": {
+					"match": false,
+					"packageHash": "e8961602484737d1b4e7077e8d0faaead591b9118d4812931261ae46134a243b",
+					"size": 487,
+					"status": "missing-in-source"
+				},
+				"support/qunit/addons/canvas/canvas-test.js": {
+					"match": false,
+					"packageHash": "0aa448a0383bcd54e0802c9d757dc4f721034ee9d60b4042f9d970d7410af5de",
+					"size": 2639,
+					"status": "missing-in-source"
+				},
+				"support/qunit/addons/canvas/canvas.html": {
+					"match": false,
+					"packageHash": "b185ada4aa49bf73252861dc7949b903f130515b96aed4740b9f07b9d588a3d5",
+					"size": 498,
+					"status": "missing-in-source"
+				},
+				"support/qunit/addons/canvas/qunit-canvas.js": {
+					"match": false,
+					"packageHash": "457f79998b02472478ec305d13f4087306a5a53f07e887ea5d3300bd09eadf5b",
+					"size": 285,
+					"status": "missing-in-source"
+				},
+				"support/qunit/addons/close-enough/README.md": {
+					"match": false,
+					"packageHash": "de2b9ac72e94391e0bc55a9e3871320aa9fe64f8381657907c90c80d48fa6a18",
+					"size": 631,
+					"status": "missing-in-source"
+				},
+				"support/qunit/addons/close-enough/close-enough-test.js": {
+					"match": false,
+					"packageHash": "6796bb662fd3b58d244249f627d94b65453a2cbc9424649e694249e510d4f6e7",
+					"size": 746,
+					"status": "missing-in-source"
+				},
+				"support/qunit/addons/close-enough/close-enough.html": {
+					"match": false,
+					"packageHash": "0a96dc762751705877948e11e05eb0e55730d499be2fd8559618646887980a90",
+					"size": 458,
+					"status": "missing-in-source"
+				},
+				"support/qunit/addons/close-enough/qunit-close-enough.js": {
+					"match": false,
+					"packageHash": "35da2612ac0850ffbedb3431a68f3683c71f5fed48505d3c01c272d2751ca6a4",
+					"size": 1188,
+					"status": "missing-in-source"
+				},
+				"support/qunit/addons/composite/README.md": {
+					"match": false,
+					"packageHash": "83161fe89cab746195c9762a9d23d187be4775cd7c4c47f358702e8552d872c3",
+					"size": 506,
+					"status": "missing-in-source"
+				},
+				"support/qunit/addons/composite/composite-demo-test.html": {
+					"match": false,
+					"packageHash": "98c7c2715a42e47388f1fa9a84d4ca40375ea596f91cc43e3bfd1ae4217d29ae",
+					"size": 595,
+					"status": "missing-in-source"
+				},
+				"support/qunit/addons/composite/index.html": {
+					"match": false,
+					"packageHash": "42c36c9ad02467d1cea58a69ae7a9829e9de6c6158cdf49c5b4721a826b5e215",
+					"size": 1052,
+					"status": "missing-in-source"
+				},
+				"support/qunit/addons/composite/qunit-composite.css": {
+					"match": false,
+					"packageHash": "660ac27ccb8a1e85d619781e603059290562b14db57fe765856182e83bcd513b",
+					"size": 193,
+					"status": "missing-in-source"
+				},
+				"support/qunit/addons/composite/qunit-composite.js": {
+					"match": false,
+					"packageHash": "f94e34824ff09418ac3033e82073dc19463bd6405b414c35d2256c7cab922dcb",
+					"size": 2423,
+					"status": "missing-in-source"
+				},
+				"support/qunit/addons/junitlogger/index.html": {
+					"match": false,
+					"packageHash": "fc42e49bc03bfd189d3ca1902467e43d077b7b695cfd15fbb91398827b7e11dc",
+					"size": 992,
+					"status": "missing-in-source"
+				},
+				"support/qunit/addons/junitlogger/junitlogger.js": {
+					"match": false,
+					"packageHash": "fe3f44054ea802e6bc582930a7c1fafb53f27c517ca80eb7a3585a10c1a9f06a",
+					"size": 5485,
+					"status": "missing-in-source"
+				},
+				"support/qunit/addons/phantomjs/README.md": {
+					"match": false,
+					"packageHash": "057748bd03f88f95c4780ca6b5cbbc1b379f638c38545d913d9565463b061b48",
+					"size": 320,
+					"status": "missing-in-source"
+				},
+				"support/qunit/addons/phantomjs/runner.js": {
+					"match": false,
+					"packageHash": "9b5636f4fb83bb3fc58a526278cc8eed0a05448d462088286642434e2578b28e",
+					"size": 2345,
+					"status": "missing-in-source"
+				},
+				"support/qunit/addons/step/README.md": {
+					"match": false,
+					"packageHash": "a014eab108955b2d29fc1b042c9421f086b14ab92dcc14070e304ff1ad5a8522",
+					"size": 462,
+					"status": "missing-in-source"
+				},
+				"support/qunit/addons/step/qunit-step.js": {
+					"match": false,
+					"packageHash": "b393905595e5c472c5001180c175096fe418018760cec3f268049864c933c874",
+					"size": 660,
+					"status": "missing-in-source"
+				},
+				"support/qunit/addons/step/step-test.js": {
+					"match": false,
+					"packageHash": "90366fbd18aa56467e33ddc140f83132dd7df582d32f94bc79807f11cf2c8e6f",
+					"size": 317,
+					"status": "missing-in-source"
+				},
+				"support/qunit/addons/step/step.html": {
+					"match": false,
+					"packageHash": "5d5ec67da11d5cd3c5820cc7abceb09fce8c35eacb074cd6febd3d76b2176d07",
+					"size": 434,
+					"status": "missing-in-source"
+				},
+				"support/qunit/addons/themes/README.md": {
+					"match": false,
+					"packageHash": "5e0c502e497f82797230a93ad7cdb9e512c933177ac2cdf2cd4cc40fbfcf44aa",
+					"size": 208,
+					"status": "missing-in-source"
+				},
+				"support/qunit/addons/themes/gabe.css": {
+					"match": false,
+					"packageHash": "c8a7a21dd4fc85665ea5dae55d1e38f0ae7d3a2dc09e52e397d94f20edbd23af",
+					"size": 17775,
+					"status": "missing-in-source"
+				},
+				"support/qunit/addons/themes/gabe.html": {
+					"match": false,
+					"packageHash": "676efdd3c6213b827884af71c87849ec6587238f4bb1300daa056cc4e76dbf38",
+					"size": 454,
+					"status": "missing-in-source"
+				},
+				"support/qunit/addons/themes/nv.css": {
+					"match": false,
+					"packageHash": "67b61adf15c78fa0e07ed56370aaae478fece246b75b51ff69ace08acfc41b05",
+					"size": 3816,
+					"status": "missing-in-source"
+				},
+				"support/qunit/addons/themes/nv.html": {
+					"match": false,
+					"packageHash": "c690ef8b53df47af9ffd08f9f28568e49cb7759445ddb5aaaed975655f9bca26",
+					"size": 450,
+					"status": "missing-in-source"
+				},
+				"support/qunit/grunt.js": {
+					"match": false,
+					"packageHash": "0dd0fce1c197b0cd78338048d30da3e3b855f7f69fd3694a8edb36db03b3474e",
+					"size": 2033,
+					"status": "missing-in-source"
+				},
+				"support/qunit/package.json": {
+					"match": false,
+					"packageHash": "a4f94a0732451b3f5bc01b47d5e9e30fe940ca2367594efe8dfed6c6c1cb6d05",
+					"size": 842,
+					"status": "missing-in-source"
+				},
+				"support/qunit/qunit/qunit.css": {
+					"match": false,
+					"packageHash": "297900ffbdb67a4f7e3b02e41b605e764819bcc49b0bb18bd8c7f1f18132e1cc",
+					"size": 4525,
+					"status": "missing-in-source"
+				},
+				"support/qunit/qunit/qunit.js": {
+					"match": false,
+					"packageHash": "b0ce7208cb75b09ab4f826c60d5aef41b49da98d9cdd12231449bf26480d464e",
+					"size": 50111,
+					"status": "missing-in-source"
+				},
+				"support/qunit/test/deepEqual.js": {
+					"match": false,
+					"packageHash": "8ced9b943cb6d0a8b2f05c039d914810984a64b8d26af94514963871c627bd94",
+					"size": 39455,
+					"status": "missing-in-source"
+				},
+				"support/qunit/test/headless.html": {
+					"match": false,
+					"packageHash": "447a4905557a19f759561796fc80b4137a7332616bb641873c0b59e7f35ad332",
+					"size": 682,
+					"status": "missing-in-source"
+				},
+				"support/qunit/test/index.html": {
+					"match": false,
+					"packageHash": "e887bb4efc281eb46671833524e04f02f2d9814c8c8561d4cf21506fe28f9214",
+					"size": 392,
+					"status": "missing-in-source"
+				},
+				"support/qunit/test/logs.html": {
+					"match": false,
+					"packageHash": "b132b036c44c654e22f9bc72ddf8de7c5eb64d2897cb6720179e8495efb51c01",
+					"size": 365,
+					"status": "missing-in-source"
+				},
+				"support/qunit/test/logs.js": {
+					"match": false,
+					"packageHash": "da1d79e83c3c7a5af9a7e63e6f0d67a2fa3cbcfd844c0372c2c83b7931e542cd",
+					"size": 3056,
+					"status": "missing-in-source"
+				},
+				"support/qunit/test/narwhal-test.js": {
+					"match": false,
+					"packageHash": "26b5687e5e2cf8df8e1514a12c44bcfeaba47bec2da27c5a739d9b7050b57aa9",
+					"size": 537,
+					"status": "missing-in-source"
+				},
+				"support/qunit/test/node-test.js": {
+					"match": false,
+					"packageHash": "6d89f1ae09447cd851dd5b9497e0f4be0a7e9615c4839b05f8976f5c4c1fc5a7",
+					"size": 517,
+					"status": "missing-in-source"
+				},
+				"support/qunit/test/swarminject.js": {
+					"match": false,
+					"packageHash": "35d5f2ec79b9f2fa85b8087c061b1387655ab6ca76ea182941d6bf7c0cd29c46",
+					"size": 334,
+					"status": "missing-in-source"
+				},
+				"support/qunit/test/test.js": {
+					"match": false,
+					"packageHash": "78361d680d325fe73010899e7566e078fcaaf6d446ce285dbac2622675c032ab",
+					"size": 13164,
+					"status": "missing-in-source"
+				},
+				"test/fixtures/async-code.js": {
+					"diff": "--- published/test/fixtures/async-code.js\n+++ rebuilt/test/fixtures/async-code.js\n@@ -1 +1 @@\n-exports.blubb = 123;\n\\ No newline at end of file\n+exports.blubb = 123;\n",
+					"match": false,
+					"packageHash": "8771303cf59789ed46f34306442eebedffdad159985987e652b3be2cdeedb25e",
+					"size": 20,
+					"sourceHash": "b2e933a5de9eb0c0943b4614e95a6823178bc3f0ee8a895a2b777801a5e86455",
+					"status": "content"
+				},
+				"test/fixtures/async-test.js": {
+					"diff": "--- published/test/fixtures/async-test.js\n+++ rebuilt/test/fixtures/async-test.js\n@@ -1,27 +1,27 @@\n-test('1', 1, function (){\n-  ok(true, \"tests intermixing sync and async tests #1\")\n+test('1', function (assert){\n+    assert.ok(true, \"tests intermixing sync and async tests #1\");\n });\n \n-test('a', 2, function(){\n-    stop();\n+test('a', function(assert){\n+    var done = assert.async();\n \n     setTimeout(function() {\n-        ok(true, 'test a1');\n-        ok(true, 'test a2');\n-        start();\n-    }, 10000);\n-})\n+        assert.ok(true, 'test a1');\n+        assert.ok(true, 'test a2');\n+        done();\n+    }, 100);\n+});\n \n-test('2', 1, function (){\n-  ok(true, \"tests intermixing sync and async tests #2\")\n+test('2', function (assert){\n+    assert.ok(true, \"tests intermixing sync and async tests #2\");\n });\n \n-test('b', 2, function(){\n-    stop();\n+test('b', function(assert){\n+    var done = assert.async();\n \n     setTimeout(function() {\n-        ok(true, 'test b1');\n-        ok(true, 'test b2');\n-        start();\n+        assert.ok(true, 'test b1');\n+        assert.ok(true, 'test b2');\n+        done();\n     }, 10);\n-})\n+});\n",
+					"match": false,
+					"packageHash": "fa7361e76dc34d8f8a8e77ae02e1fa4892d4e1e1e8f1e38b496fd0453612e8dc",
+					"size": 490,
+					"sourceHash": "0e349975af4007e58c5d0a2533c7b781c0817ef03ede81d111c65bb5a9903423",
+					"status": "content"
+				},
+				"test/fixtures/child-code-global.js": {
+					"diff": "--- published/test/fixtures/child-code-global.js\n+++ rebuilt/test/fixtures/child-code-global.js\n@@ -1,3 +1,3 @@\n exports.whereFrom = function() {\n-  return \"I was required as global\";\n+    return \"I was required as global\";\n };\n",
+					"match": false,
+					"packageHash": "94764970bfb2325b19caa3960a4bb57cdc5da60a8b3945ecb0e33f2ce2017786",
+					"size": 73,
+					"sourceHash": "fa05a32a2e160333baf1b382f4afaeb53fa7d7f329a77f4313d4cb43ab230dca",
+					"status": "content"
+				},
+				"test/fixtures/child-code-namespace.js": {
+					"diff": "--- published/test/fixtures/child-code-namespace.js\n+++ rebuilt/test/fixtures/child-code-namespace.js\n@@ -1,3 +1,3 @@\n exports.whereFrom = function() {\n-  return \"I was required as a namespace object\";\n-};\n\\ No newline at end of file\n+    return \"I was required as a namespace object\";\n+};\n",
+					"match": false,
+					"packageHash": "321c9d5b4952189bf5d1676ece9a0bff8a83225c7737c1ba62fb33bc38635397",
+					"size": 84,
+					"sourceHash": "fe5155f4dd5c697d02be3b40688ef9766d96f76a323e5859f676457018aef1a7",
+					"status": "content"
+				},
+				"test/fixtures/child-tests-global.js": {
+					"diff": "--- published/test/fixtures/child-tests-global.js\n+++ rebuilt/test/fixtures/child-tests-global.js\n@@ -1,5 +1,5 @@\n-\n-test(\"Dependency file required as global\", function() {\n-    equal(typeof whereFrom, \"function\");\n-    equal(whereFrom(), \"I was required as global\");\n+/* global whereFrom */\n+test(\"Dependency file required as global\", function(assert) {\n+    assert.equal(typeof whereFrom, \"function\");\n+    assert.equal(whereFrom(), \"I was required as global\");\n });\n",
+					"match": false,
+					"packageHash": "db05af8222ce76b0c4ad409825385c232cd4da5f6f786d93d83b6e51653f5d2f",
+					"size": 154,
+					"sourceHash": "2839e758770f610cbfcc8ceb8483bddf09777067ccbb59a1a75a91adb7dabe25",
+					"status": "content"
+				},
+				"test/fixtures/child-tests-namespace.js": {
+					"diff": "--- published/test/fixtures/child-tests-namespace.js\n+++ rebuilt/test/fixtures/child-tests-namespace.js\n@@ -1,5 +1,6 @@\n-test(\"Dependency file required as a namespace object\", function() {\n-    strictEqual(typeof testns != \"undefined\", true);\n-    equal(typeof testns.whereFrom, \"function\", \"right method attached to right object\");\n-    equal(testns.whereFrom(), \"I was required as a namespace object\");\n+/* global testns */\n+test(\"Dependency file required as a namespace object\", function(assert) {\n+    assert.strictEqual(typeof testns != \"undefined\", true);\n+    assert.equal(typeof testns.whereFrom, \"function\", \"right method attached to right object\");\n+    assert.equal(testns.whereFrom(), \"I was required as a namespace object\");\n });\n",
+					"match": false,
+					"packageHash": "395d6ae95943f1e0e36ac333ab7408edcd1fcdba47abc4c8d2fcc29ad9332685",
+					"size": 285,
+					"sourceHash": "146f0c045cfa21228778d6f87cb1569893366dccb6830aafd6d11f62def40075",
+					"status": "content"
+				},
+				"test/fixtures/testrunner-code.js": {
+					"diff": "--- published/test/fixtures/testrunner-code.js\n+++ rebuilt/test/fixtures/testrunner-code.js\n@@ -6,4 +6,4 @@\n     setTimeout(function() {\n         callback(123);\n     }, 100);\n-};\n\\ No newline at end of file\n+};\n",
+					"match": false,
+					"packageHash": "f037b7281d1fdb62ab774695f431e716d3e109cf616928650b5537189ca73b2c",
+					"size": 163,
+					"sourceHash": "0918e6b18002065ed2a64e760dfcd78402948a975dfa85edf8b429b82e0bcef5",
+					"status": "content"
+				},
+				"test/fixtures/testrunner-tests.js": {
+					"diff": "--- published/test/fixtures/testrunner-tests.js\n+++ rebuilt/test/fixtures/testrunner-tests.js\n@@ -1,29 +1,30 @@\n-test('myMethod test', function() {\n-    equal(myMethod(), 123, 'myMethod returns right result');\n-    equal(myMethod(), 321, 'this should trigger an error');\n-})\n+/* global myMethod, myAsyncMethod */\n+test('myMethod test', function(assert) {\n+    assert.equal(myMethod(), 123, 'myMethod returns right result');\n+    assert.equal(myMethod(), 321, 'this should trigger an error');\n+});\n \n-test('myAsyncMethod test', function() {\n-    ok(true, 'myAsyncMethod started');\n+test('myAsyncMethod test', function(assert) {\n+    var done = assert.async();\n+    assert.expect(3);\n \n-    stop();\n-    expect(3);\n+    assert.ok(true, 'myAsyncMethod started');\n \n     myAsyncMethod(function(data) {\n-        equal(data, 123, 'myAsyncMethod returns right result');\n-        equal(data, 321, 'this should trigger an error');\n-        start();\n+        assert.equal(data, 123, 'myAsyncMethod returns right result');\n+        assert.equal(data, 321, 'this should trigger an error');\n+        done();\n     });\n-})\n+});\n \n-test('circular reference', function() {\n-    equal(global, global, 'test global');\n+test('circular reference', function(assert) {\n+    assert.equal(global, global, 'test global');\n });\n \n-test('use original Date', function() {\n+test('use original Date', function(assert) {\n     var timekeeper = require('timekeeper');\n \n     timekeeper.travel(Date.now() - 1000000);\n \n-    ok(true, 'date modified');\n+    assert.ok(true, 'date modified');\n });\n",
+					"match": false,
+					"packageHash": "28650792a0e81bffd9754dd6cb92139377ee456fe68491409bddf59e6a6cdb1c",
+					"size": 706,
+					"sourceHash": "86b1a04c84a56caf92093799a9b7af8d7e2282de483c83975eaf0613582f32da",
+					"status": "content"
+				},
+				"test/fixtures/uncaught-exception-test.js": {
+					"diff": "--- published/test/fixtures/uncaught-exception-test.js\n+++ rebuilt/test/fixtures/uncaught-exception-test.js\n@@ -1 +1 @@\n-throw new Error('Some error.')\n+throw new Error('Some error.');\n",
+					"match": false,
+					"packageHash": "aa4feda7d7eda2945554a8178d03b846e3c2953a56cb074ef8427564248018a5",
+					"size": 31,
+					"sourceHash": "d3a361cbc8dcc5dc80578c47cf92c650577696475369dcb76f1216f1b9ddf404",
+					"status": "content"
+				},
+				"test/testrunner.js": {
+					"diff": "--- published/test/testrunner.js\n+++ rebuilt/test/testrunner.js\n@@ -1,9 +1,9 @@\n var a = require('assert'),\n-    chainer = require('chainer'),\n-    _ = require('underscore');\n+    chainer = require('chainer');\n \n var tr = require('../lib/testrunner'),\n-    log = require('../lib/log');\n+    log = require('../lib/log'),\n+    generators = require('../lib/generators');\n \n var fixtures = __dirname + '/fixtures',\n     chain = chainer();\n@@ -146,7 +146,17 @@\n     tr.run({\n         code: fixtures + '/uncaught-exception-code.js',\n         tests: fixtures + '/uncaught-exception-test.js',\n-    }, function(err, res) {\n+    }, function(err) {\n+        a.ok(err instanceof Error, 'error was forwarded');\n+        chain.next();\n+    });\n+});\n+\n+chain.add('infinite loop', function() {\n+    tr.run({\n+        code: fixtures + '/infinite-loop-code.js',\n+        tests: fixtures + '/infinite-loop-test.js',\n+    }, function(err) {\n         a.ok(err instanceof Error, 'error was forwarded');\n         chain.next();\n     });\n@@ -155,25 +165,89 @@\n chain.add('coverage', function() {\n     tr.options.coverage = true;\n     tr.run({\n-        code: fixtures + '/testrunner-code.js',\n-        tests: fixtures + '/testrunner-tests.js',\n+        code: fixtures + '/coverage-code.js',\n+        tests: fixtures + '/coverage-test.js'\n     }, function(err, res) {\n-        var coverage = {\n+        var stat = {\n             files: 1,\n-            statements: { covered: 4, total: 5 },\n-            branches: { covered: 0, total: 0 },\n-            functions: { covered: 2, total: 3 },\n-            lines: { covered: 4, total: 5 }\n+            tests: 2,\n+            assertions: 3,\n+            failed: 0,\n+            passed: 3,\n+            coverage: {\n+                files: 1,\n+                statements: { covered: 6, total: 7 },\n+                branches: { covered: 0, total: 0 },\n+                functions: { covered: 3, total: 4 },\n+                lines: { covered: 6, total: 7 }\n+            }\n         };\n+        delete res.runtime;\n         a.equal(err, null, 'no errors');\n-        a.deepEqual(coverage, res.coverage, 'Coverage calculated');\n+        a.deepEqual(stat, res, 'coverage code testing works');\n+        tr.options.coverage = false;\n         chain.next();\n     });\n });\n \n+chain.add('coverage-multiple', function() {\n+    tr.options.coverage = true;\n+    tr.run({\n+        code: fixtures + '/coverage-multiple-code.js',\n+        tests: fixtures + '/coverage-test.js',\n+        coverage: {\n+            files: [\n+                fixtures + '/coverage-multiple-code.js',\n+                fixtures + '/coverage-code.js'\n+            ],\n+        },\n+    }, function(err, res) {\n+        var stat = {\n+            files: 1,\n+            tests: 2,\n+            assertions: 3,\n+            failed: 0,\n+            passed: 3,\n+            coverage: {\n+                files: 1,\n+                statements: { covered: 7, total: 8 },\n+                branches: { covered: 0, total: 0 },\n+                functions: { covered: 3, total: 4 },\n+                lines: { covered: 7, total: 8 }\n+            }\n+        };\n+        delete res.runtime;\n+        a.equal(err, null, 'no errors');\n+        a.deepEqual(stat, res, 'coverage multiple code testing works');\n",
+					"match": false,
+					"packageHash": "929449575776bb39245606b4ceff47c5943a679190516ecd805316d31c918bf6",
+					"size": 4674,
+					"sourceHash": "f4ae2b8dc601048b4ab1058b3f68062f48f01806a45d496fbb744f0aecafb76b",
+					"status": "content"
+				},
+				".eslintignore": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				".eslintrc.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				".github/workflows/CI.yaml": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"CHANGELOG.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"SECURITY.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/generators.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/fixtures/coverage-code.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/fixtures/coverage-multiple-code.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/fixtures/coverage-test.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/fixtures/generators-code.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/fixtures/generators-test.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/fixtures/infinite-loop-code.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/fixtures/infinite-loop-test.js": {
+					"match": false,
+					"status": "missing-in-package"
+				}
+			},
+			"summary": {
+				"differentFiles": 18,
+				"matchingFiles": 3,
+				"missingInPackage": 13,
+				"missingInSource": 46,
+				"score": 0.0375,
+				"totalFiles": 80
+			}
+		}
+	}
+]
