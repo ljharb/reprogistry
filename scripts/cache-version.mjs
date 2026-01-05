@@ -9,6 +9,13 @@ import { compare as semverCompare } from 'semver';
 
 import { compareDirectories, filterNonMatching } from './compare.mjs';
 
+const depTypes = [
+	'dependencies',
+	'devDependencies',
+	'peerDependencies',
+	'optionalDependencies',
+];
+
 /**
  * Rewrite workspace: protocol dependencies to use * instead.
  * This allows npm to install monorepo packages that use yarn/pnpm workspaces.
@@ -20,7 +27,7 @@ async function rewriteWorkspaceDeps(packageDir) {
 	const pkgJson = JSON.parse(await readFile(pkgPath, 'utf8'));
 	let modified = false;
 
-	for (const depType of ['dependencies', 'devDependencies', 'peerDependencies', 'optionalDependencies']) {
+	for (const depType of depTypes) {
 		const deps = pkgJson[depType];
 		if (deps) {
 			for (const [name, version] of Object.entries(deps)) {
@@ -47,7 +54,7 @@ async function removeDep(packageDir, depName) {
 	const pkgPath = path.join(packageDir, 'package.json');
 	const pkgJson = JSON.parse(await readFile(pkgPath, 'utf8'));
 
-	for (const depType of ['dependencies', 'devDependencies', 'peerDependencies', 'optionalDependencies']) {
+	for (const depType of depTypes) {
 		if (pkgJson[depType] && pkgJson[depType][depName]) {
 			delete pkgJson[depType][depName];
 		}
@@ -76,12 +83,12 @@ async function installWithRetry(packageDir, maxRetries = 5) {
 			const output = stderr + stdout;
 
 			// Check for ETARGET/notarget error with a specific package
-			const match = output.match(/No matching version found for ([^\s@]+@[^\s]+)/);
-			if (match && attempt < maxRetries) {
-				const failedDep = match[1].split('@')[0];
+			const match = output.match(/No matching version found for (?<pkgSpec>[^\s@]+@[^\s]+)/);
+			if (match?.groups && attempt < maxRetries) {
+				const failedDep = match.groups.pkgSpec.split('@')[0];
 				console.log(`  -> Removing unpublished dep: ${failedDep}`);
-				await removeDep(packageDir, failedDep);
-				continue; // Retry
+				await removeDep(packageDir, failedDep); // eslint-disable-line no-await-in-loop
+				continue; // eslint-disable-line no-continue, no-restricted-syntax
 			}
 
 			throw err; // Re-throw if not ETARGET or max retries reached
@@ -90,7 +97,7 @@ async function installWithRetry(packageDir, maxRetries = 5) {
 }
 import normalizeGitUrl from './normalize-git-url.mjs';
 import COMPARISON_HASH from './comparison-hash.mjs';
-import reproduce from './reproduce.js';
+import reproduce from './reproduce.mjs';
 
 const { PACKAGE: pkg, VERSION: version } = process.env;
 
@@ -102,7 +109,9 @@ if (!pkg || !version) {
 const pkgDir = path.join(process.cwd(), 'data', 'results', /** @type {string} */ (pkg));
 
 /** @typedef {`${number}.${number}.${number}${'' | '-${string}'}`} Version */
-/** @typedef {{ reproduceVersion: string, timestamp: string, os: string, arch: string, strategy: string, reproduced: boolean, attested: boolean, package: object, source: object }} ReproduceResult */
+/** @typedef {{ spec: string, name: string, version: string, location: string, integrity: string, publishedAt?: string | null, publishedWith?: { node?: string | null, npm?: string | null } }} PackageInfo */
+/** @typedef {{ spec: string, location: string, integrity?: string | null }} SourceInfo */
+/** @typedef {{ reproduceVersion: string, timestamp: string, os: string, arch: string, strategy: string, reproduced: boolean, attested: boolean, package: PackageInfo, source: SourceInfo }} ReproduceResult */
 /** @typedef {import('./compare.mjs').ComparisonResult} ComparisonResult */
 
 /**
@@ -204,8 +213,10 @@ async function performComparison(result) {
 		// Clone the repo (shallow clone of the specific commit)
 		execSync(`git clone --depth 1 "${cloneUrl}" "${sourceDir}" 2>/dev/null || git clone "${cloneUrl}" "${sourceDir}"`, { stdio: 'pipe' });
 
-		// Fetch and checkout the specific commit or tag
-		// For tags, we need to fetch them explicitly since shallow clones don't include tags
+		/*
+		 * Fetch and checkout the specific commit or tag
+		 * For tags, we need to fetch them explicitly since shallow clones don't include tags
+		 */
 		execSync(`cd "${sourceDir}" && git fetch --depth 1 origin tag "${gitRef}" 2>/dev/null || git fetch --depth 1 origin "${gitRef}" 2>/dev/null || git fetch origin "${gitRef}" 2>/dev/null || git fetch --tags --unshallow origin 2>/dev/null || true`, { stdio: 'pipe' });
 		execSync(`cd "${sourceDir}" && git checkout "${gitRef}" 2>/dev/null || git checkout "tags/${gitRef}" 2>/dev/null || git checkout FETCH_HEAD`, { stdio: 'pipe' });
 
@@ -259,7 +270,7 @@ let result;
 try {
 	result = await reproduce(`${pkg}@${version}`);
 	if (!result) {
-		console.log(`  -> No source tracking available`);
+		console.log('  -> No source tracking available');
 		process.exit(0);
 	}
 } catch (err) {
@@ -269,9 +280,10 @@ try {
 
 // Perform comparison
 console.log(`Comparing ${pkg}@${version}...`);
+const reproduceResult = /** @type {ReproduceResult} */ (result);
 let comparison;
 try {
-	comparison = await performComparison(result);
+	comparison = await performComparison(reproduceResult);
 	console.log(`  -> Score: ${Math.round((comparison.summary?.score ?? 0) * 100)}%`);
 } catch (err) {
 	console.error(`  -> Comparison failed: ${/** @type {Error} */ (err).message}`);
@@ -280,7 +292,7 @@ try {
 
 /** @type {EnhancedResult} */
 const enhancedResult = {
-	...result,
+	...reproduceResult,
 	comparisonHash: COMPARISON_HASH,
 	diff: comparison,
 };
@@ -293,9 +305,7 @@ const byReproduceVersion = new Map();
 for (const r of existing) {
 	const key = r.reproduceVersion;
 	const prev = byReproduceVersion.get(key);
-	if (!prev) {
-		byReproduceVersion.set(key, r);
-	} else {
+	if (prev) {
 		// Prefer result with diff data, then latest timestamp
 		const prevHasDiff = prev.diff && prev.diff.summary;
 		const currHasDiff = r.diff && r.diff.summary;
@@ -308,6 +318,8 @@ for (const r of existing) {
 			}
 		}
 		// else: prev has diff, curr doesn't - keep prev
+	} else {
+		byReproduceVersion.set(key, r);
 	}
 }
 

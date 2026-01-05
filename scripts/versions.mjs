@@ -23,9 +23,9 @@ let packumentResult;
 try {
 	packumentResult = await packument(`${pkg}@*`);
 } catch (err) {
-	if (err && err.code === 'E404') {
+	if (err && /** @type {{ code?: string }} */ (err).code === 'E404') {
 		// Verify the 404 by making a direct request to the npm registry
-		const registryUrl = `https://registry.npmjs.org/${encodeURIComponent(pkg).replace('%40', '@')}`;
+		const registryUrl = `https://registry.npmjs.org/${encodeURIComponent(/** @type {string} */ (pkg)).replace('%40', '@')}`;
 		const verifyResponse = await fetch(registryUrl);
 		if (verifyResponse.status === 404) {
 			console.log(`Package ${pkg} confirmed not found on npm (verified via registry), marking for removal`);

@@ -10,14 +10,16 @@ import { compare as semverCompare, Range } from 'semver';
 
 import { compareDirectories, filterNonMatching } from './compare.mjs';
 import COMPARISON_HASH from './comparison-hash.mjs';
-import reproduce from './reproduce.js';
+import reproduce from './reproduce.mjs';
 
 const { PACKAGE: pkg, VERSIONS } = process.env;
 
 const pkgDir = path.join(process.cwd(), 'data', 'results', /** @type {string} */ (pkg));
 
 /** @typedef {`${number}.${number}.${number}${'' | '-${string}'}`} Version */
-/** @typedef {{ reproduceVersion: string, timestamp: string, os: string, arch: string, strategy: string, reproduced: boolean, attested: boolean, package: object, source: object }} ReproduceResult */
+/** @typedef {{ spec: string, name: string, version: string, location: string, integrity: string, publishedAt?: string | null, publishedWith?: { node?: string | null, npm?: string | null } }} PackageInfo */
+/** @typedef {{ spec: string, location: string, integrity?: string | null }} SourceInfo */
+/** @typedef {{ reproduceVersion: string, timestamp: string | Date, os: string, arch: string, strategy: string, reproduced: boolean, attested: boolean, package: PackageInfo, source: SourceInfo }} ReproduceResult */
 /** @typedef {import('./compare.mjs').ComparisonResult} ComparisonResult */
 
 /**
@@ -164,24 +166,22 @@ console.log(`Found ${allVersions.length} total versions, ${versions.length} matc
 
 // Load existing data first
 const existingData = /** @type {{ [k in Version]: EnhancedResult[] }} */ (
-	Object.fromEntries(
-		await Promise.all(versions.map(async (v) => /** @type {const} */ ([
-			v,
-			/** @type {EnhancedResult[]} */ (JSON.parse(await readFile(path.join(pkgDir, v.replace(/^v?/, 'v')), 'utf8').catch(() => '[]'))),
-		]))),
-	)
+	Object.fromEntries(await Promise.all(versions.map(async (v) => /** @type {const} */ ([
+		v,
+		/** @type {EnhancedResult[]} */ (JSON.parse(await readFile(path.join(pkgDir, v.replace(/^v?/, 'v')), 'utf8').catch(() => '[]'))),
+	]))))
 );
 
 // Run reproduce sequentially to avoid overwhelming npm/system
-/** @type {(import('reproduce').ReproduceResult | null)[]} */
+/** @type {(ReproduceResult | false | null)[]} */
 const results = [];
 for (const v of versions) {
 	console.log(`Reproducing ${pkg}@${v}...`);
 	try {
-		const result = await reproduce(`${pkg}@${v}`);
+		const result = /** @type {ReproduceResult | false} */ (await reproduce(`${pkg}@${v}`)); // eslint-disable-line no-await-in-loop
 		results.push(result);
 		if (!result) {
-			console.log(`  -> No source tracking available`);
+			console.log('  -> No source tracking available');
 		}
 	} catch (err) {
 		console.error(`  -> Reproduce failed: ${/** @type {Error} */ (err).message}`);
@@ -199,7 +199,7 @@ const errors = [];
 let successCount = 0;
 for (const result of results) {
 	if (!result) {
-		continue;
+		continue; // eslint-disable-line no-continue, no-restricted-syntax
 	}
 
 	console.log(`Comparing ${result.package.name}@${result.package.version}...`);
@@ -207,13 +207,13 @@ for (const result of results) {
 	// Perform file-level comparison
 	let comparison;
 	try {
-		comparison = await performComparison(result);
-		successCount++;
+		comparison = await performComparison(result); // eslint-disable-line no-await-in-loop
+		successCount += 1;
 		console.log(`  -> Score: ${Math.round((comparison.summary?.score ?? 0) * 100)}%`);
 	} catch (err) {
 		console.error(`  -> Comparison failed: ${/** @type {Error} */ (err).message}`);
 		errors.push(/** @type {Error} */ (err));
-		continue;
+		continue; // eslint-disable-line no-continue, no-restricted-syntax
 	}
 
 	/** @type {EnhancedResult} */
@@ -234,9 +234,7 @@ for (const result of results) {
 	for (const r of existing) {
 		const key = r.reproduceVersion;
 		const prev = byReproduceVersion.get(key);
-		if (!prev) {
-			byReproduceVersion.set(key, r);
-		} else {
+		if (prev) {
 			// Prefer result with diff data, then latest timestamp
 			const prevHasDiff = prev.diff && prev.diff.summary;
 			const currHasDiff = r.diff && r.diff.summary;
@@ -244,11 +242,13 @@ for (const result of results) {
 				byReproduceVersion.set(key, r);
 			} else if (currHasDiff === prevHasDiff) {
 				// Both have or both lack diff - keep latest
-				if (new Date(r.timestamp) > new Date(prev.timestamp)) {
+				if (new Date(r.timestamp) > new Date(prev.timestamp)) { // eslint-disable-line max-depth
 					byReproduceVersion.set(key, r);
 				}
 			}
 			// else: prev has diff, curr doesn't - keep prev
+		} else {
+			byReproduceVersion.set(key, r);
 		}
 	}
 
@@ -262,7 +262,7 @@ for (const result of results) {
 		return semverCompare(a.reproduceVersion, b.reproduceVersion);
 	});
 
-	await writeFile(dataPath, `${JSON.stringify(deduped, null, '\t')}\n`);
+	await writeFile(dataPath, `${JSON.stringify(deduped, null, '\t')}\n`); // eslint-disable-line no-await-in-loop
 }
 
 console.log(`\nSummary: ${successCount} versions compared successfully, ${errors.length} failed`);

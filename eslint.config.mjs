@@ -7,27 +7,22 @@ export default [
 	...baseConfig,
 	{
 		rules: {
+			'func-style': 'off',
 			'max-len': 'off',
 			'no-extra-parens': 'off',
 		},
 	},
 	{
-		files: ['scripts/reproduce.js'],
+		files: ['scripts/reproduce.mjs'],
 		rules: {
+			'array-bracket-newline': 'off',
 			complexity: 'off',
-			'func-style': 'off',
+			'max-depth': 'off',
+			'max-lines': 'off',
 			'max-lines-per-function': 'off',
 			'max-statements': 'off',
-			'no-param-reassign': 'off',
 			'no-underscore-dangle': 'off',
-			'no-var': 'off',
-			'object-shorthand': 'off',
-			'prefer-const': 'off',
-			'prefer-destructuring': 'off',
-			'prefer-object-spread': 'off',
-			'prefer-template': 'off',
 			'sort-keys': 'off',
-			strict: ['error', 'global'],
 		},
 	},
 ];

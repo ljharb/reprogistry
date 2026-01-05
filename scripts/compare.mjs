@@ -53,7 +53,7 @@ async function getFiles(dir, base = dir) {
 	for (const entry of entries) {
 		const fullPath = join(dir, entry.name);
 		if (entry.isDirectory()) {
-			const subFiles = await getFiles(fullPath, base);
+			const subFiles = await getFiles(fullPath, base); // eslint-disable-line no-await-in-loop
 			files = files.concat(subFiles);
 		} else if (entry.isFile()) {
 			files.push(relative(base, fullPath));
@@ -129,7 +129,7 @@ async function hashFileNormalized(filePath) {
  * @param {string} label2 - Label for second file
  * @returns {Promise<string>} Unified diff output or description
  */
-async function generateDiff(file1, file2, label1, label2) {
+async function generateDiff(file1, file2, label1, label2) { // eslint-disable-line max-params
 	const [content1, content2] = await Promise.all([
 		readFile(file1),
 		readFile(file2),
@@ -170,6 +170,7 @@ async function generateDiff(file1, file2, label1, label2) {
  * @param {string} sourceDir - Path to rebuilt source package
  * @returns {Promise<ComparisonResult>} Detailed comparison result
  */
+// eslint-disable-next-line max-lines-per-function, max-statements
 export async function compareDirectories(packageDir, sourceDir) {
 	const [packageFiles, sourceFiles] = await Promise.all([
 		getFiles(packageDir),
@@ -198,7 +199,7 @@ export async function compareDirectories(packageDir, sourceDir) {
 
 			const [
 				packageHash, sourceHash, size,
-			] = await Promise.all([
+			] = await Promise.all([ // eslint-disable-line no-await-in-loop
 				hashFileNormalized(packagePath),
 				hashFileNormalized(sourcePath),
 				getFileSize(packagePath),
@@ -214,7 +215,7 @@ export async function compareDirectories(packageDir, sourceDir) {
 				};
 				matchingFiles += 1;
 			} else {
-				const diffContent = await generateDiff(
+				const diffContent = await generateDiff( // eslint-disable-line no-await-in-loop
 					packagePath,
 					sourcePath,
 					`published/${file}`,
@@ -232,7 +233,7 @@ export async function compareDirectories(packageDir, sourceDir) {
 			}
 		} else if (inPackage && !inSource) {
 			const pkgPath = join(packageDir, file);
-			const [pkgHash, pkgSize] = await Promise.all([
+			const [pkgHash, pkgSize] = await Promise.all([ // eslint-disable-line no-await-in-loop
 				hashFileNormalized(pkgPath),
 				getFileSize(pkgPath),
 			]);
