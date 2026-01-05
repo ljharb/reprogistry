@@ -14,7 +14,8 @@ import {
 } from 'os';
 import { join as pathJoin } from 'path';
 
-import { manifest, packument } from 'pacote';
+import pacote from 'pacote';
+const { manifest, packument } = pacote;
 import {
 	coerce,
 	lt,
