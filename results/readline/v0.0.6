@@ -1,0 +1,93 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-05T08:50:44.610Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:11.7.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "readline@0.0.6",
+			"name": "readline",
+			"version": "0.0.6",
+			"location": "https://registry.npmjs.org/readline/-/readline-0.0.6.tgz",
+			"integrity": "sha512-La5KckUnQVXnijltjXWBFFMY4UyDbGtXpmZPr1s4inrRPIiNmfIIo7lk+4/ej3aagHVtuc73Zb912jEPXkG0FQ==",
+			"publishedAt": "2015-01-17T09:29:11.900Z",
+			"publishedWith": {
+				"node": null,
+				"npm": "1.3.21"
+			}
+		},
+		"source": {
+			"integrity": null,
+			"location": "git@github.com:maleck13/readline.git",
+			"spec": "github:maleck13/readline#HEAD"
+		},
+		"comparisonHash": "8a2a8dcbb729bf3ee9216e490c955701f0ddebe1",
+		"diff": {
+			"files": {
+				".npmignore": {
+					"match": false,
+					"packageHash": "f24e9d2886e450e91970a283344e8f70ed873a2f09da104ad13c52df86f7a03f",
+					"size": 28,
+					"status": "missing-in-source"
+				},
+				"README.md": {
+					"diff": "--- published/README.md\n+++ rebuilt/README.md\n@@ -3,21 +3,31 @@\n \n ## Install\n \n-## Important. In node 10 there is a core module named readline. Please use linebyline instead, it is the same module just renamed\n+## Important. Since node 0.10 there is a core module named readline. Please use linebyline instead, it is the same module just renamed:\n+[Npm linebyline](https://www.npmjs.com/package/linebyline)\n \n ```sh\n npm install linebyline\n ```\n \n+## Test\n+```sh\n+npm install .\n+npm test\n+\n+```\n+\n+\n ## What's this?\n \n-Simple streaming readline module for NodeJS. Reads a file and buffer new lines emitting a _line_ event for each line.\n+Simple streaming readline module for NodeJS. Reads a file and buffers new lines emitting a _line_ event for each line.\n \n ## Usage\n+### Simple\n ```js\n   var readline = require('linebyline'),\n       rl = readline('./somefile.txt');\n-  rl.on('line', function(line) {\n+  rl.on('line', function(line, lineCount, byteCount) {\n     // do something with the line of text\n   })\n   .on('error', function(e) {\n@@ -25,6 +35,32 @@\n   });\n ```\n \n+### ASCII file decoding\n+As the underlying `fs.createReadStream` doesn't care about the specific ASCII encoding of the file, an alternative way to decode the file is by telling the `readline` library to retain buffer and then decoding it using a converter (e.g. [`iconv-lite`](https://www.npmjs.com/package/iconv-lite)).\n+```js\n+  var readline = require('linebyline'),\n+      rl = readline('./file-in-win1251.txt', {\n+    retainBuffer: true //tell readline to retain buffer \n+  });\n+  rl.on(\"line\", function (data,linecount){\n+    var line = iconv.decode(data, 'win1251');\n+    // do something with the line of converted text\n+  });\n+```\n+##API\n+## readLine(readingObject[, options])\n+### Params:\n+\n+* `readingObject` - file path or stream object\n+* `options` can include:\n+  * `maxLineLength` - override the default 4K buffer size (lines longer than this will not be read)\n+  * `retainBuffer` - avoid converting to String prior to emitting 'line' event; will pass raw buffer with encoded data to the callback\n+\n+### Return:\n+\n+* **EventEmitter** \n+\n+\n ## License\n \n BSD © [Craig Brookes](http://craigbrookes.com/)\n",
+					"match": false,
+					"packageHash": "35e1115075856ac269a89c3bdf143e98d7df7548654a60b1daeb7bce80fdd43d",
+					"size": 659,
+					"sourceHash": "6cb0e8cb3ae6afab4b056d0c2efa6f8c17cd69a93efcc9e9a401ef2161667f12",
+					"status": "content"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -1,6 +1,6 @@\n {\n-  \"name\": \"readline\",\n-  \"version\": \"0.0.6\",\n+  \"name\": \"linebyline\",\n+  \"version\": \"1.3.0\",\n   \"description\": \"Simple streaming readline module.\",\n   \"main\": \"readline.js\",\n   \"scripts\": {\n@@ -8,13 +8,15 @@\n   },\n   \"dependencies\":{},\n   \"devDependencies\":{\n-   \"tap\":\"0.4.3\"\n+   \"tap\":\"0.4.3\",\n+   \"iconv-lite\":\"0.4.13\"\n   },\n   \"repository\": \"git@github.com:maleck13/readline.git\",\n   \"keywords\": [\n     \"readline\",\n+    \"line by line\",\n     \"file\"\n   ],\n   \"author\": \"craig brookes\",\n-  \"license\": \"BSD\"\n+  \"license\": \"apache-2.0\"\n }\n",
+					"match": false,
+					"packageHash": "2ce1877292614252db9b8d170719f68883e37dd70cffb450b69e7d6931b89260",
+					"size": 422,
+					"sourceHash": "56b55296a785346ba742bc5c5dfbd73620169880ddbe8aeff259be4025ea028e",
+					"status": "content"
+				},
+				"readline.js": {
+					"diff": "--- published/readline.js\n+++ rebuilt/readline.js\n@@ -1,47 +1,62 @@\n var fs = require('fs'),\n     EventEmitter = require('events').EventEmitter,\n-    util = require('util'),\n-    newlines = [\n-      13, // \\r\n-      10  // \\n\n-    ];\n+    util = require('util');\n \n var readLine = module.exports = function(file, opts) {\n-  if (!(this instanceof readLine)) return new readLine(file);\n+  if (!(this instanceof readLine)) return new readLine(file, opts);\n \n   EventEmitter.call(this);\n   opts = opts || {};\n+  opts.maxLineLength = opts.maxLineLength || 4096; // 4K\n+  opts.retainBuffer = !!opts.retainBuffer; //do not convert to String prior to invoking emit 'line' event\n   var self = this,\n-      line = [],\n+      lineBuffer = new Buffer(opts.maxLineLength),\n+      lineLength = 0,\n       lineCount = 0,\n-      emit = function(line, count) {\n-        self.emit('line', new Buffer(line).toString(), count);\n+      byteCount = 0,\n+      emit = function spliceAndEmit(lineCount, byteCount) {\n+        try {\n+          var line = lineBuffer.slice(0, lineLength);\n+          self.emit('line', opts.retainBuffer? line : line.toString(), lineCount, byteCount);\n+        } catch (err) {\n+          self.emit('error', err);\n+        } finally {\n+          lineLength = 0; // Empty buffer.\n+        }\n       };\n-    this.input = fs.createReadStream(file);\n-    this.input.on('open', function(fd) {\n-        self.emit('open', fd);\n+  this.input = ('string' === typeof file) ? fs.createReadStream(file, opts) : file;\n+  this.input\n+    .on('open', function onOpen(fd) {\n+      self.emit('open', fd);\n     })\n-  .on('data', function(data) {\n-     for (var i = 0; i < data.length; i++) {\n-        if (0 <= newlines.indexOf(data[i])) { // Newline char was found.\n-          lineCount++;\n-          if (line.length) emit(line, lineCount);\n-          line = []; // Empty buffer.\n+    .on('data', function onData(data) {\n+      var dataLen = data.length;\n+      for (var i = 0; i < dataLen; i++) {\n+        if (data[i] == 10 || data[i] == 13) { // Newline char was found.\n+          if (data[i] == 10) {\n+            lineCount++;\n+            emit(lineCount, byteCount);\n+          }\n         } else {\n-          line.push(data[i]); // Buffer new line data.\n+          lineBuffer[lineLength] = data[i]; // Buffer new line data.\n+          lineLength++;\n         }\n-     }\n-  })\n-  .on('error', function(err) {\n-    self.emit('error', err);\n-  })\n-  .on('end', function() {\n-    // Emit last line if anything left over since EOF won't trigger it.\n-    if (line.length) emit(line, lineCount);\n-    self.emit('end');\n-  })\n-  .on('close', function() {\n-    self.emit('close');\n-  });\n+        byteCount++;\n+      }\n+    })\n+    .on('error', function onError(err) {\n+      self.emit('error', err);\n+    })\n+    .on('end', function onEnd() {\n+      // Emit last line if anything left over since EOF won't trigger it.\n+      if (lineLength) {\n+        lineCount++;\n+        emit(lineCount, byteCount);\n+      }\n+      self.emit('end');\n+    })\n+    .on('close', function onClose() {\n+      self.emit('close');\n+    });\n };\n util.inherits(readLine, EventEmitter);\n",
+					"match": false,
+					"packageHash": "b0e1ee589a90c7588db004663864f9684d5c6bdd0226db8041564085d9326dd5",
+					"size": 1303,
+					"sourceHash": "dfc20941313d013ec15029c82be35a345ebc12c726890b4f16d1d872c3d6b4d7",
+					"status": "content"
+				},
+				"test/fixtures/afile.txt": {
+					"match": false,
+					"packageHash": "29fe87570aea9ea9f357e43b6dfd6fa8aafc06d84efd8aa65af3e7c02899ebbe",
+					"size": 1951416,
+					"status": "missing-in-source"
+				},
+				"test/fixtures/nmbr.txt": {
+					"match": false,
+					"packageHash": "d3741e906060004ce8ba8d52001fed54e2fbf1487c05b8c192e3805d499df6d2",
+					"size": 13,
+					"status": "missing-in-source"
+				},
+				"test/test_readline.js": {
+					"match": false,
+					"packageHash": "043141d0a27af2f587f9e10d0b891b5d3b30f1fc5dfc02b79e7e7487990b4dc5",
+					"size": 976,
+					"status": "missing-in-source"
+				},
+				"LICENSE": {
+					"match": false,
+					"status": "missing-in-package"
+				}
+			},
+			"summary": {
+				"differentFiles": 3,
+				"matchingFiles": 0,
+				"missingInPackage": 1,
+				"missingInSource": 4,
+				"score": 0,
+				"totalFiles": 8
+			}
+		}
+	}
+]
