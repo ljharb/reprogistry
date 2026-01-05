@@ -1,0 +1,133 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-05T05:00:34.943Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:2.15.11",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "quill@0.1.0",
+			"name": "quill",
+			"version": "0.1.0",
+			"location": "https://registry.npmjs.org/quill/-/quill-0.1.0.tgz",
+			"integrity": "sha512-pjerRRi6UKiiEb/SuEbRpAasLXYzoNhb+Wr0eIL4it1m7aa58ZS1c3XTaq9/+aqhJKmIyvkOpBcl2IBcSvC5Yw==",
+			"publishedAt": "2012-03-25T16:10:13.593Z",
+			"publishedWith": {
+				"node": "v0.6.9",
+				"npm": "1.1.0-3"
+			}
+		},
+		"source": {
+			"integrity": null,
+			"location": "git@github.com:theycallmeswift/quill.git",
+			"spec": "github:theycallmeswift/quill#HEAD"
+		},
+		"comparisonHash": "8a2a8dcbb729bf3ee9216e490c955701f0ddebe1",
+		"diff": {
+			"files": {
+				".npmignore": {
+					"match": false,
+					"packageHash": "118b5dac48d42bad2ec5ebe79c0d6bb1c6ea3c3ccb3225397b899496b57ce1f4",
+					"size": 48,
+					"status": "missing-in-source"
+				},
+				"bin/quill": {
+					"diff": "--- published/bin/quill\n+++ rebuilt/bin/quill\n@@ -2,7 +2,6 @@\n var argv = process.argv.slice(2)\n   , fs   = require(\"fs\")\n   , fd   = require(\"path\")\n-  , util = require('util')\n   , wrench = require('wrench');\n \n var expandPath = function(path, dir){\n@@ -19,7 +18,7 @@\n var copyFile = function(source, target) {\n   var is = fs.createReadStream(source);\n   var os = fs.createWriteStream(target);\n-  util.pump(is, os);\n+  is.pipe(os);\n };\n \n var help = [\n@@ -38,7 +37,7 @@\n   var path     = fd.normalize(argv[1]);\n \n   // Create parent dir\n-  if (fd.existsSync(path)) throw(path + \" already exists\");\n+  if (fs.existsSync(path)) throw(path + \" already exists\");\n   fs.mkdirSync(path, 0775);\n \n   var baseDir = __dirname + '/../'\n@@ -64,10 +63,12 @@\n \n       copyFile(sourceDir, targetDir);\n \n-      sourceDir = expandPath('package.json', baseDir);\n+      sourceDir = expandPath('package.json', baseDir + 'quill/scaffolding/');\n       targetDir = expandPath('package.json', path + \"/\");\n \n-      copyFile(sourceDir, targetDir);\n+      var package = require(sourceDir);\n+      package.name = dasherize(argv[1]);\n+      fs.writeFileSync(targetDir, JSON.stringify(package));\n \n       sourceDir = expandPath('config.json', baseDir);\n       targetDir = expandPath('config.json', path + \"/\");\n",
+					"match": false,
+					"packageHash": "6922d5cee9136d2baea34a31f21e1b5cde1439c7e54f071673bc18990945a22c",
+					"size": 2489,
+					"sourceHash": "0dc7afc66f82c5291ab9a85a31728d09f22810f60334f742d566370057dcc288",
+					"status": "content"
+				},
+				"config.json": {
+					"diff": "--- published/config.json\n+++ rebuilt/config.json\n@@ -2,22 +2,22 @@\n   \"development\": true,\n   \"theme\": \"bootstrap\",\n   \"name\": \"Quill\",\n-  \"description\": \"Stop blogging and start quillin.\",\n+  \"description\": \"Blogging for Hackers.\",\n   \"blogroll\": [\n-  \t{\n-  \t\t\"title\": \"Download Quill\",\n-  \t\t\"url\": \"https://github.com/theycallmeswift/quill\",\n-  \t\t\"description\": \"Get the quill server\"\n-  \t},\n-  \t{\n-  \t\t\"title\": \"Official Docs\",\n-  \t\t\"url\": \"https://github.com/theycallmeswift/quill\",\n-  \t\t\"description\": \"The official documentation\"\n-  \t},\n-  \t{\n-  \t\t\"title\": \"Follow us on Twitter\",\n-  \t\t\"url\": \"http://twitter.com/justquillin\",\n-  \t\t\"description\": \"Follow @justquillin on Twitter\"\n-  \t}\n+    {\n+      \"title\": \"Download Quill\",\n+      \"url\": \"https://github.com/theycallmeswift/quill\",\n+      \"description\": \"Get the quill server\"\n+    },\n+    {\n+      \"title\": \"Official Docs\",\n+      \"url\": \"https://github.com/theycallmeswift/quill\",\n+      \"description\": \"The official documentation\"\n+    },\n+    {\n+      \"title\": \"Follow us on Twitter\",\n+      \"url\": \"http://twitter.com/justquillin\",\n+      \"description\": \"Follow @justquillin on Twitter\"\n+    }\n   ]\n }\n",
+					"match": false,
+					"packageHash": "3dfb653720a2808c3d41cd48c6f81fdc9e02c23d8556352adbb5a518c357136d",
+					"size": 570,
+					"sourceHash": "181026f44576bb0dbeb7634c16ffccd46c8799ea47814ae5b68199a4c704f609",
+					"status": "content"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -5,14 +5,17 @@\n   ],\n   \"name\": \"quill\",\n   \"description\": \"A realtime git backed blogging engine for node.js\",\n-  \"version\": \"0.1.0\",\n+  \"version\": \"0.1.6\",\n   \"homepage\": \"http://justquillin.com/\",\n   \"repository\": {\n     \"type\": \"git\",\n     \"url\": \"git@github.com:theycallmeswift/quill.git\"\n   },\n+  \"bin\": {\n+    \"quill\": \"./bin/quill\"\n+  },\n   \"engines\": {\n-    \"node\": \"~0.6.9\"\n+    \"node\": \"~0.8.0\"\n   },\n   \"dependencies\": {\n     \"colors\": \"0.6.0-1\",\n",
+					"match": false,
+					"packageHash": "b71b2f30a5bfa1d6bef1c460cdc5942815b706e6af989865a7930bcd99b656a8",
+					"size": 876,
+					"sourceHash": "4445b79c76b3b15927650a524216e755eeadb6f9468a78c115efa3a2a5c57e38",
+					"status": "content"
+				},
+				"quill/compiler.js": {
+					"diff": "--- published/quill/compiler.js\n+++ rebuilt/quill/compiler.js\n@@ -39,7 +39,7 @@\n   var moveQuillAssets = function() {\n     var quillAssetsFolder = path.join(siteAssets, 'quill')\n       , realtimeAssetPath = path.join(siteAssets, 'quill', 'realtime.js')\n-      , realtimePath = path.join(__dirname, 'realtime.js');\n+      , realtimePath = path.join(__dirname, 'scaffolding', 'realtime.js');\n \n     fs.mkdir(quillAssetsFolder, function() {\n       var is = fs.createReadStream(realtimePath);\n@@ -49,12 +49,12 @@\n     });\n   };\n \n-  path.exists(themeDirectory, function(exists) {\n+  fs.exists(themeDirectory, function(exists) {\n     if(!exists) {\n       return callback(new Error(\"Error: Theme does not exist\"));\n     }\n \n-    path.exists(themeAssets, function(exists) {\n+    fs.exists(themeAssets, function(exists) {\n       if(!exists) {\n         util.log(\"No assets directory found in \" + themeDirectory);\n         fs.mkdir(siteAssets, function() {\n@@ -80,7 +80,7 @@\n   * @param Function callback Callback function\n   */\n var createSiteDirectory = function(directory, callback) {\n-  path.exists(directory, function(exists) {\n+  fs.exists(directory, function(exists) {\n     if(exists) {\n       util.log(\"Removing directory: \" + directory);\n       wrench.rmdirSyncRecursive(directory);\n@@ -94,6 +94,38 @@\n };\n \n /**\n+  * createPostDirectory\n+  *\n+  * Creates the directory where each post's index.html will exist. Removes any\n+  * existing directory beforehand.\n+  *\n+  * @param String directory Directory where the static site will be stored\n+  * @param HTML output for post\n+  * @param Function callback Callback function\n+  */\n+var createPostDirectory = function(directory, layoutHTML, callback) {\n+\tvar outputFilename;\n+\t\n+  fs.exists(directory, function(exists) {\n+    if(exists) {\n+      wrench.rmdirSyncRecursive(directory);\n+    }\n+\n+    fs.mkdir(directory, function() {\n+      outputFilename = path.join(directory, 'index.html');\n+      \n+      fs.writeFile(outputFilename, layoutHTML, function(err) {\n+        if(err) {\n+          return callback(err);\n+        }\n+        callback();\n+      });\n+      \n+    });\n+  });\n+};\n+\n+/**\n  * findPosts\n  *\n  * Locate all the generated post markdown files inside the posts directory.\n@@ -132,6 +164,10 @@\n       }\n     }\n \n+    if(matchingFiles.length == 0) {\n+      return callback(false, []);\n+    }\n+\n     fileCallback = function() {\n       fileCounter += 1;\n       if(fileCounter == matchingFiles.length) {\n@@ -159,7 +195,7 @@\n             name:      filename,\n             path:      filePath,\n             timestamp: time * 1000,\n-            url:       title.toLowerCase() + '.html'\n+            url:       title.toLowerCase()\n           });\n \n           fileCallback();\n@@ -219,14 +255,10 @@\n       indexPosts.push(file);\n \n       layoutHTML = compiledTemplate({ config: config, posts: pagePosts });\n+\t\t\t\n+\t\t\tvar outputFileDir = path.join(outputDir, file.url);\n",
+					"match": false,
+					"packageHash": "7e989dbaac74db3d32fb7603f2f4c13bd6e395ee05176820e19eb3a030d32c1e",
+					"size": 8668,
+					"sourceHash": "3e0af910bb848e995e2afe96c22260c142f9247a7d07c848f5605e620de43e04",
+					"status": "content"
+				},
+				"quill/realtime.js": {
+					"match": false,
+					"packageHash": "74dfd2ff004eab716044106e73596f523f56b6beaf4b25b59ad8b5bf0dd80f0c",
+					"size": 613,
+					"status": "missing-in-source"
+				},
+				"quill/server.js": {
+					"diff": "--- published/quill/server.js\n+++ rebuilt/quill/server.js\n@@ -9,17 +9,6 @@\n   , util   = require('util')\n   , intro = require('./intro');\n \n-var debugError = function(errorMessage, data){\n-  if (config.development) {\n-    console.log('################ ERROR ##################');\n-    console.log(errorMessage);\n-    if(data) {\n-      console.log(data);\n-    }\n-    console.log('################ ERROR ##################');\n-  }\n-};\n-\n var themeDir = path.join(__dirname, '..', 'themes', config.theme);\n var postsDir = path.join(__dirname, '..', 'posts');\n \n@@ -50,7 +39,7 @@\n   sioApp.sockets.on('connection', function(socket) {\n     socket.emit('connected');\n     socket.on('update', function(postId) {\n-      if(files && postId * 1000 < files[0].timestamp) {\n+      if(files && files.length && postId * 1000 < files[0].timestamp) {\n         socket.emit('update', files);\n       }\n     });\n",
+					"match": false,
+					"packageHash": "67ce7c941bcf2e292a1ccbc4a7a9678b154d25be5777d3dbaaef15405fe8a8f0",
+					"size": 2166,
+					"sourceHash": "4afd90cd9195b6ff6b39d3d091c4856711fa8941624242778147cfb695204eb9",
+					"status": "content"
+				},
+				"themes/bootstrap/index.html": {
+					"diff": "--- published/themes/bootstrap/index.html\n+++ rebuilt/themes/bootstrap/index.html\n@@ -12,7 +12,7 @@\n     <script src=\"http://timefield.googlecode.com/svn/trunk/timefield.js\" type=\"text/javascript\"></script>\n \n     <!-- Le styles -->\n-    <link href=\"assets/bootstrap/css/bootstrap.css\" rel=\"stylesheet\">\n+    <link href=\"/assets/bootstrap/css/bootstrap.css\" rel=\"stylesheet\">\n     <style type=\"text/css\">\n       body {\n         padding-top: 60px;\n@@ -41,7 +41,7 @@\n         background-color: #f3f3f3;\n       }\n     </style>\n-    <link href=\"assets/bootstrap/css/bootstrap-responsive.css\" rel=\"stylesheet\">\n+    <link href=\"/assets/bootstrap/css/bootstrap-responsive.css\" rel=\"stylesheet\">\n     \n     <script type=\"text/javascript\">\n     $(document).ready(function () {\n@@ -82,9 +82,12 @@\n       <!-- Example row of columns -->\n       <div class=\"row\">\n         <div class=\"span8\">\n+          <h2>Posts</h2>\n           {{#posts}}\n-            <h2>{{{ title }}} <small class=\"timefield t:{{ timestamp }}\"></small></h2>\n-            {{{ body }}}\n+            <div class=\"well\">\n+              <a href=\"/{{ url }}\"><h2>{{{ title }}} <small class=\"timefield t:{{ timestamp }}\"></small></h2></a>\n+              {{{ body }}}\n+            </div>\n           {{/posts}}\n         </div>\n         <div class=\"span4\">\n",
+					"match": false,
+					"packageHash": "8cd8199d36ead4547691deadfbbb1561a754ed736c4fbb21faa212eda115d6a5",
+					"size": 3122,
+					"sourceHash": "ad16f45f21a4d77b88ae85ccd591f7bdfb12c7458b0b005a4270d6c0a7a26627",
+					"status": "content"
+				},
+				"themes/simplertimes/index.html": {
+					"diff": "--- published/themes/simplertimes/index.html\n+++ rebuilt/themes/simplertimes/index.html\n@@ -157,14 +157,14 @@\n \t\t\t\t\t\t\t<img src=\"assets/header.png\" />\n \t\t\t\t\t\t</div>\n \t\t\t\t\t\t<h2 id=\"blog-description\">\n-\t\t\t\t\t\t\tBlogging couldn't be simpler.\n+\t\t\t\t\t\t\t{{ config.description }}}\n \t\t\t\t\t\t</h2>\n \t\t\t\t\t</hgroup>\n \t\t\t\t\t<p>\n-\t\t\t\t\t\tQuill is a simple blog engine inspired by <a href=\"https://github.com/mojombo/jekyll\">Jekyll</a>. Quill runs on <a href=\"http://nodejs.com\">node</a> and making posts is as easy as creating a text file and pushing to <a href=\"http://github.com\">github</a>.\n+\t\t\t\t\t\tQuill is a simple blog engine inspired by <a href=\"https://github.com/mojombo/jekyll\">Jekyll</a>. Quill runs on <a href=\"http://nodejs.com\">node</a> and has an easy command line interface. Themes are a single html page.\n \t\t\t\t\t</p>\n \t\t\t\t\t<p>\n-\t\t\t\t\t\tYou can get started right now! Just clone <a href=\"https://github.com/theycallmeswift/quill\">the github repo</a> and 'quill init'.\n+\t\t\t\t\t\tYou can get started right now! Follow the directions <a href=\"https://github.com/theycallmeswift/quill\">on github</a>\n \t\t\t\t\t</p>\n \t\t\t\t</div>\n \t\t\t\t<ul id=\"blog-roll\">\n",
+					"match": false,
+					"packageHash": "368090e59a54fd78e7fcafd96606fd94f6ee7932d0f62e1082aaacdf6d9844d9",
+					"size": 5080,
+					"sourceHash": "db7dec634342da55405758e8e051d2dae362c088f4967e129c5b4e9a875a2223",
+					"status": "content"
+				},
+				"LICENSE": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"README.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"posts/.gitkeep": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"posts/1332691107-welcome-to-quil.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"quill/scaffolding/package.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"quill/scaffolding/realtime.js": {
+					"match": false,
+					"status": "missing-in-package"
+				}
+			},
+			"summary": {
+				"differentFiles": 7,
+				"matchingFiles": 22,
+				"missingInPackage": 6,
+				"missingInSource": 2,
+				"score": 0.5945945945945946,
+				"totalFiles": 37
+			}
+		}
+	}
+]

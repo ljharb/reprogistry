@@ -1,0 +1,81 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-05T05:00:37.365Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:2.15.11",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "quill@0.1.5",
+			"name": "quill",
+			"version": "0.1.5",
+			"location": "https://registry.npmjs.org/quill/-/quill-0.1.5.tgz",
+			"integrity": "sha512-Je7f2ISVwHt4jWvkjNT6Ah3p5Ss0my0ztJGq9TD/K9Ll/hrYHjHZnZNDMcVJz/ZqutUQubU9fqgXha5gsvHQKA==",
+			"publishedAt": "2012-03-27T21:12:00.769Z",
+			"publishedWith": {
+				"node": "v0.6.9",
+				"npm": "1.1.0-3"
+			}
+		},
+		"source": {
+			"integrity": null,
+			"location": "git@github.com:theycallmeswift/quill.git",
+			"spec": "github:theycallmeswift/quill#HEAD"
+		},
+		"comparisonHash": "8a2a8dcbb729bf3ee9216e490c955701f0ddebe1",
+		"diff": {
+			"files": {
+				".npmignore": {
+					"match": false,
+					"packageHash": "118b5dac48d42bad2ec5ebe79c0d6bb1c6ea3c3ccb3225397b899496b57ce1f4",
+					"size": 48,
+					"status": "missing-in-source"
+				},
+				"bin/quill": {
+					"diff": "--- published/bin/quill\n+++ rebuilt/bin/quill\n@@ -2,7 +2,6 @@\n var argv = process.argv.slice(2)\n   , fs   = require(\"fs\")\n   , fd   = require(\"path\")\n-  , util = require('util')\n   , wrench = require('wrench');\n \n var expandPath = function(path, dir){\n@@ -19,7 +18,7 @@\n var copyFile = function(source, target) {\n   var is = fs.createReadStream(source);\n   var os = fs.createWriteStream(target);\n-  util.pump(is, os);\n+  is.pipe(os);\n };\n \n var help = [\n@@ -38,7 +37,7 @@\n   var path     = fd.normalize(argv[1]);\n \n   // Create parent dir\n-  if (fd.existsSync(path)) throw(path + \" already exists\");\n+  if (fs.existsSync(path)) throw(path + \" already exists\");\n   fs.mkdirSync(path, 0775);\n \n   var baseDir = __dirname + '/../'\n",
+					"match": false,
+					"packageHash": "7074734f0db2971715b8e8ef64f0b348f3e328e8c542e6296828a08a9b516adb",
+					"size": 2615,
+					"sourceHash": "0dc7afc66f82c5291ab9a85a31728d09f22810f60334f742d566370057dcc288",
+					"status": "content"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -5,7 +5,7 @@\n   ],\n   \"name\": \"quill\",\n   \"description\": \"A realtime git backed blogging engine for node.js\",\n-  \"version\": \"0.1.5\",\n+  \"version\": \"0.1.6\",\n   \"homepage\": \"http://justquillin.com/\",\n   \"repository\": {\n     \"type\": \"git\",\n@@ -15,7 +15,7 @@\n     \"quill\": \"./bin/quill\"\n   },\n   \"engines\": {\n-    \"node\": \"~0.6.9\"\n+    \"node\": \"~0.8.0\"\n   },\n   \"dependencies\": {\n     \"colors\": \"0.6.0-1\",\n",
+					"match": false,
+					"packageHash": "c41bdcbf3546ee70ce157e8948b2742469c8903a844beffef32d34f1a1a18284",
+					"size": 919,
+					"sourceHash": "4445b79c76b3b15927650a524216e755eeadb6f9468a78c115efa3a2a5c57e38",
+					"status": "content"
+				},
+				"quill/.compiler.js.swo": {
+					"match": false,
+					"packageHash": "24f74ff17b7a469a540382a5ed230431fa9d29af75710871c9ef937259dc416f",
+					"size": 24576,
+					"status": "missing-in-source"
+				},
+				"quill/compiler.js": {
+					"diff": "--- published/quill/compiler.js\n+++ rebuilt/quill/compiler.js\n@@ -49,12 +49,12 @@\n     });\n   };\n \n-  path.exists(themeDirectory, function(exists) {\n+  fs.exists(themeDirectory, function(exists) {\n     if(!exists) {\n       return callback(new Error(\"Error: Theme does not exist\"));\n     }\n \n-    path.exists(themeAssets, function(exists) {\n+    fs.exists(themeAssets, function(exists) {\n       if(!exists) {\n         util.log(\"No assets directory found in \" + themeDirectory);\n         fs.mkdir(siteAssets, function() {\n@@ -80,7 +80,7 @@\n   * @param Function callback Callback function\n   */\n var createSiteDirectory = function(directory, callback) {\n-  path.exists(directory, function(exists) {\n+  fs.exists(directory, function(exists) {\n     if(exists) {\n       util.log(\"Removing directory: \" + directory);\n       wrench.rmdirSyncRecursive(directory);\n@@ -94,6 +94,38 @@\n };\n \n /**\n+  * createPostDirectory\n+  *\n+  * Creates the directory where each post's index.html will exist. Removes any\n+  * existing directory beforehand.\n+  *\n+  * @param String directory Directory where the static site will be stored\n+  * @param HTML output for post\n+  * @param Function callback Callback function\n+  */\n+var createPostDirectory = function(directory, layoutHTML, callback) {\n+\tvar outputFilename;\n+\t\n+  fs.exists(directory, function(exists) {\n+    if(exists) {\n+      wrench.rmdirSyncRecursive(directory);\n+    }\n+\n+    fs.mkdir(directory, function() {\n+      outputFilename = path.join(directory, 'index.html');\n+      \n+      fs.writeFile(outputFilename, layoutHTML, function(err) {\n+        if(err) {\n+          return callback(err);\n+        }\n+        callback();\n+      });\n+      \n+    });\n+  });\n+};\n+\n+/**\n  * findPosts\n  *\n  * Locate all the generated post markdown files inside the posts directory.\n@@ -226,15 +258,7 @@\n \t\t\t\n \t\t\tvar outputFileDir = path.join(outputDir, file.url);\n \n-\t\t\tfs.mkdir(outputFileDir, function() {\n-\t\t\t\toutputFilename = path.join(outputFileDir, 'index.html');\n-\t\t\t\tvar fileRes = fs.writeFile(outputFilename, layoutHTML, function(err) {\n-\t\t\t\t  if(err) {\n-\t\t\t\t    return callback(err);\n-\t\t\t\t  }\n-\t\t\t\t  compileCompleted();\n-\t\t\t\t});\n-\t\t\t});\n+\t\t\tcreatePostDirectory(outputFileDir, layoutHTML, compileCompleted);\n     }\n \n     var sortByTimestamp = function(a, b) {\n",
+					"match": false,
+					"packageHash": "c4fe8a70f21095ef7317b0bdbf33f7eb4d58255b34d62de84f2f2ff8bcb5dd8b",
+					"size": 8849,
+					"sourceHash": "3e0af910bb848e995e2afe96c22260c142f9247a7d07c848f5605e620de43e04",
+					"status": "content"
+				},
+				"LICENSE": {
+					"match": false,
+					"status": "missing-in-package"
+				}
+			},
+			"summary": {
+				"differentFiles": 3,
+				"matchingFiles": 31,
+				"missingInPackage": 1,
+				"missingInSource": 2,
+				"score": 0.8378378378378378,
+				"totalFiles": 37
+			}
+		}
+	}
+]
