@@ -1,0 +1,69 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-05T09:34:05.953Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:3.10.3",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "remark-cli@2.0.0",
+			"name": "remark-cli",
+			"version": "2.0.0",
+			"location": "https://registry.npmjs.org/remark-cli/-/remark-cli-2.0.0.tgz",
+			"integrity": "sha512-wAawdOP+MxaqnpGVB4xtPbxap3p9ixSbwVhZqYn3z2ZvhD0GY1FPq7whqjYuEg1TpI2vo3itHWBZmxNnPnWSpw==",
+			"publishedAt": "2016-08-21T18:37:09.838Z",
+			"publishedWith": {
+				"node": "6.3.0",
+				"npm": "3.10.3"
+			}
+		},
+		"source": {
+			"integrity": null,
+			"location": "https://github.com/wooorm/remark/tree/master/packages/remark-cli",
+			"spec": "github:wooorm/remark/tree/master/packages/remark-cli#HEAD"
+		},
+		"comparisonHash": "8a2a8dcbb729bf3ee9216e490c955701f0ddebe1",
+		"diff": {
+			"files": {
+				"cli.js": {
+					"diff": "--- published/cli.js\n+++ rebuilt/cli.js\n@@ -1,34 +1,43 @@\n #!/usr/bin/env node\n+\n /**\n- * @author Titus Wormer\n- * @copyright 2015 Titus Wormer\n- * @license MIT\n- * @module remark:cli\n- * @fileoverview CLI to process markdown.\n+ * @typedef Pack\n+ * @property {string} name\n+ * @property {string} version\n+ * @property {string} description\n  */\n \n-'use strict';\n+import fs from 'node:fs/promises'\n+import {resolve} from 'import-meta-resolve'\n+import markdownExtensions from 'markdown-extensions'\n+import {remark} from 'remark'\n+import {args} from 'unified-args'\n+\n+/** @type {Pack} */\n+const process_ = JSON.parse(\n+  String(\n+    await fs.readFile(\n+      new URL('package.json', resolve('remark', import.meta.url))\n+    )\n+  )\n+)\n \n-/* Dependencies. */\n-var start = require('unified-args');\n-var extensions = require('markdown-extensions');\n-var processor = require('remark');\n-var proc = require('remark/package.json');\n-var cli = require('./package.json');\n+/** @type {Pack} */\n+const cli = JSON.parse(\n+  String(await fs.readFile(new URL('package.json', import.meta.url)))\n+)\n \n-/* Start. */\n-start({\n-  processor: processor,\n-  name: proc.name,\n+args({\n   description: cli.description,\n+  extensions: markdownExtensions,\n+  ignoreName: '.' + process_.name + 'ignore',\n+  name: process_.name,\n+  packageField: process_.name + 'Config',\n+  pluginPrefix: process_.name,\n+  processor: remark,\n+  rcName: '.' + process_.name + 'rc',\n   version: [\n-    proc.name + ': ' + proc.version,\n+    process_.name + ': ' + process_.version,\n     cli.name + ': ' + cli.version\n-  ].join(', '),\n-  pluginPrefix: proc.name,\n-  presetPrefix: proc.name + '-preset',\n-  packageField: proc.name + 'Config',\n-  rcName: '.' + proc.name + 'rc',\n-  ignoreName: '.' + proc.name + 'ignore',\n-  extensions: extensions\n-});\n+  ].join(', ')\n+})\n",
+					"match": false,
+					"packageHash": "80f99b5276c89398752fccb58bf2708549610355889fbe59a995a0e0ba1ed558",
+					"size": 807,
+					"sourceHash": "b7d37f089fbc0a81e11c39d12da5bce19c4d4a7f57758a1b9dead246787d9095",
+					"status": "content"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -1,34 +1,47 @@\n {\n-  \"name\": \"remark-cli\",\n-  \"version\": \"2.0.0\",\n-  \"description\": \"CLI to process markdown with remark using plugins\",\n-  \"license\": \"MIT\",\n-  \"keywords\": [\n-    \"markdown\",\n-    \"remark\",\n-    \"cli\",\n-    \"bin\"\n-  ],\n-  \"dependencies\": {\n-    \"markdown-extensions\": \"^1.1.0\",\n-    \"remark\": \"^6.0.0\",\n-    \"unified-args\": \"^2.0.0\"\n+  \"author\": \"Titus Wormer <tituswormer@gmail.com> (https://wooorm.com)\",\n+  \"bin\": {\n+    \"remark\": \"cli.js\"\n   },\n-  \"homepage\": \"http://remark.js.org\",\n-  \"repository\": \"https://github.com/wooorm/remark/tree/master/packages/remark-cli\",\n-  \"bugs\": \"https://github.com/wooorm/remark/issues\",\n-  \"author\": \"Titus Wormer <tituswormer@gmail.com> (http://wooorm.com)\",\n+  \"bugs\": \"https://github.com/remarkjs/remark/issues\",\n   \"contributors\": [\n-    \"Titus Wormer <tituswormer@gmail.com> (http://wooorm.com)\"\n+    \"Titus Wormer <tituswormer@gmail.com> (https://wooorm.com)\"\n   ],\n-  \"engines\": {\n-    \"node\": \">=0.11.0\"\n-  },\n-  \"bin\": {\n-    \"remark\": \"cli.js\"\n+  \"dependencies\": {\n+    \"import-meta-resolve\": \"^4.0.0\",\n+    \"markdown-extensions\": \"^2.0.0\",\n+    \"remark\": \"^15.0.0\",\n+    \"unified-args\": \"^11.0.0\"\n   },\n+  \"description\": \"CLI to process markdown with remark\",\n+  \"exports\": [],\n   \"files\": [\n     \"cli.js\"\n   ],\n-  \"scripts\": {}\n+  \"funding\": {\n+    \"type\": \"opencollective\",\n+    \"url\": \"https://opencollective.com/unified\"\n+  },\n+  \"homepage\": \"https://remark.js.org\",\n+  \"keywords\": [\n+    \"bin\",\n+    \"cli\",\n+    \"markdown\",\n+    \"mdast\",\n+    \"remark\",\n+    \"unified\"\n+  ],\n+  \"license\": \"MIT\",\n+  \"name\": \"remark-cli\",\n+  \"repository\": \"https://github.com/remarkjs/remark/tree/main/packages/remark-cli\",\n+  \"scripts\": {},\n+  \"typeCoverage\": {\n+    \"atLeast\": 100,\n+    \"strict\": true\n+  },\n+  \"type\": \"module\",\n+  \"version\": \"12.0.1\",\n+  \"xo\": {\n+    \"prettier\": true\n+  }\n }\n",
+					"match": false,
+					"packageHash": "4b4d0a2b5e372d1863d6973600f8bab185c13fb63486b05895e3b244858ff42b",
+					"size": 791,
+					"sourceHash": "93b44df2c80f430ef16e1262e7d06451959849dfb1d1b480458b170babf0b52c",
+					"status": "content"
+				},
+				"readme.md": {
+					"diff": "--- published/readme.md\n+++ rebuilt/readme.md\n@@ -1,64 +1,114 @@\n-# remark-cli [![Build Status][build-badge]][build-status] [![Coverage Status][coverage-badge]][coverage-status] [![Chat][chat-badge]][chat]\n+# remark-cli\n \n-Command-line interface for [**remark**][remark].\n+[![Build][badge-build-image]][badge-build-url]\n+[![Coverage][badge-coverage-image]][badge-coverage-url]\n+[![Downloads][badge-downloads-image]][badge-downloads-url]\n+\n+Command line interface to inspect and change markdown files with\n+**[remark][github-remark]**.\n+\n+## Contents\n+\n+* [What is this?](#what-is-this)\n+* [When should I use this?](#when-should-i-use-this)\n+* [Install](#install)\n+* [Use](#use)\n+* [CLI](#cli)\n+* [Examples](#examples)\n+  * [Example: checking and formatting markdown on the CLI](#example-checking-and-formatting-markdown-on-the-cli)\n+  * [Example: config files (JSON, YAML, JS)](#example-config-files-json-yaml-js)\n+* [Compatibility](#compatibility)\n+* [Security](#security)\n+* [Contribute](#contribute)\n+* [Sponsor](#sponsor)\n+* [License](#license)\n+\n+## What is this?\n+\n+This package is a command line interface (CLI) that you can use in your terminal\n+or in npm scripts and the like to inspect and change markdown files.\n+This CLI is built around remark,\n+which is an ecosystem of plugins that work with markdown as structured data,\n+specifically ASTs (abstract syntax trees).\n+You can choose from the 150+ existing plugins or make your own.\n+\n+See [the monorepo readme][github-remark] for info on what the remark ecosystem\n+is.\n+\n+## When should I use this?\n+\n+You can use this package when you want to work with the markdown files in your\n+project from the command line.\n+`remark-cli` has many options and you can combine it with many plugins,\n+so it should be possible to do what you want.\n+If not,\n+you can always use [`remark`][github-remark-core] itself manually in a script.\n+\n+## Install\n+\n+This package is [ESM only][esm].\n+In Node.js (version 16+),\n+install with [npm][npm-install]:\n \n-*   Loads [`remark-` plugins][plugins];\n-*   Searches for [markdown extensions][markdown-extensions];\n-*   Ignores paths found in [`.remarkignore` files][ignore-file];\n-*   Loads configuration from [`.remarkrc`, `.remarkrc.js` files][config-file];\n-*   Uses configuration from [`remarkConfig` fields in `package.json`\n-    files][config-file].\n+```sh\n+npm install remark-cli\n+```\n \n-## Installation\n+## Use\n \n-[npm][]:\n+Add a table of contents with [`remark-toc`][github-remark-toc] to\n+`readme.md`:\n \n-```bash\n-npm install remark-cli\n+```sh\n+remark --output --use remark-toc readme.md\n ```\n \n-## Usage\n+Lint all markdown files in the current directory according to the markdown style\n+guide with\n+[`remark-preset-lint-markdown-style-guide`][github-markdown-style-guide].\n \n-```bash\n-# Add a table of contents to `readme.md`\n-$ remark readme.md --use toc --output\n-\n-# Lint all markdown files in the current directory\n-$ remark . --use lint\n+```sh\n+remark --use remark-preset-lint-markdown-style-guide .\n ```\n \n ## CLI\n \n-See [**unified-args**][unified-args], which provides the interface,\n-for more information on all available options.\n+The interface of `remark-cli` is explained as follows on its help page\n",
+					"match": false,
+					"packageHash": "2ae87db7f6acf95d107d1c9d1e526ef226852411514a77633f8913f1b3aa21fd",
+					"size": 3287,
+					"sourceHash": "5e78933c191f8f98e023670fd9933679a3c1d48bf6be2da9fec1aab09c571686",
+					"status": "content"
+				},
+				"license": {
+					"match": false,
+					"status": "missing-in-package"
+				}
+			},
+			"summary": {
+				"differentFiles": 3,
+				"matchingFiles": 0,
+				"missingInPackage": 1,
+				"missingInSource": 0,
+				"score": 0,
+				"totalFiles": 4
+			}
+		}
+	}
+]
