@@ -1,0 +1,199 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-05T20:23:54.525Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:2.15.11",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "JSONStream@0.1.1",
+			"name": "JSONStream",
+			"version": "0.1.1",
+			"location": "https://registry.npmjs.org/JSONStream/-/JSONStream-0.1.1.tgz",
+			"integrity": "sha512-lPmS4uVtGCO8cvZ5bjgzh0mKdBLrRlN5OIS5z/q8zCq+dMPsQ75tV7plAGDdApj9O6YF89ygbAEyz265QlXDxg==",
+			"publishedAt": "2011-09-26T02:57:57.814Z",
+			"publishedWith": {
+				"node": "v0.4.10",
+				"npm": "1.0.27"
+			}
+		},
+		"source": {
+			"integrity": null,
+			"location": "git://github.com/dominictarr/JSONStream.git",
+			"spec": "github:dominictarr/JSONStream#HEAD"
+		},
+		"comparisonHash": "8a2a8dcbb729bf3ee9216e490c955701f0ddebe1",
+		"diff": {
+			"files": {
+				".gitignore": {
+					"match": false,
+					"packageHash": "a1cd9589c07a23e3a67e8c6017e10a46d26085a85c7b55dee70192c788b1d1f8",
+					"size": 42,
+					"status": "missing-in-source"
+				},
+				"examples/all_docs.js": {
+					"diff": "--- published/examples/all_docs.js\n+++ rebuilt/examples/all_docs.js\n@@ -2,7 +2,7 @@\n   , JSONStream = require('JSONStream')\n   , es = require('event-stream')\n \n-var parser = JSONStream.parse(['rows', /./]) //emit parts that match this path (any element of the rows array)\n+var parser = JSONStream.parse(['rows', true]) //emit parts that match this path (any element of the rows array)\n   , req = request({url: 'http://isaacs.couchone.com/registry/_all_docs'})\n   , logger = es.mapSync(function (data) {  //create a stream that logs to stderr,\n     console.error(data)\n",
+					"match": false,
+					"packageHash": "cc547c8e39fa2ae51ce4fe4b9a87e1e33c6f6385627a760212199be53d523fdb",
+					"size": 458,
+					"sourceHash": "1492c7523d8c43f3db5c3ae6e87a725b535f408d6151dcd8b351b929268944a8",
+					"status": "content"
+				},
+				"index.js": {
+					"diff": "--- published/index.js\n+++ rebuilt/index.js\n@@ -1,118 +1,247 @@\n+'use strict'\n \n var Parser = require('jsonparse')\n-  , Stream = require('stream').Stream\n+  , through = require('through')\n+\n+var bufferFrom = Buffer.from && Buffer.from !== Uint8Array.from\n \n /*\n \n   the value of this.stack that creationix's jsonparse has is weird.\n-  \n+\n   it makes this code ugly, but his problem is way harder that mine,\n   so i'll forgive him.\n \n */\n \n-exports.parse = function (path) {\n-  \n-  var stream = new Stream()\n+exports.parse = function (path, map) {\n+  var header, footer\n   var parser = new Parser()\n-  var count = 0\n-  if(!path.length)\n+  var stream = through(function (chunk) {\n+    if('string' === typeof chunk)\n+      chunk = bufferFrom ? Buffer.from(chunk) : new Buffer(chunk)\n+    parser.write(chunk)\n+  },\n+  function (data) {\n+    if(data)\n+      stream.write(data)\n+    if (header)\n+        stream.emit('header', header)\n+    if (footer)\n+      stream.emit('footer', footer)\n+    stream.queue(null)\n+  })\n+\n+  if('string' === typeof path)\n+    path = path.split('.').map(function (e) {\n+      if (e === '$*')\n+        return {emitKey: true}\n+      else if (e === '*')\n+        return true\n+      else if (e === '') // '..'.split('.') returns an empty string\n+        return {recurse: true}\n+      else\n+        return e\n+    })\n+\n+\n+  var count = 0, _key\n+  if(!path || !path.length)\n     path = null\n-  parser.onValue = function () {\n-    if(!this.root && this.stack.length == 1){\n-      stream.root = this.value\n-      }\n-    if(!path || this.stack.length !== path.length)\n-      return\n-    var _path = []\n-    for( var i = 0; i < (path.length - 1); i++) {\n+\n+  parser.onValue = function (value) {\n+    if (!this.root)\n+      stream.root = value\n+\n+    if(! path) return\n+\n+    var i = 0 // iterates on path\n+    var j  = 0 // iterates on stack\n+    var emitKey = false;\n+    var emitPath = false;\n+    while (i < path.length) {\n       var key = path[i]\n-      var c = this.stack[1 + (+i)]\n-      \n-      if(!c) {\n-        return\n+      var c\n+      j++\n+\n+      if (key && !key.recurse) {\n+        c = (j === this.stack.length) ? this : this.stack[j]\n+        if (!c) return\n+        if (! check(key, c.key)) {\n+          setHeaderFooter(c.key, value)\n+          return\n+        }\n+        emitKey = !!key.emitKey;\n+        emitPath = !!key.emitPath;\n+        i++\n+      } else {\n+        i++\n",
+					"match": false,
+					"packageHash": "7c8e369bf76c162e091eaed6e5bf2bb9762e996abeb27e9dca720aa273d1d832",
+					"size": 2333,
+					"sourceHash": "7b5957eaea88b1bb6709767543f7072693774a04cabbf6cb0dfee8c436f3bee3",
+					"status": "content"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -1,13 +1,40 @@\n-{ \"name\": \"JSONStream\"\n-, \"version\": \"0.1.1\"\n-, \"description\": \"rawStream.pipe(JSONStream.parse()).pipe(streamOfObjects)\"\n-, \"homepage\": \"http://github.com/dominictarr/JSONStream\"\n-, \"repository\": \n-  { \"type\": \"git\"\n-  , \"url\": \"https://github.com/dominictarr/JSONStream.git\" }\n-, \"dependencies\": {\n-    \"jsonparse\": \"0.0.1\"\n+{\n+  \"name\": \"JSONStream\",\n+  \"version\": \"1.3.5\",\n+  \"description\": \"rawStream.pipe(JSONStream.parse()).pipe(streamOfObjects)\",\n+  \"homepage\": \"http://github.com/dominictarr/JSONStream\",\n+  \"repository\": {\n+    \"type\": \"git\",\n+    \"url\": \"git://github.com/dominictarr/JSONStream.git\"\n+  },\n+  \"license\": \"(MIT OR Apache-2.0)\",\n+  \"keywords\": [\n+    \"json\",\n+    \"stream\",\n+    \"streaming\",\n+    \"parser\",\n+    \"async\",\n+    \"parsing\"\n+  ],\n+  \"dependencies\": {\n+    \"jsonparse\": \"^1.2.0\",\n+    \"through\": \">=2.2.7 <3\"\n+  },\n+  \"devDependencies\": {\n+    \"it-is\": \"~1\",\n+    \"assertions\": \"~2.2.2\",\n+    \"render\": \"~0.1.1\",\n+    \"trees\": \"~0.0.3\",\n+    \"event-stream\": \"~0.7.0\",\n+    \"tape\": \"~2.12.3\"\n+  },\n+  \"bin\": \"./bin.js\",\n+  \"author\": \"Dominic Tarr <dominic.tarr@gmail.com> (http://bit.ly/dominictarr)\",\n+  \"scripts\": {\n+    \"test\": \"node test/run.js\"\n+  },\n+  \"optionalDependencies\": {},\n+  \"engines\": {\n+    \"node\": \"*\"\n   }\n-, \"devDependencies\": {}\n-, \"author\": \"Dominic Tarr <dominic.tarr@gmail.com> (http://bit.ly/dominictarr)\"\n-, \"scripts\": { \"test\": \"meta-test test/*.js\" } }\n\\ No newline at end of file\n+}\n",
+					"match": false,
+					"packageHash": "7d1708143b10f82a2db9eef0ba28f147454dea3502c0c4091304a3977740285f",
+					"size": 474,
+					"sourceHash": "6c3e9f2eebd7710a81709f5c788615fd773116d73ecb1c64fa04cc5039bf0c62",
+					"status": "content"
+				},
+				"readme.markdown": {
+					"diff": "--- published/readme.markdown\n+++ rebuilt/readme.markdown\n@@ -2,51 +2,48 @@\n \n streaming JSON.parse and stringify\n \n+![](https://secure.travis-ci.org/dominictarr/JSONStream.png?branch=master)\n+\n+## install\n+```npm install JSONStream```\n+\n ## example\n \n-```javascript\n+``` js\n \n var request = require('request')\n   , JSONStream = require('JSONStream')\n   , es = require('event-stream')\n \n-var parser = JSONStream.parse(['rows', /./])\n-  , req = request({url: 'http://isaacs.couchone.com/registry/_all_docs'})\n-  , logger = es.mapSync(function (data) {\n-      console.error(data)\n-      return data\n-    })\n+request({url: 'http://isaacs.couchone.com/registry/_all_docs'})\n+  .pipe(JSONStream.parse('rows.*'))\n+  .pipe(es.mapSync(function (data) {\n+    console.error(data)\n+    return data\n+  }))\n ```\n \n-in node 0.4.x\n-\n-``` javascript\n-\n-req.pipe(parser)\n-parser.pipe(logger)\n-\n-```\n-\n-in node v0.5.x\n+## JSONStream.parse(path)\n \n-``` javascript\n-req.pipe(parser).pipe(logger)\n+parse stream of values that match a path\n \n+``` js\n+  JSONStream.parse('rows.*.doc')\n ```\n \n-## JSONStream.parse(path)\n+The `..` operator is the recursive descent operator from [JSONPath](http://goessner.net/articles/JsonPath/), which will match a child at any depth (see examples below).\n \n-usally, a json API will return a list of objects.  \n+If your keys have keys that include `.` or `*` etc, use an array instead.\n+`['row', true, /^doc/]`.\n \n-`path` should be an array of property names and/or `RedExp`s.  \n+If you use an array, `RegExp`s, booleans, and/or functions. The `..` operator is also available in array representation, using `{recurse: true}`.\n any object that matches the path will be emitted as 'data' (and `pipe`d down stream)\n \n-if `path` is empty or null, or if no matches are made:  \n-JSONStream.parse will only one 'data': the root object.\n+If `path` is empty or null, no 'data' events are emitted.\n \n-(this is useful when there is an error, because the error will probably not match your path)\n+If you want to have keys emitted, you can prefix your `*` operator with `$`: `obj.$*` - in this case the data passed to the stream is an object with a `key` holding the key and a `value` property holding the data.\n \n-### example\n+### Examples\n \n query a couchdb view:\n \n@@ -77,44 +74,134 @@\n \n ```\n \n-we are probably most interested in the `rows.*.docs`  \n+we are probably most interested in the `rows.*.doc`\n \n create a `Stream` that parses the documents from the feed like this:\n \n ``` js\n-JSONStream.parse(['rows', /./, 'doc']) //rows, ANYTHING, doc\n-``` \n+var stream = JSONStream.parse(['rows', true, 'doc']) //rows, ANYTHING, doc\n+\n+stream.on('data', function(data) {\n+  console.log('received:', data);\n+});\n+//emits anything from _before_ the first match\n+stream.on('header', function (data) {\n+  console.log('header:', data) // => {\"total_rows\":129,\"offset\":0}\n+})\n+\n+```\n",
+					"match": false,
+					"packageHash": "3bc59f21aa6cbe4699dfb749531891243a97ddbf6be682107095b3a416cf9592",
+					"size": 2790,
+					"sourceHash": "19743ac82dc8ab2992800d6006a71aa0dc29aa368c6907cd80d48f5ce905427d",
+					"status": "content"
+				},
+				"test/parsejson.js": {
+					"diff": "--- published/test/parsejson.js\n+++ rebuilt/test/parsejson.js\n@@ -9,17 +9,21 @@\n   , p = new Parser()\n   , assert = require('assert')  \n   , times = 20\n+  , bufferFrom = Buffer.from && Buffer.from !== Uint8Array.from\n+  , str\n+\n while (times --) {\n \n   assert.equal(JSON.parse(JSON.stringify(r)), r, 'core JSON')\n \n   p.onValue = function (v) {\n     console.error('parsed', v)\n-    assert.equal(v, r)\n+    assert.equal(v,r)\n   }\n   console.error('correct', r)\n-  p.write (new Buffer(JSON.stringify([r])))\n+  str = JSON.stringify([r])\n+  p.write (bufferFrom ? Buffer.from(str) : new Buffer(str))\n \n \n \n-}\n\\ No newline at end of file\n+}\n",
+					"match": false,
+					"packageHash": "a95414e9617e5febb87b583db14800b430283d87389efa88c955ae2e873ef7b6",
+					"size": 429,
+					"sourceHash": "b5a91e6ebff4e80021282bf67c77f4b2bfa510ae8c4e574f94bda2284003f9df",
+					"status": "content"
+				},
+				"test/test.js": {
+					"diff": "--- published/test/test.js\n+++ rebuilt/test/test.js\n@@ -17,9 +17,9 @@\n parser.on('data', function (data) {\n   called ++\n   it.has({\n-    id: it.isString(),\n-    value: {rev: it.isString()},\n-    key:it.isString()\n+    id: it.typeof('string'),\n+    value: {rev: it.typeof('string')},\n+    key:it.typeof('string')\n   })\n   parsed.push(data)\n })\n@@ -32,4 +32,4 @@\n   it(called).equal(expected.rows.length)\n   it(parsed).deepEqual(expected.rows)\n   console.error('PASSED')\n-})\n\\ No newline at end of file\n+})\n",
+					"match": false,
+					"packageHash": "416aa42d02ce23735eb9327e992c0e40df1f1599200295aa025401e2b3247c36",
+					"size": 729,
+					"sourceHash": "6960a1fe2e24c572a57703db189fdab0d7411e1d13a33fc01510e2a3133e86da",
+					"status": "content"
+				},
+				".travis.yml": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"LICENSE.APACHE2": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"LICENSE.MIT": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"bin.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/bool.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/browser.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/destroy_missing.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/doubledot1.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/doubledot2.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/empty.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/error_contents.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/fixtures/couch_sample.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/fixtures/depth.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/fixtures/error.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/fixtures/header_footer.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/fn.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/gen.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/header_footer.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/issues.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/keys.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/map.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/multiple_objects.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/multiple_objects_error.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/null.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/run.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/stringify_object.js": {
+					"match": false,
+					"status": "missing-in-package"
+				}
+			},
+			"summary": {
+				"differentFiles": 6,
+				"matchingFiles": 4,
+				"missingInPackage": 26,
+				"missingInSource": 1,
+				"score": 0.10810810810810811,
+				"totalFiles": 37
+			}
+		}
+	}
+]

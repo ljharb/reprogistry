@@ -1,0 +1,167 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-05T20:26:03.960Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:11.7.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "JSONStream@0.3.3",
+			"name": "JSONStream",
+			"version": "0.3.3",
+			"location": "https://registry.npmjs.org/JSONStream/-/JSONStream-0.3.3.tgz",
+			"integrity": "sha512-frihIAfrAzEZ+W08NFjiDoopXyrk9dBR60lKzaJbE7NeOneZdvjagKHrCWPftBnFDaPou2VCD1Ql/VuHw7bQKA==",
+			"publishedAt": "2012-09-07T11:57:34.484Z",
+			"publishedWith": {
+				"node": null,
+				"npm": "1.1.59"
+			}
+		},
+		"source": {
+			"integrity": null,
+			"location": "git://github.com/dominictarr/JSONStream.git",
+			"spec": "github:dominictarr/JSONStream#HEAD"
+		},
+		"comparisonHash": "8a2a8dcbb729bf3ee9216e490c955701f0ddebe1",
+		"diff": {
+			"files": {
+				".npmignore": {
+					"match": false,
+					"packageHash": "476ed415fa7d5f869186df2a79d8473e4506a3b01158c9c5344d34d88055f2eb",
+					"size": 28,
+					"status": "missing-in-source"
+				},
+				".travis.yml": {
+					"diff": "--- published/.travis.yml\n+++ rebuilt/.travis.yml\n@@ -1,4 +1,8 @@\n language: node_js\n node_js:\n-  - 0.8\n+  - 4\n+  - 5\n+  - 6\n+sudo: false\n+\n \n",
+					"match": false,
+					"packageHash": "439c9964761d520155f047b71fe26852e2427c34d852c81749c90fc2a6505f08",
+					"size": 36,
+					"sourceHash": "8a672a07865ce51b5a01b1fe174bf81722b02f69aa4b7da69c86cfe85c4b5b64",
+					"status": "content"
+				},
+				"index.js": {
+					"diff": "--- published/index.js\n+++ rebuilt/index.js\n@@ -1,5 +1,9 @@\n+'use strict'\n+\n var Parser = require('jsonparse')\n-  , Stream = require('stream').Stream\n+  , through = require('through')\n+\n+var bufferFrom = Buffer.from && Buffer.from !== Uint8Array.from\n \n /*\n \n@@ -10,78 +14,149 @@\n \n */\n \n-exports.parse = function (path) {\n-\n-  var stream = new Stream()\n+exports.parse = function (path, map) {\n+  var header, footer\n   var parser = new Parser()\n-  var count = 0\n+  var stream = through(function (chunk) {\n+    if('string' === typeof chunk)\n+      chunk = bufferFrom ? Buffer.from(chunk) : new Buffer(chunk)\n+    parser.write(chunk)\n+  },\n+  function (data) {\n+    if(data)\n+      stream.write(data)\n+    if (header)\n+        stream.emit('header', header)\n+    if (footer)\n+      stream.emit('footer', footer)\n+    stream.queue(null)\n+  })\n+\n+  if('string' === typeof path)\n+    path = path.split('.').map(function (e) {\n+      if (e === '$*')\n+        return {emitKey: true}\n+      else if (e === '*')\n+        return true\n+      else if (e === '') // '..'.split('.') returns an empty string\n+        return {recurse: true}\n+      else\n+        return e\n+    })\n+\n+\n+  var count = 0, _key\n   if(!path || !path.length)\n     path = null\n-  parser.onValue = function () {\n-    if(!this.root && this.stack.length == 1){\n-      stream.root = this.value\n-      }\n-    if(!path || this.stack.length !== path.length)\n-      return\n-    var _path = []\n-    for( var i = 0; i < (path.length - 1); i++) {\n+\n+  parser.onValue = function (value) {\n+    if (!this.root)\n+      stream.root = value\n+\n+    if(! path) return\n+\n+    var i = 0 // iterates on path\n+    var j  = 0 // iterates on stack\n+    var emitKey = false;\n+    var emitPath = false;\n+    while (i < path.length) {\n       var key = path[i]\n-      var c = this.stack[1 + (+i)]\n+      var c\n+      j++\n \n-      if(!c) {\n-        return\n+      if (key && !key.recurse) {\n+        c = (j === this.stack.length) ? this : this.stack[j]\n+        if (!c) return\n+        if (! check(key, c.key)) {\n+          setHeaderFooter(c.key, value)\n+          return\n+        }\n+        emitKey = !!key.emitKey;\n+        emitPath = !!key.emitPath;\n+        i++\n+      } else {\n+        i++\n+        var nextKey = path[i]\n+        if (! nextKey) return\n+        while (true) {\n+          c = (j === this.stack.length) ? this : this.stack[j]\n+          if (!c) return\n+          if (check(nextKey, c.key)) {\n",
+					"match": false,
+					"packageHash": "08bf0e02fb03890305b23d75fc31784288771b327eda90da00a4d7a86618e4d9",
+					"size": 3649,
+					"sourceHash": "7b5957eaea88b1bb6709767543f7072693774a04cabbf6cb0dfee8c436f3bee3",
+					"status": "content"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -1,25 +1,37 @@\n {\n   \"name\": \"JSONStream\",\n-  \"version\": \"0.3.3\",\n+  \"version\": \"1.3.5\",\n   \"description\": \"rawStream.pipe(JSONStream.parse()).pipe(streamOfObjects)\",\n   \"homepage\": \"http://github.com/dominictarr/JSONStream\",\n   \"repository\": {\n     \"type\": \"git\",\n     \"url\": \"git://github.com/dominictarr/JSONStream.git\"\n   },\n+  \"license\": \"(MIT OR Apache-2.0)\",\n+  \"keywords\": [\n+    \"json\",\n+    \"stream\",\n+    \"streaming\",\n+    \"parser\",\n+    \"async\",\n+    \"parsing\"\n+  ],\n   \"dependencies\": {\n-    \"jsonparse\": \"0.0.1\"\n+    \"jsonparse\": \"^1.2.0\",\n+    \"through\": \">=2.2.7 <3\"\n   },\n   \"devDependencies\": {\n     \"it-is\": \"~1\",\n     \"assertions\": \"~2.2.2\",\n     \"render\": \"~0.1.1\",\n     \"trees\": \"~0.0.3\",\n-    \"event-stream\": \"~0.7.0\"\n+    \"event-stream\": \"~0.7.0\",\n+    \"tape\": \"~2.12.3\"\n   },\n+  \"bin\": \"./bin.js\",\n   \"author\": \"Dominic Tarr <dominic.tarr@gmail.com> (http://bit.ly/dominictarr)\",\n   \"scripts\": {\n-    \"test\": \"set -e; for t in test/*.js; do echo '***' $t '***'; node $t; done\"\n+    \"test\": \"node test/run.js\"\n   },\n   \"optionalDependencies\": {},\n   \"engines\": {\n",
+					"match": false,
+					"packageHash": "8ba9f716b31d0a135d95acda69dfc4a81b817e700d86743a7997f2dee51a4fb9",
+					"size": 731,
+					"sourceHash": "6c3e9f2eebd7710a81709f5c788615fd773116d73ecb1c64fa04cc5039bf0c62",
+					"status": "content"
+				},
+				"readme.markdown": {
+					"diff": "--- published/readme.markdown\n+++ rebuilt/readme.markdown\n@@ -2,52 +2,48 @@\n \n streaming JSON.parse and stringify\n \n-<img src=https://secure.travis-ci.org/dominictarr/JSONStream.png?branch=master>\n+![](https://secure.travis-ci.org/dominictarr/JSONStream.png?branch=master)\n+\n+## install\n+```npm install JSONStream```\n \n ## example\n \n-```javascript\n+``` js\n \n var request = require('request')\n   , JSONStream = require('JSONStream')\n   , es = require('event-stream')\n \n-var parser = JSONStream.parse(['rows', true])\n-  , req = request({url: 'http://isaacs.couchone.com/registry/_all_docs'})\n-  , logger = es.mapSync(function (data) {\n-      console.error(data)\n-      return data\n-    })\n+request({url: 'http://isaacs.couchone.com/registry/_all_docs'})\n+  .pipe(JSONStream.parse('rows.*'))\n+  .pipe(es.mapSync(function (data) {\n+    console.error(data)\n+    return data\n+  }))\n ```\n \n-in node 0.4.x\n-\n-``` javascript\n+## JSONStream.parse(path)\n \n-req.pipe(parser)\n-parser.pipe(logger)\n+parse stream of values that match a path\n \n+``` js\n+  JSONStream.parse('rows.*.doc')\n ```\n \n-in node v0.5.x\n+The `..` operator is the recursive descent operator from [JSONPath](http://goessner.net/articles/JsonPath/), which will match a child at any depth (see examples below).\n \n-``` javascript\n-req.pipe(parser).pipe(logger)\n-\n-```\n-\n-## JSONStream.parse(path)\n+If your keys have keys that include `.` or `*` etc, use an array instead.\n+`['row', true, /^doc/]`.\n \n-usally, a json API will return a list of objects.\n-\n-`path` should be an array of property names, `RegExp`s, booleans, and/or functions.\n+If you use an array, `RegExp`s, booleans, and/or functions. The `..` operator is also available in array representation, using `{recurse: true}`.\n any object that matches the path will be emitted as 'data' (and `pipe`d down stream)\n \n-a 'root' event is emitted when all data has been received. The 'root' event passes the root object & the count of matched objects.\n+If `path` is empty or null, no 'data' events are emitted.\n \n-if `path` is empty or null, no 'data' events are emitted.\n+If you want to have keys emitted, you can prefix your `*` operator with `$`: `obj.$*` - in this case the data passed to the stream is an object with a `key` holding the key and a `value` property holding the data.\n \n-### example\n+### Examples\n \n query a couchdb view:\n \n@@ -78,7 +74,7 @@\n \n ```\n \n-we are probably most interested in the `rows.*.docs`\n+we are probably most interested in the `rows.*.doc`\n \n create a `Stream` that parses the documents from the feed like this:\n \n@@ -88,15 +84,76 @@\n stream.on('data', function(data) {\n   console.log('received:', data);\n });\n+//emits anything from _before_ the first match\n+stream.on('header', function (data) {\n+  console.log('header:', data) // => {\"total_rows\":129,\"offset\":0}\n+})\n \n-stream.on('root', function(root, count) {\n-  if (!count) {\n-    console.log('no matches found:', root);\n-  }\n-});\n",
+					"match": false,
+					"packageHash": "0d9febba6508e636b72530d772ed4321dc9fb29536152e36771e9611cee91040",
+					"size": 3390,
+					"sourceHash": "19743ac82dc8ab2992800d6006a71aa0dc29aa368c6907cd80d48f5ce905427d",
+					"status": "content"
+				},
+				"test/destroy_missing.js": {
+					"diff": "--- published/test/destroy_missing.js\n+++ rebuilt/test/destroy_missing.js\n@@ -7,16 +7,21 @@\n \n var server = net.createServer(function(client) {\n     var parser = JSONStream.parse([]);\n-    parser.on('close', function() {\n+    parser.on('end', function() {\n+        console.log('close')\n         console.error('PASSED');\n         server.close();\n     });\n     client.pipe(parser);\n-    client.destroy();\n+    var n = 4\n+    client.on('data', function () {\n+      if(--n) return\n+      client.end();\n+    })\n });\n server.listen(9999);\n \n \n var client = net.connect({ port : 9999 }, function() {\n-    fs.createReadStream(file).pipe(client);\n+    fs.createReadStream(file).pipe(client).on('data', console.log) //.resume();\n });\n",
+					"match": false,
+					"packageHash": "c10090c16fd57ac6d5b1bf3ebb16e85078dc0946ffec8e4b8a471b3d3a59eb58",
+					"size": 540,
+					"sourceHash": "f264545e2fb52741b9b290886282ba4d6c9761f1f6c0418b477de9111fdee0a4",
+					"status": "content"
+				},
+				"test/parsejson.js": {
+					"diff": "--- published/test/parsejson.js\n+++ rebuilt/test/parsejson.js\n@@ -9,19 +9,20 @@\n   , p = new Parser()\n   , assert = require('assert')  \n   , times = 20\n+  , bufferFrom = Buffer.from && Buffer.from !== Uint8Array.from\n+  , str\n+\n while (times --) {\n \n   assert.equal(JSON.parse(JSON.stringify(r)), r, 'core JSON')\n \n   p.onValue = function (v) {\n     console.error('parsed', v)\n-    assert.equal(\n-      String(v).slice(0,12),\n-      String(r).slice(0,12)\n-    )\n+    assert.equal(v,r)\n   }\n   console.error('correct', r)\n-  p.write (new Buffer(JSON.stringify([r])))\n+  str = JSON.stringify([r])\n+  p.write (bufferFrom ? Buffer.from(str) : new Buffer(str))\n \n \n \n",
+					"match": false,
+					"packageHash": "8bcf961e8c2e2516c5b352c3fae55b17a12293b2516ed60776e8027360427026",
+					"size": 488,
+					"sourceHash": "b5a91e6ebff4e80021282bf67c77f4b2bfa510ae8c4e574f94bda2284003f9df",
+					"status": "content"
+				},
+				"bin.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/browser.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/doubledot1.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/doubledot2.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/error_contents.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/fixtures/couch_sample.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/fixtures/depth.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/fixtures/error.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/fixtures/header_footer.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/gen.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/header_footer.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/issues.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/keys.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/map.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/multiple_objects.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/multiple_objects_error.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/null.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/run.js": {
+					"match": false,
+					"status": "missing-in-package"
+				}
+			},
+			"summary": {
+				"differentFiles": 6,
+				"matchingFiles": 12,
+				"missingInPackage": 18,
+				"missingInSource": 1,
+				"score": 0.32432432432432434,
+				"totalFiles": 37
+			}
+		}
+	}
+]

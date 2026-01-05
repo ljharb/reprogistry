@@ -1,0 +1,167 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-05T20:31:27.145Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:11.7.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "JSONStream@0.8.0",
+			"name": "JSONStream",
+			"version": "0.8.0",
+			"location": "https://registry.npmjs.org/JSONStream/-/JSONStream-0.8.0.tgz",
+			"integrity": "sha512-PiV28BpoUorz9kKFwRbD7+wg0t/k0ITHKn0DgCU44YZ/GaGAZRPt9q5PzoifC85gE55SEPIdMu0Labfxevj8cw==",
+			"publishedAt": "2014-02-13T02:40:35.675Z",
+			"publishedWith": {
+				"node": null,
+				"npm": null
+			}
+		},
+		"source": {
+			"integrity": null,
+			"location": "git://github.com/dominictarr/JSONStream.git",
+			"spec": "github:dominictarr/JSONStream#HEAD"
+		},
+		"comparisonHash": "8a2a8dcbb729bf3ee9216e490c955701f0ddebe1",
+		"diff": {
+			"files": {
+				".npmignore": {
+					"match": false,
+					"packageHash": "476ed415fa7d5f869186df2a79d8473e4506a3b01158c9c5344d34d88055f2eb",
+					"size": 28,
+					"status": "missing-in-source"
+				},
+				".travis.yml": {
+					"diff": "--- published/.travis.yml\n+++ rebuilt/.travis.yml\n@@ -1,4 +1,8 @@\n language: node_js\n node_js:\n-  - \"0.8\"\n-  - \"0.10\"\n+  - 4\n+  - 5\n+  - 6\n+sudo: false\n+\n+\n",
+					"match": false,
+					"packageHash": "9b9a2cce2d8b28843a1a10647f82300c8403ccde268df5b6abc6c349e5167b34",
+					"size": 48,
+					"sourceHash": "8a672a07865ce51b5a01b1fe174bf81722b02f69aa4b7da69c86cfe85c4b5b64",
+					"status": "content"
+				},
+				"bin.js": {
+					"diff": "--- published/bin.js\n+++ rebuilt/bin.js\n@@ -1,24 +1,12 @@\n #! /usr/bin/env node\n+\n var JSONStream = require('./')\n-var lines, args\n \n-process.argv.slice(2).forEach(function (e) {\n-  if(/^(--lines|-l)/.test(e))\n-    lines = true\n-  else if(!args) {\n-    try {\n-      args = JSON.parse(args)\n-    } catch (err) {\n-      args = e\n-    }\n-  }\n-})\n+if(!module.parent && process.title !== 'browser') {\n+  process.stdin\n+    .pipe(JSONStream.parse(process.argv[2]))\n+    .pipe(JSONStream.stringify('[', ',\\n', ']\\n', 2))\n+    .pipe(process.stdout)\n+}\n \n-process.stdin\n-  .pipe(JSONStream.parse(args || '*'))\n-  .pipe(!lines\n-    ? JSONStream.stringify('[\\n', ',\\n', '\\n]', 2)\n-    : JSONStream.stringify('', '\\n', '\\n')\n-  )\n-  .pipe(process.stdout)\n \n",
+					"match": false,
+					"packageHash": "827c4a5f1e73fda5d672798dd3611c15a5ec31406cd5b7d4c5c04a46dfba37b5",
+					"size": 460,
+					"sourceHash": "1bd78ae5d12547a65c6a7957518ce8e4d342a289d322b088e77df535b812206e",
+					"status": "content"
+				},
+				"index.js": {
+					"diff": "--- published/index.js\n+++ rebuilt/index.js\n@@ -1,7 +1,10 @@\n+'use strict'\n+\n var Parser = require('jsonparse')\n-  , Stream = require('stream').Stream\n   , through = require('through')\n \n+var bufferFrom = Buffer.from && Buffer.from !== Uint8Array.from\n+\n /*\n \n   the value of this.stack that creationix's jsonparse has is weird.\n@@ -12,29 +15,28 @@\n */\n \n exports.parse = function (path, map) {\n-\n+  var header, footer\n   var parser = new Parser()\n   var stream = through(function (chunk) {\n-    if('string' === typeof chunk) {\n-      if (process.browser) {\n-        var buf = new Array(chunk.length)\n-        for (var i = 0; i < chunk.length; i++) buf[i] = chunk.charCodeAt(i)\n-        chunk = new Int32Array(buf)\n-      } else {\n-        chunk = new Buffer(chunk)\n-      }\n-    }\n+    if('string' === typeof chunk)\n+      chunk = bufferFrom ? Buffer.from(chunk) : new Buffer(chunk)\n     parser.write(chunk)\n   },\n   function (data) {\n     if(data)\n       stream.write(data)\n+    if (header)\n+        stream.emit('header', header)\n+    if (footer)\n+      stream.emit('footer', footer)\n     stream.queue(null)\n   })\n \n   if('string' === typeof path)\n     path = path.split('.').map(function (e) {\n-      if (e === '*')\n+      if (e === '$*')\n+        return {emitKey: true}\n+      else if (e === '*')\n         return true\n       else if (e === '') // '..'.split('.') returns an empty string\n         return {recurse: true}\n@@ -47,14 +49,16 @@\n   if(!path || !path.length)\n     path = null\n \n-  parser.onValue = function () {\n-    if (!this.root && this.stack.length == 1)\n-      stream.root = this.value\n+  parser.onValue = function (value) {\n+    if (!this.root)\n+      stream.root = value\n \n     if(! path) return\n \n     var i = 0 // iterates on path\n     var j  = 0 // iterates on stack\n+    var emitKey = false;\n+    var emitPath = false;\n     while (i < path.length) {\n       var key = path[i]\n       var c\n@@ -63,7 +67,12 @@\n       if (key && !key.recurse) {\n         c = (j === this.stack.length) ? this : this.stack[j]\n         if (!c) return\n-        if (! check(key, c.key)) return\n+        if (! check(key, c.key)) {\n+          setHeaderFooter(c.key, value)\n+          return\n+        }\n+        emitKey = !!key.emitKey;\n+        emitPath = !!key.emitPath;\n         i++\n       } else {\n         i++\n@@ -72,18 +81,46 @@\n         while (true) {\n           c = (j === this.stack.length) ? this : this.stack[j]\n           if (!c) return\n-          if (check(nextKey, c.key)) { i++; break}\n+          if (check(nextKey, c.key)) {\n+            i++;\n+            if (!Object.isFrozen(this.stack[j]))\n+              this.stack[j].value = null\n+            break\n+          } else {\n+            setHeaderFooter(c.key, value)\n",
+					"match": false,
+					"packageHash": "94980454f968aa38a8806e76f17e33529babfc2c1009ea669816ae58fc522d9f",
+					"size": 4057,
+					"sourceHash": "7b5957eaea88b1bb6709767543f7072693774a04cabbf6cb0dfee8c436f3bee3",
+					"status": "content"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -1,15 +1,24 @@\n {\n   \"name\": \"JSONStream\",\n-  \"version\": \"0.8.0\",\n+  \"version\": \"1.3.5\",\n   \"description\": \"rawStream.pipe(JSONStream.parse()).pipe(streamOfObjects)\",\n   \"homepage\": \"http://github.com/dominictarr/JSONStream\",\n   \"repository\": {\n     \"type\": \"git\",\n     \"url\": \"git://github.com/dominictarr/JSONStream.git\"\n   },\n+  \"license\": \"(MIT OR Apache-2.0)\",\n+  \"keywords\": [\n+    \"json\",\n+    \"stream\",\n+    \"streaming\",\n+    \"parser\",\n+    \"async\",\n+    \"parsing\"\n+  ],\n   \"dependencies\": {\n-    \"jsonparse\": \"0.0.5\",\n-    \"through\": \"~2.2.7\"\n+    \"jsonparse\": \"^1.2.0\",\n+    \"through\": \">=2.2.7 <3\"\n   },\n   \"devDependencies\": {\n     \"it-is\": \"~1\",\n@@ -17,11 +26,12 @@\n     \"render\": \"~0.1.1\",\n     \"trees\": \"~0.0.3\",\n     \"event-stream\": \"~0.7.0\",\n-    \"tape\": \"~0.3.3\"\n+    \"tape\": \"~2.12.3\"\n   },\n+  \"bin\": \"./bin.js\",\n   \"author\": \"Dominic Tarr <dominic.tarr@gmail.com> (http://bit.ly/dominictarr)\",\n   \"scripts\": {\n-    \"test\": \"set -e; for t in test/*.js; do echo '***' $t '***'; node $t; done\"\n+    \"test\": \"node test/run.js\"\n   },\n   \"optionalDependencies\": {},\n   \"engines\": {\n",
+					"match": false,
+					"packageHash": "d40b153de4de54caf092912260520a5b702dfc75e77be3e45cb27be02b4b1a42",
+					"size": 778,
+					"sourceHash": "6c3e9f2eebd7710a81709f5c788615fd773116d73ecb1c64fa04cc5039bf0c62",
+					"status": "content"
+				},
+				"readme.markdown": {
+					"diff": "--- published/readme.markdown\n+++ rebuilt/readme.markdown\n@@ -2,7 +2,10 @@\n \n streaming JSON.parse and stringify\n \n-<img src=https://secure.travis-ci.org/dominictarr/JSONStream.png?branch=master>\n+![](https://secure.travis-ci.org/dominictarr/JSONStream.png?branch=master)\n+\n+## install\n+```npm install JSONStream```\n \n ## example\n \n@@ -12,22 +15,15 @@\n   , JSONStream = require('JSONStream')\n   , es = require('event-stream')\n \n-var parser = JSONStream.parse(['rows', true])\n-  , req = request({url: 'http://isaacs.couchone.com/registry/_all_docs'})\n-  , logger = es.mapSync(function (data) {\n-      console.error(data)\n-      return data\n-    })\n-\n-  request({url: 'http://isaacs.couchone.com/registry/_all_docs'})\n-    .pipe(JSONStream.parse('rows.*'))\n-    .pipe(es.mapSync(function (data) {\n-      console.error(data)\n-      return data\n-    }))\n+request({url: 'http://isaacs.couchone.com/registry/_all_docs'})\n+  .pipe(JSONStream.parse('rows.*'))\n+  .pipe(es.mapSync(function (data) {\n+    console.error(data)\n+    return data\n+  }))\n ```\n \n-## JSONStream.parse(path, map?)\n+## JSONStream.parse(path)\n \n parse stream of values that match a path\n \n@@ -45,9 +41,7 @@\n \n If `path` is empty or null, no 'data' events are emitted.\n \n-`map` is an optional function. `map` is passed the matching data before it's emitted.\n-The result that map returns will be emitted. If `map(data)` returns `undefined`\n-then the data will not be emitted.\n+If you want to have keys emitted, you can prefix your `*` operator with `$`: `obj.$*` - in this case the data passed to the stream is an object with a `key` holding the key and a `value` property holding the data.\n \n ### Examples\n \n@@ -80,7 +74,7 @@\n \n ```\n \n-we are probably most interested in the `rows.*.docs`\n+we are probably most interested in the `rows.*.doc`\n \n create a `Stream` that parses the documents from the feed like this:\n \n@@ -90,19 +84,42 @@\n stream.on('data', function(data) {\n   console.log('received:', data);\n });\n+//emits anything from _before_ the first match\n+stream.on('header', function (data) {\n+  console.log('header:', data) // => {\"total_rows\":129,\"offset\":0}\n+})\n \n-stream.on('root', function(root, count) {\n-  if (!count) {\n-    console.log('no matches found:', root);\n-  }\n-});\n ```\n awesome!\n \n+In case you wanted the contents the doc emitted:\n+\n+``` js\n+var stream = JSONStream.parse(['rows', true, 'doc', {emitKey: true}]) //rows, ANYTHING, doc, items in docs with keys\n+\n+stream.on('data', function(data) {\n+  console.log('key:', data.key);\n+  console.log('value:', data.value);\n+});\n+\n+```\n+\n+You can also emit the path:\n+\n+``` js\n+var stream = JSONStream.parse(['rows', true, 'doc', {emitPath: true}]) //rows, ANYTHING, doc, items in docs with keys\n+\n+stream.on('data', function(data) {\n+  console.log('path:', data.path);\n",
+					"match": false,
+					"packageHash": "87b1f76dead2eb1b25f440b50c4a9e93d1718e46bde747a3a531b791b9b89c7f",
+					"size": 4577,
+					"sourceHash": "19743ac82dc8ab2992800d6006a71aa0dc29aa368c6907cd80d48f5ce905427d",
+					"status": "content"
+				},
+				"test/doubledot2.js": {
+					"diff": "--- published/test/doubledot2.js\n+++ rebuilt/test/doubledot2.js\n@@ -22,8 +22,9 @@\n  })\n \n  process.on('exit', function () {\n-   it(called).equal(5)\n+   var expectedValues = [0, [1], {\"a\": 2}, \"3\", 4]\n+   it(called).equal(expectedValues.length)\n    for (var i = 0 ; i < 5 ; i++)\n-     it(parsed[i]).deepEqual(i)\n+     it(parsed[i]).deepEqual(expectedValues[i])\n    console.error('PASSED')\n  })\n",
+					"match": false,
+					"packageHash": "3f182fff5574efd8d71567856f755a850fb71a9d0a765a32263e0d973e3c5ca0",
+					"size": 667,
+					"sourceHash": "5abeaa3754932e17d5e63169cf08d8429dd22c55c33a5c6201fa521f3d7a7e46",
+					"status": "content"
+				},
+				"test/fixtures/depth.json": {
+					"diff": "--- published/test/fixtures/depth.json\n+++ rebuilt/test/fixtures/depth.json\n@@ -7,9 +7,9 @@\n         \"some\": \"property\"\n       }\n     },\n-    {\"value\": 1},\n-    {\"value\": 2},\n-    {\"blbl\": [{}, {\"a\":0, \"b\":1, \"value\":3}, 10]},\n+    {\"value\": [1]},\n+    {\"value\": {\"a\":2}},\n+    {\"blbl\": [{}, {\"a\":0, \"b\":1, \"value\":\"3\"}, 10]},\n     {\"value\": 4}\n   ]\n-}\n\\ No newline at end of file\n+}\n",
+					"match": false,
+					"packageHash": "42542cd215951e17ccd7d0082fb9992bfad13c29a6df757196cf05ba859b08c9",
+					"size": 220,
+					"sourceHash": "6bd475aa444943415ec65162ba32fc0ca3bd0c1cf1f26e1afac916b1e3dd1bbe",
+					"status": "content"
+				},
+				"test/multiple_objects.js": {
+					"diff": "--- published/test/multiple_objects.js\n+++ rebuilt/test/multiple_objects.js\n@@ -10,13 +10,8 @@\n var datas = {}\n \n var server = net.createServer(function(client) {\n-    var root_calls = 0;\n     var data_calls = 0;\n     var parser = JSONStream.parse(['rows', true, 'key']);\n-    parser.on('root', function(root, count) {\n-        ++ root_calls;\n-    });\n-\n     parser.on('data', function(data) {\n         ++ data_calls;\n         datas[data] = (datas[data] || 0) + 1\n@@ -26,9 +21,8 @@\n     parser.on('end', function() {\n         console.log('END')\n         var min = Infinity\n-        for (var d in datas) \n+        for (var d in datas)\n           min = min > datas[d] ? datas[d] : min\n-        it(root_calls).equal(3);\n         it(min).equal(3);\n         server.close();\n     });\n",
+					"match": false,
+					"packageHash": "a128f81ef0aef7797db3f7173a669da64f88c6ccfd135405a8ef4471d164d2cb",
+					"size": 1068,
+					"sourceHash": "ced812cd000f70628fea341330374fed2d6a5b24ff2e47b8a1db6531a5c40d07",
+					"status": "content"
+				},
+				"test/multiple_objects_error.js": {
+					"diff": "--- published/test/multiple_objects_error.js\n+++ rebuilt/test/multiple_objects_error.js\n@@ -8,14 +8,8 @@\n var str = fs.readFileSync(file);\n \n var server = net.createServer(function(client) {\n-    var root_calls = 0;\n     var data_calls = 0;\n     var parser = JSONStream.parse();\n-    parser.on('root', function(root, count) {\n-        ++ root_calls;\n-        it(root_calls).notEqual(2);\n-    });\n-\n     parser.on('error', function(err) {\n         console.log(err);\n         server.close();\n",
+					"match": false,
+					"packageHash": "e417e3ff32bd8023f7986d8597a32648dd624d07825af12b2e1265a4590dc27a",
+					"size": 832,
+					"sourceHash": "5a75602fcb5f507990a91414a4cfa62c13f8c78a23d77412d7e6dae10d6fdbfd",
+					"status": "content"
+				},
+				"test/parsejson.js": {
+					"diff": "--- published/test/parsejson.js\n+++ rebuilt/test/parsejson.js\n@@ -9,19 +9,20 @@\n   , p = new Parser()\n   , assert = require('assert')  \n   , times = 20\n+  , bufferFrom = Buffer.from && Buffer.from !== Uint8Array.from\n+  , str\n+\n while (times --) {\n \n   assert.equal(JSON.parse(JSON.stringify(r)), r, 'core JSON')\n \n   p.onValue = function (v) {\n     console.error('parsed', v)\n-    assert.equal(\n-      String(v).slice(0,12),\n-      String(r).slice(0,12)\n-    )\n+    assert.equal(v,r)\n   }\n   console.error('correct', r)\n-  p.write (new Buffer(JSON.stringify([r])))\n+  str = JSON.stringify([r])\n+  p.write (bufferFrom ? Buffer.from(str) : new Buffer(str))\n \n \n \n",
+					"match": false,
+					"packageHash": "8bcf961e8c2e2516c5b352c3fae55b17a12293b2516ed60776e8027360427026",
+					"size": 488,
+					"sourceHash": "b5a91e6ebff4e80021282bf67c77f4b2bfa510ae8c4e574f94bda2284003f9df",
+					"status": "content"
+				},
+				"test/error_contents.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/fixtures/couch_sample.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/fixtures/error.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/fixtures/header_footer.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/header_footer.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/issues.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/keys.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/map.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/null.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/run.js": {
+					"match": false,
+					"status": "missing-in-package"
+				}
+			},
+			"summary": {
+				"differentFiles": 10,
+				"matchingFiles": 16,
+				"missingInPackage": 10,
+				"missingInSource": 1,
+				"score": 0.43243243243243246,
+				"totalFiles": 37
+			}
+		}
+	}
+]
