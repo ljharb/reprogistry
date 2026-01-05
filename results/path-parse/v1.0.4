@@ -1,0 +1,93 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-05T00:01:24.004Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:11.7.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "path-parse@1.0.4",
+			"name": "path-parse",
+			"version": "1.0.4",
+			"location": "https://registry.npmjs.org/path-parse/-/path-parse-1.0.4.tgz",
+			"integrity": "sha512-AsptKwPee8q8v2VL4hc0gQK4YcWBRervN7fFQjl9kQIhYt9bPLwLkjFck0YNvX65e1iJMHPKgn0Tskn+gDGSmA==",
+			"publishedAt": "2015-04-21T15:49:40.034Z",
+			"publishedWith": {
+				"node": null,
+				"npm": "1.4.9"
+			}
+		},
+		"source": {
+			"integrity": "sha512-zubGf6CkkLyWFy8A7XtsbTU0s2hc0HsZ7+r2o97I3My41PRCEuDVgDtJvzA9YCr4/6wgFXIe2QS1C00zS+AMtQ==",
+			"location": "https://github.com/jbgutierrez/path-parse.git",
+			"spec": "github:jbgutierrez/path-parse#HEAD"
+		},
+		"comparisonHash": "8a2a8dcbb729bf3ee9216e490c955701f0ddebe1",
+		"diff": {
+			"files": {
+				".travis.yml": {
+					"match": false,
+					"packageHash": "6daa7d212a9e2b26898dae20ebbaa67003a91537c4da5f7ad45163ae4175f774",
+					"size": 105,
+					"status": "missing-in-source"
+				},
+				"README.md": {
+					"diff": "--- published/README.md\n+++ rebuilt/README.md\n@@ -1,8 +1,6 @@\n # path-parse [![Build Status](https://travis-ci.org/jbgutierrez/path-parse.svg?branch=master)](https://travis-ci.org/jbgutierrez/path-parse)\n \n-> Node.js [`path.parse(pathString)`](https://nodejs.org/api/path.html#path_path_parse_pathstring) ponyfill.\n-\n-> Ponyfill: A polyfill that doesn't overwrite the native method\n+> Node.js [`path.parse(pathString)`](https://nodejs.org/api/path.html#path_path_parse_pathstring) [ponyfill](https://ponyfill.com).\n \n ## Install\n \n",
+					"match": false,
+					"packageHash": "89f79968e25de53e9b92f13b16a8ba74e20d0333a9756f2f9edbec8944fde69e",
+					"size": 912,
+					"sourceHash": "d092ef6a3cb3d63789cc44c5508bfe4fabf63bc0a2eec8100f51701e39f9b08f",
+					"status": "content"
+				},
+				"index.js": {
+					"diff": "--- published/index.js\n+++ rebuilt/index.js\n@@ -2,29 +2,14 @@\n \n var isWindows = process.platform === 'win32';\n \n-// Regex to split a windows path into three parts: [*, device, slash,\n-// tail] windows-only\n-var splitDeviceRe =\n-    /^([a-zA-Z]:|[\\\\\\/]{2}[^\\\\\\/]+[\\\\\\/]+[^\\\\\\/]+)?([\\\\\\/])?([\\s\\S]*?)$/;\n-\n-// Regex to split the tail part of the above into [*, dir, basename, ext]\n-var splitTailRe =\n-    /^([\\s\\S]*?)((?:\\.{1,2}|[^\\\\\\/]+?|)(\\.[^.\\/\\\\]*|))(?:[\\\\\\/]*)$/;\n+// Regex to split a windows path into into [dir, root, basename, name, ext]\n+var splitWindowsRe =\n+    /^(((?:[a-zA-Z]:|[\\\\\\/]{2}[^\\\\\\/]+[\\\\\\/]+[^\\\\\\/]+)?[\\\\\\/]?)(?:[^\\\\\\/]*[\\\\\\/])*)((\\.{1,2}|[^\\\\\\/]+?|)(\\.[^.\\/\\\\]*|))[\\\\\\/]*$/;\n \n var win32 = {};\n \n-// Function to split a filename into [root, dir, basename, ext]\n function win32SplitPath(filename) {\n-  // Separate device+slash from tail\n-  var result = splitDeviceRe.exec(filename),\n-      device = (result[1] || '') + (result[2] || ''),\n-      tail = result[3] || '';\n-  // Split the tail into dir, basename and extension\n-  var result2 = splitTailRe.exec(tail),\n-      dir = result2[1],\n-      basename = result2[2],\n-      ext = result2[3];\n-  return [device, dir, basename, ext];\n+  return splitWindowsRe.exec(filename).slice(1);\n }\n \n win32.parse = function(pathString) {\n@@ -34,24 +19,24 @@\n     );\n   }\n   var allParts = win32SplitPath(pathString);\n-  if (!allParts || allParts.length !== 4) {\n+  if (!allParts || allParts.length !== 5) {\n     throw new TypeError(\"Invalid path '\" + pathString + \"'\");\n   }\n   return {\n-    root: allParts[0],\n-    dir: allParts[0] + allParts[1].slice(0, -1),\n+    root: allParts[1],\n+    dir: allParts[0] === allParts[1] ? allParts[0] : allParts[0].slice(0, -1),\n     base: allParts[2],\n-    ext: allParts[3],\n-    name: allParts[2].slice(0, allParts[2].length - allParts[3].length)\n+    ext: allParts[4],\n+    name: allParts[3]\n   };\n };\n \n \n \n-// Split a filename into [root, dir, basename, ext], unix version\n+// Split a filename into [dir, root, basename, name, ext], unix version\n // 'root' is just a slash, or nothing.\n var splitPathRe =\n-    /^(\\/?|)([\\s\\S]*?)((?:\\.{1,2}|[^\\/]+?|)(\\.[^.\\/]*|))(?:[\\/]*)$/;\n+    /^((\\/?)(?:[^\\/]*\\/)*)((\\.{1,2}|[^\\/]+?|)(\\.[^.\\/]*|))[\\/]*$/;\n var posix = {};\n \n \n@@ -67,24 +52,21 @@\n     );\n   }\n   var allParts = posixSplitPath(pathString);\n-  if (!allParts || allParts.length !== 4) {\n+  if (!allParts || allParts.length !== 5) {\n     throw new TypeError(\"Invalid path '\" + pathString + \"'\");\n   }\n-  allParts[1] = allParts[1] || '';\n-  allParts[2] = allParts[2] || '';\n-  allParts[3] = allParts[3] || '';\n-\n+  \n   return {\n-    root: allParts[0],\n-    dir: allParts[0] + allParts[1].slice(0, -1),\n+    root: allParts[1],\n+    dir: allParts[0].slice(0, -1),\n     base: allParts[2],\n-    ext: allParts[3],\n-    name: allParts[2].slice(0, allParts[2].length - allParts[3].length)\n+    ext: allParts[4],\n+    name: allParts[3],\n   };\n };\n \n \n-if isWindows\n+if (isWindows)\n   module.exports = win32.parse;\n else /* posix */\n   module.exports = posix.parse;\n",
+					"match": false,
+					"packageHash": "d32cf6552b1b461bf33cd6ecf474b470fe0701239e0a75b14669751a8aa8bb96",
+					"size": 2584,
+					"sourceHash": "6bd95b5d0cf6f3821cc8acf81c2f4d84b7a158f6fd284659884f9e3b44f34124",
+					"status": "content"
+				},
+				"index.min.js": {
+					"match": false,
+					"packageHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+					"size": 0,
+					"status": "missing-in-source"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -1,6 +1,6 @@\n {\n   \"name\": \"path-parse\",\n-  \"version\": \"1.0.4\",\n+  \"version\": \"1.0.7\",\n   \"description\": \"Node.js path.parse() ponyfill\",\n   \"main\": \"index.js\",\n   \"scripts\": {\n",
+					"match": false,
+					"packageHash": "47f5bfa98d998c6be8928e49cf6a4f5f7be1be897802ab1ff3db73486f0f2bd9",
+					"size": 667,
+					"sourceHash": "9c680ecfd322afe056b4ccbfdb6c7043342276903f017c0a29b77c3926790d13",
+					"status": "content"
+				},
+				"test.js": {
+					"match": false,
+					"packageHash": "e0acf81c7b912da71a2501baa764f6e974a6d75f9a9870b7232876cdb98eacdf",
+					"size": 3720,
+					"status": "missing-in-source"
+				},
+				"test.min.js": {
+					"match": false,
+					"packageHash": "e46afdbf46360bb15f2f70550da1587c922069f0a2300610daeba167fab3ee96",
+					"size": 3119,
+					"status": "missing-in-source"
+				},
+				"LICENSE": {
+					"match": false,
+					"status": "missing-in-package"
+				}
+			},
+			"summary": {
+				"differentFiles": 3,
+				"matchingFiles": 0,
+				"missingInPackage": 1,
+				"missingInSource": 4,
+				"score": 0,
+				"totalFiles": 8
+			}
+		}
+	}
+]

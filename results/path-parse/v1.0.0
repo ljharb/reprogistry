@@ -1,0 +1,81 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-05T00:01:27.169Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:2.3.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "path-parse@1.0.0",
+			"name": "path-parse",
+			"version": "1.0.0",
+			"location": "https://registry.npmjs.org/path-parse/-/path-parse-1.0.0.tgz",
+			"integrity": "sha512-WiQ5m2YR6tbpF/8F2H6cMrMUHTN7p72NHgagdUHxkNk7poIFkZX8wH0qcKaoXWcqUtAJnDOj/Md/XQoznsc28g==",
+			"publishedAt": "2015-04-17T11:46:10.675Z",
+			"publishedWith": {
+				"node": "0.11.16",
+				"npm": "2.3.0"
+			}
+		},
+		"source": {
+			"integrity": null,
+			"location": "https://github.com/jbgutierrez/path-parse.git",
+			"spec": "github:jbgutierrez/path-parse#HEAD"
+		},
+		"comparisonHash": "8a2a8dcbb729bf3ee9216e490c955701f0ddebe1",
+		"diff": {
+			"files": {
+				".travis.yml": {
+					"match": false,
+					"packageHash": "6daa7d212a9e2b26898dae20ebbaa67003a91537c4da5f7ad45163ae4175f774",
+					"size": 105,
+					"status": "missing-in-source"
+				},
+				"README.md": {
+					"diff": "--- published/README.md\n+++ rebuilt/README.md\n@@ -1,8 +1,6 @@\n # path-parse [![Build Status](https://travis-ci.org/jbgutierrez/path-parse.svg?branch=master)](https://travis-ci.org/jbgutierrez/path-parse)\n \n-> Node.js 0.11.15 [`path.parse(pathString)`](https://nodejs.org/api/path.html#path_path_parse_pathstring) ponyfill.\n-\n-> Ponyfill: A polyfill that doesn't overwrite the native method\n+> Node.js [`path.parse(pathString)`](https://nodejs.org/api/path.html#path_path_parse_pathstring) [ponyfill](https://ponyfill.com).\n \n ## Install\n \n",
+					"match": false,
+					"packageHash": "c72a9b8687bd88ff4ec0443f9879b45c8f4f799626ba9e88bb69634dc4dc0568",
+					"size": 920,
+					"sourceHash": "d092ef6a3cb3d63789cc44c5508bfe4fabf63bc0a2eec8100f51701e39f9b08f",
+					"status": "content"
+				},
+				"index.js": {
+					"diff": "--- published/index.js\n+++ rebuilt/index.js\n@@ -1,57 +1,42 @@\n 'use strict';\n \n-var path = require('path'),\n-    util = require('util');\n+var isWindows = process.platform === 'win32';\n \n-// Regex to split a windows path into three parts: [*, device, slash,\n-// tail] windows-only\n-var splitDeviceRe =\n-    /^([a-zA-Z]:|[\\\\\\/]{2}[^\\\\\\/]+[\\\\\\/]+[^\\\\\\/]+)?([\\\\\\/])?([\\s\\S]*?)$/;\n-\n-// Regex to split the tail part of the above into [*, dir, basename, ext]\n-var splitTailRe =\n-    /^([\\s\\S]*?)((?:\\.{1,2}|[^\\\\\\/]+?|)(\\.[^.\\/\\\\]*|))(?:[\\\\\\/]*)$/;\n+// Regex to split a windows path into into [dir, root, basename, name, ext]\n+var splitWindowsRe =\n+    /^(((?:[a-zA-Z]:|[\\\\\\/]{2}[^\\\\\\/]+[\\\\\\/]+[^\\\\\\/]+)?[\\\\\\/]?)(?:[^\\\\\\/]*[\\\\\\/])*)((\\.{1,2}|[^\\\\\\/]+?|)(\\.[^.\\/\\\\]*|))[\\\\\\/]*$/;\n \n var win32 = {};\n \n-// Function to split a filename into [root, dir, basename, ext]\n function win32SplitPath(filename) {\n-  // Separate device+slash from tail\n-  var result = splitDeviceRe.exec(filename),\n-      device = (result[1] || '') + (result[2] || ''),\n-      tail = result[3] || '';\n-  // Split the tail into dir, basename and extension\n-  var result2 = splitTailRe.exec(tail),\n-      dir = result2[1],\n-      basename = result2[2],\n-      ext = result2[3];\n-  return [device, dir, basename, ext];\n+  return splitWindowsRe.exec(filename).slice(1);\n }\n \n win32.parse = function(pathString) {\n-  if (!util.isString(pathString)) {\n+  if (typeof pathString !== 'string') {\n     throw new TypeError(\n         \"Parameter 'pathString' must be a string, not \" + typeof pathString\n     );\n   }\n   var allParts = win32SplitPath(pathString);\n-  if (!allParts || allParts.length !== 4) {\n+  if (!allParts || allParts.length !== 5) {\n     throw new TypeError(\"Invalid path '\" + pathString + \"'\");\n   }\n   return {\n-    root: allParts[0],\n-    dir: allParts[0] + allParts[1].slice(0, -1),\n+    root: allParts[1],\n+    dir: allParts[0] === allParts[1] ? allParts[0] : allParts[0].slice(0, -1),\n     base: allParts[2],\n-    ext: allParts[3],\n-    name: allParts[2].slice(0, allParts[2].length - allParts[3].length)\n+    ext: allParts[4],\n+    name: allParts[3]\n   };\n };\n \n \n-// Split a filename into [root, dir, basename, ext], unix version\n+\n+// Split a filename into [dir, root, basename, name, ext], unix version\n // 'root' is just a slash, or nothing.\n var splitPathRe =\n-    /^(\\/?|)([\\s\\S]*?)((?:\\.{1,2}|[^\\/]+?|)(\\.[^.\\/]*|))(?:[\\/]*)$/;\n+    /^((\\/?)(?:[^\\/]*\\/)*)((\\.{1,2}|[^\\/]+?|)(\\.[^.\\/]*|))[\\/]*$/;\n var posix = {};\n \n \n@@ -61,30 +46,27 @@\n \n \n posix.parse = function(pathString) {\n-  if (!util.isString(pathString)) {\n+  if (typeof pathString !== 'string') {\n     throw new TypeError(\n         \"Parameter 'pathString' must be a string, not \" + typeof pathString\n     );\n   }\n   var allParts = posixSplitPath(pathString);\n-  if (!allParts || allParts.length !== 4) {\n+  if (!allParts || allParts.length !== 5) {\n     throw new TypeError(\"Invalid path '\" + pathString + \"'\");\n   }\n-  allParts[1] = allParts[1] || '';\n-  allParts[2] = allParts[2] || '';\n-  allParts[3] = allParts[3] || '';\n-\n+  \n   return {\n-    root: allParts[0],\n-    dir: allParts[0] + allParts[1].slice(0, -1),\n+    root: allParts[1],\n+    dir: allParts[0].slice(0, -1),\n     base: allParts[2],\n",
+					"match": false,
+					"packageHash": "9feb06c87538a34a7d22f8e0ad5a1979c47bcc8edd7128f88927addad42bf3df",
+					"size": 2592,
+					"sourceHash": "6bd95b5d0cf6f3821cc8acf81c2f4d84b7a158f6fd284659884f9e3b44f34124",
+					"status": "content"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -1,7 +1,7 @@\n {\n   \"name\": \"path-parse\",\n-  \"version\": \"1.0.0\",\n-  \"description\": \"Node.js 0.12 path.parse() ponyfill\",\n+  \"version\": \"1.0.7\",\n+  \"description\": \"Node.js path.parse() ponyfill\",\n   \"main\": \"index.js\",\n   \"scripts\": {\n     \"test\": \"node test.js\"\n",
+					"match": false,
+					"packageHash": "9931d68eaaccb35f58b43a1a8fc542211c977752125a3ec168bdcc801b8115b6",
+					"size": 672,
+					"sourceHash": "9c680ecfd322afe056b4ccbfdb6c7043342276903f017c0a29b77c3926790d13",
+					"status": "content"
+				},
+				"test.js": {
+					"match": false,
+					"packageHash": "e0acf81c7b912da71a2501baa764f6e974a6d75f9a9870b7232876cdb98eacdf",
+					"size": 3720,
+					"status": "missing-in-source"
+				},
+				"LICENSE": {
+					"match": false,
+					"status": "missing-in-package"
+				}
+			},
+			"summary": {
+				"differentFiles": 3,
+				"matchingFiles": 0,
+				"missingInPackage": 1,
+				"missingInSource": 2,
+				"score": 0,
+				"totalFiles": 6
+			}
+		}
+	}
+]
