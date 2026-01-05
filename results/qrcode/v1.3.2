@@ -1,0 +1,373 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-05T04:44:02.312Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:6.4.1",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "qrcode@1.3.2",
+			"name": "qrcode",
+			"version": "1.3.2",
+			"location": "https://registry.npmjs.org/qrcode/-/qrcode-1.3.2.tgz",
+			"integrity": "sha512-sYo+Tf7nx14YZSNPqnyEWefVrjUEpM4/NxOrxOk+jcQ9NhM2LCNuzGmQctDhGTQdO2YJorKY55dypx+hvVo5jw==",
+			"publishedAt": "2018-11-05T19:45:11.686Z",
+			"publishedWith": {
+				"node": "10.12.0",
+				"npm": "6.4.1"
+			}
+		},
+		"source": {
+			"integrity": null,
+			"location": "git://github.com/soldair/node-qrcode.git",
+			"spec": "github:soldair/node-qrcode#2285c199d5a685acfa81a3bfafcd965c63c4a1e4"
+		},
+		"comparisonHash": "8a2a8dcbb729bf3ee9216e490c955701f0ddebe1",
+		"diff": {
+			"files": {
+				"README.md": {
+					"diff": "--- published/README.md\n+++ rebuilt/README.md\n@@ -12,9 +12,10 @@\n - [Error correction level](#error-correction-level)\n - [QR Code capacity](#qr-code-capacity)\n - [Encoding Modes](#encoding-modes)\n+- [Binary data](#binary-data)\n - [Multibyte characters](#multibyte-characters)\n - [API](#api)\n-- [GS1 QR Codes](#gs1)\n+- [GS1 QR Codes](#gs1-qr-codes)\n - [Credits](#credits)\n - [License](#license)\n \n@@ -49,21 +50,23 @@\n Usage: qrcode [options] <input string>\n \n QR Code options:\n-  -v, --version  QR Code symbol version (1 - 40)\n-  -e, --error    Error correction level            [choices: \"L\", \"M\", \"Q\", \"H\"]\n-  -m, --mask     Mask pattern (0 - 7)\n+  -v, --qversion  QR Code symbol version (1 - 40)                       [number]\n+  -e, --error     Error correction level           [choices: \"L\", \"M\", \"Q\", \"H\"]\n+  -m, --mask      Mask pattern (0 - 7)                                  [number]\n \n Renderer options:\n   -t, --type        Output type                  [choices: \"png\", \"svg\", \"utf8\"]\n-  -w, --width       Image width (px)\n-  -s, --scale       Scale factor\n-  -q, --qzone       Quiet zone size\n+  -w, --width       Image width (px)                                    [number]\n+  -s, --scale       Scale factor                                        [number]\n+  -q, --qzone       Quiet zone size                                     [number]\n   -l, --lightcolor  Light RGBA hex color\n   -d, --darkcolor   Dark RGBA hex color\n+  --small  Output smaller QR code to terminal                          [boolean]\n \n Options:\n   -o, --output  Output file\n   -h, --help    Show help                                              [boolean]\n+  --version     Show version number                                    [boolean]\n \n Examples:\n   qrcode \"some text\"                    Draw in terminal window\n@@ -102,7 +105,7 @@\n ```html\n <canvas id=\"canvas\"></canvas>\n \n-<script src=\"/build/qrcode.min.js\"></script>\n+<script src=\"/build/qrcode.js\"></script>\n <script>\n   QRCode.toCanvas(document.getElementById('canvas'), 'sample text', function (error) {\n     if (error) console.error(error)\n@@ -111,10 +114,12 @@\n </script>\n ```\n \n-If you install through `npm`, precompiled files will be available in `node_modules/qrcode/build/` folder.<br>\n+If you install through `npm`, precompiled files will be available in `node_modules/qrcode/build/` folder.\n+\n+The precompiled bundle have support for [Internet Explorer 10+, Safari 5.1+, and all evergreen browsers](https://browserl.ist/?q=defaults%2C+IE+%3E%3D+10%2C+Safari+%3E%3D+5.1).\n \n ### NodeJS\n-Simply require the module `qrcode`\n+Require the module `qrcode`\n \n ```javascript\n var QRCode = require('qrcode')\n@@ -124,6 +129,15 @@\n })\n ```\n \n+render a qrcode for the terminal\n+```js\n+var QRCode = require('qrcode')\n+\n+QRCode.toString('I am a pony!',{type:'terminal'}, function (err, url) {\n+  console.log(url)\n+})\n+```\n+\n ### ES6/ES7\n Promises and Async/Await can be used in place of callback function.\n \n@@ -296,6 +310,48 @@\n </script>\n ```\n \n+## Binary data\n+QR Codes can hold arbitrary byte-based binary data. If you attempt to create a binary QR Code by first converting the data to a JavaScript string, it will fail to encode propery because string encoding adds additional bytes. Instead, you must pass a [`Uint8ClampedArray`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Uint8ClampedArray) or compatible array, or a Node [Buffer](https://nodejs.org/api/buffer.html), as follows:\n+\n+```javascript\n+// Regular array example\n+// WARNING: Element values will be clamped to 0-255 even if your data contains higher values.\n+const QRCode = require('qrcode')\n+QRCode.toFile(\n+  'foo.png',\n+  [{ data: [253,254,255], mode: 'byte' }],\n+  ...options...,\n+  ...callback...\n",
+					"match": false,
+					"packageHash": "725aab269c7e19200cfa450809e8b1e170f3cca77dbb3a2f9f1f01f751c817b1",
+					"size": 20063,
+					"sourceHash": "2c562622aa4a285617dbf412fa51ae73b6f00a73c8423c295103c4bbbae72035",
+					"status": "content"
+				},
+				"bin/qrcode": {
+					"diff": "--- published/bin/qrcode\n+++ rebuilt/bin/qrcode\n@@ -22,15 +22,16 @@\n     }\n \n     console.log(text)\n-    console.log('\\n')\n   })\n }\n \n function parseOptions (args) {\n   return {\n-    version: args.version,\n+    version: args.qversion,\n     errorCorrectionLevel: args.error,\n     type: args.type,\n+    small: !!args.small,\n+    inverse: !!args.inverse,\n     maskPattern: args.mask,\n     margin: args.qzone,\n     width: args.width,\n@@ -59,9 +60,10 @@\n   .detectLocale(false)\n   .usage('Usage: $0 [options] <input string>')\n   .option('v', {\n-    alias: 'version',\n+    alias: 'qversion',\n     description: 'QR Code symbol version (1 - 40)',\n-    group: 'QR Code options:'\n+    group: 'QR Code options:',\n+    type: 'number'\n   })\n   .option('e', {\n     alias: 'error',\n@@ -72,7 +74,8 @@\n   .option('m', {\n     alias: 'mask',\n     description: 'Mask pattern (0 - 7)',\n-    group: 'QR Code options:'\n+    group: 'QR Code options:',\n+    type: 'number'\n   })\n   .option('t', {\n     alias: 'type',\n@@ -81,22 +84,31 @@\n     implies: 'output',\n     group: 'Renderer options:'\n   })\n+  .option('i', {\n+    alias: 'inverse',\n+    type: 'boolean',\n+    description: 'Invert colors',\n+    group: 'Renderer options:'\n+  })\n   .option('w', {\n     alias: 'width',\n     description: 'Image width (px)',\n     conflicts: 'scale',\n-    group: 'Renderer options:'\n+    group: 'Renderer options:',\n+    type: 'number'\n   })\n   .option('s', {\n     alias: 'scale',\n     description: 'Scale factor',\n     conflicts: 'width',\n-    group: 'Renderer options:'\n+    group: 'Renderer options:',\n+    type: 'number'\n   })\n   .option('q', {\n     alias: 'qzone',\n     description: 'Quiet zone size',\n-    group: 'Renderer options:'\n+    group: 'Renderer options:',\n+    type: 'number'\n   })\n   .option('l', {\n     alias: 'lightcolor',\n@@ -108,15 +120,23 @@\n     description: 'Dark RGBA hex color',\n     group: 'Renderer options:'\n   })\n+  .option('small', {\n+    type: 'boolean',\n+    description: 'Output smaller QR code to terminal',\n+    conflicts: 'type',\n+    group: 'Renderer options:'\n+  })\n   .option('o', {\n     alias: 'output',\n     description: 'Output file'\n   })\n   .help('h')\n   .alias('h', 'help')\n+  .version()\n   .example('$0 \"some text\"', 'Draw in terminal window')\n   .example('$0 -o out.png \"some text\"', 'Save as png image')\n   .example('$0 -d F00 -o out.png \"some text\"', 'Use red as foreground color')\n+  .parserConfiguration({'parse-numbers': false})\n",
+					"match": false,
+					"packageHash": "2d8b938af0f16a07559dff739db69049a0d4607300a6e4bbd1a4372c5e6f00ff",
+					"size": 3158,
+					"sourceHash": "d304dd7918e13800cde038ce37f51087816ccbe42c3688fbe638fd39c04bab5c",
+					"status": "content"
+				},
+				"build/qrcode.js": {
+					"match": false,
+					"packageHash": "3009e8b959f647190e95d24ee3804726e2aac0feaf6b42ad670ed225014450fe",
+					"size": 243178,
+					"status": "missing-in-source"
+				},
+				"build/qrcode.min.js": {
+					"match": false,
+					"packageHash": "23c518578f4fdc8287ad5ccc52f23d44bb5c89148b13413aa10bf5ac533538e3",
+					"size": 31977,
+					"status": "missing-in-source"
+				},
+				"build/qrcode.min.js.map": {
+					"match": false,
+					"packageHash": "bfff5f4c4bc8f4e44933431388fc1be18bed13235508e06730b39e3d427895f1",
+					"size": 49673,
+					"status": "missing-in-source"
+				},
+				"build/qrcode.tosjis.js": {
+					"match": false,
+					"packageHash": "8dd6edfcc1e4a5bd2df83ef72fb22223efde6ae2d042b0b2a6afbc74573deb4d",
+					"size": 53139,
+					"status": "missing-in-source"
+				},
+				"build/qrcode.tosjis.min.js": {
+					"match": false,
+					"packageHash": "53521883a526a28db51b245a5d5faf408c1814f72cb39dd47c56f3f4568d59cf",
+					"size": 21884,
+					"status": "missing-in-source"
+				},
+				"build/qrcode.tosjis.min.js.map": {
+					"match": false,
+					"packageHash": "d046614eaa03afa32fe82ee6160f89f89478f3af5e1eabb9b0c3d5f696102638",
+					"size": 2299,
+					"status": "missing-in-source"
+				},
+				"helper/to-sjis.js": {
+					"diff": "--- published/helper/to-sjis.js\n+++ rebuilt/helper/to-sjis.js\n@@ -1,9 +1,12 @@\n-var SJIS_UTF8 = [\n+const SJIS_UTF8 = [\n   [0x8140, '　、。，．・：；？！゛゜´｀¨＾￣＿ヽヾゝゞ〃仝々〆〇ー―‐／＼～∥｜…‥‘’“”（）〔〕［］｛｝〈〉《》「」『』【】＋－±×'],\n-  [0x8180, '÷＝≠＜＞'],\n-  [0x818f, '￥＄￠￡％＃＆＊＠§☆★'],\n+  [0x8180, '÷＝≠＜＞≦≧∞∴♂♀°′″℃'],\n+  [0x818f, '￥＄￠￡％＃＆＊＠§☆★○●◎◇◆□■△▲▽▼'],\n   [0x81a6, '※〒→←↑↓〓'],\n-  [0x81ca, '￢'],\n+  [0x81b8, '∈∋⊆⊇⊂⊃∪∩'],\n+  [0x81c8, '∧∨￢⇒⇔∀∃'],\n+  [0x81da, '∠⊥⌒∂∇≡≒≪≫√∽∝∵∫∬'],\n+  [0x81f0, 'Å‰♯♭♪†‡¶'],\n   [0x824f, '０１２３４５６７８９'],\n   [0x8260, 'ＡＢＣＤＥＦＧＨＩＪＫＬＭＮＯＰＱＲＳＴＵＶＷＸＹＺ'],\n   [0x8281, 'ａｂｃｄｅｆｇｈｉｊｋｌｍｎｏｐｑｒｓｔｕｖｗｘｙｚ'],\n@@ -16,6 +19,8 @@\n   [0x8470, 'абвгдеёжзийклмн'],\n   [0x8480, 'опрстуфхцчшщъыьэюя'],\n   [0x8780, '〝〟'],\n+  [0x889f, '亜唖娃阿哀愛挨姶逢葵茜穐悪握渥旭葦芦鯵梓圧斡扱宛姐虻飴絢綾鮎或粟袷安庵按暗案闇鞍杏以伊位依偉囲夷委威尉惟意慰易椅為畏異移維緯胃萎衣'],\n+  [0x88e0, '謂違遺医井亥域育郁磯一壱溢逸稲茨芋鰯允印咽員因姻引飲淫胤蔭'],\n   [0x8940, '院陰隠韻吋右宇烏羽迂雨卯鵜窺丑碓臼渦嘘唄欝蔚鰻姥厩浦瓜閏噂云運雲荏餌叡営嬰影映曳栄永泳洩瑛盈穎頴英衛詠鋭液疫益駅悦謁越閲榎厭円'],\n   [0x8980, '園堰奄宴延怨掩援沿演炎焔煙燕猿縁艶苑薗遠鉛鴛塩於汚甥凹央奥往応押旺横欧殴王翁襖鴬鴎黄岡沖荻億屋憶臆桶牡乙俺卸恩温穏音下化仮何伽価佳加可嘉夏嫁家寡科暇果架歌河火珂禍禾稼箇花苛茄荷華菓蝦課嘩貨迦過霞蚊俄峨我牙画臥芽蛾賀雅餓駕介会解回塊壊廻快怪悔恢懐戒拐改'],\n   [0x8a40, '魁晦械海灰界皆絵芥蟹開階貝凱劾外咳害崖慨概涯碍蓋街該鎧骸浬馨蛙垣柿蛎鈎劃嚇各廓拡撹格核殻獲確穫覚角赫較郭閣隔革学岳楽額顎掛笠樫'],\n@@ -89,10 +94,10 @@\n module.exports = function toSJIS (utf8Char) {\n   if (!utf8Char || utf8Char === '') return\n \n-  for (var i = 0; i < SJIS_UTF8.length; i++) {\n-    var kanji = SJIS_UTF8[i][1]\n+  for (let i = 0; i < SJIS_UTF8.length; i++) {\n+    const kanji = SJIS_UTF8[i][1]\n \n-    var posIndex = kanji.indexOf(utf8Char)\n+    const posIndex = kanji.indexOf(utf8Char)\n     if (posIndex >= 0) {\n       return SJIS_UTF8[i][0] + posIndex\n     }\n",
+					"match": false,
+					"packageHash": "a6cf403a89259ed6432fadbb2fb957b1ae10763d60f66335a2643c6cf08e26b2",
+					"size": 21638,
+					"sourceHash": "ca432a194287a573ba2b1600e01c647c9c2dcec45f92cc0412a11cb5121f3eaf",
+					"status": "content"
+				},
+				"lib/browser.js": {
+					"diff": "--- published/lib/browser.js\n+++ rebuilt/lib/browser.js\n@@ -1,14 +1,14 @@\n \n-var canPromise = require('./can-promise')\n+const canPromise = require('./can-promise')\n \n-var QRCode = require('./core/qrcode')\n-var CanvasRenderer = require('./renderer/canvas')\n-var SvgRenderer = require('./renderer/svg-tag.js')\n+const QRCode = require('./core/qrcode')\n+const CanvasRenderer = require('./renderer/canvas')\n+const SvgRenderer = require('./renderer/svg-tag.js')\n \n function renderCanvas (renderFunc, canvas, text, opts, cb) {\n-  var args = [].slice.call(arguments, 1)\n-  var argsNum = args.length\n-  var isLastArgCb = typeof args[argsNum - 1] === 'function'\n+  const args = [].slice.call(arguments, 1)\n+  const argsNum = args.length\n+  const isLastArgCb = typeof args[argsNum - 1] === 'function'\n \n   if (!isLastArgCb && !canPromise()) {\n     throw new Error('Callback required as last argument')\n@@ -50,7 +50,7 @@\n \n     return new Promise(function (resolve, reject) {\n       try {\n-        var data = QRCode.create(text, opts)\n+        const data = QRCode.create(text, opts)\n         resolve(renderFunc(data, canvas, opts))\n       } catch (e) {\n         reject(e)\n@@ -59,7 +59,7 @@\n   }\n \n   try {\n-    var data = QRCode.create(text, opts)\n+    const data = QRCode.create(text, opts)\n     cb(null, renderFunc(data, canvas, opts))\n   } catch (e) {\n     cb(e)\n",
+					"match": false,
+					"packageHash": "c38f5ea8e882d7c8c5029c1592f0e28d896530fc7fdf75d6631e1118f9f0ee84",
+					"size": 1868,
+					"sourceHash": "868da79917b05db1f3d4402f4875148fb06ce843cbd74c65429cd6ef960b1638",
+					"status": "content"
+				},
+				"lib/core/alignment-pattern.js": {
+					"diff": "--- published/lib/core/alignment-pattern.js\n+++ rebuilt/lib/core/alignment-pattern.js\n@@ -8,7 +8,7 @@\n  * and their number depends on the symbol version.\n  */\n \n-var getSymbolSize = require('./utils').getSymbolSize\n+const getSymbolSize = require('./utils').getSymbolSize\n \n /**\n  * Calculate the row/column coordinates of the center module of each alignment pattern\n@@ -27,12 +27,12 @@\n exports.getRowColCoords = function getRowColCoords (version) {\n   if (version === 1) return []\n \n-  var posCount = Math.floor(version / 7) + 2\n-  var size = getSymbolSize(version)\n-  var intervals = size === 145 ? 26 : Math.ceil((size - 13) / (2 * posCount - 2)) * 2\n-  var positions = [size - 7] // Last coord is always (size - 7)\n+  const posCount = Math.floor(version / 7) + 2\n+  const size = getSymbolSize(version)\n+  const intervals = size === 145 ? 26 : Math.ceil((size - 13) / (2 * posCount - 2)) * 2\n+  const positions = [size - 7] // Last coord is always (size - 7)\n \n-  for (var i = 1; i < posCount - 1; i++) {\n+  for (let i = 1; i < posCount - 1; i++) {\n     positions[i] = positions[i - 1] - intervals\n   }\n \n@@ -55,21 +55,21 @@\n  * Note that the coordinates (6,6), (6,38), (38,6) are occupied by finder patterns\n  * and are not therefore used for alignment patterns.\n  *\n- * var pos = getPositions(7)\n+ * let pos = getPositions(7)\n  * // [[6,22], [22,6], [22,22], [22,38], [38,22], [38,38]]\n  *\n  * @param  {Number} version QR Code version\n  * @return {Array}          Array of coordinates\n  */\n exports.getPositions = function getPositions (version) {\n-  var coords = []\n-  var pos = exports.getRowColCoords(version)\n-  var posLength = pos.length\n+  const coords = []\n+  const pos = exports.getRowColCoords(version)\n+  const posLength = pos.length\n \n-  for (var i = 0; i < posLength; i++) {\n-    for (var j = 0; j < posLength; j++) {\n+  for (let i = 0; i < posLength; i++) {\n+    for (let j = 0; j < posLength; j++) {\n       // Skip if position is occupied by finder patterns\n-      if ((i === 0 && j === 0) ||             // top-left\n+      if ((i === 0 && j === 0) || // top-left\n           (i === 0 && j === posLength - 1) || // bottom-left\n           (i === posLength - 1 && j === 0)) { // top-right\n         continue\n",
+					"match": false,
+					"packageHash": "fddf6916a51436bf1424ea225dd9f47ddc221c6001a0b57370aa78a4fe13bce7",
+					"size": 2992,
+					"sourceHash": "7e642a801c5c3d114bcceeeb08a3930369ec16fe874bdb617f02efb43aaea9ba",
+					"status": "content"
+				},
+				"lib/core/alphanumeric-data.js": {
+					"diff": "--- published/lib/core/alphanumeric-data.js\n+++ rebuilt/lib/core/alphanumeric-data.js\n@@ -1,4 +1,4 @@\n-var Mode = require('./mode')\n+const Mode = require('./mode')\n \n /**\n  * Array of characters available in alphanumeric mode\n@@ -9,7 +9,7 @@\n  *\n  * @type {Array}\n  */\n-var ALPHA_NUM_CHARS = [\n+const ALPHA_NUM_CHARS = [\n   '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',\n   'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M',\n   'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z',\n@@ -34,13 +34,13 @@\n }\n \n AlphanumericData.prototype.write = function write (bitBuffer) {\n-  var i\n+  let i\n \n   // Input data characters are divided into groups of two characters\n   // and encoded as 11-bit binary codes.\n   for (i = 0; i + 2 <= this.data.length; i += 2) {\n     // The character value of the first character is multiplied by 45\n-    var value = ALPHA_NUM_CHARS.indexOf(this.data[i]) * 45\n+    let value = ALPHA_NUM_CHARS.indexOf(this.data[i]) * 45\n \n     // The character value of the second digit is added to the product\n     value += ALPHA_NUM_CHARS.indexOf(this.data[i + 1])\n",
+					"match": false,
+					"packageHash": "7da4763841fca8a1527d1f47e84b090c7d187380e8bad937be95ac8b60b1f9e5",
+					"size": 1818,
+					"sourceHash": "cf8f81197e02c0db069155a2e82c098d26329019cfd06cc0e4479124636fa1ea",
+					"status": "content"
+				},
+				"lib/core/bit-buffer.js": {
+					"diff": "--- published/lib/core/bit-buffer.js\n+++ rebuilt/lib/core/bit-buffer.js\n@@ -6,12 +6,12 @@\n BitBuffer.prototype = {\n \n   get: function (index) {\n-    var bufIndex = Math.floor(index / 8)\n+    const bufIndex = Math.floor(index / 8)\n     return ((this.buffer[bufIndex] >>> (7 - index % 8)) & 1) === 1\n   },\n \n   put: function (num, length) {\n-    for (var i = 0; i < length; i++) {\n+    for (let i = 0; i < length; i++) {\n       this.putBit(((num >>> (length - i - 1)) & 1) === 1)\n     }\n   },\n@@ -21,7 +21,7 @@\n   },\n \n   putBit: function (bit) {\n-    var bufIndex = Math.floor(this.length / 8)\n+    const bufIndex = Math.floor(this.length / 8)\n     if (this.buffer.length <= bufIndex) {\n       this.buffer.push(0)\n     }\n",
+					"match": false,
+					"packageHash": "b691373ef80867935c8e88866a86d2cf57595558ce8d7aea7de58b63db2cc85a",
+					"size": 715,
+					"sourceHash": "c6f982814aa373da6e44183a61f75762c8559909087fff76603885b180bac0ad",
+					"status": "content"
+				},
+				"lib/core/bit-matrix.js": {
+					"diff": "--- published/lib/core/bit-matrix.js\n+++ rebuilt/lib/core/bit-matrix.js\n@@ -1,5 +1,3 @@\n-var Buffer = require('../utils/buffer')\n-\n /**\n  * Helper class to handle QR Code symbol modules\n  *\n@@ -11,10 +9,8 @@\n   }\n \n   this.size = size\n-  this.data = new Buffer(size * size)\n-  this.data.fill(0)\n-  this.reservedBit = new Buffer(size * size)\n-  this.reservedBit.fill(0)\n+  this.data = new Uint8Array(size * size)\n+  this.reservedBit = new Uint8Array(size * size)\n }\n \n /**\n@@ -27,7 +23,7 @@\n  * @param {Boolean} reserved\n  */\n BitMatrix.prototype.set = function (row, col, value, reserved) {\n-  var index = row * this.size + col\n+  const index = row * this.size + col\n   this.data[index] = value\n   if (reserved) this.reservedBit[index] = true\n }\n",
+					"match": false,
+					"packageHash": "e1214c852a5f88286447c3f653f807e34a229801e24072c3d0c28d484d439b7b",
+					"size": 1579,
+					"sourceHash": "77e051929fbc9d3b3ba91bd9b190f9a1ab3ccea162d627696ad2c01bf41e51bd",
+					"status": "content"
+				},
+				"lib/core/byte-data.js": {
+					"diff": "--- published/lib/core/byte-data.js\n+++ rebuilt/lib/core/byte-data.js\n@@ -1,9 +1,12 @@\n-var Buffer = require('../utils/buffer')\n-var Mode = require('./mode')\n+const Mode = require('./mode')\n \n function ByteData (data) {\n   this.mode = Mode.BYTE\n-  this.data = new Buffer(data)\n+  if (typeof (data) === 'string') {\n+    this.data = new TextEncoder().encode(data)\n+  } else {\n+    this.data = new Uint8Array(data)\n+  }\n }\n \n ByteData.getBitsLength = function getBitsLength (length) {\n@@ -19,7 +22,7 @@\n }\n \n ByteData.prototype.write = function (bitBuffer) {\n-  for (var i = 0, l = this.data.length; i < l; i++) {\n+  for (let i = 0, l = this.data.length; i < l; i++) {\n     bitBuffer.put(this.data[i], 8)\n   }\n }\n",
+					"match": false,
+					"packageHash": "a534fc98c181182b73bc5b8a9578c63008ae329aeaeef1a508534ae815330d96",
+					"size": 609,
+					"sourceHash": "24614cb942165dcc5378117a951cc1d68fbfc2e60043830111ae99283cd9aa94",
+					"status": "content"
+				},
+				"lib/core/error-correction-code.js": {
+					"diff": "--- published/lib/core/error-correction-code.js\n+++ rebuilt/lib/core/error-correction-code.js\n@@ -1,6 +1,6 @@\n-var ECLevel = require('./error-correction-level')\r\n+const ECLevel = require('./error-correction-level')\r\n \r\n-var EC_BLOCKS_TABLE = [\r\n+const EC_BLOCKS_TABLE = [\r\n // L  M  Q  H\r\n   1, 1, 1, 1,\r\n   1, 1, 1, 1,\r\n@@ -44,7 +44,7 @@\n   25, 49, 68, 81\r\n ]\r\n \r\n-var EC_CODEWORDS_TABLE = [\r\n+const EC_CODEWORDS_TABLE = [\r\n // L  M  Q  H\r\n   7, 10, 13, 17,\r\n   10, 16, 22, 28,\r\n",
+					"match": false,
+					"packageHash": "7464b45c87c6e678557e6d0dc277e14f5f13ad5e51e8f03a7b2b2b894950fa35",
+					"size": 3409,
+					"sourceHash": "a672676dd9821b7a675bba38da7c34725295d1380fdb3bb560a06f29bd03f8e5",
+					"status": "content"
+				},
+				"lib/core/error-correction-level.js": {
+					"diff": "--- published/lib/core/error-correction-level.js\n+++ rebuilt/lib/core/error-correction-level.js\n@@ -8,7 +8,7 @@\n     throw new Error('Param is not a string')\n   }\n \n-  var lcStr = string.toLowerCase()\n+  const lcStr = string.toLowerCase()\n \n   switch (lcStr) {\n     case 'l':\n",
+					"match": false,
+					"packageHash": "3304dee9019a91a52f8a8fce0146143969a4cabd5369ae7707bf503791a8750b",
+					"size": 891,
+					"sourceHash": "7f31b2250223cb7549bf3c305cce948ad9b0ee67cb9ee93b6c08352b7fa2b7f6",
+					"status": "content"
+				},
+				"lib/core/finder-pattern.js": {
+					"diff": "--- published/lib/core/finder-pattern.js\n+++ rebuilt/lib/core/finder-pattern.js\n@@ -1,5 +1,5 @@\n-var getSymbolSize = require('./utils').getSymbolSize\n-var FINDER_PATTERN_SIZE = 7\n+const getSymbolSize = require('./utils').getSymbolSize\n+const FINDER_PATTERN_SIZE = 7\n \n /**\n  * Returns an array containing the positions of each finder pattern.\n@@ -9,7 +9,7 @@\n  * @return {Array}          Array of coordinates\n  */\n exports.getPositions = function getPositions (version) {\n-  var size = getSymbolSize(version)\n+  const size = getSymbolSize(version)\n \n   return [\n     // top-left\n",
+					"match": false,
+					"packageHash": "c47eb5347f62f8380c066328aea135b0176c0160e8a550330b81b22cd788b2d2",
+					"size": 593,
+					"sourceHash": "e5808e9b8ed06fd7c3ed201a03f7e7341a5c80f6a8b4cc78c9a94c3ee0ddd6e2",
+					"status": "content"
+				},
+				"lib/core/format-info.js": {
+					"diff": "--- published/lib/core/format-info.js\n+++ rebuilt/lib/core/format-info.js\n@@ -1,8 +1,8 @@\n-var Utils = require('./utils')\n+const Utils = require('./utils')\n \n-var G15 = (1 << 10) | (1 << 8) | (1 << 5) | (1 << 4) | (1 << 2) | (1 << 1) | (1 << 0)\n-var G15_MASK = (1 << 14) | (1 << 12) | (1 << 10) | (1 << 4) | (1 << 1)\n-var G15_BCH = Utils.getBCHDigit(G15)\n+const G15 = (1 << 10) | (1 << 8) | (1 << 5) | (1 << 4) | (1 << 2) | (1 << 1) | (1 << 0)\n+const G15_MASK = (1 << 14) | (1 << 12) | (1 << 10) | (1 << 4) | (1 << 1)\n+const G15_BCH = Utils.getBCHDigit(G15)\n \n /**\n  * Returns format information with relative error correction bits\n@@ -15,8 +15,8 @@\n  * @return {Number}                      Encoded format information bits\n  */\n exports.getEncodedBits = function getEncodedBits (errorCorrectionLevel, mask) {\n-  var data = ((errorCorrectionLevel.bit << 3) | mask)\n-  var d = data << 10\n+  const data = ((errorCorrectionLevel.bit << 3) | mask)\n+  let d = data << 10\n \n   while (Utils.getBCHDigit(d) - G15_BCH >= 0) {\n     d ^= (G15 << (Utils.getBCHDigit(d) - G15_BCH))\n",
+					"match": false,
+					"packageHash": "60803edddab0354533308e9a64da9b84e1712757b778295dc9f7269fa332a507",
+					"size": 1116,
+					"sourceHash": "889b133cd6a86f4079a3a5d1dfd94c495ca71d4fde4ec88ce9e9a5de358629d0",
+					"status": "content"
+				},
+				"lib/core/galois-field.js": {
+					"diff": "--- published/lib/core/galois-field.js\n+++ rebuilt/lib/core/galois-field.js\n@@ -1,8 +1,5 @@\n-var Buffer = require('../utils/buffer')\n-\n-var EXP_TABLE = new Buffer(512)\n-var LOG_TABLE = new Buffer(256)\n-\n+const EXP_TABLE = new Uint8Array(512)\n+const LOG_TABLE = new Uint8Array(256)\n /**\n  * Precompute the log and anti-log tables for faster computation later\n  *\n@@ -12,8 +9,8 @@\n  * ref {@link https://en.wikiversity.org/wiki/Reed%E2%80%93Solomon_codes_for_coders#Introduction_to_mathematical_fields}\n  */\n ;(function initTables () {\n-  var x = 1\n-  for (var i = 0; i < 255; i++) {\n+  let x = 1\n+  for (let i = 0; i < 255; i++) {\n     EXP_TABLE[i] = x\n     LOG_TABLE[x] = i\n \n@@ -30,7 +27,7 @@\n   // stay inside the bounds (because we will mainly use this table for the multiplication of\n   // two GF numbers, no more).\n   // @see {@link mul}\n-  for (i = 255; i < 512; i++) {\n+  for (let i = 255; i < 512; i++) {\n     EXP_TABLE[i] = EXP_TABLE[i - 255]\n   }\n }())\n",
+					"match": false,
+					"packageHash": "8ecab881cfd55b2ce19c69818e540ebd7b75eda7895cc5a84fe4344def7a1b05",
+					"size": 1925,
+					"sourceHash": "d487207ce5040b49f95441bedafb6dbc9c010b245a0f0f47b9e3f10f8d9530a6",
+					"status": "content"
+				},
+				"lib/core/kanji-data.js": {
+					"diff": "--- published/lib/core/kanji-data.js\n+++ rebuilt/lib/core/kanji-data.js\n@@ -1,5 +1,5 @@\n-var Mode = require('./mode')\n-var Utils = require('./utils')\n+const Mode = require('./mode')\n+const Utils = require('./utils')\n \n function KanjiData (data) {\n   this.mode = Mode.KANJI\n@@ -19,13 +19,13 @@\n }\n \n KanjiData.prototype.write = function (bitBuffer) {\n-  var i\n+  let i\n \n   // In the Shift JIS system, Kanji characters are represented by a two byte combination.\n   // These byte values are shifted from the JIS X 0208 values.\n   // JIS X 0208 gives details of the shift coded representation.\n   for (i = 0; i < this.data.length; i++) {\n-    var value = Utils.toSJIS(this.data[i])\n+    let value = Utils.toSJIS(this.data[i])\n \n     // For characters with Shift JIS values from 0x8140 to 0x9FFC:\n     if (value >= 0x8140 && value <= 0x9FFC) {\n",
+					"match": false,
+					"packageHash": "2cc50ab3ac8b12b421f2957d455411edb6b9b1c3eb504138420fae6fa70f26c6",
+					"size": 1580,
+					"sourceHash": "2dcd7d5aee492392e0c47976ae718e9783c5b13234487804ed21558fbd4a62de",
+					"status": "content"
+				},
+				"lib/core/mask-pattern.js": {
+					"diff": "--- published/lib/core/mask-pattern.js\n+++ rebuilt/lib/core/mask-pattern.js\n@@ -17,7 +17,7 @@\n  * Weighted penalty scores for the undesirable features\n  * @type {Object}\n  */\n-var PenaltyScores = {\n+const PenaltyScores = {\n   N1: 3,\n   N2: 3,\n   N3: 40,\n@@ -53,19 +53,19 @@\n * i is the amount by which the number of adjacent modules of the same color exceeds 5\n */\n exports.getPenaltyN1 = function getPenaltyN1 (data) {\n-  var size = data.size\n-  var points = 0\n-  var sameCountCol = 0\n-  var sameCountRow = 0\n-  var lastCol = null\n-  var lastRow = null\n+  const size = data.size\n+  let points = 0\n+  let sameCountCol = 0\n+  let sameCountRow = 0\n+  let lastCol = null\n+  let lastRow = null\n \n-  for (var row = 0; row < size; row++) {\n+  for (let row = 0; row < size; row++) {\n     sameCountCol = sameCountRow = 0\n     lastCol = lastRow = null\n \n-    for (var col = 0; col < size; col++) {\n-      var module = data.get(row, col)\n+    for (let col = 0; col < size; col++) {\n+      let module = data.get(row, col)\n       if (module === lastCol) {\n         sameCountCol++\n       } else {\n@@ -97,12 +97,12 @@\n  * Points: N2 * (m - 1) * (n - 1)\n  */\n exports.getPenaltyN2 = function getPenaltyN2 (data) {\n-  var size = data.size\n-  var points = 0\n+  const size = data.size\n+  let points = 0\n \n-  for (var row = 0; row < size - 1; row++) {\n-    for (var col = 0; col < size - 1; col++) {\n-      var last = data.get(row, col) +\n+  for (let row = 0; row < size - 1; row++) {\n+    for (let col = 0; col < size - 1; col++) {\n+      const last = data.get(row, col) +\n         data.get(row, col + 1) +\n         data.get(row + 1, col) +\n         data.get(row + 1, col + 1)\n@@ -121,14 +121,14 @@\n  * Points: N3 * number of pattern found\n  */\n exports.getPenaltyN3 = function getPenaltyN3 (data) {\n-  var size = data.size\n-  var points = 0\n-  var bitsCol = 0\n-  var bitsRow = 0\n+  const size = data.size\n+  let points = 0\n+  let bitsCol = 0\n+  let bitsRow = 0\n \n-  for (var row = 0; row < size; row++) {\n+  for (let row = 0; row < size; row++) {\n     bitsCol = bitsRow = 0\n-    for (var col = 0; col < size; col++) {\n+    for (let col = 0; col < size; col++) {\n       bitsCol = ((bitsCol << 1) & 0x7FF) | data.get(row, col)\n       if (col >= 10 && (bitsCol === 0x5D0 || bitsCol === 0x05D)) points++\n \n@@ -149,12 +149,12 @@\n  * in the symbol from 50% in steps of 5%\n  */\n exports.getPenaltyN4 = function getPenaltyN4 (data) {\n-  var darkCount = 0\n-  var modulesCount = data.data.length\n+  let darkCount = 0\n+  const modulesCount = data.data.length\n \n-  for (var i = 0; i < modulesCount; i++) darkCount += data.data[i]\n+  for (let i = 0; i < modulesCount; i++) darkCount += data.data[i]\n \n-  var k = Math.abs(Math.ceil((darkCount * 100 / modulesCount) / 5) - 10)\n+  const k = Math.abs(Math.ceil((darkCount * 100 / modulesCount) / 5) - 10)\n \n   return k * PenaltyScores.N4\n }\n@@ -189,10 +189,10 @@\n  * @param  {BitMatrix} data    BitMatrix data\n  */\n exports.applyMask = function applyMask (pattern, data) {\n",
+					"match": false,
+					"packageHash": "5dac163e03f4b10ad83b7fa1e8d582d42e1047fa01eb25aa72a7efd78b70a125",
+					"size": 6081,
+					"sourceHash": "c8cfdab7b8d8276f9c1128ab8e5d930759df7594f03211f72b80c3002af91aa9",
+					"status": "content"
+				},
+				"lib/core/mode.js": {
+					"diff": "--- published/lib/core/mode.js\n+++ rebuilt/lib/core/mode.js\n@@ -1,5 +1,5 @@\n-var VersionCheck = require('./version-check')\n-var Regex = require('./regex')\n+const VersionCheck = require('./version-check')\n+const Regex = require('./regex')\n \n /**\n  * Numeric mode encodes data from the decimal digit set (0 - 9)\n@@ -130,7 +130,7 @@\n     throw new Error('Param is not a string')\n   }\n \n-  var lcStr = string.toLowerCase()\n+  const lcStr = string.toLowerCase()\n \n   switch (lcStr) {\n     case 'numeric':\n",
+					"match": false,
+					"packageHash": "aae42483d9b92b40194a99162356af9cf225ec85f44d0126016b579524ab320d",
+					"size": 3977,
+					"sourceHash": "25d3574cf4b0cdbd62363ff2c57eb46da41d21124e6d37eb0e84f979799bd530",
+					"status": "content"
+				},
+				"lib/core/numeric-data.js": {
+					"diff": "--- published/lib/core/numeric-data.js\n+++ rebuilt/lib/core/numeric-data.js\n@@ -1,4 +1,4 @@\n-var Mode = require('./mode')\n+const Mode = require('./mode')\n \n function NumericData (data) {\n   this.mode = Mode.NUMERIC\n@@ -18,7 +18,7 @@\n }\n \n NumericData.prototype.write = function write (bitBuffer) {\n-  var i, group, value\n+  let i, group, value\n \n   // The input data string is divided into groups of three digits,\n   // and each group is converted to its 10-bit binary equivalent.\n@@ -31,7 +31,7 @@\n \n   // If the number of input digits is not an exact multiple of three,\n   // the final one or two digits are converted to 4 or 7 bits respectively.\n-  var remainingNum = this.data.length - i\n+  const remainingNum = this.data.length - i\n   if (remainingNum > 0) {\n     group = this.data.substr(i)\n     value = parseInt(group, 10)\n",
+					"match": false,
+					"packageHash": "3d549adb05da2028dded7df289f3af56223a7dd42bf2c7baafbdc171b21c6618",
+					"size": 1207,
+					"sourceHash": "3e506376e4c84b88162024c1d840b5bc3721da3b0d02f18784161adea5e3b2e8",
+					"status": "content"
+				},
+				"lib/core/polynomial.js": {
+					"diff": "--- published/lib/core/polynomial.js\n+++ rebuilt/lib/core/polynomial.js\n@@ -1,19 +1,17 @@\n-var Buffer = require('../utils/buffer')\n-var GF = require('./galois-field')\n+const GF = require('./galois-field')\n \n /**\n  * Multiplies two polynomials inside Galois Field\n  *\n- * @param  {Buffer} p1 Polynomial\n- * @param  {Buffer} p2 Polynomial\n- * @return {Buffer}    Product of p1 and p2\n+ * @param  {Uint8Array} p1 Polynomial\n+ * @param  {Uint8Array} p2 Polynomial\n+ * @return {Uint8Array}    Product of p1 and p2\n  */\n exports.mul = function mul (p1, p2) {\n-  var coeff = new Buffer(p1.length + p2.length - 1)\n-  coeff.fill(0)\n+  const coeff = new Uint8Array(p1.length + p2.length - 1)\n \n-  for (var i = 0; i < p1.length; i++) {\n-    for (var j = 0; j < p2.length; j++) {\n+  for (let i = 0; i < p1.length; i++) {\n+    for (let j = 0; j < p2.length; j++) {\n       coeff[i + j] ^= GF.mul(p1[i], p2[j])\n     }\n   }\n@@ -24,22 +22,22 @@\n /**\n  * Calculate the remainder of polynomials division\n  *\n- * @param  {Buffer} divident Polynomial\n- * @param  {Buffer} divisor  Polynomial\n- * @return {Buffer}          Remainder\n+ * @param  {Uint8Array} divident Polynomial\n+ * @param  {Uint8Array} divisor  Polynomial\n+ * @return {Uint8Array}          Remainder\n  */\n exports.mod = function mod (divident, divisor) {\n-  var result = new Buffer(divident)\n+  let result = new Uint8Array(divident)\n \n   while ((result.length - divisor.length) >= 0) {\n-    var coeff = result[0]\n+    const coeff = result[0]\n \n-    for (var i = 0; i < divisor.length; i++) {\n+    for (let i = 0; i < divisor.length; i++) {\n       result[i] ^= GF.mul(divisor[i], coeff)\n     }\n \n     // remove all zeros from buffer head\n-    var offset = 0\n+    let offset = 0\n     while (offset < result.length && result[offset] === 0) offset++\n     result = result.slice(offset)\n   }\n@@ -52,12 +50,12 @@\n  * (used by Reed-Solomon encoder)\n  *\n  * @param  {Number} degree Degree of the generator polynomial\n- * @return {Buffer}        Buffer containing polynomial coefficients\n+ * @return {Uint8Array}    Buffer containing polynomial coefficients\n  */\n exports.generateECPolynomial = function generateECPolynomial (degree) {\n-  var poly = new Buffer([1])\n-  for (var i = 0; i < degree; i++) {\n-    poly = exports.mul(poly, [1, GF.exp(i)])\n+  let poly = new Uint8Array([1])\n+  for (let i = 0; i < degree; i++) {\n+    poly = exports.mul(poly, new Uint8Array([1, GF.exp(i)]))\n   }\n \n   return poly\n",
+					"match": false,
+					"packageHash": "20070e89b7fba181f942bc6dba75c475dd0a2c25be3c9c1107c5a277f57f12ae",
+					"size": 1587,
+					"sourceHash": "34cb4e4216fc51fe75ac1c4bb00c4f4fc118a51da50c8250aec951062ff3a3c4",
+					"status": "content"
+				},
+				"lib/core/qrcode.js": {
+					"diff": "--- published/lib/core/qrcode.js\n+++ rebuilt/lib/core/qrcode.js\n@@ -1,18 +1,16 @@\n-var Buffer = require('../utils/buffer')\n-var Utils = require('./utils')\n-var ECLevel = require('./error-correction-level')\n-var BitBuffer = require('./bit-buffer')\n-var BitMatrix = require('./bit-matrix')\n-var AlignmentPattern = require('./alignment-pattern')\n-var FinderPattern = require('./finder-pattern')\n-var MaskPattern = require('./mask-pattern')\n-var ECCode = require('./error-correction-code')\n-var ReedSolomonEncoder = require('./reed-solomon-encoder')\n-var Version = require('./version')\n-var FormatInfo = require('./format-info')\n-var Mode = require('./mode')\n-var Segments = require('./segments')\n-var isArray = require('isarray')\n+const Utils = require('./utils')\n+const ECLevel = require('./error-correction-level')\n+const BitBuffer = require('./bit-buffer')\n+const BitMatrix = require('./bit-matrix')\n+const AlignmentPattern = require('./alignment-pattern')\n+const FinderPattern = require('./finder-pattern')\n+const MaskPattern = require('./mask-pattern')\n+const ECCode = require('./error-correction-code')\n+const ReedSolomonEncoder = require('./reed-solomon-encoder')\n+const Version = require('./version')\n+const FormatInfo = require('./format-info')\n+const Mode = require('./mode')\n+const Segments = require('./segments')\n \n /**\n  * QRCode for JavaScript\n@@ -47,17 +45,17 @@\n  * @param  {Number}    version QR Code version\n  */\n function setupFinderPattern (matrix, version) {\n-  var size = matrix.size\n-  var pos = FinderPattern.getPositions(version)\n+  const size = matrix.size\n+  const pos = FinderPattern.getPositions(version)\n \n-  for (var i = 0; i < pos.length; i++) {\n-    var row = pos[i][0]\n-    var col = pos[i][1]\n+  for (let i = 0; i < pos.length; i++) {\n+    const row = pos[i][0]\n+    const col = pos[i][1]\n \n-    for (var r = -1; r <= 7; r++) {\n+    for (let r = -1; r <= 7; r++) {\n       if (row + r <= -1 || size <= row + r) continue\n \n-      for (var c = -1; c <= 7; c++) {\n+      for (let c = -1; c <= 7; c++) {\n         if (col + c <= -1 || size <= col + c) continue\n \n         if ((r >= 0 && r <= 6 && (c === 0 || c === 6)) ||\n@@ -80,10 +78,10 @@\n  * @param  {BitMatrix} matrix Modules matrix\n  */\n function setupTimingPattern (matrix) {\n-  var size = matrix.size\n+  const size = matrix.size\n \n-  for (var r = 8; r < size - 8; r++) {\n-    var value = r % 2 === 0\n+  for (let r = 8; r < size - 8; r++) {\n+    const value = r % 2 === 0\n     matrix.set(r, 6, value, true)\n     matrix.set(6, r, value, true)\n   }\n@@ -98,14 +96,14 @@\n  * @param  {Number}    version QR Code version\n  */\n function setupAlignmentPattern (matrix, version) {\n-  var pos = AlignmentPattern.getPositions(version)\n+  const pos = AlignmentPattern.getPositions(version)\n \n-  for (var i = 0; i < pos.length; i++) {\n-    var row = pos[i][0]\n-    var col = pos[i][1]\n+  for (let i = 0; i < pos.length; i++) {\n+    const row = pos[i][0]\n+    const col = pos[i][1]\n \n-    for (var r = -2; r <= 2; r++) {\n-      for (var c = -2; c <= 2; c++) {\n+    for (let r = -2; r <= 2; r++) {\n+      for (let c = -2; c <= 2; c++) {\n         if (r === -2 || r === 2 || c === -2 || c === 2 ||\n           (r === 0 && c === 0)) {\n           matrix.set(row + r, col + c, true, true)\n@@ -124,11 +122,11 @@\n  * @param  {Number}    version QR Code version\n  */\n function setupVersionInfo (matrix, version) {\n-  var size = matrix.size\n-  var bits = Version.getEncodedBits(version)\n",
+					"match": false,
+					"packageHash": "47c5aab95a20e4d3360b2ecdc861b3222b0fa3f0f8307f0937b00764877a870e",
+					"size": 15093,
+					"sourceHash": "216e490908ed95df74992a05d44efa35ea7bc8dcab27b49b446725964704e833",
+					"status": "content"
+				},
+				"lib/core/reed-solomon-encoder.js": {
+					"diff": "--- published/lib/core/reed-solomon-encoder.js\n+++ rebuilt/lib/core/reed-solomon-encoder.js\n@@ -1,5 +1,4 @@\n-var Buffer = require('../utils/buffer')\n-var Polynomial = require('./polynomial')\n+const Polynomial = require('./polynomial')\n \n function ReedSolomonEncoder (degree) {\n   this.genPoly = undefined\n@@ -23,8 +22,8 @@\n /**\n  * Encodes a chunk of data\n  *\n- * @param  {Buffer} data Buffer containing input data\n- * @return {Buffer}      Buffer containing encoded data\n+ * @param  {Uint8Array} data Buffer containing input data\n+ * @return {Uint8Array}      Buffer containing encoded data\n  */\n ReedSolomonEncoder.prototype.encode = function encode (data) {\n   if (!this.genPoly) {\n@@ -33,22 +32,20 @@\n \n   // Calculate EC for this data block\n   // extends data size to data+genPoly size\n-  var pad = new Buffer(this.degree)\n-  pad.fill(0)\n-  var paddedData = Buffer.concat([data, pad], data.length + this.degree)\n+  const paddedData = new Uint8Array(data.length + this.degree)\n+  paddedData.set(data)\n \n   // The error correction codewords are the remainder after dividing the data codewords\n   // by a generator polynomial\n-  var remainder = Polynomial.mod(paddedData, this.genPoly)\n+  const remainder = Polynomial.mod(paddedData, this.genPoly)\n \n   // return EC data blocks (last n byte, where n is the degree of genPoly)\n   // If coefficients number in remainder are less than genPoly degree,\n   // pad with 0s to the left to reach the needed number of coefficients\n-  var start = this.degree - remainder.length\n+  const start = this.degree - remainder.length\n   if (start > 0) {\n-    var buff = new Buffer(this.degree)\n-    buff.fill(0)\n-    remainder.copy(buff, start)\n+    const buff = new Uint8Array(this.degree)\n+    buff.set(remainder, start)\n \n     return buff\n   }\n",
+					"match": false,
+					"packageHash": "e51f2a89d8d41fffbb3b1364face0785cb6c802700f43c431b9d621495b29c63",
+					"size": 1700,
+					"sourceHash": "080273fcf5a73c2348330f3edb55f3968c78853e298dc55a074becd7cee3faa2",
+					"status": "content"
+				},
+				"lib/core/regex.js": {
+					"diff": "--- published/lib/core/regex.js\n+++ rebuilt/lib/core/regex.js\n@@ -1,12 +1,12 @@\n-var numeric = '[0-9]+'\n-var alphanumeric = '[A-Z $%*+\\\\-./:]+'\n-var kanji = '(?:[u3000-u303F]|[u3040-u309F]|[u30A0-u30FF]|' +\n+const numeric = '[0-9]+'\n+const alphanumeric = '[A-Z $%*+\\\\-./:]+'\n+let kanji = '(?:[u3000-u303F]|[u3040-u309F]|[u30A0-u30FF]|' +\n   '[uFF00-uFFEF]|[u4E00-u9FAF]|[u2605-u2606]|[u2190-u2195]|u203B|' +\n   '[u2010u2015u2018u2019u2025u2026u201Cu201Du2225u2260]|' +\n   '[u0391-u0451]|[u00A7u00A8u00B1u00B4u00D7u00F7])+'\n kanji = kanji.replace(/u/g, '\\\\u')\n \n-var byte = '(?:(?![A-Z0-9 $%*+\\\\-./:]|' + kanji + ')(?:.|[\\r\\n]))+'\n+const byte = '(?:(?![A-Z0-9 $%*+\\\\-./:]|' + kanji + ')(?:.|[\\r\\n]))+'\n \n exports.KANJI = new RegExp(kanji, 'g')\n exports.BYTE_KANJI = new RegExp('[^A-Z0-9 $%*+\\\\-./:]+', 'g')\n@@ -14,9 +14,9 @@\n exports.NUMERIC = new RegExp(numeric, 'g')\n exports.ALPHANUMERIC = new RegExp(alphanumeric, 'g')\n \n-var TEST_KANJI = new RegExp('^' + kanji + '$')\n-var TEST_NUMERIC = new RegExp('^' + numeric + '$')\n-var TEST_ALPHANUMERIC = new RegExp('^[A-Z0-9 $%*+\\\\-./:]+$')\n+const TEST_KANJI = new RegExp('^' + kanji + '$')\n+const TEST_NUMERIC = new RegExp('^' + numeric + '$')\n+const TEST_ALPHANUMERIC = new RegExp('^[A-Z0-9 $%*+\\\\-./:]+$')\n \n exports.testKanji = function testKanji (str) {\n   return TEST_KANJI.test(str)\n",
+					"match": false,
+					"packageHash": "17dd5e4e658f1c7b09e23f8694029d504351a7b0ecdf4638d06da16b35482144",
+					"size": 1072,
+					"sourceHash": "974d9358148d11c8e48713ef2da8fc12e597b76f4e6fc6bde00cfe7c8094efa1",
+					"status": "content"
+				},
+				"lib/core/segments.js": {
+					"diff": "--- published/lib/core/segments.js\n+++ rebuilt/lib/core/segments.js\n@@ -1,11 +1,11 @@\n-var Mode = require('./mode')\n-var NumericData = require('./numeric-data')\n-var AlphanumericData = require('./alphanumeric-data')\n-var ByteData = require('./byte-data')\n-var KanjiData = require('./kanji-data')\n-var Regex = require('./regex')\n-var Utils = require('./utils')\n-var dijkstra = require('dijkstrajs')\n+const Mode = require('./mode')\n+const NumericData = require('./numeric-data')\n+const AlphanumericData = require('./alphanumeric-data')\n+const ByteData = require('./byte-data')\n+const KanjiData = require('./kanji-data')\n+const Regex = require('./regex')\n+const Utils = require('./utils')\n+const dijkstra = require('dijkstrajs')\n \n /**\n  * Returns UTF8 byte length\n@@ -26,8 +26,8 @@\n  * @return {Array}       Array of object with segments data\n  */\n function getSegments (regex, mode, str) {\n-  var segments = []\n-  var result\n+  const segments = []\n+  let result\n \n   while ((result = regex.exec(str)) !== null) {\n     segments.push({\n@@ -49,10 +49,10 @@\n  * @return {Array}          Array of object with segments data\n  */\n function getSegmentsFromString (dataStr) {\n-  var numSegs = getSegments(Regex.NUMERIC, Mode.NUMERIC, dataStr)\n-  var alphaNumSegs = getSegments(Regex.ALPHANUMERIC, Mode.ALPHANUMERIC, dataStr)\n-  var byteSegs\n-  var kanjiSegs\n+  const numSegs = getSegments(Regex.NUMERIC, Mode.NUMERIC, dataStr)\n+  const alphaNumSegs = getSegments(Regex.ALPHANUMERIC, Mode.ALPHANUMERIC, dataStr)\n+  let byteSegs\n+  let kanjiSegs\n \n   if (Utils.isKanjiModeEnabled()) {\n     byteSegs = getSegments(Regex.BYTE, Mode.BYTE, dataStr)\n@@ -62,7 +62,7 @@\n     kanjiSegs = []\n   }\n \n-  var segs = numSegs.concat(alphaNumSegs, byteSegs, kanjiSegs)\n+  const segs = numSegs.concat(alphaNumSegs, byteSegs, kanjiSegs)\n \n   return segs\n     .sort(function (s1, s2) {\n@@ -106,7 +106,7 @@\n  */\n function mergeSegments (segs) {\n   return segs.reduce(function (acc, curr) {\n-    var prevSeg = acc.length - 1 >= 0 ? acc[acc.length - 1] : null\n+    const prevSeg = acc.length - 1 >= 0 ? acc[acc.length - 1] : null\n     if (prevSeg && prevSeg.mode === curr.mode) {\n       acc[acc.length - 1].data += curr.data\n       return acc\n@@ -134,9 +134,9 @@\n  * @return {Array}      Array of object with segments data\n  */\n function buildNodes (segs) {\n-  var nodes = []\n-  for (var i = 0; i < segs.length; i++) {\n-    var seg = segs[i]\n+  const nodes = []\n+  for (let i = 0; i < segs.length; i++) {\n+    const seg = segs[i]\n \n     switch (seg.mode) {\n       case Mode.NUMERIC:\n@@ -178,24 +178,24 @@\n  * @return {Object}         Graph of all possible segments\n  */\n function buildGraph (nodes, version) {\n-  var table = {}\n-  var graph = {'start': {}}\n-  var prevNodeIds = ['start']\n-\n-  for (var i = 0; i < nodes.length; i++) {\n-    var nodeGroup = nodes[i]\n-    var currentNodeIds = []\n-\n-    for (var j = 0; j < nodeGroup.length; j++) {\n-      var node = nodeGroup[j]\n-      var key = '' + i + j\n+  const table = {}\n+  const graph = { start: {} }\n+  let prevNodeIds = ['start']\n+\n+  for (let i = 0; i < nodes.length; i++) {\n+    const nodeGroup = nodes[i]\n",
+					"match": false,
+					"packageHash": "c48a873425a60eecaf81951951a2df57c93af37e57d8149bc193cb36d94928c0",
+					"size": 9274,
+					"sourceHash": "abd08a6ddd778c92e36e2a303d2b4a3b4ad1d9089d2a7605bee8b9d06da7846a",
+					"status": "content"
+				},
+				"lib/core/utils.js": {
+					"diff": "--- published/lib/core/utils.js\n+++ rebuilt/lib/core/utils.js\n@@ -1,5 +1,5 @@\n-var toSJISFunction\n-var CODEWORDS_COUNT = [\n+let toSJISFunction\n+const CODEWORDS_COUNT = [\n   0, // Not used\n   26, 44, 70, 100, 134, 172, 196, 242, 292, 346,\n   404, 466, 532, 581, 655, 733, 815, 901, 991, 1085,\n@@ -36,7 +36,7 @@\n  * @return {Number}      Encoded value\n  */\n exports.getBCHDigit = function (data) {\n-  var digit = 0\n+  let digit = 0\n \n   while (data !== 0) {\n     digit++\n",
+					"match": false,
+					"packageHash": "ff8a0144d55bdea8a2d8553ae31a046998e86b77ff9324087821f6b5686e7f37",
+					"size": 1619,
+					"sourceHash": "1b66145cb9afddadf46ea7314b168e0b8369b2ab4938256fe64bd1c465a473bd",
+					"status": "content"
+				},
+				"lib/core/version.js": {
+					"diff": "--- published/lib/core/version.js\n+++ rebuilt/lib/core/version.js\n@@ -1,16 +1,15 @@\n-var Utils = require('./utils')\n-var ECCode = require('./error-correction-code')\n-var ECLevel = require('./error-correction-level')\n-var Mode = require('./mode')\n-var VersionCheck = require('./version-check')\n-var isArray = require('isarray')\n+const Utils = require('./utils')\n+const ECCode = require('./error-correction-code')\n+const ECLevel = require('./error-correction-level')\n+const Mode = require('./mode')\n+const VersionCheck = require('./version-check')\n \n // Generator polynomial used to encode version information\n-var G18 = (1 << 12) | (1 << 11) | (1 << 10) | (1 << 9) | (1 << 8) | (1 << 5) | (1 << 2) | (1 << 0)\n-var G18_BCH = Utils.getBCHDigit(G18)\n+const G18 = (1 << 12) | (1 << 11) | (1 << 10) | (1 << 9) | (1 << 8) | (1 << 5) | (1 << 2) | (1 << 0)\n+const G18_BCH = Utils.getBCHDigit(G18)\n \n function getBestVersionForDataLength (mode, length, errorCorrectionLevel) {\n-  for (var currentVersion = 1; currentVersion <= 40; currentVersion++) {\n+  for (let currentVersion = 1; currentVersion <= 40; currentVersion++) {\n     if (length <= exports.getCapacity(currentVersion, errorCorrectionLevel, mode)) {\n       return currentVersion\n     }\n@@ -25,10 +24,10 @@\n }\n \n function getTotalBitsFromDataArray (segments, version) {\n-  var totalBits = 0\n+  let totalBits = 0\n \n   segments.forEach(function (data) {\n-    var reservedBits = getReservedBitsCount(data.mode, version)\n+    const reservedBits = getReservedBitsCount(data.mode, version)\n     totalBits += reservedBits + data.getBitsLength()\n   })\n \n@@ -36,8 +35,8 @@\n }\n \n function getBestVersionForMixedData (segments, errorCorrectionLevel) {\n-  for (var currentVersion = 1; currentVersion <= 40; currentVersion++) {\n-    var length = getTotalBitsFromDataArray(segments, currentVersion)\n+  for (let currentVersion = 1; currentVersion <= 40; currentVersion++) {\n+    const length = getTotalBitsFromDataArray(segments, currentVersion)\n     if (length <= exports.getCapacity(currentVersion, errorCorrectionLevel, Mode.MIXED)) {\n       return currentVersion\n     }\n@@ -80,17 +79,17 @@\n   if (typeof mode === 'undefined') mode = Mode.BYTE\n \n   // Total codewords for this QR code version (Data + Error correction)\n-  var totalCodewords = Utils.getSymbolTotalCodewords(version)\n+  const totalCodewords = Utils.getSymbolTotalCodewords(version)\n \n   // Total number of error correction codewords\n-  var ecTotalCodewords = ECCode.getTotalCodewordsCount(version, errorCorrectionLevel)\n+  const ecTotalCodewords = ECCode.getTotalCodewordsCount(version, errorCorrectionLevel)\n \n   // Total number of data codewords\n-  var dataTotalCodewordsBits = (totalCodewords - ecTotalCodewords) * 8\n+  const dataTotalCodewordsBits = (totalCodewords - ecTotalCodewords) * 8\n \n   if (mode === Mode.MIXED) return dataTotalCodewordsBits\n \n-  var usableBits = dataTotalCodewordsBits - getReservedBitsCount(mode, version)\n+  const usableBits = dataTotalCodewordsBits - getReservedBitsCount(mode, version)\n \n   // Return max number of storable codewords\n   switch (mode) {\n@@ -118,11 +117,11 @@\n  * @return {Number}                          QR Code version\n  */\n exports.getBestVersionForData = function getBestVersionForData (data, errorCorrectionLevel) {\n-  var seg\n+  let seg\n \n-  var ecl = ECLevel.from(errorCorrectionLevel, ECLevel.M)\n+  const ecl = ECLevel.from(errorCorrectionLevel, ECLevel.M)\n \n-  if (isArray(data)) {\n+  if (Array.isArray(data)) {\n     if (data.length > 1) {\n       return getBestVersionForMixedData(data, ecl)\n     }\n@@ -154,7 +153,7 @@\n     throw new Error('Invalid QR Code version')\n   }\n \n-  var d = version << 12\n+  let d = version << 12\n \n   while (Utils.getBCHDigit(d) - G18_BCH >= 0) {\n     d ^= (G18 << (Utils.getBCHDigit(d) - G18_BCH))\n",
+					"match": false,
+					"packageHash": "a65265b60d434f20436c2d587b5b933e76022ba9e0a70afb953c4a6eacf62989",
+					"size": 4927,
+					"sourceHash": "1221665a29e6927d3823912bde8bd711c114c61188d7ce862997a33d47fcfba9",
+					"status": "content"
+				},
+				"lib/renderer/canvas.js": {
+					"diff": "--- published/lib/renderer/canvas.js\n+++ rebuilt/lib/renderer/canvas.js\n@@ -1,4 +1,4 @@\n-var Utils = require('./utils')\n+const Utils = require('./utils')\n \n function clearCanvas (ctx, canvas, size) {\n   ctx.clearRect(0, 0, canvas.width, canvas.height)\n@@ -19,8 +19,8 @@\n }\n \n exports.render = function render (qrData, canvas, options) {\n-  var opts = options\n-  var canvasEl = canvas\n+  let opts = options\n+  let canvasEl = canvas\n \n   if (typeof opts === 'undefined' && (!canvas || !canvas.getContext)) {\n     opts = canvas\n@@ -32,10 +32,10 @@\n   }\n \n   opts = Utils.getOptions(opts)\n-  var size = Utils.getImageWidth(qrData.modules.size, opts)\n+  const size = Utils.getImageWidth(qrData.modules.size, opts)\n \n-  var ctx = canvasEl.getContext('2d')\n-  var image = ctx.createImageData(size, size)\n+  const ctx = canvasEl.getContext('2d')\n+  const image = ctx.createImageData(size, size)\n   Utils.qrToImageData(image.data, qrData, opts)\n \n   clearCanvas(ctx, canvasEl, size)\n@@ -45,7 +45,7 @@\n }\n \n exports.renderToDataURL = function renderToDataURL (qrData, canvas, options) {\n-  var opts = options\n+  let opts = options\n \n   if (typeof opts === 'undefined' && (!canvas || !canvas.getContext)) {\n     opts = canvas\n@@ -54,10 +54,10 @@\n \n   if (!opts) opts = {}\n \n-  var canvasEl = exports.render(qrData, canvas, opts)\n+  const canvasEl = exports.render(qrData, canvas, opts)\n \n-  var type = opts.type || 'image/png'\n-  var rendererOpts = opts.rendererOpts || {}\n+  const type = opts.type || 'image/png'\n+  const rendererOpts = opts.rendererOpts || {}\n \n   return canvasEl.toDataURL(type, rendererOpts.quality)\n }\n",
+					"match": false,
+					"packageHash": "289ccfd3af5019d3909c16f287a516b2953852de2f1b14c22927a2b18d20c545",
+					"size": 1487,
+					"sourceHash": "0ce857661e234786295c9b4042cad6dc1f4d7a496c4990f52870d2bc4ab1e6a9",
+					"status": "content"
+				},
+				"lib/renderer/png.js": {
+					"diff": "--- published/lib/renderer/png.js\n+++ rebuilt/lib/renderer/png.js\n@@ -1,16 +1,16 @@\n-var fs = require('fs')\n-var PNG = require('pngjs').PNG\n-var Utils = require('./utils')\n+const fs = require('fs')\n+const PNG = require('pngjs').PNG\n+const Utils = require('./utils')\n \n exports.render = function render (qrData, options) {\n-  var opts = Utils.getOptions(options)\n-  var pngOpts = opts.rendererOpts\n-  var size = Utils.getImageWidth(qrData.modules.size, opts)\n+  const opts = Utils.getOptions(options)\n+  const pngOpts = opts.rendererOpts\n+  const size = Utils.getImageWidth(qrData.modules.size, opts)\n \n   pngOpts.width = size\n   pngOpts.height = size\n \n-  var pngImage = new PNG(pngOpts)\n+  const pngImage = new PNG(pngOpts)\n   Utils.qrToImageData(pngImage.data, qrData, opts)\n \n   return pngImage\n@@ -24,7 +24,7 @@\n \n   exports.renderToBuffer(qrData, options, function (err, output) {\n     if (err) cb(err)\n-    var url = 'data:image/png;base64,'\n+    let url = 'data:image/png;base64,'\n     url += output.toString('base64')\n     cb(null, url)\n   })\n@@ -36,8 +36,8 @@\n     options = undefined\n   }\n \n-  var png = exports.render(qrData, options)\n-  var buffer = []\n+  const png = exports.render(qrData, options)\n+  const buffer = []\n \n   png.on('error', cb)\n \n@@ -58,14 +58,21 @@\n     options = undefined\n   }\n \n-  var stream = fs.createWriteStream(path)\n-  stream.on('error', cb)\n-  stream.on('close', cb)\n+  let called = false\n+  const done = (...args) => {\n+    if (called) return\n+    called = true\n+    cb.apply(null, args)\n+  }\n+  const stream = fs.createWriteStream(path)\n+\n+  stream.on('error', done)\n+  stream.on('close', done)\n \n   exports.renderToFileStream(stream, qrData, options)\n }\n \n exports.renderToFileStream = function renderToFileStream (stream, qrData, options) {\n-  var png = exports.render(qrData, options)\n+  const png = exports.render(qrData, options)\n   png.pack().pipe(stream)\n }\n",
+					"match": false,
+					"packageHash": "4b4c9e1aa2db630eef9aa38528b2a0612ed1a940dbd4b493e878a59fe6563583",
+					"size": 1628,
+					"sourceHash": "26c35ca2087bde13f91a69cbb755870b6e9ca97e2ca9999f11afaafda16a681a",
+					"status": "content"
+				},
+				"lib/renderer/svg-tag.js": {
+					"diff": "--- published/lib/renderer/svg-tag.js\n+++ rebuilt/lib/renderer/svg-tag.js\n@@ -1,8 +1,8 @@\n-var Utils = require('./utils')\n+const Utils = require('./utils')\n \n function getColorAttrib (color, attrib) {\n-  var alpha = color.a / 255\n-  var str = attrib + '=\"' + color.hex + '\"'\n+  const alpha = color.a / 255\n+  const str = attrib + '=\"' + color.hex + '\"'\n \n   return alpha < 1\n     ? str + ' ' + attrib + '-opacity=\"' + alpha.toFixed(2).slice(1) + '\"'\n@@ -10,21 +10,21 @@\n }\n \n function svgCmd (cmd, x, y) {\n-  var str = cmd + x\n+  let str = cmd + x\n   if (typeof y !== 'undefined') str += ' ' + y\n \n   return str\n }\n \n function qrToPath (data, size, margin) {\n-  var path = ''\n-  var moveBy = 0\n-  var newRow = false\n-  var lineLength = 0\n-\n-  for (var i = 0; i < data.length; i++) {\n-    var col = Math.floor(i % size)\n-    var row = Math.floor(i / size)\n+  let path = ''\n+  let moveBy = 0\n+  let newRow = false\n+  let lineLength = 0\n+\n+  for (let i = 0; i < data.length; i++) {\n+    const col = Math.floor(i % size)\n+    const row = Math.floor(i / size)\n \n     if (!col && !newRow) newRow = true\n \n@@ -53,25 +53,25 @@\n }\n \n exports.render = function render (qrData, options, cb) {\n-  var opts = Utils.getOptions(options)\n-  var size = qrData.modules.size\n-  var data = qrData.modules.data\n-  var qrcodesize = size + opts.margin * 2\n+  const opts = Utils.getOptions(options)\n+  const size = qrData.modules.size\n+  const data = qrData.modules.data\n+  const qrcodesize = size + opts.margin * 2\n \n-  var bg = !opts.color.light.a\n+  const bg = !opts.color.light.a\n     ? ''\n     : '<path ' + getColorAttrib(opts.color.light, 'fill') +\n       ' d=\"M0 0h' + qrcodesize + 'v' + qrcodesize + 'H0z\"/>'\n \n-  var path =\n+  const path =\n     '<path ' + getColorAttrib(opts.color.dark, 'stroke') +\n     ' d=\"' + qrToPath(data, size, opts.margin) + '\"/>'\n \n-  var viewBox = 'viewBox=\"' + '0 0 ' + qrcodesize + ' ' + qrcodesize + '\"'\n+  const viewBox = 'viewBox=\"' + '0 0 ' + qrcodesize + ' ' + qrcodesize + '\"'\n \n-  var width = !opts.width ? '' : 'width=\"' + opts.width + '\" height=\"' + opts.width + '\" '\n+  const width = !opts.width ? '' : 'width=\"' + opts.width + '\" height=\"' + opts.width + '\" '\n \n-  var svgTag = '<svg xmlns=\"http://www.w3.org/2000/svg\" ' + width + viewBox + ' shape-rendering=\"crispEdges\">' + bg + path + '</svg>\\n'\n+  const svgTag = '<svg xmlns=\"http://www.w3.org/2000/svg\" ' + width + viewBox + ' shape-rendering=\"crispEdges\">' + bg + path + '</svg>\\n'\n \n   if (typeof cb === 'function') {\n     cb(null, svgTag)\n",
+					"match": false,
+					"packageHash": "bc09a1ebd032bbcd19dd779dbcb3c92b7541536ec3ba0a6c531bf49d3c4db5ea",
+					"size": 1943,
+					"sourceHash": "2f733e88d0b0155fae4aa4827de0fb9ae73cbbfdfc0cae52dc9d5ed17ae0447d",
+					"status": "content"
+				},
+				"lib/renderer/svg.js": {
+					"diff": "--- published/lib/renderer/svg.js\n+++ rebuilt/lib/renderer/svg.js\n@@ -1,4 +1,4 @@\n-var svgTagRenderer = require('./svg-tag')\n+const svgTagRenderer = require('./svg-tag')\n \n exports.render = svgTagRenderer.render\n \n@@ -8,10 +8,10 @@\n     options = undefined\n   }\n \n-  var fs = require('fs')\n-  var svgTag = exports.render(qrData, options)\n+  const fs = require('fs')\n+  const svgTag = exports.render(qrData, options)\n \n-  var xmlStr = '<?xml version=\"1.0\" encoding=\"utf-8\"?>' +\n+  const xmlStr = '<?xml version=\"1.0\" encoding=\"utf-8\"?>' +\n     '<!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1//EN\" \"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd\">' +\n     svgTag\n \n",
+					"match": false,
+					"packageHash": "4595cb484b108fb0eda2a8fbc32000b868580d8b7a6cda0cfbb097d89d819094",
+					"size": 524,
+					"sourceHash": "21a5e38ca570d96c9be324c9395950e8959b2d82f23c256614ac3f517d1337ef",
+					"status": "content"
+				},
+				"lib/renderer/terminal.js": {
+					"diff": "--- published/lib/renderer/terminal.js\n+++ rebuilt/lib/renderer/terminal.js\n@@ -1,49 +1,9 @@\n-// var Utils = require('./utils')\n+const big = require('./terminal/terminal')\n+const small = require('./terminal/terminal-small')\n \n exports.render = function (qrData, options, cb) {\n-  var size = qrData.modules.size\n-  var data = qrData.modules.data\n-\n-  // var opts = Utils.getOptions(options)\n-\n-  // use same scheme as https://github.com/gtanner/qrcode-terminal because it actually works! =)\n-  var black = '\\x1b[40m  \\x1b[0m'\n-  var white = '\\x1b[47m  \\x1b[0m'\n-\n-  var output = ''\n-  var hMargin = Array(size + 3).join(white)\n-  var vMargin = Array(2).join(white)\n-\n-  output += hMargin + '\\n'\n-  for (var i = 0; i < size; ++i) {\n-    output += white\n-    for (var j = 0; j < size; j++) {\n-      // var topModule = data[i * size + j]\n-      // var bottomModule = data[(i + 1) * size + j]\n-\n-      output += data[i * size + j] ? black : white// getBlockChar(topModule, bottomModule)\n-    }\n-    // output += white+'\\n'\n-    output += vMargin + '\\n'\n-  }\n-\n-  output += hMargin + '\\n'\n-\n-  if (typeof cb === 'function') {\n-    cb(null, output)\n-  }\n-\n-  return output\n-}\n-/*\n-exports.renderToFile = function renderToFile (path, qrData, options, cb) {\n-  if (typeof cb === 'undefined') {\n-    cb = options\n-    options = undefined\n+  if (options && options.small) {\n+    return small.render(qrData, options, cb)\n   }\n-\n-  var fs = require('fs')\n-  var utf8 = exports.render(qrData, options)\n-  fs.writeFile(path, utf8, cb)\n+  return big.render(qrData, options, cb)\n }\n-*/\n",
+					"match": false,
+					"packageHash": "1cd7a941ea3dc0f9a72cc3302c5ff5d9ba280a7e122d1526932eae8cbbe5a62e",
+					"size": 1208,
+					"sourceHash": "227348f2f20ab09dda29e404c95a58a90b25c5511f9208c71516dc69f0b88fa3",
+					"status": "content"
+				},
+				"lib/renderer/utf8.js": {
+					"diff": "--- published/lib/renderer/utf8.js\n+++ rebuilt/lib/renderer/utf8.js\n@@ -1,39 +1,50 @@\n-var Utils = require('./utils')\n+const Utils = require('./utils')\n \n-var BLOCK_CHAR = {\n+const BLOCK_CHAR = {\n   WW: ' ',\n   WB: '▄',\n   BB: '█',\n   BW: '▀'\n }\n \n-function getBlockChar (top, bottom) {\n-  if (top && bottom) return BLOCK_CHAR.BB\n-  if (top && !bottom) return BLOCK_CHAR.BW\n-  if (!top && bottom) return BLOCK_CHAR.WB\n-  return BLOCK_CHAR.WW\n+const INVERTED_BLOCK_CHAR = {\n+  BB: ' ',\n+  BW: '▄',\n+  WW: '█',\n+  WB: '▀'\n+}\n+\n+function getBlockChar (top, bottom, blocks) {\n+  if (top && bottom) return blocks.BB\n+  if (top && !bottom) return blocks.BW\n+  if (!top && bottom) return blocks.WB\n+  return blocks.WW\n }\n \n exports.render = function (qrData, options, cb) {\n-  var size = qrData.modules.size\n-  var data = qrData.modules.data\n+  const opts = Utils.getOptions(options)\n+  let blocks = BLOCK_CHAR\n+  if (opts.color.dark.hex === '#ffffff' || opts.color.light.hex === '#000000') {\n+    blocks = INVERTED_BLOCK_CHAR\n+  }\n \n-  var opts = Utils.getOptions(options)\n+  const size = qrData.modules.size\n+  const data = qrData.modules.data\n \n-  var output = ''\n-  var hMargin = Array(size + (opts.margin * 2) + 1).join(BLOCK_CHAR.WW)\n+  let output = ''\n+  let hMargin = Array(size + (opts.margin * 2) + 1).join(blocks.WW)\n   hMargin = Array((opts.margin / 2) + 1).join(hMargin + '\\n')\n \n-  var vMargin = Array(opts.margin + 1).join(BLOCK_CHAR.WW)\n+  const vMargin = Array(opts.margin + 1).join(blocks.WW)\n \n   output += hMargin\n-  for (var i = 0; i < size; i += 2) {\n+  for (let i = 0; i < size; i += 2) {\n     output += vMargin\n-    for (var j = 0; j < size; j++) {\n-      var topModule = data[i * size + j]\n-      var bottomModule = data[(i + 1) * size + j]\n+    for (let j = 0; j < size; j++) {\n+      const topModule = data[i * size + j]\n+      const bottomModule = data[(i + 1) * size + j]\n \n-      output += getBlockChar(topModule, bottomModule)\n+      output += getBlockChar(topModule, bottomModule, blocks)\n     }\n \n     output += vMargin + '\\n'\n@@ -54,7 +65,7 @@\n     options = undefined\n   }\n \n-  var fs = require('fs')\n-  var utf8 = exports.render(qrData, options)\n+  const fs = require('fs')\n+  const utf8 = exports.render(qrData, options)\n   fs.writeFile(path, utf8, cb)\n }\n",
+					"match": false,
+					"packageHash": "373f539efe14ad6b0ff0b072679aea8c63d506997b1b05885475060c23fb2870",
+					"size": 1341,
+					"sourceHash": "a47dc2b5147bff1e503e299d9effb2b83ddd379e976e9fe66f4d4519034565f4",
+					"status": "content"
+				},
+				"lib/renderer/utils.js": {
+					"diff": "--- published/lib/renderer/utils.js\n+++ rebuilt/lib/renderer/utils.js\n@@ -1,9 +1,13 @@\n function hex2rgba (hex) {\n+  if (typeof hex === 'number') {\n+    hex = hex.toString()\n+  }\n+\n   if (typeof hex !== 'string') {\n     throw new Error('Color should be defined as hex string')\n   }\n \n-  var hexCode = hex.slice().replace('#', '').split('')\n+  let hexCode = hex.slice().replace('#', '').split('')\n   if (hexCode.length < 3 || hexCode.length === 5 || hexCode.length > 8) {\n     throw new Error('Invalid hex color: ' + hex)\n   }\n@@ -18,7 +22,7 @@\n   // Add default alpha value\n   if (hexCode.length === 6) hexCode.push('F', 'F')\n \n-  var hexValue = parseInt(hexCode.join(''), 16)\n+  const hexValue = parseInt(hexCode.join(''), 16)\n \n   return {\n     r: (hexValue >> 24) & 255,\n@@ -33,12 +37,14 @@\n   if (!options) options = {}\n   if (!options.color) options.color = {}\n \n-  var margin = typeof options.margin === 'undefined' ||\n+  const margin = typeof options.margin === 'undefined' ||\n     options.margin === null ||\n-    options.margin < 0 ? 4 : options.margin\n+    options.margin < 0\n+    ? 4\n+    : options.margin\n \n-  var width = options.width && options.width >= 21 ? options.width : undefined\n-  var scale = options.scale || 4\n+  const width = options.width && options.width >= 21 ? options.width : undefined\n+  const scale = options.scale || 4\n \n   return {\n     width: width,\n@@ -60,27 +66,27 @@\n }\n \n exports.getImageWidth = function getImageWidth (qrSize, opts) {\n-  var scale = exports.getScale(qrSize, opts)\n+  const scale = exports.getScale(qrSize, opts)\n   return Math.floor((qrSize + opts.margin * 2) * scale)\n }\n \n exports.qrToImageData = function qrToImageData (imgData, qr, opts) {\n-  var size = qr.modules.size\n-  var data = qr.modules.data\n-  var scale = exports.getScale(size, opts)\n-  var symbolSize = Math.floor((size + opts.margin * 2) * scale)\n-  var scaledMargin = opts.margin * scale\n-  var palette = [opts.color.light, opts.color.dark]\n-\n-  for (var i = 0; i < symbolSize; i++) {\n-    for (var j = 0; j < symbolSize; j++) {\n-      var posDst = (i * symbolSize + j) * 4\n-      var pxColor = opts.color.light\n+  const size = qr.modules.size\n+  const data = qr.modules.data\n+  const scale = exports.getScale(size, opts)\n+  const symbolSize = Math.floor((size + opts.margin * 2) * scale)\n+  const scaledMargin = opts.margin * scale\n+  const palette = [opts.color.light, opts.color.dark]\n+\n+  for (let i = 0; i < symbolSize; i++) {\n+    for (let j = 0; j < symbolSize; j++) {\n+      let posDst = (i * symbolSize + j) * 4\n+      let pxColor = opts.color.light\n \n       if (i >= scaledMargin && j >= scaledMargin &&\n         i < symbolSize - scaledMargin && j < symbolSize - scaledMargin) {\n-        var iSrc = Math.floor((i - scaledMargin) / scale)\n-        var jSrc = Math.floor((j - scaledMargin) / scale)\n+        const iSrc = Math.floor((i - scaledMargin) / scale)\n+        const jSrc = Math.floor((j - scaledMargin) / scale)\n         pxColor = palette[data[iSrc * size + jSrc] ? 1 : 0]\n       }\n \n",
+					"match": false,
+					"packageHash": "880b5fc75218b98483bb495d8eca2e6392369752a798f5ae1be8b3930e9c5212",
+					"size": 2797,
+					"sourceHash": "03ffb1b5f7e629bef61a83835107b391efc0b7a71ab9329a950708b20f361b87",
+					"status": "content"
+				},
+				"lib/server.js": {
+					"diff": "--- published/lib/server.js\n+++ rebuilt/lib/server.js\n@@ -1,9 +1,9 @@\n-var canPromise = require('can-promise')\n-var QRCode = require('./core/qrcode')\n-var PngRenderer = require('./renderer/png')\n-var Utf8Renderer = require('./renderer/utf8')\n-var TerminalRenderer = require('./renderer/terminal')\n-var SvgRenderer = require('./renderer/svg')\n+const canPromise = require('./can-promise')\n+const QRCode = require('./core/qrcode')\n+const PngRenderer = require('./renderer/png')\n+const Utf8Renderer = require('./renderer/utf8')\n+const TerminalRenderer = require('./renderer/terminal')\n+const SvgRenderer = require('./renderer/svg')\n \n function checkParams (text, opts, cb) {\n   if (typeof text === 'undefined') {\n@@ -68,7 +68,7 @@\n   if (!params.cb) {\n     return new Promise(function (resolve, reject) {\n       try {\n-        var data = QRCode.create(text, params.opts)\n+        const data = QRCode.create(text, params.opts)\n         return renderFunc(data, params.opts, function (err, data) {\n           return err ? reject(err) : resolve(data)\n         })\n@@ -79,7 +79,7 @@\n   }\n \n   try {\n-    var data = QRCode.create(text, params.opts)\n+    const data = QRCode.create(text, params.opts)\n     return renderFunc(data, params.opts, params.cb)\n   } catch (e) {\n     params.cb(e)\n@@ -91,20 +91,21 @@\n exports.toCanvas = require('./browser').toCanvas\n \n exports.toString = function toString (text, opts, cb) {\n-  var params = checkParams(text, opts, cb)\n-  var renderer = getStringRendererFromType(params.opts.type)\n+  const params = checkParams(text, opts, cb)\n+  const type = params.opts ? params.opts.type : undefined\n+  const renderer = getStringRendererFromType(type)\n   return render(renderer.render, text, params)\n }\n \n exports.toDataURL = function toDataURL (text, opts, cb) {\n-  var params = checkParams(text, opts, cb)\n-  var renderer = getRendererFromType(params.opts.type)\n+  const params = checkParams(text, opts, cb)\n+  const renderer = getRendererFromType(params.opts.type)\n   return render(renderer.renderToDataURL, text, params)\n }\n \n exports.toBuffer = function toBuffer (text, opts, cb) {\n-  var params = checkParams(text, opts, cb)\n-  var renderer = getRendererFromType(params.opts.type)\n+  const params = checkParams(text, opts, cb)\n+  const renderer = getRendererFromType(params.opts.type)\n   return render(renderer.renderToBuffer, text, params)\n }\n \n@@ -117,10 +118,10 @@\n     throw new Error('Too few arguments provided')\n   }\n \n-  var params = checkParams(text, opts, cb)\n-  var type = params.opts.type || getTypeFromFilename(path)\n-  var renderer = getRendererFromType(type)\n-  var renderToFile = renderer.renderToFile.bind(null, path)\n+  const params = checkParams(text, opts, cb)\n+  const type = params.opts.type || getTypeFromFilename(path)\n+  const renderer = getRendererFromType(type)\n+  const renderToFile = renderer.renderToFile.bind(null, path)\n \n   return render(renderToFile, text, params)\n }\n@@ -130,8 +131,8 @@\n     throw new Error('Too few arguments provided')\n   }\n \n-  var params = checkParams(text, opts, stream.emit.bind(stream, 'error'))\n-  var renderer = getRendererFromType('png') // Only png support for now\n-  var renderToFileStream = renderer.renderToFileStream.bind(null, stream)\n+  const params = checkParams(text, opts, stream.emit.bind(stream, 'error'))\n+  const renderer = getRendererFromType('png') // Only png support for now\n+  const renderToFileStream = renderer.renderToFileStream.bind(null, stream)\n   render(renderToFileStream, text, params)\n }\n",
+					"match": false,
+					"packageHash": "51819cba3fdcac93a2b6f9e345d61357e07a4120bd44e364caa8e032f45a5990",
+					"size": 3481,
+					"sourceHash": "67555d163f483ee6309fa8f5a038ea2b649347f159c2b31159fdf073ab71a744",
+					"status": "content"
+				},
+				"lib/utils/buffer.js": {
+					"match": false,
+					"packageHash": "c730af16ef8c9ed4ad9a44efb6cec4b15a3c12c7b7888d9a41be6c20378d780d",
+					"size": 42,
+					"status": "missing-in-source"
+				},
+				"lib/utils/typedarray-buffer.js": {
+					"match": false,
+					"packageHash": "cb6589d636c06e7855ed412844f36f1bad0c20fce79a593f7a8578b311cc0a2b",
+					"size": 12689,
+					"status": "missing-in-source"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -1,20 +1,21 @@\n {\n   \"name\": \"qrcode\",\n   \"description\": \"QRCode / 2d Barcode api with both server side and client side support using canvas\",\n-  \"version\": \"1.3.2\",\n+  \"version\": \"1.5.4\",\n   \"author\": \"Ryan Day <soldair@gmail.com>\",\n   \"contributors\": [\n-    \"Vincenzo Greco <greco.vincenzo@gmail.com>\"\n+    \"Vincenzo Greco <greco.vincenzo@gmail.com>\",\n+    \"Linus Unnebäck <linus@folkdatorn.se>\"\n   ],\n   \"keywords\": [\n+    \"qr\",\n+    \"code\",\n     \"canvas\",\n-    \"qrcode\",\n-    \"barcode\"\n+    \"qrcode\"\n   ],\n   \"main\": \"./lib/index.js\",\n   \"browser\": {\n     \"./lib/index.js\": \"./lib/browser.js\",\n-    \"./lib/utils/buffer.js\": \"./lib/utils/typedarray-buffer.js\",\n     \"fs\": false\n   },\n   \"files\": [\n@@ -28,44 +29,49 @@\n   \"scripts\": {\n     \"lint\": \"standard\",\n     \"pretest\": \"npm run lint\",\n-    \"test\": \"node test.js\",\n-    \"build\": \"node build.js\",\n-    \"prepublish\": \"npm run build\"\n+    \"test\": \"node --throw-deprecation test.js\",\n+    \"build\": \"rollup -c\",\n+    \"prepublish\": \"npm run build\",\n+    \"browser\": \"node examples/clientsideserver.js\"\n   },\n   \"bin\": {\n     \"qrcode\": \"./bin/qrcode\"\n   },\n   \"dependencies\": {\n-    \"can-promise\": \"0.0.1\",\n     \"dijkstrajs\": \"^1.0.1\",\n-    \"isarray\": \"^2.0.1\",\n-    \"pngjs\": \"^3.3.0\",\n-    \"yargs\": \"^8.0.2\"\n+    \"pngjs\": \"^5.0.0\",\n+    \"yargs\": \"^15.3.1\"\n   },\n   \"devDependencies\": {\n-    \"browserify\": \"^14.1.0\",\n-    \"canvas\": \"^1.6.11\",\n-    \"canvasutil\": \"*\",\n-    \"colors\": \"*\",\n-    \"express\": \"2.5.x\",\n-    \"htmlparser2\": \"^3.9.2\",\n-    \"os-tmpdir\": \"^1.0.2\",\n-    \"sinon\": \"^1.17.7\",\n-    \"standard\": \"^9.0.2\",\n-    \"tap\": \"^10.3.1\",\n-    \"uglify-js\": \"^2.7.5\"\n+    \"@babel/core\": \"^7.9.0\",\n+    \"@babel/preset-env\": \"^7.9.5\",\n+    \"@rollup/plugin-commonjs\": \"^11.1.0\",\n+    \"@rollup/plugin-node-resolve\": \"^7.1.3\",\n+    \"browserify\": \"^16.5.1\",\n+    \"canvas\": \"^2.8.0\",\n+    \"canvasutil\": \"0.0.4\",\n+    \"colors\": \"^1.4.0\",\n+    \"express\": \"^4.17.1\",\n+    \"htmlparser2\": \"^4.1.0\",\n+    \"rollup\": \"^2.6.1\",\n+    \"rollup-plugin-babel\": \"^4.4.0\",\n+    \"rollup-plugin-terser\": \"^5.3.0\",\n+    \"sinon\": \"^9.0.2\",\n+    \"standard\": \"^16.0.4\",\n+    \"tap\": \"^16.2.0\"\n   },\n   \"repository\": {\n     \"type\": \"git\",\n     \"url\": \"git://github.com/soldair/node-qrcode.git\"\n   },\n   \"engines\": {\n-    \"node\": \">=4\"\n+    \"node\": \">=10.13.0\"\n   },\n   \"standard\": {\n     \"ignore\": [\n       \"build/\",\n-      \"examples/vendors/\"\n+      \"examples/vendors/\",\n+      \"lib/core/regex.js\"\n     ]\n   }\n }\n",
+					"match": false,
+					"packageHash": "3efe42cc49451141a92751376c44a8b1b591cb3c09020b00b66a2d34796e2eca",
+					"size": 1524,
+					"sourceHash": "cbe26d7282c802f4ab9c1f790c5d8450d2b5c82e8bb5f67e3a5c2641ea347d1d",
+					"status": "content"
+				},
+				"helper/to-sjis-browser.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/renderer/terminal/terminal-small.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/renderer/terminal/terminal.js": {
+					"match": false,
+					"status": "missing-in-package"
+				}
+			},
+			"summary": {
+				"differentFiles": 34,
+				"matchingFiles": 4,
+				"missingInPackage": 3,
+				"missingInSource": 8,
+				"score": 0.08163265306122448,
+				"totalFiles": 49
+			}
+		}
+	}
+]
