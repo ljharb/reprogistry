@@ -1,0 +1,55 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-06T22:37:01.052Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:11.7.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "react-virtualized@4.4.2",
+			"name": "react-virtualized",
+			"version": "4.4.2",
+			"location": "https://registry.npmjs.org/react-virtualized/-/react-virtualized-4.4.2.tgz",
+			"integrity": "sha512-GlIYdeEIIa2Ln+ccxeL23wza4/+E4dR7vG0OebUoUWZwRKOC4855446g7uOH38PN3kHLbl1Jfik8o6r94ulYhA==",
+			"publishedAt": "2016-02-01T17:54:18.546Z",
+			"publishedWith": {
+				"node": "5.3.0",
+				"npm": "3.3.12"
+			}
+		},
+		"source": {
+			"integrity": null,
+			"location": "git+https://github.com/bvaughn/react-virtualized.git",
+			"spec": "github:bvaughn/react-virtualized#05553361764f05ccd5281f525bf50137b3c6f766"
+		},
+		"comparisonHash": "9ef46a5bd31291e57cbab41e2f17c57bd6da0b5b",
+		"diff": {
+			"files": {
+				".npmignore": {
+					"match": false,
+					"packageHash": "e91929c4a2840cf09e5bc8628e743335b6756be8d6c013a27b57a521f849993b",
+					"size": 43,
+					"status": "missing-in-source"
+				},
+				"source/Grid/Grid.example.js": {
+					"diff": "--- published/source/Grid/Grid.example.js\n+++ rebuilt/source/Grid/Grid.example.js\n@@ -3,9 +3,10 @@\n import React, { Component, PropTypes } from 'react'\n import { ContentBox, ContentBoxHeader, ContentBoxParagraph } from '../demo/ContentBox'\n import { LabeledInput, InputRow } from '../demo/LabeledInput'\n+import AutoSizer from '../AutoSizer'\n import Grid from './Grid'\n import shouldPureComponentUpdate from 'react-pure-render/function'\n-// import cn from 'classnames'\n+import cn from 'classnames'\n import styles from './Grid.example.css'\n \n export default class GridExample extends Component {\n@@ -113,20 +114,22 @@\n         </InputRow>\n \n         <div>\n+        <AutoSizer disableHeight>\n           <Grid\n             ref='Grid'\n             className={styles.Grid}\n-            columnWidth={50}\n+            columnWidth={this._getColumnWidth}\n             columnsCount={columnsCount}\n-            height={100}\n+            height={height}\n             noContentRenderer={this._noContentRenderer}\n             renderCell={this._renderCell}\n-            rowHeight={20}\n+            rowHeight={useDynamicRowHeights ? this._getRowHeight : rowHeight}\n             rowsCount={rowsCount}\n             scrollToColumn={scrollToColumn}\n             scrollToRow={scrollToRow}\n-            width={200}\n+            width={0}\n           />\n+        </AutoSizer>\n         </div>\n       </ContentBox>\n     )\n@@ -163,10 +166,43 @@\n   }\n \n   _renderCell ({ columnIndex, rowIndex }) {\n-    // const { list } = this.props\n-    // const datum = list.get(rowIndex)\n+    const { list } = this.props\n+    const rowClass = this._getRowClassName(rowIndex)\n+    const datum = list.get(rowIndex)\n+\n+    let content\n+\n+    switch (columnIndex) {\n+      case 0:\n+        content = datum.name.charAt(0)\n+        break\n+      case 1:\n+        content = datum.name\n+        break\n+      case 2:\n+        content = datum.random\n+        break\n+      default:\n+        content = `${rowIndex}, ${columnIndex}`\n+        break\n+    }\n+\n+    const classNames = cn(rowClass, styles.cell, {\n+      [styles.centeredCell]: columnIndex > 2,\n+      [styles.letterCell]: columnIndex === 0\n+    })\n+    const style = columnIndex === 0\n+      ? { backgroundColor: datum.color }\n+      : {}\n \n-    return `${rowIndex}, ${columnIndex}`\n+    return (\n+      <div\n+        className={classNames}\n+        style={style}\n+      >\n+        {content}\n+      </div>\n+    )\n   }\n \n   _updateUseDynamicRowHeights (value) {\n",
+					"match": false,
+					"packageHash": "2e881994a2d169ae52df5f5969bbd7b8ecece0b3f20d30ed9f9d1ce3e9f00624",
+					"size": 6052,
+					"sourceHash": "722fa9083b42e2dca5dd87c5d82878d36577e487c28a2a8ae58fe6d606af2e2c",
+					"status": "content"
+				}
+			},
+			"summary": {
+				"differentFiles": 1,
+				"matchingFiles": 69,
+				"missingInPackage": 0,
+				"missingInSource": 1,
+				"score": 0.971830985915493,
+				"totalFiles": 71
+			}
+		}
+	}
+]
