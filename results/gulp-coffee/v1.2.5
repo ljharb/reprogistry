@@ -1,0 +1,129 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-06T11:07:19.834Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:11.7.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "gulp-coffee@1.2.5",
+			"name": "gulp-coffee",
+			"version": "1.2.5",
+			"location": "https://registry.npmjs.org/gulp-coffee/-/gulp-coffee-1.2.5.tgz",
+			"integrity": "sha512-NqgD6B3qRiMvbIPO4pxhKiuVg3ja22CyGbZ/ICq41k0ZO/T5JYKo0M1cM2FT66xKj11fJVX0jMv9H1bkzHIbcg==",
+			"publishedAt": "2014-01-05T15:57:26.967Z",
+			"publishedWith": {
+				"node": null,
+				"npm": "1.3.15"
+			}
+		},
+		"source": {
+			"integrity": null,
+			"location": "git://github.com/wearefractal/gulp-coffee.git",
+			"spec": "github:wearefractal/gulp-coffee#HEAD"
+		},
+		"comparisonHash": "9ef46a5bd31291e57cbab41e2f17c57bd6da0b5b",
+		"diff": {
+			"files": {
+				".npmignore": {
+					"match": false,
+					"packageHash": "9b5fc0102a30c8a3941cd5837f3f7af34439e2c50b6e5666d1225d79d112c858",
+					"size": 52,
+					"status": "missing-in-source"
+				},
+				".travis.yml": {
+					"diff": "--- published/.travis.yml\n+++ rebuilt/.travis.yml\n@@ -1,4 +1,6 @@\n+sudo: false\n language: node_js\n node_js:\n-  - 0.9\n-  - 0.10\n+  - 6\n+  - 7\n+  - 8\n",
+					"match": false,
+					"packageHash": "63fe31f379224695f1e4ea466abf8ba8d08894ff45395e3f2da1411912464031",
+					"size": 44,
+					"sourceHash": "978f48f3aeffd7b0c5c7ed7f9ca92cf26d663b8e277321b07503e4fd62c1ac8e",
+					"status": "content"
+				},
+				"LICENSE": {
+					"diff": "--- published/LICENSE\n+++ rebuilt/LICENSE\n@@ -1,4 +1,4 @@\n-Copyright (c) 2013 Fractal <contact@wearefractal.com>\n+Copyright (c) 2015 Contra <yo@contra.io>\n \n Permission is hereby granted, free of charge, to any person obtaining\n a copy of this software and associated documentation files (the\n",
+					"match": false,
+					"packageHash": "311dfa9b74d6cf31cc69e2cbe4e3249a334734709ad4555c3f6c2dceeecf773d",
+					"size": 1078,
+					"sourceHash": "87e179ee72c39585357be5f48a66cff8a2dcb331877a930f6c07e1706426e7c1",
+					"status": "content"
+				},
+				"README.md": {
+					"diff": "--- published/README.md\n+++ rebuilt/README.md\n@@ -1,9 +1,9 @@\n-![status](https://secure.travis-ci.org/wearefractal/gulp-coffee.png?branch=master)\n+[![Build Status](https://secure.travis-ci.org/gulp-community/gulp-coffee.png?branch=master)](https://travis-ci.org/gulp-community/gulp-coffee)\n \n ## Information\n \n <table>\n-<tr> \n+<tr>\n <td>Package</td><td>gulp-coffee</td>\n </tr>\n <tr>\n@@ -12,7 +12,7 @@\n </tr>\n <tr>\n <td>Node Version</td>\n-<td>>= 0.4</td>\n+<td>>= 6</td>\n </tr>\n </table>\n \n@@ -23,56 +23,64 @@\n \n gulp.task('coffee', function() {\n   gulp.src('./src/*.coffee')\n-    .pipe(coffee({bare: true}).on('error', gutil.log))\n-    .pipe(gulp.dest('./public/'))\n+    .pipe(coffee({bare: true}))\n+    .pipe(gulp.dest('./public/'));\n });\n ```\n \n-### Error handling\n+## Options\n \n-gulp-coffee will emit an error for cases such as invalid coffeescript syntax. If uncaught, the error will crash gulp.\n+- `coffee` (optional): A reference to a custom CoffeeScript version/fork (eg. `coffee: require('my-name/coffeescript')`)\n \n-You will need to attach a listener (i.e. `.on('error')`) for the error event emitted by gulp-coffee:\n+Additionally, the options object supports all options that are supported by the standard CoffeeScript compiler.\n \n-```javascript\n-var coffeeStream = coffee({bare: true});\n+## Source maps\n \n-// Attach listener\n-coffeeStream.on('error', function(err) {});\n-```\n+### gulp 3.x\n \n-In addition, you may utilize [gulp-util](https://github.com/wearefractal/gulp-util)'s logging function:\n+gulp-coffee can be used in tandem with [gulp-sourcemaps](https://github.com/floridoo/gulp-sourcemaps) to generate source maps for the coffee to javascript transition. You will need to initialize [gulp-sourcemaps](https://github.com/floridoo/gulp-sourcemaps) prior to running the gulp-coffee compiler and write the source maps after.\n \n ```javascript\n-var gutil = require('gulp-util');\n-\n-// ...\n-\n-var coffeeStream = coffee({bare: true});\n+var sourcemaps = require('gulp-sourcemaps');\n \n-// Attach listener\n-coffeeStream.on('error', gutil.log);\n+gulp.src('./src/*.coffee')\n+  .pipe(sourcemaps.init())\n+  .pipe(coffee())\n+  .pipe(sourcemaps.write())\n+  .pipe(gulp.dest('./dest/js'));\n \n+// will write the source maps inline in the compiled javascript files\n ```\n \n-Since `.on(...)` returns `this`, you can make you can compact it as inline code:\n+By default, [gulp-sourcemaps](https://github.com/floridoo/gulp-sourcemaps) writes the source maps inline in the compiled javascript files. To write them to a separate file, specify a relative file path in the `sourcemaps.write()` function.\n \n ```javascript\n+var sourcemaps = require('gulp-sourcemaps');\n \n gulp.src('./src/*.coffee')\n-  .pipe(coffee({bare: true}).on('error', gutil.log))\n-  // ...\n+  .pipe(sourcemaps.init())\n+  .pipe(coffee({ bare: true }))\n+  .pipe(sourcemaps.write('./maps'))\n+  .pipe(gulp.dest('./dest/js'));\n+\n+// will write the source maps to ./dest/js/maps\n ```\n \n-## Options\n+### gulp 4.x\n \n-The options object supports the same options as the standard CoffeeScript compiler \n+In gulp 4, sourcemaps are built-in by default.\n+\n+```js\n+gulp.src('./src/*.coffee', { sourcemaps: true })\n+  .pipe(coffee({ bare: true }))\n",
+					"match": false,
+					"packageHash": "479d6c6ee68479c9033cfc06706c9681d2152885c6abaccccc0e65f892e642ad",
+					"size": 2525,
+					"sourceHash": "597979814a3371f200aff0b8294f25d0203459aa3ccddde082ebf9104c17d120",
+					"status": "content"
+				},
+				"index.js": {
+					"diff": "--- published/index.js\n+++ rebuilt/index.js\n@@ -1,35 +1,50 @@\n-var es = require('event-stream');\n-var coffee = require('coffee-script');\n-var gutil = require('gulp-util');\n-var formatError = require('./lib/formatError');\n-var Buffer = require('buffer').Buffer;\n-\n-module.exports = function(opt){\n-  function modifyFile(file){\n-    if (file.isNull()) return this.emit('data', file); // pass along\n-    if (file.isStream()) return this.emit('error', new Error(\"gulp-coffee: Streaming not supported\"));\n+var through = require('through2');\n+var applySourceMap = require('vinyl-sourcemaps-apply');\n+var replaceExt = require('replace-ext');\n+var PluginError = require('plugin-error');\n+\n+module.exports = function (opt) {\n+  function replaceExtension(path) {\n+    path = path.replace(/\\.coffee\\.md$/, '.litcoffee');\n+    return replaceExt(path, '.js');\n+  }\n \n-    var str = file.contents.toString('utf8');\n+  function transform(file, enc, cb) {\n+    if (file.isNull()) return cb(null, file);\n+    if (file.isStream()) return cb(new PluginError('gulp-coffee', 'Streaming not supported'));\n \n-    var options = {};\n+    var data;\n+    var str = file.contents.toString('utf8');\n+    var dest = replaceExtension(file.path);\n \n-    if ( opt ) {\n-      options = {\n-        bare: opt.bare != null ? !!opt.bare : false,\n-        literate: opt.literate != null ? !!opt.literate : false,\n-        sourceMap: opt.sourceMap != null ? !!opt.sourceMap : false\n-      }\n-    }\n+    var options = Object.assign({\n+      bare: false,\n+      coffee: require('coffeescript'),\n+      header: false,\n+      sourceMap: Boolean(file.sourceMap),\n+      sourceRoot: false,\n+      literate: /\\.(litcoffee|coffee\\.md)$/.test(file.path),\n+      filename: file.path,\n+      sourceFiles: [file.relative],\n+      generatedFile: replaceExtension(file.relative)\n+    }, opt);\n \n     try {\n-      file.contents = new Buffer(coffee.compile(str, options));\n+      data = options.coffee.compile(str, options);\n     } catch (err) {\n-      var newError = formatError(file, err);\n-      return this.emit('error', newError);\n+      return cb(new PluginError('gulp-coffee', err));\n     }\n-    file.path = gutil.replaceExtension(file.path, \".js\");\n-    this.emit('data', file);\n+\n+    if (data && data.v3SourceMap && file.sourceMap) {\n+      applySourceMap(file, data.v3SourceMap);\n+      file.contents = Buffer.from(data.js);\n+    } else {\n+      file.contents = Buffer.from(data);\n+    }\n+\n+    file.path = dest;\n+    cb(null, file);\n   }\n \n-  return es.through(modifyFile);\n+  return through.obj(transform);\n };\n",
+					"match": false,
+					"packageHash": "6f65064a0eca881efa994899e47da1f57433a1748a654663424cd5f851d15da8",
+					"size": 1050,
+					"sourceHash": "281f0ead4ca145624dfeb6e5112c767aacc1b23caecae295ee95836196ea221f",
+					"status": "content"
+				},
+				"lib/formatError.js": {
+					"match": false,
+					"packageHash": "552b87551efc76359d408d4c49a79078d5384407ba1c863de490aef330b117f4",
+					"size": 200,
+					"status": "missing-in-source"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -1,33 +1,32 @@\n {\n   \"name\": \"gulp-coffee\",\n   \"description\": \"Compile CoffeeScript files\",\n-  \"version\": \"1.2.5\",\n-  \"homepage\": \"http://github.com/wearefractal/gulp-coffee\",\n-  \"repository\": \"git://github.com/wearefractal/gulp-coffee.git\",\n-  \"author\": \"Fractal <contact@wearefractal.com> (http://wearefractal.com/)\",\n+  \"version\": \"3.0.3\",\n+  \"homepage\": \"http://github.com/gulp-community/gulp-coffee\",\n+  \"repository\": \"git://github.com/gulp-community/gulp-coffee.git\",\n+  \"author\": \"Contra <yo@contra.io> (http://contra.io/)\",\n   \"main\": \"./index.js\",\n   \"keywords\": [\n     \"gulpplugin\"\n   ],\n   \"dependencies\": {\n-    \"event-stream\": \"~3.0.20\",\n-    \"coffee-script\": \"~1.6.3\",\n-    \"gulp-util\": \"~2.2.1\"\n+    \"coffeescript\": \"^2.1.0\",\n+    \"plugin-error\": \"^1.0.0\",\n+    \"replace-ext\": \"^1.0.0\",\n+    \"through2\": \"^2.0.1\",\n+    \"vinyl-sourcemaps-apply\": \"^0.2.1\"\n   },\n   \"devDependencies\": {\n-    \"mocha\": \"*\",\n-    \"should\": \"*\"\n+    \"gulp-sourcemaps\": \"^2.6.2\",\n+    \"mocha\": \"^5.0.0\",\n+    \"should\": \"^13.0.0\",\n+    \"vinyl\": \"^2.1.0\"\n   },\n   \"scripts\": {\n     \"test\": \"mocha\"\n   },\n   \"engines\": {\n-    \"node\": \">= 0.4.0\"\n+    \"node\": \">= 6.0.0\"\n   },\n-  \"licenses\": [\n-    {\n-      \"type\": \"MIT\",\n-      \"url\": \"http://github.com/wearefractal/gulp-coffee/raw/master/LICENSE\"\n-    }\n-  ]\n+  \"license\": \"MIT\"\n }\n",
+					"match": false,
+					"packageHash": "ae013cf95d82f37f4042e3a368f1a7cc0680b34bc4f8deab0b3e6a08591a3863",
+					"size": 752,
+					"sourceHash": "dc2e019c7a46cfc61a11cd56120c0db8dbf65ccdd09f701bf3629aa7dbffbc32",
+					"status": "content"
+				},
+				"test/expected/grammar-bare.js": {
+					"match": false,
+					"packageHash": "c388f970ad0a5454e1489d1e245cd200921cff00195eae40914951577aa6feb3",
+					"size": 18039,
+					"status": "missing-in-source"
+				},
+				"test/expected/grammar.js": {
+					"match": false,
+					"packageHash": "c9327bdd686d056ff65dad58e76f8a2661d12214472959c19acb6e4e3080f3ae",
+					"size": 19287,
+					"status": "missing-in-source"
+				},
+				"test/expected/journo-bare.js": {
+					"match": false,
+					"packageHash": "5c0b1f817954e20f832e3c4a4e1e92d0adaf805d942cf68c81fc23d01c365936",
+					"size": 9803,
+					"status": "missing-in-source"
+				},
+				"test/expected/journo.js": {
+					"match": false,
+					"packageHash": "f0fb6d1879e298fc9af557cb9a6976ed9cbaab93f1e9d62b3e7a12fdb8c750f6",
+					"size": 10473,
+					"status": "missing-in-source"
+				},
+				"test/main.js": {
+					"diff": "--- published/test/main.js\n+++ rebuilt/test/main.js\n@@ -1,152 +1,276 @@\n var coffee = require('../');\n var should = require('should');\n-var coffeescript = require('coffee-script');\n-var gutil = require('gulp-util');\n+var coffeescript = require('coffeescript');\n var fs = require('fs');\n-require('mocha');\n+var path = require('path');\n+var sourcemaps = require('gulp-sourcemaps');\n+var File = require('vinyl');\n+\n+var createFile = function (filepath, contents) {\n+  var base = path.dirname(filepath);\n+  return new File({\n+    path: filepath,\n+    base: base,\n+    cwd: path.dirname(base),\n+    contents: contents\n+  });\n+};\n \n describe('gulp-coffee', function() {\n   describe('coffee()', function() {\n-    it('should concat two files', function(done) {\n-      var stream = coffee({bare: true});\n-      var fakeFile = new gutil.File({\n-        path: \"/home/contra/test/file.coffee\",\n-        base: \"/home/contra/test/\",\n-        cwd: \"/home/contra/\",\n-        contents: new Buffer(\"a = 2\")\n-      });\n+    before(function() {\n+      this.testData = function (expected, newPath, done) {\n+        var newPaths = [newPath],\n+            expectedSourceMap;\n+\n+        if (expected.v3SourceMap) {\n+          expectedSourceMap = JSON.parse(expected.v3SourceMap);\n+          expected = [expected.js];\n+        } else {\n+          expected = [expected];\n+        }\n+\n+        return function (newFile) {\n+          this.expected = expected.shift();\n+          this.newPath = newPaths.shift();\n+\n+          should.exist(newFile);\n+          should.exist(newFile.path);\n+          should.exist(newFile.relative);\n+          should.exist(newFile.contents);\n+          newFile.path.should.equal(this.newPath);\n+          newFile.relative.should.equal(path.basename(this.newPath));\n+          String(newFile.contents).should.equal(this.expected);\n+\n+          if (expectedSourceMap) {\n+            // check whether the sources from the coffee have been\n+            // applied to the files source map\n+            newFile.sourceMap.sources\n+              .should.containDeep(expectedSourceMap.sources);\n+          }\n+\n+          if (done && !expected.length) {\n+            done.call(this);\n+          }\n+        };\n+      };\n+    });\n \n-      var expected = coffeescript.compile(String(fakeFile.contents), {bare:true});\n-      stream.on('error', done);\n-      stream.on('data', function(newFile){\n-        should.exist(newFile);\n-        should.exist(newFile.path);\n-        should.exist(newFile.relative);\n-        should.exist(newFile.contents);\n-\n-        newFile.path.should.equal(\"/home/contra/test/file.js\");\n-        newFile.relative.should.equal(\"file.js\");\n-        String(newFile.contents).should.equal(expected);\n-        done();\n-      });\n-      stream.write(fakeFile);\n+    it('should concat two files', function(done) {\n+      var filepath = '/home/contra/test/file.coffee';\n+      var contents = Buffer.from('a = 2');\n+      var opts = {bare: true};\n+      var expected = coffeescript.compile(String(contents), opts);\n+\n+      coffee(opts)\n+        .on('error', done)\n+        .on('data', this.testData(expected, path.normalize('/home/contra/test/file.js'), done))\n+        .write(createFile(filepath, contents));\n     });\n \n     it('should emit errors correctly', function(done) {\n-      var stream = coffee({bare: true});\n",
+					"match": false,
+					"packageHash": "af0cb8fd67d4cf1ba579dcc58af054ee7a9af92a7a1c3487dbbe2c61cd99a2b4",
+					"size": 5034,
+					"sourceHash": "1edf17c271e3b9490acfa82ef5fd0e3857b1d46415fe1ccb7afc6b420cec5e51",
+					"status": "content"
+				},
+				"test/fixtures/journo.coffee.md": {
+					"match": false,
+					"status": "missing-in-package"
+				}
+			},
+			"summary": {
+				"differentFiles": 6,
+				"matchingFiles": 2,
+				"missingInPackage": 1,
+				"missingInSource": 6,
+				"score": 0.13333333333333333,
+				"totalFiles": 15
+			}
+		}
+	}
+]
