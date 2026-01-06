@@ -1,0 +1,79 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-06T10:10:27.110Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:11.7.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "formidable@1.0.13",
+			"name": "formidable",
+			"version": "1.0.13",
+			"location": "https://registry.npmjs.org/formidable/-/formidable-1.0.13.tgz",
+			"integrity": "sha512-xFFIqHBxGtkKUIMocMh+Bebykl3bSBNccYVYVwts7WQBr0jpawTUwqk55kg43Lhj8EkMSMoJVKOwSVvayq2DFA==",
+			"publishedAt": "2013-03-16T19:41:26.120Z",
+			"publishedWith": {
+				"node": null,
+				"npm": "1.2.12"
+			}
+		},
+		"source": {
+			"integrity": "sha512-PPqSF08Mu8cwA/vwWLGNrfubX/bhIzC44jXjBMovghPW5f96EXWSLXeQnsM1ve3E4tuyDh3gLxfbumrJiPdGbA==",
+			"location": "git://github.com/felixge/node-formidable.git",
+			"spec": "github:felixge/node-formidable#v1.0.13"
+		},
+		"comparisonHash": "9ef46a5bd31291e57cbab41e2f17c57bd6da0b5b",
+		"diff": {
+			"files": {
+				".npmignore": {
+					"match": false,
+					"packageHash": "c59c6722db3bfdb80014d12536f91209cf820b593759cf6770238b2a9fbd66f0",
+					"size": 33,
+					"status": "missing-in-source"
+				},
+				"lib/incoming_form.js": {
+					"diff": "--- published/lib/incoming_form.js\n+++ rebuilt/lib/incoming_form.js\n@@ -276,9 +276,14 @@\n };\n \n IncomingForm.prototype._parseContentLength = function() {\n+  this.bytesReceived = 0;\n   if (this.headers['content-length']) {\n-    this.bytesReceived = 0;\n     this.bytesExpected = parseInt(this.headers['content-length'], 10);\n+  } else if (this.headers['transfer-encoding'] === undefined) {\n+    this.bytesExpected = 0;\n+  }\n+\n+  if (this.bytesExpected !== null) {\n     this.emit('progress', this.bytesReceived, this.bytesExpected);\n   }\n };\n",
+					"match": false,
+					"packageHash": "267b72341ee3a2ac0fdc0fc7ad63e8bca19aab9bdd396bff227ea52cf19fd793",
+					"size": 12238,
+					"sourceHash": "a166953158d8604a78042dd123d0b5922f9bdc88a1a2a1edd667d00a91c4d088",
+					"status": "content"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -20,7 +20,7 @@\n     \"clean\": \"rm test/tmp/*\"\n   },\n   \"engines\": {\n-    \"node\": \"<0.9.0\"\n+    \"node\": \">=0.8.0\"\n   },\n   \"repository\": {\n     \"type\": \"git\",\n",
+					"match": false,
+					"packageHash": "b4084092968eb2f930dfbde738556365b85f617af96a5daae1e5ad28cdbda7d4",
+					"size": 761,
+					"sourceHash": "00439dc86178c211194794fc8e32ff11b882c4736964925ef4c5364abc65202c",
+					"status": "content"
+				},
+				"test/fixture/js/misc.js": {
+					"diff": "--- published/test/fixture/js/misc.js\n+++ rebuilt/test/fixture/js/misc.js\n@@ -2,4 +2,5 @@\n   'empty.http': [],\n   'empty-urlencoded.http': [],\n   'empty-multipart.http': [],\n+  'minimal.http': [],\n };\n",
+					"match": false,
+					"packageHash": "d03851eeee25989e702c412706822ec8df9aaa2d1dbd5fb0f1bb06201cdf7d3a",
+					"size": 103,
+					"sourceHash": "b427e511858285715472f2509579a31a598ff14b8ce6c3e6d57db305ebc129ad",
+					"status": "content"
+				},
+				"test/legacy/simple/test-incoming-form.js": {
+					"diff": "--- published/test/legacy/simple/test-incoming-form.js\n+++ rebuilt/test/legacy/simple/test-incoming-form.js\n@@ -378,9 +378,12 @@\n   var HEADERS = {};\n \n   form.headers = {};\n+  gently.expect(form, 'emit', function(event, bytesReceived, bytesExpected) {\n+    assert.equal(event, 'progress');\n+    assert.equal(bytesReceived, 0);\n+    assert.equal(bytesExpected, 0);\n+  });\n   form._parseContentLength();\n-  assert.strictEqual(form.bytesReceived, null);\n-  assert.strictEqual(form.bytesExpected, null);\n \n   form.headers['content-length'] = '8';\n   gently.expect(form, 'emit', function(event, bytesReceived, bytesExpected) {\n",
+					"match": false,
+					"packageHash": "b8ad58894835f8f6d3e8fbfbc7e3c96ba9819b286ecfe6a45036cbd47d06ef52",
+					"size": 19406,
+					"sourceHash": "16e358a4d8aef95d9f3c09897fbd3e083cc961600707ced9ac37d0ef3fa97fec",
+					"status": "content"
+				}
+			},
+			"summary": {
+				"differentFiles": 4,
+				"matchingFiles": 45,
+				"missingInPackage": 0,
+				"missingInSource": 1,
+				"score": 0.9,
+				"totalFiles": 50
+			}
+		}
+	}
+]

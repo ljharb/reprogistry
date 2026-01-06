@@ -1,0 +1,255 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-06T10:23:52.998Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:11.7.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "formidable@4.0.0-rc.2",
+			"name": "formidable",
+			"version": "4.0.0-rc.2",
+			"location": "https://registry.npmjs.org/formidable/-/formidable-4.0.0-rc.2.tgz",
+			"integrity": "sha512-Mx9QfE33qrugihgzA40UCyt81Ix2kCTX8tU/Fq0VQv5Ss7EXgirXPdvRgKcS+gnlbJGy38FESN5jH/sML0EFww==",
+			"publishedAt": "2025-04-30T04:44:11.763Z",
+			"publishedWith": {
+				"node": "22.6.0",
+				"npm": "10.8.3"
+			}
+		},
+		"source": {
+			"integrity": null,
+			"location": "https://github.com/node-formidable/formidable.git",
+			"spec": "github:node-formidable/formidable#HEAD::path:packages/formidable-v3-thin"
+		},
+		"comparisonHash": "9ef46a5bd31291e57cbab41e2f17c57bd6da0b5b",
+		"diff": {
+			"files": {
+				"README.md": {
+					"diff": "--- published/README.md\n+++ rebuilt/README.md\n@@ -1,189 +1,891 @@\n-# formidable@next\n+<p align=\"center\">\n+  <img alt=\"npm formidable package logo\" src=\"https://raw.githubusercontent.com/node-formidable/formidable/master/logo.png\" />\n+</p>\n+\n+# formidable [![npm version][npmv-img]][npmv-url] [![MIT license][license-img]][license-url] [![Libera Manifesto][libera-manifesto-img]][libera-manifesto-url] [![Twitter][twitter-img]][twitter-url]\n+\n+> A Node.js module for parsing form data, especially file uploads.\n+\n+[![Code style][codestyle-img]][codestyle-url]\n+[![linux build status][linux-build-img]][build-url]\n+[![macos build status][macos-build-img]][build-url]\n+<!-- [![codecoverage][codecov-img]][codecov-url] -->\n+\n+If you have any _how-to_ kind of questions, please read the [Contributing\n+Guide][contributing-url] and [Code of Conduct][code_of_conduct-url]\n+documents.<br /> For bugs reports and feature requests, [please create an\n+issue][open-issue-url] or ping [@wgw_eth / @wgw_lol][twitter-url]\n+at Twitter.\n+\n+[![Conventional Commits][ccommits-img]][ccommits-url]\n+[![Minimum Required Nodejs][nodejs-img]][npmv-url]\n+[![Buy me a Kofi][kofi-img]][kofi-url]\n+[![Make A Pull Request][prs-welcome-img]][prs-welcome-url]\n+<!-- [![Tidelift Subscription][tidelift-img]][tidelift-url] -->\n+<!-- [![Renovate App Status][renovateapp-img]][renovateapp-url] -->\n+\n+This project is [semantically versioned](https://semver.org) and if you want support in migrating between versions you can schedule us for training or support us through donations, so we can prioritize.\n+\n+> [!CAUTION]\n+> As of April 2025, old versions like v1 and v2 are still the most used, while they are deperecated for years -- they are also vulnerable to attacks if you are not implementing it properly. **Please upgrade!** We are here to help, and AI Editors & Agents could help a lot in such codemod-like migrations.\n+\n+> [!TIP]\n+> If you are starting a fresh project, you can check out the `formidable-mini` which is a super minimal version of Formidable (not quite configurable yet, but when it does it could become the basis for `formidable@v4`), using web standards like FormData API and File API, and you can use it to stream uploads directly to S3 or other such services.\n+\n+<!-- This project is [semantically versioned](https://semver.org) and available as\n+part of the [Tidelift Subscription][tidelift-url] for professional grade\n+assurances, enhanced support and security.\n+[Learn more.](https://tidelift.com/subscription/pkg/npm-formidable?utm_source=npm-formidable&utm_medium=referral&utm_campaign=enterprise)\n+\n+_The maintainers of `formidable` and thousands of other packages are working\n+with Tidelift to deliver commercial support and maintenance for the Open Source\n+dependencies you use to build your applications. Save time, reduce risk, and\n+improve code health, while paying the maintainers of the exact dependencies you\n+use._ -->\n+\n+[![][npm-weekly-img]][npmv-url] [![][npm-monthly-img]][npmv-url]\n+[![][npm-yearly-img]][npmv-url] [![][npm-alltime-img]][npmv-url]\n+\n+## Project Status: Maintained\n+\n+> [!NOTE]\n+> Check [VERSION NOTES](https://github.com/node-formidable/formidable/blob/master/VERSION_NOTES.md) for more information on v1, v2, and v3 plans, NPM dist-tags and branches._\n+\n+This module was initially developed by\n+[**@felixge**](https://github.com/felixge) for\n+[Transloadit](http://transloadit.com/), a service focused on uploading and\n+encoding images and videos. It has been battle-tested against hundreds of GBs of\n+file uploads from a large variety of clients and is considered production-ready\n+and is used in production for years.\n+\n+Currently, we are few maintainers trying to deal with it. :) More contributors\n+are always welcome! :heart: Jump on\n+[issue #412](https://github.com/felixge/node-formidable/issues/412) which is\n+closed, but if you are interested we can discuss it and add you after strict\n+rules, like enabling Two-Factor Auth in your npm and GitHub accounts.\n+\n+## Highlights\n+\n+- [Fast (~900-2500 mb/sec)](#benchmarks) & streaming multipart parser\n+- Automatically writing file uploads to disk (optional, see\n+  [`options.fileWriteStreamHandler`](#options))\n+- [Plugins API](#useplugin-plugin) - allowing custom parsers and plugins\n+- Low memory footprint\n+- Graceful error handling\n+- Very high test coverage\n+\n+## Install\n \n-v4 preparations. Modern multipart form-data parser for Node.js, Bun, Deno, Cloudflare, and the\n-browser.\n+This package is a dual ESM/commonjs package.\n \n-## install\n+> [!NOTE]\n+> This project requires `Node.js >= 20`. Install it using [yarn](https://yarnpkg.com) or [npm](https://npmjs.com).<br /> _We highly recommend to use Yarn when you think to contribute to this project._\n+\n+This is a low-level package, and if you're using a high-level framework it _may_\n+already be included. Check the examples below and the [examples/](https://github.com/node-formidable/formidable/tree/master/examples) folder.\n \n ```\n-npm i formidable@next\n+# v2\n+npm install formidable@v2\n+\n+# v3\n+npm install formidable\n",
+					"match": false,
+					"packageHash": "991c138091ecbe4c36269155b7c2a699ce176a5e356ee66ca38bb6d75765dc49",
+					"size": 6350,
+					"sourceHash": "10872a253ade2d2a0e792e3107d56494e6d8666daf2de4ccbf0b5ca64545ab39",
+					"status": "content"
+				},
+				"dist/index.cjs": {
+					"match": false,
+					"packageHash": "400246bbe1647f0b91ca4c730e3f577fde66b78fc1461ba37c34a6f0e4e5d854",
+					"size": 18594,
+					"status": "missing-in-source"
+				},
+				"dist/index.d.cts": {
+					"match": false,
+					"packageHash": "768c7b43a2211fd9b0cf4ea007fcb32415f99af9f7679ed02a0663b523ff7895",
+					"size": 6054,
+					"status": "missing-in-source"
+				},
+				"dist/index.d.ts": {
+					"match": false,
+					"packageHash": "768c7b43a2211fd9b0cf4ea007fcb32415f99af9f7679ed02a0663b523ff7895",
+					"size": 6054,
+					"status": "missing-in-source"
+				},
+				"dist/index.js": {
+					"match": false,
+					"packageHash": "da983c4d6e91f8110141446765a06df7d267115743743d58260a25f671ababbf",
+					"size": 17358,
+					"status": "missing-in-source"
+				},
+				"dist/node14.cjs": {
+					"match": false,
+					"packageHash": "06f6273ffd6be57e455a96ab200ec8d3edfeb695a5a20c9085409e8802540553",
+					"size": 89614,
+					"status": "missing-in-source"
+				},
+				"dist/node14.d.cts": {
+					"match": false,
+					"packageHash": "768c7b43a2211fd9b0cf4ea007fcb32415f99af9f7679ed02a0663b523ff7895",
+					"size": 6054,
+					"status": "missing-in-source"
+				},
+				"dist/node14.d.ts": {
+					"match": false,
+					"packageHash": "768c7b43a2211fd9b0cf4ea007fcb32415f99af9f7679ed02a0663b523ff7895",
+					"size": 6054,
+					"status": "missing-in-source"
+				},
+				"dist/node14.js": {
+					"match": false,
+					"packageHash": "5b36487f6c3ae4320c64989f0fb3b84bb1b84a3c2575c14858d839ce469498fb",
+					"size": 89134,
+					"status": "missing-in-source"
+				},
+				"dist/node16.cjs": {
+					"match": false,
+					"packageHash": "83801dc2094e307135a0b5a7aaabd963664284b4c595efd86d7acc1950876bb9",
+					"size": 84494,
+					"status": "missing-in-source"
+				},
+				"dist/node16.d.cts": {
+					"match": false,
+					"packageHash": "768c7b43a2211fd9b0cf4ea007fcb32415f99af9f7679ed02a0663b523ff7895",
+					"size": 6054,
+					"status": "missing-in-source"
+				},
+				"dist/node16.d.ts": {
+					"match": false,
+					"packageHash": "768c7b43a2211fd9b0cf4ea007fcb32415f99af9f7679ed02a0663b523ff7895",
+					"size": 6054,
+					"status": "missing-in-source"
+				},
+				"dist/node16.js": {
+					"match": false,
+					"packageHash": "d326db0910152604f116cf82afcc1dd1c2e9a39bac40dd6861fbcc32cebc9d0c",
+					"size": 84014,
+					"status": "missing-in-source"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -1,100 +1,115 @@\n {\n   \"name\": \"formidable\",\n-  \"version\": \"4.0.0-rc.2\",\n+  \"version\": \"3.5.4\",\n   \"license\": \"MIT\",\n-  \"description\": \"The oldest and most popular Node.js form parsing library, with support for multipart/form-data, file uploads, and more.\",\n-  \"author\": \"tunnckoCore\",\n-  \"homepage\": \"https://github.com/node-formidable/formidable/tree/monorepo/packages/formidable-v3-thin\",\n-  \"repository\": {\n-    \"type\": \"git\",\n-    \"url\": \"https://github.com/node-formidable/formidable.git\",\n-    \"directory\": \"packages/formidable-v3-thin\"\n-  },\n+  \"description\": \"A node.js module for parsing form data, especially file uploads.\",\n+  \"homepage\": \"https://github.com/node-formidable/formidable\",\n+  \"funding\": \"https://ko-fi.com/tunnckoCore/commissions\",\n+  \"repository\": \"node-formidable/formidable\",\n   \"type\": \"module\",\n+  \"main\": \"./dist/index.cjs\",\n   \"exports\": {\n     \".\": {\n       \"import\": {\n-        \"types\": \"./dist/index.d.ts\",\n-        \"default\": \"./dist/index.js\"\n+        \"default\": \"./src/index.js\"\n       },\n       \"require\": {\n-        \"types\": \"./dist/index.d.cts\",\n         \"default\": \"./dist/index.cjs\"\n-      }\n+      },\n+      \"default\": \"./dist/index.cjs\"\n     },\n-    \"./node14\": {\n+    \"./src/helpers/*.js\": {\n       \"import\": {\n-        \"types\": \"./dist/node14.d.ts\",\n-        \"default\": \"./dist/node14.js\"\n+        \"default\": \"./src/helpers/*.js\"\n       },\n       \"require\": {\n-        \"types\": \"./dist/node14.d.cts\",\n-        \"default\": \"./dist/node14.cjs\"\n+        \"default\": \"./dist/helpers/*.cjs\"\n       }\n     },\n-    \"./node16\": {\n+    \"./src/parsers/*.js\": {\n       \"import\": {\n-        \"types\": \"./dist/node16.d.ts\",\n-        \"default\": \"./dist/node16.js\"\n+        \"default\": \"./src/parsers/*.js\"\n       },\n       \"require\": {\n-        \"types\": \"./dist/node16.d.cts\",\n-        \"default\": \"./dist/node16.cjs\"\n+        \"default\": \"./dist/index.cjs\"\n       }\n-    },\n-    \"./src/*\": \"./src/*\",\n-    \"./package.json\": \"./package.json\"\n+    }\n   },\n   \"files\": [\n     \"src\",\n-    \"dist\"\n+    \"./dist\",\n+    \"./CHANGELOG\",\n+    \"./README.md\",\n+    \"./README_pt_BR.md\"\n   ],\n   \"publishConfig\": {\n     \"access\": \"public\",\n-    \"tag\": \"next\"\n+    \"tag\": \"latest\"\n   },\n   \"scripts\": {\n-    \"prebuild\": \"rm -rf dist\",\n-    \"build\": \"tsdown && pnpm run build:node14 && pnpm run build:node16\",\n-    \"build:node14\": \"pnpm run build:node14cjs && pnpm run build:node14esm\",\n-    \"postbuild:node14\": \"cp ./dist/index.d.ts ./dist/node14.d.cts && cp ./dist/index.d.ts ./dist/node14.d.ts\",\n-    \"build:node14cjs\": \"esbuild ./src/entrypoints/node14.ts --minify --bundle --format=cjs --outfile=./dist/node14.cjs --tsconfig=../../tsconfig.node.json\",\n-    \"build:node14esm\": \"esbuild ./src/entrypoints/node14.ts --minify --bundle --format=esm --outfile=./dist/node14.js --tsconfig=../../tsconfig.node.json\",\n-    \"build:node16\": \"pnpm run build:node16cjs && pnpm run build:node16esm\",\n-    \"postbuild:node16\": \"cp ./dist/index.d.ts ./dist/node16.d.cts && cp ./dist/index.d.ts ./dist/node16.d.ts\",\n-    \"build:node16cjs\": \"esbuild ./src/entrypoints/node16.ts --minify --bundle --format=cjs --outfile=./dist/node16.cjs --tsconfig=../../tsconfig.node.json\",\n-    \"build:node16esm\": \"esbuild ./src/entrypoints/node16.ts --minify --bundle --format=esm --outfile=./dist/node16.js --tsconfig=../../tsconfig.node.json\",\n-    \"prepublishOnly\": \"pnpm run build\"\n+    \"build-package\": \"rollup --config ./tool/rollup.config.js\",\n+    \"prepublishOnly\": \"pnpm run build-package\",\n+    \"bench\": \"node benchmark\",\n+    \"bench2prep\": \"node benchmark/server.js\",\n+    \"bench2\": \"bombardier --body-file=\\\"./README.md\\\" --method=POST --duration=10s --connections=100 http://localhost:3000/api/upload\",\n+    \"fmt\": \"pnpm run fmt:prepare '**/*'\",\n+    \"fmt:prepare\": \"prettier --write\",\n+    \"lint\": \"pnpm run lint:prepare .\",\n+    \"lint:prepare\": \"eslint --cache --fix --quiet --format codeframe\",\n",
+					"match": false,
+					"packageHash": "da953ba3f17126e61b4ac31a59ebc2e446ff295205c9ede0fa8cb6d305b18818",
+					"size": 3151,
+					"sourceHash": "49c7f258a04939e73d7f11801ce36ceb4cf84404ba15f4b6931c32ed2a404fbb",
+					"status": "content"
+				},
+				"src/buffer-search.ts": {
+					"match": false,
+					"packageHash": "39ba8ac2a9eb468bbac379abbae3e2e75268472e7d6f58210abfcd6a32a8c5c9",
+					"size": 2589,
+					"status": "missing-in-source"
+				},
+				"src/entrypoints/index.ts": {
+					"match": false,
+					"packageHash": "5c79c9dae8edb32e85a38b7a0512222a80d445aa54cc48684e2dad3882eb9515",
+					"size": 78,
+					"status": "missing-in-source"
+				},
+				"src/entrypoints/node14.ts": {
+					"match": false,
+					"packageHash": "086f8f86d09f749342d4acc1769b5985e3e009634cc6b4e089827cb046a85112",
+					"size": 221,
+					"status": "missing-in-source"
+				},
+				"src/entrypoints/node16.ts": {
+					"match": false,
+					"packageHash": "a223876f8b864f79afcb2f6a5cc1dcd9554d2a363343c128a5f535528d297485",
+					"size": 69,
+					"status": "missing-in-source"
+				},
+				"src/multipart-request.ts": {
+					"match": false,
+					"packageHash": "09783bb00f5a55885e4dcc4c96477e85fb8f6f3aebec8ffe3ecf6a1c3d7883b2",
+					"size": 3809,
+					"status": "missing-in-source"
+				},
+				"src/multipart-web.ts": {
+					"match": false,
+					"packageHash": "99b91debfeb92458b8c433ba896f8fb216ff68c28be763e95b9c8aec908f58bd",
+					"size": 18860,
+					"status": "missing-in-source"
+				},
+				"src/read-stream.ts": {
+					"match": false,
+					"packageHash": "87a51e95936cf51483f1b8d80dd6a2715c0805de68bffe853e6e6a0b0e6c5348",
+					"size": 439,
+					"status": "missing-in-source"
+				},
+				"LICENSE": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"README_pt_BR.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/Formidable.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/FormidableError.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/PersistentFile.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/VolatileFile.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/helpers/firstValues.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/helpers/readBooleans.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/index.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/parsers/Dummy.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/parsers/JSON.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/parsers/Multipart.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/parsers/OctetStream.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/parsers/Querystring.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/parsers/StreamingQuerystring.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/parsers/index.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/plugins/index.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/plugins/json.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/plugins/multipart.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/plugins/octetstream.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/plugins/querystring.js": {
+					"match": false,
+					"status": "missing-in-package"
+				}
+			},
+			"summary": {
+				"differentFiles": 2,
+				"matchingFiles": 0,
+				"missingInPackage": 21,
+				"missingInSource": 19,
+				"score": 0,
+				"totalFiles": 42
+			}
+		}
+	}
+]
