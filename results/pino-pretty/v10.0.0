@@ -1,0 +1,431 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-06T20:23:32.631Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:11.7.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "pino-pretty@10.0.0",
+			"name": "pino-pretty",
+			"version": "10.0.0",
+			"location": "https://registry.npmjs.org/pino-pretty/-/pino-pretty-10.0.0.tgz",
+			"integrity": "sha512-zKFjYXBzLaLTEAN1ayKpHXtL5UeRQC7R3lvhKe7fWs7hIVEjKGG/qIXwQt9HmeUp71ogUd/YcW+LmMwRp4KT6Q==",
+			"publishedAt": "2023-03-13T11:19:56.884Z",
+			"publishedWith": {
+				"node": "18.15.0",
+				"npm": "9.5.0"
+			}
+		},
+		"source": {
+			"integrity": null,
+			"location": "git+ssh://git@github.com/pinojs/pino-pretty.git",
+			"spec": "github:pinojs/pino-pretty#fcdc15c84580ec6890b806cb83397e353608fd08"
+		},
+		"comparisonHash": "9ef46a5bd31291e57cbab41e2f17c57bd6da0b5b",
+		"diff": {
+			"files": {
+				".github/dependabot.yml": {
+					"diff": "--- published/.github/dependabot.yml\n+++ rebuilt/.github/dependabot.yml\n@@ -9,5 +9,5 @@\n   - package-ecosystem: \"npm\"\n     directory: \"/\"\n     schedule:\n-      interval: \"weekly\"\n+      interval: \"monthly\"\n     open-pull-requests-limit: 10\n",
+					"match": false,
+					"packageHash": "67dcd2013ebde5683fd6684194a6df609eeed7de80098198f59a7e07b5c19eba",
+					"size": 273,
+					"sourceHash": "60ffc0c7159ff6af5e36ad3ecc56fe63782e4defaabafa94a13df7150d9a84c6",
+					"status": "content"
+				},
+				".github/workflows/ci.yml": {
+					"diff": "--- published/.github/workflows/ci.yml\n+++ rebuilt/.github/workflows/ci.yml\n@@ -24,37 +24,36 @@\n       contents: read\n     steps:\n       - name: Check out repo\n-        uses: actions/checkout@v3\n+        uses: actions/checkout@v6\n         with:\n           persist-credentials: false\n \n       - name: Dependency review\n-        uses: actions/dependency-review-action@v3\n+        uses: actions/dependency-review-action@v4\n \n   test:\n     name: Test\n     runs-on: ${{ matrix.os }}\n-    outputs:\n-      COVERALLS: ${{ steps.coveralls-trigger.outputs.COVERALLS_TRIGGER }}\n     permissions:\n       contents: read\n     strategy:\n       matrix:\n-        node-version: [14, 16, 18]\n+        node-version: [20, 22, 24]\n         os: [ubuntu-latest]\n+        pino-version: [^10.0.0]\n     steps:\n       - name: Check out repo\n-        uses: actions/checkout@v3\n+        uses: actions/checkout@v6\n         with:\n           persist-credentials: false\n \n       - name: Setup Node ${{ matrix.node-version }}\n-        uses: actions/setup-node@v3\n+        uses: actions/setup-node@v6\n         with:\n           node-version: ${{ matrix.node-version }}\n \n       - name: Restore cached dependencies\n-        uses: actions/cache@v3\n+        uses: actions/cache@v5\n         with:\n           path: node_modules\n           key: node-modules-${{ hashFiles('package.json') }}\n@@ -62,37 +61,12 @@\n       - name: Install dependencies\n         run: npm i --ignore-scripts\n \n+      - name: Install pino ${{ matrix.pino-version }}\n+        run: npm i --no-save pino@${{ matrix.pino-version }}\n+\n       - name: Run tests\n         run: npm run ci\n \n-      - name: Coveralls Parallel\n-        id: coveralls-parallel\n-        uses: coverallsapp/github-action@v1.2.4\n-        continue-on-error: true\n-        with:\n-          github-token: ${{ secrets.GITHUB_TOKEN }}\n-          parallel: true\n-          flag-name: run-${{ matrix.node-version }}-${{ matrix.os }}\n-\n-      - name: Should Trigger coverallsapp/github-action@master\n-        id: coveralls-trigger\n-        # https://docs.github.com/en/actions/reference/context-and-expression-syntax-for-github-actions#steps-context\n-        # when continue-on-error failed, outcome is failure and conclusion is success\n-        if: steps.coveralls-parallel.conclusion == 'success' && steps.coveralls-parallel.outcome != 'success'\n-        run: |\n-          echo \"::set-output name=COVERALLS_TRIGGER::failure\"\n-\n-  coverage:\n-    needs: test\n-    runs-on: ubuntu-latest\n-    if: needs.test.outputs.COVERALLS != 'failure'\n-    steps:\n-      - name: Coveralls Finished\n-        uses: coverallsapp/github-action@v1.2.4\n-        with:\n-          github-token: ${{ secrets.GITHUB_TOKEN }}\n-          parallel-finished: true\n-\n   automerge:\n     name: Automerge Dependabot PRs\n     if: >\n",
+					"match": false,
+					"packageHash": "b7fd01ffd5153a95bfc52de8ba8d1f9f690ca01b8b17bec8db87c3d023c09f0a",
+					"size": 3101,
+					"sourceHash": "10cc42d573155fef5a0d51d722691f53c875856bd9feb01e79ee1491c71b3fed",
+					"status": "content"
+				},
+				".taprc": {
+					"match": false,
+					"packageHash": "7fdc66bef8d2e253761fa8f090f96cfe1f8409978b5a5c11b03db5b77ce228cb",
+					"size": 64,
+					"status": "missing-in-source"
+				},
+				"LICENSE": {
+					"diff": "--- published/LICENSE\n+++ rebuilt/LICENSE\n@@ -1,8 +1,6 @@\n The MIT License (MIT)\n \n-Copyright (c) 2019 the Pino team\n-\n-Pino team listed at https://github.com/pinojs/pino#the-team\n+Copyright (c) 2019 the Pino team listed at https://github.com/pinojs/pino#the-team\n \n Permission is hereby granted, free of charge, to any person obtaining a copy\n of this software and associated documentation files (the \"Software\"), to deal\n",
+					"match": false,
+					"packageHash": "4e84b894f0a7b737e92fc4803b69206beaceb5b963762682266e75be659f4dfb",
+					"size": 1141,
+					"sourceHash": "4a979e76cd5e6515e37baa8f71cb703cdfc92f13b83e84285cbe8ff87b277232",
+					"status": "content"
+				},
+				"Readme.md": {
+					"diff": "--- published/Readme.md\n+++ rebuilt/Readme.md\n@@ -6,7 +6,7 @@\n [![Coverage Status](https://img.shields.io/coveralls/github/pinojs/pino-pretty)](https://coveralls.io/github/pinojs/pino-pretty?branch=master)\n [![js-standard-style](https://img.shields.io/badge/code%20style-standard-brightgreen.svg?style=flat)](https://standardjs.com/)\n \n-This module provides a basic [ndjson](http://ndjson.org/) formatter to be used in __development__. If an\n+This module provides a basic [ndjson](https://github.com/ndjson/ndjson-spec) formatter to be used in __development__. If an\n incoming line looks like it could be a log line from an ndjson logger, in\n particular the [Pino](https://getpino.io/) logging library, then it will apply\n extra formatting by considering things like the log level and timestamp.\n@@ -40,7 +40,7 @@\n ## Install\n \n ```sh\n-$ npm install -g pino-pretty\n+npm install -g pino-pretty\n ```\n \n <a id=\"usage\"></a>\n@@ -57,12 +57,12 @@\n ### CLI Arguments\n \n - `--colorize` (`-c`): Adds terminal color escape sequences to the output.\n-- `--colorizeObjects` (`-C`): Allows suppressing colorization of objects when set to `false`. In combination with `--singleLine`, this ensures that the end of each line is parsable JSON.\n+- `--no-colorizeObjects`: Suppress colorization of objects.\n - `--crlf` (`-f`): Appends carriage return and line feed, instead of just a line\n   feed, to the formatted log line.\n - `--errorProps` (`-e`): When formatting an error object, display this list\n   of properties. The list should be a comma-separated list of properties Default: `''`.\n-  Do not use this option if logging from pino@7. Support will be removed from future verions.\n+  Do not use this option if logging from pino@7. Support will be removed from future versions.\n - `--levelFirst` (`-l`): Display the log level name before the logged date and time.\n - `--errorLikeObjectKeys` (`-k`): Define the log keys that are associated with\n   error like objects. Default: `err,error`.\n@@ -107,6 +107,10 @@\n We recommend against using `pino-pretty` in production and highly\n recommend installing `pino-pretty` as a development dependency.\n \n+```bash\n+npm install --save-dev pino-pretty\n+```\n+\n Install `pino-pretty` alongside `pino` and set the transport target to `'pino-pretty'`:\n \n ```js\n@@ -161,6 +165,23 @@\n \n See the [Options](#options) section for all possible options.\n \n+The following configuration ensures that `pino-pretty` is activated only in development mode.\n+\n+```js\n+const pino = require('pino')\n+\n+// Define the transport configuration only when the output stream is connected to a TTY\n+const transport =\n+  process.stdout.isTTY\n+    ? { transport: { target: 'pino-pretty' } }\n+    : {};\n+\n+const logger = pino({\n+  ...transport\n+})\n+\n+logger.info('hi')\n+```\n \n ### Usage as a stream\n \n@@ -230,6 +251,19 @@\n })\n ```\n \n+### Checking color support in TTY\n+\n+This boolean returns whether the currently used TTY supports colorizing the logs.\n+\n+```js\n+import pretty from 'pino-pretty'\n+\n+if (pretty.isColorSupported) {\n+  ...\n+}\n+\n+```\n+\n <a id=\"options\"></a>\n ### Options\n \n@@ -240,10 +274,10 @@\n   colorize: colorette.isColorSupported, // --colorize\n   colorizeObjects: true, //--colorizeObjects\n   crlf: false, // --crlf\n-  errorLikeObjectKeys: ['err', 'error'], // --errorLikeObjectKeys\n+  errorLikeObjectKeys: ['err', 'error'], // --errorLikeObjectKeys (not required to match custom errorKey with pino >=8.21.0)\n   errorProps: '', // --errorProps\n   levelFirst: false, // --levelFirst\n-  messageKey: 'msg', // --messageKey\n+  messageKey: 'msg', // --messageKey (not required with pino >=8.21.0)\n",
+					"match": false,
+					"packageHash": "6e3a00e5b6690c87cac38148b669d9bb3ef5495cd5c84ceb5f320e410b1a3153",
+					"size": 12372,
+					"sourceHash": "8cc5e924e89683801076196e9b05ab02ebd3d28c9a3e5cff3dcbff40ed2cd88f",
+					"status": "content"
+				},
+				"bin.js": {
+					"diff": "--- published/bin.js\n+++ rebuilt/bin.js\n@@ -1,7 +1,9 @@\n #!/usr/bin/env node\n \n-const fs = require('fs')\n-const path = require('path')\n+'use strict'\n+\n+const fs = require('node:fs')\n+const path = require('node:path')\n const help = require('help-me')({\n   dir: path.join(__dirname, 'help'),\n   ext: '.txt'\n@@ -9,7 +11,7 @@\n const pump = require('pump')\n const sjp = require('secure-json-parse')\n const JoyCon = require('joycon')\n-const stripJsonComments = require('strip-json-comments')\n+const { default: stripJsonComments } = require('strip-json-comments')\n \n const build = require('./')\n const CONSTANTS = require('./lib/constants')\n@@ -33,84 +35,79 @@\n \n const cmd = minimist(process.argv.slice(2))\n \n-helper(cmd)\n-\n-const DEFAULT_VALUE = '\\0default'\n-\n-let opts = minimist(process.argv, {\n-  alias: {\n-    colorize: 'c',\n-    colorizeObjects: 'C',\n-    crlf: 'f',\n-    errorProps: 'e',\n-    levelFirst: 'l',\n-    minimumLevel: 'L',\n-    customLevels: 'x',\n-    customColors: 'X',\n-    useOnlyCustomProps: 'U',\n-    errorLikeObjectKeys: 'k',\n-    messageKey: 'm',\n-    levelKey: CONSTANTS.LEVEL_KEY,\n-    levelLabel: 'b',\n-    messageFormat: 'o',\n-    timestampKey: 'a',\n-    translateTime: 't',\n-    ignore: 'i',\n-    include: 'I',\n-    hideObject: 'H',\n-    singleLine: 'S'\n-  },\n-  default: {\n-    messageKey: DEFAULT_VALUE,\n-    minimumLevel: DEFAULT_VALUE,\n-    levelKey: DEFAULT_VALUE,\n-    timestampKey: DEFAULT_VALUE\n-  }\n-})\n-\n-// Remove default values\n-opts = filter(opts, value => value !== DEFAULT_VALUE)\n-const config = loadConfig(opts.config)\n-// Override config with cli options\n-opts = Object.assign({}, config, opts)\n-// set defaults\n-opts.errorLikeObjectKeys = opts.errorLikeObjectKeys || 'err,error'\n-opts.errorProps = opts.errorProps || ''\n-\n-const res = build(opts)\n-pump(process.stdin, res)\n-\n-// https://github.com/pinojs/pino/pull/358\n-/* istanbul ignore next */\n-if (!process.stdin.isTTY && !fs.fstatSync(process.stdin.fd).isFile()) {\n-  process.once('SIGINT', function noOp () {})\n-}\n+if (cmd.h || cmd.help) {\n+  help.toStdout()\n+} else {\n+  const DEFAULT_VALUE = '\\0default'\n+\n+  let opts = minimist(process.argv, {\n+    alias: {\n+      colorize: 'c',\n+      crlf: 'f',\n+      errorProps: 'e',\n+      levelFirst: 'l',\n+      minimumLevel: 'L',\n+      customLevels: 'x',\n+      customColors: 'X',\n+      useOnlyCustomProps: 'U',\n+      errorLikeObjectKeys: 'k',\n+      messageKey: 'm',\n+      levelKey: CONSTANTS.LEVEL_KEY,\n+      levelLabel: 'b',\n+      messageFormat: 'o',\n+      timestampKey: 'a',\n",
+					"match": false,
+					"packageHash": "79eea619da50fdec8c543823e49067c6a2224a6706017467c1f9a7a34e8694d7",
+					"size": 2825,
+					"sourceHash": "03e76c79d6d9274e11cba5e8551037e13a3b5d0543077b30da1d897f87f133d2",
+					"status": "content"
+				},
+				"help/help.txt": {
+					"diff": "--- published/help/help.txt\n+++ rebuilt/help/help.txt\n@@ -1,4 +1,4 @@\n-  Usage: pino pretty [options] [command]\n+  Usage: pino-pretty [options] [command]\n   \n   Commands:\n     help     Display help\n",
+					"match": false,
+					"packageHash": "011379b35c11109f20735d67b0cb12358887350fdaf37d62d4c3acc2be5b1824",
+					"size": 3490,
+					"sourceHash": "95d0fc69581734684261a098048562ed33a52e420ab0efab0c54dec230a2c30e",
+					"status": "content"
+				},
+				"index.d.ts": {
+					"diff": "--- published/index.d.ts\n+++ rebuilt/index.d.ts\n@@ -6,199 +6,229 @@\n \n /// <reference types=\"node\" />\n \n-import { Transform } from 'stream';\n+import { Transform } from 'node:stream';\n import { OnUnknown } from 'pino-abstract-transport';\n // @ts-ignore fall back to any if pino is not available, i.e. when running pino tests\n import { DestinationStream, Level } from 'pino';\n+import * as Colorette from \"colorette\";\n \n type LogDescriptor = Record<string, unknown>;\n \n-declare function PinoPretty(options?: PrettyOptions_): PinoPretty.PrettyStream;\n-\n-declare function colorizerFactory(\n-  useColors?: boolean,\n-  customColors?: [number, string][],\n-  useOnlyCustomProps?: boolean,\n-): {\n-  (\n-    level?: number | string,\n-    opts?: {\n-      customLevels?: { [level: number]: string };\n-      customLevelNames?: { [name: string]: number };\n-    },\n-  ): string,\n-  message: (input: string | number) => string,\n-  greyMessage: (input: string | number) => string,\n-}\n-\n-declare function prettyFactory(\n-  options: PrettyOptions_,\n-): (inputData: any) => string\n-\n-interface PrettyOptions_ {\n-  /**\n-   * Hide objects from output (but not error object).\n-   * @default false\n-   */\n-  hideObject?: boolean;\n-  /**\n-   * Translate the epoch time value into a human readable date and time string. This flag also can set the format\n-   * string to apply when translating the date to human readable format. For a list of available pattern letters\n-   * see the {@link https://www.npmjs.com/package/dateformat|dateformat documentation}.\n-   * - The default format is `yyyy-mm-dd HH:MM:ss.l o` in UTC.\n-   * - Requires a `SYS:` prefix to translate time to the local system's timezone. Use the shortcut `SYS:standard`\n-   *   to translate time to `yyyy-mm-dd HH:MM:ss.l o` in system timezone.\n-   * @default false\n-   */\n-  translateTime?: boolean | string;\n-  /**\n-   * If set to true, it will print the name of the log level as the first field in the log line.\n-   * @default false\n-   */\n-  levelFirst?: boolean;\n-  /**\n-   * Define the key that contains the level of the log.\n-   * @default \"level\"\n-   */\n-  levelKey?: string;\n-  /**\n-   * Output the log level using the specified label.\n-   * @default \"levelLabel\"\n-   */\n-  levelLabel?: string;\n-  /**\n-   * The key in the JSON object to use as the highlighted message.\n-   * @default \"msg\"\n-   */\n-  messageKey?: string;\n-  /**\n-   * Print each log message on a single line (errors will still be multi-line).\n-   * @default false\n-   */\n-  singleLine?: boolean;\n-  /**\n-   * The key in the JSON object to use for timestamp display.\n-   * @default \"time\"\n-   */\n-  timestampKey?: string;\n-  /**\n-   * The minimum log level to include in the output.\n-   * @default \"trace\"\n-   */\n-  minimumLevel?: Level;\n-  /**\n-   * Format output of message, e.g. {level} - {pid} will output message: INFO - 1123\n-   * @default false\n-   *\n-   * @example\n-   * ```typescript\n-   * {\n-   *   messageFormat: (log, messageKey) => {\n-   *     const message = log[messageKey];\n-   *     if (log.requestId) return `[${log.requestId}] ${message}`;\n-   *     return message;\n-   *   }\n",
+					"match": false,
+					"packageHash": "d67aebb29007c438c6fb95baa1df3d2fb9d4e9689c9c0ea81b3a9ee8d5f6f626",
+					"size": 6131,
+					"sourceHash": "f5a1b2ccbcb26cea8b577af7882ff2a9294f4df6a45de84592edb5d076e748fe",
+					"status": "content"
+				},
+				"index.js": {
+					"diff": "--- published/index.js\n+++ rebuilt/index.js\n@@ -2,216 +2,148 @@\n \n const { isColorSupported } = require('colorette')\n const pump = require('pump')\n-const { Transform } = require('readable-stream')\n+const { Transform } = require('node:stream')\n const abstractTransport = require('pino-abstract-transport')\n-const sjs = require('secure-json-parse')\n const colors = require('./lib/colors')\n-const { ERROR_LIKE_KEYS, MESSAGE_KEY, TIMESTAMP_KEY, LEVEL_KEY, LEVEL_NAMES } = require('./lib/constants')\n const {\n-  isObject,\n-  prettifyErrorLog,\n-  prettifyLevel,\n-  prettifyMessage,\n-  prettifyMetadata,\n-  prettifyObject,\n-  prettifyTime,\n+  ERROR_LIKE_KEYS,\n+  LEVEL_KEY,\n+  LEVEL_LABEL,\n+  MESSAGE_KEY,\n+  TIMESTAMP_KEY\n+} = require('./lib/constants')\n+const {\n   buildSafeSonicBoom,\n-  filterLog,\n-  handleCustomlevelsOpts,\n-  handleCustomlevelNamesOpts\n+  parseFactoryOptions\n } = require('./lib/utils')\n+const pretty = require('./lib/pretty')\n \n-const jsonParser = input => {\n-  try {\n-    return { value: sjs.parse(input, { protoAction: 'remove' }) }\n-  } catch (err) {\n-    return { err }\n-  }\n-}\n-\n+/**\n+ * @typedef {object} PinoPrettyOptions\n+ * @property {boolean} [colorize] Indicates if colors should be used when\n+ * prettifying. The default will be determined by the terminal capabilities at\n+ * run time.\n+ * @property {boolean} [colorizeObjects=true] Apply coloring to rendered objects\n+ * when coloring is enabled.\n+ * @property {boolean} [crlf=false] End lines with `\\r\\n` instead of `\\n`.\n+ * @property {string|null} [customColors=null] A comma separated list of colors\n+ * to use for specific level labels, e.g. `err:red,info:blue`.\n+ * @property {string|null} [customLevels=null] A comma separated list of user\n+ * defined level names and numbers, e.g. `err:99,info:1`.\n+ * @property {CustomPrettifiers} [customPrettifiers={}] A set of prettifier\n+ * functions to apply to keys defined in this object.\n+ * @property {K_ERROR_LIKE_KEYS} [errorLikeObjectKeys] A list of string property\n+ * names to consider as error objects.\n+ * @property {string} [errorProps=''] A comma separated list of properties on\n+ * error objects to include in the output.\n+ * @property {boolean} [hideObject=false] When `true`, data objects will be\n+ * omitted from the output (except for error objects).\n+ * @property {string} [ignore='hostname'] A comma separated list of log keys\n+ * to omit when outputting the prettified log information.\n+ * @property {undefined|string} [include=undefined] A comma separated list of\n+ * log keys to include in the prettified log information. Only the keys in this\n+ * list will be included in the output.\n+ * @property {boolean} [levelFirst=false] When true, the log level will be the\n+ * first field in the prettified output.\n+ * @property {string} [levelKey='level'] The key name in the log data that\n+ * contains the level value for the log.\n+ * @property {string} [levelLabel='levelLabel'] Token name to use in\n+ * `messageFormat` to represent the name of the logged level.\n+ * @property {null|MessageFormatString|MessageFormatFunction} [messageFormat=null]\n+ * When a string, defines how the prettified line should be formatted according\n+ * to defined tokens. When a function, a synchronous function that returns a\n+ * formatted string.\n+ * @property {string} [messageKey='msg'] Defines the key in incoming logs that\n+ * contains the message of the log, if present.\n+ * @property {undefined|string|number} [minimumLevel=undefined] The minimum\n+ * level for logs that should be processed. Any logs below this level will\n+ * be omitted.\n+ * @property {object} [outputStream=process.stdout] The stream to write\n+ * prettified log lines to.\n+ * @property {boolean} [singleLine=false] When `true` any objects, except error\n+ * objects, in the log data will be printed as a single line instead as multiple\n+ * lines.\n+ * @property {string} [timestampKey='time'] Defines the key in incoming logs\n+ * that contains the timestamp of the log, if present.\n+ * @property {boolean|string} [translateTime=true] When true, will translate a\n+ * JavaScript date integer into a human-readable string. If set to a string,\n+ * it must be a format string.\n+ * @property {boolean} [useOnlyCustomProps=true] When true, only custom levels\n+ * and colors will be used if they have been provided.\n+ */\n+\n+/**\n+ * The default options that will be used when prettifying log lines.\n+ *\n",
+					"match": false,
+					"packageHash": "88448282a71399a2fa8b47972ff0282cca19e33d7faf20261750f2ef6de5ff0a",
+					"size": 7464,
+					"sourceHash": "331964661c50758d986e1ef97fd6d0f0bf901dc758fdf2293985014ea6c4cc47",
+					"status": "content"
+				},
+				"lib/colors.js": {
+					"diff": "--- published/lib/colors.js\n+++ rebuilt/lib/colors.js\n@@ -1,7 +1,5 @@\n 'use strict'\n \n-const { LEVELS, LEVEL_NAMES } = require('./constants')\n-\n const nocolor = input => input\n const plain = {\n   default: nocolor,\n@@ -12,12 +10,14 @@\n   20: nocolor,\n   10: nocolor,\n   message: nocolor,\n-  greyMessage: nocolor\n+  greyMessage: nocolor,\n+  property: nocolor\n }\n \n const { createColors } = require('colorette')\n+const getLevelLabelData = require('./utils/get-level-label-data')\n const availableColors = createColors({ useColor: true })\n-const { white, bgRed, red, yellow, green, blue, gray, cyan } = availableColors\n+const { white, bgRed, red, yellow, green, blue, gray, cyan, magenta } = availableColors\n \n const colored = {\n   default: white,\n@@ -28,7 +28,8 @@\n   20: blue,\n   10: gray,\n   message: cyan,\n-  greyMessage: gray\n+  greyMessage: gray,\n+  property: magenta\n }\n \n function resolveCustomColoredColorizer (customColors) {\n@@ -38,23 +39,13 @@\n \n       return agg\n     },\n-    { default: white, message: cyan, greyMessage: gray }\n+    { default: white, message: cyan, greyMessage: gray, property: magenta }\n   )\n }\n \n function colorizeLevel (useOnlyCustomProps) {\n   return function (level, colorizer, { customLevels, customLevelNames } = {}) {\n-    const levels = useOnlyCustomProps ? customLevels || LEVELS : Object.assign({}, LEVELS, customLevels)\n-    const levelNames = useOnlyCustomProps ? customLevelNames || LEVEL_NAMES : Object.assign({}, LEVEL_NAMES, customLevelNames)\n-\n-    let levelNum = 'default'\n-    if (Number.isInteger(+level)) {\n-      levelNum = Object.prototype.hasOwnProperty.call(levels, level) ? level : levelNum\n-    } else {\n-      levelNum = Object.prototype.hasOwnProperty.call(levelNames, level.toLowerCase()) ? levelNames[level.toLowerCase()] : levelNum\n-    }\n-\n-    const levelStr = levels[levelNum]\n+    const [levelStr, levelNum] = getLevelLabelData(useOnlyCustomProps, customLevels, customLevelNames)(level)\n \n     return Object.prototype.hasOwnProperty.call(colorizer, levelNum) ? colorizer[levelNum](levelStr) : colorizer.default(levelStr)\n   }\n@@ -67,6 +58,8 @@\n   }\n   customColoredColorizer.message = plain.message\n   customColoredColorizer.greyMessage = plain.greyMessage\n+  customColoredColorizer.property = plain.property\n+  customColoredColorizer.colors = createColors({ useColor: false })\n   return customColoredColorizer\n }\n \n@@ -76,7 +69,9 @@\n     return newColoredColorizer(level, colored, opts)\n   }\n   customColoredColorizer.message = colored.message\n+  customColoredColorizer.property = colored.property\n   customColoredColorizer.greyMessage = colored.greyMessage\n+  customColoredColorizer.colors = availableColors\n   return customColoredColorizer\n }\n \n@@ -88,22 +83,40 @@\n   const customColoredColorizer = function (level, opts) {\n     return colorizeLevelCustom(level, customColored, opts)\n   }\n+  customColoredColorizer.colors = availableColors\n   customColoredColorizer.message = customColoredColorizer.message || customColored.message\n+  customColoredColorizer.property = customColoredColorizer.property || customColored.property\n   customColoredColorizer.greyMessage = customColoredColorizer.greyMessage || customColored.greyMessage\n \n   return customColoredColorizer\n }\n \n /**\n+ * Applies colorization, if possible, to a string representing the passed in\n+ * `level`. For example, the default colorizer will return a \"green\" colored\n+ * string for the \"info\" level.\n+ *\n+ * @typedef {function} ColorizerFunc\n",
+					"match": false,
+					"packageHash": "1a28c20458dfa3204e7c0c7cf89cf4e983fb4c821d1fc7cfb0322ce382bfecf7",
+					"size": 4468,
+					"sourceHash": "43aaf38527d10aa401acbbff4fec7e3555d3da6b0cc6393ab8fbd2adc286396b",
+					"status": "content"
+				},
+				"lib/constants.js": {
+					"diff": "--- published/lib/constants.js\n+++ rebuilt/lib/constants.js\n@@ -1,9 +1,18 @@\n 'use strict'\n \n+/**\n+ * A set of property names that indicate the value represents an error object.\n+ *\n+ * @typedef {string[]} K_ERROR_LIKE_KEYS\n+ */\n+\n module.exports = {\n   DATE_FORMAT: 'yyyy-mm-dd HH:MM:ss.l o',\n   DATE_FORMAT_SIMPLE: 'HH:MM:ss.l',\n \n+  /**\n+   * @type {K_ERROR_LIKE_KEYS}\n+   */\n   ERROR_LIKE_KEYS: ['err', 'error'],\n \n   MESSAGE_KEY: 'msg',\n",
+					"match": false,
+					"packageHash": "b21f338608ab2d259ba4a07a7d2970b11f2a29e6b30e13b70a4c9c007a8d0909",
+					"size": 691,
+					"sourceHash": "332d20048598fdeba8ad9cf8c9288f92454f83937f9f76960d7585b0508b3c02",
+					"status": "content"
+				},
+				"lib/utils.js": {
+					"match": false,
+					"packageHash": "1ada0d4a3e3d4ca2d808a2be815e6485560629426aab19791552a9cdd19dc728",
+					"size": 25721,
+					"status": "missing-in-source"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -1,6 +1,6 @@\n {\n   \"name\": \"pino-pretty\",\n-  \"version\": \"10.0.0\",\n+  \"version\": \"13.1.3\",\n   \"description\": \"Prettifier for Pino log lines\",\n   \"type\": \"commonjs\",\n   \"main\": \"index.js\",\n@@ -9,10 +9,13 @@\n     \"pino-pretty\": \"./bin.js\"\n   },\n   \"scripts\": {\n-    \"ci\": \"standard && tap --coverage-report=lcovonly && npm run test-types\",\n-    \"lint\": \"standard | snazzy\",\n-    \"test\": \"tap --100 --color\",\n-    \"test-types\": \"tsc && tsd\"\n+    \"ci\": \"eslint && borp --check-coverage && npm run test-types\",\n+    \"lint\": \"eslint\",\n+    \"lint:fix\": \"eslint --fix\",\n+    \"test\": \"borp\",\n+    \"test-types\": \"tsc && tsd && attw --pack .\",\n+    \"test:watch\": \"borp -w --reporter gh\",\n+    \"test:report\": \"c8 --reporter html borp\"\n   },\n   \"repository\": {\n     \"type\": \"git\",\n@@ -27,36 +30,35 @@\n     \"url\": \"https://github.com/pinojs/pino-pretty/issues\"\n   },\n   \"homepage\": \"https://github.com/pinojs/pino-pretty#readme\",\n-  \"precommit\": [\n-    \"lint\",\n-    \"test\"\n-  ],\n   \"dependencies\": {\n     \"colorette\": \"^2.0.7\",\n     \"dateformat\": \"^4.6.3\",\n-    \"fast-copy\": \"^3.0.0\",\n+    \"fast-copy\": \"^4.0.0\",\n     \"fast-safe-stringify\": \"^2.1.1\",\n+    \"help-me\": \"^5.0.0\",\n     \"joycon\": \"^3.1.1\",\n-    \"help-me\": \"^4.0.1\",\n     \"minimist\": \"^1.2.6\",\n-    \"on-exit-leak-free\": \"^2.1.0\",\n-    \"pino-abstract-transport\": \"^1.0.0\",\n-    \"pump\": \"^3.0.0\",\n-    \"readable-stream\": \"^4.0.0\",\n-    \"secure-json-parse\": \"^2.4.0\",\n-    \"sonic-boom\": \"^3.0.0\",\n-    \"strip-json-comments\": \"^3.1.1\"\n+    \"on-exit-leak-free\": \"^2.1.2\",\n+    \"pino-abstract-transport\": \"^3.0.0\",\n+    \"pump\": \"^3.0.3\",\n+    \"secure-json-parse\": \"^4.1.0\",\n+    \"sonic-boom\": \"^4.2.0\",\n+    \"strip-json-comments\": \"^5.0.3\"\n   },\n   \"devDependencies\": {\n-    \"@types/node\": \"^18.0.0\",\n-    \"pino\": \"^8.0.0\",\n-    \"pre-commit\": \"^1.2.2\",\n-    \"rimraf\": \"^3.0.2\",\n-    \"snazzy\": \"^9.0.0\",\n-    \"standard\": \"^17.0.0\",\n-    \"tap\": \"^16.0.0\",\n-    \"tsd\": \"^0.27.0\",\n-    \"typescript\": \"^4.4.3\"\n+    \"@arethetypeswrong/cli\": \"^0.18.1\",\n+    \"@jsumners/assert-match\": \"^1.0.0\",\n+    \"@jsumners/line-reporter\": \"^1.0.1\",\n+    \"@types/node\": \"^25.0.3\",\n+    \"borp\": \"^0.21.0\",\n+    \"eslint\": \"^9.39.1\",\n+    \"fastbench\": \"^1.0.1\",\n+    \"neostandard\": \"^0.12.2\",\n+    \"pino\": \"^10.1.0\",\n+    \"rimraf\": \"^6.1.2\",\n+    \"semver\": \"^7.6.0\",\n+    \"tsd\": \"^0.33.0\",\n+    \"typescript\": \"^5.9.3\"\n   },\n   \"tsd\": {\n     \"directory\": \"./test/types\"\n",
+					"match": false,
+					"packageHash": "8fb11786464a8e9214244af9a70fb231b82cb5b0045c168c5c16c35876fae65a",
+					"size": 1554,
+					"sourceHash": "7e4382930df4cfef20eed25975f95dcc7b0d077f5eded1b8af54e342730d4252",
+					"status": "content"
+				},
+				"test/basic.test.js": {
+					"diff": "--- published/test/basic.test.js\n+++ rebuilt/test/basic.test.js\n@@ -2,17 +2,19 @@\n \n process.env.TZ = 'UTC'\n \n-const { Writable } = require('readable-stream')\n-const os = require('os')\n-const test = require('tap').test\n+const os = require('node:os')\n+const fs = require('node:fs')\n+const { join } = require('node:path')\n+const { describe, test, beforeEach, afterEach } = require('node:test')\n+const { Writable } = require('node:stream')\n+const match = require('@jsumners/assert-match')\n const pino = require('pino')\n const dateformat = require('dateformat')\n-const path = require('path')\n const rimraf = require('rimraf')\n-const { join } = require('path')\n-const fs = require('fs')\n-const pinoPretty = require('..')\n const SonicBoom = require('sonic-boom')\n+const semver = require('semver')\n+\n+const pinoPretty = require('..')\n const _prettyFactory = pinoPretty.prettyFactory\n \n // Disable pino warnings\n@@ -27,36 +29,39 @@\n   return _prettyFactory(opts)\n }\n \n+const Empty = function () {}\n+Empty.prototype = Object.create(null)\n+\n // All dates are computed from 'Fri, 30 Mar 2018 17:35:28 GMT'\n const epoch = 1522431328992\n const formattedEpoch = '17:35:28.992'\n const pid = process.pid\n const hostname = os.hostname()\n \n-test('basic prettifier tests', (t) => {\n-  t.beforeEach(() => {\n+describe('basic prettifier tests', () => {\n+  beforeEach(() => {\n     Date.originalNow = Date.now\n     Date.now = () => epoch\n   })\n-  t.afterEach(() => {\n+  afterEach(() => {\n     Date.now = Date.originalNow\n     delete Date.originalNow\n   })\n \n-  t.test('preserves output if not valid JSON', (t) => {\n+  test('preserves output if not valid JSON', (t) => {\n     t.plan(1)\n     const pretty = prettyFactory()\n     const formatted = pretty('this is not json\\nit\\'s just regular output\\n')\n-    t.equal(formatted, 'this is not json\\nit\\'s just regular output\\n\\n')\n+    t.assert.strictEqual(formatted, 'this is not json\\nit\\'s just regular output\\n\\n')\n   })\n \n-  t.test('formats a line without any extra options', (t) => {\n+  test('formats a line without any extra options', (t) => {\n     t.plan(1)\n     const pretty = prettyFactory()\n     const log = pino({}, new Writable({\n       write (chunk, enc, cb) {\n         const formatted = pretty(chunk.toString())\n-        t.equal(\n+        t.assert.strictEqual(\n           formatted,\n           `[${formattedEpoch}] INFO (${pid}): foo\\n`\n         )\n@@ -66,13 +71,13 @@\n     log.info('foo')\n   })\n \n-  t.test('will add color codes', (t) => {\n+  test('will add color codes', (t) => {\n     t.plan(1)\n     const pretty = prettyFactory({ colorize: true })\n     const log = pino({}, new Writable({\n       write (chunk, enc, cb) {\n         const formatted = pretty(chunk.toString())\n-        t.equal(\n+        t.assert.strictEqual(\n           formatted,\n           `[${formattedEpoch}] \\u001B[32mINFO\\u001B[39m (${pid}): \\u001B[36mfoo\\u001B[39m\\n`\n         )\n@@ -82,13 +87,13 @@\n     log.info('foo')\n   })\n \n-  t.test('will omit color codes from objects when colorizeObjects = false', (t) => {\n+  test('will omit color codes from objects when colorizeObjects = false', (t) => {\n     t.plan(1)\n     const pretty = prettyFactory({ colorize: true, singleLine: true, colorizeObjects: false })\n",
+					"match": false,
+					"packageHash": "726f965bf6f8614b784f4bb4f47e0dc4e220969a71cbeaf3e47f6f253f1324c3",
+					"size": 29346,
+					"sourceHash": "02ae3e86bbad0d8437c21f057c315909893ce57b29c6adae5006c0563106e2c2",
+					"status": "content"
+				},
+				"test/cli-rc.test.js": {
+					"diff": "--- published/test/cli-rc.test.js\n+++ rebuilt/test/cli-rc.test.js\n@@ -2,23 +2,24 @@\n \n process.env.TZ = 'UTC'\n \n-const path = require('path')\n-const spawn = require('child_process').spawn\n-const test = require('tap').test\n-const fs = require('fs')\n-const rimraf = require('rimraf')\n+const fs = require('node:fs')\n+const path = require('node:path')\n+const { spawn } = require('node:child_process')\n+const { describe, after, test } = require('node:test')\n+const match = require('@jsumners/assert-match')\n+const { rimraf } = require('rimraf')\n+const { once } = require('./helper')\n \n const bin = require.resolve('../bin')\n const logLine = '{\"level\":30,\"time\":1522431328992,\"msg\":\"hello world\",\"pid\":42,\"hostname\":\"foo\"}\\n'\n-const noop = () => {}\n \n-test('cli', (t) => {\n+describe('cli', () => {\n   const tmpDir = path.join(__dirname, '.tmp_' + Date.now())\n   fs.mkdirSync(tmpDir)\n \n-  t.teardown(() => rimraf(tmpDir, noop))\n+  after(() => rimraf(tmpDir))\n \n-  t.test('loads and applies default config file: pino-pretty.config.js', (t) => {\n+  test('loads and applies default config file: pino-pretty.config.js', async (t) => {\n     t.plan(1)\n     // Set translateTime: true on run configuration\n     const configFile = path.join(tmpDir, 'pino-pretty.config.js')\n@@ -26,18 +27,19 @@\n     const env = { TERM: 'dumb', TZ: 'UTC' }\n     const child = spawn(process.argv[0], [bin], { env, cwd: tmpDir })\n     // Validate that the time has been translated\n-    child.on('error', t.threw)\n-    child.stdout.on('data', (data) => {\n-      t.equal(data.toString(), '[17:35:28.992] INFO (42): hello world\\n')\n+    child.on('error', t.assert.fail)\n+    const endPromise = once(child.stdout, 'data', (data) => {\n+      t.assert.strictEqual(data.toString(), '[17:35:28.992] INFO (42): hello world\\n')\n     })\n     child.stdin.write(logLine)\n-    t.teardown(() => {\n+    await endPromise\n+    t.after(() => {\n       fs.unlinkSync(configFile)\n       child.kill()\n     })\n   })\n \n-  t.test('loads and applies default config file: pino-pretty.config.cjs', (t) => {\n+  test('loads and applies default config file: pino-pretty.config.cjs', async (t) => {\n     t.plan(1)\n     // Set translateTime: true on run configuration\n     const configFile = path.join(tmpDir, 'pino-pretty.config.cjs')\n@@ -48,19 +50,20 @@\n     const env = { TERM: ' dumb', TZ: 'UTC' }\n     const child = spawn(process.argv[0], [bin], { env, cwd: tmpDir })\n     // Validate that the time has been translated\n-    child.on('error', t.threw)\n-    child.stdout.on('data', (data) => {\n-      t.equal(data.toString(), '[17:35:28.992] INFO (42): hello world\\n')\n+    child.on('error', t.assert.fail)\n+    const endPromise = once(child.stdout, 'data', (data) => {\n+      t.assert.strictEqual(data.toString(), '[17:35:28.992] INFO (42): hello world\\n')\n     })\n     child.stdin.write(logLine)\n-    t.teardown(() => {\n+    await endPromise\n+    t.after(() => {\n       fs.unlinkSync(configFile)\n       fs.unlinkSync(packageJsonFile)\n       child.kill()\n     })\n   })\n \n-  t.test('loads and applies default config file: .pino-prettyrc', (t) => {\n+  test('loads and applies default config file: .pino-prettyrc', async (t) => {\n     t.plan(1)\n     // Set translateTime: true on run configuration\n     const configFile = path.join(tmpDir, '.pino-prettyrc')\n@@ -68,18 +71,19 @@\n     const env = { TERM: ' dumb', TZ: 'UTC' }\n     const child = spawn(process.argv[0], [bin], { env, cwd: tmpDir })\n     // Validate that the time has been translated\n-    child.on('error', t.threw)\n-    child.stdout.on('data', (data) => {\n-      t.equal(data.toString(), '[17:35:28.992] INFO (42): hello world\\n')\n+    child.on('error', t.assert.fail)\n+    const endPromise = once(child.stdout, 'data', (data) => {\n+      t.assert.strictEqual(data.toString(), '[17:35:28.992] INFO (42): hello world\\n')\n     })\n     child.stdin.write(logLine)\n-    t.teardown(() => {\n",
+					"match": false,
+					"packageHash": "f0a031a66cac95fa2c0b827941b6a6c14ab7364bac95f9244d7b1f244c10a6b1",
+					"size": 10086,
+					"sourceHash": "37b8608d655f46d3755a9eb898d2ab196cb93b4b751c8d8ec7a899af2342471b",
+					"status": "content"
+				},
+				"test/cli.test.js": {
+					"diff": "--- published/test/cli.test.js\n+++ rebuilt/test/cli.test.js\n@@ -2,9 +2,10 @@\n \n process.env.TZ = 'UTC'\n \n-const path = require('path')\n-const spawn = require('child_process').spawn\n-const test = require('tap').test\n+const path = require('node:path')\n+const { spawn } = require('node:child_process')\n+const { describe, test } = require('node:test')\n+const { once } = require('./helper')\n \n const bin = require.resolve(path.join(__dirname, '..', 'bin.js'))\n const epoch = 1522431328992\n@@ -12,274 +13,297 @@\n const env = { TERM: 'dumb', TZ: 'UTC' }\n const formattedEpoch = '17:35:28.992'\n \n-test('cli', (t) => {\n-  t.test('does basic reformatting', (t) => {\n+describe('cli', () => {\n+  test('does basic reformatting', async (t) => {\n     t.plan(1)\n     const child = spawn(process.argv[0], [bin], { env })\n-    child.on('error', t.threw)\n-    child.stdout.on('data', (data) => {\n-      t.equal(data.toString(), `[${formattedEpoch}] INFO (42): hello world\\n`)\n+    child.on('error', t.assert.fail)\n+    const endPromise = once(child.stdout, 'data', (data) => {\n+      t.assert.strictEqual(data.toString(), `[${formattedEpoch}] INFO (42): hello world\\n`)\n     })\n     child.stdin.write(logLine)\n-    t.teardown(() => child.kill())\n+    await endPromise\n+    t.after(() => child.kill())\n   })\n \n-  ;['--levelFirst', '-l'].forEach((optionName) => {\n-    t.test(`flips epoch and level via ${optionName}`, (t) => {\n+  for (const optionName of ['--levelFirst', '-l']) {\n+    test(`flips epoch and level via ${optionName}`, async (t) => {\n       t.plan(1)\n       const child = spawn(process.argv[0], [bin, optionName], { env })\n-      child.on('error', t.threw)\n-      child.stdout.on('data', (data) => {\n-        t.equal(data.toString(), `INFO [${formattedEpoch}] (42): hello world\\n`)\n+      child.on('error', t.assert.fail)\n+      const endPromise = once(child.stdout, 'data', (data) => {\n+        t.assert.strictEqual(data.toString(), `INFO [${formattedEpoch}] (42): hello world\\n`)\n       })\n       child.stdin.write(logLine)\n-      t.teardown(() => child.kill())\n+      await endPromise\n+      t.after(() => child.kill())\n     })\n-  })\n+  }\n \n-  ;['--translateTime', '-t'].forEach((optionName) => {\n-    t.test(`translates time to default format via ${optionName}`, (t) => {\n+  for (const optionName of ['--translateTime', '-t']) {\n+    test(`translates time to default format via ${optionName}`, async (t) => {\n       t.plan(1)\n       const child = spawn(process.argv[0], [bin, optionName], { env })\n-      child.on('error', t.threw)\n-      child.stdout.on('data', (data) => {\n-        t.equal(data.toString(), `[${formattedEpoch}] INFO (42): hello world\\n`)\n+      child.on('error', t.assert.fail)\n+      const endPromise = once(child.stdout, 'data', (data) => {\n+        t.assert.strictEqual(data.toString(), `[${formattedEpoch}] INFO (42): hello world\\n`)\n       })\n       child.stdin.write(logLine)\n-      t.teardown(() => child.kill())\n+      await endPromise\n+      t.after(() => child.kill())\n     })\n-  })\n+  }\n \n-  ;['--ignore', '-i'].forEach((optionName) => {\n-    t.test('does ignore multiple keys', (t) => {\n+  for (const optionName of ['--ignore', '-i']) {\n+    test('does ignore multiple keys', async (t) => {\n       t.plan(1)\n       const child = spawn(process.argv[0], [bin, optionName, 'pid,hostname'], { env })\n-      child.on('error', t.threw)\n-      child.stdout.on('data', (data) => {\n-        t.equal(data.toString(), `[${formattedEpoch}] INFO: hello world\\n`)\n+      child.on('error', t.assert.fail)\n+      const endPromise = once(child.stdout, 'data', (data) => {\n+        t.assert.strictEqual(data.toString(), `[${formattedEpoch}] INFO: hello world\\n`)\n       })\n       child.stdin.write(logLine)\n-      t.teardown(() => child.kill())\n+      await endPromise\n+      t.after(() => child.kill())\n     })\n-  })\n",
+					"match": false,
+					"packageHash": "253bc920756a1d59f4c4c5a9546c1bb78011a07caafe34c51d850bd0a1b8067f",
+					"size": 12590,
+					"sourceHash": "aaf53a714d89b2cfe970d0231d71c32b7032be3668168c19c65b8038b6e949ca",
+					"status": "content"
+				},
+				"test/crlf.test.js": {
+					"diff": "--- published/test/crlf.test.js\n+++ rebuilt/test/crlf.test.js\n@@ -2,7 +2,7 @@\n \n process.env.TZ = 'UTC'\n \n-const test = require('tap').test\n+const { describe, test } = require('node:test')\n const _prettyFactory = require('../').prettyFactory\n \n function prettyFactory (opts) {\n@@ -16,20 +16,18 @@\n \n const logLine = '{\"level\":30,\"time\":1522431328992,\"msg\":\"hello world\",\"pid\":42,\"hostname\":\"foo\"}\\n'\n \n-test('crlf', (t) => {\n-  t.test('uses LF by default', (t) => {\n+describe('crlf', () => {\n+  test('uses LF by default', (t) => {\n     t.plan(1)\n     const pretty = prettyFactory()\n     const formatted = pretty(logLine)\n-    t.equal(formatted.substr(-2), 'd\\n')\n+    t.assert.strictEqual(formatted.substr(-2), 'd\\n')\n   })\n \n-  t.test('can use CRLF', (t) => {\n+  test('can use CRLF', (t) => {\n     t.plan(1)\n     const pretty = prettyFactory({ crlf: true })\n     const formatted = pretty(logLine)\n-    t.equal(formatted.substr(-3), 'd\\r\\n')\n+    t.assert.strictEqual(formatted.substr(-3), 'd\\r\\n')\n   })\n-\n-  t.end()\n })\n",
+					"match": false,
+					"packageHash": "b1a5a1610fbd3b7ea87add55c0339316858346f32db1d21595150b418d610d08",
+					"size": 831,
+					"sourceHash": "e98194eae6ec7ac7beafdfa980714fa609be63bd511b3572c0a84ebde5f4a0c5",
+					"status": "content"
+				},
+				"test/error-objects.test.js": {
+					"diff": "--- published/test/error-objects.test.js\n+++ rebuilt/test/error-objects.test.js\n@@ -2,11 +2,13 @@\n \n process.env.TZ = 'UTC'\n \n-const Writable = require('stream').Writable\n-const test = require('tap').test\n+const { Writable } = require('node:stream')\n+const { describe, test, afterEach, beforeEach } = require('node:test')\n const pino = require('pino')\n+const semver = require('semver')\n const serializers = pino.stdSerializers\n-const _prettyFactory = require('../').prettyFactory\n+const pinoPretty = require('../')\n+const _prettyFactory = pinoPretty.prettyFactory\n \n function prettyFactory (opts) {\n   if (!opts) {\n@@ -22,17 +24,17 @@\n const formattedEpoch = '17:35:28.992'\n const pid = process.pid\n \n-test('error like objects tests', (t) => {\n-  t.beforeEach(() => {\n+describe('error like objects tests', () => {\n+  beforeEach(() => {\n     Date.originalNow = Date.now\n     Date.now = () => epoch\n   })\n-  t.afterEach(() => {\n+  afterEach(() => {\n     Date.now = Date.originalNow\n     delete Date.originalNow\n   })\n \n-  t.test('pino transform prettifies Error', (t) => {\n+  test('pino transform prettifies Error', (t) => {\n     t.plan(2)\n     const pretty = prettyFactory()\n     const err = Error('hello world')\n@@ -43,8 +45,8 @@\n       write (chunk, enc, cb) {\n         const formatted = pretty(chunk.toString())\n         const lines = formatted.split('\\n')\n-        t.equal(lines.length, expected.length + 6)\n-        t.equal(lines[0], `[${formattedEpoch}] INFO (${pid}): hello world`)\n+        t.assert.strictEqual(lines.length, expected.length + 6)\n+        t.assert.strictEqual(lines[0], `[${formattedEpoch}] INFO (${pid}): hello world`)\n         cb()\n       }\n     }))\n@@ -52,15 +54,15 @@\n     log.info(err)\n   })\n \n-  t.test('errorProps recognizes user specified properties', (t) => {\n+  test('errorProps recognizes user specified properties', (t) => {\n     t.plan(3)\n     const pretty = prettyFactory({ errorProps: 'statusCode,originalStack' })\n     const log = pino({}, new Writable({\n       write (chunk, enc, cb) {\n         const formatted = pretty(chunk.toString())\n-        t.match(formatted, /\\s{4}error stack/)\n-        t.match(formatted, /\"statusCode\": 500/)\n-        t.match(formatted, /\"originalStack\": \"original stack\"/)\n+        t.assert.match(formatted, /\\s{4}error stack/)\n+        t.assert.match(formatted, /\"statusCode\": 500/)\n+        t.assert.match(formatted, /\"originalStack\": \"original stack\"/)\n         cb()\n       }\n     }))\n@@ -73,14 +75,13 @@\n     log.error(error)\n   })\n \n-  t.test('prettifies ignores undefined errorLikeObject', (t) => {\n+  test('prettifies ignores undefined errorLikeObject', (t) => {\n     const pretty = prettyFactory()\n     pretty({ err: undefined })\n     pretty({ error: undefined })\n-    t.end()\n   })\n \n-  t.test('prettifies Error in property within errorLikeObjectKeys', (t) => {\n+  test('prettifies Error in property within errorLikeObjectKeys', (t) => {\n     t.plan(8)\n     const pretty = prettyFactory({\n       errorLikeObjectKeys: ['err']\n@@ -94,15 +95,15 @@\n       write (chunk, enc, cb) {\n         const formatted = pretty(chunk.toString())\n         const lines = formatted.split('\\n')\n-        t.equal(lines.length, expected.length + 6)\n-        t.equal(lines[0], `[${formattedEpoch}] INFO (${pid}): hello world`)\n-        t.match(lines[1], /\\s{4}err: {/)\n-        t.match(lines[2], /\\s{6}\"type\": \"Error\",/)\n-        t.match(lines[3], /\\s{6}\"message\": \"hello world\",/)\n-        t.match(lines[4], /\\s{6}\"stack\":/)\n-        t.match(lines[5], /\\s{6}Error: hello world/)\n",
+					"match": false,
+					"packageHash": "5bbb63659846df189800f275e6c664cab16d958588dd53b889ae313c0d4de56d",
+					"size": 13997,
+					"sourceHash": "33bb04455e5608cbd1359c060cad7f59cf918fd7525b55183bf54313cad935df",
+					"status": "content"
+				},
+				"test/example/example.js": {
+					"diff": "--- published/test/example/example.js\n+++ rebuilt/test/example/example.js\n@@ -1,8 +1,10 @@\n+'use strict'\n+\n // Run this to see how colouring works\n \n const _prettyFactory = require('../../')\n const pino = require('pino')\n-const { Writable } = require('readable-stream')\n+const { Writable } = require('node:stream')\n \n function prettyFactory () {\n   return _prettyFactory({\n",
+					"match": false,
+					"packageHash": "f32e4b9ec5c868b4b2127c6ffb2543781a8a697aed62cfdac34d37823a15e824",
+					"size": 624,
+					"sourceHash": "9e15d6530b21930827b226246b483fb4dca3d512ee016cdc444cd625d0e30021",
+					"status": "content"
+				},
+				"test/lib/colors.test.js": {
+					"match": false,
+					"packageHash": "36155ddebbff7ead3200d4939a84326d543d46785fa7516252679813e59202e7",
+					"size": 3742,
+					"status": "missing-in-source"
+				},
+				"test/lib/utils.internals.test.js": {
+					"match": false,
+					"packageHash": "3c12daabb1bccd01b3f9ce745028b9c84e0d4cfc6e26dcac7fc398bc2fe04bcd",
+					"size": 7744,
+					"status": "missing-in-source"
+				},
+				"test/lib/utils.public.test.js": {
+					"match": false,
+					"packageHash": "ba3fd4cf70c9420e39969f46fc78c89a396c24f6d3112b7c36f0500d483ae7db",
+					"size": 20525,
+					"status": "missing-in-source"
+				},
+				"test/types/pino-pretty.test-d.ts": {
+					"diff": "--- published/test/types/pino-pretty.test-d.ts\n+++ rebuilt/test/types/pino-pretty.test-d.ts\n@@ -32,39 +32,21 @@\n   customPrettifiers: {\n     key: (value) => {\n       return value.toString().toUpperCase();\n+    },\n+    level: (level, levelKey, log, { label, labelColorized, colors }) => {\n+      return level.toString();\n+    },\n+    foo: (value, key, log, { colors }) => {\n+      return value.toString();\n     }\n   },\n+  customLevels: 'verbose:5',\n+  customColors: 'default:white,verbose:gray',\n   sync: false,\n   destination: 2,\n   append: true,\n   mkdir: true,\n-};\n-\n-const options2: PrettyOptions = {\n-  colorize: true,\n-  crlf: false,\n-  errorLikeObjectKeys: [\"err\", \"error\"],\n-  errorProps: \"\",\n-  hideObject: true,\n-  levelKey: \"level\",\n-  levelLabel: \"foo\",\n-  messageFormat: false,\n-  ignore: \"\",\n-  levelFirst: false,\n-  messageKey: \"msg\",\n-  timestampKey: \"timestamp\",\n-  minimumLevel: \"trace\",\n-  translateTime: \"UTC:h:MM:ss TT Z\",\n-  singleLine: false,\n-  customPrettifiers: {\n-    key: (value) => {\n-      return value.toString().toUpperCase();\n-    }\n-  },\n-  sync: false,\n-  destination: 2,\n-  append: true,\n-  mkdir: true,\n+  useOnlyCustomProps: false,\n };\n \n expectType<PrettyStream>(pretty()); // #326\n@@ -72,9 +54,5 @@\n expectType<PrettyStream>(PinoPrettyNamed(options));\n expectType<PrettyStream>(PinoPrettyDefault(options));\n expectType<PrettyStream>(PinoPrettyStar.PinoPretty(options));\n-expectType<PrettyStream>(PinoPrettyStar.default(options));\n expectType<PrettyStream>(PinoPrettyCjsImport.PinoPretty(options));\n-expectType<PrettyStream>(PinoPrettyCjsImport.default(options));\n expectType<any>(PinoPrettyCjs(options));\n-expectType<PinoPretty.ColorizerFactory>(colorizerFactory)\n-expectType<PinoPretty.PrettyFactory>(prettyFactory)\n",
+					"match": false,
+					"packageHash": "e9f555e93b97ed9212805cca92dd2aa53627fdbcabf0d38ea9fb6af78081c7a5",
+					"size": 2111,
+					"sourceHash": "99cb4a47a70608f4ba40160f35d0d6d25b864da3d8d80be01220fb8ac9dd1b5d",
+					"status": "content"
+				},
+				".borp.yaml": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				".eslintrc": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"benchmark.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"coverage-map.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"eslint.config.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/colors.test.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/pretty.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/utils/build-safe-sonic-boom.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/utils/build-safe-sonic-boom.test.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/utils/create-date.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/utils/create-date.test.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/utils/delete-log-property.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/utils/delete-log-property.test.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/utils/filter-log.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/utils/filter-log.test.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/utils/format-time.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/utils/format-time.test.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/utils/get-level-label-data.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/utils/get-property-value.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/utils/get-property-value.test.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/utils/handle-custom-levels-names-opts.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/utils/handle-custom-levels-names-opts.test.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/utils/handle-custom-levels-opts.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/utils/handle-custom-levels-opts.test.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/utils/index.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/utils/index.test.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/utils/interpret-conditionals.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/utils/interpret-conditionals.test.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/utils/is-object.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/utils/is-object.test.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/utils/is-valid-date.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/utils/is-valid-date.test.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/utils/join-lines-with-indentation.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/utils/join-lines-with-indentation.test.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/utils/noop.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/utils/noop.test.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/utils/parse-factory-options.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/utils/prettify-error-log.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/utils/prettify-error-log.test.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/utils/prettify-error.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/utils/prettify-error.test.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/utils/prettify-level.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/utils/prettify-level.test.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/utils/prettify-message.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/utils/prettify-message.test.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/utils/prettify-metadata.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/utils/prettify-metadata.test.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/utils/prettify-object.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/utils/prettify-object.test.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/utils/prettify-time.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/utils/prettify-time.test.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/utils/split-property-key.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/utils/split-property-key.test.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/helper.js": {
+					"match": false,
+					"status": "missing-in-package"
+				}
+			},
+			"summary": {
+				"differentFiles": 18,
+				"matchingFiles": 4,
+				"missingInPackage": 54,
+				"missingInSource": 5,
+				"score": 0.04938271604938271,
+				"totalFiles": 81
+			}
+		}
+	}
+]
