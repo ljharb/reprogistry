@@ -1,0 +1,91 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-06T18:21:16.731Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:11.7.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "node-watch@0.3.1",
+			"name": "node-watch",
+			"version": "0.3.1",
+			"location": "https://registry.npmjs.org/node-watch/-/node-watch-0.3.1.tgz",
+			"integrity": "sha512-yA8R9uPwqxkwHk1WDq5dDeTS9rW3ZVcf6tCmlni52GUnOnwSpR7Oy1KYxLi9Kra0U0R/fnHcygutEj1XuEdBdA==",
+			"publishedAt": "2013-03-21T06:52:08.205Z",
+			"publishedWith": {
+				"node": null,
+				"npm": "1.2.14"
+			}
+		},
+		"source": {
+			"integrity": null,
+			"location": "git://github.com/yuanchuan/node-watch.git",
+			"spec": "github:yuanchuan/node-watch#HEAD"
+		},
+		"comparisonHash": "9ef46a5bd31291e57cbab41e2f17c57bd6da0b5b",
+		"diff": {
+			"files": {
+				"LICENSE": {
+					"diff": "--- published/LICENSE\n+++ rebuilt/LICENSE\n@@ -1,6 +1,6 @@\n (The MIT License)\n \n-Copyright (c) 2012 Yuan Chuan <yuanchuan23@gmail.com>\n+Copyright (c) 2012-2021 Yuan Chuan <yuanchuan23@gmail.com>\n \n Permission is hereby granted, free of charge, to any person obtaining\n a copy of this software and associated documentation files (the\n",
+					"match": false,
+					"packageHash": "9c31ef92756421d4819f657302bcb96ff91af62d11600b6f47b2b807df152916",
+					"size": 1097,
+					"sourceHash": "9321d210212ef39cc3748807334e5aba9a346ce80c5021703d9279fa15225631",
+					"status": "content"
+				},
+				"README.md": {
+					"diff": "--- published/README.md\n+++ rebuilt/README.md\n@@ -1,80 +1,233 @@\n-#Node-watch\n-A [fs.watch](http://nodejs.org/api/fs.html#fs_fs_watch_filename_options_listener) wrapper to watch files or directories(recursively by default).  \n+# node-watch [![Status](https://github.com/yuanchuan/node-watch/actions/workflows/ci.yml/badge.svg)](https://github.com/yuanchuan/node-watch/actions/workflows/ci.yml/badge.svg)\n \n+A wrapper and enhancements for [fs.watch](http://nodejs.org/api/fs.html#fs_fs_watch_filename_options_listener).\n \n-### Installation\n+[![NPM](https://nodei.co/npm/node-watch.png?downloads=true&downloadRank=true&stars=true)](https://nodei.co/npm/node-watch.png/)\n+\n+\n+## Installation\n \n ```bash\n npm install node-watch\n ```\n \n- \n-\n-### Example\n+## Example\n \n ```js\n var watch = require('node-watch');\n \n-watch('somedir_or_somefile', function(filename) {\n-  console.log(filename, ' changed.');\n+watch('file_or_dir', { recursive: true }, function(evt, name) {\n+  console.log('%s changed.', name);\n });\n-``` \n+```\n \n-### Why fs.watch wrapper\n+Now it's fast to watch **deep** directories on macOS and Windows, since the `recursive` option is natively supported except on Linux.\n \n-* Some editors will generate temporary files which will cause the callback function to trigger multiple times.\n-* when watching a single file, the callback function will only be triggered one time and then the file is unwatched.\n-* Missing an option to watch a directory recursively.\n- \n- \n+```js\n+// watch the whole disk\n+watch('/', { recursive: true }, console.log);\n+```\n \n \n-### The difference\n-This module **currently** does not differentiate event like `rename` or `delete`. Once there is a change, the callback function will be triggered.\n+## Why?\n \n+* Some editors will generate temporary files which will cause the callback function to be triggered multiple times.\n+* The callback function will only be triggered once on watching a single file.\n+* <del>Missing an option to watch a directory recursively.</del>\n+* Recursive watch is not supported on Linux or in older versions of nodejs.\n+* Keep it simple, stupid.\n \n \n ## Options\n \n-`recursive`:Watch it recursively or not (defaults to **true**). \n+The usage and options of `node-watch` are compatible with [fs.watch](https://nodejs.org/dist/latest-v7.x/docs/api/fs.html#fs_fs_watch_filename_options_listener).\n+* `persistent: Boolean` (default **true**)\n+* `recursive: Boolean` (default **false**)\n+* `encoding: String` (default **'utf8'**)\n+\n+**Extra options**\n+\n+* `filter: RegExp | Function`\n+\n+   Return that matches the filter expression.\n+\n+    ```js\n+    // filter with regular expression\n+    watch('./', { filter: /\\.json$/ });\n+\n+    // filter with custom function\n+    watch('./', { filter: f => !/node_modules/.test(f) });\n+\n+    ```\n+\n+   Each file and directory will be passed to the filter to determine whether\n+   it will then be passed to the callback function. Like `Array.filter` does in `JavaScript`.\n+   There are three kinds of return values for filter function:\n+\n+     * **`true`**: Will be passed to callback.\n+     * **`false`**: Will not be passed to callback.\n+     * **`skip`**: Same with `false`, and skip to watch all its subdirectories.\n+\n+   On Linux, where the `recursive` option is not natively supported,\n+   it is more efficient to skip ignored directories by returning the `skip` flag:\n+\n+    ```js\n+    watch('./', {\n+      recursive: true,\n+      filter(f, skip) {\n+        // skip node_modules\n+        if (/\\/node_modules/.test(f)) return skip;\n",
+					"match": false,
+					"packageHash": "19c2428a7986331a72d1d001687443efdf684f5830c40653ce6d58ae632361fb",
+					"size": 1709,
+					"sourceHash": "2b830512d08d22c2c844ed0712a16d511c40783ee0b9bf387cacd4da8689aed3",
+					"status": "content"
+				},
+				"index.js": {
+					"match": false,
+					"packageHash": "8f566b9344fc30acc090b7414097c1126833461699d51ce2e33b4ab1bade84ad",
+					"size": 41,
+					"status": "missing-in-source"
+				},
+				"lib/watch.js": {
+					"diff": "--- published/lib/watch.js\n+++ rebuilt/lib/watch.js\n@@ -1,243 +1,550 @@\n-/**\n- *  Module dependencies.\n- */\n-var fs   = require('fs')\n-  , path = require('path');\n- \n-\n-/**\n- * Utility functions to synchronously test whether the giving path \n- * is a file or a directory or a symbolic link.\n- */\n-var is = (function(ret) {\n-  var shortcuts = {\n-      'file': 'File'\n-    , 'dir': 'Directory'\n-    , 'sym': 'SymbolicLink'\n-  };\n-  Object.keys(shortcuts).forEach(function(method) {\n-    ret[method] = function(fpath) { \n-      var stat = fs[method === 'sym' ? 'lstatSync' :'statSync'];\n-      if (fs.existsSync(fpath)) {\n-        memo.push(fpath, method);\n-        return stat(fpath)['is' + shortcuts[method]]();  \n-      }\n-      return false;\n-    }\n-  });\n-  return ret;\n-}({}));\n-\n-\n-/**\n- *  Get sub-directories in a directory.\n- */\n-var sub = function(parent, cb) {\n-  if (is.dir(parent)) {\n-    fs.readdir(parent, function(err, all) {\n-      all && all.forEach(function(f) {\n-        var sdir = path.join(parent, f) \n-        if (is.dir(sdir)) {\n-          cb.call(null, sdir) \n-        }\n+var fs = require('fs');\n+var path = require('path');\n+var util = require('util');\n+var events = require('events');\n+\n+var hasNativeRecursive = require('./has-native-recursive');\n+var is = require('./is');\n+\n+var EVENT_UPDATE = 'update';\n+var EVENT_REMOVE = 'remove';\n+\n+var SKIP_FLAG = Symbol('skip');\n+\n+function hasDup(arr) {\n+  return arr.some(function(v, i, self) {\n+    return self.indexOf(v) !== i;\n+  });\n+}\n+\n+function unique(arr) {\n+  return arr.filter(function(v, i, self) {\n+    return self.indexOf(v) === i;\n+  });\n+}\n+\n+// One level flat\n+function flat1(arr) {\n+  return arr.reduce(function(acc, v) {\n+    return acc.concat(v);\n+  }, []);\n+}\n+\n+function assertEncoding(encoding) {\n+  if (encoding && encoding !== 'buffer' && !Buffer.isEncoding(encoding)) {\n+    throw new Error('Unknown encoding: ' + encoding);\n+  }\n+}\n+\n+function guard(fn) {\n+  if (is.func(fn)) {\n+    return function(arg, action) {\n+      if (fn(arg, false)) action();\n+    }\n+  }\n+  if (is.regExp(fn)) {\n+    return function(arg, action) {\n+      if (fn.test(arg)) action();\n+    }\n+  }\n+  return function(arg, action) {\n+    action();\n+  }\n+}\n+\n+function composeMessage(names) {\n",
+					"match": false,
+					"packageHash": "e915e7c65ca3b933ae19d6c699474a73673bc23a9846003be537e539bac4cd04",
+					"size": 5567,
+					"sourceHash": "f2559c636443eb41dad28e37cdb532da8010b74a313f42a4c691ebb17cd183cf",
+					"status": "content"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -1,16 +1,36 @@\n {\n-    \"name\": \"node-watch\" \n-  , \"version\": \"0.3.1\"\n-  , \"description\": \"fs.watch() wrapper of Nodejs \"\n-  , \"url\": \"https://github.com/yuanchuan/node-watch\"\n-  , \"author\": \"yuanchuan <yuanchuan23@gmail.com> (http://yuanchuan.name)\"\n-  , \"main\": \"./lib/watch.js\"\n-  , \"keywords\": [\"nodewatch\", \"watch\", \"watchfile\"]\n-  , \"bugs\": {\n-      \"url\": \"https://github.com/yuanchuan/node-watch/issues\"\n-    }\n-  , \"repository\": {\n-        \"type\": \"git\"\n-      , \"url\": \"git://github.com/yuanchuan/node-watch.git\"\n-    }\n+  \"description\": \"A wrapper and enhancements for fs.watch\",\n+  \"license\": \"MIT\",\n+  \"name\": \"node-watch\",\n+  \"repository\": {\n+    \"url\": \"git://github.com/yuanchuan/node-watch.git\",\n+    \"type\": \"git\"\n+  },\n+  \"keywords\": [\n+    \"fs.watch\",\n+    \"watch\",\n+    \"watchfile\"\n+  ],\n+  \"version\": \"0.7.4\",\n+  \"bugs\": {\n+    \"url\": \"https://github.com/yuanchuan/node-watch/issues\"\n+  },\n+  \"url\": \"https://github.com/yuanchuan/node-watch\",\n+  \"author\": \"yuanchuan <yuanchuan23@gmail.com> (http://yuanchuan.name)\",\n+  \"main\": \"./lib/watch\",\n+  \"types\": \"./lib/watch.d.ts\",\n+  \"files\": [\n+    \"lib/\"\n+  ],\n+  \"homepage\": \"https://github.com/yuanchuan/node-watch#readme\",\n+  \"scripts\": {\n+    \"test\": \"mocha test/test.js --exit --slow 500\"\n+  },\n+  \"engines\": {\n+    \"node\": \">=6\"\n+  },\n+  \"devDependencies\": {\n+    \"fs-extra\": \"^7.0.1\",\n+    \"mocha\": \"^10.2.0\"\n+  }\n }\n",
+					"match": false,
+					"packageHash": "c537bd8bc4dad62335e71f56c7607e90cb48a98c74db4225eb50b085c1ef7f31",
+					"size": 501,
+					"sourceHash": "2d86d08d1ff280dcb99ab00f3e0804ffd9ef44e1755648d84e00fb1e3e3a1e6e",
+					"status": "content"
+				},
+				"lib/has-native-recursive.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/is.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/watch.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				}
+			},
+			"summary": {
+				"differentFiles": 4,
+				"matchingFiles": 0,
+				"missingInPackage": 3,
+				"missingInSource": 1,
+				"score": 0,
+				"totalFiles": 8
+			}
+		}
+	}
+]
