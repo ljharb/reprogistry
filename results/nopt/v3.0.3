@@ -1,0 +1,109 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-06T18:37:22.834Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:11.7.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "nopt@3.0.3",
+			"name": "nopt",
+			"version": "3.0.3",
+			"location": "https://registry.npmjs.org/nopt/-/nopt-3.0.3.tgz",
+			"integrity": "sha512-oCT64BXP373m3EApJPNCr6xHmIZtsVtlbj6gBq1YqRjNIrjGz7DRvDk8te7fwh4J1UHxsqYKpq4mwa+lyq9Vqw==",
+			"publishedAt": "2015-06-23T01:16:18.259Z",
+			"publishedWith": {
+				"node": "2.2.1",
+				"npm": "2.12.0"
+			}
+		},
+		"source": {
+			"integrity": null,
+			"location": "git+ssh://git@github.com/isaacs/nopt.git",
+			"spec": "github:isaacs/nopt#f64a64cd48d9f2660dd4e59191ff46a26397d6b1"
+		},
+		"comparisonHash": "9ef46a5bd31291e57cbab41e2f17c57bd6da0b5b",
+		"diff": {
+			"files": {
+				".npmignore": {
+					"match": false,
+					"packageHash": "16d30e4462189fb14dd611bdb708c510630c576a1f35b9383e89a4352da36c97",
+					"size": 13,
+					"status": "missing-in-source"
+				},
+				".travis.yml": {
+					"match": false,
+					"packageHash": "44c7a3f484549c1c42783defdacc6e82b148496f6c6dbdcd35b29c475a486f50",
+					"size": 134,
+					"status": "missing-in-source"
+				},
+				"README.md": {
+					"diff": "--- published/README.md\n+++ rebuilt/README.md\n@@ -19,34 +19,37 @@\n \n ## USAGE\n \n-    // my-program.js\n-    var nopt = require(\"nopt\")\n-      , Stream = require(\"stream\").Stream\n-      , path = require(\"path\")\n-      , knownOpts = { \"foo\" : [String, null]\n-                    , \"bar\" : [Stream, Number]\n-                    , \"baz\" : path\n-                    , \"bloo\" : [ \"big\", \"medium\", \"small\" ]\n-                    , \"flag\" : Boolean\n-                    , \"pick\" : Boolean\n-                    , \"many\" : [String, Array]\n-                    }\n-      , shortHands = { \"foofoo\" : [\"--foo\", \"Mr. Foo\"]\n-                     , \"b7\" : [\"--bar\", \"7\"]\n-                     , \"m\" : [\"--bloo\", \"medium\"]\n-                     , \"p\" : [\"--pick\"]\n-                     , \"f\" : [\"--flag\"]\n-                     }\n-                 // everything is optional.\n-                 // knownOpts and shorthands default to {}\n-                 // arg list defaults to process.argv\n-                 // slice defaults to 2\n-      , parsed = nopt(knownOpts, shortHands, process.argv, 2)\n-    console.log(parsed)\n+```javascript\n+// my-program.js\n+var nopt = require(\"nopt\")\n+  , Stream = require(\"stream\").Stream\n+  , path = require(\"path\")\n+  , knownOpts = { \"foo\" : [String, null]\n+                , \"bar\" : [Stream, Number]\n+                , \"baz\" : path\n+                , \"bloo\" : [ \"big\", \"medium\", \"small\" ]\n+                , \"flag\" : Boolean\n+                , \"pick\" : Boolean\n+                , \"many1\" : [String, Array]\n+                , \"many2\" : [path, Array]\n+                }\n+  , shortHands = { \"foofoo\" : [\"--foo\", \"Mr. Foo\"]\n+                 , \"b7\" : [\"--bar\", \"7\"]\n+                 , \"m\" : [\"--bloo\", \"medium\"]\n+                 , \"p\" : [\"--pick\"]\n+                 , \"f\" : [\"--flag\"]\n+                 }\n+             // everything is optional.\n+             // knownOpts and shorthands default to {}\n+             // arg list defaults to process.argv\n+             // slice defaults to 2\n+  , parsed = nopt(knownOpts, shortHands, process.argv, 2)\n+console.log(parsed)\n+```\n \n This would give you support for any of the following:\n \n-```bash\n+```console\n $ node my-program.js --foo \"blerp\" --no-flag\n { \"foo\" : \"blerp\", \"flag\" : false }\n \n@@ -78,11 +81,11 @@\n # values, and will always be an array.  The other types provided\n # specify what types are allowed in the list.\n \n-$ node my-program.js --many 1 --many null --many foo\n-{ many: [\"1\", \"null\", \"foo\"] }\n+$ node my-program.js --many1 5 --many1 null --many1 foo\n+{ many1: [\"5\", \"null\", \"foo\"] }\n \n-$ node my-program.js --many foo\n-{ many: [\"foo\"] }\n+$ node my-program.js --many2 foo --many2 bar\n+{ many2: [\"/path/to/foo\", \"path/to/bar\"] }\n ```\n \n Read the tests at the bottom of `lib/nopt.js` for more examples of\n@@ -138,14 +141,15 @@\n \n ## Error Handling\n \n-By default, nopt outputs a warning to standard error when invalid\n-options are found.  You can change this behavior by assigning a method\n-to `nopt.invalidHandler`.  This method will be called with\n-the offending `nopt.invalidHandler(key, val, types)`.\n-\n-If no `nopt.invalidHandler` is assigned, then it will console.error\n-its whining.  If it is assigned to boolean `false` then the warning is\n-suppressed.\n+By default nopt logs debug messages if `DEBUG_NOPT` or `NOPT_DEBUG` are set in the environment.\n+\n+You can assign the following methods to `nopt` for a more granular notification of invalid, unknown, and expanding options:\n+\n+`nopt.invalidHandler(key, value, type, data)` - Called when a value is invalid for its option.\n+`nopt.unknownHandler(key, next)` - Called when an option is found that has no configuration.  In certain situations the next option on the command line will be parsed on its own instead of as part of the unknown option. In this case `next` will contain that option.\n+`nopt.abbrevHandler(short, long)` - Called when an option is automatically translated via abbreviations.\n",
+					"match": false,
+					"packageHash": "63df431d08aebcd5168d991724a32403febfa0d473047224d34b6f73316b0e20",
+					"size": 7591,
+					"sourceHash": "f23a4ae4ba5f494cf303c55db67aa6d45ac72f47ac44f6faea8a7cdb36150b4d",
+					"status": "content"
+				},
+				"bin/nopt.js": {
+					"diff": "--- published/bin/nopt.js\n+++ rebuilt/bin/nopt.js\n@@ -1,54 +1,29 @@\n #!/usr/bin/env node\n-var nopt = require(\"../lib/nopt\")\n-  , path = require(\"path\")\n-  , types = { num: Number\n-            , bool: Boolean\n-            , help: Boolean\n-            , list: Array\n-            , \"num-list\": [Number, Array]\n-            , \"str-list\": [String, Array]\n-            , \"bool-list\": [Boolean, Array]\n-            , str: String\n-            , clear: Boolean\n-            , config: Boolean\n-            , length: Number\n-            , file: path\n-            }\n-  , shorthands = { s: [ \"--str\", \"astring\" ]\n-                 , b: [ \"--bool\" ]\n-                 , nb: [ \"--no-bool\" ]\n-                 , tft: [ \"--bool-list\", \"--no-bool-list\", \"--bool-list\", \"true\" ]\n-                 , \"?\": [\"--help\"]\n-                 , h: [\"--help\"]\n-                 , H: [\"--help\"]\n-                 , n: [ \"--num\", \"125\" ]\n-                 , c: [\"--config\"]\n-                 , l: [\"--length\"]\n-                 , f: [\"--file\"]\n-                 }\n-  , parsed = nopt( types\n-                 , shorthands\n-                 , process.argv\n-                 , 2 )\n-\n-console.log(\"parsed\", parsed)\n-\n-if (parsed.help) {\n-  console.log(\"\")\n-  console.log(\"nopt cli tester\")\n-  console.log(\"\")\n-  console.log(\"types\")\n-  console.log(Object.keys(types).map(function M (t) {\n-    var type = types[t]\n-    if (Array.isArray(type)) {\n-      return [t, type.map(function (type) { return type.name })]\n-    }\n-    return [t, type && type.name]\n-  }).reduce(function (s, i) {\n-    s[i[0]] = i[1]\n-    return s\n-  }, {}))\n-  console.log(\"\")\n-  console.log(\"shorthands\")\n-  console.log(shorthands)\n-}\n+const nopt = require('../lib/nopt')\n+const path = require('path')\n+console.log('parsed', nopt({\n+  num: Number,\n+  bool: Boolean,\n+  help: Boolean,\n+  list: Array,\n+  'num-list': [Number, Array],\n+  'str-list': [String, Array],\n+  'bool-list': [Boolean, Array],\n+  str: String,\n+  clear: Boolean,\n+  config: Boolean,\n+  length: Number,\n+  file: path,\n+}, {\n+  s: ['--str', 'astring'],\n+  b: ['--bool'],\n+  nb: ['--no-bool'],\n+  tft: ['--bool-list', '--no-bool-list', '--bool-list', 'true'],\n+  '?': ['--help'],\n+  h: ['--help'],\n+  H: ['--help'],\n+  n: ['--num', '125'],\n+  c: ['--config'],\n+  l: ['--length'],\n+  f: ['--file'],\n+}, process.argv, 2))\n",
+					"match": false,
+					"packageHash": "419fd0c250623dcf67bb4993817881331c17096960907ee34adc85af9e74da31",
+					"size": 1549,
+					"sourceHash": "95527c67ac7a1e294f7fcb09e648d1e454f6cfef06346a18a297173389b97d21",
+					"status": "content"
+				},
+				"examples/my-program.js": {
+					"match": false,
+					"packageHash": "701c67a3301b077b1552ddc5d7ebac56b69aaaa4c55321d1a4e4a48078026db9",
+					"size": 1032,
+					"status": "missing-in-source"
+				},
+				"lib/nopt.js": {
+					"diff": "--- published/lib/nopt.js\n+++ rebuilt/lib/nopt.js\n@@ -1,414 +1,34 @@\n-// info about each config option.\n+const lib = require('./nopt-lib')\n+const defaultTypeDefs = require('./type-defs')\n \n-var debug = process.env.DEBUG_NOPT || process.env.NOPT_DEBUG\n-  ? function () { console.error.apply(console, arguments) }\n-  : function () {}\n-\n-var url = require(\"url\")\n-  , path = require(\"path\")\n-  , Stream = require(\"stream\").Stream\n-  , abbrev = require(\"abbrev\")\n+// This is the version of nopt's API that requires setting typeDefs and invalidHandler\n+// on the required `nopt` object since it is a singleton. To not do a breaking change\n+// an API that requires all options be passed in is located in `nopt-lib.js` and\n+// exported here as lib.\n+// TODO(breaking): make API only work in non-singleton mode\n \n module.exports = exports = nopt\n exports.clean = clean\n+exports.typeDefs = defaultTypeDefs\n+exports.lib = lib\n \n-exports.typeDefs =\n-  { String  : { type: String,  validate: validateString  }\n-  , Boolean : { type: Boolean, validate: validateBoolean }\n-  , url     : { type: url,     validate: validateUrl     }\n-  , Number  : { type: Number,  validate: validateNumber  }\n-  , path    : { type: path,    validate: validatePath    }\n-  , Stream  : { type: Stream,  validate: validateStream  }\n-  , Date    : { type: Date,    validate: validateDate    }\n-  }\n-\n-function nopt (types, shorthands, args, slice) {\n-  args = args || process.argv\n-  types = types || {}\n-  shorthands = shorthands || {}\n-  if (typeof slice !== \"number\") slice = 2\n-\n-  debug(types, shorthands, args, slice)\n-\n-  args = args.slice(slice)\n-  var data = {}\n-    , key\n-    , remain = []\n-    , cooked = args\n-    , original = args.slice(0)\n-\n-  parse(args, data, remain, types, shorthands)\n-  // now data is full\n-  clean(data, types, exports.typeDefs)\n-  data.argv = {remain:remain,cooked:cooked,original:original}\n-  Object.defineProperty(data.argv, 'toString', { value: function () {\n-    return this.original.map(JSON.stringify).join(\" \")\n-  }, enumerable: false })\n-  return data\n-}\n-\n-function clean (data, types, typeDefs) {\n-  typeDefs = typeDefs || exports.typeDefs\n-  var remove = {}\n-    , typeDefault = [false, true, null, String, Array]\n-\n-  Object.keys(data).forEach(function (k) {\n-    if (k === \"argv\") return\n-    var val = data[k]\n-      , isArray = Array.isArray(val)\n-      , type = types[k]\n-    if (!isArray) val = [val]\n-    if (!type) type = typeDefault\n-    if (type === Array) type = typeDefault.concat(Array)\n-    if (!Array.isArray(type)) type = [type]\n-\n-    debug(\"val=%j\", val)\n-    debug(\"types=\", type)\n-    val = val.map(function (val) {\n-      // if it's an unknown value, then parse false/true/null/numbers/dates\n-      if (typeof val === \"string\") {\n-        debug(\"string %j\", val)\n-        val = val.trim()\n-        if ((val === \"null\" && ~type.indexOf(null))\n-            || (val === \"true\" &&\n-               (~type.indexOf(true) || ~type.indexOf(Boolean)))\n-            || (val === \"false\" &&\n-               (~type.indexOf(false) || ~type.indexOf(Boolean)))) {\n-          val = JSON.parse(val)\n-          debug(\"jsonable %j\", val)\n-        } else if (~type.indexOf(Number) && !isNaN(val)) {\n-          debug(\"convert to number\", val)\n-          val = +val\n-        } else if (~type.indexOf(Date) && !isNaN(Date.parse(val))) {\n-          debug(\"convert to date\", val)\n-          val = new Date(val)\n-        }\n-      }\n-\n-      if (!types.hasOwnProperty(k)) {\n",
+					"match": false,
+					"packageHash": "911cc5373a08b5694326f3a47dd0bbc8e00d726189e63e953ce53f38bfb3d0bf",
+					"size": 11653,
+					"sourceHash": "0cd507599b0b67afaaf6aa1019dfb2ea9dc958efd1d79f5e74cd997205d65469",
+					"status": "content"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -1,19 +1,49 @@\n {\n   \"name\": \"nopt\",\n-  \"version\": \"3.0.3\",\n+  \"version\": \"9.0.0\",\n   \"description\": \"Option parsing for Node, supporting types, shorthands, etc. Used by npm.\",\n-  \"author\": \"Isaac Z. Schlueter <i@izs.me> (http://blog.izs.me/)\",\n+  \"author\": \"GitHub Inc.\",\n   \"main\": \"lib/nopt.js\",\n   \"scripts\": {\n-    \"test\": \"tap test/*.js\"\n+    \"test\": \"node --test './test/**/*.js'\",\n+    \"lint\": \"npm run eslint\",\n+    \"postlint\": \"template-oss-check\",\n+    \"template-oss-apply\": \"template-oss-apply --force\",\n+    \"lintfix\": \"npm run eslint -- --fix\",\n+    \"snap\": \"node --test --test-update-snapshots './test/**/*.js'\",\n+    \"posttest\": \"npm run lint\",\n+    \"eslint\": \"eslint \\\"**/*.{js,cjs,ts,mjs,jsx,tsx}\\\"\",\n+    \"test:node20\": \"node --test test\",\n+    \"test:cover\": \"node --test --experimental-test-coverage --test-timeout=3000 --test-coverage-lines=100 --test-coverage-functions=100 --test-coverage-branches=100 './test/**/*.js'\"\n+  },\n+  \"repository\": {\n+    \"type\": \"git\",\n+    \"url\": \"git+https://github.com/npm/nopt.git\"\n+  },\n+  \"bin\": {\n+    \"nopt\": \"bin/nopt.js\"\n   },\n-  \"repository\": \"http://github.com/isaacs/nopt\",\n-  \"bin\": \"./bin/nopt.js\",\n   \"license\": \"ISC\",\n   \"dependencies\": {\n-    \"abbrev\": \"1\"\n+    \"abbrev\": \"^4.0.0\"\n   },\n   \"devDependencies\": {\n-    \"tap\": \"^1.2.0\"\n+    \"@npmcli/eslint-config\": \"^6.0.0\",\n+    \"@npmcli/template-oss\": \"4.28.1\"\n+  },\n+  \"files\": [\n+    \"bin/\",\n+    \"lib/\"\n+  ],\n+  \"engines\": {\n+    \"node\": \"^20.17.0 || >=22.9.0\"\n+  },\n+  \"templateOSS\": {\n+    \"//@npmcli/template-oss\": \"This file is partially managed by @npmcli/template-oss. Edits may be overwritten.\",\n+    \"windowsCI\": false,\n+    \"version\": \"4.28.1\",\n+    \"publish\": true,\n+    \"testRunner\": \"node:test\",\n+    \"latestCiVersion\": 24\n   }\n }\n",
+					"match": false,
+					"packageHash": "eceee9b97f3c6dfbe210b212600ebddd9a95f9de778936f14312e18173b0d4f4",
+					"size": 462,
+					"sourceHash": "adebdcef1f4eb07ae4de5573e64f4d6412d933a8f22b1ec217cf18ac17ace056",
+					"status": "content"
+				},
+				"test/basic.js": {
+					"match": false,
+					"packageHash": "f4f29965a66b26141569fd9d651ac7857af79bf6872f8e0c7fe381c7831f87f2",
+					"size": 7248,
+					"status": "missing-in-source"
+				},
+				"lib/debug.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/nopt-lib.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/type-defs.js": {
+					"match": false,
+					"status": "missing-in-package"
+				}
+			},
+			"summary": {
+				"differentFiles": 4,
+				"matchingFiles": 1,
+				"missingInPackage": 3,
+				"missingInSource": 4,
+				"score": 0.08333333333333333,
+				"totalFiles": 12
+			}
+		}
+	}
+]
