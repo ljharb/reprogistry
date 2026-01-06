@@ -1,0 +1,191 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-06T06:28:43.207Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:11.7.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "es5-shim@0.0.0",
+			"name": "es5-shim",
+			"version": "0.0.0",
+			"location": "https://registry.npmjs.org/es5-shim/-/es5-shim-0.0.0.tgz",
+			"integrity": "sha512-z8DoY9Iyu1RGtTFgNkHRlQq5pz6xBgwB/1CAO1Iw3OD+HyVPOWj9gu8UWtDaUmdAEiagPQCBIpvoAFmoj3TiVA==",
+			"publishedAt": "2011-01-27T22:54:39.953Z",
+			"publishedWith": {
+				"node": "v0.3.1-pre",
+				"npm": "0.2.7-2"
+			}
+		},
+		"source": {
+			"integrity": null,
+			"location": "http://github.com/kriskowal/es5-shim.git",
+			"spec": "github:kriskowal/es5-shim#HEAD"
+		},
+		"comparisonHash": "9ef46a5bd31291e57cbab41e2f17c57bd6da0b5b",
+		"diff": {
+			"files": {
+				"LICENSE": {
+					"diff": "--- published/LICENSE\n+++ rebuilt/LICENSE\n@@ -1,10 +1,12 @@\n+The MIT License (MIT)\n+\n+Copyright (C) 2009-2016 Kristopher Michael Kowal and contributors\n \n-Copyright 2009, 2010 Kristopher Michael Kowal. All rights reserved.\n Permission is hereby granted, free of charge, to any person obtaining a copy\n-of this software and associated documentation files (the \"Software\"), to\n-deal in the Software without restriction, including without limitation the\n-rights to use, copy, modify, merge, publish, distribute, sublicense, and/or\n-sell copies of the Software, and to permit persons to whom the Software is\n+of this software and associated documentation files (the \"Software\"), to deal\n+in the Software without restriction, including without limitation the rights\n+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell\n+copies of the Software, and to permit persons to whom the Software is\n furnished to do so, subject to the following conditions:\n \n The above copyright notice and this permission notice shall be included in\n@@ -14,6 +16,7 @@\n IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,\n FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE\n AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER\n-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING\n-FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS\n-IN THE SOFTWARE.\n+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,\n+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN\n+THE SOFTWARE.\n+\n",
+					"match": false,
+					"packageHash": "b9db14ab1db6d769f184558b9f7e109c94f7b939ab5e5b766aa9f8e0261551a0",
+					"size": 1092,
+					"sourceHash": "68f7e459f79180b490520f06eddb1715650d5f1af5583ff3f8447e795b2a6a2f",
+					"status": "content"
+				},
+				"README": {
+					"match": false,
+					"packageHash": "b00ad9bf260539dece0bfe5912cdf3c0218fd0b65ee52c89ea4981f0e64c69bf",
+					"size": 103,
+					"status": "missing-in-source"
+				},
+				"es5-shim.js": {
+					"diff": "--- published/es5-shim.js\n+++ rebuilt/es5-shim.js\n@@ -1,692 +1,2338 @@\n-\n-// -- kriskowal Kris Kowal Copyright (C) 2009-2010 MIT License\n-// -- tlrobinson Tom Robinson\n-// -- dantman Daniel Friesen\n-\n /*!\n-    Copyright (c) 2009, 280 North Inc. http://280north.com/\n-    MIT License. http://github.com/280north/narwhal/blob/master/README.md\n-*/\n-\n-/**\n- * Brings an environment as close to ECMAScript 5 compliance\n- * as is possible with the facilities of erstwhile engines.\n- *\n- * ES5 Draft\n- * http://www.ecma-international.org/publications/files/drafts/tc39-2009-050.pdf\n- *\n- * NOTE: this is a draft, and as such, the URL is subject to change.  If the\n- * link is broken, check in the parent directory for the latest TC39 PDF.\n- * http://www.ecma-international.org/publications/files/drafts/\n- *\n- * Previous ES5 Draft\n- * http://www.ecma-international.org/publications/files/drafts/tc39-2009-025.pdf\n- * This is a broken link to the previous draft of ES5 on which most of the\n- * numbered specification references and quotes herein were taken.  Updating\n- * these references and quotes to reflect the new document would be a welcome\n- * volunteer project.\n- * \n- * @module\n+ * https://github.com/es-shims/es5-shim\n+ * @license es5-shim Copyright 2009-2020 by contributors, MIT License\n+ * see https://github.com/es-shims/es5-shim/blob/master/LICENSE\n  */\n \n-/*whatsupdoc*/\n+// vim: ts=4 sts=4 sw=4 expandtab\n \n-//\n-// Array\n-// =====\n-//\n-\n-// ES5 15.4.3.2 \n-if (!Array.isArray) {\n-    Array.isArray = function(obj) {\n-        return Object.prototype.toString.call(obj) == \"[object Array]\";\n-    };\n-}\n-\n-// ES5 15.4.4.18\n-if (!Array.prototype.forEach) {\n-    Array.prototype.forEach =  function(block, thisObject) {\n-        var len = this.length >>> 0;\n-        for (var i = 0; i < len; i++) {\n-            if (i in this) {\n-                block.call(thisObject, this[i], i, this);\n+// Add semicolon to prevent IIFE from being passed as argument to concatenated code.\n+; // eslint-disable-line no-extra-semi\n+\n+// UMD (Universal Module Definition)\n+// see https://github.com/umdjs/umd/blob/master/templates/returnExports.js\n+(function (root, factory) {\n+    'use strict';\n+\n+    /* global define */\n+    if (typeof define === 'function' && define.amd) {\n+        // AMD. Register as an anonymous module.\n+        define(factory);\n+    } else if (typeof exports === 'object') {\n+        // Node. Does not work with strict CommonJS, but\n+        // only CommonJS-like enviroments that support module.exports,\n+        // like Node.\n+        module.exports = factory();\n+    } else {\n+        // Browser globals (root is window)\n+        root.returnExports = factory(); // eslint-disable-line no-param-reassign\n+    }\n+}(this, function () {\n+    /**\n+     * Brings an environment as close to ECMAScript 5 compliance\n+     * as is possible with the facilities of erstwhile engines.\n+     *\n+     * Annotated ES5: https://es5.github.io/ (specific links below)\n+     * ES5 Spec: https://www.ecma-international.org/wp-content/uploads/ECMA-262_5.1_edition_june_2011.pdf\n+     * Required reading: https://javascriptweblog.wordpress.com/2011/12/05/extending-javascript-natives/\n+     */\n+\n+    // Shortcut to an often accessed properties, in order to avoid multiple\n+    // dereference that costs universally. This also holds a reference to known-good\n+    // functions.\n+    var $Array = Array;\n+    var ArrayPrototype = $Array.prototype;\n+    var $Object = Object;\n+    var ObjectPrototype = $Object.prototype;\n+    var $Function = Function;\n+    var FunctionPrototype = $Function.prototype;\n+    var $String = String;\n",
+					"match": false,
+					"packageHash": "28f4effc412a3fae2edbe63f29605728a725fde1d6b5a901e07e1463f05c8581",
+					"size": 23790,
+					"sourceHash": "0379d9c6757e3ba78a29305ccc12bcd9462d3ed577697b334b69c863d83f67fa",
+					"status": "content"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -1,25 +1,82 @@\n {\n-    \"name\": \"es5-shim\",\n-    \"description\": \"ES5 as implementable on previous engines\",\n-    \"version\": \"0.0.0\",\n-    \"homepage\": \"http://github.com/kriskowal/es5-shim/\",\n-    \"author\": \"Kris Kowal <kris@cixar.com> (http://github.com/kriskowal/)\",\n-    \"bugs\": {\n-        \"mail\": \"kris@cixar.com\",\n-        \"web\": \"http://github.com/kriskowal/es5-shim/issues\"\n-    },\n-    \"licenses\": [\n-        {\n-            \"type\": \"MIT\",\n-            \"url\": \"http://github.com/kriskowal/es5-shim/raw/master/LICENSE\"\n-        }\n-    ],\n-    \"main\": \"es5-shim.js\",\n-    \"repository\": {\n-        \"type\": \"git\",\n-        \"url\": \"http://github.com/kriskowal/es5-shim.git\"\n-    },\n-    \"engines\": {\n-        \"node\": \">=0.2.0\"\n-    }\n+\t\"name\": \"es5-shim\",\n+\t\"version\": \"4.6.7\",\n+\t\"description\": \"ECMAScript 5 compatibility shims for legacy JavaScript engines\",\n+\t\"homepage\": \"https://github.com/es-shims/es5-shim/\",\n+\t\"contributors\": [\n+\t\t\"Kris Kowal <kris@cixar.com> (https://github.com/kriskowal/)\",\n+\t\t\"Sami Samhuri <sami.samhuri@gmail.com> (https://samhuri.net/)\",\n+\t\t\"Florian Schäfer <florian.schaefer@gmail.com> (https://github.com/fschaefer)\",\n+\t\t\"Irakli Gozalishvili <rfobic@gmail.com> (https://gozala.io)\",\n+\t\t\"Kit Cambridge <kitcambridge@gmail.com> (https://github.com/kitcambridge)\",\n+\t\t\"Jordan Harband <ljharb@gmail.com> (https://github.com/ljharb/)\"\n+\t],\n+\t\"bugs\": {\n+\t\t\"mail\": \"ljharb@gmail.com\",\n+\t\t\"url\": \"https://github.com/es-shims/es5-shim/issues\"\n+\t},\n+\t\"license\": \"MIT\",\n+\t\"main\": \"es5-shim.js\",\n+\t\"repository\": {\n+\t\t\"type\": \"git\",\n+\t\t\"url\": \"https://github.com/es-shims/es5-shim.git\"\n+\t},\n+\t\"scripts\": {\n+\t\t\"prepack\": \"npmignore --auto --commentLines=autogenerated\",\n+\t\t\"prepublish\": \"not-in-publish || npm run prepublishOnly\",\n+\t\t\"prepublishOnly\": \"safe-publish-latest && npm run minify\",\n+\t\t\"minify\": \"npm run --silent minify-shim && npm run --silent minify-sham\",\n+\t\t\"minify-shim\": \"uglifyjs es5-shim.js --support-ie8 --keep-fnames --comments --source-map=es5-shim.map -m -b ascii_only=true,beautify=false | sed 's/0xde0b6b3a7640080/1000000000000000128/' > es5-shim.min.js\",\n+\t\t\"minify-sham\": \"uglifyjs es5-sham.js --support-ie8 --keep-fnames --comments --source-map=es5-sham.map -m -b ascii_only=true,beautify=false > es5-sham.min.js\",\n+\t\t\"pretest\": \"npm run --silent lint\",\n+\t\t\"test\": \"npm run tests-only\",\n+\t\t\"posttest\": \"aud --production\",\n+\t\t\"tests-only\": \"nyc jasmine-node --matchall es5-sh*m.js tests/helpers/ tests/spec/\",\n+\t\t\"tests-native\": \"jasmine-node --matchall tests/helpers/ tests/spec/\",\n+\t\t\"lint\": \"eslint .\"\n+\t},\n+\t\"devDependencies\": {\n+\t\t\"@ljharb/eslint-config\": \"^21.0.0\",\n+\t\t\"aud\": \"^2.0.1\",\n+\t\t\"eslint\": \"=8.8.0\",\n+\t\t\"in-publish\": \"^2.0.1\",\n+\t\t\"jasmine-node\": \"^1.16.2\",\n+\t\t\"npmignore\": \"^0.3.0\",\n+\t\t\"nyc\": \"^10.3.2\",\n+\t\t\"safe-publish-latest\": \"^2.0.0\",\n+\t\t\"uglify-js\": \"2.7.3\"\n+\t},\n+\t\"engines\": {\n+\t\t\"node\": \">=0.4.0\"\n+\t},\n+\t\"testling\": {\n+\t\t\"browsers\": [\n+\t\t\t\"iexplore/6.0..latest\",\n+\t\t\t\"firefox/3.0..6.0\",\n+\t\t\t\"firefox/18.0..latest\",\n+\t\t\t\"firefox/nightly\",\n+\t\t\t\"chrome/4.0..10.0\",\n+\t\t\t\"chrome/25.0..latest\",\n+\t\t\t\"chrome/canary\",\n+\t\t\t\"opera/10.0..latest\",\n+\t\t\t\"opera/next\",\n+\t\t\t\"safari/4.0..latest\",\n+\t\t\t\"ipad/6.0..latest\",\n+\t\t\t\"iphone/6.0..latest\",\n+\t\t\t\"android-browser/4.2\"\n+\t\t]\n+\t},\n+\t\"keywords\": [\n+\t\t\"shim\",\n+\t\t\"es5\",\n+\t\t\"es5 shim\",\n+\t\t\"javascript\",\n+\t\t\"ecmascript\",\n",
+					"match": false,
+					"packageHash": "957a66525bb7d6cacf7d35816278cc1686d90972b58b6e3b401c2f0fa2444a1f",
+					"size": 697,
+					"sourceHash": "2e33adda7da8760fa4de4272e970eaf8e8d950f07b76dfa7a777c5973bd798fb",
+					"status": "content"
+				},
+				".eslintrc": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				".gitattributes": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				".nycrc": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"CHANGELOG.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"CONTRIBUTORS.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"README.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"bower.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"component.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"es5-sham.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"es5-sham.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"es5-sham.min.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"es5-shim.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"es5-shim.min.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"shims.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"tests/helpers/h-matchers.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"tests/index.html": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"tests/index.min.html": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"tests/lib/jasmine-html.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"tests/lib/jasmine.css": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"tests/lib/jasmine.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"tests/native.html": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"tests/spec/s-array.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"tests/spec/s-date.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"tests/spec/s-error.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"tests/spec/s-function.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"tests/spec/s-global.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"tests/spec/s-number.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"tests/spec/s-object.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"tests/spec/s-regexp.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"tests/spec/s-string.js": {
+					"match": false,
+					"status": "missing-in-package"
+				}
+			},
+			"summary": {
+				"differentFiles": 3,
+				"matchingFiles": 0,
+				"missingInPackage": 30,
+				"missingInSource": 1,
+				"score": 0,
+				"totalFiles": 34
+			}
+		}
+	}
+]

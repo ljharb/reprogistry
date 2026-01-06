@@ -1,0 +1,197 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-06T06:28:46.550Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:11.7.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "es5-shim@1.2.4",
+			"name": "es5-shim",
+			"version": "1.2.4",
+			"location": "https://registry.npmjs.org/es5-shim/-/es5-shim-1.2.4.tgz",
+			"integrity": "sha512-OPkJzyF75oZ0E+IDiKQo641oGTb/yyHZSNiltJ05jEoEpNFWQuxnj8UkSpcyOhh/bhmCD3T/esyB1MuXoOqNVQ==",
+			"publishedAt": "2011-08-11T22:13:03.126Z",
+			"publishedWith": {
+				"node": "v0.4.7",
+				"npm": "1.0.15"
+			}
+		},
+		"source": {
+			"integrity": "sha512-POfOd633jhn0oDBc21A/cKR3k6Vwqu6yFufEKnXSTQm9svgsd8p+w1IpKrdFhTaRjKb1q0Qaf6iRrga5HlQFXg==",
+			"location": "git://github.com/kriskowal/es5-shim.git",
+			"spec": "github:kriskowal/es5-shim#v1.2.4"
+		},
+		"comparisonHash": "9ef46a5bd31291e57cbab41e2f17c57bd6da0b5b",
+		"diff": {
+			"files": {
+				".gitignore": {
+					"match": false,
+					"packageHash": "3f4f172d3ad42d8c5678ad58211562d0d95ee9e897f579e139076d4ba7548b71",
+					"size": 23,
+					"status": "missing-in-source"
+				},
+				"CHANGES": {
+					"diff": "--- published/CHANGES\n+++ rebuilt/CHANGES\n@@ -1,7 +1,4 @@\n \n-1.2.5\n- - Fixed a bug for padding it Date..toISOString (tadfisher issue #33)\n-\n 1.2.4\n  - Fixed a descriptor bug in Object.defineProperty (raynos)\n \n",
+					"match": false,
+					"packageHash": "48dc4aac77c248d9d8265f972c3fd2d12f15fd65765cd7a2abcf6934bd528e7f",
+					"size": 2107,
+					"sourceHash": "123b752991b22640df172e919cf8140721476f85f50b9d2312883341111be1ec",
+					"status": "content"
+				},
+				"README.html": {
+					"match": false,
+					"packageHash": "2df86724e61b4fe2c7516c16fe993ece6a5ea0b1f068326e0d9a7590a7b81ac2",
+					"size": 5076,
+					"status": "missing-in-source"
+				},
+				"README.markdown": {
+					"match": false,
+					"packageHash": "8160889cb47ca36392ae55471f11ca3de6dd40b0a420316974bcc43f3a823f53",
+					"size": 4791,
+					"status": "missing-in-source"
+				},
+				"es5-shim.js": {
+					"diff": "--- published/es5-shim.js\n+++ rebuilt/es5-shim.js\n@@ -12,7 +12,7 @@\n \n (function (definition) {\n     // RequireJS\n-    if (typeof define == \"function\") {\n+    if (typeof define === \"function\") {\n         define(function () {\n             definition();\n         });\n@@ -62,7 +62,7 @@\n         // 2. If IsCallable(Target) is false, throw a TypeError exception.\n         // XXX this gets pretty close, for all intents and purposes, letting\n         // some duck-types slide\n-        if (typeof target.apply != \"function\" || typeof target.call != \"function\")\n+        if (typeof target.apply !== \"function\" || typeof target.call !== \"function\")\n             return new TypeError();\n         // 3. Let A be a new (possibly empty) internal list of all of the\n         //   argument values provided after thisArg (arg1, arg2 etc), in order.\n@@ -78,7 +78,7 @@\n         //   15.3.4.5.3.\n         // 13. The [[Scope]] internal property of F is unused and need not\n         //   exist.\n-        var bound = function () {\n+        function bound() {\n \n             if (this instanceof bound) {\n                 // 15.3.4.5.2 [[Construct]]\n@@ -96,7 +96,8 @@\n                 //   values as the list ExtraArgs in the same order.\n \n                 var self = Object.create(target.prototype);\n-                return target.apply(self, args.concat(slice.call(arguments))) || self;\n+                target.apply(self, args.concat(slice.call(arguments)));\n+                return self;\n \n             } else {\n                 // 15.3.4.5.1 [[Call]]\n@@ -126,20 +127,15 @@\n             }\n \n         }\n-        // XXX this will have no effect if length is not writable.\n-        // It will throw an exception if this is strict mode.\n-        try {\n-            bound.length = (\n-                // 14. If the [[Class]] internal property of Target is \"Function\", then\n-                typeof target == \"function\" ?\n-                // a. Let L be the length property of Target minus the length of A.\n-                // b. Set the length own property of F to either 0 or L, whichever is larger.\n-                Math.max(target.length - args.length, 0) :\n-                // 15. Else set the length own property of F to 0.\n-                0\n-            );\n-        } catch (exception) {\n-        }\n+        bound.length = (\n+            // 14. If the [[Class]] internal property of Target is \"Function\", then\n+            typeof target === \"function\" ?\n+            // a. Let L be the length property of Target minus the length of A.\n+            // b. Set the length own property of F to either 0 or L, whichever is larger.\n+            Math.max(target.length - args.length, 0) :\n+            // 15. Else set the length own property of F to 0.\n+            0\n+        );\n         // 16. The length own property of F is given attributes as specified in\n         //   15.3.5.1.\n         // TODO\n@@ -189,31 +185,18 @@\n // ES5 15.4.3.2\n if (!Array.isArray) {\n     Array.isArray = function isArray(obj) {\n-        return Object.prototype.toString.call(obj) == \"[object Array]\";\n+        return Object.prototype.toString.call(obj) === \"[object Array]\";\n     };\n }\n \n // ES5 15.4.4.18\n-// https://developer.mozilla.org/en/JavaScript/Reference/Global_Objects/array/foreach\n if (!Array.prototype.forEach) {\n-    Array.prototype.forEach = function forEach(fun /*, thisp*/) {\n-        var self = Object(this),\n-            thisp = arguments[1],\n-            i = 0,\n-            length = self.length >>> 0;\n-\n-        // If no callback function or if callback is not a callable function\n-        if (!fun || !fun.call) {\n-            throw new TypeError();\n-        }\n-\n-        while (i < length) {\n-            if (i in self) {\n-                // Invoke the callback function with call, passing arguments:\n-                // context, property value, property key, thisArg object context\n-                fun.call(thisp, self[i], i, self);\n+    Array.prototype.forEach =  function forEach(block, thisObject) {\n+        var len = +this.length;\n+        for (var i = 0; i < len; i++) {\n",
+					"match": false,
+					"packageHash": "2f95a11d424f9bca2b67d98b8972e7e0868e063005aa40d779660c0da004cf3e",
+					"size": 34148,
+					"sourceHash": "b61c96734768c06179efb16b3a3bb52aa3a92903f39f7137fe9502008eb75395",
+					"status": "content"
+				},
+				"es5-shim.min.js": {
+					"diff": "--- published/es5-shim.min.js\n+++ rebuilt/es5-shim.min.js\n@@ -1,16 +1,14 @@\n-(function(l){typeof define==\"function\"?define(function(){l()}):l()})(function(l){function m(c){return c<10?\"0\"+c:c}if(!Function.prototype.bind){var o=Array.prototype.slice;Function.prototype.bind=function(c){var b=this;if(typeof b.apply!=\"function\"||typeof b.call!=\"function\")return new TypeError;var a=o.call(arguments),d=function(){if(this instanceof d){var c=Object.create(b.prototype);return b.apply(c,a.concat(o.call(arguments)))||c}else return b.call.apply(b,a.concat(o.call(arguments)))};try{d.length=\n-typeof b==\"function\"?Math.max(b.length-a.length,0):0}catch(e){}return d}}var f=Function.prototype.call,h=Object.prototype,i=f.bind(h.hasOwnProperty),s,t,p,q,n;if(n=i(h,\"__defineGetter__\"))s=f.bind(h.__defineGetter__),t=f.bind(h.__defineSetter__),p=f.bind(h.__lookupGetter__),q=f.bind(h.__lookupSetter__);if(!Array.isArray)Array.isArray=function(c){return Object.prototype.toString.call(c)==\"[object Array]\"};if(!Array.prototype.forEach)Array.prototype.forEach=function(c,b){var a=Object(this),d=0,e=a.length>>>\n-0;if(!c||!c.call)throw new TypeError;for(;d<e;)d in a&&c.call(b,a[d],d,a),d++};if(!Array.prototype.map)Array.prototype.map=function(c,b){var a=Object(this),d=a.length>>>0;if(typeof c!=\"function\")throw new TypeError;for(var e=Array(d),k=0;k<d;k++)k in a&&(e[k]=c.call(b,a[k],k,a));return e};if(!Array.prototype.filter)Array.prototype.filter=function(c,b){for(var a=Object(this),d=a.length>>>0,e=0;e<d;e++)e in a&&c.call(b,a[e],e,a)&&values.push(a[e]);return values};if(!Array.prototype.every)Array.prototype.every=\n-function(c,b){if(this===void 0||this===null)throw new TypeError;if(typeof c!==\"function\")throw new TypeError;for(var a=Object(this),d=a.length>>>0,e=0;e<d;e++)if(e in a&&!c.call(b,a[e],e,a))return!1;return!0};if(!Array.prototype.some)Array.prototype.some=function(c,b){if(this===void 0||this===null)throw new TypeError;if(typeof c!==\"function\")throw new TypeError;for(var a=Object(this),d=a.length>>>0,e=0;e<d;e++)if(e in a&&c.call(b,a[e],e,a))return!0;return!1};if(!Array.prototype.reduce)Array.prototype.reduce=\n-function(c){var b=Object(this),a=b.length>>>0;if(Object.prototype.toString.call(c)!=\"[object Function]\")throw new TypeError;if(!a&&arguments.length==1)throw new TypeError;var d=0,e;if(arguments.length>=2)e=arguments[1];else{do{if(d in b){e=b[d++];break}if(++d>=a)throw new TypeError;}while(1)}for(;d<a;d++)d in b&&(e=c.call(null,e,b[d],d,b));return e};if(!Array.prototype.reduceRight)Array.prototype.reduceRight=function(c){var b=Object(this),a=b.length>>>0;if(Object.prototype.toString.call(c)!=\"[object Function]\")throw new TypeError;\n-if(!a&&arguments.length==1)throw new TypeError;var d;a-=1;if(arguments.length>=2)d=arguments[1];else{do{if(a in b){d=b[a--];break}if(--a<0)throw new TypeError;}while(1)}do a in this&&(d=c.call(null,d,b[a],a,b));while(a--);return d};if(!Array.prototype.indexOf)Array.prototype.indexOf=function(c){if(this===void 0||this===null)throw new TypeError;var b=Object(this),a=b.length>>>0;if(!a)return-1;var d=0;arguments.length>0&&(d=u(arguments[1]));for(d=d>=0?d:Math.max(a-Math.abs(d),0);d<a;d++)if(d in b&&\n-b[d]===c)return d;return-1};if(!Array.prototype.lastIndexOf)Array.prototype.lastIndexOf=function(c){if(this===void 0||this===null)throw new TypeError;var b=Object(this),a=b.length>>>0;if(!a)return-1;var d=a-1;arguments.length>0&&(d=u(arguments[1]));for(d=d>=0?d:Math.max(a-Math.abs(d),0);d>=0;d--)if(d in b&&c===b[d])return d;return-1};if(!Object.getPrototypeOf)Object.getPrototypeOf=function(c){return c.__proto__||c.constructor.prototype};if(!Object.getOwnPropertyDescriptor)Object.getOwnPropertyDescriptor=\n-function(c,b){if(typeof c!=\"object\"&&typeof c!=\"function\"||c===null)throw new TypeError(\"Object.getOwnPropertyDescriptor called on a non-object: \"+c);if(!i(c,b))return l;var a,d,e;a={enumerable:!0,configurable:!0};if(n){var k=c.__proto__;c.__proto__=h;d=p(c,b);e=q(c,b);c.__proto__=k;if(d||e){if(d)a.get=d;if(e)a.set=e;return a}}a.value=c[b];return a};if(!Object.getOwnPropertyNames)Object.getOwnPropertyNames=function(c){return Object.keys(c)};if(!Object.create)Object.create=function(c,b){var a;if(c===\n-null)a={__proto__:null};else{if(typeof c!=\"object\")throw new TypeError(\"typeof prototype[\"+typeof c+\"] != 'object'\");a=function(){};a.prototype=c;a=new a;a.__proto__=c}typeof b!=\"undefined\"&&Object.defineProperties(a,b);return a};var r=Object.defineProperty;if(f=!!r)f={},Object.defineProperty(f,\"\",{}),f=\"\"in f;if(!f)Object.defineProperty=function(c,b,a){if(typeof c!=\"object\"&&typeof c!=\"function\")throw new TypeError(\"Object.defineProperty called on non-object: \"+c);if(typeof a!=\"object\"||a===null)throw new TypeError(\"Property description must be an object: \"+\n-a);if(r&&c.nodeType)return r(c,b,a);if(i(a,\"value\"))if(n&&(p(c,b)||q(c,b))){var d=c.__proto__;c.__proto__=h;delete c[b];c[b]=a.value;c.__proto__=d}else c[b]=a.value;else{if(!n)throw new TypeError(\"getters & setters can not be defined on this javascript engine\");i(a,\"get\")&&s(c,b,a.get);i(a,\"set\")&&t(c,b,a.set)}return c};if(!Object.defineProperties)Object.defineProperties=function(c,b){for(var a in b)i(b,a)&&Object.defineProperty(c,a,b[a]);return c};if(!Object.seal)Object.seal=function(c){return c};\n-if(!Object.freeze)Object.freeze=function(c){return c};try{Object.freeze(function(){})}catch(B){Object.freeze=function(c){return function(b){return typeof b==\"function\"?b:c(b)}}(Object.freeze)}if(!Object.preventExtensions)Object.preventExtensions=function(c){return c};if(!Object.isSealed)Object.isSealed=function(){return!1};if(!Object.isFrozen)Object.isFrozen=function(){return!1};if(!Object.isExtensible)Object.isExtensible=function(){return!0};if(!Object.keys){var v=!0,w=\"toString,toLocaleString,valueOf,hasOwnProperty,isPrototypeOf,propertyIsEnumerable,constructor\".split(\",\"),\n-x=w.length,y;for(y in{toString:null})v=!1;Object.keys=function b(a){if(typeof a!=\"object\"&&typeof a!=\"function\"||a===null)throw new TypeError(\"Object.keys called on a non-object\");var b=[],d;for(d in a)i(a,d)&&b.push(d);if(v)for(d=0;d<x;d++){var e=w[d];i(a,e)&&b.push(e)}return b}}if(!Date.prototype.toISOString)Date.prototype.toISOString=function(){return this.getUTCFullYear()+\"-\"+m(this.getUTCMonth()+1)+\"-\"+m(this.getUTCDate())+\"T\"+m(this.getUTCHours())+\":\"+m(this.getUTCMinutes())+\":\"+m(this.getUTCSeconds())+\n-\"Z\"};if(!Date.now)Date.now=function(){return(new Date).getTime()};if(!Date.prototype.toJSON)Date.prototype.toJSON=function(){if(typeof this.toISOString.call!=\"function\")throw new TypeError;return this.toISOString.call(this)};isNaN(Date.parse(\"2011-06-15T21:40:05+06:00\"))&&(Date=function(b){var a=function(d,e,f,g,h,i,l){var j=arguments.length;return this instanceof b?(j=j==1&&String(d)===d?new b(a.parse(d)):j>=7?new b(d,e,f,g,h,i,l):j>=6?new b(d,e,f,g,h,i):j>=5?new b(d,e,f,g,h):j>=4?new b(d,e,f,g):\n-j>=3?new b(d,e,f):j>=2?new b(d,e):j>=1?new b(d):new b,j.constructor=a,j):b.apply(this,arguments)},d=RegExp(\"^(?:((?:[+-]\\\\d\\\\d)?\\\\d\\\\d\\\\d\\\\d)(?:-(\\\\d\\\\d)(?:-(\\\\d\\\\d))?)?)?(?:T(\\\\d\\\\d):(\\\\d\\\\d)(?::(\\\\d\\\\d)(?:\\\\.(\\\\d\\\\d\\\\d))?)?)?(?:Z|([+-])(\\\\d\\\\d):(\\\\d\\\\d))?$\"),e;for(e in b)a[e]=b[e];a.now=b.now;a.UTC=b.UTC;a.prototype=b.prototype;a.prototype.constructor=a;a.parse=function(a){var e=d.exec(a);if(e){e.shift();for(var f=e[0]===l,g=0;g<10;g++)g!=7&&(e[g]=+(e[g]||(g<3?1:0)),g==1&&e[g]--);if(f)return((e[3]*\n-60+e[4])*60+e[5])*1E3+e[6];f=(e[8]*60+e[9])*6E4;e[6]==\"-\"&&(f=-f);return b.UTC.apply(this,e.slice(0,7))+f}return b.parse.apply(this,arguments)};return a}(Date));if(!String.prototype.trim){var z=RegExp(\"^[\\t\\n-\\r \\u00a0\\u1680\\u180e\\u2000-\\u200a\\u202f\\u205f\\u3000\\u2028\\u2029\\ufeff][\\t\\n-\\r \\u00a0\\u1680\\u180e\\u2000-\\u200a\\u202f\\u205f\\u3000\\u2028\\u2029\\ufeff]*\"),A=RegExp(\"[\\t\\n-\\r \\u00a0\\u1680\\u180e\\u2000-\\u200a\\u202f\\u205f\\u3000\\u2028\\u2029\\ufeff][\\t\\n-\\r \\u00a0\\u1680\\u180e\\u2000-\\u200a\\u202f\\u205f\\u3000\\u2028\\u2029\\ufeff]*$\");\n-String.prototype.trim=function(){return String(this).replace(z,\"\").replace(A,\"\")}}var u=function(b){b=+b;b!==b?b=-1:b!==0&&b!==1/0&&b!==-(1/0)&&(b=(b>0||-1)*Math.floor(Math.abs(b)));return b}});\n\\ No newline at end of file\n+(function(j){typeof define===\"function\"?define(function(){j()}):j()})(function(j){if(!Function.prototype.bind){var n=Array.prototype.slice;Function.prototype.bind=function(){function c(){if(this instanceof c){var d=Object.create(b.prototype);b.apply(d,a.concat(n.call(arguments)));return d}else return b.call.apply(b,a.concat(n.call(arguments)))}var b=this;if(typeof b.apply!==\"function\"||typeof b.call!==\"function\")return new TypeError;var a=n.call(arguments);c.length=typeof b===\"function\"?Math.max(b.length-\n+a.length,0):0;return c}}var l=Function.prototype.call,f=Object.prototype,h=l.bind(f.hasOwnProperty),q,r,o,p,m;if(m=h(f,\"__defineGetter__\"))q=l.bind(f.__defineGetter__),r=l.bind(f.__defineSetter__),o=l.bind(f.__lookupGetter__),p=l.bind(f.__lookupSetter__);if(!Array.isArray)Array.isArray=function(c){return Object.prototype.toString.call(c)===\"[object Array]\"};if(!Array.prototype.forEach)Array.prototype.forEach=function(c,b){for(var a=+this.length,d=0;d<a;d++)d in this&&c.call(b,this[d],d,this)};if(!Array.prototype.map)Array.prototype.map=\n+function(c,b){var a=+this.length;if(typeof c!==\"function\")throw new TypeError;for(var d=Array(a),e=0;e<a;e++)e in this&&(d[e]=c.call(b,this[e],e,this));return d};if(!Array.prototype.filter)Array.prototype.filter=function(c,b){for(var a=[],d=0;d<this.length;d++)c.call(b,this[d])&&a.push(this[d]);return a};if(!Array.prototype.every)Array.prototype.every=function(c,b){for(var a=0;a<this.length;a++)if(!c.call(b,this[a]))return!1;return!0};if(!Array.prototype.some)Array.prototype.some=function(c,b){for(var a=\n+0;a<this.length;a++)if(c.call(b,this[a]))return!0;return!1};if(!Array.prototype.reduce)Array.prototype.reduce=function(c){var b=+this.length;if(typeof c!==\"function\")throw new TypeError;if(b===0&&arguments.length===1)throw new TypeError;var a=0;if(arguments.length>=2)var d=arguments[1];else{do{if(a in this){d=this[a++];break}if(++a>=b)throw new TypeError;}while(1)}for(;a<b;a++)a in this&&(d=c.call(null,d,this[a],a,this));return d};if(!Array.prototype.reduceRight)Array.prototype.reduceRight=function(c){var b=\n++this.length;if(typeof c!==\"function\")throw new TypeError;if(b===0&&arguments.length===1)throw new TypeError;var a;b-=1;if(arguments.length>=2)a=arguments[1];else{do{if(b in this){a=this[b--];break}if(--b<0)throw new TypeError;}while(1)}for(;b>=0;b--)b in this&&(a=c.call(null,a,this[b],b,this));return a};if(!Array.prototype.indexOf)Array.prototype.indexOf=function(c,b){var a=this.length;if(!a)return-1;var d=b||0;if(d>=a)return-1;for(d<0&&(d+=a);d<a;d++)if(d in this&&c===this[d])return d;return-1};\n+if(!Array.prototype.lastIndexOf)Array.prototype.lastIndexOf=function(c,b){var a=this.length;if(!a)return-1;var d=b||a;d<0&&(d+=a);for(d=Math.min(d,a-1);d>=0;d--)if(d in this&&c===this[d])return d;return-1};if(!Object.getPrototypeOf)Object.getPrototypeOf=function(c){return c.__proto__||c.constructor.prototype};if(!Object.getOwnPropertyDescriptor)Object.getOwnPropertyDescriptor=function(c,b){if(typeof c!==\"object\"&&typeof c!==\"function\"||c===null)throw new TypeError(\"Object.getOwnPropertyDescriptor called on a non-object: \"+\n+c);if(!h(c,b))return j;var a,d,e;a={enumerable:!0,configurable:!0};if(m){var u=c.__proto__;c.__proto__=f;d=o(c,b);e=p(c,b);c.__proto__=u;if(d||e){if(d)a.get=d;if(e)a.set=e;return a}}a.value=c[b];return a};if(!Object.getOwnPropertyNames)Object.getOwnPropertyNames=function(c){return Object.keys(c)};if(!Object.create)Object.create=function(c,b){var a;if(c===null)a={__proto__:null};else{if(typeof c!==\"object\")throw new TypeError(\"typeof prototype[\"+typeof c+\"] != 'object'\");a=function(){};a.prototype=\n+c;a=new a;a.__proto__=c}typeof b!==\"undefined\"&&Object.defineProperties(a,b);return a};if(!Object.defineProperty)Object.defineProperty=function(c,b,a){if(typeof c!==\"object\"&&typeof c!==\"function\")throw new TypeError(\"Object.defineProperty called on non-object: \"+c);if(typeof a!==\"object\"||a===null)throw new TypeError(\"Property description must be an object: \"+a);if(h(a,\"value\")){if(m&&(o(c,b)||p(c,b)))c.__proto__=f,delete c[b];c[b]=a.value}else{if(!m)throw new TypeError(\"getters & setters can not be defined on this javascript engine\");\n+h(a,\"get\")&&q(c,b,a.get);h(a,\"set\")&&r(c,b,a.set)}return c};if(!Object.defineProperties)Object.defineProperties=function(c,b){for(var a in b)h(b,a)&&Object.defineProperty(c,a,b[a]);return c};if(!Object.seal)Object.seal=function(c){return c};if(!Object.freeze)Object.freeze=function(c){return c};try{Object.freeze(function(){})}catch(z){Object.freeze=function(c){return function(b){return typeof b===\"function\"?b:c(b)}}(Object.freeze)}if(!Object.preventExtensions)Object.preventExtensions=function(c){return c};\n+if(!Object.isSealed)Object.isSealed=function(){return!1};if(!Object.isFrozen)Object.isFrozen=function(){return!1};if(!Object.isExtensible)Object.isExtensible=function(){return!0};if(!Object.keys){var s=!0,t=[\"toString\",\"toLocaleString\",\"valueOf\",\"hasOwnProperty\",\"isPrototypeOf\",\"propertyIsEnumerable\",\"constructor\"],v=t.length,w;for(w in{toString:null})s=!1;Object.keys=function b(a){if(typeof a!==\"object\"&&typeof a!==\"function\"||a===null)throw new TypeError(\"Object.keys called on a non-object\");var b=\n+[],d;for(d in a)h(a,d)&&b.push(d);if(s)for(d=0;d<v;d++){var e=t[d];h(a,e)&&b.push(e)}return b}}if(!Date.prototype.toISOString)Date.prototype.toISOString=function(){return this.getUTCFullYear()+\"-\"+(this.getUTCMonth()+1)+\"-\"+this.getUTCDate()+\"T\"+this.getUTCHours()+\":\"+this.getUTCMinutes()+\":\"+this.getUTCSeconds()+\"Z\"};if(!Date.now)Date.now=function(){return(new Date).getTime()};if(!Date.prototype.toJSON)Date.prototype.toJSON=function(){if(typeof this.toISOString!==\"function\")throw new TypeError;return this.toISOString()};\n+isNaN(Date.parse(\"T00:00\"))&&(Date=function(b){var a=function(d,k,e,g,f,h,j){var i=arguments.length;if(this instanceof b)return i=i===1&&String(d)===d?new b(a.parse(d)):i>=7?new b(d,k,e,g,f,h,j):i>=6?new b(d,k,e,g,f,h):i>=5?new b(d,k,e,g,f):i>=4?new b(d,k,e,g):i>=3?new b(d,k,e):i>=2?new b(d,k):i>=1?new b(d):new b,i.constructor=a,i;return b.apply(this,arguments)},d=RegExp(\"^(?:((?:[+-]\\\\d\\\\d)?\\\\d\\\\d\\\\d\\\\d)(?:-(\\\\d\\\\d)(?:-(\\\\d\\\\d))?)?)?(?:T(\\\\d\\\\d):(\\\\d\\\\d)(?::(\\\\d\\\\d)(?:\\\\.(\\\\d\\\\d\\\\d))?)?)?(?:Z|([+-])(\\\\d\\\\d):(\\\\d\\\\d))?$\"),\n+e;for(e in b)a[e]=b[e];a.now=b.now;a.UTC=b.UTC;a.prototype=b.prototype;a.prototype.constructor=a;a.parse=function(a){var e=d.exec(a);if(e){e.shift();for(var f=e[0]===j,g=0;g<10;g++)g!==7&&(e[g]=+(e[g]||(g<3?1:0)),g===1&&e[g]--);if(f)return((e[3]*60+e[4])*60+e[5])*1E3+e[6];f=(e[8]*60+e[9])*6E4;e[6]===\"-\"&&(f=-f);return b.UTC.apply(this,e.slice(0,7))+f}return b.parse.apply(this,arguments)};return a}(Date));if(!String.prototype.trim){var x=/^\\s\\s*/,y=/\\s\\s*$/;String.prototype.trim=function(){return String(this).replace(x,\n+\"\").replace(y,\"\")}}});\n\\ No newline at end of file\n",
+					"match": false,
+					"packageHash": "8e87297723db41b4ca5ca6db67fda42a766d6a0e1ef0f27d1b2de9cbba929ce9",
+					"size": 8004,
+					"sourceHash": "d7939032513123987e548c63d0d3279eae2a7b39f1a6122485677bc2e999ffd1",
+					"status": "content"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -1,7 +1,7 @@\n {\n     \"name\": \"es5-shim\",\n-    \"version\": \"1.2.4\",\n     \"description\": \"ES5 as implementable on previous engines\",\n+    \"version\": \"1.2.4\",\n     \"homepage\": \"http://github.com/kriskowal/es5-shim/\",\n     \"contributors\": [\n         \"Kris Kowal <kris@cixar.com> (http://github.com/kriskowal/)\",\n",
+					"match": false,
+					"packageHash": "4434db96ae139c2258d5cd5ce172e6e32a8f0f047749f9b7eaded328ffdf4d7b",
+					"size": 952,
+					"sourceHash": "d3bece34c5312e7831fcb620495252250aba16331c4f2095e7f57e023c50623b",
+					"status": "content"
+				},
+				"test/array.js": {
+					"match": false,
+					"packageHash": "fb0293eefcb3c97c190f15ed77018a106e5a7428fcf760441269384445a43ecb",
+					"size": 9468,
+					"status": "missing-in-source"
+				},
+				"test/date.js": {
+					"match": false,
+					"packageHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+					"size": 0,
+					"status": "missing-in-source"
+				},
+				"test/function.js": {
+					"match": false,
+					"packageHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+					"size": 0,
+					"status": "missing-in-source"
+				},
+				"test/index.html": {
+					"match": false,
+					"packageHash": "94dc0ea2a636580f08edf231da7f5d8ac4a36f0c4a52a820ea372d980c0ca5db",
+					"size": 1206,
+					"status": "missing-in-source"
+				},
+				"test/object.js": {
+					"match": false,
+					"packageHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+					"size": 0,
+					"status": "missing-in-source"
+				},
+				"test/string.js": {
+					"match": false,
+					"packageHash": "16035649e2b8164d588518e81da66135db639e7427d621e39506e439a3d86803",
+					"size": 463,
+					"status": "missing-in-source"
+				},
+				"tests/helpers/h-kill.js": {
+					"match": false,
+					"packageHash": "30da2663c4b68238e7ccc254581015ed7cca73d823456a540651bb11ed74e0b5",
+					"size": 616,
+					"status": "missing-in-source"
+				},
+				"tests/helpers/h-matchers.js": {
+					"match": false,
+					"packageHash": "3ec2cec8bb9949a2fb8a6f318dc6e6efa7d98f62e9a2cb6d9ef8e02fb083cd08",
+					"size": 582,
+					"status": "missing-in-source"
+				},
+				"tests/helpers/h.js": {
+					"match": false,
+					"packageHash": "8510620db7ac866a1aa1e55055633e6500ec96d2c76f0cf33f4419df25c729a1",
+					"size": 50,
+					"status": "missing-in-source"
+				},
+				"tests/index.html": {
+					"match": false,
+					"packageHash": "2fc7ca5062ffa93875ea51c95e211e55e3125af4ca7d0bc36c40b92b67ded31b",
+					"size": 1315,
+					"status": "missing-in-source"
+				},
+				"tests/lib/jasmine-html.js": {
+					"match": false,
+					"packageHash": "348e5222628d91208c21910119bf09b2be0f5926a1700c27cad26b3d904209db",
+					"size": 6934,
+					"status": "missing-in-source"
+				},
+				"tests/lib/jasmine.css": {
+					"match": false,
+					"packageHash": "7a51a5b96e3061d513602f12e93dbd02851a49110fac17df7562d3eb447aba84",
+					"size": 2120,
+					"status": "missing-in-source"
+				},
+				"tests/lib/jasmine.js": {
+					"match": false,
+					"packageHash": "71458c018aaecddedf9c495e0db9e8745da387b1f12a9c490057e8247279691d",
+					"size": 66781,
+					"status": "missing-in-source"
+				},
+				"tests/lib/jasmine_favicon.png": {
+					"match": false,
+					"packageHash": "7daac3df1d75608f52f3d0250b9799266c9810a0c98d67c013db5512051c325a",
+					"size": 905,
+					"status": "missing-in-source"
+				},
+				"tests/lib/json2.js": {
+					"match": false,
+					"packageHash": "6cf23ca95d78625aedc3ea11d4c99d3e6d4c5e563f851e4683ffacfa10b7d7b9",
+					"size": 17344,
+					"status": "missing-in-source"
+				},
+				"tests/spec/s-array.js": {
+					"match": false,
+					"packageHash": "8e765c6919b23726b94b5565673a5787fd3eadb0641591f773afdc43414fd9b0",
+					"size": 31770,
+					"status": "missing-in-source"
+				},
+				"tests/spec/s-function.js": {
+					"match": false,
+					"packageHash": "b99bfff80b30f2aa018ebe3e3eb7a51a81d4d1f6b8828a5a16a3a7cb19b65d72",
+					"size": 2545,
+					"status": "missing-in-source"
+				},
+				"README": {
+					"match": false,
+					"status": "missing-in-package"
+				}
+			},
+			"summary": {
+				"differentFiles": 4,
+				"matchingFiles": 1,
+				"missingInPackage": 1,
+				"missingInSource": 20,
+				"score": 0.038461538461538464,
+				"totalFiles": 26
+			}
+		}
+	}
+]
