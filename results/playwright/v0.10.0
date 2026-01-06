@@ -1,0 +1,667 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-06T20:20:27.063Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:11.7.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "playwright@0.10.0",
+			"name": "playwright",
+			"version": "0.10.0",
+			"location": "https://registry.npmjs.org/playwright/-/playwright-0.10.0.tgz",
+			"integrity": "sha512-f3VRME/PIO5NbcWnlCDfXwPC0DAZJ7ETkcAdE+sensLCOkfDtLh97E71ZuxNCaPYsUA6FIPi5syD8pHJW/4hQQ==",
+			"publishedAt": "2020-02-01T02:44:38.263Z",
+			"publishedWith": {
+				"node": "12.6.0",
+				"npm": "6.9.0"
+			}
+		},
+		"source": {
+			"integrity": null,
+			"location": "git+https://github.com/Microsoft/playwright.git",
+			"spec": "github:Microsoft/playwright#v0.10.0"
+		},
+		"comparisonHash": "9ef46a5bd31291e57cbab41e2f17c57bd6da0b5b",
+		"diff": {
+			"files": {
+				"index.d.ts": {
+					"diff": "--- published/index.d.ts\n+++ rebuilt/index.d.ts\n@@ -1 +1,24 @@\n-export * from \"playwright-core\";\n+/**\n+ * Copyright (c) Microsoft Corporation.\n+ *\n+ * Licensed under the Apache License, Version 2.0 (the \"License\");\n+ * you may not use this file except in compliance with the License.\n+ * You may obtain a copy of the License at\n+ *\n+ * http://www.apache.org/licenses/LICENSE-2.0\n+ *\n+ * Unless required by applicable law or agreed to in writing, software\n+ * distributed under the License is distributed on an \"AS IS\" BASIS,\n+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n+ * See the License for the specific language governing permissions and\n+ * limitations under the License.\n+ */\n+\n+export * from './lib/api';\n+export const devices: typeof import('./lib/deviceDescriptors').DeviceDescriptors;\n+export const errors: { TimeoutError: typeof import('./lib/errors').TimeoutError };\n+export const chromium: import('./lib/server/chromium').Chromium;\n+export const firefox: import('./lib/server/firefox').Firefox;\n+export const webkit: import('./lib/server/webkit').WebKit;\n+export const selectors: import('./lib/api').Selectors;\n+export type PlaywrightWeb = typeof import('./lib/web');\n",
+					"match": false,
+					"packageHash": "ce29a2cc88bf16e0c432af2fe729daf9ccc332b17210cd591d731b8ef7fad0a9",
+					"size": 33,
+					"sourceHash": "ccc81df6236b043c2e43f944cbffd79db2f381fba7f991e82912947274645494",
+					"status": "content"
+				},
+				"index.js": {
+					"diff": "--- published/index.js\n+++ rebuilt/index.js\n@@ -13,4 +13,26 @@\n  * See the License for the specific language governing permissions and\n  * limitations under the License.\n  */\n-module.exports = require('playwright-core');\n+\n+const { helper } = require('./lib/helper');\n+const api = require('./lib/api');\n+const packageJson = require('./package.json');\n+const { DeviceDescriptors } = require('./lib/deviceDescriptors');\n+const { TimeoutError } = require('./lib/errors');\n+const { Chromium } = require('./lib/server/chromium');\n+const { Firefox } = require('./lib/server/firefox');\n+const { WebKit } = require('./lib/server/webkit');\n+\n+for (const className in api) {\n+  if (typeof api[className] === 'function')\n+    helper.installApiHooks(className, api[className]);\n+}\n+\n+module.exports = {\n+  devices: DeviceDescriptors,\n+  errors: { TimeoutError },\n+  selectors: api.Selectors._instance(),\n+  chromium: new Chromium(__dirname, packageJson.playwright.chromium_revision),\n+  firefox: new Firefox(__dirname, packageJson.playwright.firefox_revision),\n+  webkit: new WebKit(__dirname, packageJson.playwright.webkit_revision),\n+}\n",
+					"match": false,
+					"packageHash": "5f517bd15b74d90764e4ade1229e9e7c4ed34bef368f2477ca93e20268b337da",
+					"size": 647,
+					"sourceHash": "5eb5ddca24b7cb8b2058661f3f3d2d9f1d5bb9002e248d6949b254097860ab3a",
+					"status": "content"
+				},
+				"install.js": {
+					"match": false,
+					"packageHash": "559dc2ce544e4cb5b777873808f3e54ae5a37606c4ee02bded7e4a80603888d1",
+					"size": 807,
+					"status": "missing-in-source"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -1,17 +1,87 @@\n {\n-  \"name\": \"playwright\",\n+  \"name\": \"playwright-core\",\n   \"version\": \"0.10.0\",\n   \"description\": \"A high-level API to automate web browsers\",\n   \"repository\": \"github:Microsoft/playwright\",\n+  \"engines\": {\n+    \"node\": \">=10.15.0\"\n+  },\n   \"main\": \"index.js\",\n+  \"playwright\": {\n+    \"chromium_revision\": \"737027\",\n+    \"firefox_revision\": \"1021\",\n+    \"webkit_revision\": \"1127\"\n+  },\n   \"scripts\": {\n-    \"install\": \"node install.js\"\n+    \"ctest\": \"cross-env BROWSER=chromium node test/test.js\",\n+    \"ftest\": \"cross-env BROWSER=firefox node test/test.js\",\n+    \"wtest\": \"cross-env BROWSER=webkit node test/test.js\",\n+    \"debug-test\": \"node --inspect-brk test/test.js\",\n+    \"test-doclint\": \"node utils/doclint/check_public_api/test/test.js && node utils/doclint/preprocessor/test.js\",\n+    \"test\": \"npm run lint --silent && npm run coverage && npm run test-doclint && node utils/testrunner/test/test.js\",\n+    \"prepare\": \"node prepare.js\",\n+    \"lint\": \"([ \\\"$CI\\\" = true ] && eslint --quiet -f codeframe --ext js,ts ./src || eslint --ext js,ts ./src) && npm run tsc && npm run doc\",\n+    \"doc\": \"node utils/doclint/cli.js\",\n+    \"ccoverage\": \"cross-env COVERAGE=true npm run ctest\",\n+    \"fcoverage\": \"cross-env COVERAGE=true BROWSER=firefox node test/test.js\",\n+    \"wcoverage\": \"cross-env COVERAGE=true BROWSER=webkit node test/test.js\",\n+    \"tsc\": \"tsc -p .\",\n+    \"clean\": \"rimraf lib\",\n+    \"build\": \"node utils/runWebpack.js --mode='development' && tsc -p .\",\n+    \"watch\": \"node utils/runWebpack.js --mode='development' --watch --silent | tsc -w -p .\",\n+    \"apply-next-version\": \"node utils/apply_next_version.js\",\n+    \"version\": \"node utils/sync_package_versions.js && npm run doc\"\n   },\n   \"author\": {\n     \"name\": \"Microsoft Corporation\"\n   },\n   \"license\": \"Apache-2.0\",\n   \"dependencies\": {\n-    \"playwright-core\": \"=0.10.0\"\n+    \"debug\": \"^4.1.0\",\n+    \"extract-zip\": \"^1.6.6\",\n+    \"https-proxy-agent\": \"^3.0.0\",\n+    \"jpeg-js\": \"^0.3.6\",\n+    \"mime\": \"^2.0.3\",\n+    \"pngjs\": \"^3.4.0\",\n+    \"progress\": \"^2.0.3\",\n+    \"proxy-from-env\": \"^1.0.0\",\n+    \"rimraf\": \"^2.6.1\",\n+    \"uuid\": \"^3.4.0\",\n+    \"ws\": \"^6.1.0\"\n+  },\n+  \"devDependencies\": {\n+    \"@types/debug\": \"0.0.31\",\n+    \"@types/extract-zip\": \"^1.6.2\",\n+    \"@types/jpeg-js\": \"^0.3.7\",\n+    \"@types/mime\": \"^2.0.0\",\n+    \"@types/node\": \"^8.10.34\",\n+    \"@types/pngjs\": \"^3.4.0\",\n+    \"@types/proxy-from-env\": \"^1.0.0\",\n+    \"@types/rimraf\": \"^2.0.2\",\n+    \"@types/uuid\": \"^3.4.6\",\n+    \"@types/ws\": \"^6.0.1\",\n+    \"@typescript-eslint/eslint-plugin\": \"^2.6.1\",\n+    \"@typescript-eslint/parser\": \"^2.6.1\",\n+    \"commonmark\": \"^0.28.1\",\n+    \"cross-env\": \"^5.0.5\",\n+    \"eslint\": \"^6.6.0\",\n+    \"esprima\": \"^4.0.0\",\n+    \"minimist\": \"^1.2.0\",\n+    \"ncp\": \"^2.0.0\",\n+    \"node-stream-zip\": \"^1.8.2\",\n+    \"pixelmatch\": \"^4.0.2\",\n+    \"text-diff\": \"^1.0.1\",\n+    \"ts-loader\": \"^6.1.2\",\n+    \"typescript\": \"3.6.3\",\n+    \"webpack\": \"^4.41.0\",\n+    \"webpack-cli\": \"^3.3.9\"\n+  },\n+  \"browser\": {\n+    \"./lib/BrowserFetcher.js\": false,\n+    \"ws\": \"./utils/browser/WebSocket\",\n+    \"fs\": false,\n+    \"child_process\": false,\n+    \"rimraf\": false,\n+    \"readline\": false\n   }\n }\n",
+					"match": false,
+					"packageHash": "ad1669fcd19c6e5bd89ef27983057764d8652df564783b19102cce4529c3a1ae",
+					"size": 374,
+					"sourceHash": "3c34be9c816df7eef14ba6f729792f9598872eaf46f1cbf28b6e93b84ce94775",
+					"status": "content"
+				},
+				"LICENSE": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"download-browser.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/accessibility.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/accessibility.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/api.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/api.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/browser.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/browser.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/browserContext.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/browserContext.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/chromium/crAccessibility.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/chromium/crAccessibility.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/chromium/crBrowser.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/chromium/crBrowser.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/chromium/crConnection.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/chromium/crConnection.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/chromium/crCoverage.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/chromium/crCoverage.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/chromium/crExecutionContext.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/chromium/crExecutionContext.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/chromium/crInput.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/chromium/crInput.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/chromium/crNetworkManager.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/chromium/crNetworkManager.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/chromium/crPage.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/chromium/crPage.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/chromium/crPdf.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/chromium/crPdf.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/chromium/crProtocolHelper.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/chromium/crProtocolHelper.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/chromium/crTarget.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/chromium/crTarget.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/chromium/events.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/chromium/events.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/console.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/console.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/deviceDescriptors.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/deviceDescriptors.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/dialog.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/dialog.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/dom.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/dom.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/errors.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/errors.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/events.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/events.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/firefox/ffAccessibility.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/firefox/ffAccessibility.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/firefox/ffBrowser.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/firefox/ffBrowser.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/firefox/ffConnection.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/firefox/ffConnection.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/firefox/ffExecutionContext.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/firefox/ffExecutionContext.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/firefox/ffInput.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/firefox/ffInput.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/firefox/ffNetworkManager.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/firefox/ffNetworkManager.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/firefox/ffPage.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/firefox/ffPage.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/frames.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/frames.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/generated/injectedSource.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/generated/injectedSource.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/generated/zsSelectorEngineSource.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/generated/zsSelectorEngineSource.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/helper.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/helper.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/injected/cssSelectorEngine.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/injected/cssSelectorEngine.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/injected/generated/zsSelectorEngineSource.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/injected/injected.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/injected/injected.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/injected/packed/injectedSource.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/injected/selectorEngine.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/injected/selectorEngine.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/injected/textSelectorEngine.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/injected/textSelectorEngine.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/injected/utils.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/injected/utils.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/injected/xpathSelectorEngine.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/injected/xpathSelectorEngine.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/injected/zsSelectorEngine.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/injected/zsSelectorEngine.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/input.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/input.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/javascript.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/javascript.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/network.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/network.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/page.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/page.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/platform.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/platform.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/screenshotter.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/screenshotter.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/selectors.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/selectors.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/server/browserApp.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/server/browserApp.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/server/browserFetcher.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/server/browserFetcher.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/server/browserType.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/server/browserType.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/server/chromium.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/server/chromium.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/server/firefox.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/server/firefox.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/server/pipeTransport.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/server/pipeTransport.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/server/playwright.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/server/playwright.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/server/processLauncher.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/server/processLauncher.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/server/webkit.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/server/webkit.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/timeoutSettings.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/timeoutSettings.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/transport.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/transport.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/types.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/types.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/usKeyboardLayout.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/usKeyboardLayout.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/web.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/web.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/webkit/wkAccessibility.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/webkit/wkAccessibility.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/webkit/wkBrowser.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/webkit/wkBrowser.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/webkit/wkConnection.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/webkit/wkConnection.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/webkit/wkExecutionContext.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/webkit/wkExecutionContext.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/webkit/wkInput.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/webkit/wkInput.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/webkit/wkInterceptableRequest.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/webkit/wkInterceptableRequest.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/webkit/wkPage.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/webkit/wkPage.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/webkit/wkPageProxy.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/webkit/wkPageProxy.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/webkit/wkProtocolHelper.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/webkit/wkProtocolHelper.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/webkit/wkProvisionalPage.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/webkit/wkProvisionalPage.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/webkit/wkWorkers.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/webkit/wkWorkers.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"web.js": {
+					"match": false,
+					"status": "missing-in-package"
+				}
+			},
+			"summary": {
+				"differentFiles": 3,
+				"matchingFiles": 1,
+				"missingInPackage": 149,
+				"missingInSource": 1,
+				"score": 0.006493506493506494,
+				"totalFiles": 154
+			}
+		}
+	}
+]
