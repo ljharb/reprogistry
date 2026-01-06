@@ -1,0 +1,993 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-06T21:55:02.446Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:11.7.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "react-native-reanimated@2.3.0-alpha.1",
+			"name": "react-native-reanimated",
+			"version": "2.3.0-alpha.1",
+			"location": "https://registry.npmjs.org/react-native-reanimated/-/react-native-reanimated-2.3.0-alpha.1.tgz",
+			"integrity": "sha512-6FTQ6wkKxNwQS3IumJnF8pE2OxMcIKI/cLoHPq4PuN5f6vsSvZ3zNzzNOSRHZSVV/Gg9FCNt05gXvFNRrGdGig==",
+			"publishedAt": "2021-06-07T14:27:24.229Z",
+			"publishedWith": {
+				"node": "16.2.0",
+				"npm": "7.13.0"
+			}
+		},
+		"source": {
+			"integrity": "sha512-uoHzNRi0ly/2wAiDv/0JmrqPJRYo0FA7cLhICAOLOthXmohEMp9x735eDFVRMdd1JJfK6u3yCmNRfg53xQe3pg==",
+			"location": "git+https://github.com/software-mansion/react-native-reanimated.git",
+			"spec": "github:software-mansion/react-native-reanimated#2.3.0-alpha.1"
+		},
+		"comparisonHash": "9ef46a5bd31291e57cbab41e2f17c57bd6da0b5b",
+		"diff": {
+			"files": {
+				"android/build.gradle": {
+					"diff": "--- published/android/build.gradle\n+++ rebuilt/android/build.gradle\n@@ -1,14 +1,494 @@\n-import groovy.json.JsonSlurper;\n-configurations.maybeCreate(\"default\")\n+def localProps = new Properties()\n+def localPropertiesFile = file(\"local.properties\")\n+if (localPropertiesFile.exists()) {\n+    localProps.load(new InputStreamReader(new FileInputStream(localPropertiesFile), \"UTF-8\"))\n+}\n+def debugNativeLibraries = localProps.getProperty('NATIVE_DEBUG_ON', 'FALSE').toBoolean()\n+\n+import java.nio.file.Paths\n+\n+import de.undercouch.gradle.tasks.download.Download\n+import org.apache.tools.ant.taskdefs.condition.Os\n+import org.apache.tools.ant.filters.ReplaceTokens\n+\n+def reactProperties = new Properties()\n+file(\"$projectDir/../node_modules/react-native/ReactAndroid/gradle.properties\").withInputStream { reactProperties.load(it) }\n+\n+def BOOST_VERSION = reactProperties.getProperty(\"BOOST_VERSION\")\n+def DOUBLE_CONVERSION_VERSION = reactProperties.getProperty(\"DOUBLE_CONVERSION_VERSION\")\n+def FOLLY_VERSION = reactProperties.getProperty(\"FOLLY_VERSION\")\n+def GLOG_VERSION = reactProperties.getProperty(\"GLOG_VERSION\")\n+def REACT_VERSION = reactProperties.getProperty(\"VERSION_NAME\").split(\"\\\\.\")[1].toInteger()\n+\n+// We download various C++ open-source dependencies into downloads.\n+// We then copy both the downloaded code and our custom makefiles and headers into third-party-ndk.\n+// After that we build native code from src/main/jni with module path pointing at third-party-ndk.\n+\n+def downloadsDir = new File(\"$buildDir/downloads\")\n+def thirdPartyNdkDir = new File(\"$buildDir/third-party-ndk\")\n+\n+def reactNative = new File(\"$projectDir/../node_modules/react-native\")\n+def reactNativeThirdParty = new File(\"$reactNative/ReactAndroid/src/main/jni/third-party\")\n+\n+def HOME = System.getProperty(\"user.home\")\n+\n+def FOR_HERMES = \"\";\n+if(findProject(':app')) {\n+    FOR_HERMES = project(':app').ext.react.enableHermes;\n+}\n+else {\n+    FOR_HERMES = System.getenv(\"FOR_HERMES\") == \"True\";\n+}\n+// You need to have following folders in this directory:\n+//   - boost_1_63_0\n+//   - double-conversion-1.1.6\n+//   - folly-deprecate-dynamic-initializer\n+//   - glog-0.3.5\n+def dependenciesPath = System.getenv(\"REACT_NATIVE_DEPENDENCIES\")\n+\n+// The Boost library is a very large download (>100MB).\n+// If Boost is already present on your system, define the REACT_NATIVE_BOOST_PATH env variable\n+// and the build will use that.\n+def boostPath = dependenciesPath ?: System.getenv(\"REACT_NATIVE_BOOST_PATH\")\n+\n+def follyReplaceContent = '''\n+  ssize_t r;\n+  do {\n+    r = open(name, flags, mode);\n+  } while (r == -1 && errno == EINTR);\n+  return r;\n+'''\n+\n+def boost_file = new File(downloadsDir, \"boost_${BOOST_VERSION}.tar.gz\")\n+def double_conversion_file = new File(downloadsDir, \"double-conversion-${DOUBLE_CONVERSION_VERSION}.tar.gz\")\n+def folly_file = new File(downloadsDir, \"folly-${FOLLY_VERSION}.tar.gz\")\n+def glog_file = new File(downloadsDir, \"glog-${GLOG_VERSION}.tar.gz\")\n+\n+\n+buildscript {\n+    repositories {\n+        jcenter()\n+        google()\n+        maven {\n+            url \"https://plugins.gradle.org/m2/\"\n+        }\n+    }\n+    dependencies {\n+        classpath('com.android.tools.build:gradle:4.1.2')\n+        classpath(\"de.undercouch:gradle-download-task:4.0.4\")\n+    }\n+}\n+\n+\n+def safeExtGet(prop, fallback) {\n+    rootProject.ext.has(prop) ? rootProject.ext.get(prop) : fallback\n+}\n+\n+apply plugin: 'com.android.library'\n+apply plugin: 'maven'\n+apply plugin: 'de.undercouch.download'\n+\n+def CMAKE_TOOLCHAIN_FILE = \"\"\n+if(!System.getenv('IS_TRAVIS')) {\n+    CMAKE_TOOLCHAIN_FILE = \"-DCMAKE_TOOLCHAIN_FILE=${getNdkBuildFullPath()}/../build/cmake/android.toolchain.cmake\"\n+}\n+\n",
+					"match": false,
+					"packageHash": "53a32362d510cf198f692d3fd0ce17d72af0f7c18999b58aaa9bb667dc0e6abf",
+					"size": 479,
+					"sourceHash": "f08f56ab58f51c331e9bb66e2fc359f04274442b4e81e6a6698099bc822ef2d6",
+					"status": "content"
+				},
+				"android/react-native-reanimated-62-hermes.aar": {
+					"match": false,
+					"packageHash": "dd82fe028bf4ac8828a6452ac80dbeb79f8f6c9673d9ea9990ef5df2bed2a43c",
+					"size": 1964823,
+					"status": "missing-in-source"
+				},
+				"android/react-native-reanimated-62-jsc.aar": {
+					"match": false,
+					"packageHash": "1fbecbf2db29141c2f577ac2935c15ccde5cde9c33de99d71090b912227d94b0",
+					"size": 1953076,
+					"status": "missing-in-source"
+				},
+				"android/react-native-reanimated-63-hermes.aar": {
+					"match": false,
+					"packageHash": "986021c774bfbb04b4f8d4714dc52b7e43ae006849d8d6bf329ee101a9beda96",
+					"size": 1974843,
+					"status": "missing-in-source"
+				},
+				"android/react-native-reanimated-63-jsc.aar": {
+					"match": false,
+					"packageHash": "a6d53a86ccbd018fb609dde919dee9423676ecb65d3f65a2c63772b3371de881",
+					"size": 1961560,
+					"status": "missing-in-source"
+				},
+				"android/react-native-reanimated-64-hermes.aar": {
+					"match": false,
+					"packageHash": "0056734f8938b74ab0b56b1bc583be64eac564ba5468f3e088d5668c2f0401c9",
+					"size": 1944864,
+					"status": "missing-in-source"
+				},
+				"android/react-native-reanimated-64-jsc.aar": {
+					"match": false,
+					"packageHash": "498ba02666a9dddf165dc080c8d0965b77953f9e40fc2a7a6f9973c3c16abde8",
+					"size": 1928718,
+					"status": "missing-in-source"
+				},
+				"android/src/AndroidManifest.xml": {
+					"match": false,
+					"packageHash": "68902200815dce42ae8ffd769b41ebd4ef6ac2443655b188118c23cbcefeaec1",
+					"size": 129,
+					"status": "missing-in-source"
+				},
+				"android/src/main/java/com/swmansion/reanimated/ReanimatedProxyPackage.java": {
+					"match": false,
+					"packageHash": "9f559e9546b11a9fb672ba81a0d3154eb9133983e10900fb4597d1734a66d7af",
+					"size": 409,
+					"status": "missing-in-source"
+				},
+				"lib/Animated.js": {
+					"match": false,
+					"packageHash": "75e2743f93d73de839c7cea72984b13367f0beab741b64ba7336df6b9f49af97",
+					"size": 694,
+					"status": "missing-in-source"
+				},
+				"lib/ConfigHelper.js": {
+					"match": false,
+					"packageHash": "78ee9cfddbe23b0c96edfc0481e958d9762351114af4007586473e0a9a78128e",
+					"size": 3921,
+					"status": "missing-in-source"
+				},
+				"lib/ReanimatedEventEmitter.js": {
+					"match": false,
+					"packageHash": "1b4bd1b1e0153dfd6515381e605e84669115bd1dc7038832ce957c03347463e6",
+					"size": 160,
+					"status": "missing-in-source"
+				},
+				"lib/ReanimatedModule.js": {
+					"match": false,
+					"packageHash": "9b86947aa74d69189d5d83fb7122cd3fd71657ec5a0c7e49c544f91decdcbbc0",
+					"size": 103,
+					"status": "missing-in-source"
+				},
+				"lib/ReanimatedModule.macos.js": {
+					"match": false,
+					"packageHash": "9b86947aa74d69189d5d83fb7122cd3fd71657ec5a0c7e49c544f91decdcbbc0",
+					"size": 103,
+					"status": "missing-in-source"
+				},
+				"lib/ReanimatedModule.native.js": {
+					"match": false,
+					"packageHash": "c5ab96a3a7e2e4b3f18edf9e01871b51ad6f0c9d2e9e0c7e453ffcafa90d8e8c",
+					"size": 125,
+					"status": "missing-in-source"
+				},
+				"lib/ReanimatedModule.windows.js": {
+					"match": false,
+					"packageHash": "9b86947aa74d69189d5d83fb7122cd3fd71657ec5a0c7e49c544f91decdcbbc0",
+					"size": 103,
+					"status": "missing-in-source"
+				},
+				"lib/ReanimatedModuleCompat.js": {
+					"match": false,
+					"packageHash": "d0447b64aa3d329296f08afb6eb69fa17485eb6f8e9c1a8d10ec5947ca19df07",
+					"size": 679,
+					"status": "missing-in-source"
+				},
+				"lib/__mocks__/ReanimatedEventEmitter.js": {
+					"match": false,
+					"packageHash": "084c466ab384579894f960083c8aab7301d567eb378af4d3e911579aebf31693",
+					"size": 104,
+					"status": "missing-in-source"
+				},
+				"lib/__mocks__/ReanimatedModule.native.js": {
+					"match": false,
+					"packageHash": "4e977f0af51eb1b8485be294c633aff08ea7649e6f8d3a29278e71711e118e94",
+					"size": 167,
+					"status": "missing-in-source"
+				},
+				"lib/createAnimatedComponent.js": {
+					"match": false,
+					"packageHash": "86eb7841e96e529945a4b395bc551f789cb87c21761a79d6ba5059fc09c452f1",
+					"size": 17573,
+					"status": "missing-in-source"
+				},
+				"lib/index.js": {
+					"match": false,
+					"packageHash": "75e2743f93d73de839c7cea72984b13367f0beab741b64ba7336df6b9f49af97",
+					"size": 694,
+					"status": "missing-in-source"
+				},
+				"lib/reanimated1/Easing.js": {
+					"match": false,
+					"packageHash": "cadd61c8de2916ec7eb0ec8a7d897491e9a8d5df80a00e1d6de8e80563033cdd",
+					"size": 5746,
+					"status": "missing-in-source"
+				},
+				"lib/reanimated1/SpringConfig.js": {
+					"match": false,
+					"packageHash": "f0f1ec1d8a11def8fa8d57d1483f7b610ebef26aa783a1f54e1939863ffed59d",
+					"size": 1898,
+					"status": "missing-in-source"
+				},
+				"lib/reanimated1/Transitioning.js": {
+					"match": false,
+					"packageHash": "901c302d71fa7ef604ecfbff885f8a23c108b7e14940080a8d33b9fac1ab6407",
+					"size": 3934,
+					"status": "missing-in-source"
+				},
+				"lib/reanimated1/animations/Animation.js": {
+					"match": false,
+					"packageHash": "abee39f7fae7745a188e9bdad7e7f56fe4824518552ae9698a0cd1d60d49f00c",
+					"size": 721,
+					"status": "missing-in-source"
+				},
+				"lib/reanimated1/animations/SpringUtils.js": {
+					"match": false,
+					"packageHash": "90ea72c55158a805c1a68892fea0e99968160e0d2a7f99df12fa76255b87b46c",
+					"size": 4913,
+					"status": "missing-in-source"
+				},
+				"lib/reanimated1/animations/backwardCompatibleAnimWrapper.js": {
+					"match": false,
+					"packageHash": "8d96f1130513af7b880413b5d0c95e70c0ff27f71878440e16ef3629668ca5a2",
+					"size": 3229,
+					"status": "missing-in-source"
+				},
+				"lib/reanimated1/animations/decay.js": {
+					"match": false,
+					"packageHash": "c1748536623ebdc82151c3b77dd5f9bd8f9cf8fd3891f7f0d85516fe15d988e0",
+					"size": 1279,
+					"status": "missing-in-source"
+				},
+				"lib/reanimated1/animations/spring.js": {
+					"match": false,
+					"packageHash": "4cd0d326b2a7083a65a1ee472b041d949785351a7baa01ff42bce49d9cdff958",
+					"size": 4435,
+					"status": "missing-in-source"
+				},
+				"lib/reanimated1/animations/timing.js": {
+					"match": false,
+					"packageHash": "46eef70b90a7832a03965d9cdb698b027a1937e03ba005fc63963ca8265413f9",
+					"size": 1655,
+					"status": "missing-in-source"
+				},
+				"lib/reanimated1/base.js": {
+					"match": false,
+					"packageHash": "6475d86df5b88b53b09c21f141a61a5087b88a831c464d7b6a5b21cf08e7e453",
+					"size": 905,
+					"status": "missing-in-source"
+				},
+				"lib/reanimated1/core/AnimatedAlways.js": {
+					"match": false,
+					"packageHash": "48844af3f2e8a3bf4b66ba5d09054bfe239074920e2077318f5b3cfd0859dde3",
+					"size": 677,
+					"status": "missing-in-source"
+				},
+				"lib/reanimated1/core/AnimatedBezier.js": {
+					"match": false,
+					"packageHash": "72fd1936674dc1392e04e2c19dde6416a45ddf58959fb9afb3210a679b7a5b6a",
+					"size": 3935,
+					"status": "missing-in-source"
+				},
+				"lib/reanimated1/core/AnimatedBlock.js": {
+					"match": false,
+					"packageHash": "2389e55f60adcb82b45cbbbe1681e1cb3a03224fbf4571c6517d181aa636ed57",
+					"size": 1277,
+					"status": "missing-in-source"
+				},
+				"lib/reanimated1/core/AnimatedCall.js": {
+					"match": false,
+					"packageHash": "afecc0dc6e9fb2a33e314c7fff2237b54d369d5fd36189b69935ede1177d2268",
+					"size": 1381,
+					"status": "missing-in-source"
+				},
+				"lib/reanimated1/core/AnimatedCallFunc.js": {
+					"match": false,
+					"packageHash": "6d5255dfd1ae21a07e21c76f2d39f1e0a4268e4050af904b22904aa29944442e",
+					"size": 1759,
+					"status": "missing-in-source"
+				},
+				"lib/reanimated1/core/AnimatedClock.js": {
+					"match": false,
+					"packageHash": "6d23d2219aa4400802ba4015352bb52d0dfa9b9ab9cadd1d47689a22d71ceb5b",
+					"size": 1707,
+					"status": "missing-in-source"
+				},
+				"lib/reanimated1/core/AnimatedClockTest.js": {
+					"match": false,
+					"packageHash": "d9c6487e82556f4605bd86082533a1624bad0305f9790173bb60d679ae282028",
+					"size": 461,
+					"status": "missing-in-source"
+				},
+				"lib/reanimated1/core/AnimatedCode.js": {
+					"match": false,
+					"packageHash": "545e8b158c054b1f5dedabd7945657c619606735834f21f783675e2593b83a46",
+					"size": 813,
+					"status": "missing-in-source"
+				},
+				"lib/reanimated1/core/AnimatedConcat.js": {
+					"match": false,
+					"packageHash": "5869cdf1044461167a8cf8463f4f8cecdbe5e2311de98d1b2ef06c09be2a286d",
+					"size": 910,
+					"status": "missing-in-source"
+				},
+				"lib/reanimated1/core/AnimatedCond.js": {
+					"match": false,
+					"packageHash": "78d3f839cfbcbebefc87a6a0b8764ef0af92d49f4d79562aa8f8d9075821b6b4",
+					"size": 1556,
+					"status": "missing-in-source"
+				},
+				"lib/reanimated1/core/AnimatedDebug.js": {
+					"match": false,
+					"packageHash": "554ad80d7d40f0212955d5afe9924d75c7852e457516f8556c2620249801f438",
+					"size": 1998,
+					"status": "missing-in-source"
+				},
+				"lib/reanimated1/core/AnimatedEvent.js": {
+					"match": false,
+					"packageHash": "9323187a76151af7c7c3ecf6f6a17a1a4638927d1fb37f869d0e39c674ea4453",
+					"size": 3927,
+					"status": "missing-in-source"
+				},
+				"lib/reanimated1/core/AnimatedFunction.js": {
+					"match": false,
+					"packageHash": "9155b7f23498ff067a702adefbe43ebb32605748fc6e0c6506a2b82a6e40a866",
+					"size": 1402,
+					"status": "missing-in-source"
+				},
+				"lib/reanimated1/core/AnimatedNode.js": {
+					"match": false,
+					"packageHash": "e4be8db783f3722ee5399b3140f0ee4476d30755d27d7ee83c779fee138c42f2",
+					"size": 5111,
+					"status": "missing-in-source"
+				},
+				"lib/reanimated1/core/AnimatedOperator.js": {
+					"match": false,
+					"packageHash": "7a1f65d35124e0e7365c99912fbab0f22815784d3feff8d63fa5857184ffa203",
+					"size": 2946,
+					"status": "missing-in-source"
+				},
+				"lib/reanimated1/core/AnimatedParam.js": {
+					"match": false,
+					"packageHash": "f1243c1b36dc48844602c74a7cf0b433cf1d90dadf42cbed7cd0c0be8617bab0",
+					"size": 2128,
+					"status": "missing-in-source"
+				},
+				"lib/reanimated1/core/AnimatedProps.js": {
+					"match": false,
+					"packageHash": "84aeb26ede9542409df71c76933b508e7d4d376b67a652e4af246b6ffec1e5ea",
+					"size": 2506,
+					"status": "missing-in-source"
+				},
+				"lib/reanimated1/core/AnimatedSet.js": {
+					"match": false,
+					"packageHash": "f9797b6f87cbfe7ea674b0005eb13b3d4128eae97e31608649683f2a3d21989e",
+					"size": 1041,
+					"status": "missing-in-source"
+				},
+				"lib/reanimated1/core/AnimatedStartClock.js": {
+					"match": false,
+					"packageHash": "dfe94321d4ca48085915051016a8777b991ea2b960aac41466854bc4721c760a",
+					"size": 803,
+					"status": "missing-in-source"
+				},
+				"lib/reanimated1/core/AnimatedStopClock.js": {
+					"match": false,
+					"packageHash": "fa7cd28c2f0275b72d47c1934e2962ab1d45ed398f510c34d297be89a8079d46",
+					"size": 796,
+					"status": "missing-in-source"
+				},
+				"lib/reanimated1/core/AnimatedStyle.js": {
+					"match": false,
+					"packageHash": "6c119f275c168604d493a4a787964e6bd950cb42aac85ccee25cb4079527ab44",
+					"size": 2051,
+					"status": "missing-in-source"
+				},
+				"lib/reanimated1/core/AnimatedTransform.js": {
+					"match": false,
+					"packageHash": "2fe2a6c965b38549f3eddec98853fe5f4c6dd3d480c7fedcd4866f7ebda87e41",
+					"size": 1911,
+					"status": "missing-in-source"
+				},
+				"lib/reanimated1/core/AnimatedValue.js": {
+					"match": false,
+					"packageHash": "30d497b0e4a34d3076a0006fae776ab5a847087bb86a57582a9821c2c5858e83",
+					"size": 1191,
+					"status": "missing-in-source"
+				},
+				"lib/reanimated1/core/InternalAnimatedValue.js": {
+					"match": false,
+					"packageHash": "2f15f43a3f809341a87d6a2163e88d979530fc7f348b7f67fccb13a38038fbac",
+					"size": 2317,
+					"status": "missing-in-source"
+				},
+				"lib/reanimated1/core/__mocks__/AnimatedProps.js": {
+					"match": false,
+					"packageHash": "e716cfef1e7df6bd9bb4027be32591052fa86855b6f7ff645cf09187905d228a",
+					"size": 2131,
+					"status": "missing-in-source"
+				},
+				"lib/reanimated1/core/createEventObjectProxyPolyfill.js": {
+					"match": false,
+					"packageHash": "10800ad8cd8d9d9ccde312f5f69383070d904bc7b3ea10b419196e2cd1c73dc6",
+					"size": 1315,
+					"status": "missing-in-source"
+				},
+				"lib/reanimated1/derived/__mocks__/evaluateOnce.js": {
+					"match": false,
+					"packageHash": "3822e25f5e4f5c7d542c5bf6917877d466602797d6087bcd1607851faff466e0",
+					"size": 410,
+					"status": "missing-in-source"
+				},
+				"lib/reanimated1/derived/acc.js": {
+					"match": false,
+					"packageHash": "167a4bac31826cbd8968a50d2849b5f0972b881c28a117b9f62fc3ee0dd3ee0d",
+					"size": 277,
+					"status": "missing-in-source"
+				},
+				"lib/reanimated1/derived/color.js": {
+					"match": false,
+					"packageHash": "d3c8f9c723e544b839efe7e7197bac3dd871d664b3ca5f6b334c8c547234d8b0",
+					"size": 928,
+					"status": "missing-in-source"
+				},
+				"lib/reanimated1/derived/diff.js": {
+					"match": false,
+					"packageHash": "7c2d8a9db5125016d0d2739c29c783b17a8992617544640e335290fff1716f66",
+					"size": 430,
+					"status": "missing-in-source"
+				},
+				"lib/reanimated1/derived/diffClamp.js": {
+					"match": false,
+					"packageHash": "4caa4d8735bdad7140f956f6544e1ee8477d6953fd38cd01678a248d4319b7a0",
+					"size": 347,
+					"status": "missing-in-source"
+				},
+				"lib/reanimated1/derived/evaluateOnce.js": {
+					"match": false,
+					"packageHash": "923dda770955d63970eafa346789109fc017d4daa102661589693272e6fbf5d3",
+					"size": 1101,
+					"status": "missing-in-source"
+				},
+				"lib/reanimated1/derived/index.js": {
+					"match": false,
+					"packageHash": "ac58f6588119fafb6663ed703931ed0eb7fd6f820764daf91b72450e17f9b339",
+					"size": 417,
+					"status": "missing-in-source"
+				},
+				"lib/reanimated1/derived/interpolate.js": {
+					"match": false,
+					"packageHash": "d2a6a0cfd49411db181d70f529516dc02a5864a789bcd2ac429e70907a0fe08c",
+					"size": 4217,
+					"status": "missing-in-source"
+				},
+				"lib/reanimated1/derived/interpolateColors.js": {
+					"match": false,
+					"packageHash": "b8d317af0671d6e7a1fb3bfe50ca365684b834d4666e85b45f857c7d1b8cd6b5",
+					"size": 1597,
+					"status": "missing-in-source"
+				},
+				"lib/reanimated1/derived/onChange.js": {
+					"match": false,
+					"packageHash": "efec62f97f3dad69921e0a84136a2669c09f80e1d77f57840d50958bdea8082f",
+					"size": 487,
+					"status": "missing-in-source"
+				},
+				"lib/reanimated1/derived/useCode.js": {
+					"match": false,
+					"packageHash": "72237d458e1f2caa18926f3f43b98ad5e5598a263523a4e67d26b18dc56988b3",
+					"size": 1132,
+					"status": "missing-in-source"
+				},
+				"lib/reanimated1/index.js": {
+					"match": false,
+					"packageHash": "f23b61b42321bed01049e60e42d5e8212a25a47fe140b2f29bee5cd31e8b5467",
+					"size": 1381,
+					"status": "missing-in-source"
+				},
+				"lib/reanimated1/operators.js": {
+					"match": false,
+					"packageHash": "e11e8834f3565547ea2307870b9f91801798d53b84a24b7237afaa2dbc9a92fa",
+					"size": 1321,
+					"status": "missing-in-source"
+				},
+				"lib/reanimated1/useValue.js": {
+					"match": false,
+					"packageHash": "a9a8db47b5eda50294b3634f69f5f926353b6814f1ae3cd654fb357555a27f06",
+					"size": 270,
+					"status": "missing-in-source"
+				},
+				"lib/reanimated1/val.js": {
+					"match": false,
+					"packageHash": "13d7eb8b8042d1393d3786bbc02ef3f9b3539ce236eec98874993ff6f919c108",
+					"size": 81,
+					"status": "missing-in-source"
+				},
+				"lib/reanimated2/Bezier.js": {
+					"match": false,
+					"packageHash": "65fad790ea0963bb0ae413159a58457d6ef79037d2d32a5dcdc36b850a3c8259",
+					"size": 4381,
+					"status": "missing-in-source"
+				},
+				"lib/reanimated2/Colors.js": {
+					"match": false,
+					"packageHash": "0335163ead684be66030f1979bc0d3509305983c50e058d2c847b5c6a915209a",
+					"size": 18526,
+					"status": "missing-in-source"
+				},
+				"lib/reanimated2/Easing.js": {
+					"match": false,
+					"packageHash": "e858b570931749d27de7b0e96b4cc8059e06e8c867bdcffc5598ae96a147c9ad",
+					"size": 5755,
+					"status": "missing-in-source"
+				},
+				"lib/reanimated2/Hooks.js": {
+					"match": false,
+					"packageHash": "395f7aba349bd2b66c2a87d476f8e309ec46e3b22f35abe731902fb5050a10dc",
+					"size": 25712,
+					"status": "missing-in-source"
+				},
+				"lib/reanimated2/NativeMethods.js": {
+					"match": false,
+					"packageHash": "d135adbdab1c689e62d668c0b48f0a6b85c332974470ba8d1ffa322cb3416512",
+					"size": 880,
+					"status": "missing-in-source"
+				},
+				"lib/reanimated2/NativeReanimated.js": {
+					"match": false,
+					"packageHash": "3b0231d97ca7cf90912be6ef13438150e4dc28174149ed3f0d1274f5372d261c",
+					"size": 150,
+					"status": "missing-in-source"
+				},
+				"lib/reanimated2/NativeReanimated.native.js": {
+					"match": false,
+					"packageHash": "590bf4978a8790b4b24e5efbf06e516a15f8ece0c8ebf5dcb9aadf98afb8c312",
+					"size": 1552,
+					"status": "missing-in-source"
+				},
+				"lib/reanimated2/PropAdapters.js": {
+					"match": false,
+					"packageHash": "67aca39190bc3663591ed9b8ef681e007b35bcd1f9b76da515be12051efce9f4",
+					"size": 2215,
+					"status": "missing-in-source"
+				},
+				"lib/reanimated2/UpdateProps.js": {
+					"match": false,
+					"packageHash": "8e6d87d7dd89533a3a7cb57fb3404358288e8d887d9b899eba760f95e7114ce2",
+					"size": 1832,
+					"status": "missing-in-source"
+				},
+				"lib/reanimated2/WorkletEventHandler.js": {
+					"match": false,
+					"packageHash": "41315bb069d1f664b8ee7e87c0acb826594ea38be08094f6d7b63a6fa1ea4852",
+					"size": 1423,
+					"status": "missing-in-source"
+				},
+				"lib/reanimated2/__mocks__/MutableValue.js": {
+					"match": false,
+					"packageHash": "7ccd85212bf82ca8d00db9bc5812fa4a3e7617a26cfb8c251f91452be8cf563a",
+					"size": 293,
+					"status": "missing-in-source"
+				},
+				"lib/reanimated2/__mocks__/NativeReanimated.js": {
+					"match": false,
+					"packageHash": "a7a06955480e5609f8668f52164df3e845a8374aa170b847bad6db6802100276",
+					"size": 510,
+					"status": "missing-in-source"
+				},
+				"lib/reanimated2/__mocks__/NativeReanimated.native.js": {
+					"match": false,
+					"packageHash": "a7a06955480e5609f8668f52164df3e845a8374aa170b847bad6db6802100276",
+					"size": 510,
+					"status": "missing-in-source"
+				},
+				"lib/reanimated2/animations.js": {
+					"match": false,
+					"packageHash": "690e03b949c76e82ff5abf246a4c7ab69790bdb5b0a60e55ae38b860292364f7",
+					"size": 29343,
+					"status": "missing-in-source"
+				},
+				"lib/reanimated2/core.js": {
+					"match": false,
+					"packageHash": "0014028786c5118b54f8b0e52f9c9386a10d21ce8bc94309a693528e4ab19de0",
+					"size": 9534,
+					"status": "missing-in-source"
+				},
+				"lib/reanimated2/globals.d.ts": {
+					"match": false,
+					"packageHash": "6f7eb9cfa78bd71a3baa1c7e21f0bc1083554bf3f73885c13a6889174bb6f31f",
+					"size": 33,
+					"status": "missing-in-source"
+				},
+				"lib/reanimated2/index.js": {
+					"match": false,
+					"packageHash": "0435851bd915035bf75b887027fabcb9c6de8526c11f013f3b7c86ba620c7853",
+					"size": 266,
+					"status": "missing-in-source"
+				},
+				"lib/reanimated2/interpolation.js": {
+					"match": false,
+					"packageHash": "0312f05f07a86cf8f5c508921311846ec147b60b3d15193d0567c27d0224f218",
+					"size": 4526,
+					"status": "missing-in-source"
+				},
+				"lib/reanimated2/jestUtils.js": {
+					"match": false,
+					"packageHash": "dee993532ad27b84bdfe586d91c5e7510a400b116a4b4a638775f7a074cbcc0d",
+					"size": 5519,
+					"status": "missing-in-source"
+				},
+				"lib/reanimated2/js-reanimated/JSReanimated.js": {
+					"match": false,
+					"packageHash": "2e156a03f7fc8062ff14db9c9cd93dd1e8f62b88332add1d8873696f39ec6efa",
+					"size": 2269,
+					"status": "missing-in-source"
+				},
+				"lib/reanimated2/js-reanimated/Mapper.js": {
+					"match": false,
+					"packageHash": "58ccd8685bee24169b620ada4b902efd0c68a7520628912541044670556aae76",
+					"size": 1317,
+					"status": "missing-in-source"
+				},
+				"lib/reanimated2/js-reanimated/MapperRegistry.js": {
+					"match": false,
+					"packageHash": "96695254c3adb5e9403bf82dbeef3bb341e2eb528d84a2fc99562c576773ecb6",
+					"size": 3547,
+					"status": "missing-in-source"
+				},
+				"lib/reanimated2/js-reanimated/MutableValue.js": {
+					"match": false,
+					"packageHash": "ed4c43527846c56883daef7c2fac9ee271f7f64c4089f33994034902fa93b3ef",
+					"size": 870,
+					"status": "missing-in-source"
+				},
+				"lib/reanimated2/js-reanimated/index.js": {
+					"match": false,
+					"packageHash": "77f5eec38c5ef075e11892244ccf9e249d82937e07401398df98319568775a17",
+					"size": 14,
+					"status": "missing-in-source"
+				},
+				"lib/reanimated2/js-reanimated/index.web.js": {
+					"match": false,
+					"packageHash": "162c1ada59493a9c3d318cce3efe36af0abb90794ac71bcf91526c17ba6c41c3",
+					"size": 747,
+					"status": "missing-in-source"
+				},
+				"lib/reanimated2/layoutReanimation/AnimatedRoot.js": {
+					"match": false,
+					"packageHash": "75f87bc299da2f30eba820c71f32fed3f310a82bfb1a7e4f0ec498172fce897c",
+					"size": 1928,
+					"status": "missing-in-source"
+				},
+				"lib/reanimated2/layoutReanimation/defaultAnimations/Bounce.js": {
+					"match": false,
+					"packageHash": "34ff7c338c971975287d5acc53f981d623764e477028d67ae654d2d99a50807a",
+					"size": 10355,
+					"status": "missing-in-source"
+				},
+				"lib/reanimated2/layoutReanimation/defaultAnimations/Fade.js": {
+					"match": false,
+					"packageHash": "0d80b38a201f247557943799a6aaa37d3ee966df340ae8934b1426013fc6e7ef",
+					"size": 7695,
+					"status": "missing-in-source"
+				},
+				"lib/reanimated2/layoutReanimation/defaultAnimations/Flip.js": {
+					"match": false,
+					"packageHash": "7681441ed8f08177c8720bc7600a0fa7c091bf61f1acd84f6579fb5034f3f8b2",
+					"size": 11800,
+					"status": "missing-in-source"
+				},
+				"lib/reanimated2/layoutReanimation/defaultAnimations/Slide.js": {
+					"match": false,
+					"packageHash": "b966f21840891f8a5d3465832135f42777f42fe28d0fb5b3d1262cf586cb0cd2",
+					"size": 5251,
+					"status": "missing-in-source"
+				},
+				"lib/reanimated2/layoutReanimation/defaultAnimations/Stretch.js": {
+					"match": false,
+					"packageHash": "2dfee107cdab51a2fdd372cd489fdf31698b7ef8aa7a20b3bad04dca7910f4cd",
+					"size": 2681,
+					"status": "missing-in-source"
+				},
+				"lib/reanimated2/layoutReanimation/defaultAnimations/Zoom.js": {
+					"match": false,
+					"packageHash": "b05277b007880407ae8ce383cc83bb44939d9a243bd4e0b89dac1c131fb5ee50",
+					"size": 12380,
+					"status": "missing-in-source"
+				},
+				"lib/reanimated2/layoutReanimation/defaultAnimations/index.js": {
+					"match": false,
+					"packageHash": "d9c981b2ab6b8a3013bd2446b157cc8371cc8740b733554ffe1dc1735dedcb9b",
+					"size": 150,
+					"status": "missing-in-source"
+				},
+				"lib/reanimated2/layoutReanimation/defaultAnimationsBuilder.js": {
+					"match": false,
+					"packageHash": "2bd7cfc36ce3179215aca8bd541fd1ed605951a1b528c0895600bc8e3d47b02c",
+					"size": 10283,
+					"status": "missing-in-source"
+				},
+				"lib/reanimated2/layoutReanimation/index.js": {
+					"match": false,
+					"packageHash": "183a84afcc1c0dcd96ccbe00d4afc9c77f9fba88550c1e65fc261527f8377947",
+					"size": 113,
+					"status": "missing-in-source"
+				},
+				"lib/reanimated2/mock.js": {
+					"match": false,
+					"packageHash": "19fc5f7907e53ae61a43e07d85de8612e18f27645e9124fb3152a0ee429cbbfb",
+					"size": 1520,
+					"status": "missing-in-source"
+				},
+				"lib/reanimated2/platform-specific/RNRenderer.js": {
+					"match": false,
+					"packageHash": "e6769f2ead3409e025156bd8ff6756445bd425d4a21d0a8ae1e0a003a2ab4133",
+					"size": 168,
+					"status": "missing-in-source"
+				},
+				"lib/reanimated2/platform-specific/RNRenderer.web.js": {
+					"match": false,
+					"packageHash": "77f5eec38c5ef075e11892244ccf9e249d82937e07401398df98319568775a17",
+					"size": 14,
+					"status": "missing-in-source"
+				},
+				"lib/setAndForwardRef.js": {
+					"match": false,
+					"packageHash": "9e0c30f72bb36474502da4f419b47f2b4b6aa313fd1e806b6b05e45cbcb83d77",
+					"size": 1399,
+					"status": "missing-in-source"
+				},
+				"android/.classpath": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/.settings/org.eclipse.buildship.core.prefs": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/CMakeLists.txt": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/README.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/empty.cpp": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/gradle.properties": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/settings.gradle": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/AndroidManifest.xml": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/cpp/AndroidErrorHandler.cpp": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/cpp/AndroidLogger.cpp": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/cpp/AndroidScheduler.cpp": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/cpp/JNIHelper.cpp": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/cpp/LayoutAnimations.cpp": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/cpp/NativeProxy.cpp": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/cpp/OnLoad.cpp": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/cpp/TurboModule.cpp": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/cpp/headers/AndroidErrorHandler.h": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/cpp/headers/AndroidLogger.h": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/cpp/headers/AndroidScheduler.h": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/cpp/headers/JNIHelper.h": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/cpp/headers/LayoutAnimations.h": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/cpp/headers/NativeProxy.h": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/cpp/headers/TurboModule.h": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/java/com/facebook/react/uimanager/UIManagerReanimatedHelper.java": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/java/com/swmansion/reanimated/AndroidErrorHandler.java": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/java/com/swmansion/reanimated/CopiedEvent.java": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/java/com/swmansion/reanimated/MapUtils.java": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/java/com/swmansion/reanimated/NativeMethodsHelper.java": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/java/com/swmansion/reanimated/NativeProxy.java": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/java/com/swmansion/reanimated/NodesManager.java": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/java/com/swmansion/reanimated/ReanimatedJSIModulePackage.java": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/java/com/swmansion/reanimated/ReanimatedModule.java": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/java/com/swmansion/reanimated/ReanimatedPackage.java": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/java/com/swmansion/reanimated/Scheduler.java": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/java/com/swmansion/reanimated/UpdateContext.java": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/java/com/swmansion/reanimated/Utils.java": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/java/com/swmansion/reanimated/layoutReanimation/AnimatedRoot.java": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/java/com/swmansion/reanimated/layoutReanimation/AnimatedRootManager.java": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/java/com/swmansion/reanimated/layoutReanimation/AnimationsManager.java": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/java/com/swmansion/reanimated/layoutReanimation/LayoutAnimations.java": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/java/com/swmansion/reanimated/layoutReanimation/NativeMethodsHolder.java": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/java/com/swmansion/reanimated/layoutReanimation/ReactBatchObserver.java": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/java/com/swmansion/reanimated/layoutReanimation/Snapshooter.java": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/java/com/swmansion/reanimated/layoutReanimation/ViewTraverser.java": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/java/com/swmansion/reanimated/nodes/AlwaysNode.java": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/java/com/swmansion/reanimated/nodes/BezierNode.java": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/java/com/swmansion/reanimated/nodes/BlockNode.java": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/java/com/swmansion/reanimated/nodes/CallFuncNode.java": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/java/com/swmansion/reanimated/nodes/ClockNode.java": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/java/com/swmansion/reanimated/nodes/ClockOpNode.java": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/java/com/swmansion/reanimated/nodes/ConcatNode.java": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/java/com/swmansion/reanimated/nodes/CondNode.java": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/java/com/swmansion/reanimated/nodes/DebugNode.java": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/java/com/swmansion/reanimated/nodes/EventNode.java": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/java/com/swmansion/reanimated/nodes/FinalNode.java": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/java/com/swmansion/reanimated/nodes/FunctionNode.java": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/java/com/swmansion/reanimated/nodes/JSCallNode.java": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/java/com/swmansion/reanimated/nodes/Node.java": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/java/com/swmansion/reanimated/nodes/NoopNode.java": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/java/com/swmansion/reanimated/nodes/OperatorNode.java": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/java/com/swmansion/reanimated/nodes/ParamNode.java": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/java/com/swmansion/reanimated/nodes/PropsNode.java": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/java/com/swmansion/reanimated/nodes/SetNode.java": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/java/com/swmansion/reanimated/nodes/StyleNode.java": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/java/com/swmansion/reanimated/nodes/TransformNode.java": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/java/com/swmansion/reanimated/nodes/ValueNode.java": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/java/com/swmansion/reanimated/transitions/ChangeTransition.java": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/java/com/swmansion/reanimated/transitions/SaneSidePropagation.java": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/java/com/swmansion/reanimated/transitions/Scale.java": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/java/com/swmansion/reanimated/transitions/TransitionModule.java": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/java/com/swmansion/reanimated/transitions/TransitionUtils.java": {
+					"match": false,
+					"status": "missing-in-package"
+				}
+			},
+			"summary": {
+				"differentFiles": 1,
+				"matchingFiles": 233,
+				"missingInPackage": 71,
+				"missingInSource": 110,
+				"score": 0.5614457831325301,
+				"totalFiles": 415
+			}
+		}
+	}
+]

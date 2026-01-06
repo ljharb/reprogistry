@@ -1,0 +1,1029 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-06T21:54:21.726Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:11.7.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "react-native-reanimated@2.0.1",
+			"name": "react-native-reanimated",
+			"version": "2.0.1",
+			"location": "https://registry.npmjs.org/react-native-reanimated/-/react-native-reanimated-2.0.1.tgz",
+			"integrity": "sha512-Wg/mEdI8xMRDQHYkgNGztJDjAcx1EFR5OMMtXrLSMmT0qzqcRWcVZgDHBN2MEAJqem/HkPAoOFutWzibwvinVg==",
+			"publishedAt": "2021-03-24T13:06:37.229Z",
+			"publishedWith": {
+				"node": "15.3.0",
+				"npm": "7.7.0"
+			}
+		},
+		"source": {
+			"integrity": "sha512-yU8YYOriVDnoFuAwD8qI9blDT/K7Dlk2HAFwvqWbFrbqFfEjxcFAnL4JeaAkpfXvn2DThr39Qg6x4tAMyEHdrA==",
+			"location": "git+https://github.com/software-mansion/react-native-reanimated.git",
+			"spec": "github:software-mansion/react-native-reanimated#2.0.1"
+		},
+		"comparisonHash": "9ef46a5bd31291e57cbab41e2f17c57bd6da0b5b",
+		"diff": {
+			"files": {
+				"Common/cpp/NativeModules/NativeReanimatedModule.cpp": {
+					"diff": "--- published/Common/cpp/NativeModules/NativeReanimatedModule.cpp\n+++ rebuilt/Common/cpp/NativeModules/NativeReanimatedModule.cpp\n@@ -63,35 +63,25 @@\n                                                std::function<jsi::Value(jsi::Runtime &, const int, const jsi::String &)> propObtainer,\n                                                PlatformDepMethodsHolder platformDepMethodsHolder) : NativeReanimatedModuleSpec(jsInvoker),\n                                                   runtime(std::move(rt)),\n-                                                  mapperRegistry(new MapperRegistry()),\n-                                                  eventHandlerRegistry(new EventHandlerRegistry()),\n+                                                  mapperRegistry(std::make_shared<MapperRegistry>()),\n+                                                  eventHandlerRegistry(std::make_shared<EventHandlerRegistry>()),\n                                                   requestRender(platformDepMethodsHolder.requestRender),\n                                                   propObtainer(propObtainer),\n                                                   errorHandler(errorHandler),\n-                                                  workletsCache(new WorkletsCache()),\n+                                                  workletsCache(std::make_shared<WorkletsCache>()),\n                                                   scheduler(scheduler)\n {\n   auto requestAnimationFrame = [=](FrameCallback callback) {\n     frameCallbacks.push_back(callback);\n     maybeRequestRender();\n   };\n-\n-  RuntimeDecorator::addNativeObjects(*runtime,\n-                                     platformDepMethodsHolder.updaterFunction,\n-                                     requestAnimationFrame,\n-                                     platformDepMethodsHolder.scrollToFunction,\n-                                     platformDepMethodsHolder.measuringFunction,\n-                                     platformDepMethodsHolder.getCurrentTime);\n-}\n-\n-bool NativeReanimatedModule::isUIRuntime(jsi::Runtime &rt)\n-{\n-  return runtime.get() == &rt;\n-}\n-\n-bool NativeReanimatedModule::isHostRuntime(jsi::Runtime &rt)\n-{\n-  return !isUIRuntime(rt);\n+  \n+  RuntimeDecorator::decorateUIRuntime(*runtime,\n+                                      platformDepMethodsHolder.updaterFunction,\n+                                      requestAnimationFrame,\n+                                      platformDepMethodsHolder.scrollToFunction,\n+                                      platformDepMethodsHolder.measuringFunction,\n+                                      platformDepMethodsHolder.getCurrentTime);\n }\n \n void NativeReanimatedModule::installCoreFunctions(jsi::Runtime &rt, const jsi::Value &valueSetter)\n@@ -174,7 +164,7 @@\n   const int viewTagInt = (int)viewTag.asNumber();\n   std::string propNameStr = propName.asString(rt).utf8(rt);\n   jsi::Function fun = callback.getObject(rt).asFunction(rt);\n-  std::shared_ptr<jsi::Function> funPtr(new jsi::Function(std::move(fun)));\n+  std::shared_ptr<jsi::Function> funPtr = std::make_shared<jsi::Function>(std::move(fun));\n \n   scheduler->scheduleOnUI([&rt, viewTagInt, funPtr, this, propNameStr]() {\n     const jsi::String propNameValue = jsi::String::createFromUtf8(rt, propNameStr);\n",
+					"match": false,
+					"packageHash": "1c9c31c98bf7535bf6db16b8b944960b30794ddfeb102144f1e71ce690481213",
+					"size": 9166,
+					"sourceHash": "a3b270175faf2fe992eec3d1452bfba263148811204e95bcf31147f964769b6f",
+					"status": "content"
+				},
+				"Common/cpp/Registries/WorkletsCache.cpp": {
+					"diff": "--- published/Common/cpp/Registries/WorkletsCache.cpp\n+++ rebuilt/Common/cpp/Registries/WorkletsCache.cpp\n@@ -22,7 +22,7 @@\n       rt,\n       ValueWrapper::asString(frozenObj->map[\"asString\"]->valueContainer)\n     );\n-    std::shared_ptr<jsi::Function> funPtr(new jsi::Function(std::move(fun)));\n+    std::shared_ptr<jsi::Function> funPtr = std::make_shared<jsi::Function>(std::move(fun));\n     worklets[workletHash] = funPtr;\n   }\n   return worklets[workletHash];\n",
+					"match": false,
+					"packageHash": "f6cb1246b5284c5bb588649bcd6ac7ae88ca538ff5464e6f6ccdd3f39c7be8ec",
+					"size": 948,
+					"sourceHash": "ead521be87ead76ec33f2c46fdbd1c7a66ff4edb6a832ee48bd4d46caad1123f",
+					"status": "content"
+				},
+				"Common/cpp/SharedItems/MutableValue.cpp": {
+					"diff": "--- published/Common/cpp/SharedItems/MutableValue.cpp\n+++ rebuilt/Common/cpp/SharedItems/MutableValue.cpp\n@@ -16,7 +16,7 @@\n     }\n   };\n   \n-  if (module->isUIRuntime(rt)) {\n+  if (RuntimeDecorator::isWorkletRuntime(rt)) {\n     notifyListeners();\n   } else {\n     module->scheduler->scheduleOnUI([notifyListeners] {\n@@ -33,7 +33,7 @@\n void MutableValue::set(jsi::Runtime &rt, const jsi::PropNameID &name, const jsi::Value &newValue) {\n   auto propName = name.utf8(rt);\n \n-  if (module->isHostRuntime(rt)) {\n+  if (RuntimeDecorator::isReactRuntime(rt)) {\n     if (propName == \"value\") {\n       auto shareable = ShareableValue::adapt(rt, newValue, module);\n       module->scheduler->scheduleOnUI([this, shareable] {\n@@ -72,7 +72,7 @@\n     return getValue(rt);\n   }\n \n-  if (module->isUIRuntime(rt)) {\n+  if (RuntimeDecorator::isWorkletRuntime(rt)) {\n     // _value and _animation should be accessed from UI only\n     if (propName == \"_value\") {\n       return getValue(rt);\n",
+					"match": false,
+					"packageHash": "7495ce56f3832e91a6d9795ed2ec3c77be3c419f4b7992ddc1bfbe94823fe8c9",
+					"size": 3406,
+					"sourceHash": "81e3529ce4689496f35c164a9bb46944b9c4d9f6b51a62a14710413a15c9aea9",
+					"status": "content"
+				},
+				"Common/cpp/SharedItems/RemoteObject.cpp": {
+					"diff": "--- published/Common/cpp/SharedItems/RemoteObject.cpp\n+++ rebuilt/Common/cpp/SharedItems/RemoteObject.cpp\n@@ -1,13 +1,14 @@\n #include \"RemoteObject.h\"\n #include \"SharedParent.h\"\n #include \"NativeReanimatedModule.h\"\n+#include \"RuntimeDecorator.h\"\n #include <jsi/jsi.h>\n \n using namespace facebook;\n \n namespace reanimated {\n \n-void RemoteObject::maybeInitializeOnUIRuntime(jsi::Runtime &rt) {\n+void RemoteObject::maybeInitializeOnWorkletRuntime(jsi::Runtime &rt) {\n   if (initializer.get() != nullptr) {\n     backing = getWeakRef(rt);\n     *backing.lock() = initializer->shallowClone(rt);\n@@ -16,14 +17,14 @@\n }\n \n jsi::Value RemoteObject::get(jsi::Runtime &rt, const jsi::PropNameID &name) {\n-  if (module->isUIRuntime(rt)) {\n+  if (RuntimeDecorator::isWorkletRuntime(rt)) {\n     return backing.lock()->getObject(rt).getProperty(rt, name);\n   }\n   return jsi::Value::undefined();\n }\n \n void RemoteObject::set(jsi::Runtime &rt, const jsi::PropNameID &name, const jsi::Value &value) {\n-  if (module->isUIRuntime(rt)) {\n+  if (RuntimeDecorator::isWorkletRuntime(rt)) {\n     backing.lock()->getObject(rt).setProperty(rt, name, value);\n   }\n   // TODO: we should throw if trying to update remote from host runtime\n",
+					"match": false,
+					"packageHash": "f3592bac5b7416c514b12fcd18d74a6788297d526aa930c2e7532d0706459b2f",
+					"size": 1256,
+					"sourceHash": "0c1f1f806e5be0b808c52eba9e38885b72f12a4184d8756618297aa6493200d6",
+					"status": "content"
+				},
+				"Common/cpp/SharedItems/ShareableValue.cpp": {
+					"diff": "--- published/Common/cpp/SharedItems/ShareableValue.cpp\n+++ rebuilt/Common/cpp/SharedItems/ShareableValue.cpp\n@@ -10,12 +10,14 @@\n \n const char *HIDDEN_HOST_OBJECT_PROP = \"__reanimatedHostObjectRef\";\n const char *ALREADY_CONVERTED= \"__alreadyConverted\";\n+const char *CALL_ASYNC = \"__callAsync\";\n+const char *PRIMAL_FUNCTION = \"__primalFunction\";\n std::string CALLBACK_ERROR_SUFFIX = R\"(\n \n Possible solutions are:\n a) If you want to synchronously execute this method, mark it as a Worklet\n b) If you want to execute this method on the JS thread, wrap it using runOnJS )\";\n-  \n+\n void addHiddenProperty(jsi::Runtime &rt,\n                        jsi::Value &&value,\n                        jsi::Object &obj,\n@@ -38,7 +40,7 @@\n void ShareableValue::adaptCache(jsi::Runtime &rt, const jsi::Value &value) {\n   // when adapting from host object we can assign cached value immediately such that we avoid\n   // running `toJSValue` in the future when given object is accessed\n-  if (module->isUIRuntime(rt)) {\n+  if (RuntimeDecorator::isWorkletRuntime(rt)) {\n     if (remoteValue.expired()) {\n       remoteValue = getWeakRef(rt);\n     }\n@@ -49,7 +51,7 @@\n }\n \n void ShareableValue::adapt(jsi::Runtime &rt, const jsi::Value &value, ValueType objectType) {\n-  bool isRNRuntime = !(module->isUIRuntime(rt));\n+  bool isRNRuntime = RuntimeDecorator::isReactRuntime(rt);\n   if (value.isObject()) {\n     jsi::Object object = value.asObject(rt);\n     jsi::Value hiddenValue = object.getProperty(rt, HIDDEN_HOST_OBJECT_PROP);\n@@ -70,7 +72,7 @@\n       }\n     }\n   }\n-  \n+\n   if (objectType == ValueType::MutableValueType) {\n     type = ValueType::MutableValueType;\n     valueContainer = std::make_unique<MutableValueWrapper>(\n@@ -96,13 +98,22 @@\n         // not a worklet, we treat this as a host function\n         type = ValueType::HostFunctionType;\n         containsHostFunction = true;\n-        valueContainer = std::make_unique<HostFunctionWrapper>(\n-          std::make_shared<HostFunctionHandler>(std::make_shared<jsi::Function>(object.asFunction(rt)), rt),\n-          &rt\n-        );\n+\n+        //Check if it's a hostFunction wrapper\n+        jsi::Value primalFunction = object.getProperty(rt, PRIMAL_FUNCTION);\n+        if (!primalFunction.isUndefined()) {\n+            jsi::Object handlerAsObject = primalFunction.asObject(rt);\n+            std::shared_ptr<HostFunctionHandler> handler = handlerAsObject.getHostObject<HostFunctionHandler>(rt);\n+            valueContainer = std::make_unique<HostFunctionWrapper>(handler);\n+        } else {\n+            valueContainer = std::make_unique<HostFunctionWrapper>(\n+              std::make_shared<HostFunctionHandler>(std::make_shared<jsi::Function>(object.asFunction(rt)), rt));\n+        }\n+\n       } else {\n         // a worklet\n         type = ValueType::WorkletFunctionType;\n+\n         valueContainer = std::make_unique<FrozenObjectWrapper>(std::make_shared<FrozenObject>(rt, object, module));\n         auto& frozenObject = ValueWrapper::asFrozenObject(valueContainer);\n         containsHostFunction |= frozenObject->containsHostFunction;\n@@ -166,12 +177,12 @@\n \n jsi::Value ShareableValue::getValue(jsi::Runtime &rt) {\n   // TODO: maybe we can cache toJSValue results on a per-runtime basis, need to avoid ref loops\n-  if (module->isUIRuntime(rt)) {\n+  if (RuntimeDecorator::isWorkletRuntime(rt)) {\n     if (remoteValue.expired()) {\n       auto ref = getWeakRef(rt);\n       remoteValue = ref;\n     }\n-    \n+\n     if (remoteValue.lock()->isUndefined()) {\n       (*remoteValue.lock()) = jsi::Value(rt, toJSValue(rt));\n     }\n@@ -212,7 +223,7 @@\n       return jsi::Value(ValueWrapper::asNumber(valueContainer));\n     case ValueType::StringType: {\n       auto& stringValue = ValueWrapper::asString(valueContainer);\n-      return jsi::Value(rt, jsi::String::createFromAscii(rt, stringValue));\n+      return jsi::Value(rt, jsi::String::createFromUtf8(rt, stringValue));\n     }\n     case ValueType::FrozenObjectType: {\n       auto& frozenObject = ValueWrapper::asFrozenObject(valueContainer);\n@@ -228,8 +239,8 @@\n     }\n     case ValueType::RemoteObjectType: {\n       auto& remoteObject = ValueWrapper::asRemoteObject(valueContainer);\n",
+					"match": false,
+					"packageHash": "9bbc0642bbe343f755c70623f675631026c14814e6ffc8ded7139c28eafde132",
+					"size": 18032,
+					"sourceHash": "cb88a68c72289f4843caa2017b7bbf5e06e2b7556969e4e6361d250118fb3d13",
+					"status": "content"
+				},
+				"Common/cpp/Tools/RuntimeDecorator.cpp": {
+					"diff": "--- published/Common/cpp/Tools/RuntimeDecorator.cpp\n+++ rebuilt/Common/cpp/Tools/RuntimeDecorator.cpp\n@@ -5,22 +5,20 @@\n \n namespace reanimated {\n \n-void RuntimeDecorator::addNativeObjects(jsi::Runtime &rt,\n-                                        UpdaterFunction updater,\n-                                        RequestFrameFunction requestFrame,\n-                                        ScrollToFunction scrollTo,\n-                                        MeasuringFunction measure,\n-                                        TimeProviderFunction getCurrentTime) {\n+void RuntimeDecorator::decorateRuntime(jsi::Runtime &rt, std::string label) {\n+  // This property will be used to find out if a runtime is a custom worklet runtime (e.g. UI, VisionCamera frame processor, ...)\n   rt.global().setProperty(rt, \"_WORKLET\", jsi::Value(true));\n+  // This property will be used for debugging\n+  rt.global().setProperty(rt, \"_LABEL\", jsi::String::createFromAscii(rt, label));\n   \n   jsi::Object dummyGlobal(rt);\n-  auto dummyFunction = [requestFrame](\n-     jsi::Runtime &rt,\n-     const jsi::Value &thisValue,\n-     const jsi::Value *args,\n-     size_t count\n-     ) -> jsi::Value {\n-   return jsi::Value::undefined();\n+  auto dummyFunction = [](\n+                          jsi::Runtime &rt,\n+                          const jsi::Value &thisValue,\n+                          const jsi::Value *args,\n+                          size_t count\n+                          ) -> jsi::Value {\n+    return jsi::Value::undefined();\n   };\n   jsi::Function __reanimatedWorkletInit = jsi::Function::createFromHostFunction(rt, jsi::PropNameID::forAscii(rt, \"__reanimatedWorkletInit\"), 1, dummyFunction);\n   \n@@ -28,13 +26,13 @@\n   rt.global().setProperty(rt, \"global\", dummyGlobal);\n   \n   rt.global().setProperty(rt, \"jsThis\", jsi::Value::undefined());\n-\n+  \n   auto callback = [](\n-      jsi::Runtime &rt,\n-      const jsi::Value &thisValue,\n-      const jsi::Value *args,\n-      size_t count\n-      ) -> jsi::Value {\n+                     jsi::Runtime &rt,\n+                     const jsi::Value &thisValue,\n+                     const jsi::Value *args,\n+                     size_t count\n+                     ) -> jsi::Value {\n     const jsi::Value *value = &args[0];\n     if (value->isString()) {\n       Logger::log(value->getString(rt).utf8(rt).c_str());\n@@ -46,17 +44,36 @@\n       Logger::log(\"unsupported value type\");\n     }\n     return jsi::Value::undefined();\n-    };\n+  };\n   jsi::Value log = jsi::Function::createFromHostFunction(rt, jsi::PropNameID::forAscii(rt, \"_log\"), 1, callback);\n-\trt.global().setProperty(rt, \"_log\", log);\n-\n+  rt.global().setProperty(rt, \"_log\", log);\n+  \n+  auto setGlobalConsole = [](\n+                             jsi::Runtime &rt,\n+                             const jsi::Value &thisValue,\n+                             const jsi::Value *args,\n+                             size_t count\n+                             ) -> jsi::Value {\n+    rt.global().setProperty(rt, \"console\", args[0]);\n+    return jsi::Value::undefined();\n+  };\n+  rt.global().setProperty(rt, \"_setGlobalConsole\", jsi::Function::createFromHostFunction(rt, jsi::PropNameID::forAscii(rt, \"_setGlobalConsole\"), 1, setGlobalConsole));\n+}\n \n+void RuntimeDecorator::decorateUIRuntime(jsi::Runtime &rt,\n+                                         UpdaterFunction updater,\n+                                         RequestFrameFunction requestFrame,\n+                                         ScrollToFunction scrollTo,\n+                                         MeasuringFunction measure,\n+                                         TimeProviderFunction getCurrentTime) {\n+  RuntimeDecorator::decorateRuntime(rt, \"UI\");\n+  \n   auto clb = [updater](\n-      jsi::Runtime &rt,\n-      const jsi::Value &thisValue,\n-      const jsi::Value *args,\n-      size_t count\n-      ) -> jsi::Value {\n+                       jsi::Runtime &rt,\n+                       const jsi::Value &thisValue,\n+                       const jsi::Value *args,\n+                       size_t count\n+                       ) -> jsi::Value {\n     const auto viewTag = args[0].asNumber();\n     const jsi::Value* viewName = &args[1];\n",
+					"match": false,
+					"packageHash": "0dd4af75656ae8dc28efb5b022716d0e5549ca1604af59953b761e991fc3302d",
+					"size": 5252,
+					"sourceHash": "b6b78af0e7255dfd7064d9769a32c3d8ff173e6a741994084f196cf50f6dc51a",
+					"status": "content"
+				},
+				"Common/cpp/headers/NativeModules/NativeReanimatedModule.h": {
+					"diff": "--- published/Common/cpp/headers/NativeModules/NativeReanimatedModule.h\n+++ rebuilt/Common/cpp/headers/NativeModules/NativeReanimatedModule.h\n@@ -24,50 +24,47 @@\n {\n   friend ShareableValue;\n   friend MutableValue;\n-  \n-  public:\n-    NativeReanimatedModule(std::shared_ptr<CallInvoker> jsInvoker,\n-                           std::shared_ptr<Scheduler> scheduler,\n-                           std::unique_ptr<jsi::Runtime> rt,\n-                           std::shared_ptr<ErrorHandler> errorHandler,\n-                           std::function<jsi::Value(jsi::Runtime &, const int, const jsi::String &)> propObtainer,\n-                           PlatformDepMethodsHolder platformDepMethodsHolder);\n-\n-    virtual ~NativeReanimatedModule();\n-\n-    void installCoreFunctions(jsi::Runtime &rt, const jsi::Value &valueSetter) override;\n-\n-    jsi::Value makeShareable(jsi::Runtime &rt, const jsi::Value &value) override;\n-    jsi::Value makeMutable(jsi::Runtime &rt, const jsi::Value &value) override;\n-    jsi::Value makeRemote(jsi::Runtime &rt, const jsi::Value &value) override;\n-\n-    jsi::Value startMapper(jsi::Runtime &rt, const jsi::Value &worklet, const jsi::Value &inputs, const jsi::Value &outputs) override;\n-    void stopMapper(jsi::Runtime &rt, const jsi::Value &mapperId) override;\n-\n-    jsi::Value registerEventHandler(jsi::Runtime &rt, const jsi::Value &eventHash, const jsi::Value &worklet) override;\n-    void unregisterEventHandler(jsi::Runtime &rt, const jsi::Value &registrationId) override;\n-\n-    jsi::Value getViewProp(jsi::Runtime &rt, const jsi::Value &viewTag, const jsi::Value &propName, const jsi::Value &callback) override;\n-    \n-    void onRender(double timestampMs);\n-    void onEvent(std::string eventName, std::string eventAsString);\n-    bool isAnyHandlerWaitingForEvent(std::string eventName);\n-\n-    void maybeRequestRender();\n-\n-    bool isUIRuntime(jsi::Runtime &rt);\n-    bool isHostRuntime(jsi::Runtime &rt);\n-  public:\n-    std::unique_ptr<jsi::Runtime> runtime;\n-  private:\n-    std::shared_ptr<MapperRegistry> mapperRegistry;\n-    std::shared_ptr<EventHandlerRegistry> eventHandlerRegistry;\n-    std::function<void(FrameCallback, jsi::Runtime&)> requestRender;\n-    std::shared_ptr<jsi::Value> dummyEvent;\n-    std::vector<FrameCallback> frameCallbacks;\n-    bool renderRequested = false;\n-    std::function<jsi::Value(jsi::Runtime &, const int, const jsi::String &)> propObtainer;\n-  public:\n+\n+public:\n+  NativeReanimatedModule(std::shared_ptr<CallInvoker> jsInvoker,\n+                         std::shared_ptr<Scheduler> scheduler,\n+                         std::unique_ptr<jsi::Runtime> rt,\n+                         std::shared_ptr<ErrorHandler> errorHandler,\n+                         std::function<jsi::Value(jsi::Runtime &, const int, const jsi::String &)> propObtainer,\n+                         PlatformDepMethodsHolder platformDepMethodsHolder);\n+\n+  virtual ~NativeReanimatedModule();\n+\n+  void installCoreFunctions(jsi::Runtime &rt, const jsi::Value &valueSetter) override;\n+\n+  jsi::Value makeShareable(jsi::Runtime &rt, const jsi::Value &value) override;\n+  jsi::Value makeMutable(jsi::Runtime &rt, const jsi::Value &value) override;\n+  jsi::Value makeRemote(jsi::Runtime &rt, const jsi::Value &value) override;\n+\n+  jsi::Value startMapper(jsi::Runtime &rt, const jsi::Value &worklet, const jsi::Value &inputs, const jsi::Value &outputs) override;\n+  void stopMapper(jsi::Runtime &rt, const jsi::Value &mapperId) override;\n+\n+  jsi::Value registerEventHandler(jsi::Runtime &rt, const jsi::Value &eventHash, const jsi::Value &worklet) override;\n+  void unregisterEventHandler(jsi::Runtime &rt, const jsi::Value &registrationId) override;\n+\n+  jsi::Value getViewProp(jsi::Runtime &rt, const jsi::Value &viewTag, const jsi::Value &propName, const jsi::Value &callback) override;\n+\n+  void onRender(double timestampMs);\n+  void onEvent(std::string eventName, std::string eventAsString);\n+  bool isAnyHandlerWaitingForEvent(std::string eventName);\n+\n+  void maybeRequestRender();\n+public:\n+  std::unique_ptr<jsi::Runtime> runtime;\n+private:\n+  std::shared_ptr<MapperRegistry> mapperRegistry;\n+  std::shared_ptr<EventHandlerRegistry> eventHandlerRegistry;\n+  std::function<void(FrameCallback, jsi::Runtime&)> requestRender;\n+  std::shared_ptr<jsi::Value> dummyEvent;\n+  std::vector<FrameCallback> frameCallbacks;\n+  bool renderRequested = false;\n+  std::function<jsi::Value(jsi::Runtime &, const int, const jsi::String &)> propObtainer;\n+public:\n   std::shared_ptr<ErrorHandler> errorHandler;\n   std::shared_ptr<WorkletsCache> workletsCache;\n   std::shared_ptr<ShareableValue> valueSetter;\n",
+					"match": false,
+					"packageHash": "539b41857f561d2c7ce65fce8ce09744a61f4d557736ba76b34f9f48808b60d2",
+					"size": 2923,
+					"sourceHash": "6b149d2685490b3d6e10a5f332cfa7603db2035b94db13a1e3ed537da8aba9ed",
+					"status": "content"
+				},
+				"Common/cpp/headers/Registries/WorkletsCache.h": {
+					"diff": "--- published/Common/cpp/headers/Registries/WorkletsCache.h\n+++ rebuilt/Common/cpp/headers/Registries/WorkletsCache.h\n@@ -13,6 +13,7 @@\n class FrozenObject;\n \n class WorkletsCache {\n+private:\n   std::unordered_map<long long, std::shared_ptr<jsi::Function>> worklets;\n public:\n   std::shared_ptr<jsi::Function> getFunction(jsi::Runtime & rt, std::shared_ptr<reanimated::FrozenObject> frozenObj);\n",
+					"match": false,
+					"packageHash": "aaebe302ea466dcf91e03d74a1cd96a329a38e060f4cfd2669f82490f16a2f98",
+					"size": 422,
+					"sourceHash": "ee4b3a80635d43b7dfa77a1776377e51ee74f52d1386c398ed952dc28510f1a3",
+					"status": "content"
+				},
+				"Common/cpp/headers/SharedItems/HostFunctionHandler.h": {
+					"diff": "--- published/Common/cpp/headers/SharedItems/HostFunctionHandler.h\n+++ rebuilt/Common/cpp/headers/SharedItems/HostFunctionHandler.h\n@@ -1,16 +1,22 @@\n #pragma once\n \n+#include <jsi/jsi.h>\n+\n namespace reanimated {\n \n-struct HostFunctionHandler {\n+struct HostFunctionHandler : jsi::HostObject {\n   std::shared_ptr<jsi::Function> pureFunction;\n   std::string functionName;\n+  jsi::Runtime *hostRuntime;\n+    jsi::HostObject a;\n+    \n   HostFunctionHandler(std::shared_ptr<jsi::Function> f, jsi::Runtime &rt) {\n     pureFunction = f;\n     functionName = f->getProperty(rt, \"name\").asString(rt).utf8(rt);\n+    hostRuntime = &rt;\n   }\n   \n-  std::shared_ptr<jsi::Function> get() {\n+  std::shared_ptr<jsi::Function> getPureFunction() {\n     return pureFunction;\n   }\n };\n",
+					"match": false,
+					"packageHash": "fb1cf166a36970d9e20fd4f45e64e666d8cb4062bc80a28366f5e6060d2c14ba",
+					"size": 392,
+					"sourceHash": "60eab223a51929bc3a791a3475aef49ed8167e2c7d7ccf96acb017df4860c312",
+					"status": "content"
+				},
+				"Common/cpp/headers/SharedItems/RemoteObject.h": {
+					"diff": "--- published/Common/cpp/headers/SharedItems/RemoteObject.h\n+++ rebuilt/Common/cpp/headers/SharedItems/RemoteObject.h\n@@ -10,13 +10,12 @@\n \n class RemoteObject: public jsi::HostObject, public StoreUser {\n private:\n-  NativeReanimatedModule *module;\n   std::weak_ptr<jsi::Value> backing;\n   std::unique_ptr<FrozenObject> initializer;\n public:\n-  void maybeInitializeOnUIRuntime(jsi::Runtime &rt);\n+  void maybeInitializeOnWorkletRuntime(jsi::Runtime &rt);\n   RemoteObject(jsi::Runtime &rt, jsi::Object &object, NativeReanimatedModule *module, std::shared_ptr<Scheduler> s):\n-     StoreUser(s), module(module), initializer(new FrozenObject(rt, object, module)) {}\n+     StoreUser(s), initializer(std::make_unique<FrozenObject>(rt, object, module)) {}\n   void set(jsi::Runtime &rt, const jsi::PropNameID &name, const jsi::Value &value);\n   jsi::Value get(jsi::Runtime &rt, const jsi::PropNameID &name);\n   std::vector<jsi::PropNameID> getPropertyNames(jsi::Runtime &rt);\n",
+					"match": false,
+					"packageHash": "112f968a1597751315836de18a90f1105f17072b6550d1cee4e59c9326506e15",
+					"size": 825,
+					"sourceHash": "04e6ba53b551f7c10a390e967b782f7076362b404080c111aa2afcbedd3f877f",
+					"status": "content"
+				},
+				"Common/cpp/headers/SharedItems/ValueWrapper.h": {
+					"diff": "--- published/Common/cpp/headers/SharedItems/ValueWrapper.h\n+++ rebuilt/Common/cpp/headers/SharedItems/ValueWrapper.h\n@@ -61,12 +61,7 @@\n public:\n   HostFunctionWrapper(const std::shared_ptr<HostFunctionHandler> & _value)\n     : ValueWrapper(ValueType::HostFunctionType), value(_value) {};\n-  HostFunctionWrapper(\n-    const std::shared_ptr<HostFunctionHandler> & _value,\n-    jsi::Runtime *_hostRuntime\n-  ) : ValueWrapper(ValueType::HostFunctionType), value(_value), hostRuntime(_hostRuntime) {};\n   std::shared_ptr<HostFunctionHandler> value;\n-  jsi::Runtime *hostRuntime;\n };\n \n class FrozenObjectWrapper : public ValueWrapper {\n",
+					"match": false,
+					"packageHash": "f1c16c8a4d928408a82f1ec412d61e44ff94b330231421c11279fa1b5ba5e5ed",
+					"size": 5273,
+					"sourceHash": "3ff97014afba4a420f17faa98c897b34e91a46dcc5663e413a2b7e2eda813169",
+					"status": "content"
+				},
+				"Common/cpp/headers/Tools/ReanimatedHiddenHeaders.h": {
+					"diff": "--- published/Common/cpp/headers/Tools/ReanimatedHiddenHeaders.h\n+++ rebuilt/Common/cpp/headers/Tools/ReanimatedHiddenHeaders.h\n@@ -7,9 +7,9 @@\n     #include \"LoggerInterface.h\"\n     #include \"SpeedChecker.h\"\n #else\n-    #include \"../../hidden_headers/Logger.h\"\n-    #include \"../../hidden_headers/LoggerInterface.h\"\n-    #include \"../../hidden_headers/SpeedChecker.h\"\n+    #include \"Common/cpp/hidden_headers/Logger.h\"\n+    #include \"Common/cpp/hidden_headers/LoggerInterface.h\"\n+    #include \"Common/cpp/hidden_headers/SpeedChecker.h\"\n #endif\n \n #endif //REANIMATEDEXAMPLE_REANIMATEDHIDDEN_H\n",
+					"match": false,
+					"packageHash": "d1a44c10e9440add6f77786a3725ff2bcb830db761ca04470068d9b73e741733",
+					"size": 412,
+					"sourceHash": "168b2aa434707d4266bfa276b1ac7b758003eef1bb417ca34db4ace9e4a79aff",
+					"status": "content"
+				},
+				"Common/cpp/headers/Tools/RuntimeDecorator.h": {
+					"diff": "--- published/Common/cpp/headers/Tools/RuntimeDecorator.h\n+++ rebuilt/Common/cpp/headers/Tools/RuntimeDecorator.h\n@@ -12,12 +12,16 @@\n \n class RuntimeDecorator {\n public:\n-  static void addNativeObjects(jsi::Runtime &rt,\n-                               UpdaterFunction updater,\n-                               RequestFrameFunction requestFrame,\n-                               ScrollToFunction scrollTo,\n-                               MeasuringFunction measure,\n-                               TimeProviderFunction getCurrentTime);\n+  static void decorateRuntime(jsi::Runtime &rt, std::string label);\n+  static void decorateUIRuntime(jsi::Runtime &rt,\n+                                UpdaterFunction updater,\n+                                RequestFrameFunction requestFrame,\n+                                ScrollToFunction scrollTo,\n+                                MeasuringFunction measure,\n+                                TimeProviderFunction getCurrentTime);\n+  \n+  static bool isWorkletRuntime(jsi::Runtime &rt);\n+  static bool isReactRuntime(jsi::Runtime &rt);\n };\n \n }\n",
+					"match": false,
+					"packageHash": "215c6ac5d7bfd9f84d47e2f351e6f7ac3c271e89be67b70b4d0584b1333c1b8e",
+					"size": 619,
+					"sourceHash": "9dcbb27bee818d20f027aa5d0bd2962753fb7987ff03c0c240a00a847bc8e616",
+					"status": "content"
+				},
+				"android/build.gradle": {
+					"diff": "--- published/android/build.gradle\n+++ rebuilt/android/build.gradle\n@@ -1,9 +1,470 @@\n-import groovy.json.JsonSlurper;\n-configurations.maybeCreate(\"default\")\n+def localProps = new Properties()\n+def localPropertiesFile = file(\"local.properties\")\n+if (localPropertiesFile.exists()) {\n+    localProps.load(new InputStreamReader(new FileInputStream(localPropertiesFile), \"UTF-8\"))\n+}\n+def debugNativeLibraries = localProps.getProperty('NATIVE_DEBUG_ON', 'FALSE').toBoolean()\n \n-def inputFile = new File(projectDir, '../../react-native/package.json')\n-def json = new JsonSlurper().parseText(inputFile.text)\n-def reactNativeVersion = json.version as String\n-def (major, minor, patch) = reactNativeVersion.tokenize('.')\n+buildscript {\n+    repositories {\n+        jcenter()\n+        google()\n+        maven {\n+            url \"https://plugins.gradle.org/m2/\"\n+        }\n+    }\n+    dependencies {\n+        classpath('com.android.tools.build:gradle:4.1.2')\n+        classpath(\"de.undercouch:gradle-download-task:4.0.4\")\n+    }\n+}\n+\n+\n+def safeExtGet(prop, fallback) {\n+    rootProject.ext.has(prop) ? rootProject.ext.get(prop) : fallback\n+}\n+\n+apply plugin: 'com.android.library'\n+apply plugin: 'maven'\n+apply plugin: 'de.undercouch.download'\n+\n+android {\n+    compileSdkVersion safeExtGet('compileSdkVersion', 29)\n+    buildToolsVersion safeExtGet('buildToolsVersion', '29.0.2')\n+    defaultConfig {\n+\n+        minSdkVersion safeExtGet('minSdkVersion', 16)\n+        targetSdkVersion safeExtGet('targetSdkVersion', 29)\n+        versionCode 1\n+        versionName \"1.0\"\n+        ndk {\n+            moduleName(\"reanimated\")\n+        }\n+        buildConfigField(\"boolean\", \"IS_INTERNAL_BUILD\", \"false\")\n+        buildConfigField(\"int\", \"EXOPACKAGE_FLAGS\", \"0\")\n+    }\n+    lintOptions {\n+        abortOnError false\n+    }\n+\n+    packagingOptions {\n+        println \"Native libs debug enabled: ${debugNativeLibraries}\"\n+        doNotStrip debugNativeLibraries ? \"**/**/*.so\" : ''\n+    }\n+\n+    tasks.withType(JavaCompile) {\n+        compileTask ->\n+            compileTask.dependsOn(packageNdkLibs)\n+    }\n+\n+    configurations {\n+        extractHeaders\n+        extractJNI\n+    }\n+}\n+\n+import java.nio.file.Paths\n+\n+import de.undercouch.gradle.tasks.download.Download\n+import org.apache.tools.ant.taskdefs.condition.Os\n+import org.apache.tools.ant.filters.ReplaceTokens\n+\n+def reactProperties = new Properties()\n+file(\"$projectDir/../node_modules/react-native/ReactAndroid/gradle.properties\").withInputStream { reactProperties.load(it) }\n+\n+def BOOST_VERSION = reactProperties.getProperty(\"BOOST_VERSION\")\n+def DOUBLE_CONVERSION_VERSION = reactProperties.getProperty(\"DOUBLE_CONVERSION_VERSION\")\n+def FOLLY_VERSION = reactProperties.getProperty(\"FOLLY_VERSION\")\n+def GLOG_VERSION = reactProperties.getProperty(\"GLOG_VERSION\")\n+def REACT_VERSION = reactProperties.getProperty(\"VERSION_NAME\").split(\"\\\\.\")[1].toInteger()\n+\n+// We download various C++ open-source dependencies into downloads.\n+// We then copy both the downloaded code and our custom makefiles and headers into third-party-ndk.\n+// After that we build native code from src/main/jni with module path pointing at third-party-ndk.\n+\n+def downloadsDir = new File(\"$buildDir/downloads\")\n+def thirdPartyNdkDir = new File(\"$buildDir/third-party-ndk\")\n+\n+def reactNative = new File(\"$projectDir/../node_modules/react-native\")\n+def reactNativeThirdParty = new File(\"$reactNative/ReactAndroid/src/main/jni/third-party\")\n+\n+// You need to have following folders in this directory:\n",
+					"match": false,
+					"packageHash": "8e870d51c4e452080c7b382940072fe91cf33c20de8791248ac733dd9d96ed73",
+					"size": 378,
+					"sourceHash": "80fff23d69ad3646d68e101cb4d18c98d5a557f5069f3ed41eac07a4fba09145",
+					"status": "content"
+				},
+				"android/react-native-reanimated-62.aar": {
+					"match": false,
+					"packageHash": "0c7998cc80ca315968a238292efdce6a89f9098134203808b2a82d43ef989908",
+					"size": 815009,
+					"status": "missing-in-source"
+				},
+				"android/react-native-reanimated-63.aar": {
+					"match": false,
+					"packageHash": "b2986cdc8829daa4ae682b1f99f36c2ca12162b7fa8c690a193f47d60aec4853",
+					"size": 821091,
+					"status": "missing-in-source"
+				},
+				"android/react-native-reanimated-64.aar": {
+					"match": false,
+					"packageHash": "e18764232d462171dbb8d59fe633068f26ab27518aacb6f7a0dbf48592bfaa04",
+					"size": 826579,
+					"status": "missing-in-source"
+				},
+				"android/react-native-reanimated.aar": {
+					"match": false,
+					"packageHash": "366bbb3424d64a2544a47b2f98b9c1349a3cb10311291ff8ab4065c7f4210024",
+					"size": 661444,
+					"status": "missing-in-source"
+				},
+				"android/src/AndroidManifest.xml": {
+					"match": false,
+					"packageHash": "68902200815dce42ae8ffd769b41ebd4ef6ac2443655b188118c23cbcefeaec1",
+					"size": 129,
+					"status": "missing-in-source"
+				},
+				"android/src/main/java/com/swmansion/reanimated/ReanimatedProxyPackage.java": {
+					"match": false,
+					"packageHash": "9f559e9546b11a9fb672ba81a0d3154eb9133983e10900fb4597d1734a66d7af",
+					"size": 409,
+					"status": "missing-in-source"
+				},
+				"ios/native/NativeProxy.mm": {
+					"diff": "--- published/ios/native/NativeProxy.mm\n+++ rebuilt/ios/native/NativeProxy.mm\n@@ -1,7 +1,6 @@\n #import \"NativeProxy.h\"\n #import \"REAIOSScheduler.h\"\n #import \"REAIOSErrorHandler.h\"\n-#import \"RuntimeDecorator.h\"\n #import \"REAModule.h\"\n #import \"REANodesManager.h\"\n #import \"NativeMethods.h\"\n@@ -111,13 +110,14 @@\n       return val;\n   };\n \n-  std::shared_ptr<Scheduler> scheduler(new REAIOSScheduler(jsInvoker));\n \n #if __has_include(<hermes/hermes.h>)\n   std::unique_ptr<jsi::Runtime> animatedRuntime = facebook::hermes::makeHermesRuntime();\n #else\n   std::unique_ptr<jsi::Runtime> animatedRuntime = facebook::jsc::makeJSCRuntime();\n #endif\n+  \n+  std::shared_ptr<Scheduler> scheduler = std::make_shared<REAIOSScheduler>(jsInvoker);\n   std::shared_ptr<ErrorHandler> errorHandler = std::make_shared<REAIOSErrorHandler>(scheduler);\n   std::shared_ptr<NativeReanimatedModule> module;\n \n@@ -142,13 +142,13 @@\n     getCurrentTime,\n   };\n \n-module = std::make_shared<NativeReanimatedModule>(jsInvoker,\n-                                                  scheduler,\n-                                                  std::move(animatedRuntime),\n-                                                  errorHandler,\n-                                                  propObtainer,\n-                                                  platformDepMethodsHolder\n-                                                  );\n+  module = std::make_shared<NativeReanimatedModule>(jsInvoker,\n+                                                    scheduler,\n+                                                    std::move(animatedRuntime),\n+                                                    errorHandler,\n+                                                    propObtainer,\n+                                                    platformDepMethodsHolder\n+                                                    );\n \n   scheduler->setModule(module);\n \n",
+					"match": false,
+					"packageHash": "5e699d71b8166df5a95065d65a7f1d8fb2c013c161cc63d12e445d762a738663",
+					"size": 6242,
+					"sourceHash": "eacd4ff99e27dedc4bd8adddf92ddb138966c3a660f0cdabf7d542b005ab8140",
+					"status": "content"
+				},
+				"ios/native/REAIOSLogger.mm": {
+					"diff": "--- published/ios/native/REAIOSLogger.mm\n+++ rebuilt/ios/native/REAIOSLogger.mm\n@@ -3,7 +3,7 @@\n \n namespace reanimated {\n \n-std::unique_ptr<LoggerInterface> Logger::instance = std::unique_ptr<REAIOSLogger>(new REAIOSLogger());\n+std::unique_ptr<LoggerInterface> Logger::instance = std::make_unique<REAIOSLogger>();\n \n void REAIOSLogger::log(const char* str) {\n   NSLog(@\"%@\", [NSString stringWithCString:str encoding:[NSString defaultCStringEncoding]]);\n",
+					"match": false,
+					"packageHash": "60136fe9efcc56646ef042d75389c56b52845295e887fc2c235465580bd2a743",
+					"size": 614,
+					"sourceHash": "f0efb9915ff0caad1f6882a454616705816b81d50d81c0cd22811611f26a08ad",
+					"status": "content"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -26,6 +26,7 @@\n     \"android/\",\n     \"ios/\",\n     \"!ios/build/\",\n+    \"!android/build/\",\n     \"RNReanimated.podspec\",\n     \"README.md\",\n     \"react-native-reanimated.d.ts\",\n@@ -94,7 +95,7 @@\n     \"lint-staged\": \"^10.2.11\",\n     \"prettier\": \"^2.2.1\",\n     \"react\": \"17.0.1\",\n-    \"react-native\": \"^0.63.4\",\n+    \"react-native\": \"0.64.0-rc.2\",\n     \"react-native-gesture-handler\": \"^1.6.1\",\n     \"react-test-renderer\": \"17.0.1\",\n     \"release-it\": \"^13.1.1\",\n",
+					"match": false,
+					"packageHash": "c192504aaaa50e3a6f31268e2e88862a795f3d92b541605dd46a99d9a6c92b53",
+					"size": 3907,
+					"sourceHash": "be72bec94da9e790a73bb7ea9486d7f1c89b4289a1be827c662a8c838eae41e1",
+					"status": "content"
+				},
+				"react-native-reanimated.d.ts": {
+					"diff": "--- published/react-native-reanimated.d.ts\n+++ rebuilt/react-native-reanimated.d.ts\n@@ -198,7 +198,7 @@\n       ? T\n       : never;\n     export type AdaptTransforms<T> = {\n-      [P in keyof T]: Adaptable<T[P] extends string ? number | string : T[P]>;\n+      [P in keyof T]: Adaptable<T[P]>;\n     };\n     export type AnimatedTransform = AdaptTransforms<TransformStyleTypes>[];\n \n@@ -208,7 +208,7 @@\n         : S[K] extends ReadonlyArray<any>\n         ? ReadonlyArray<AnimateStyle<S[K][0]>>\n         : S[K] extends object\n-        ? AnimateStyle<S[K]> // allow `number` where `string` normally is to support colors\n+        ? AnimateStyle<S[K]>\n         : S[K] extends ColorValue | undefined\n         ? S[K] | number\n         :\n",
+					"match": false,
+					"packageHash": "c897d986d277b04e1f48be902eaa0b8dbcefe751a88e0beb513c4bdc1482883a",
+					"size": 26693,
+					"sourceHash": "5436d3c578eb5736892d4b34974fec562a09d563386d8c67e32dfa9e54dad66d",
+					"status": "content"
+				},
+				"src/Animated.js": {
+					"diff": "--- published/src/Animated.js\n+++ rebuilt/src/Animated.js\n@@ -1,99 +1,28 @@\n import { Image, ScrollView, Text, View } from 'react-native';\n-import EasingNode from './Easing';\n-import AnimatedClock from './core/AnimatedClock';\n-import AnimatedValue from './core/AnimatedValue';\n-import AnimatedNode from './core/AnimatedNode';\n-import AnimatedCode from './core/AnimatedCode';\n-import * as base from './base';\n-import * as derived from './derived';\n import createAnimatedComponent from './createAnimatedComponent';\n-import decay from './animations/decay';\n-import timing from './animations/timing';\n-import spring from './animations/spring';\n-import Animation from './animations/Animation';\n import {\n   addWhitelistedNativeProps,\n   addWhitelistedUIProps,\n } from './ConfigHelper';\n-import backwardCompatibleAnimWrapper from './animations/backwardCompatibleAnimWrapper';\n-import {\n-  Transition,\n-  Transitioning,\n-  createTransitioningComponent,\n-} from './Transitioning';\n-import SpringUtils from './animations/SpringUtils';\n-import useValue from './useValue';\n import * as reanimated2 from './reanimated2';\n+import * as reanimated1 from './reanimated1';\n \n-const decayWrapper = backwardCompatibleAnimWrapper(\n-  decay,\n-  Animation.decayDefaultState\n-);\n-const timingWrapper = backwardCompatibleAnimWrapper(\n-  timing,\n-  Animation.timingDefaultState\n-);\n-const springWrapper = backwardCompatibleAnimWrapper(\n-  spring,\n-  Animation.springDefaultState\n-);\n const Animated = {\n   // components\n   View: createAnimatedComponent(View),\n   Text: createAnimatedComponent(Text),\n   Image: createAnimatedComponent(Image),\n   ScrollView: createAnimatedComponent(ScrollView),\n-  Code: AnimatedCode,\n   createAnimatedComponent,\n-\n-  // classes\n-  Clock: AnimatedClock,\n-  Value: AnimatedValue,\n-  Node: AnimatedNode,\n-\n-  // operations\n-  ...base,\n-  ...derived,\n-\n-  // animations\n-  decay: decayWrapper,\n-  timing: timingWrapper,\n-  spring: springWrapper,\n-  SpringUtils,\n-\n   // configuration\n   addWhitelistedNativeProps,\n   addWhitelistedUIProps,\n-\n-  // hooks\n-  useValue,\n-\n-  // reanimated2\n+  // reanimated 1\n+  ...reanimated1,\n+  // reanimated 2\n   ...reanimated2,\n };\n \n-export default Animated;\n-\n-// operations\n-export * from './base';\n-export * from './derived';\n-\n export * from './reanimated2';\n-\n-export {\n-  EasingNode,\n-  Transitioning,\n-  Transition,\n-  createTransitioningComponent,\n-  // classes\n-  AnimatedClock as Clock,\n-  AnimatedValue as Value,\n-  AnimatedNode as Node,\n-  // animations\n-  decayWrapper as decay,\n",
+					"match": false,
+					"packageHash": "b520bfc3eb7dac55edca6d58af6651c3bbbae3a490c2871a8ddbc92105e36084",
+					"size": 2354,
+					"sourceHash": "da6b566778a435244cbdd8fbd04e7727ec23f685ed9e6b792e2014451b385120",
+					"status": "content"
+				},
+				"src/Easing.js": {
+					"match": false,
+					"packageHash": "cadd61c8de2916ec7eb0ec8a7d897491e9a8d5df80a00e1d6de8e80563033cdd",
+					"size": 5746,
+					"status": "missing-in-source"
+				},
+				"src/SpringConfig.js": {
+					"match": false,
+					"packageHash": "f0f1ec1d8a11def8fa8d57d1483f7b610ebef26aa783a1f54e1939863ffed59d",
+					"size": 1898,
+					"status": "missing-in-source"
+				},
+				"src/Transitioning.js": {
+					"match": false,
+					"packageHash": "8a729c6b0fbfe37e996ae24d34f5e6b5e643d63a1469a862bceadf18b1118a12",
+					"size": 3933,
+					"status": "missing-in-source"
+				},
+				"src/animations/Animation.js": {
+					"match": false,
+					"packageHash": "abee39f7fae7745a188e9bdad7e7f56fe4824518552ae9698a0cd1d60d49f00c",
+					"size": 721,
+					"status": "missing-in-source"
+				},
+				"src/animations/SpringUtils.js": {
+					"match": false,
+					"packageHash": "90ea72c55158a805c1a68892fea0e99968160e0d2a7f99df12fa76255b87b46c",
+					"size": 4913,
+					"status": "missing-in-source"
+				},
+				"src/animations/backwardCompatibleAnimWrapper.js": {
+					"match": false,
+					"packageHash": "8d96f1130513af7b880413b5d0c95e70c0ff27f71878440e16ef3629668ca5a2",
+					"size": 3229,
+					"status": "missing-in-source"
+				},
+				"src/animations/decay.js": {
+					"match": false,
+					"packageHash": "0f3016880f0a2d3f76d62331a5d546438f8b609a3f750e05d6c685adc2ff4415",
+					"size": 1246,
+					"status": "missing-in-source"
+				},
+				"src/animations/spring.js": {
+					"match": false,
+					"packageHash": "95f6ff9f6266f588cedbedd510c32f0becc833b581e5ca9cf887fe0bfcfb5ba3",
+					"size": 4403,
+					"status": "missing-in-source"
+				},
+				"src/animations/timing.js": {
+					"match": false,
+					"packageHash": "91c57c54f551be8dc6a8115197966896ecdb2a40a2ff97eee37fe3e0cd517121",
+					"size": 1649,
+					"status": "missing-in-source"
+				},
+				"src/base.js": {
+					"match": false,
+					"packageHash": "6475d86df5b88b53b09c21f141a61a5087b88a831c464d7b6a5b21cf08e7e453",
+					"size": 905,
+					"status": "missing-in-source"
+				},
+				"src/core/AnimatedAlways.js": {
+					"match": false,
+					"packageHash": "48844af3f2e8a3bf4b66ba5d09054bfe239074920e2077318f5b3cfd0859dde3",
+					"size": 677,
+					"status": "missing-in-source"
+				},
+				"src/core/AnimatedBezier.js": {
+					"match": false,
+					"packageHash": "72fd1936674dc1392e04e2c19dde6416a45ddf58959fb9afb3210a679b7a5b6a",
+					"size": 3935,
+					"status": "missing-in-source"
+				},
+				"src/core/AnimatedBlock.js": {
+					"match": false,
+					"packageHash": "2389e55f60adcb82b45cbbbe1681e1cb3a03224fbf4571c6517d181aa636ed57",
+					"size": 1277,
+					"status": "missing-in-source"
+				},
+				"src/core/AnimatedCall.js": {
+					"match": false,
+					"packageHash": "4c47902ad935e79c1f3108cdf0de30803302f945a3d975803320587cf5a11489",
+					"size": 1378,
+					"status": "missing-in-source"
+				},
+				"src/core/AnimatedCallFunc.js": {
+					"match": false,
+					"packageHash": "6d5255dfd1ae21a07e21c76f2d39f1e0a4268e4050af904b22904aa29944442e",
+					"size": 1759,
+					"status": "missing-in-source"
+				},
+				"src/core/AnimatedClock.js": {
+					"match": false,
+					"packageHash": "6d23d2219aa4400802ba4015352bb52d0dfa9b9ab9cadd1d47689a22d71ceb5b",
+					"size": 1707,
+					"status": "missing-in-source"
+				},
+				"src/core/AnimatedClockTest.js": {
+					"match": false,
+					"packageHash": "d9c6487e82556f4605bd86082533a1624bad0305f9790173bb60d679ae282028",
+					"size": 461,
+					"status": "missing-in-source"
+				},
+				"src/core/AnimatedCode.js": {
+					"match": false,
+					"packageHash": "545e8b158c054b1f5dedabd7945657c619606735834f21f783675e2593b83a46",
+					"size": 813,
+					"status": "missing-in-source"
+				},
+				"src/core/AnimatedConcat.js": {
+					"match": false,
+					"packageHash": "5869cdf1044461167a8cf8463f4f8cecdbe5e2311de98d1b2ef06c09be2a286d",
+					"size": 910,
+					"status": "missing-in-source"
+				},
+				"src/core/AnimatedCond.js": {
+					"match": false,
+					"packageHash": "78d3f839cfbcbebefc87a6a0b8764ef0af92d49f4d79562aa8f8d9075821b6b4",
+					"size": 1556,
+					"status": "missing-in-source"
+				},
+				"src/core/AnimatedDebug.js": {
+					"match": false,
+					"packageHash": "e3cb5788caabaa5de6e784fb147792f7288fe832809fe4fb78efe237f05023c7",
+					"size": 1788,
+					"status": "missing-in-source"
+				},
+				"src/core/AnimatedEvent.js": {
+					"match": false,
+					"packageHash": "5c465ce5105500e212d36f1380651f1f8f839d8b0efc86f48e32b875f68530f9",
+					"size": 3924,
+					"status": "missing-in-source"
+				},
+				"src/core/AnimatedFunction.js": {
+					"match": false,
+					"packageHash": "9155b7f23498ff067a702adefbe43ebb32605748fc6e0c6506a2b82a6e40a866",
+					"size": 1402,
+					"status": "missing-in-source"
+				},
+				"src/core/AnimatedNode.js": {
+					"match": false,
+					"packageHash": "f3677f2fe61a14e530769b13be92deb6ada4fa115e7c2ceefc467dde72dd30f5",
+					"size": 5108,
+					"status": "missing-in-source"
+				},
+				"src/core/AnimatedOperator.js": {
+					"match": false,
+					"packageHash": "7a1f65d35124e0e7365c99912fbab0f22815784d3feff8d63fa5857184ffa203",
+					"size": 2946,
+					"status": "missing-in-source"
+				},
+				"src/core/AnimatedParam.js": {
+					"match": false,
+					"packageHash": "f1243c1b36dc48844602c74a7cf0b433cf1d90dadf42cbed7cd0c0be8617bab0",
+					"size": 2128,
+					"status": "missing-in-source"
+				},
+				"src/core/AnimatedProps.js": {
+					"match": false,
+					"packageHash": "84aeb26ede9542409df71c76933b508e7d4d376b67a652e4af246b6ffec1e5ea",
+					"size": 2506,
+					"status": "missing-in-source"
+				},
+				"src/core/AnimatedSet.js": {
+					"match": false,
+					"packageHash": "f9797b6f87cbfe7ea674b0005eb13b3d4128eae97e31608649683f2a3d21989e",
+					"size": 1041,
+					"status": "missing-in-source"
+				},
+				"src/core/AnimatedStartClock.js": {
+					"match": false,
+					"packageHash": "dfe94321d4ca48085915051016a8777b991ea2b960aac41466854bc4721c760a",
+					"size": 803,
+					"status": "missing-in-source"
+				},
+				"src/core/AnimatedStopClock.js": {
+					"match": false,
+					"packageHash": "fa7cd28c2f0275b72d47c1934e2962ab1d45ed398f510c34d297be89a8079d46",
+					"size": 796,
+					"status": "missing-in-source"
+				},
+				"src/core/AnimatedStyle.js": {
+					"match": false,
+					"packageHash": "6c119f275c168604d493a4a787964e6bd950cb42aac85ccee25cb4079527ab44",
+					"size": 2051,
+					"status": "missing-in-source"
+				},
+				"src/core/AnimatedTransform.js": {
+					"match": false,
+					"packageHash": "2fe2a6c965b38549f3eddec98853fe5f4c6dd3d480c7fedcd4866f7ebda87e41",
+					"size": 1911,
+					"status": "missing-in-source"
+				},
+				"src/core/AnimatedValue.js": {
+					"match": false,
+					"packageHash": "4f252e230a069e2ff6f487ec4d61b77c8df0581756ab0b1636182a381c41ba7c",
+					"size": 1188,
+					"status": "missing-in-source"
+				},
+				"src/core/InternalAnimatedValue.js": {
+					"match": false,
+					"packageHash": "4963816d8cf0d3027768e3b707ab91be9f66acf9dcdf36cc48c278ab6619130b",
+					"size": 2314,
+					"status": "missing-in-source"
+				},
+				"src/core/__mocks__/AnimatedProps.js": {
+					"match": false,
+					"packageHash": "e716cfef1e7df6bd9bb4027be32591052fa86855b6f7ff645cf09187905d228a",
+					"size": 2131,
+					"status": "missing-in-source"
+				},
+				"src/core/createEventObjectProxyPolyfill.js": {
+					"match": false,
+					"packageHash": "10800ad8cd8d9d9ccde312f5f69383070d904bc7b3ea10b419196e2cd1c73dc6",
+					"size": 1315,
+					"status": "missing-in-source"
+				},
+				"src/createAnimatedComponent.js": {
+					"diff": "--- published/src/createAnimatedComponent.js\n+++ rebuilt/src/createAnimatedComponent.js\n@@ -2,10 +2,10 @@\n import { findNodeHandle, Platform, StyleSheet } from 'react-native';\n import ReanimatedEventEmitter from './ReanimatedEventEmitter';\n \n-import AnimatedEvent from './core/AnimatedEvent';\n-import AnimatedNode from './core/AnimatedNode';\n-import AnimatedValue from './core/AnimatedValue';\n-import { createOrReusePropsNode } from './core/AnimatedProps';\n+import AnimatedEvent from './reanimated1/core/AnimatedEvent';\n+import AnimatedNode from './reanimated1/core/AnimatedNode';\n+import AnimatedValue from './reanimated1/core/AnimatedValue';\n+import { createOrReusePropsNode } from './reanimated1/core/AnimatedProps';\n import WorkletEventHandler from './reanimated2/WorkletEventHandler';\n import setAndForwardRef from './setAndForwardRef';\n \n@@ -396,6 +396,9 @@\n         } else if (key === 'animatedProps') {\n           Object.keys(value.initial).forEach((key) => {\n             props[key] = value.initial[key];\n+            if (value.viewRef.current === null) {\n+              value.viewRef.current = this;\n+            }\n           });\n         } else if (value instanceof AnimatedEvent) {\n           // we cannot filter out event listeners completely as some components\n",
+					"match": false,
+					"packageHash": "5689caada1b84703357b01dde04c68e9cea7628aab85a256d2dc3ae052d7b457",
+					"size": 15990,
+					"sourceHash": "0eb69c6dde1467fb9470daa405df32199f45bb3f598fae024a8f0466d50b7b26",
+					"status": "content"
+				},
+				"src/derived/__mocks__/evaluateOnce.js": {
+					"match": false,
+					"packageHash": "3822e25f5e4f5c7d542c5bf6917877d466602797d6087bcd1607851faff466e0",
+					"size": 410,
+					"status": "missing-in-source"
+				},
+				"src/derived/acc.js": {
+					"match": false,
+					"packageHash": "167a4bac31826cbd8968a50d2849b5f0972b881c28a117b9f62fc3ee0dd3ee0d",
+					"size": 277,
+					"status": "missing-in-source"
+				},
+				"src/derived/color.js": {
+					"match": false,
+					"packageHash": "d3c8f9c723e544b839efe7e7197bac3dd871d664b3ca5f6b334c8c547234d8b0",
+					"size": 928,
+					"status": "missing-in-source"
+				},
+				"src/derived/diff.js": {
+					"match": false,
+					"packageHash": "7c2d8a9db5125016d0d2739c29c783b17a8992617544640e335290fff1716f66",
+					"size": 430,
+					"status": "missing-in-source"
+				},
+				"src/derived/diffClamp.js": {
+					"match": false,
+					"packageHash": "4caa4d8735bdad7140f956f6544e1ee8477d6953fd38cd01678a248d4319b7a0",
+					"size": 347,
+					"status": "missing-in-source"
+				},
+				"src/derived/evaluateOnce.js": {
+					"match": false,
+					"packageHash": "923dda770955d63970eafa346789109fc017d4daa102661589693272e6fbf5d3",
+					"size": 1101,
+					"status": "missing-in-source"
+				},
+				"src/derived/index.js": {
+					"match": false,
+					"packageHash": "ac58f6588119fafb6663ed703931ed0eb7fd6f820764daf91b72450e17f9b339",
+					"size": 417,
+					"status": "missing-in-source"
+				},
+				"src/derived/interpolate.js": {
+					"match": false,
+					"packageHash": "ebbe9c43e960419ea2675226c9a71b471058b5f7b3d43690443247a31efd674d",
+					"size": 4106,
+					"status": "missing-in-source"
+				},
+				"src/derived/interpolateColors.js": {
+					"match": false,
+					"packageHash": "b8d317af0671d6e7a1fb3bfe50ca365684b834d4666e85b45f857c7d1b8cd6b5",
+					"size": 1597,
+					"status": "missing-in-source"
+				},
+				"src/derived/onChange.js": {
+					"match": false,
+					"packageHash": "efec62f97f3dad69921e0a84136a2669c09f80e1d77f57840d50958bdea8082f",
+					"size": 487,
+					"status": "missing-in-source"
+				},
+				"src/derived/useCode.js": {
+					"match": false,
+					"packageHash": "72237d458e1f2caa18926f3f43b98ad5e5598a263523a4e67d26b18dc56988b3",
+					"size": 1132,
+					"status": "missing-in-source"
+				},
+				"src/operators.js": {
+					"match": false,
+					"packageHash": "e11e8834f3565547ea2307870b9f91801798d53b84a24b7237afaa2dbc9a92fa",
+					"size": 1321,
+					"status": "missing-in-source"
+				},
+				"src/reanimated2/Colors.js": {
+					"diff": "--- published/src/reanimated2/Colors.js\n+++ rebuilt/src/reanimated2/Colors.js\n@@ -11,7 +11,7 @@\n import { Platform } from 'react-native';\n import { makeRemote, makeShareable, isConfigured } from './core';\n import { interpolate } from './interpolation';\n-import { Extrapolate } from '../derived';\n+import { Extrapolate } from '../reanimated1/derived';\n \n // var INTEGER = '[-+]?\\\\d+';\n const NUMBER = '[-+]?\\\\d*\\\\.?\\\\d+';\n@@ -681,4 +681,4 @@\n   throw new Error(\n     `invalid color space provided: ${colorSpace}. Supported values are: ['RGB', 'HSV']`\n   );\n-};\n\\ No newline at end of file\n+};\n",
+					"match": false,
+					"packageHash": "d9db6cae796895f17768a264035006768f64c2cbd17268888abd2b5dcaebc886",
+					"size": 16041,
+					"sourceHash": "bea0cc94a779ce4b16f913e3b9b49ff95d1a423024e9055954a4b3a9f49617e2",
+					"status": "content"
+				},
+				"src/reanimated2/Easing.js": {
+					"diff": "--- published/src/reanimated2/Easing.js\n+++ rebuilt/src/reanimated2/Easing.js\n@@ -1,5 +1,5 @@\n /* global _WORKLET */\n-import EasingNode from '../Easing';\n+import EasingNode from '../reanimated1/Easing';\n import { Bezier } from './Bezier';\n \n /**\n@@ -257,21 +257,25 @@\n \n function createChecker(worklet, workletName, prevArgs) {\n   function checkIfReaOne() {\n-    'worklet'\n-    if (arguments && (!_WORKLET)) {\n+    'worklet';\n+    if (arguments && !_WORKLET) {\n       for (let i = 0; i < arguments.length; i++) {\n         const arg = arguments[i];\n         if (arg && arg.__nodeID) {\n-          console.warn(`Easing was renamed to EasingNode in Reanimated 2. Please use EasingNode instead`);\n+          console.warn(\n+            `Easing was renamed to EasingNode in Reanimated 2. Please use EasingNode instead`\n+          );\n           if (prevArgs) {\n-            return EasingNode[workletName].apply(undefined, prevArgs).apply(undefined, arguments);\n+            return EasingNode[workletName]\n+              .apply(undefined, prevArgs)\n+              .apply(undefined, arguments);\n           }\n           return EasingNode[workletName].apply(undefined, arguments);\n         }\n       }\n     }\n     const res = worklet.apply(this, arguments);\n-    if ((!_WORKLET) && res && (typeof res === 'function') && res.__worklet) {\n+    if (!_WORKLET && res && typeof res === 'function' && res.__worklet) {\n       return createChecker(res, workletName, arguments);\n     }\n     return res;\n",
+					"match": false,
+					"packageHash": "7b3d0187fe96920fa6e4679002883438f3d91ef406b3eb7ea8c40dd6fa2ebafa",
+					"size": 6811,
+					"sourceHash": "7107dad6a07d6c30402d93eb93ead9e39f2d2110f51b75a840547effd2ae4cc7",
+					"status": "content"
+				},
+				"src/reanimated2/Hooks.js": {
+					"diff": "--- published/src/reanimated2/Hooks.js\n+++ rebuilt/src/reanimated2/Hooks.js\n@@ -493,13 +493,33 @@\n \n   // check for invalid usage of shared values in returned object\n   let wrongKey;\n-  const isError = Object.keys(initial).some((key) => {\n-    const element = initial[key];\n+  const isObjectValid = (element, key) => {\n     const result = typeof element === 'object' && element.value !== undefined;\n     if (result) {\n       wrongKey = key;\n     }\n-    return result;\n+    return !result;\n+  };\n+  const isError = Object.keys(initial).some((key) => {\n+    const element = initial[key];\n+    let result = false;\n+    // a case for transform that has a format of an array of objects\n+    if (Array.isArray(element)) {\n+      for (const elementArrayItem of element) {\n+        // this means unhandled format and it doesn't match the transform format\n+        if (typeof elementArrayItem !== 'object') {\n+          break;\n+        }\n+        const objectValue = Object.values(elementArrayItem)[0];\n+        result = isObjectValid(objectValue, key);\n+        if (!result) {\n+          break;\n+        }\n+      }\n+    } else {\n+      result = isObjectValid(element, key);\n+    }\n+    return !result;\n   });\n   if (isError && wrongKey !== undefined) {\n     throw new Error(\n",
+					"match": false,
+					"packageHash": "537863323fbb4a617e3db1e0a9a483b444ad44290b14f5ea4732f7efb92e1caa",
+					"size": 21569,
+					"sourceHash": "a5eaaea3b8f4e175ce1238115b5401e3c83c87c2c0d5d17d5b0341354e588481",
+					"status": "content"
+				},
+				"src/reanimated2/NativeReanimated.native.js": {
+					"diff": "--- published/src/reanimated2/NativeReanimated.native.js\n+++ rebuilt/src/reanimated2/NativeReanimated.native.js\n@@ -49,4 +49,4 @@\n   );\n }\n \n-export default NativeReanimated;\n\\ No newline at end of file\n+export default NativeReanimated;\n",
+					"match": false,
+					"packageHash": "8b32e2ad9691e15080b86abf659ceb7dc65f59d2026f26d0f7ac0075146bfd78",
+					"size": 1377,
+					"sourceHash": "fc118568144dbe6b7126d2337e8843fed50b68ffbd53381119cbc3338ba4cf3d",
+					"status": "content"
+				},
+				"src/reanimated2/UpdateProps.js": {
+					"diff": "--- published/src/reanimated2/UpdateProps.js\n+++ rebuilt/src/reanimated2/UpdateProps.js\n@@ -74,4 +74,4 @@\n   updateProps(viewDescriptor, updates, maybeViewRef, adapters);\n };\n \n-export default updateProps;\n\\ No newline at end of file\n+export default updateProps;\n",
+					"match": false,
+					"packageHash": "4b4b0ed105b31e0096a0a8d8304788f7cf0d61334d9bcd3f5b1aaaf1cdd51825",
+					"size": 1637,
+					"sourceHash": "c1db1ca42eb122807e60ac91e244bd6fd7f1d1a4928e19e550804f9989be2dfc",
+					"status": "content"
+				},
+				"src/reanimated2/interpolation.js": {
+					"diff": "--- published/src/reanimated2/interpolation.js\n+++ rebuilt/src/reanimated2/interpolation.js\n@@ -1,6 +1,6 @@\n-import interpolateNode,{\n-  Extrapolate\n-} from '../derived/interpolate';\n+import interpolateNode, {\n+  Extrapolate,\n+} from '../reanimated1/derived/interpolate';\n \n function getVal(config) {\n   'worklet';\n@@ -114,7 +114,9 @@\n export function interpolate(x, input, output, type) {\n   'worklet';\n   if (x && x.__nodeID) {\n-    console.warn(`interpolate() was renamed to interpolateNode() in Reanimated 2. Please use interpolateNode() instead`);\n+    console.warn(\n+      `interpolate() was renamed to interpolateNode() in Reanimated 2. Please use interpolateNode() instead`\n+    );\n     return interpolateNode.apply(undefined, arguments);\n   }\n \n",
+					"match": false,
+					"packageHash": "bd81a8594488739cff249e8e5de7cc0b3f55fc5913b6a753b1bd54523a0d1b29",
+					"size": 3960,
+					"sourceHash": "70e7b9cb515f8e30ca26e49a26a8a610f70ee03e215fd59073b864127c20f8cf",
+					"status": "content"
+				},
+				"src/useValue.js": {
+					"match": false,
+					"packageHash": "a9a8db47b5eda50294b3634f69f5f926353b6814f1ae3cd654fb357555a27f06",
+					"size": 270,
+					"status": "missing-in-source"
+				},
+				"src/val.js": {
+					"match": false,
+					"packageHash": "13d7eb8b8042d1393d3786bbc02ef3f9b3539ce236eec98874993ff6f919c108",
+					"size": 81,
+					"status": "missing-in-source"
+				},
+				"android/.classpath": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/.settings/org.eclipse.buildship.core.prefs": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/README.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/gradle.properties": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/settings.gradle": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/AndroidManifest.xml": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/JNI/Android.mk": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/JNI/Application.mk": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/JNI/react/Android.mk": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/cpp/AndroidErrorHandler.cpp": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/cpp/AndroidLogger.cpp": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/cpp/AndroidScheduler.cpp": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/cpp/NativeProxy.cpp": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/cpp/OnLoad.cpp": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/cpp/TurboModule.cpp": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/cpp/headers/AndroidErrorHandler.h": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/cpp/headers/AndroidLogger.h": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/cpp/headers/AndroidScheduler.h": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/cpp/headers/NativeProxy.h": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/cpp/headers/TurboModule.h": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/java/com/facebook/react/uimanager/UIManagerReanimatedHelper.java": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/java/com/swmansion/reanimated/AndroidErrorHandler.java": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/java/com/swmansion/reanimated/CopiedEvent.java": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/java/com/swmansion/reanimated/MapUtils.java": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/java/com/swmansion/reanimated/NativeMethodsHelper.java": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/java/com/swmansion/reanimated/NativeProxy.java": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/java/com/swmansion/reanimated/NodesManager.java": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/java/com/swmansion/reanimated/ReanimatedJSIModulePackage.java": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/java/com/swmansion/reanimated/ReanimatedModule.java": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/java/com/swmansion/reanimated/ReanimatedPackage.java": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/java/com/swmansion/reanimated/Scheduler.java": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/java/com/swmansion/reanimated/UpdateContext.java": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/java/com/swmansion/reanimated/Utils.java": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/java/com/swmansion/reanimated/nodes/AlwaysNode.java": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/java/com/swmansion/reanimated/nodes/BezierNode.java": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/java/com/swmansion/reanimated/nodes/BlockNode.java": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/java/com/swmansion/reanimated/nodes/CallFuncNode.java": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/java/com/swmansion/reanimated/nodes/ClockNode.java": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/java/com/swmansion/reanimated/nodes/ClockOpNode.java": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/java/com/swmansion/reanimated/nodes/ConcatNode.java": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/java/com/swmansion/reanimated/nodes/CondNode.java": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/java/com/swmansion/reanimated/nodes/DebugNode.java": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/java/com/swmansion/reanimated/nodes/EventNode.java": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/java/com/swmansion/reanimated/nodes/FinalNode.java": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/java/com/swmansion/reanimated/nodes/FunctionNode.java": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/java/com/swmansion/reanimated/nodes/JSCallNode.java": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/java/com/swmansion/reanimated/nodes/Node.java": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/java/com/swmansion/reanimated/nodes/NoopNode.java": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/java/com/swmansion/reanimated/nodes/OperatorNode.java": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/java/com/swmansion/reanimated/nodes/ParamNode.java": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/java/com/swmansion/reanimated/nodes/PropsNode.java": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/java/com/swmansion/reanimated/nodes/SetNode.java": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/java/com/swmansion/reanimated/nodes/StyleNode.java": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/java/com/swmansion/reanimated/nodes/TransformNode.java": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/java/com/swmansion/reanimated/nodes/ValueNode.java": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/java/com/swmansion/reanimated/transitions/ChangeTransition.java": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/java/com/swmansion/reanimated/transitions/SaneSidePropagation.java": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/java/com/swmansion/reanimated/transitions/Scale.java": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/java/com/swmansion/reanimated/transitions/TransitionModule.java": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/java/com/swmansion/reanimated/transitions/TransitionUtils.java": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/reanimated1/Easing.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/reanimated1/SpringConfig.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/reanimated1/Transitioning.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/reanimated1/animations/Animation.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/reanimated1/animations/SpringUtils.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/reanimated1/animations/backwardCompatibleAnimWrapper.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/reanimated1/animations/decay.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/reanimated1/animations/spring.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/reanimated1/animations/timing.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/reanimated1/base.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/reanimated1/core/AnimatedAlways.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/reanimated1/core/AnimatedBezier.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/reanimated1/core/AnimatedBlock.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/reanimated1/core/AnimatedCall.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/reanimated1/core/AnimatedCallFunc.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/reanimated1/core/AnimatedClock.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/reanimated1/core/AnimatedClockTest.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/reanimated1/core/AnimatedCode.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/reanimated1/core/AnimatedConcat.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/reanimated1/core/AnimatedCond.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/reanimated1/core/AnimatedDebug.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/reanimated1/core/AnimatedEvent.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/reanimated1/core/AnimatedFunction.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/reanimated1/core/AnimatedNode.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/reanimated1/core/AnimatedOperator.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/reanimated1/core/AnimatedParam.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/reanimated1/core/AnimatedProps.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/reanimated1/core/AnimatedSet.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/reanimated1/core/AnimatedStartClock.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/reanimated1/core/AnimatedStopClock.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/reanimated1/core/AnimatedStyle.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/reanimated1/core/AnimatedTransform.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/reanimated1/core/AnimatedValue.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/reanimated1/core/InternalAnimatedValue.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/reanimated1/core/__mocks__/AnimatedProps.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/reanimated1/core/createEventObjectProxyPolyfill.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/reanimated1/derived/__mocks__/evaluateOnce.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/reanimated1/derived/acc.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/reanimated1/derived/color.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/reanimated1/derived/diff.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/reanimated1/derived/diffClamp.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/reanimated1/derived/evaluateOnce.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/reanimated1/derived/index.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/reanimated1/derived/interpolate.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/reanimated1/derived/interpolateColors.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/reanimated1/derived/onChange.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/reanimated1/derived/useCode.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/reanimated1/index.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/reanimated1/operators.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/reanimated1/useValue.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/reanimated1/val.js": {
+					"match": false,
+					"status": "missing-in-package"
+				}
+			},
+			"summary": {
+				"differentFiles": 26,
+				"matchingFiles": 130,
+				"missingInPackage": 111,
+				"missingInSource": 56,
+				"score": 0.4024767801857585,
+				"totalFiles": 323
+			}
+		}
+	}
+]

@@ -1,0 +1,1551 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-06T21:42:19.752Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:11.7.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "react-native-reanimated@2.0.0-alpha.1",
+			"name": "react-native-reanimated",
+			"version": "2.0.0-alpha.1",
+			"location": "https://registry.npmjs.org/react-native-reanimated/-/react-native-reanimated-2.0.0-alpha.1.tgz",
+			"integrity": "sha512-nNYO+lX0xKfeXKLoGQZtJIAcEt3JV4OD94/oQJZlqBhVUgfCkLFXB9yiPgcVHNp9BHefmdI2lBbJfWmmWVNZQg==",
+			"publishedAt": "2020-05-28T15:41:13.322Z",
+			"publishedWith": {
+				"node": "13.11.0",
+				"npm": "6.13.7"
+			}
+		},
+		"source": {
+			"integrity": null,
+			"location": "git+https://github.com/software-mansion/react-native-reanimated.git",
+			"spec": "github:software-mansion/react-native-reanimated#0e449a20d30028a115eb9e6a51a6a0762f6b514d"
+		},
+		"comparisonHash": "9ef46a5bd31291e57cbab41e2f17c57bd6da0b5b",
+		"diff": {
+			"files": {
+				"Common/cpp/.DS_Store": {
+					"match": false,
+					"packageHash": "aeb641cc0071f164bf730161d02876a1b8f72c8718a7f69b13eaa8d39a8fd35d",
+					"size": 6148,
+					"status": "missing-in-source"
+				},
+				"Common/cpp/NativeModules/NativeReanimatedModule.cpp": {
+					"diff": "--- published/Common/cpp/NativeModules/NativeReanimatedModule.cpp\n+++ rebuilt/Common/cpp/NativeModules/NativeReanimatedModule.cpp\n@@ -53,11 +53,11 @@\n                                                std::function<void(std::function<void(double)>)> requestRender,\n                                                std::function<void(jsi::Runtime&, int, const jsi::Object&)> propUpdater):\n NativeReanimatedModuleSpec(jsInvoker),\n+scheduler(scheduler),\n runtime(std::move(rt)),\n mapperRegistry(new MapperRegistry()),\n eventHandlerRegistry(new EventHandlerRegistry()),\n-requestRender(requestRender),\n-scheduler(scheduler) {\n+requestRender(requestRender) {\n   RuntimeDecorator::addNativeObjects(*runtime, propUpdater, [=](FrameCallback callback) {\n     frameCallbacks.push_back(callback);\n     maybeRequestRender();\n",
+					"match": false,
+					"packageHash": "237a8f39b9a8659a269b489df8113efd9f2ea0c180ec998692f33adccd813d92",
+					"size": 5907,
+					"sourceHash": "48941de6e1b5dd2ff10b84fab161b6b563998063fde543b17a04f8904a242276",
+					"status": "content"
+				},
+				"Common/cpp/headers/.DS_Store": {
+					"match": false,
+					"packageHash": "aa660fa869dd4837e2793f4e3bd6eafe6c5e15d78bc9bc590461949aa540a186",
+					"size": 6148,
+					"status": "missing-in-source"
+				},
+				"android/build.gradle": {
+					"diff": "--- published/android/build.gradle\n+++ rebuilt/android/build.gradle\n@@ -1,2 +1,144 @@\n-configurations.maybeCreate(\"default\")\n-artifacts.add(\"default\", file('react-native-reanimated.aar'))\n\\ No newline at end of file\n+def safeExtGet(prop, fallback) {\n+    rootProject.ext.has(prop) ? rootProject.ext.get(prop) : fallback\n+}\n+\n+buildscript {\n+    if (project == rootProject) {\n+        // The Android Gradle plugin is only required when opening the android folder stand-alone.\n+        // This avoids unnecessary downloads and potential conflicts when the library is included as a\n+        // module dependency in an application project.\n+        repositories {\n+            google()\n+            jcenter()\n+        }\n+        dependencies {\n+            classpath 'com.android.tools.build:gradle:3.5.2'\n+        }\n+    }\n+}\n+\n+apply plugin: 'com.android.library'\n+apply plugin: 'maven'\n+\n+android {\n+    compileSdkVersion safeExtGet('compileSdkVersion', 28)\n+    buildToolsVersion safeExtGet('buildToolsVersion', '28.0.3')\n+    defaultConfig {\n+        minSdkVersion safeExtGet('minSdkVersion', 16)\n+        targetSdkVersion safeExtGet('targetSdkVersion', 28)\n+        versionCode 1\n+        versionName \"1.0\"\n+    }\n+    lintOptions {\n+        abortOnError false\n+    }\n+}\n+\n+repositories {\n+    mavenLocal()\n+    maven {\n+        // All of React Native (JS, Obj-C sources, Android binaries) is installed from npm\n+        url \"$rootDir/../node_modules/react-native/android\"\n+    }\n+    maven {\n+        // Android JSC is installed from npm\n+        url \"$rootDir/../node_modules/jsc-android/dist\"\n+    }\n+    google()\n+    jcenter()\n+}\n+\n+dependencies {\n+    //noinspection GradleDynamicVersion\n+    implementation 'com.facebook.react:react-native:+'  // From node_modules\n+    implementation \"androidx.transition:transition:1.1.0\"\n+}\n+\n+def configureReactNativePom(def pom) {\n+    def packageJson = new groovy.json.JsonSlurper().parseText(file('../package.json').text)\n+\n+    pom.project {\n+        name packageJson.title\n+        artifactId packageJson.name\n+        version = packageJson.version\n+        group = \"com.swmansion.reanimated\"\n+        description packageJson.description\n+        url packageJson.repository.baseUrl\n+\n+        licenses {\n+            license {\n+                name packageJson.license\n+                url packageJson.repository.baseUrl + '/blob/master/' + packageJson.licenseFilename\n+                distribution 'repo'\n+            }\n+        }\n+\n+        developers {\n+            developer {\n+                id packageJson.author.username\n+                name packageJson.author.name\n+            }\n+        }\n+    }\n+}\n+\n+/*task copyCppCodeToReactNative() {\n+    println(\"copy reanimated code\")\n+    copy {\n+        from \"$projectDir/src/main/cpp/\"\n+        from \"$projectDir/src/main/cpp/headers/\"\n+        include '*.cpp'\n+        include '*.h'\n+        into \"$rootDir/../node_modules/react-native/ReactAndroid/src/main/java/com/facebook/react/jscexecutor/\"\n+    }\n+}*/\n",
+					"match": false,
+					"packageHash": "50ef2b6443d427dde8598096eb21635d8b5f59cd3362277c25f46d54b2ddde31",
+					"size": 99,
+					"sourceHash": "801ad7755023bb45c4797176f6d4ac958f9255f0c495ef7d1b3a420994101014",
+					"status": "content"
+				},
+				"android/react-native-reanimated.aar": {
+					"match": false,
+					"packageHash": "4669a3e70912fb263893763f8bcfc7f62ae61a463873671ade6d0c5356feb6ce",
+					"size": 543242,
+					"status": "missing-in-source"
+				},
+				"android/src/AndroidManifest.xml": {
+					"match": false,
+					"packageHash": "68902200815dce42ae8ffd769b41ebd4ef6ac2443655b188118c23cbcefeaec1",
+					"size": 129,
+					"status": "missing-in-source"
+				},
+				"android/src/main/java/com/swmansion/reanimated/ReanimatedProxyPackage.java": {
+					"match": false,
+					"packageHash": "9f559e9546b11a9fb672ba81a0d3154eb9133983e10900fb4597d1734a66d7af",
+					"size": 409,
+					"status": "missing-in-source"
+				},
+				"ios/RNReanimated.xcodeproj/project.xcworkspace/contents.xcworkspacedata": {
+					"match": false,
+					"packageHash": "7f3b00b5c3fdb45242d7b87e1e5c4e25d1fa8129a16c94295ecc4e8ea2235c5f",
+					"size": 135,
+					"status": "missing-in-source"
+				},
+				"ios/RNReanimated.xcodeproj/project.xcworkspace/xcshareddata/IDEWorkspaceChecks.plist": {
+					"match": false,
+					"packageHash": "dfa0f9bb85b95ccba9c6811adadf8cb407fb5d52088e89db83ebc308ec448542",
+					"size": 238,
+					"status": "missing-in-source"
+				},
+				"ios/RNReanimated.xcodeproj/project.xcworkspace/xcuserdata/mdk.xcuserdatad/UserInterfaceState.xcuserstate": {
+					"match": false,
+					"packageHash": "0e7f7ad18c902e1d3e9aa21ddf800859788bbf445e30290c13fe0092430cea84",
+					"size": 8481,
+					"status": "missing-in-source"
+				},
+				"ios/RNReanimated.xcodeproj/xcuserdata/mdk.xcuserdatad/xcschemes/xcschememanagement.plist": {
+					"match": false,
+					"packageHash": "33f6c9bd01a56d6a72b68c8fd472b72731d65d80b441ae2de45c90534028aa38",
+					"size": 568,
+					"status": "missing-in-source"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -8,7 +8,8 @@\n     \"test:unit\": \"jest\",\n     \"format\": \"prettier --write --list-different './src/**/*.js'\",\n     \"lint\": \"eslint './src/**/*.js'\",\n-    \"release\": \"npm login && release-it\"\n+    \"release\": \"npm login && release-it\",\n+    \"prepare\": \"bob build\"\n   },\n   \"main\": \"lib/commonjs/Animated\",\n   \"module\": \"lib/module/Animated\",\n",
+					"match": false,
+					"packageHash": "f4520f3a4950f50ff1b8b7caea08f124e654f3e5249f3e36dc4afa24bb7fbf7c",
+					"size": 2996,
+					"sourceHash": "e9980f947e13ce198f05668ea5ab3c5a59a97b72b2289e4faae03d58ce3d7667",
+					"status": "content"
+				},
+				"src/derived/index.js": {
+					"diff": "--- published/src/derived/index.js\n+++ rebuilt/src/derived/index.js\n@@ -4,5 +4,7 @@\n export { default as diffClamp } from './diffClamp';\n export { default as interpolateNode, Extrapolate } from './interpolate';\n export { default as interpolateColors } from './interpolateColors';\n+export { default as max } from './max';\n+export { default as min } from './min';\n export { default as onChange } from './onChange';\n export { default as useCode } from './useCode';\n",
+					"match": false,
+					"packageHash": "ac58f6588119fafb6663ed703931ed0eb7fd6f820764daf91b72450e17f9b339",
+					"size": 417,
+					"sourceHash": "8e38704f57dbfc67716953d88df692e05a32272c7d22f2f290d267f3a521718e",
+					"status": "content"
+				},
+				"android/.classpath": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/.settings/org.eclipse.buildship.core.prefs": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/Android.mk": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/README.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/gradle.properties": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/settings.gradle": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/AndroidManifest.xml": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/cpp/AndroidLogger.cpp": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/cpp/AndroidScheduler.cpp": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/cpp/NativeProxy.cpp": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/cpp/OnLoad.cpp": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/cpp/TurboModule.cpp": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/cpp/headers/AndroidErrorHandler.h": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/cpp/headers/AndroidLogger.h": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/cpp/headers/AndroidScheduler.h": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/cpp/headers/NativeProxy.h": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/cpp/headers/TurboModule.h": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/java/com/facebook/react/uimanager/UIManagerReanimatedHelper.java": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/java/com/swmansion/reanimated/MapUtils.java": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/java/com/swmansion/reanimated/NativeProxy.java": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/java/com/swmansion/reanimated/NodesManager.java": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/java/com/swmansion/reanimated/ReanimatedJSIModulePackage.java": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/java/com/swmansion/reanimated/ReanimatedModule.java": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/java/com/swmansion/reanimated/ReanimatedPackage.java": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/java/com/swmansion/reanimated/Scheduler.java": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/java/com/swmansion/reanimated/UpdateContext.java": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/java/com/swmansion/reanimated/Utils.java": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/java/com/swmansion/reanimated/nodes/AlwaysNode.java": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/java/com/swmansion/reanimated/nodes/BezierNode.java": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/java/com/swmansion/reanimated/nodes/BlockNode.java": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/java/com/swmansion/reanimated/nodes/CallFuncNode.java": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/java/com/swmansion/reanimated/nodes/ClockNode.java": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/java/com/swmansion/reanimated/nodes/ClockOpNode.java": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/java/com/swmansion/reanimated/nodes/ConcatNode.java": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/java/com/swmansion/reanimated/nodes/CondNode.java": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/java/com/swmansion/reanimated/nodes/DebugNode.java": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/java/com/swmansion/reanimated/nodes/EventNode.java": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/java/com/swmansion/reanimated/nodes/FinalNode.java": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/java/com/swmansion/reanimated/nodes/FunctionNode.java": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/java/com/swmansion/reanimated/nodes/JSCallNode.java": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/java/com/swmansion/reanimated/nodes/Node.java": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/java/com/swmansion/reanimated/nodes/NoopNode.java": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/java/com/swmansion/reanimated/nodes/OperatorNode.java": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/java/com/swmansion/reanimated/nodes/ParamNode.java": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/java/com/swmansion/reanimated/nodes/PropsNode.java": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/java/com/swmansion/reanimated/nodes/SetNode.java": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/java/com/swmansion/reanimated/nodes/StyleNode.java": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/java/com/swmansion/reanimated/nodes/TransformNode.java": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/java/com/swmansion/reanimated/nodes/ValueNode.java": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/java/com/swmansion/reanimated/transitions/ChangeTransition.java": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/java/com/swmansion/reanimated/transitions/SaneSidePropagation.java": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/java/com/swmansion/reanimated/transitions/Scale.java": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/java/com/swmansion/reanimated/transitions/TransitionModule.java": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/java/com/swmansion/reanimated/transitions/TransitionUtils.java": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/commonjs/Animated.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/commonjs/Animated.js.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/commonjs/Animated.test.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/commonjs/Animated.test.js.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/commonjs/ConfigHelper.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/commonjs/ConfigHelper.js.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/commonjs/Easing.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/commonjs/Easing.js.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/commonjs/ReanimatedEventEmitter.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/commonjs/ReanimatedEventEmitter.js.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/commonjs/ReanimatedModule.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/commonjs/ReanimatedModule.js.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/commonjs/ReanimatedModule.native.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/commonjs/ReanimatedModule.native.js.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/commonjs/SpringConfig.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/commonjs/SpringConfig.js.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/commonjs/Transitioning.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/commonjs/Transitioning.js.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/commonjs/__mocks__/ReanimatedEventEmitter.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/commonjs/__mocks__/ReanimatedEventEmitter.js.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/commonjs/__mocks__/ReanimatedModule.native.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/commonjs/__mocks__/ReanimatedModule.native.js.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/commonjs/animations/Animation.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/commonjs/animations/Animation.js.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/commonjs/animations/DecayAnimation.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/commonjs/animations/DecayAnimation.js.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/commonjs/animations/SpringAnimation.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/commonjs/animations/SpringAnimation.js.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/commonjs/animations/SpringUtils.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/commonjs/animations/SpringUtils.js.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/commonjs/animations/TimingAnimation.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/commonjs/animations/TimingAnimation.js.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/commonjs/animations/backwardCompatibleAnimWrapper.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/commonjs/animations/backwardCompatibleAnimWrapper.js.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/commonjs/animations/decay.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/commonjs/animations/decay.js.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/commonjs/animations/spring.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/commonjs/animations/spring.js.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/commonjs/animations/timing.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/commonjs/animations/timing.js.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/commonjs/base.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/commonjs/base.js.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/commonjs/core/AnimatedAlways.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/commonjs/core/AnimatedAlways.js.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/commonjs/core/AnimatedBezier.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/commonjs/core/AnimatedBezier.js.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/commonjs/core/AnimatedBlock.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/commonjs/core/AnimatedBlock.js.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/commonjs/core/AnimatedCall.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/commonjs/core/AnimatedCall.js.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/commonjs/core/AnimatedCallFunc.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/commonjs/core/AnimatedCallFunc.js.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/commonjs/core/AnimatedClock.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/commonjs/core/AnimatedClock.js.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/commonjs/core/AnimatedClockTest.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/commonjs/core/AnimatedClockTest.js.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/commonjs/core/AnimatedCode.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/commonjs/core/AnimatedCode.js.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/commonjs/core/AnimatedConcat.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/commonjs/core/AnimatedConcat.js.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/commonjs/core/AnimatedCond.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/commonjs/core/AnimatedCond.js.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/commonjs/core/AnimatedDebug.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/commonjs/core/AnimatedDebug.js.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/commonjs/core/AnimatedEvent.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/commonjs/core/AnimatedEvent.js.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/commonjs/core/AnimatedFunction.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/commonjs/core/AnimatedFunction.js.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/commonjs/core/AnimatedNode.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/commonjs/core/AnimatedNode.js.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/commonjs/core/AnimatedOperator.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/commonjs/core/AnimatedOperator.js.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/commonjs/core/AnimatedParam.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/commonjs/core/AnimatedParam.js.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/commonjs/core/AnimatedProps.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/commonjs/core/AnimatedProps.js.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/commonjs/core/AnimatedSet.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/commonjs/core/AnimatedSet.js.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/commonjs/core/AnimatedStartClock.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/commonjs/core/AnimatedStartClock.js.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/commonjs/core/AnimatedStopClock.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/commonjs/core/AnimatedStopClock.js.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/commonjs/core/AnimatedStyle.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/commonjs/core/AnimatedStyle.js.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/commonjs/core/AnimatedTransform.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/commonjs/core/AnimatedTransform.js.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/commonjs/core/AnimatedValue.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/commonjs/core/AnimatedValue.js.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/commonjs/core/Core.test.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/commonjs/core/Core.test.js.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/commonjs/core/InternalAnimatedValue.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/commonjs/core/InternalAnimatedValue.js.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/commonjs/core/__mocks__/AnimatedProps.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/commonjs/core/__mocks__/AnimatedProps.js.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/commonjs/core/createEventObjectProxyPolyfill.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/commonjs/core/createEventObjectProxyPolyfill.js.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/commonjs/createAnimatedComponent.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/commonjs/createAnimatedComponent.js.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/commonjs/derived/__mocks__/evaluateOnce.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/commonjs/derived/__mocks__/evaluateOnce.js.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/commonjs/derived/__snapshots__/interpolate.test.js.snap": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/commonjs/derived/acc.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/commonjs/derived/acc.js.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/commonjs/derived/color.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/commonjs/derived/color.js.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/commonjs/derived/diff.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/commonjs/derived/diff.js.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/commonjs/derived/diffClamp.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/commonjs/derived/diffClamp.js.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/commonjs/derived/evaluateOnce.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/commonjs/derived/evaluateOnce.js.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/commonjs/derived/index.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/commonjs/derived/index.js.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/commonjs/derived/interpolate.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/commonjs/derived/interpolate.js.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/commonjs/derived/interpolate.test.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/commonjs/derived/interpolate.test.js.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/commonjs/derived/interpolateColors.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/commonjs/derived/interpolateColors.js.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/commonjs/derived/onChange.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/commonjs/derived/onChange.js.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/commonjs/derived/useCode.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/commonjs/derived/useCode.js.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/commonjs/operators.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/commonjs/operators.js.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/commonjs/reanimated2/Bezier.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/commonjs/reanimated2/Bezier.js.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/commonjs/reanimated2/Colors.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/commonjs/reanimated2/Colors.js.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/commonjs/reanimated2/Easing.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/commonjs/reanimated2/Easing.js.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/commonjs/reanimated2/Hooks.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/commonjs/reanimated2/Hooks.js.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/commonjs/reanimated2/NativeReanimated.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/commonjs/reanimated2/NativeReanimated.js.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/commonjs/reanimated2/UpdateProps.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/commonjs/reanimated2/UpdateProps.js.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/commonjs/reanimated2/WorkletEventHandler.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/commonjs/reanimated2/WorkletEventHandler.js.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/commonjs/reanimated2/animations.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/commonjs/reanimated2/animations.js.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/commonjs/reanimated2/core.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/commonjs/reanimated2/core.js.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/commonjs/reanimated2/index.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/commonjs/reanimated2/index.js.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/commonjs/reanimated2/interpolation.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/commonjs/reanimated2/interpolation.js.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/commonjs/useValue.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/commonjs/useValue.js.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/commonjs/val.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/commonjs/val.js.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/module/Animated.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/module/Animated.js.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/module/Animated.test.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/module/Animated.test.js.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/module/ConfigHelper.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/module/ConfigHelper.js.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/module/Easing.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/module/Easing.js.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/module/ReanimatedEventEmitter.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/module/ReanimatedEventEmitter.js.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/module/ReanimatedModule.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/module/ReanimatedModule.js.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/module/ReanimatedModule.native.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/module/ReanimatedModule.native.js.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/module/SpringConfig.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/module/SpringConfig.js.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/module/Transitioning.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/module/Transitioning.js.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/module/__mocks__/ReanimatedEventEmitter.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/module/__mocks__/ReanimatedEventEmitter.js.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/module/__mocks__/ReanimatedModule.native.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/module/__mocks__/ReanimatedModule.native.js.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/module/animations/Animation.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/module/animations/Animation.js.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/module/animations/DecayAnimation.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/module/animations/DecayAnimation.js.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/module/animations/SpringAnimation.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/module/animations/SpringAnimation.js.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/module/animations/SpringUtils.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/module/animations/SpringUtils.js.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/module/animations/TimingAnimation.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/module/animations/TimingAnimation.js.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/module/animations/backwardCompatibleAnimWrapper.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/module/animations/backwardCompatibleAnimWrapper.js.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/module/animations/decay.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/module/animations/decay.js.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/module/animations/spring.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/module/animations/spring.js.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/module/animations/timing.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/module/animations/timing.js.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/module/base.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/module/base.js.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/module/core/AnimatedAlways.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/module/core/AnimatedAlways.js.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/module/core/AnimatedBezier.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/module/core/AnimatedBezier.js.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/module/core/AnimatedBlock.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/module/core/AnimatedBlock.js.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/module/core/AnimatedCall.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/module/core/AnimatedCall.js.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/module/core/AnimatedCallFunc.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/module/core/AnimatedCallFunc.js.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/module/core/AnimatedClock.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/module/core/AnimatedClock.js.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/module/core/AnimatedClockTest.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/module/core/AnimatedClockTest.js.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/module/core/AnimatedCode.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/module/core/AnimatedCode.js.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/module/core/AnimatedConcat.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/module/core/AnimatedConcat.js.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/module/core/AnimatedCond.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/module/core/AnimatedCond.js.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/module/core/AnimatedDebug.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/module/core/AnimatedDebug.js.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/module/core/AnimatedEvent.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/module/core/AnimatedEvent.js.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/module/core/AnimatedFunction.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/module/core/AnimatedFunction.js.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/module/core/AnimatedNode.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/module/core/AnimatedNode.js.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/module/core/AnimatedOperator.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/module/core/AnimatedOperator.js.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/module/core/AnimatedParam.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/module/core/AnimatedParam.js.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/module/core/AnimatedProps.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/module/core/AnimatedProps.js.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/module/core/AnimatedSet.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/module/core/AnimatedSet.js.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/module/core/AnimatedStartClock.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/module/core/AnimatedStartClock.js.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/module/core/AnimatedStopClock.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/module/core/AnimatedStopClock.js.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/module/core/AnimatedStyle.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/module/core/AnimatedStyle.js.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/module/core/AnimatedTransform.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/module/core/AnimatedTransform.js.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/module/core/AnimatedValue.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/module/core/AnimatedValue.js.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/module/core/Core.test.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/module/core/Core.test.js.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/module/core/InternalAnimatedValue.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/module/core/InternalAnimatedValue.js.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/module/core/__mocks__/AnimatedProps.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/module/core/__mocks__/AnimatedProps.js.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/module/core/createEventObjectProxyPolyfill.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/module/core/createEventObjectProxyPolyfill.js.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/module/createAnimatedComponent.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/module/createAnimatedComponent.js.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/module/derived/__mocks__/evaluateOnce.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/module/derived/__mocks__/evaluateOnce.js.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/module/derived/__snapshots__/interpolate.test.js.snap": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/module/derived/acc.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/module/derived/acc.js.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/module/derived/color.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/module/derived/color.js.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/module/derived/diff.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/module/derived/diff.js.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/module/derived/diffClamp.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/module/derived/diffClamp.js.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/module/derived/evaluateOnce.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/module/derived/evaluateOnce.js.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/module/derived/index.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/module/derived/index.js.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/module/derived/interpolate.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/module/derived/interpolate.js.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/module/derived/interpolate.test.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/module/derived/interpolate.test.js.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/module/derived/interpolateColors.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/module/derived/interpolateColors.js.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/module/derived/onChange.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/module/derived/onChange.js.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/module/derived/useCode.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/module/derived/useCode.js.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/module/operators.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/module/operators.js.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/module/reanimated2/Bezier.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/module/reanimated2/Bezier.js.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/module/reanimated2/Colors.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/module/reanimated2/Colors.js.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/module/reanimated2/Easing.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/module/reanimated2/Easing.js.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/module/reanimated2/Hooks.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/module/reanimated2/Hooks.js.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/module/reanimated2/NativeReanimated.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/module/reanimated2/NativeReanimated.js.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/module/reanimated2/UpdateProps.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/module/reanimated2/UpdateProps.js.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/module/reanimated2/WorkletEventHandler.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/module/reanimated2/WorkletEventHandler.js.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/module/reanimated2/animations.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/module/reanimated2/animations.js.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/module/reanimated2/core.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/module/reanimated2/core.js.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/module/reanimated2/index.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/module/reanimated2/index.js.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/module/reanimated2/interpolation.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/module/reanimated2/interpolation.js.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/module/useValue.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/module/useValue.js.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/module/val.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/module/val.js.map": {
+					"match": false,
+					"status": "missing-in-package"
+				}
+			},
+			"summary": {
+				"differentFiles": 4,
+				"matchingFiles": 169,
+				"missingInPackage": 356,
+				"missingInSource": 9,
+				"score": 0.3141263940520446,
+				"totalFiles": 538
+			}
+		}
+	}
+]

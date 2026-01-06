@@ -1,0 +1,333 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-06T21:53:13.095Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:11.7.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "react-native-reanimated@2.0.0",
+			"name": "react-native-reanimated",
+			"version": "2.0.0",
+			"location": "https://registry.npmjs.org/react-native-reanimated/-/react-native-reanimated-2.0.0.tgz",
+			"integrity": "sha512-kIrdBoXSky7DQ62SOgosgimKM+Lt+SzAaM+ovVpCLBcwUK2aYRfLxa9ffgvKjeH9/n7dONlwEMjbKssGkuyq2Q==",
+			"publishedAt": "2021-03-04T15:54:28.240Z",
+			"publishedWith": {
+				"node": "15.3.0",
+				"npm": "7.0.14"
+			}
+		},
+		"source": {
+			"integrity": "sha512-4x2YW5p28mlnt4ZwzuAeLYAz2+zE8N/P3qAm1Dumdpg5AmXJMYdLiW3XSjp1TFGUxnmOENjrw4r246VoQtY9Tg==",
+			"location": "git+https://github.com/software-mansion/react-native-reanimated.git",
+			"spec": "github:software-mansion/react-native-reanimated#2.0.0"
+		},
+		"comparisonHash": "9ef46a5bd31291e57cbab41e2f17c57bd6da0b5b",
+		"diff": {
+			"files": {
+				"android/build.gradle": {
+					"diff": "--- published/android/build.gradle\n+++ rebuilt/android/build.gradle\n@@ -1,9 +1,470 @@\n-import groovy.json.JsonSlurper;\n-configurations.maybeCreate(\"default\")\n+def localProps = new Properties()\n+def localPropertiesFile = file(\"local.properties\")\n+if (localPropertiesFile.exists()) {\n+    localProps.load(new InputStreamReader(new FileInputStream(localPropertiesFile), \"UTF-8\"))\n+}\n+def debugNativeLibraries = localProps.getProperty('NATIVE_DEBUG_ON', 'FALSE').toBoolean()\n \n-def inputFile = new File(projectDir, '../../react-native/package.json')\n-def json = new JsonSlurper().parseText(inputFile.text)\n-def reactNativeVersion = json.version as String\n-def (major, minor, patch) = reactNativeVersion.tokenize('.')\n+buildscript {\n+    repositories {\n+        jcenter()\n+        google()\n+        maven {\n+            url \"https://plugins.gradle.org/m2/\"\n+        }\n+    }\n+    dependencies {\n+        classpath('com.android.tools.build:gradle:4.1.2')\n+        classpath(\"de.undercouch:gradle-download-task:4.0.4\")\n+    }\n+}\n+\n+\n+def safeExtGet(prop, fallback) {\n+    rootProject.ext.has(prop) ? rootProject.ext.get(prop) : fallback\n+}\n+\n+apply plugin: 'com.android.library'\n+apply plugin: 'maven'\n+apply plugin: 'de.undercouch.download'\n+\n+android {\n+    compileSdkVersion safeExtGet('compileSdkVersion', 29)\n+    buildToolsVersion safeExtGet('buildToolsVersion', '29.0.2')\n+    defaultConfig {\n+\n+        minSdkVersion safeExtGet('minSdkVersion', 16)\n+        targetSdkVersion safeExtGet('targetSdkVersion', 29)\n+        versionCode 1\n+        versionName \"1.0\"\n+        ndk {\n+            moduleName(\"reanimated\")\n+        }\n+        buildConfigField(\"boolean\", \"IS_INTERNAL_BUILD\", \"false\")\n+        buildConfigField(\"int\", \"EXOPACKAGE_FLAGS\", \"0\")\n+    }\n+    lintOptions {\n+        abortOnError false\n+    }\n+\n+    packagingOptions {\n+        println \"Native libs debug enabled: ${debugNativeLibraries}\"\n+        doNotStrip debugNativeLibraries ? \"**/**/*.so\" : ''\n+    }\n+\n+    tasks.withType(JavaCompile) {\n+        compileTask ->\n+            compileTask.dependsOn(packageNdkLibs)\n+    }\n+\n+    configurations {\n+        extractHeaders\n+        extractJNI\n+    }\n+}\n+\n+import java.nio.file.Paths\n+\n+import de.undercouch.gradle.tasks.download.Download\n+import org.apache.tools.ant.taskdefs.condition.Os\n+import org.apache.tools.ant.filters.ReplaceTokens\n+\n+def reactProperties = new Properties()\n+file(\"$projectDir/../node_modules/react-native/ReactAndroid/gradle.properties\").withInputStream { reactProperties.load(it) }\n+\n+def BOOST_VERSION = reactProperties.getProperty(\"BOOST_VERSION\")\n+def DOUBLE_CONVERSION_VERSION = reactProperties.getProperty(\"DOUBLE_CONVERSION_VERSION\")\n+def FOLLY_VERSION = reactProperties.getProperty(\"FOLLY_VERSION\")\n+def GLOG_VERSION = reactProperties.getProperty(\"GLOG_VERSION\")\n+def REACT_VERSION = reactProperties.getProperty(\"VERSION_NAME\").split(\"\\\\.\")[1].toInteger()\n+\n+// We download various C++ open-source dependencies into downloads.\n+// We then copy both the downloaded code and our custom makefiles and headers into third-party-ndk.\n+// After that we build native code from src/main/jni with module path pointing at third-party-ndk.\n+\n+def downloadsDir = new File(\"$buildDir/downloads\")\n+def thirdPartyNdkDir = new File(\"$buildDir/third-party-ndk\")\n+\n+def reactNative = new File(\"$projectDir/../node_modules/react-native\")\n+def reactNativeThirdParty = new File(\"$reactNative/ReactAndroid/src/main/jni/third-party\")\n+\n+// You need to have following folders in this directory:\n",
+					"match": false,
+					"packageHash": "8e870d51c4e452080c7b382940072fe91cf33c20de8791248ac733dd9d96ed73",
+					"size": 378,
+					"sourceHash": "80fff23d69ad3646d68e101cb4d18c98d5a557f5069f3ed41eac07a4fba09145",
+					"status": "content"
+				},
+				"android/react-native-reanimated-62.aar": {
+					"match": false,
+					"packageHash": "0c7998cc80ca315968a238292efdce6a89f9098134203808b2a82d43ef989908",
+					"size": 815009,
+					"status": "missing-in-source"
+				},
+				"android/react-native-reanimated-63.aar": {
+					"match": false,
+					"packageHash": "b2986cdc8829daa4ae682b1f99f36c2ca12162b7fa8c690a193f47d60aec4853",
+					"size": 821091,
+					"status": "missing-in-source"
+				},
+				"android/react-native-reanimated-64.aar": {
+					"match": false,
+					"packageHash": "e18764232d462171dbb8d59fe633068f26ab27518aacb6f7a0dbf48592bfaa04",
+					"size": 826579,
+					"status": "missing-in-source"
+				},
+				"android/react-native-reanimated.aar": {
+					"match": false,
+					"packageHash": "366bbb3424d64a2544a47b2f98b9c1349a3cb10311291ff8ab4065c7f4210024",
+					"size": 661444,
+					"status": "missing-in-source"
+				},
+				"android/src/AndroidManifest.xml": {
+					"match": false,
+					"packageHash": "68902200815dce42ae8ffd769b41ebd4ef6ac2443655b188118c23cbcefeaec1",
+					"size": 129,
+					"status": "missing-in-source"
+				},
+				"android/src/main/java/com/swmansion/reanimated/ReanimatedProxyPackage.java": {
+					"match": false,
+					"packageHash": "9f559e9546b11a9fb672ba81a0d3154eb9133983e10900fb4597d1734a66d7af",
+					"size": 409,
+					"status": "missing-in-source"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -94,7 +94,7 @@\n     \"lint-staged\": \"^10.2.11\",\n     \"prettier\": \"^2.2.1\",\n     \"react\": \"17.0.1\",\n-    \"react-native\": \"^0.63.4\",\n+    \"react-native\": \"0.64.0-rc.2\",\n     \"react-native-gesture-handler\": \"^1.6.1\",\n     \"react-test-renderer\": \"17.0.1\",\n     \"release-it\": \"^13.1.1\",\n",
+					"match": false,
+					"packageHash": "c3a38489c08ebfeaef90a77c01cb6299436746b5746ea9851084091b5dc27bf3",
+					"size": 3907,
+					"sourceHash": "8f84033a9d3a2133f114e06316b4c8dcafeabffbab6a1e663b121009175d2d6b",
+					"status": "content"
+				},
+				"android/.classpath": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/.settings/org.eclipse.buildship.core.prefs": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/README.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/gradle.properties": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/settings.gradle": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/AndroidManifest.xml": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/JNI/Android.mk": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/JNI/Application.mk": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/JNI/react/Android.mk": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/cpp/AndroidErrorHandler.cpp": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/cpp/AndroidLogger.cpp": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/cpp/AndroidScheduler.cpp": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/cpp/NativeProxy.cpp": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/cpp/OnLoad.cpp": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/cpp/TurboModule.cpp": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/cpp/headers/AndroidErrorHandler.h": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/cpp/headers/AndroidLogger.h": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/cpp/headers/AndroidScheduler.h": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/cpp/headers/NativeProxy.h": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/cpp/headers/TurboModule.h": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/java/com/facebook/react/uimanager/UIManagerReanimatedHelper.java": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/java/com/swmansion/reanimated/AndroidErrorHandler.java": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/java/com/swmansion/reanimated/CopiedEvent.java": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/java/com/swmansion/reanimated/MapUtils.java": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/java/com/swmansion/reanimated/NativeMethodsHelper.java": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/java/com/swmansion/reanimated/NativeProxy.java": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/java/com/swmansion/reanimated/NodesManager.java": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/java/com/swmansion/reanimated/ReanimatedJSIModulePackage.java": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/java/com/swmansion/reanimated/ReanimatedModule.java": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/java/com/swmansion/reanimated/ReanimatedPackage.java": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/java/com/swmansion/reanimated/Scheduler.java": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/java/com/swmansion/reanimated/UpdateContext.java": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/java/com/swmansion/reanimated/Utils.java": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/java/com/swmansion/reanimated/nodes/AlwaysNode.java": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/java/com/swmansion/reanimated/nodes/BezierNode.java": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/java/com/swmansion/reanimated/nodes/BlockNode.java": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/java/com/swmansion/reanimated/nodes/CallFuncNode.java": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/java/com/swmansion/reanimated/nodes/ClockNode.java": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/java/com/swmansion/reanimated/nodes/ClockOpNode.java": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/java/com/swmansion/reanimated/nodes/ConcatNode.java": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/java/com/swmansion/reanimated/nodes/CondNode.java": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/java/com/swmansion/reanimated/nodes/DebugNode.java": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/java/com/swmansion/reanimated/nodes/EventNode.java": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/java/com/swmansion/reanimated/nodes/FinalNode.java": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/java/com/swmansion/reanimated/nodes/FunctionNode.java": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/java/com/swmansion/reanimated/nodes/JSCallNode.java": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/java/com/swmansion/reanimated/nodes/Node.java": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/java/com/swmansion/reanimated/nodes/NoopNode.java": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/java/com/swmansion/reanimated/nodes/OperatorNode.java": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/java/com/swmansion/reanimated/nodes/ParamNode.java": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/java/com/swmansion/reanimated/nodes/PropsNode.java": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/java/com/swmansion/reanimated/nodes/SetNode.java": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/java/com/swmansion/reanimated/nodes/StyleNode.java": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/java/com/swmansion/reanimated/nodes/TransformNode.java": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/java/com/swmansion/reanimated/nodes/ValueNode.java": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/java/com/swmansion/reanimated/transitions/ChangeTransition.java": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/java/com/swmansion/reanimated/transitions/SaneSidePropagation.java": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/java/com/swmansion/reanimated/transitions/Scale.java": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/java/com/swmansion/reanimated/transitions/TransitionModule.java": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"android/src/main/java/com/swmansion/reanimated/transitions/TransitionUtils.java": {
+					"match": false,
+					"status": "missing-in-package"
+				}
+			},
+			"summary": {
+				"differentFiles": 2,
+				"matchingFiles": 204,
+				"missingInPackage": 60,
+				"missingInSource": 6,
+				"score": 0.75,
+				"totalFiles": 272
+			}
+		}
+	}
+]
