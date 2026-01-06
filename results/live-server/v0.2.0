@@ -1,0 +1,63 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-06T16:15:09.939Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:11.7.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "live-server@0.2.0",
+			"name": "live-server",
+			"version": "0.2.0",
+			"location": "https://registry.npmjs.org/live-server/-/live-server-0.2.0.tgz",
+			"integrity": "sha512-RHlAvFMvtmp/kZqH56n99Z9xtzJ80Pz2+q5mnEGoo4gd2cVQoKw9dpiFdWTayVGVekBB3Cm8WkCWvLwKL/8DJg==",
+			"publishedAt": "2012-12-14T15:17:20.532Z",
+			"publishedWith": {
+				"node": null,
+				"npm": "1.1.65"
+			}
+		},
+		"source": {
+			"integrity": "sha512-XFpG+dp1xYcEMkExcn7qQXkya/eAgBNC8hGqPD8B8aFoVdu3VWt3iy9cOv7Bw5yk7vjacD6xNXk1Z88/+GZxQw==",
+			"location": "https://github.com/tapio/live-server.git",
+			"spec": "github:tapio/live-server#0.2.0"
+		},
+		"comparisonHash": "9ef46a5bd31291e57cbab41e2f17c57bd6da0b5b",
+		"diff": {
+			"files": {
+				".npmignore": {
+					"match": false,
+					"packageHash": "16d30e4462189fb14dd611bdb708c510630c576a1f35b9383e89a4352da36c97",
+					"size": 13,
+					"status": "missing-in-source"
+				},
+				"live-server.js": {
+					"diff": "--- published/live-server.js\n+++ rebuilt/live-server.js\n@@ -18,11 +18,11 @@\n \t\t.replace(/</g, '&lt;')\n \t\t.replace(/>/g, '&gt;')\n \t\t.replace(/\"/g, '&quot;');\n-};\n+}\n \n // Based on connect.static(), but streamlined and with added code injecter\n-function static(root) {\n-\treturn function static(req, res, next) {\n+function staticServer(root) {\n+\treturn function(req, res, next) {\n \t\tif ('GET' != req.method && 'HEAD' != req.method) return next();\n \t\tvar reqpath = url.parse(req.url).pathname;\n \n@@ -40,7 +40,7 @@\n \n \t\tfunction inject(stream) {\n \t\t\tvar x = path.extname(reqpath);\n-\t\t\tif (x == \"\" || x == \".html\" || x == \".htm\" || x == \".xhtml\" || x == \".php\") {\n+\t\t\tif (x === \"\" || x == \".html\" || x == \".htm\" || x == \".xhtml\" || x == \".php\") {\n \t\t\t\t// We need to modify the length given to browser\n \t\t\t\tvar len = INJECTED_CODE.length + res.getHeader('Content-Length');\n \t\t\t\tres.setHeader('Content-Length', len);\n@@ -56,20 +56,20 @@\n \t\t\t.on('directory', directory)\n \t\t\t.pipe(res);\n \t};\n-};\n+}\n \n function start(port, directory) {\n \tport = port || 8080;\n \tdirectory = directory || process.cwd();\n \t// Setup a web server\n \tvar app = connect()\n-\t\t.use(static(directory)) // Custom static server\n+\t\t.use(staticServer(directory)) // Custom static server\n \t\t.use(connect.logger('dev'));\n \tvar server = http.createServer(app).listen(port);\n \t// WebSocket\n \tserver.addListener('upgrade', function(request, socket, head) {\n \t\tws = new WebSocket(request, socket, head);\n-\t\tws.onopen = function() { ws.send('connected'); }\n+\t\tws.onopen = function() { ws.send('connected'); };\n \t});\n \t// Setup file watcher\n \twatchr.watch({\n",
+					"match": false,
+					"packageHash": "e7de0b9c5772b706d4571b2fcc9b63d20957f5352f2b0bc87dcfb89aec3f76a3",
+					"size": 2529,
+					"sourceHash": "3c2076e9b1a80cae861e0b32914b1d965365970b3716466e6bf1be84f62cf913",
+					"status": "content"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -19,6 +19,9 @@\n \t\t\"watchr\": \"2.x.x\",\n \t\t\"faye-websocket\": \"0.4.x\"\n \t},\n+\t\"scripts\": {\n+\t\t\"test\": \"jshint *.js\"\n+\t},\n \t\"bin\": {\n \t\t\"live-server\": \"./live-server.js\"\n \t},\n",
+					"match": false,
+					"packageHash": "ac232ea0e765151e0afadf5bd81de946e174a3a3b8496a1acc95c59f8664c732",
+					"size": 621,
+					"sourceHash": "354036a5e1e5702c2ca7118b1467478c0fe8a51188ee217405569d2f135b3d66",
+					"status": "content"
+				}
+			},
+			"summary": {
+				"differentFiles": 2,
+				"matchingFiles": 2,
+				"missingInPackage": 0,
+				"missingInSource": 1,
+				"score": 0.4,
+				"totalFiles": 5
+			}
+		}
+	}
+]
