@@ -1,0 +1,851 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-06T09:15:57.526Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:11.7.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "fetch-mock@2.2.13",
+			"name": "fetch-mock",
+			"version": "2.2.13",
+			"location": "https://registry.npmjs.org/fetch-mock/-/fetch-mock-2.2.13.tgz",
+			"integrity": "sha512-gW+9Hb8kp8l+LVZqFilWWiKJQ8b1SEyoX0TjmRavfHaYtUVyOouDbvlR28A9xSt1DydkUZVbtXZoAdQT79cqkw==",
+			"publishedAt": "2015-11-09T15:05:34.674Z",
+			"publishedWith": {
+				"node": "4.1.0",
+				"npm": "2.14.3"
+			}
+		},
+		"source": {
+			"integrity": "sha512-aa+2nGh0OC8cOwQBqJ06B2Em+t7Jdeln+ITycyTPFuE0/MlQOY9TRbthwSDmfVqABOdvAkYbWSea4NwSNdIXlA==",
+			"location": "git+https://github.com/wheresrhys/fetch-mock.git",
+			"spec": "github:wheresrhys/fetch-mock#28662368c60f9777be0a10070c5cf31ea4b5e966"
+		},
+		"comparisonHash": "9ef46a5bd31291e57cbab41e2f17c57bd6da0b5b",
+		"diff": {
+			"files": {
+				".npmignore": {
+					"match": false,
+					"packageHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+					"size": 0,
+					"status": "missing-in-source"
+				},
+				".travis.yml": {
+					"match": false,
+					"packageHash": "885106a80680151baaf1225f0be00270b75979c2ce7fc9fd1139a6abea9aae38",
+					"size": 168,
+					"status": "missing-in-source"
+				},
+				"Makefile": {
+					"match": false,
+					"packageHash": "066b7c91fa353fb8f5f8dd7e3ff75cc55a9026db2bb04848fbc3d2a6834c4133",
+					"size": 93,
+					"status": "missing-in-source"
+				},
+				"README.md": {
+					"diff": "--- published/README.md\n+++ rebuilt/README.md\n@@ -1,249 +1,3 @@\n-# fetch-mock [![Build Status](https://travis-ci.org/wheresrhys/fetch-mock.svg?branch=master)](https://travis-ci.org/wheresrhys/fetch-mock) [![Coverage Status](https://coveralls.io/repos/wheresrhys/fetch-mock/badge.svg)](https://coveralls.io/r/wheresrhys/fetch-mock)\n-Mock http requests made using fetch (or [isomorphic-fetch](https://www.npmjs.com/package/isomorphic-fetch)). As well as shorthand methods for the simplest use cases, it offers a flexible API for customising mocking behaviour, and can also be persisted (with resettable state) over a series of tests.\n-\n-## Which version to require\n-- Browser tests: `require('fetch-mock)` \n-- Server side tests running in nodejs 4 or higher: `require('fetch-mock/server')`\n-- Server side tests running in nodejs 0.12 or lower: `require('fetch-mock/es5/server)`\n-\n-You will need to ensure `fetch` and `Promise` are already available as globals in your environment\n-\n-\n-## API\n-*To output useful messages for debugging `export DEBUG=fetch-mock`*\n-\n-**`require('fetch-mock')`** exports a singleton with the following methods\n-\n-#### `mock()`\n-Replaces `fetch()` with a stub which records it's calls, grouped by route, and optionally returns a stub response or passes the call through to `fetch()`. \n-\n-* `mock(matcher, response)` - configuration for a single unnamed route to be mocked (shorthand for `mock(route)` - see below)\n-* `mock(matcher, method, response)` - configuration for a single unnamed route to be mocked for a given method (shorthand for `mock(route)` - see below) \n-* `mock(route)` - configuration for a single route with the following properties\n-\t* `name` [required]: A unique string naming the route\n-\t* `method` [optional]: If specified will only match requests using the given http method\n-\t* `matcher` [required]: The rule for matching calls to `fetch()`. Accepts any of the following\n-\t\t* `string`: Either an exact url to match e.g. 'http://www.site.com/page.html' or, if the string begins with a `^`, the string following the `^` must begin the url e.g. '^http://www.site.com' would match 'http://www.site.com' or 'http://www.site.com/page.html'\n-\t\t* `RegExp`: A regular  expression to test the url against\n-\t\t* `Function(url, opts)`: A function (returning a Boolean) that is passed the url and opts `fetch()` is called with.\n-\t* `response` [required]: Configures the response object returned by the mock. Can take any of the following values\n-\t\t* `number`: Creates a response with this status\n-\t\t* `string`: Creates a 200 response with the string as the response body\n-\t\t* `object`: As long as the object does not contain any of the properties below it is converted into a json string and returned as the body of a 200 response. If any of the properties below are defined it is used to configure a `Response` object\n-\t\t\t* `body`: Set the response body (`string` or `object`)\n-\t\t\t* `status`: Set the response status (defaut `200`)\n-\t\t\t* `headers`: Set the response headers. (`object`)\n-\t\t\t* `throws`: If this property is present then a `Promise` rejected with the value of `throws` is returned\n-\t\t* `Function(url, opts)`: A function that is passed the url and opts `fetch()` is called with and that returns any of the responses listed above\n-* `mock(routes)` - array of route configuration objects (see above)\n-* `mock(config)` - object containing more complex config for fine grained controlled over mocking behaviour with the following properties\n-\t- `routes`: Either a single route config object or an array of them (see above)\n-\t- `responses`: When `registerRoute()` has already been used to register some routes then `responses` can be used to override the default response. Its value should be an object mapping route names to responses, which should be similar to those provided in the `response` property of stanadard route configurations e.g.\n-\n-\t```javascript\n-\t  responses: {\n-\t  \tsession: function (url, opts) {\n-\t  \t\tif (opts.headers.authorized) {\n-\t  \t\t\treturn {user: 'dummy-authorized-user'};\n-\t  \t\t} else {\n-\t  \t\t\treturn {user: 'dummy-unauthorized-user'};\n-\t  \t\t}\n-\t  \t}\n-\t  }\n-\t```\n-\n-\t- `greed`: Determines how the mock handles unmatched requests\n-\t\t- 'none': all unmatched calls get passed through to `fetch()`\n-\t\t- 'bad': all unmatched calls result in a rejected promise\n-\t\t- 'good': all unmatched calls result in a resolved promise with a 200 status\n-\n-\n-#### `restore()`\n-Restores `fetch()` to its unstubbed state and clears all data recorded for its calls\n-\n-#### `reMock()`\n-Normally calling `mock()` twice without restoring inbetween will throw an error. `reMock()` calls `restore()` internally before calling `mock()` again. This allows you to put a generic call to `mock()` in a `beforeEach()` while retaining the flexibility to vary the responses for some tests\n-\n-#### `reset()`\n-Clears all data recorded for `fetch()`'s calls\n-\n-#### `calls(routeName)`\n-Returns an array of arrays of the arguments passed to `fetch()` that matched the given route. '__unmatched' can be passed in to return results for calls not matching any route.\n-\n-When shorthands are used by `mock()` to define unnamed routes `routeName` is not required (but `_mock` can be passed in to distinguish from calls to previously registered routes)\n-\n-#### `called(routeName)`\n-Returns a Boolean denoting whether any calls matched the given route. '__unmatched' can be passed in to return results for calls not matching any route. If no routeName is passed it returns `true` if any fetch calls were made\n-\n-#### `registerRoute()`\n-Often your application/module will need a mocked response for some http requests in order to initialise properly, even if the content of those calls are not the subject of a given test e.g. a mock response from an authentication service and a multi-variant testing service might be necessary in order to test the UI for a version of a log in form. It's helpful to be able to define some default responses for these services which will exist throughout all or a large subset of your tests. `registerRoute()` aims to fulfil this need. All these predefined routes can be overridden when `mock(config)` is called.\n-\n-* `registerRoute(object)`: An object similar to the route objects accepted by `mock()`\n-* `registerRoute(array)`: An array of the above objects\n-* `registerRoute(name, matcher, response)`: The 3 properties of the route object spread across 3 parameters\n-\n-#### `unregisterRoute(name)`\n-Unregisters one or more previously registered routes. Accepts either a string or an array of strings\n-\n-#### `useNonGlobalFetch(func)`\n-When using isomorphic-fetch or node-fetch ideally `fetch` should be added as a global. If not possible to do so you can still use fetch-mock in combination with [mockery](https://github.com/mfncooper/mockery) in nodejs. To use fetch-mock with with [mockery](https://github.com/mfncooper/mockery) you will need to use this function to prevent fetch-mock trying to mock the function globally.\n-* `func` Optional reference to `fetch` (or any other function you may want to substitute for `fetch` in your tests).\n-\n-##### Mockery example\n-```javascript\n-var fetch = require('node-fetch');\n-var fetchMock = require('fetch-mock');\n-var mockery = require('mockery');\n-fetchMock.useNonGlobalFetch(fetch);\n",
+					"match": false,
+					"packageHash": "af56e2ee497c214fb6fd0b27c88f05e6251997ddde8a51376f3c49e29736df98",
+					"size": 11017,
+					"sourceHash": "92ddbe6585fc620565e3a25130b56f76331cfef9570bd04d7ce3a936ed8a0e35",
+					"status": "content"
+				},
+				"bower_components/fetch/.bower.json": {
+					"match": false,
+					"packageHash": "b57309d67f087b25e09c3464ec36403c462276f4aef52aac48efcb9ff33f58f6",
+					"size": 546,
+					"status": "missing-in-source"
+				},
+				"bower_components/fetch/LICENSE": {
+					"match": false,
+					"packageHash": "c8e4da4d9143d8c87a45e0844246206708a277f7db33b99a082fb925ea4e9086",
+					"size": 1056,
+					"status": "missing-in-source"
+				},
+				"bower_components/fetch/bower.json": {
+					"match": false,
+					"packageHash": "846439b970810484defbb4143ab9c6162b576eb72f5943ef0761c4339ee25cbd",
+					"size": 227,
+					"status": "missing-in-source"
+				},
+				"bower_components/fetch/fetch.js": {
+					"match": false,
+					"packageHash": "85a373c545aa1e076bcda96aa4040e1333944a64837b91b3c700ced9d169fa31",
+					"size": 6273,
+					"status": "missing-in-source"
+				},
+				"es5/client.js": {
+					"match": false,
+					"packageHash": "f02d7fd9882e5274ca16f63d9a35bc66fe0ee224f8ffbb5ff7fadadb3bbfe4db",
+					"size": 392,
+					"status": "missing-in-source"
+				},
+				"es5/fetch-mock.js": {
+					"match": false,
+					"packageHash": "65cd1c3df886e92c0d624c2b6ddc3ef2fc28d22c90fe61f52a56307977668d51",
+					"size": 10204,
+					"status": "missing-in-source"
+				},
+				"es5/server.js": {
+					"match": false,
+					"packageHash": "2e18c261bfc8d12687bf5d491d27a18748ec09279eacf9887f4dd6fdf6c1dbb6",
+					"size": 333,
+					"status": "missing-in-source"
+				},
+				"karma.conf.js": {
+					"match": false,
+					"packageHash": "80e739ae263c89ce5275ffcb6eedf84a3f7a59df8a3e0452c145dd8a934a8092",
+					"size": 689,
+					"status": "missing-in-source"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -1,49 +1,93 @@\n {\n-  \"name\": \"fetch-mock\",\n-  \"version\": \"2.2.13\",\n-  \"description\": \"Mock http requests made using fetch (or isomorphic-fetch)\",\n-  \"main\": \"es5/client.js\",\n-  \"scripts\": {\n-    \"test\": \"make test\",\n-    \"prepublish\": \"babel src --out-dir es5 --presets es2015\"\n-  },\n-  \"repository\": {\n-    \"type\": \"git\",\n-    \"url\": \"https://github.com/wheresrhys/fetch-mock.git\"\n-  },\n-  \"keywords\": [\n-    \"fetch\",\n-    \"http\",\n-    \"mock\",\n-    \"testing\",\n-    \"spy\"\n-  ],\n-  \"author\": \"Rhys Evans\",\n-  \"license\": \"ISC\",\n-  \"bugs\": {\n-    \"url\": \"https://github.com/wheresrhys/fetch-mock/issues\"\n-  },\n-  \"homepage\": \"https://github.com/wheresrhys/fetch-mock\",\n-  \"dependencies\": {\n-    \"node-fetch\": \"^1.3.3\",\n-    \"debug\": \"^2.2.0\"\n-  },\n-  \"devDependencies\": {\n-    \"babel\": \"^6.0.15\",\n-    \"babel-cli\": \"^6.1.2\",\n-    \"babel-preset-es2015\": \"^6.1.2\",\n-    \"babelify\": \"^7.2.0\",\n-    \"browserify\": \"^12.0.0\",\n-    \"chai\": \"^2.3.0\",\n-    \"karma\": \"^0.12.31\",\n-    \"karma-browserify\": \"^4.1.2\",\n-    \"karma-chai\": \"^0.1.0\",\n-    \"karma-chrome-launcher\": \"^0.1.8\",\n-    \"karma-firefox-launcher\": \"^0.1.6\",\n-    \"karma-mocha\": \"^0.1.10\",\n-    \"karma-phantomjs-launcher\": \"^0.2.1\",\n-    \"mocha\": \"^2.2.4\",\n-    \"sinon\": \"^1.17.0\",\n-    \"whatwg-fetch\": \"^0.10.1\"\n-  }\n+\t\"name\": \"fetch-mock-monorepo\",\n+\t\"description\": \"Mock http requests made using fetch (or isomorphic-fetch)\",\n+\t\"version\": \"1.0.0\",\n+\t\"type\": \"module\",\n+\t\"repository\": {\n+\t\t\"type\": \"git\",\n+\t\t\"url\": \"git+https://github.com/wheresrhys/fetch-mock.git\"\n+\t},\n+\t\"author\": \"Rhys Evans\",\n+\t\"license\": \"MIT\",\n+\t\"bugs\": {\n+\t\t\"url\": \"https://github.com/wheresrhys/fetch-mock/issues\"\n+\t},\n+\t\"homepage\": \"http://www.wheresrhys.co.uk/fetch-mock\",\n+\t\"engines\": {\n+\t\t\"node\": \">=8.0.0\"\n+\t},\n+\t\"workspaces\": [\n+\t\t\"packages/*\",\n+\t\t\"docs\",\n+\t\t\"import-compat\"\n+\t],\n+\t\"scripts\": {\n+\t\t\"lint:staged\": \"eslint --cache --fix\",\n+\t\t\"lint\": \"eslint --cache --fix .\",\n+\t\t\"lint:ci\": \"eslint .\",\n+\t\t\"prettier\": \"prettier --cache --write *.md \\\"./**/*.md\\\" *.json \\\"./**/*.json\\\"\",\n+\t\t\"prettier:ci\": \"prettier *.md \\\"./**/*.md\\\" *.json \\\"./**/*.json\\\"\",\n+\t\t\"types:check\": \"tsc --project ./jsconfig.json && echo 'types check done'\",\n+\t\t\"prepare\": \"husky || echo \\\"husky not available\\\"\",\n+\t\t\"build\": \"npm run build -w=packages\",\n+\t\t\"docs\": \"npm run start -w docs\",\n+\t\t\"test\": \"vitest . --ui --exclude=packages/jest/src/__tests__/*\",\n+\t\t\"test:ci\": \"vitest . --typecheck --reporter=junit --outputFile=test-results/junit.xml --coverage.provider=istanbul --exclude=packages/jest/src/__tests__/*\",\n+\t\t\"test:jest\": \"node --experimental-vm-modules node_modules/jest/bin/jest.js packages/jest/src/__tests__/*.spec.?s\",\n+\t\t\"test:browser\": \"vitest . --browser.enabled --browser.name chromium --browser.provider playwright --exclude=packages/{jest,codemods}/src/__tests__/*\",\n+\t\t\"coverage:send\": \"cat ./coverage/lcov.info | coveralls\",\n+\t\t\"compat:module\": \"npm run compat:module -w import-compat\"\n+\t},\n+\t\"devDependencies\": {\n+\t\t\"@commitlint/cli\": \"^19.3.0\",\n+\t\t\"@commitlint/config-conventional\": \"^19.2.2\",\n+\t\t\"@eslint/js\": \"^9.8.0\",\n+\t\t\"@rollup/plugin-commonjs\": \"^26.0.1\",\n+\t\t\"@rollup/plugin-node-resolve\": \"^15.2.3\",\n+\t\t\"@testing-library/dom\": \"^10.4.0\",\n+\t\t\"@types/chai\": \"^4.3.17\",\n+\t\t\"@types/eslint__js\": \"^8.42.3\",\n+\t\t\"@types/events\": \"^3.0.3\",\n",
+					"match": false,
+					"packageHash": "2aafff8e3ed40c40bd35bcab173b22fd62009a4894f22a7718ff98e181f428c2",
+					"size": 1209,
+					"sourceHash": "685d3ae58c14f97482c1ee058f8bcf3f205612a2fb8d465a4fe7b161f89754a0",
+					"status": "content"
+				},
+				"src/client.js": {
+					"match": false,
+					"packageHash": "453139f45d25fcffa2a4a872739f0f3d19fa093720b1341b4a09bd7625c62f5e",
+					"size": 390,
+					"status": "missing-in-source"
+				},
+				"src/fetch-mock.js": {
+					"match": false,
+					"packageHash": "4f2acd5d175a3eb432a67d2be29862a680c49c749b5e650ef62af6fb2af390ab",
+					"size": 8137,
+					"status": "missing-in-source"
+				},
+				"src/server.js": {
+					"match": false,
+					"packageHash": "c27c10f9e24be24fd43de3f9984c1fa15c7d3dd36624cd93dd3ab16cee6de8da",
+					"size": 342,
+					"status": "missing-in-source"
+				},
+				"test/client.js": {
+					"match": false,
+					"packageHash": "17eea4446713ef191b7941a1267d3fb7553e4c29912a118347cdf70069a89313",
+					"size": 124,
+					"status": "missing-in-source"
+				},
+				"test/server.js": {
+					"match": false,
+					"packageHash": "fbe1c789e15bca09612a9ea1b3018ee9b64c59cc6dee1dae813cc4687c64c853",
+					"size": 1197,
+					"status": "missing-in-source"
+				},
+				"test/spec.js": {
+					"match": false,
+					"packageHash": "b224afda07bfc7e0e564f76f886108aa91b8cfedf1e9092b52c3c6ee093b0bdc",
+					"size": 23205,
+					"status": "missing-in-source"
+				},
+				".circleci/config.yml": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				".codeclimate.yml": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				".github/ISSUE_TEMPLATE/config.yml": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				".github/workflows/deploy.yml": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				".github/workflows/release-please.yml": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				".github/workflows/test-deploy.yml": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				".husky/commit-msg": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				".husky/pre-commit": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				".prettierignore": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				".prettierrc.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				".release-please-manifest.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"LICENSE": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"commitlint.config.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"docs/README.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"docs/babel.config.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"docs/blog/2024-07-20-new-beginnings.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"docs/blog/2024-07-21-introducing-core.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"docs/blog/2024-09-24-fetch-mock-12.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"docs/docs/API/CallHistory.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"docs/docs/API/_category_.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"docs/docs/API/mocking-and-spying.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"docs/docs/API/more-routing-methods.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"docs/docs/API/resetting.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"docs/docs/API/route/_category_.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"docs/docs/API/route/index.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"docs/docs/API/route/matcher.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"docs/docs/API/route/options.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"docs/docs/API/route/response.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"docs/docs/Usage/_category_.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"docs/docs/Usage/configuration.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"docs/docs/Usage/installation.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"docs/docs/Usage/quickstart.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"docs/docs/Usage/requirements.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"docs/docs/Usage/upgrade-guide.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"docs/docs/index.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"docs/docs/legacy-api/API/Inspection/_category_.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"docs/docs/legacy-api/API/Inspection/done.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"docs/docs/legacy-api/API/Inspection/flush.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"docs/docs/legacy-api/API/Inspection/inspecting-calls.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"docs/docs/legacy-api/API/Lifecycle/_category_.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"docs/docs/legacy-api/API/Lifecycle/resetting.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"docs/docs/legacy-api/API/Lifecycle/sandbox.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"docs/docs/legacy-api/API/Mocking/Parameters/_category_.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"docs/docs/legacy-api/API/Mocking/Parameters/matcher.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"docs/docs/legacy-api/API/Mocking/Parameters/options.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"docs/docs/legacy-api/API/Mocking/Parameters/response.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"docs/docs/legacy-api/API/Mocking/_category_.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"docs/docs/legacy-api/API/Mocking/add-matcher.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"docs/docs/legacy-api/API/Mocking/catch.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"docs/docs/legacy-api/API/Mocking/mock.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"docs/docs/legacy-api/API/Mocking/shorthands.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"docs/docs/legacy-api/API/Mocking/spy.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"docs/docs/legacy-api/API/_category_.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"docs/docs/legacy-api/Troubleshooting/_category_.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"docs/docs/legacy-api/Troubleshooting/cookies.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"docs/docs/legacy-api/Troubleshooting/custom-classes.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"docs/docs/legacy-api/Troubleshooting/debug-mode.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"docs/docs/legacy-api/Troubleshooting/global-non-global.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"docs/docs/legacy-api/Troubleshooting/importing.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"docs/docs/legacy-api/Troubleshooting/troubleshooting.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"docs/docs/legacy-api/Usage/Usage.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"docs/docs/legacy-api/Usage/_category_.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"docs/docs/legacy-api/Usage/cheatsheet.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"docs/docs/legacy-api/Usage/configuration.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"docs/docs/legacy-api/Usage/installation.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"docs/docs/legacy-api/Usage/quickstart.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"docs/docs/legacy-api/Usage/requirements.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"docs/docs/legacy-api/Usage/versions.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"docs/docs/legacy-api/index.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"docs/docs/wrappers/index.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"docs/docs/wrappers/jest.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"docs/docs/wrappers/vitest.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"docs/docusaurus.config.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"docs/package.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"docs/sidebars.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"docs/src/components/HomepageFeatures/index.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"docs/src/components/HomepageFeatures/styles.module.css": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"docs/src/css/custom.css": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"docs/src/pages/index.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"docs/src/pages/index.module.css": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"docs/static/.nojekyll": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"docs/static/img/docusaurus-social-card.jpg": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"docs/static/img/docusaurus.png": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"docs/static/img/favicon.ico": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"docs/static/img/logo.svg": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"docs/static/img/undraw_docusaurus_mountain.svg": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"docs/static/img/undraw_docusaurus_react.svg": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"docs/static/img/undraw_docusaurus_tree.svg": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"eslint.config.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"import-compat/package.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"import-compat/ts-cjs.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"import-compat/ts-esm.mts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"import-compat/ts-esm.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"jest.config.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"jsconfig.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/codemods/CHANGELOG.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/codemods/README.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/codemods/package.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/codemods/src/__tests__/fixtures/extra-vars.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/codemods/src/__tests__/fixtures/jsx.jsx": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/codemods/src/__tests__/fixtures/tsx.tsx": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/codemods/src/__tests__/fixtures/typescript.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/codemods/src/__tests__/identifying-fetchmock-instances.test.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/codemods/src/__tests__/integration.test.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/codemods/src/__tests__/method-codemods.test.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/codemods/src/__tests__/option-codemods.test.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/codemods/src/__tests__/package.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/codemods/src/codemods/methods.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/codemods/src/codemods/options.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/codemods/src/index.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/codemods/try.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/fetch-mock/CHANGELOG.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/fetch-mock/LICENSE": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/fetch-mock/README.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/fetch-mock/package.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/fetch-mock/src/CallHistory.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/fetch-mock/src/FetchMock.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/fetch-mock/src/IsSubsetOf.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/fetch-mock/src/Matchers.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/fetch-mock/src/RequestUtils.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/fetch-mock/src/Route.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/fetch-mock/src/Router.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/fetch-mock/src/StatusTextMap.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/fetch-mock/src/TypeDescriptor.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/fetch-mock/src/__tests__/CallHistory.test.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/fetch-mock/src/__tests__/FetchMock/flush.test.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/fetch-mock/src/__tests__/FetchMock/instance-management.test.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/fetch-mock/src/__tests__/FetchMock/mock-and-spy.test.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/fetch-mock/src/__tests__/FetchMock/response-construction.test.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/fetch-mock/src/__tests__/FetchMock/response-negotiation.test.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/fetch-mock/src/__tests__/FetchMock/routing.test.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/fetch-mock/src/__tests__/Matchers/body.test.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/fetch-mock/src/__tests__/Matchers/express.test.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/fetch-mock/src/__tests__/Matchers/function.test.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/fetch-mock/src/__tests__/Matchers/headers.test.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/fetch-mock/src/__tests__/Matchers/method.test.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/fetch-mock/src/__tests__/Matchers/query-string.test.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/fetch-mock/src/__tests__/Matchers/route-config-object.test.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/fetch-mock/src/__tests__/Matchers/url.test.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/fetch-mock/src/__tests__/router-integration.test.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/fetch-mock/src/__tests__/spec-compliance.test.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/fetch-mock/src/index.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/fetch-mock/tsconfig.cjs.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/fetch-mock/tsconfig.esm.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/jest/CHANGELOG.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/jest/LICENSE": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/jest/README.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/jest/package.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/jest/src/__tests__/custom-jsdom-environment.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/jest/src/__tests__/extensions.spec.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/jest/src/__tests__/jsdom.spec.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/jest/src/__tests__/reset-methods.spec.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/jest/src/index.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/jest/src/jest-extensions.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/jest/src/types.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/jest/tsconfig.cjs.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/jest/tsconfig.esm.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/vitest/CHANGELOG.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/vitest/LICENSE": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/vitest/README.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/vitest/package.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/vitest/src/__tests__/extensions.spec.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/vitest/src/__tests__/reset-methods.spec.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/vitest/src/index.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/vitest/src/types.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/vitest/src/vitest-extensions.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/vitest/tsconfig.cjs.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/vitest/tsconfig.esm.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"release-please-config.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"scripts/circleci-npm-publish.sh": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"scripts/declare-dist-type.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"tea.yaml": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"tsconfig.base.json": {
+					"match": false,
+					"status": "missing-in-package"
+				}
+			},
+			"summary": {
+				"differentFiles": 2,
+				"matchingFiles": 0,
+				"missingInPackage": 173,
+				"missingInSource": 17,
+				"score": 0,
+				"totalFiles": 192
+			}
+		}
+	}
+]
