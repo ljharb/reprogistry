@@ -1,0 +1,255 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-06T11:30:24.182Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:11.7.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "gulp-git@0.3.3",
+			"name": "gulp-git",
+			"version": "0.3.3",
+			"location": "https://registry.npmjs.org/gulp-git/-/gulp-git-0.3.3.tgz",
+			"integrity": "sha512-F7E+PF+VT5/DRvGADlfO2pvIdreQxzGICeMS8UUOlTu46P8fFDNKNBAB2vMwE/XAmohprPpW2ML5ZWsjINmI6Q==",
+			"publishedAt": "2014-02-26T01:04:20.650Z",
+			"publishedWith": {
+				"node": null,
+				"npm": "1.4.4"
+			}
+		},
+		"source": {
+			"integrity": null,
+			"location": "http://github.com/stevelacy/gulp-git.git",
+			"spec": "github:stevelacy/gulp-git#HEAD"
+		},
+		"comparisonHash": "9ef46a5bd31291e57cbab41e2f17c57bd6da0b5b",
+		"diff": {
+			"files": {
+				".npmignore": {
+					"match": false,
+					"packageHash": "b5583496f58cbc857c9d26bef794fceb3cf9a081ac380586e11ed636d7b7089b",
+					"size": 107,
+					"status": "missing-in-source"
+				},
+				".travis.yml": {
+					"match": false,
+					"packageHash": "3ff81f3c80b22ad3fc025034a20a2e38e868f7e350ec200b08947729c492e357",
+					"size": 45,
+					"status": "missing-in-source"
+				},
+				"LICENSE": {
+					"diff": "--- published/LICENSE\n+++ rebuilt/LICENSE\n@@ -1,4 +1,4 @@\n-Copyright (c) 2014 Steve Lacy <me@slacy.me> slacy.me - Fractal <contact@wearefractal.com> wearefractal.com\n+Copyright (c) 2015 Steve Lacy <me@slacy.me> slacy.me\n \n Permission is hereby granted, free of charge, to any person obtaining\n a copy of this software and associated documentation files (the\n",
+					"match": false,
+					"packageHash": "73d9e8032dc8cee54676203cc1156ff67b55f40a811c67c49e536d33bad3890f",
+					"size": 1131,
+					"sourceHash": "4e7321d577e6d891c4cdf065ac8adb5b439cc3d5bbcd0e083012bf4258ebf6e0",
+					"status": "content"
+				},
+				"README.md": {
+					"diff": "--- published/README.md\n+++ rebuilt/README.md\n@@ -1,14 +1,15 @@\n-#gulp-git\n+# gulp-git\n+\n [![Build Status](https://travis-ci.org/stevelacy/gulp-git.png?branch=master)](https://travis-ci.org/stevelacy/gulp-git)\n [![NPM version](https://badge.fury.io/js/gulp-git.png)](http://badge.fury.io/js/gulp-git)\n \n <table>\n-<tr> \n+<tr>\n <td>Package</td><td>gulp-git</td>\n </tr>\n <tr>\n <td>Description</td>\n-<td>Git plugin for Gulp (gulpjs.com)</td>\n+<td>Git plugin for gulp (gulpjs.com)</td>\n </tr>\n <tr>\n <td>Node Version</td>\n@@ -24,7 +25,7 @@\n ### Install\n     npm install gulp-git --save\n \n-#### 0.3.0 introduced Breaking Changes!\n+#### 0.4.0 introduced Breaking Changes!\n Git actions which did not require a [Vinyl](https://github.com/wearefractal/vinyl) file were refactored.\n Please review the following docs for changes:\n ##Example\n@@ -33,240 +34,744 @@\n var gulp = require('gulp');\n var git = require('gulp-git');\n \n-// Run git init \n+// Run git init\n // src is the root folder for git to initialize\n gulp.task('init', function(){\n-  git.init();\n+  git.init(function (err) {\n+    if (err) throw err;\n+  });\n });\n \n // Run git init with options\n gulp.task('init', function(){\n-  git.init({args: '--quiet --bare'});\n+  git.init({args: '--quiet --bare'}, function (err) {\n+    if (err) throw err;\n+  });\n });\n \n-// Run git add \n+// Run git add\n // src is the file(s) to add (or ./*)\n gulp.task('add', function(){\n-  gulp.src('./git-test/*')\n-  .pipe(git.add());\n+  return gulp.src('./git-test/*')\n+    .pipe(git.add());\n });\n \n // Run git add with options\n gulp.task('add', function(){\n-  gulp.src('./git-test/*')\n-  .pipe(git.add({args: '-f -i -p'}));\n+  return gulp.src('./git-test/*')\n+    .pipe(git.add({args: '-f -i -p'}));\n });\n \n // Run git commit\n // src are the files to commit (or ./*)\n gulp.task('commit', function(){\n-  gulp.src('./git-test/*')\n-  .pipe(git.commit('initial commit'));\n+  return gulp.src('./git-test/*')\n+    .pipe(git.commit('initial commit'));\n+});\n+\n+// Run git commit with a computed commit message\n+gulp.task('commit', function(){\n+  let newVersion;\n+  function computeNewVersion() { newVersion = /* ... */ }\n+  return gulp.src('./git-test/*')\n+    .pipe(computeNewVersion())\n+    .pipe(git.commit(() => `Bumps to version ${newVersion}`));\n });\n \n // Run git commit with options\n gulp.task('commit', function(){\n-  gulp.src('./git-test/*')\n-  .pipe(git.commit('initial commit', {args: '-A --amend -s'}));\n+  return gulp.src('./git-test/*')\n+    .pipe(git.commit('initial commit', {args: '-A --amend -s'}));\n+});\n+\n+// Run git commit without checking for a message using raw arguments\n+gulp.task('commit', function(){\n+  return gulp.src('./git-test/*')\n+    .pipe(git.commit(undefined, {\n",
+					"match": false,
+					"packageHash": "7d40fa14b56ab11e40ac78007d1bf6a86a15bba3436f6f0edb43bac2824f4123",
+					"size": 6130,
+					"sourceHash": "2532033bd24e342d31175c9290ef636367ed014ff15ef12804128169fd7a51d8",
+					"status": "content"
+				},
+				"examples/gulpfile.js": {
+					"match": false,
+					"packageHash": "7e67a5ef7d1fcadc28a34a724ab7237f7d20b9c832c3f248636fc9bb5ed87091",
+					"size": 1317,
+					"status": "missing-in-source"
+				},
+				"index.js": {
+					"diff": "--- published/index.js\n+++ rebuilt/index.js\n@@ -1,13 +1,33 @@\n-module.exports = {\n-  init: require('./lib/init'),\n-  add: require('./lib/add'),\n-  commit: require('./lib/commit'),\n-  addRemote: require('./lib/addRemote'),\n-  push: require('./lib/push'),\n-  pull: require('./lib/pull'),\n-  tag: require('./lib/tag'),\n-  branch: require('./lib/branch'),\n-  merge: require('./lib/merge'),\n-  checkout: require('./lib/checkout'),\n-  rm: require('./lib/rm')\n-};\n+'use strict';\n+/**\n+ * git\n+ * @exports gulp-git\n+ * @property {function} add             {@link module:gulp-git/lib/add}\n+ * @property {function} addRemote       {@link module:gulp-git/lib/addRemote}\n+ * @property {function} addSubmodule    {@link module:gulp-git/lib/addSubmodule}\n+ * @property {function} branch          {@link module:gulp-git/lib/branch}\n+ * @property {function} catFile         {@link module:gulp-git/lib/catFile}\n+ * @property {function} checkout        {@link module:gulp-git/lib/checkout}\n+ * @property {function} checkoutFiles   {@link module:gulp-git/lib/checkoutFiles}\n+ * @property {function} clean           {@link module:gulp-git/lib/clean}\n+ * @property {function} clone           {@link module:gulp-git/lib/clone}\n+ * @property {function} commit          {@link module:gulp-git/lib/commit}\n+ * @property {function} diff            {@link module:gulp-git/lib/diff}\n+ * @property {function} exec            {@link module:gulp-git/lib/exec}\n+ * @property {function} fetch           {@link module:gulp-git/lib/fetch}\n+ * @property {function} init            {@link module:gulp-git/lib/init}\n+ * @property {function} merge           {@link module:gulp-git/lib/merge}\n+ * @property {function} pull            {@link module:gulp-git/lib/pull}\n+ * @property {function} push            {@link module:gulp-git/lib/push}\n+ * @property {function} removeRemote    {@link module:gulp-git/lib/removeRemote}\n+ * @property {function} reset           {@link module:gulp-git/lib/reset}\n+ * @property {function} revParse        {@link module:gulp-git/lib/revParse}\n+ * @property {function} rm              {@link module:gulp-git/lib/rm}\n+ * @property {function} showBranch      {@link module:gulp-git/lib/showBranch}\n+ * @property {function} stash           {@link module:gulp-git/lib/stash}\n+ * @property {function} status          {@link module:gulp-git/lib/status}\n+ * @property {function} tag             {@link module:gulp-git/lib/tag}\n+ * @property {function} updateSubmodule {@link module:gulp-git/lib/updateSubmodule}\n+ */\n+var requireDir = require('require-dir');\n+module.exports = requireDir('./lib');\n",
+					"match": false,
+					"packageHash": "58722066f96eee5719be556ecade195a90d04ca509c56657a3e753407a4b6e88",
+					"size": 382,
+					"sourceHash": "c98849f83efc561c67158e1507d3a01ef093e49bb6cf315df0fc57627acf2dc7",
+					"status": "content"
+				},
+				"lib/add.js": {
+					"diff": "--- published/lib/add.js\n+++ rebuilt/lib/add.js\n@@ -1,21 +1,63 @@\n-var map = require(\"map-stream\");\n-var gutil = require(\"gulp-util\");\n-var exec = require(\"child_process\").exec;\n-var escape = require(\"any-shell-escape\");\n+'use strict';\n+\n+var Transform = require('stream').Transform;\n+var log = require('fancy-log');\n+var exec = require('child_process').exec;\n+var escape = require('any-shell-escape');\n+\n+function addFiles(files, opt, cb) {\n+  var cwd = opt.cwd || files[files.length - 1].cwd;\n+  var cmd = 'git add ' + escape(files.map(function(file) { return file.path; })) + ' ' + opt.args;\n+  var maxBuffer = opt.maxBuffer || 200 * 1024;\n+\n+  exec(cmd, {cwd: cwd, maxBuffer: maxBuffer}, function(err, stdout, stderr) {\n+    if (err) return cb(err);\n+    if (!opt.quiet) log(stdout, stderr);\n+    cb();\n+  });\n+}\n \n module.exports = function (opt) {\n-  if(!opt) opt = {};\n-  if(!opt.args) opt.args = '';\n+  if (!opt) opt = {};\n+  if (!opt.args) opt.args = ' ';\n+\n+  var files = [];\n+  var maxFiles = opt.maxFiles || Infinity;\n+\n+  var write = function(file, enc, cb) {\n+    var that = this;\n+\n+    files.push(file);\n+\n+    if (files.length >= maxFiles)\n+      addFiles(files.splice(0, maxFiles), opt, function(err)  {\n+        if (err) return cb(err);\n+        files.forEach(that.push.bind(that));\n+        cb();\n+      });\n+    else\n+      cb();\n+  }\n+\n+  var flush = function(cb) {\n+    var that = this;\n \n-  function add(file, cb) {\n-    var cmd = \"git add \" + escape([file.path]) + \" \" + opt.args;\n-    exec(cmd, {cwd: file.cwd}, function(err, stdout, stderr){\n-      if(err) gutil.log(err);\n-      gutil.log(stdout, stderr);\n-      cb(null, file);\n-    });\n+    if (files.length > 0) {\n+      addFiles(files, opt, function(err) {\n+        if (err) return cb(err);\n+        files.forEach(that.push.bind(that));\n+        that.emit('end');\n+        cb();\n+      });\n+    } else {\n+      that.emit('end');\n+      cb();\n+    }\n   }\n \n-  // Return a stream\n-  return map(add);\n-};\n\\ No newline at end of file\n+  return new Transform({\n+    objectMode: true,\n+    transform: write,\n+    flush\n+  });\n+};\n",
+					"match": false,
+					"packageHash": "01a6d945bb943f9e07c2a1b4dccc31b19a9a9e96873fc493f6ccf7c1ab42b92c",
+					"size": 533,
+					"sourceHash": "e0e648443570ad3272c6375b30ca007b9c7a82145147d1f1efe897141810a5cf",
+					"status": "content"
+				},
+				"lib/addRemote.js": {
+					"diff": "--- published/lib/addRemote.js\n+++ rebuilt/lib/addRemote.js\n@@ -1,18 +1,28 @@\n-var gutil = require('gulp-util');\n+'use strict';\n+\n+var log = require('fancy-log');\n var exec = require('child_process').exec;\n var escape = require('any-shell-escape');\n \n module.exports = function (remote, url, opt, cb) {\n-  if(!url) cb(new Error('gulp-git: Repo URL is required git.addRemote(\"origin\", \"https://github.com/user/repo.git\")'));\n-  if(!remote) remote = 'origin';\n-  if(!opt) opt = {};\n-  if(!opt.cwd) opt.cwd = process.cwd();\n-  if(!opt.args) opt.args = '';\n+  if (!cb && typeof opt === 'function') {\n+    // optional options\n+    cb = opt;\n+    opt = {};\n+  }\n+  if (!cb || typeof cb !== 'function') cb = function () {};\n+  if (!url) return cb(new Error('gulp-git: Repo URL is required git.addRemote(\"origin\", \"https://github.com/user/repo.git\")'));\n+  if (!remote) remote = 'origin';\n+  if (!opt) opt = {};\n+  if (!opt.cwd) opt.cwd = process.cwd();\n+  if (!opt.args) opt.args = ' ';\n+\n+  var maxBuffer = opt.maxBuffer || 200 * 1024;\n \n-  var cmd = \"git remote add \" + escape([remote, url]) + \" \" + opt.args;\n-  return exec(cmd, {cwd: opt.cwd}, function(err, stdout, stderr){\n-    if(err) gutil.log(err);\n-    gutil.log(stdout, stderr);\n-    if(cb) cb();\n+  var cmd = 'git remote add ' + opt.args + ' ' + escape([remote, url]);\n+  return exec(cmd, {cwd: opt.cwd, maxBuffer: maxBuffer}, function(err, stdout, stderr) {\n+    if (err) return cb(err);\n+    if (!opt.quiet) log(stdout, stderr);\n+    cb();\n   });\n-};\n\\ No newline at end of file\n+};\n",
+					"match": false,
+					"packageHash": "ffaf318e30a9192f72df6d4e69d7f499a899465b46f2f3276fd215940609c6a0",
+					"size": 638,
+					"sourceHash": "cedb99e5ba63a9ec1cd349ff4cbe54de051b8df71c8fd7660e71e69780cb5389",
+					"status": "content"
+				},
+				"lib/branch.js": {
+					"diff": "--- published/lib/branch.js\n+++ rebuilt/lib/branch.js\n@@ -1,17 +1,30 @@\n-var gutil = require('gulp-util');\n+'use strict';\n+\n+var log = require('fancy-log');\n var exec = require('child_process').exec;\n var escape = require('any-shell-escape');\n \n+// want to get the current branch instead?\n+// git.revParse({args:'--abbrev-ref HEAD'})\n+\n module.exports = function (branch, opt, cb) {\n-  if(!opt) opt = {};\n-  if(!branch) return cb(new Error('gulp-git: Branch name is require git.branch(\"name\")'));\n-  if(!opt.cwd) opt.cwd = process.cwd();\n-  if(!opt.args) opt.args = '';\n+  if (!cb && typeof opt === 'function') {\n+    // optional options\n+    cb = opt;\n+    opt = {};\n+  }\n+  if (!cb || typeof cb !== 'function') cb = function () {};\n+  if (!opt) opt = {};\n+  if (!branch) return cb(new Error('gulp-git: Branch name is required git.branch(\"name\")'));\n+  if (!opt.cwd) opt.cwd = process.cwd();\n+  if (!opt.args) opt.args = ' ';\n+\n+  var maxBuffer = opt.maxBuffer || 200 * 1024;\n \n-  var cmd = \"git branch \" + escape([branch]) + \" \" + opt.args;\n-  return exec(cmd, {cwd: opt.cwd}, function(err, stdout, stderr){\n-    if(err) gutil.log(err);\n-    gutil.log(stdout, stderr);\n-    if(cb) cb();\n+  var cmd = 'git branch ' + opt.args + ' ' + escape([branch]);\n+  return exec(cmd, {cwd: opt.cwd, maxBuffer: maxBuffer}, function(err, stdout, stderr) {\n+    if (err) return cb(err);\n+    if (!opt.quiet) log(stdout, stderr);\n+    cb(null, stdout);\n   });\n-};\n\\ No newline at end of file\n+};\n",
+					"match": false,
+					"packageHash": "1eeabc583ce9a026ab9729073d843e15170363cedf228a09aa97a86dac38b023",
+					"size": 562,
+					"sourceHash": "155cf53ea493276ad5017a140260d2ec28a94868c863ec67e449ef72eca0036e",
+					"status": "content"
+				},
+				"lib/checkout.js": {
+					"diff": "--- published/lib/checkout.js\n+++ rebuilt/lib/checkout.js\n@@ -1,22 +1,27 @@\n-var map = require('map-stream');\n-var gutil = require('gulp-util');\n+'use strict';\n+\n+var log = require('fancy-log');\n var exec = require('child_process').exec;\n var escape = require('any-shell-escape');\n \n-module.exports = function (branch, opt) {\n-  if(!opt) opt = {};\n-  if(!branch) throw new Error('gulp-git: Branch name is require git.checkout(\"name\")');\n-  if(!opt.args) opt.args = '';\n-  \n-  function checkout(file, cb) {\n-    var cmd = \"git checkout \" + escape([branch]) + \" \" + opt.args;\n-    exec(cmd, {cwd: file.cwd}, function(err, stdout, stderr){\n-      if(err) gutil.log(err);\n-      gutil.log(stdout, stderr);\n-      cb(null, file);\n-    });\n+module.exports = function (branch, opt, cb) {\n+  if (!cb && typeof opt === 'function') {\n+    // optional options\n+    cb = opt;\n+    opt = {};\n   }\n+  if (!cb || typeof cb !== 'function') cb = function () {};\n+  if (!opt) opt = {};\n+  if (!branch) throw new Error('gulp-git: Branch name is require git.checkout(\"name\")');\n+  if (!opt.args) opt.args = ' ';\n+  if (!opt.cwd) opt.cwd = process.cwd();\n+\n+  var maxBuffer = opt.maxBuffer || 200 * 1024;\n \n-  // Return a stream\n-  return map(checkout);\n+  var cmd = 'git checkout ' + opt.args + ' ' + escape([branch]);\n+  exec(cmd, {cwd: opt.cwd, maxBuffer: maxBuffer}, function(err, stdout, stderr) {\n+    if (err) return cb(err);\n+    if (!opt.quiet) log(stdout, stderr);\n+    cb(null);\n+  });\n };\n",
+					"match": false,
+					"packageHash": "7d9bb5e36335577ca67d7935670461c68e4a1953e57497fef67fb50b4eeea90c",
+					"size": 644,
+					"sourceHash": "d7366e60e6e0cd0511cf6556976f1c3ae12eb84f2213900914cd347c5d1e627d",
+					"status": "content"
+				},
+				"lib/commit.js": {
+					"diff": "--- published/lib/commit.js\n+++ rebuilt/lib/commit.js\n@@ -1,22 +1,124 @@\n-var map = require('map-stream');\n-var gutil = require('gulp-util');\n+'use strict';\n+\n+var Transform = require('stream').Transform;\n+var log = require('fancy-log');\n var exec = require('child_process').exec;\n var escape = require('any-shell-escape');\n+var path = require('path');\n \n-module.exports = function (message, opt) {\n-  if(!opt) opt = {};\n-  if(!message) throw new Error('gulp-git: Commit message is required git.commit(\"commit message\")');\n-  if(!opt.args) opt.args = '';\n-  \n-  function commit(file, cb) {\n-    var cmd = 'git commit -m \"' + message + '\" ' + escape([file.path]) + ' ' + opt.args;\n-    exec(cmd, {cwd: file.cwd}, function(err, stdout, stderr){\n-      if(err) gutil.log(err);\n-      gutil.log(stdout, stderr);\n-      cb(null, file);\n-    });\n+// want to get the current git hash instead?\n+// git.revParse({args:'--short HEAD'})\n+\n+module.exports = function(message, opt) {\n+  if (!opt) opt = {};\n+  if (!message) {\n+    if (opt.args.indexOf('--amend') === -1 && opt.disableMessageRequirement !== true) {\n+      throw new Error('gulp-git: Commit message is required git.commit(\"commit message\") or --amend arg must be given');\n+    }\n   }\n+  if (!opt.cwd) opt.cwd = process.cwd();\n+  if (!opt.maxBuffer) opt.maxBuffer = 200 * 1024; // Default buffer value for child_process.exec\n+  if (!opt.args) opt.args = ' ';\n+\n+  var files = [];\n+  var paths = [];\n+\n+  var write = function(file, enc, cb) {\n+    files.push(file);\n+    paths.push(path.relative(opt.cwd, file.path).replace('\\\\', '/') || '.');\n+    cb();\n+  };\n+\n+  var messageEntry = function(entry) {\n+    return '-m \"' + entry + '\" ';\n+  };\n+\n+  var flush = function(cb) {\n+    var writeStdin = false;\n+    var cmd = 'git commit ';\n+    // Allow delayed execution to determine the message\n+    if (typeof message === 'function') {\n+      message = message();\n+    }\n+\n+    if (message && opt.args.indexOf('--amend') === -1) {\n+\n+      // Check if the message is multiline\n+      if (message && message instanceof Array) {\n+\n+        if (opt.multiline) {\n+          writeStdin = true;\n+          message = message.join('\\n');\n+        } else {\n+          var messageExpanded = '';\n+\n+          // repeat -m as needed\n+          for (var i = 0; i < message.length; i++) {\n+            messageExpanded += messageEntry(message[i]);\n+          }\n+          cmd += messageExpanded + opt.args;\n+        }\n+        if (!opt.disableAppendPaths) {\n+          cmd += ' ' + escape(paths);\n+        }\n+      } else {\n+        if (~message.indexOf('\\n')) {\n+          writeStdin = true;\n+        } else {\n+          cmd += '-m \"' + message + '\" ' + opt.args;\n+        }\n+        if (!opt.disableAppendPaths) {\n+          cmd += ' ' + escape(paths);\n+        }\n+      }\n+    } else if (opt.disableMessageRequirement === true) {\n+      cmd += opt.args;\n+    } else {\n+      // When amending, just add the file automatically and do not include the message not the file.\n+      // Also, add all the files and avoid lauching the editor (even if --no-editor was added)\n+      cmd += '-a ' + opt.args + (opt.args.indexOf('--no-edit') === -1 ? ' --no-edit' : '');\n+    }\n+    var self = this;\n+\n+    // If `message` was an array and `opt.multiline` was true\n",
+					"match": false,
+					"packageHash": "1239a8a93414bfa62b722b6349443c3a4b5d79605c654ed353b144b0c2a4a2c4",
+					"size": 675,
+					"sourceHash": "15ae02fb67e69fb8e2165b2151477123448ad0960db3b4513cd6b2a5aa6d11e7",
+					"status": "content"
+				},
+				"lib/init.js": {
+					"diff": "--- published/lib/init.js\n+++ rebuilt/lib/init.js\n@@ -1,17 +1,26 @@\n-var gutil = require('gulp-util');\n+'use strict';\n+\n+var log = require('fancy-log');\n var exec = require('child_process').exec;\n-var escape = require('any-shell-escape');\n \n module.exports = function (opt, cb) {\n-  if(!opt) opt = {};\n+  if (!cb && typeof opt === 'function') {\n+    // optional options\n+    cb = opt;\n+    opt = {};\n+  }\n+  if (!cb || typeof cb !== 'function') cb = function () {};\n+  if (!opt) opt = {};\n   if (!opt.cwd) opt.cwd = process.cwd();\n-  if (!opt.args) opt.args = '';\n+  if (!opt.args) opt.args = ' ';\n+\n+  var maxBuffer = opt.maxBuffer || 200 * 1024;\n \n-  var cmd = \"git init \" + opt.args;\n-  return exec(cmd, {cwd: opt.cwd}, function(err, stdout, stderr){\n-    if(err) gutil.log(err);\n-    gutil.log(stdout, stderr);\n-    if(cb) cb();\n+  var cmd = 'git init ' + opt.args;\n+  return exec(cmd, {cwd: opt.cwd, maxBuffer: maxBuffer}, function(err, stdout, stderr) {\n+    if (err) return cb(err);\n+    if (!opt.quiet) log(stdout, stderr);\n+    cb();\n   });\n \n-};\n\\ No newline at end of file\n+};\n",
+					"match": false,
+					"packageHash": "8a6a48434bb04a33fb5671f9e338c2d7efec68bc3bd9469dcd9eb2b8662c528c",
+					"size": 439,
+					"sourceHash": "0196a131787acf91313c31262e4972705dc32a61ea2004e76ea5f24607008b6f",
+					"status": "content"
+				},
+				"lib/merge.js": {
+					"diff": "--- published/lib/merge.js\n+++ rebuilt/lib/merge.js\n@@ -1,17 +1,27 @@\n-var gutil = require('gulp-util');\n+'use strict';\n+\n+var log = require('fancy-log');\n var exec = require('child_process').exec;\n var escape = require('any-shell-escape');\n \n module.exports = function (branch, opt, cb) {\n-  if(!opt) opt = {};\n-  if(!branch) return cb(new Error('gulp-git: Branch name is require git.merge(\"name\")'));\n-  if(!opt.cwd) opt.cwd = process.cwd();\n-  if(!opt.args) opt.args = '';\n-  \n-  var cmd = \"git merge \" + escape([branch]) + \" \" + opt.args;\n-  return exec(cmd, {cwd: opt.cwd}, function(err, stdout, stderr){\n-    if(err) gutil.log(err);\n-    gutil.log(stdout, stderr);\n-    if(cb) cb();\n+  if (!cb && typeof opt === 'function') {\n+    // optional options\n+    cb = opt;\n+    opt = {};\n+  }\n+  if (!cb || typeof cb !== 'function') cb = function () {};\n+  if (!opt) opt = {};\n+  if (!branch) return cb && cb(new Error('gulp-git: Branch name is require git.merge(\"name\")'));\n+  if (!opt.cwd) opt.cwd = process.cwd();\n+  if (!opt.args) opt.args = ' ';\n+\n+  var maxBuffer = opt.maxBuffer || 200 * 1024;\n+\n+  var cmd = 'git merge ' + opt.args + ' ' + escape([branch]);\n+  return exec(cmd, {cwd: opt.cwd, maxBuffer: maxBuffer}, function(err, stdout, stderr) {\n+    if (err) return cb(err);\n+    if (!opt.quiet) log(stdout, stderr);\n+    cb();\n   });\n };\n",
+					"match": false,
+					"packageHash": "6887985db8c25c8a666c925e9873cffaf3ff9e97e2383d631e604149fb9d3c84",
+					"size": 563,
+					"sourceHash": "a1730e97aeb290bead41e98e7c32b2c616ae7c0e0aaecaa68132a6c7c6391451",
+					"status": "content"
+				},
+				"lib/pull.js": {
+					"diff": "--- published/lib/pull.js\n+++ rebuilt/lib/pull.js\n@@ -1,18 +1,37 @@\n-var gutil = require('gulp-util');\n+'use strict';\n+\n+var log = require('fancy-log');\n var exec = require('child_process').exec;\n var escape = require('any-shell-escape');\n \n module.exports = function (remote, branch, opt, cb) {\n-  if(!branch) branch = 'master';\n-  if(!remote) remote = 'origin';\n-  if(!opt) opt = {};\n-  if(!opt.cwd) opt.cwd = process.cwd();\n-  if(!opt.args) opt.args = '';\n+  if (!cb && typeof opt === 'function') {\n+    // optional options\n+    cb = opt;\n+    opt = {};\n+  }\n+  // pull with callback only\n+  if (!cb && typeof remote === 'function') {\n+    cb = remote;\n+    remote = {};\n+  }\n+  if (!cb || typeof cb !== 'function') cb = function () {};\n+  if (!opt) opt = {};\n+  if (!opt.cwd) opt.cwd = process.cwd();\n+  if (!opt.args) opt.args = ' ';\n+\n+  var cmd = 'git pull ' + opt.args;\n+  if (typeof remote === 'string') {\n+    cmd += ' ' + escape(remote);\n+  }\n+  if (branch && typeof branch === 'string' || branch && branch[0]) {\n+    cmd +=  ' ' + escape([].concat(branch));\n+  }\n+  var maxBuffer = opt.maxBuffer || 200 * 1024;\n \n-  var cmd = \"git pull \" + escape([remote, branch])+ \" \" + opt.args;\n-  return exec(cmd, {cwd: opt.cwd}, function(err, stdout, stderr){\n-    if(err) gutil.log(err);\n-    gutil.log(stdout, stderr);\n-    if(cb) cb();\n+  return exec(cmd, {cwd: opt.cwd, maxBuffer: maxBuffer}, function(err, stdout, stderr) {\n+    if (err) return cb(err);\n+    if (!opt.quiet) log(stdout, stderr);\n+    cb();\n   });\n-};\n\\ No newline at end of file\n+};\n",
+					"match": false,
+					"packageHash": "bd66d1278bed43016877a4a5e7d27417c7d16ed0b90bf50d007eecb4436c01d5",
+					"size": 550,
+					"sourceHash": "bcc70cc1543a36a8787ceac162baf628230ddc47724b727340e08ed36057955e",
+					"status": "content"
+				},
+				"lib/push.js": {
+					"diff": "--- published/lib/push.js\n+++ rebuilt/lib/push.js\n@@ -1,18 +1,59 @@\n-var gutil = require('gulp-util');\n+'use strict';\n+\n+var log = require('fancy-log');\n var exec = require('child_process').exec;\n var escape = require('any-shell-escape');\n+var revParse = require('./revParse');\n \n module.exports = function (remote, branch, opt, cb) {\n-  if(!branch) branch = 'master';\n-  if(!remote) remote = 'origin';\n-  if(!opt) opt = {};\n-  if(!opt.cwd) opt.cwd = process.cwd();\n-  if(!opt.args) args = '';\n-\n-  var cmd = \"git push \" + escape([remote, branch]) + \" \" + opt.args;\n-  return exec(cmd, {cwd: opt.cwd}, function(err, stdout, stderr){\n-    if(err) gutil.log(err);\n-    gutil.log(stdout, stderr);\n-    if(cb) cb();\n-  });\n-};\n\\ No newline at end of file\n+\n+  if (!remote) remote = 'origin';\n+\n+  function setBranch(cb2) {\n+    if (branch && typeof branch === 'function') {\n+      cb = branch;\n+      branch = null;\n+    }\n+    if (branch && Object.prototype.toString.call(branch) === '[object Object]') {\n+      opt = branch;\n+      branch = null;\n+    }\n+    if (!branch) {\n+      revParse({ args: '--abbrev-ref HEAD' },\n+        function callback(err, out) {\n+          if (err) return cb2(err);\n+          branch = out;\n+          cb2();\n+        });\n+    } else {\n+      cb2();\n+    }\n+  }\n+\n+  function flush(err) {\n+    if (err) return cb(err);\n+    if (!cb && typeof opt === 'function') {\n+      cb = opt;\n+      opt = {};\n+    }\n+    if (!cb || typeof cb !== 'function') cb = function() {};\n+    if (!opt) opt = {};\n+    if (!opt.cwd) opt.cwd = process.cwd();\n+    if (!opt.args) opt.args = ' ';\n+\n+    var cmd = 'git push ' + escape([].concat(remote, branch)) + ' ' + opt.args;\n+    var maxBuffer = opt.maxBuffer || 200 * 1024;\n+\n+    return exec(cmd, {\n+      cwd: opt.cwd,\n+      maxBuffer: maxBuffer\n+    }, function(err, stdout, stderr) {\n+      if (err) return cb(err);\n+      if (!opt.quiet) log(stdout, stderr);\n+      cb();\n+    });\n+  }\n+\n+  return setBranch(flush);\n+\n+};\n",
+					"match": false,
+					"packageHash": "8a3813f253b9e3347b2656ea5c2e8ae0712a4d09e1a94cc43fc3cc4f849f8fbf",
+					"size": 547,
+					"sourceHash": "2f5ccde9f2e98a8b4faebd954cab8e9453d8ecdc31430b11a92f45209624452f",
+					"status": "content"
+				},
+				"lib/reset.js": {
+					"diff": "--- published/lib/reset.js\n+++ rebuilt/lib/reset.js\n@@ -1,18 +1,28 @@\n-var gutil = require('gulp-util');\n+'use strict';\n+\n+var log = require('fancy-log');\n var exec = require('child_process').exec;\n-var escape = require('shell-escape');\n+var escape = require('any-shell-escape');\n \n module.exports = function (commit, opt, cb) {\n-  if(!opt) opt = {};\n-  if(!opt.cwd) opt.cwd = process.cwd();\n-  if(!opt.args) opt.args = '';\n-  if(!commit) commit = '';\n+  if (!cb && typeof opt === 'function') {\n+    // optional options\n+    cb = opt;\n+    opt = {};\n+  }\n+  if (!cb || typeof cb !== 'function') cb = function () {};\n+  if (!opt) opt = {};\n+  if (!opt.cwd) opt.cwd = process.cwd();\n+  if (!opt.args) opt.args = ' ';\n+  if (!commit) commit = ' ';\n+\n+  var maxBuffer = opt.maxBuffer || 200 * 1024;\n \n-  var cmd = \"git reset \" + commit + \" \" + opt.args;\n-  return exec(cmd, {cwd: opt.cwd}, function(err, stdout, stderr){\n-    if(err) gutil.log(err);\n-    gutil.log(stdout, stderr);\n-    if(cb) cb();\n+  var cmd = 'git reset ' + opt.args + ' ' + escape([commit]);\n+  return exec(cmd, {cwd: opt.cwd, maxBuffer: maxBuffer}, function(err, stdout, stderr) {\n+    if (err) return cb(err);\n+    if (!opt.quiet) log(stdout, stderr);\n+    cb();\n   });\n \n-};\n\\ No newline at end of file\n+};\n",
+					"match": false,
+					"packageHash": "da9e234bcafb9dd88a3acb663a70cf5c7e7171baba9c9ba7d516390f7a39cd74",
+					"size": 484,
+					"sourceHash": "b5dd366b25ee579eea4fdc4a7e1981a3e76ec0b78d867728b204d0bea014096d",
+					"status": "content"
+				},
+				"lib/rm.js": {
+					"diff": "--- published/lib/rm.js\n+++ rebuilt/lib/rm.js\n@@ -1,23 +1,42 @@\n-var map = require('map-stream');\n-var gutil = require('gulp-util');\n+'use strict';\n+\n+var Transform = require('stream').Transform;\n+var log = require('fancy-log');\n var exec = require('child_process').exec;\n var escape = require('any-shell-escape');\n \n module.exports = function (opt) {\n-  if(!opt) opt = {};\n-  if(!opt.args) opt.args = '';\n-  \n-  function rm(file, cb) {\n-    console.log(file.path);\n-    if(!file.path) throw new Error('gulp-git: file is required');\n-    var cmd = \"git rm \" + escape([file.path]) + \" \" + opt.args;\n-    exec(cmd, {cwd: file.cwd}, function(err, stdout, stderr){\n-      if(err) gutil.log(err);\n-      gutil.log(stdout, stderr);\n-      cb(null, file);\n+  if (!opt) opt = {};\n+  if (!opt.args) opt.args = ' ';\n+\n+  var paths = [];\n+  var files = [];\n+  var fileCwd = process.cwd;\n+  var write = function(file, enc, cb) {\n+    paths.push(file.path);\n+    files.push(file);\n+    fileCwd = file.cwd;\n+    cb();\n+  };\n+\n+  var flush = function(cb) {\n+    var cwd = opt.cwd || fileCwd;\n+\n+    var maxBuffer = opt.maxBuffer || 200 * 1024;\n+\n+    var cmd = 'git rm ' + escape(paths) + ' ' + opt.args;\n+    var that = this;\n+    exec(cmd, {cwd: cwd, maxBuffer: maxBuffer}, function(err, stdout, stderr) {\n+      if (err) return cb(err);\n+      if (!opt.quiet) log(stdout, stderr);\n+      files.forEach(that.push.bind(that));\n+      cb();\n     });\n-  }\n+  };\n \n-  // Return a stream\n-  return map(rm);\n-};\n\\ No newline at end of file\n+  return new Transform({\n+    objectMode: true,\n+    transform: write,\n+    flush\n+  });\n+};\n",
+					"match": false,
+					"packageHash": "095355c4b04052e348d617b5452c6748c2aa3bc2b5bd92ef2990039d7f60021c",
+					"size": 626,
+					"sourceHash": "455f2ff999eb5982718ffa73f7f7abb60e46a289efb9c6ccbe59ed8f9b1f2298",
+					"status": "content"
+				},
+				"lib/tag.js": {
+					"diff": "--- published/lib/tag.js\n+++ rebuilt/lib/tag.js\n@@ -1,21 +1,49 @@\n-var gutil = require('gulp-util');\n+'use strict';\n+\n+var log = require('fancy-log');\n+var _ = require('lodash');\n var exec = require('child_process').exec;\n var escape = require('any-shell-escape');\n \n module.exports = function (version, message, opt, cb) {\n-  if(!version) return cb(new Error('Version must be defined'));\n-  if(!message) return cb(new Error('Message must be defined'));\n-  if(!opt) opt = {};\n-  if(!opt.cwd) opt.cwd = process.cwd();\n-  if(!opt.args) opt.args = '';\n+  if (!cb && typeof opt === 'function') {\n+    // optional options\n+    cb = opt;\n+    opt = {};\n+  }\n+  if (!cb && typeof version === 'function') {\n+    cb = version;\n+    version = '';\n+    message = '';\n+  }\n+  if (!cb || typeof cb !== 'function') cb = function () {};\n+  if (!opt) opt = {};\n+  if (!message) {\n+    opt.lightWeight = true;\n+    message = '';\n+  }\n+  else message = escape([message]);\n+  if (!opt.cwd) opt.cwd = process.cwd();\n+  if (!opt.args) opt.args = ' ';\n+\n+  var maxBuffer = opt.maxBuffer || 200 * 1024;\n \n   var signedarg = opt.signed ? ' -s ' : ' -a ';\n \n-  var cmd = 'git tag ' + signedarg + escape([version])+ ' -m \"' + message + '\" ' +opt.args;\n-  var templ = gutil.template(cmd, {file:message});\n-  return exec(templ, {cwd: opt.cwd}, function(err, stdout, stderr){\n-    if(err) gutil.log(err);\n-    gutil.log(stdout, stderr);\n-    if(cb) cb();\n+  var cmd = 'git tag';\n+  if (version !== '') {\n+    if (!opt.lightWeight) {\n+      cmd += ' ' + signedarg + ' -m ' + message + ' ';\n+    }\n+    cmd += opt.args + ' ' + escape([version]);\n+  }\n+  var templ = _.template(cmd)({file: message});\n+  return exec(templ, {cwd: opt.cwd, maxBuffer: maxBuffer}, function(err, stdout, stderr) {\n+    if (err) return cb(err);\n+    if (!opt.quiet && version !== '') log(stdout, stderr);\n+    if (version === '') {\n+      stdout = stdout.split('\\n');\n+    }\n+    return cb(null, stdout);\n   });\n-};\n\\ No newline at end of file\n+};\n",
+					"match": false,
+					"packageHash": "d3a86a3cf8de56c63c957372aaecd471c511057a05a4673d8f616fe821b08bf2",
+					"size": 740,
+					"sourceHash": "9ad58ebe6443ad1ad877022780baab4300014ccd5326d31ff67efda156475d97",
+					"status": "content"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -1,7 +1,7 @@\n {\n   \"name\": \"gulp-git\",\n-  \"description\": \"Git plugin for Gulp (gulpjs.com)\",\n-  \"version\": \"0.3.3\",\n+  \"description\": \"Git plugin for gulp (gulpjs.com)\",\n+  \"version\": \"2.11.0\",\n   \"homepage\": \"http://github.com/stevelacy/gulp-git\",\n   \"repository\": {\n     \"type\": \"git\",\n@@ -10,32 +10,35 @@\n   \"author\": \"Steve Lacy me@slacy.me (slacy.me)\",\n   \"main\": \"./index.js\",\n   \"dependencies\": {\n-    \"gulp-util\": \"~2.2.14\",\n-    \"map-stream\": \"~0.1.0\",\n-    \"any-shell-escape\": \"0.1.0\"\n+    \"any-shell-escape\": \"^0.1.1\",\n+    \"fancy-log\": \"^1.3.2\",\n+    \"lodash\": \"^4.17.21\",\n+    \"plugin-error\": \"^1.0.1\",\n+    \"require-dir\": \"^1.0.0\",\n+    \"strip-bom-stream\": \"^3.0.0\",\n+    \"vinyl\": \"^2.0.1\"\n   },\n   \"devDependencies\": {\n-    \"mocha\": \"*\",\n-    \"should\": \"*\",\n-    \"rimraf\": \"~2.2.5\"\n+    \"eslint\": \"^6.7.2\",\n+    \"mocha\": \"^6.2.2\",\n+    \"mock-require\": \"^2.0.2\",\n+    \"rimraf\": \"^2.6.1\",\n+    \"should\": \"^13.2.3\"\n   },\n   \"scripts\": {\n-    \"test\": \"mocha --reporter spec\"\n+    \"docs\": \"rimraf docs/* && jsdoc ./index.js ./lib --recurse --destination ./docs\",\n+    \"lint\": \"rimraf test/repo test/tmp && eslint ./index.js ./examples/ ./lib/ ./test/\",\n+    \"test\": \"mocha --reporter spec --timeout 6000 test/main.js && npm run lint\"\n   },\n   \"engines\": {\n     \"node\": \">= 0.9.0\"\n   },\n+  \"license\": \"MIT\",\n   \"keywords\": [\n     \"gulp\",\n     \"git\",\n     \"gulpgit\",\n     \"gulpplugin\",\n     \"gulp-plugin\"\n-  ],\n-  \"licenses\": [\n-    {\n-      \"type\": \"MIT\",\n-      \"url\": \"http://github.com/stevelacy/gulp-git/raw/master/LICENSE\"\n-    }\n   ]\n }\n",
+					"match": false,
+					"packageHash": "577e6d7f66f07432e43de80199e88ca3628273e55f179763307819a073c1c768",
+					"size": 843,
+					"sourceHash": "b8f6a95ec737039dafb6638ce89f0523ce5db680d04cd28243d0db24f1f07866",
+					"status": "content"
+				},
+				"test/main.js": {
+					"match": false,
+					"packageHash": "1a50dc47f53bc29054dfc920fabf549de2fcb68a85e0723de5a338f5afd64cad",
+					"size": 6314,
+					"status": "missing-in-source"
+				},
+				"test/test.js": {
+					"match": false,
+					"packageHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+					"size": 0,
+					"status": "missing-in-source"
+				},
+				"lib/addSubmodule.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/catFile.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/checkoutFiles.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/clean.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/clone.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/diff.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/exec.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/fetch.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/removeRemote.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/revParse.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/showBranch.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/stash.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/status.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/updateSubmodule.js": {
+					"match": false,
+					"status": "missing-in-package"
+				}
+			},
+			"summary": {
+				"differentFiles": 16,
+				"matchingFiles": 0,
+				"missingInPackage": 14,
+				"missingInSource": 5,
+				"score": 0,
+				"totalFiles": 35
+			}
+		}
+	}
+]
