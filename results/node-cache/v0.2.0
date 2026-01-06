@@ -1,0 +1,107 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-06T17:59:23.738Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:11.7.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "node-cache@0.2.0",
+			"name": "node-cache",
+			"version": "0.2.0",
+			"location": "https://registry.npmjs.org/node-cache/-/node-cache-0.2.0.tgz",
+			"integrity": "sha512-MOo+gRLXng7Jq+/yvVu+IlH1IsTA329RmtFOi50k7KDuP0xemXmd1JkzJYNXSKlwyuymDVPfxsAU7Oy9uH2y4w==",
+			"publishedAt": "2011-10-20T14:52:16.323Z",
+			"publishedWith": {
+				"node": "v0.4.12",
+				"npm": "1.0.30"
+			}
+		},
+		"source": {
+			"integrity": null,
+			"location": "git://github.com/tcs-de/nodecache.git",
+			"spec": "github:tcs-de/nodecache#0.2.0"
+		},
+		"comparisonHash": "9ef46a5bd31291e57cbab41e2f17c57bd6da0b5b",
+		"diff": {
+			"files": {
+				".npmignore": {
+					"match": false,
+					"packageHash": "4c4c8f075912724926bc9aa5ae1ec0e8e6736171f9b48a27f11ea6087f571c8b",
+					"size": 42,
+					"status": "missing-in-source"
+				},
+				"README.md": {
+					"diff": "--- published/README.md\n+++ rebuilt/README.md\n@@ -58,55 +58,17 @@\n   }\n });\n ```\n-\n-### Retrieve multiple keys (GET):\n-\n-`myCache.get( [ key1, key2, ... ,keyn ], callback )`\n-\n-Gets multiple saved values from the cache.\n-Returns an empty object `{}` if not found or expired.\n-If the value was found it returns an object with the `key` `value` pair.\n-\n-```\n-myCache.get( [ \"myKeyA\", \"myKeyB\" ], function( err, value ){\n-  if( !err ){\n-    console.log( value );\n-    /*\n-      {\n-        \"myKeyA\": { my: \"Special\", variable: 123 },\n-        \"myKeyB\": { the: \"Glory\", answer: 42 }\n-      }\n-    */\n-    // ... do something ...\n-  }\n-});\n-```\n-\n ### Delete a key\n \n `myCache.del( key, callback )`\n \n-Delete a key. Returns the number of deleted entries. A delete will never fail.\n-\n-```\n-myCache.del( \"myKey\", function( err, count ){\n-  if( !err ){\n-    console.log( count ); // 1\n-    // ... do something ...\n-  }\n-});\n-```\n-\n-### Delete multiple keys\n-\n-`myCache.del( [ key1, key2, ... ,keyn ], callback )`\n-\n-Delete multiple keys. Returns the number of deleted entries. A delete will never fail.\n+Delete a key. Returns `true`. A delete will never fail.\n \n ```\n-myCache.del( [ \"myKeyA\", \"myKeyB\" ], function( err, count ){\n+myCache.del( \"myKey\", function( err, value ){\n   if( !err ){\n-    console.log( count ); // 2\n+    console.log( value );\n+    // { \"myKey\": { my: \"Special\", variable: 42 } }\n     // ... do something ...\n   }\n });\n@@ -122,26 +84,6 @@\n myCache.getStats();\n   /*\n     {\n-      keys: 0,    // global key count\n-      hits: 0,    // global hit count\n-      misses: 0,  // global miss count\n-      ksize: 0,   // global key size count\n-      vsize: 0    // global value size count\n-    }\n-  */\n-```\n-\n-### Flush all data\n-\n-`myCache.flushAll()`\n-\n-Flush all data.  \n-\n-```\n-myCache.flushAll();\n-myCache.getStats();\n-  /*\n-    {\n       keys: 0,    // global key count\n       hits: 0,    // global hit count\n       misses: 0,  // global miss count\n",
+					"match": false,
+					"packageHash": "61c81d4d7fe0f6dfce91a8679cde6103148f24b6565692a19bb30738f712f39d",
+					"size": 4331,
+					"sourceHash": "0d53dbd1452b21390a2eac97b785dd61a97ecf11d13c4a4b01651cea6cbe611e",
+					"status": "content"
+				},
+				"docs/docco.css": {
+					"match": false,
+					"packageHash": "75f8cb448d0ab1d6b9d0fb9b430860387b3caf593ffdddcf313a95be97e454fd",
+					"size": 7101,
+					"status": "missing-in-source"
+				},
+				"docs/node_cache.html": {
+					"match": false,
+					"packageHash": "f5d76c9f706bee18defe0d1d43ce0df67afc5401f7377484b25b5e670972441d",
+					"size": 42017,
+					"status": "missing-in-source"
+				},
+				"lib/node_cache.coffee": {
+					"diff": "--- published/lib/node_cache.coffee\n+++ rebuilt/lib/node_cache.coffee\n@@ -1,5 +1,17 @@\n _ = require( \"underscore\" )\n \n+# configure the time method\n+# define options and the sequential multiplicators\n+_timeConfig = \n+\ttypes: [ \"ms\", \"s\", \"m\", \"h\", \"d\" ]\n+\tmultiConfig: [ 1, 1000, 60, 60, 24 ]\n+# calculate the final multiplacatos\n+_timeConfig.multi = _.reduce( _timeConfig.multiConfig, ( v1, v2, idx, ar )->\n+\tv1.push ( v1[ idx-1 ] or 1 ) * v2\n+\tv1\n+, [] )\n+\n+\n # generate superclass\n module.exports = class NodeCache\n \tconstructor: ( @options = {} )->\n@@ -14,10 +26,8 @@\n \t\t\t# used standard size for calculating value size\n \t\t\tobjectValueSize: 80\n \t\t\tarrayValueSize: 40\n-\t\t\t# standard time to live in seconds. 0 = infinity;\n+\t\t\t# standard time to live. 0 = infinity; 10 = 10ms; 1m = 1 Min. ...\n \t\t\tstdTTL: 0\n-\t\t\t# time in seconds to check all data and delete expired keys\n-\t\t\tcheckperiod: 600\n \t\t, @options )\n \n \t\t# statistics container\n@@ -25,11 +35,8 @@\n \t\t\thits: 0\n \t\t\tmisses: 0\n \t\t\tkeys: 0\n-\t\t\tksize: 0\n-\t\t\tvsize: 0\n-\t\t\n-\t\t# initalize checking period\n-\t\t@_checkData()\n+\t\t\tksize: 0 # cummulierte Länge aller Keynamen\n+\t\t\tvsize: 0 # cummulierte Länge aller Values. Nur bei Strings relevant\n \n \t# ## get\n \t#\n@@ -37,7 +44,7 @@\n \t#\n \t# **Parameters:**\n \t#\n-\t# * `key` ( String | String[] ): cache key or an array of keys\n+\t# * `key` ( String ): cache key\n \t# * `cb` ( Function ): Callback function\n \t# \n \t# **Example:**\n@@ -45,24 +52,17 @@\n \t#     myCache.key \"myKey\", ( err, val )->\n \t#       console.log( err, val )\n \t#\n-\tget: ( keys, cb )=>\n-\t\t# convert a string to an array of one key\n-\t\tif _.isString( keys )\n-\t\t\tkeys = [ keys ]\n-\t\t\n-\t\t# define return\n-\t\toRet = {}\n-\t\tfor key in keys\n-\t\t\t# get data and incremet stats\n-\t\t\tif @data[ key ]? and @_check( key, @data[ key ] )\n-\t\t\t\t@stats.hits++\n-\t\t\t\toRet[ key ] = @_unwrap( @data[ key ] )\n-\t\t\telse\n-\t\t\t\t# if not found return a error\n-\t\t\t\t@stats.misses++\n-\n-\t\t# return all found keys\n-\t\tcb( null, oRet )\n+\tget: ( key, cb )->\n+\t\t# get data and incremet stats\n+\t\tif @data[ key ]? and @_check( key, @data[ key ] )\n+\t\t\t@stats.hits++\n+\t\t\toRet = {}\n+\t\t\toRet[ key ] = @_unwrap( @data[ key ] )\n+\t\t\tcb( null, oRet )\n+\t\telse\n+\t\t\t# if not found return a error\n+\t\t\t@stats.misses++\n+\t\t\tcb( null, {} )\n \t\treturn\n \t\n \t# ## set\n@@ -73,7 +73,7 @@\n \t#\n \t# * `key` ( String ): cache key\n \t# * `value` ( Any ): A element to cache. If the option `option.forceString` is `true` the module trys to translate it to a serialized JSON\n-\t# * `[ ttl ]` ( Number | String ): ( optional ) The time to live in seconds.\n+\t# * `[ ttl ]` ( Number | String ): The time to live. Possible example Value are: `10` = 10 ms; `0` = infinity; `5m` = 5 Minutes; The following extensions are allowed: s, m, h, d\n \t# * `cb` ( Function ): Callback function\n \t# \n \t# **Example:**\n",
+					"match": false,
+					"packageHash": "b769b1480f863979433b3cb8b62066a4274e3980945689d732b404703f7f304f",
+					"size": 7076,
+					"sourceHash": "056a353d9e1d315ac789b88c50690208a490bf76048d20db5e25d6ca47e96792",
+					"status": "content"
+				},
+				"lib/node_cache.js": {
+					"diff": "--- published/lib/node_cache.js\n+++ rebuilt/lib/node_cache.js\n@@ -1,29 +1,35 @@\n (function() {\n-  var NodeCache, _;\n+  var NodeCache, _, _timeConfig;\n   var __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };\n   _ = require(\"underscore\");\n+  _timeConfig = {\n+    types: [\"ms\", \"s\", \"m\", \"h\", \"d\"],\n+    multiConfig: [1, 1000, 60, 60, 24]\n+  };\n+  _timeConfig.multi = _.reduce(_timeConfig.multiConfig, function(v1, v2, idx, ar) {\n+    v1.push((v1[idx - 1] || 1) * v2);\n+    return v1;\n+  }, []);\n   module.exports = NodeCache = (function() {\n     function NodeCache(options) {\n       this.options = options != null ? options : {};\n+      this._getMilliSeconds = __bind(this._getMilliSeconds, this);\n       this._error = __bind(this._error, this);\n+      this._check = __bind(this._check, this);\n       this._getValLength = __bind(this._getValLength, this);\n       this._getKeyLength = __bind(this._getKeyLength, this);\n       this._unwrap = __bind(this._unwrap, this);\n       this._wrap = __bind(this._wrap, this);\n-      this._check = __bind(this._check, this);\n-      this._checkData = __bind(this._checkData, this);\n-      this.flushAll = __bind(this.flushAll, this);\n+      this.checkData = __bind(this.checkData, this);\n       this.getStats = __bind(this.getStats, this);\n       this.del = __bind(this.del, this);\n       this.set = __bind(this.set, this);\n-      this.get = __bind(this.get, this);\n       this.data = {};\n       this.options = _.extend({\n         forceString: false,\n         objectValueSize: 80,\n         arrayValueSize: 40,\n-        stdTTL: 0,\n-        checkperiod: 600\n+        stdTTL: 0\n       }, this.options);\n       this.stats = {\n         hits: 0,\n@@ -32,35 +38,26 @@\n         ksize: 0,\n         vsize: 0\n       };\n-      this._checkData();\n     }\n-    NodeCache.prototype.get = function(keys, cb) {\n-      var key, oRet, _i, _len;\n-      if (_.isString(keys)) {\n-        keys = [keys];\n-      }\n-      oRet = {};\n-      for (_i = 0, _len = keys.length; _i < _len; _i++) {\n-        key = keys[_i];\n-        if ((this.data[key] != null) && this._check(key, this.data[key])) {\n-          this.stats.hits++;\n-          oRet[key] = this._unwrap(this.data[key]);\n-        } else {\n-          this.stats.misses++;\n-        }\n+    NodeCache.prototype.get = function(key, cb) {\n+      var oRet;\n+      if ((this.data[key] != null) && this._check(key, this.data[key])) {\n+        this.stats.hits++;\n+        oRet = {};\n+        oRet[key] = this._unwrap(this.data[key]);\n+        cb(null, oRet);\n+      } else {\n+        this.stats.misses++;\n+        cb(null, {});\n       }\n-      cb(null, oRet);\n     };\n     NodeCache.prototype.set = function(key, value, ttl, cb) {\n       var existend;\n-      if (cb == null) {\n-        cb = function() {};\n-      }\n       existend = false;\n       if (this.options.forceString && !_.isString(value)) {\n         value = JSON.stringify(value);\n       }\n-      if (arguments.length === 3 && _.isFunction(ttl)) {\n+      if (arguments.length === 3) {\n         cb = ttl;\n         ttl = this.options.stdTTL;\n       }\n@@ -76,91 +73,41 @@\n       }\n       cb(null, true);\n     };\n-    NodeCache.prototype.del = function(keys, cb) {\n-      var delCount, key, _i, _len;\n+    NodeCache.prototype.del = function(key, cb) {\n       if (cb == null) {\n",
+					"match": false,
+					"packageHash": "bad55475f8064bed3d7733f4a0ea4043e728029c06b85855443889c660c95cb0",
+					"size": 5932,
+					"sourceHash": "ebc86e973c1012722ed098eb9215633f3cddb7b2d1814bb7f3ca9b2a00c63f3a",
+					"status": "content"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -1,8 +1,8 @@\n {\n \t\"name\": \"node-cache\",\n-\t\"description\": \"Simple and fast NodeJS internal caching.\",\n-\t\"keywords\": [ \"cache\", \"caching\", \"local\", \"variable\", \"coffee\", \"coffee-script\", \"underscore\", \"multi\" ],\n-\t\"version\": \"0.2.0\",\n+\t\"description\": \"A simple node internal caching module with expiring values\",\n+\t\"keywords\": [ \"cache\", \"local\", \"variable\", \"coffee\", \"coffee-script\", \"underscore\" ],\n+\t\"version\": \"0.1.3\",\n \t\"author\": \"tcs-de <github@tcs.de>\",\n \t\"main\": \"./index.js\",\n \t\"homepage\": \"https://github.com/tcs-de/nodecache\",\n",
+					"match": false,
+					"packageHash": "96e1c76217ab87831b8c3539f6054776469c5fcdb7a5a113e52fc6f0b10afc39",
+					"size": 502,
+					"sourceHash": "db8c49a513da97afd82091d490f6fc39eeabca2b75c9bfb0cc263437f18d2588",
+					"status": "content"
+				},
+				"test/node_cache-test.coffee": {
+					"diff": "--- published/test/node_cache-test.coffee\n+++ rebuilt/test/node_cache-test.coffee\n@@ -2,9 +2,7 @@\n _ = require( \"underscore\" )\n \n VCache = require \"../lib/node_cache\"\n-localCache = new VCache( stdTTL: 0 )\n-# just for testing disable the check period\n-localCache._killCheckPeriod()\n+localCache = new VCache( stdTTL: '15m' )\n \n # test helper\n randomString = ( length, withnumbers = true ) ->\n@@ -27,7 +25,6 @@\n # define tests\n module.exports = \n \t\"general\": (beforeExit, assert) ->\n-\t\tconsole.log \"START GENERAL TEST\"\n \n \t\tn = 0\n \n@@ -63,7 +60,7 @@\n \t\t\tlocalCache.del \"xxx\", ( err, res )->\n \t\t\t\tn++\n \t\t\t\tassert.isNull( err, err )\n-\t\t\t\tassert.equal( 0, res )\n+\t\t\t\tassert.ok res\n \t\t\t\n \t\t\t# test update\n \t\t\tlocalCache.set key, value2, 0, ( err, res )->\n@@ -86,7 +83,7 @@\n \t\t\tlocalCache.del key, ( err, res )->\n \t\t\t\tn++\n \t\t\t\tassert.isNull( err, err )\n-\t\t\t\tassert.equal 1, res\n+\t\t\t\tassert.ok res\n \n \t\t\t\t# check stats\n \t\t\t\tassert.equal 0, localCache.getStats().keys - start.keys\n@@ -99,48 +96,15 @@\n \n \t\tbeforeExit ->\n \t\t\tassert.equal( 8, n, \"not exited\" )\n-\t\n-\t\"flush\": (beforeExit, assert) ->\n-\t\tconsole.log \"START FLUSH TEST\"\n-\t\tn = 0\n-\t\tcount = 100\n-\t\tstartKeys = localCache.getStats().keys\n-\n-\t\t# set `count` values\n-\t\tks = []\n-\t\tval = randomString( 20 )\n-\t\tfor i in [1..count]\n-\t\t\tkey = randomString( 7 )\n-\t\t\tks.push key\n-\t\t\n-\t\tfor key in ks\t\n-\t\t\tlocalCache.set key, val, 0, ( err, res )->\n-\t\t\t\tn++\n-\t\t\t\tassert.isNull( err, err )\n-\t\t\t\treturn\n-\t\t\n-\t\t# check if all data set\n-\t\tassert.equal( localCache.getStats().keys, startKeys + count )\n-\n-\t\tlocalCache.flushAll( false )\n-\n-\t\t# check for empty data\n-\t\tassert.equal( localCache.getStats().keys, 0 )\n-\t\tassert.eql( localCache.data, {} )\n-\n-\n-\t\tbeforeExit ->\n-\t\t\t# check  successfull runs\n-\t\t\tassert.equal( n, count + 0 )\n \n \t\"many\": (beforeExit, assert) ->\n \t\tn = 0\n \t\tcount = 100000\n \t\tconsole.log \"START MANY TEST/BENCHMARK.\\nSet, Get and check #{count} elements\"\n \t\tval = randomString( 20 )\n-\t\tks = []\n \t\tfor i in [1..count]\n \t\t\tkey = randomString( 7 )\n+\n \t\t\tks.push key\n \t\t\n \t\ttime = new Date().getTime()\n@@ -162,11 +126,11 @@\n \t\tconsole.log( \"MANY STATS:\", localCache.getStats() )\n \t\t\n \t\tbeforeExit ->\n-\t\t\tassert.equal( n, count )\n+\n+\t\t\tassert.equal( n, count)\n \t\t\t\n \n \t\"delete\": (beforeExit, assert) ->\n-\t\tconsole.log \"START DELETE TEST\"\n",
+					"match": false,
+					"packageHash": "78421e8b8c315fae0197dfea0a4e98e936da028536755200b3887b3da8961653",
+					"size": 8815,
+					"sourceHash": "ff53b1b7af1bffa1b2675f548237cca97f5968c208ae7db0e83dabbc1f740503",
+					"status": "content"
+				},
+				"test/node_cache-test.js": {
+					"diff": "--- published/test/node_cache-test.js\n+++ rebuilt/test/node_cache-test.js\n@@ -3,9 +3,8 @@\n   _ = require(\"underscore\");\n   VCache = require(\"../lib/node_cache\");\n   localCache = new VCache({\n-    stdTTL: 0\n+    stdTTL: '15m'\n   });\n-  localCache._killCheckPeriod();\n   randomString = function(length, withnumbers) {\n     var chars, i, randomstring, rnum, string_length;\n     if (withnumbers == null) {\n@@ -30,7 +29,6 @@\n   module.exports = {\n     \"general\": function(beforeExit, assert) {\n       var key, n, start, value, value2;\n-      console.log(\"START GENERAL TEST\");\n       n = 0;\n       start = _.clone(localCache.getStats());\n       value = randomString(100);\n@@ -55,7 +53,7 @@\n         localCache.del(\"xxx\", function(err, res) {\n           n++;\n           assert.isNull(err, err);\n-          return assert.equal(0, res);\n+          return assert.ok(res);\n         });\n         localCache.set(key, value2, 0, function(err, res) {\n           n++;\n@@ -73,7 +71,7 @@\n         return localCache.del(key, function(err, res) {\n           n++;\n           assert.isNull(err, err);\n-          assert.equal(1, res);\n+          assert.ok(res);\n           assert.equal(0, localCache.getStats().keys - start.keys);\n           return localCache.get(key, function(err, res) {\n             n++;\n@@ -86,40 +84,12 @@\n         return assert.equal(8, n, \"not exited\");\n       });\n     },\n-    \"flush\": function(beforeExit, assert) {\n-      var count, i, key, n, startKeys, val, _i, _len;\n-      console.log(\"START FLUSH TEST\");\n-      n = 0;\n-      count = 100;\n-      startKeys = localCache.getStats().keys;\n-      ks = [];\n-      val = randomString(20);\n-      for (i = 1; 1 <= count ? i <= count : i >= count; 1 <= count ? i++ : i--) {\n-        key = randomString(7);\n-        ks.push(key);\n-      }\n-      for (_i = 0, _len = ks.length; _i < _len; _i++) {\n-        key = ks[_i];\n-        localCache.set(key, val, 0, function(err, res) {\n-          n++;\n-          assert.isNull(err, err);\n-        });\n-      }\n-      assert.equal(localCache.getStats().keys, startKeys + count);\n-      localCache.flushAll(false);\n-      assert.equal(localCache.getStats().keys, 0);\n-      assert.eql(localCache.data, {});\n-      return beforeExit(function() {\n-        return assert.equal(n, count + 0);\n-      });\n-    },\n     \"many\": function(beforeExit, assert) {\n       var count, i, key, n, time, val, _i, _j, _len, _len2;\n       n = 0;\n       count = 100000;\n       console.log(\"START MANY TEST/BENCHMARK.\\nSet, Get and check \" + count + \" elements\");\n       val = randomString(20);\n-      ks = [];\n       for (i = 1; 1 <= count ? i <= count : i >= count; 1 <= count ? i++ : i--) {\n         key = randomString(7);\n         ks.push(key);\n@@ -151,23 +121,22 @@\n     },\n     \"delete\": function(beforeExit, assert) {\n       var count, i, n, ri, startKeys;\n-      console.log(\"START DELETE TEST\");\n       n = 0;\n       count = 10000;\n       startKeys = localCache.getStats().keys;\n       for (i = 1; 1 <= count ? i <= count : i >= count; 1 <= count ? i++ : i--) {\n         ri = Math.floor(Math.random() * vs.length);\n-        localCache.del(ks[i], function(err, count) {\n+        localCache.del(ks[i], function(err, success) {\n           n++;\n           assert.isNull(err, err);\n-          return assert.equal(1, count);\n+          return assert.ok(success);\n         });\n       }\n       for (i = 1; 1 <= count ? i <= count : i >= count; 1 <= count ? i++ : i--) {\n         ri = Math.floor(Math.random() * vs.length);\n",
+					"match": false,
+					"packageHash": "38e65e5baafbb5b8ba3a03894db9d01e491e7abb355b4a2c409bc4d18036019c",
+					"size": 11296,
+					"sourceHash": "99cd4a90096634031eb1f0a874e073aa9eb2c3fc822b7a5939c50d2c4690f755",
+					"status": "content"
+				}
+			},
+			"summary": {
+				"differentFiles": 6,
+				"matchingFiles": 1,
+				"missingInPackage": 0,
+				"missingInSource": 3,
+				"score": 0.1,
+				"totalFiles": 10
+			}
+		}
+	}
+]
