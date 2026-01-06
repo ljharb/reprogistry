@@ -1,0 +1,253 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-06T04:45:09.122Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:11.7.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "depcheck@0.4.1",
+			"name": "depcheck",
+			"version": "0.4.1",
+			"location": "https://registry.npmjs.org/depcheck/-/depcheck-0.4.1.tgz",
+			"integrity": "sha512-D3vzlAvS1iT0mUjmx1or5jqKMpUQ/UIqG8UfNJQmKjSd5Yt60up4ZC3A6Ia6vVitG1Y5Qc2b+9WSvma7UXfbyA==",
+			"publishedAt": "2014-06-16T10:03:12.967Z",
+			"publishedWith": {
+				"node": null,
+				"npm": "1.3.8"
+			}
+		},
+		"source": {
+			"integrity": "sha512-QXKqoub4C0Thmq6ByWzKoHTmEca50fGZ73sYOtksByKss8fnXJ9TQG+RyQzwsUx5KkIyLBf3A51dJFsnkYKKjw==",
+			"location": "git://github.com/rumpl/depcheck.git",
+			"spec": "github:rumpl/depcheck#HEAD"
+		},
+		"comparisonHash": "9ef46a5bd31291e57cbab41e2f17c57bd6da0b5b",
+		"diff": {
+			"files": {
+				".editorconfig": {
+					"match": false,
+					"packageHash": "0f7ccc548b61f149e1f365867ddaacf4c2fc1c497231c027721fe8f5da2fd9a4",
+					"size": 166,
+					"status": "missing-in-source"
+				},
+				".jshintrc": {
+					"match": false,
+					"packageHash": "b4a9eb1d15764e388111c3726cf3f543ce2e28f2b72f788abde20cf9f8ef5077",
+					"size": 289,
+					"status": "missing-in-source"
+				},
+				".npmignore": {
+					"match": false,
+					"packageHash": "16d30e4462189fb14dd611bdb708c510630c576a1f35b9383e89a4352da36c97",
+					"size": 13,
+					"status": "missing-in-source"
+				},
+				".travis.yml": {
+					"diff": "--- published/.travis.yml\n+++ rebuilt/.travis.yml\n@@ -1,4 +1,27 @@\n+sudo: false\n+\n language: node_js\n+\n node_js:\n-  - '0.10'\n-  - '0.11'\n+  - 12\n+\n+before_deploy:\n+  - ./node_modules/.bin/patch-version\n+\n+deploy:\n+  - provider: npm\n+    skip_cleanup: true\n+    email: lukic.djordje@gmail.com\n+    api_key:\n+      secure: PwEt5+Vgf1Klas8rB1arAF/5zjIGMkP6NekNHkKhJXDwQkY3g19p3ORXnwOk4oRg3ggf3FO1CI7uh/fJb7nnfVMYc+X1Db1MoYgVQAWBS5L723VgLQ8I2BRHNie7CRmXywMUIV4E/8RYGeH/4b6jlY6gKNx3gnjeSeSjKyKl+OQ=\n+    on:\n+      tags: true\n+      node: 12\n+  - provider: releases\n+    skip_cleanup: true\n+    api_key:\n+      secure: KSDU8zjWT7h0lE92ww+4GXAP4RMMXAqZ3fpq4F1C2tHCdK4udXBLPYhRead70FkHMXbRvAHL84KO5018Jnx4QNGvWjSYQxDH2mgMj7FxempSS/Vll30LlDym62F1v6zLvgICYfb+0phJJ2JCCk7gdKnhF+++Kq71DQDarLsUJXw=\n+    draft: true\n+    on:\n+      tags: true\n+      node: 12\n",
+					"match": false,
+					"packageHash": "49261769b6b11e55a87d5fbdf52d5a12f3adc8e3d47aaa6c3754f8ea4f14ec6b",
+					"size": 49,
+					"sourceHash": "f8375f634fecb0c0d44235e39ffb93c818db6c8faafb11d30a2e4ebc530872c6",
+					"status": "content"
+				},
+				"README.md": {
+					"diff": "--- published/README.md\n+++ rebuilt/README.md\n@@ -1,65 +1,294 @@\n-# depcheck [![build status](https://secure.travis-ci.org/rumpl/depcheck.png)](http://travis-ci.org/rumpl/depcheck)\n+# depcheck\n \n-Keeping track of your dependencies is not an easy task, especially if you have a big application.\n-Are you sure you are using all of the dependencies you define in your `package.json` file? One way to find out is to\n-look at all your files and check which modules you are using, but that's too time consuming. Or maybe you can do a\n-`grep` on all the files of your project, and then some `grep -v` to remove the junk. But that's a hassle too.\n+> [!NOTE]  \n+> Depcheck is no longer actively maintained\n \n-And that is why `depcheck` exists.\n+While it has been widely used to identify unused dependencies in JavaScript and TypeScript projects, its lack of updates means it may not work well with modern tooling and frameworks.\n+We strongly recommend switching to knip, a more actively maintained and feature-rich alternative. Knip provides better support for TypeScript, monorepos, and modern build tools, making it a more reliable choice for keeping your project dependencies clean.\n+Check out [knip.dev](https://knip.dev)\n \n-It's a nifty little tool that looks at your `package.json` file and scans your code in order to find any unused\n-dependencies.\n+Depcheck is a tool for analyzing the dependencies in a project to see: how each dependency is used, which dependencies are useless, and which dependencies are missing from `package.json`.\n \n-Works with grunt dependencies too!\n+## Status\n+\n+[![Build Status](https://github.com/depcheck/depcheck/workflows/ci/badge.svg)](https://github.com/depcheck/depcheck/actions)\n+[![Financial Contributors on Open Collective](https://opencollective.com/depcheck/all/badge.svg?label=financial+contributors)](https://opencollective.com/depcheck) [![Build status](https://ci.appveyor.com/api/projects/status/xbooh370dinuyi0y/branch/master?svg=true)](https://ci.appveyor.com/project/lijunle/depcheck/branch/master)\n+[![codecov.io](https://codecov.io/github/depcheck/depcheck/coverage.svg?branch=master)](https://codecov.io/github/depcheck/depcheck?branch=master)\n+\n+[![Dependencies](https://img.shields.io/librariesio/github/depcheck/depcheck)](https://libraries.io/github/depcheck/depcheck)\n \n ## Installation\n \n-`npm install depcheck -g`\n+```\n+npm install -g depcheck\n+```\n+\n+Or simply using [npx](https://blog.npmjs.org/post/162869356040/introducing-npx-an-npm-package-runner) which is a package runner bundled in `npm`:\n+\n+```\n+$ npx depcheck\n+```\n+\n+_Notice:_ depcheck needs node.js >= 10.\n+\n+## Syntax Support\n+\n+Depcheck not only recognizes the dependencies in JavaScript files, but also supports these syntaxes:\n+\n+- JavaScript (ES5, ES6 and ES7)\n+- [React JSX](http://facebook.github.io/react/docs/jsx-in-depth.html)\n+- [CoffeeScript](http://coffeescript.org/)\n+- [TypeScript](http://www.typescriptlang.org/) (with `typescript` dependency)\n+- [SASS and SCSS](http://sass-lang.com/)\n+- [Vue.js](https://vuejs.org/) (with `@vue/compiler-sfc` dependency)\n+\n+To get the syntax support by external dependency, please install the corresponding package explicitly. For example, for TypeScript user, install depcheck with `typescript` package:\n+\n+```\n+npm install -g depcheck typescript\n+```\n+\n+## Special\n+\n+The _special_ component is used to recognize the dependencies that are not generally used in the above syntax files. The following scenarios are supported by specials:\n+\n+- `babel` - [Babel](https://www.npmjs.com/package/babel) presets and plugins\n+- `bin` - Dependencies used in npm commands, Travis scripts or other CI scripts\n+- `commitizen` - [Commitizen](https://www.npmjs.com/package/commitizen) configuration adaptor\n+- `eslint` - [ESLint](https://www.npmjs.com/package/eslint) configuration presets, parsers and plugins\n+- `feross-standard` - [Feross standard](https://www.npmjs.com/package/standard) format parser\n+- `gatsby` - [Gatsby](https://www.npmjs.com/package/gatsby) configuration parser\n+- `gulp-load-plugins` - [Gulp-load-plugins](https://www.npmjs.com/package/gulp-load-plugins) lazy loaded plugins\n+- `husky` - [Husky](https://www.npmjs.com/package/husky) configuration parser\n+- `istanbul` - [Istanbul nyc](https://www.npmjs.com/package/nyc) configuration extensions\n+- `jest` - [Jest](https://www.npmjs.com/package/jest) properties in [Jest Configuration](https://jestjs.io/docs/en/configuration)\n+- `karma` - [Karma](https://www.npmjs.com/package/karma) configuration frameworks, browsers, preprocessors and reporters\n+- `lint-staged` - [Lint-staged](https://www.npmjs.com/package/lint-staged) configuration parser\n+- `mocha` - [Mocha](https://www.npmjs.com/package/mocha) explicit required dependencies\n+- `prettier` - [Prettier](https://www.npmjs.com/package/prettier) configuration module\n+- `tslint` - [TSLint](https://www.npmjs.com/package/tslint) configuration presets, parsers and plugins\n+- `ttypescript` - [ttypescript](https://github.com/cevek/ttypescript) transformers\n+- `webpack` - [Webpack](https://www.npmjs.com/package/webpack) loaders\n+- `serverless`- [Serverless](https://www.npmjs.com/package/serverless) plugins\n+\n+The logic of a special is not perfect. There might be [false alerts](#false-alert). If this happens, please open an issue for us.\n \n ## Usage\n \n-As easy as **depcheck [DIRECTORY]**.\n+```\n+depcheck [directory] [arguments]\n+```\n+\n+The `directory` argument is the root directory of your project (where the `package.json` file is). If unspecified, defaults to current directory.\n+\n+All of the arguments are optional:\n+\n+`--ignore-bin-package=[true|false]`: A flag to indicate if depcheck ignores the packages containing bin entry. The default value is `false`.\n",
+					"match": false,
+					"packageHash": "6f1ac9d1bcd754e9bbc1394942243fd2020596b13364d518ed2f396d7b18fb77",
+					"size": 2061,
+					"sourceHash": "404b1ed31c9877c437c8ab4fcaecf6df2865b466f9512dc1aa8872b60ac787b1",
+					"status": "content"
+				},
+				"bin/depcheck": {
+					"match": false,
+					"packageHash": "79b77a5abef541b9c1c5ab2a12ffaac6f277e9ca4154709eb78e1eac3329fa8d",
+					"size": 1537,
+					"status": "missing-in-source"
+				},
+				"index.js": {
+					"match": false,
+					"packageHash": "e98f7b31ba1174522cacc8285626d419ba3325db16a83d108f4c9a90341d57c9",
+					"size": 2893,
+					"status": "missing-in-source"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -1,32 +1,126 @@\n {\n   \"name\": \"depcheck\",\n-  \"version\": \"0.4.1\",\n+  \"version\": \"0.0.1\",\n   \"description\": \"Check dependencies in your node module\",\n-  \"main\": \"index\",\n+  \"main\": \"dist/index.js\",\n+  \"types\": \"dist/index.d.ts\",\n+  \"engines\": {\n+    \"node\": \">=10\"\n+  },\n   \"bin\": {\n-    \"depcheck\": \"bin/depcheck\"\n+    \"depcheck\": \"bin/depcheck.js\"\n   },\n   \"repository\": {\n     \"type\": \"git\",\n-    \"url\": \"git://github.com/rumpl/depcheck.git\"\n+    \"url\": \"git://github.com/depcheck/depcheck.git\"\n   },\n   \"scripts\": {\n-    \"test\": \"mocha test/index.js\"\n+    \"component\": \"node -r @babel/register ./build/component.js > ./dist/component.json && node -r @babel/register ./build/component.js ./index.d.tmpl > ./dist/index.d.ts\",\n+    \"compile\": \"babel src/ -d dist/\",\n+    \"depcheck\": \"node ./bin/depcheck.js --ignore-dirs=fake_modules\",\n+    \"depcheck-json\": \"node ./bin/depcheck.js --ignore-dirs=fake_modules --json | node -r @babel/register ./build/check-json\",\n+    \"prepublishOnly\": \"npm run compile && npm run component\",\n+    \"prettier\": \"prettier --write \\\"**/*.@(js|json|md|yml)\\\"\",\n+    \"prettier-check\": \"npm run prettier -- --check\",\n+    \"lint\": \"eslint ./src ./build ./test\",\n+    \"test\": \"mocha ./test ./test/special --timeout 10000\",\n+    \"test-coverage\": \"cross-env NODE_ENV=test nyc --reporter=lcov mocha ./test ./test/special --timeout 20000\"\n+  },\n+  \"author\": {\n+    \"name\": \"Djordje Lukic\",\n+    \"email\": \"lukic.djordje@gmail.com\"\n   },\n-  \"author\": \"Djordje Lukic\",\n+  \"contributors\": [\n+    {\n+      \"name\": \"Junle Li\",\n+      \"email\": \"lijunle@gmail.com\"\n+    }\n+  ],\n+  \"keywords\": [\n+    \"check\",\n+    \"unused\",\n+    \"package\",\n+    \"packages\",\n+    \"depcheck\",\n+    \"dependency\",\n+    \"dependencies\",\n+    \"devDependencies\"\n+  ],\n   \"license\": \"MIT\",\n   \"readmeFilename\": \"README.md\",\n   \"dependencies\": {\n-    \"detective\": \"^3.1.0\",\n-    \"esprima\": \"~1.0.4\",\n-    \"lodash\": \"^2.4.1\",\n-    \"minimatch\": \"^0.3.0\",\n-    \"q\": \"^1.0.1\",\n-    \"walkdir\": \"0.0.7\",\n-    \"optimist\": \"~0.6.0\"\n+    \"@babel/parser\": \"^7.23.0\",\n+    \"@babel/traverse\": \"^7.23.2\",\n+    \"@vue/compiler-sfc\": \"^3.3.4\",\n+    \"callsites\": \"^3.1.0\",\n+    \"camelcase\": \"^6.3.0\",\n+    \"cosmiconfig\": \"^7.1.0\",\n+    \"debug\": \"^4.3.4\",\n+    \"deps-regex\": \"^0.2.0\",\n+    \"findup-sync\": \"^5.0.0\",\n+    \"ignore\": \"^5.2.4\",\n+    \"is-core-module\": \"^2.12.0\",\n+    \"js-yaml\": \"^3.14.1\",\n+    \"json5\": \"^2.2.3\",\n+    \"lodash\": \"^4.17.21\",\n+    \"minimatch\": \"^7.4.6\",\n+    \"multimatch\": \"^5.0.0\",\n+    \"please-upgrade-node\": \"^3.2.0\",\n+    \"readdirp\": \"^3.6.0\",\n+    \"require-package-name\": \"^2.0.1\",\n+    \"resolve\": \"^1.22.3\",\n+    \"resolve-from\": \"^5.0.0\",\n+    \"semver\": \"^7.5.4\",\n+    \"yargs\": \"^16.2.0\"\n   },\n   \"devDependencies\": {\n-    \"should\": \"~1.2.2\",\n-    \"mocha\": \"~1.8.1\"\n+    \"@babel/cli\": \"^7.23.0\",\n+    \"@babel/core\": \"^7.23.2\",\n+    \"@babel/plugin-transform-object-assign\": \"^7.22.5\",\n+    \"@babel/polyfill\": \"^7.12.1\",\n+    \"@babel/preset-env\": \"^7.23.2\",\n+    \"@babel/register\": \"^7.22.15\",\n",
+					"match": false,
+					"packageHash": "0a92cdc31504c8f13d1a9cf14ed26cf60e887138491fdc5d0a6428cc60f31ec3",
+					"size": 669,
+					"sourceHash": "5e96130e44cfc46c11e7c19bb8e189dc4ac10a01c511ddc2ec12cefe304e3365",
+					"status": "content"
+				},
+				"test/fake_modules/bad/index.js": {
+					"match": false,
+					"packageHash": "fdc67eb4707fb09f1016cf9e6e90e9b4b9383d77b8105bb5dd523398f8b3658a",
+					"size": 25,
+					"status": "missing-in-source"
+				},
+				"test/fake_modules/bad/package.json": {
+					"match": false,
+					"packageHash": "d44f7bca9bd2aec9f5a1e6670cfa7202d9abdfe5300f770b21dcea00892e2ff6",
+					"size": 53,
+					"status": "missing-in-source"
+				},
+				"test/fake_modules/bad_deep/package.json": {
+					"match": false,
+					"packageHash": "d44f7bca9bd2aec9f5a1e6670cfa7202d9abdfe5300f770b21dcea00892e2ff6",
+					"size": 53,
+					"status": "missing-in-source"
+				},
+				"test/fake_modules/bad_deep/test/sandbox/index.js": {
+					"match": false,
+					"packageHash": "87fcd90b8ffe497c8f65758d00162f072d78ed23c210193a2d020f5abeb7da52",
+					"size": 36,
+					"status": "missing-in-source"
+				},
+				"test/fake_modules/dev/index.js": {
+					"match": false,
+					"packageHash": "87fcd90b8ffe497c8f65758d00162f072d78ed23c210193a2d020f5abeb7da52",
+					"size": 36,
+					"status": "missing-in-source"
+				},
+				"test/fake_modules/dev/package.json": {
+					"match": false,
+					"packageHash": "a2d614fb975a645ce5909cba662d7240c9b37b1626bae1a934cda845419de971",
+					"size": 75,
+					"status": "missing-in-source"
+				},
+				"test/fake_modules/good/index.js": {
+					"match": false,
+					"packageHash": "87fcd90b8ffe497c8f65758d00162f072d78ed23c210193a2d020f5abeb7da52",
+					"size": 36,
+					"status": "missing-in-source"
+				},
+				"test/fake_modules/good/package.json": {
+					"match": false,
+					"packageHash": "d44f7bca9bd2aec9f5a1e6670cfa7202d9abdfe5300f770b21dcea00892e2ff6",
+					"size": 53,
+					"status": "missing-in-source"
+				},
+				"test/fake_modules/grunt/index.js": {
+					"match": false,
+					"packageHash": "fb35c0d74a0bbdf75006c47736e9ccbdf93e3cf5ee2bf04c7de46aa7badb685b",
+					"size": 44,
+					"status": "missing-in-source"
+				},
+				"test/fake_modules/grunt/package.json": {
+					"match": false,
+					"packageHash": "3c8fc23c64aede9d57c51f2310996e11fca6738db2f886183e6ea0c9f57f33d8",
+					"size": 65,
+					"status": "missing-in-source"
+				},
+				"test/fake_modules/grunt-tasks/index.js": {
+					"match": false,
+					"packageHash": "d5a89cbebed5e4ad46ffb99c672ebd585fe191f42174bcdbc6516af6c771690c",
+					"size": 50,
+					"status": "missing-in-source"
+				},
+				"test/fake_modules/grunt-tasks/package.json": {
+					"match": false,
+					"packageHash": "3c8fc23c64aede9d57c51f2310996e11fca6738db2f886183e6ea0c9f57f33d8",
+					"size": 65,
+					"status": "missing-in-source"
+				},
+				"test/index.js": {
+					"match": false,
+					"packageHash": "c38d5364fb7b47993ea679d4cfcfd28cc56025507832ea0cf320db0daac0a76f",
+					"size": 2207,
+					"status": "missing-in-source"
+				},
+				".babelrc": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				".eslintignore": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				".eslintrc.yml": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				".gitattributes": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				".github/FUNDING.yml": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				".github/ISSUE_TEMPLATE/bug_report.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				".github/ISSUE_TEMPLATE/feature_request.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				".github/stale.yml": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				".github/workflows/nodejs.yml": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				".github/workflows/publish.yml": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				".prettierignore": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				".prettierrc": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"CHANGELOG.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"CODE_OF_CONDUCT.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"CONTRIBUTING.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"LICENSE": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"bin/depcheck.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"dependent-build.yml": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"false-alert.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"index.d.tmpl": {
+					"match": false,
+					"status": "missing-in-package"
+				}
+			},
+			"summary": {
+				"differentFiles": 3,
+				"matchingFiles": 0,
+				"missingInPackage": 20,
+				"missingInSource": 18,
+				"score": 0,
+				"totalFiles": 41
+			}
+		}
+	}
+]
