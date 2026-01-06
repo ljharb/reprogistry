@@ -1,0 +1,85 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-06T15:56:46.951Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:11.7.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "karma-junit-reporter@0.0.1",
+			"name": "karma-junit-reporter",
+			"version": "0.0.1",
+			"location": "https://registry.npmjs.org/karma-junit-reporter/-/karma-junit-reporter-0.0.1.tgz",
+			"integrity": "sha512-WjIJQ8S8aF7byJoYpZhVmGjVmNfGBKOjN0el6rKwQu5Vm8LlLqykaY5O4kxDMemZcq1VwzqW0I+IAxc38hwDRw==",
+			"publishedAt": "2013-03-20T00:13:57.259Z",
+			"publishedWith": {
+				"node": null,
+				"npm": "1.2.12"
+			}
+		},
+		"source": {
+			"integrity": null,
+			"location": "git://github.com/karma-runner/karma-junit-reporter.git",
+			"spec": "github:karma-runner/karma-junit-reporter#HEAD"
+		},
+		"comparisonHash": "9ef46a5bd31291e57cbab41e2f17c57bd6da0b5b",
+		"diff": {
+			"files": {
+				".npmignore": {
+					"match": false,
+					"packageHash": "8c1145e100523b60afd32a1c269c6660aa6c2d84cc289177913b9be5f8d2a623",
+					"size": 17,
+					"status": "missing-in-source"
+				},
+				"CONTRIBUTING.md": {
+					"match": false,
+					"packageHash": "46898e98f114e5d8460f2c2988e62a47c33fb674c02dd25e23c89dd27dfd943a",
+					"size": 186,
+					"status": "missing-in-source"
+				},
+				"LICENSE": {
+					"diff": "--- published/LICENSE\n+++ rebuilt/LICENSE\n@@ -1,6 +1,6 @@\n The MIT License\n \n-Copyright (C) 2011-2013 Vojta Jína and contributors.\n+Copyright (C) 2011-2013 Google, Inc.\n \n Permission is hereby granted, free of charge, to any person obtaining a copy of\n this software and associated documentation files (the \"Software\"), to deal in\n",
+					"match": false,
+					"packageHash": "aeec55919caa5b3bc95cd4c8a55f2f94c000db2cb43f16a2ab62d925cb64695b",
+					"size": 1094,
+					"sourceHash": "296b9a3c5e4eb7b79a6f1dca9a27ee31e48fe5c9d48a32ec31ac924b65ff287c",
+					"status": "content"
+				},
+				"README.md": {
+					"diff": "--- published/README.md\n+++ rebuilt/README.md\n@@ -1,8 +1,120 @@\n # karma-junit-reporter\n \n+[![js-standard-style](https://img.shields.io/badge/code%20style-standard-brightgreen.svg?style=flat-square)](https://github.com/karma-runner/karma-junit-reporter)\n+ [![npm version](https://img.shields.io/npm/v/karma-junit-reporter.svg?style=flat-square)](https://www.npmjs.com/package/karma-junit-reporter) [![npm downloads](https://img.shields.io/npm/dm/karma-junit-reporter.svg?style=flat-square)](https://www.npmjs.com/package/karma-junit-reporter)\n+\n+[![Build Status](https://img.shields.io/travis/karma-runner/karma-junit-reporter/master.svg?style=flat-square)](https://travis-ci.org/karma-runner/karma-junit-reporter) [![Dependency Status](https://img.shields.io/david/karma-runner/karma-junit-reporter.svg?style=flat-square)](https://david-dm.org/karma-runner/karma-junit-reporter) [![devDependency Status](https://img.shields.io/david/dev/karma-runner/karma-junit-reporter.svg?style=flat-square)](https://david-dm.org/karma-runner/karma-junit-reporter#info=devDependencies)\n+\n > Reporter for the JUnit XML format.\n \n+## Installation\n+\n+The easiest way is to keep `karma-junit-reporter` as a devDependency in your `package.json`. Just run\n+\n+```bash\n+npm install karma-junit-reporter --save-dev\n+```\n+\n+to let npm automatically add it there.\n+\n+## Configuration\n+\n+```js\n+// karma.conf.js\n+module.exports = function(config) {\n+  config.set({\n+    reporters: ['progress', 'junit'],\n+\n+    // the default configuration\n+    junitReporter: {\n+      outputDir: '', // results will be saved as $outputDir/$browserName.xml\n+      outputFile: undefined, // if included, results will be saved as $outputDir/$browserName/$outputFile\n+      suite: '', // suite will become the package name attribute in xml testsuite element\n+      useBrowserName: true, // add browser name to report and classes names\n+      nameFormatter: undefined, // function (browser, result) to customize the name attribute in xml testcase element\n+      classNameFormatter: undefined, // function (browser, result) to customize the classname attribute in xml testcase element\n+      properties: {}, // key value pair of properties to add to the <properties> section of the report\n+      xmlVersion: null // use '1' if reporting to be per SonarQube 6.2 XML format\n+    }\n+  });\n+};\n+```\n+\n+You can pass list of reporters as a CLI argument too:\n+```bash\n+karma start --reporters junit,dots\n+```\n+\n+## Produce test result with schema acceptable in sonar\n+\n+To make this possible, it's required to make the classnames of each tests to match its file name.\n+\n+For Example:\n+```js\n+describe('analytics.AnalyticsModule_test', function(){\n+\n+    var analytics;\n+    beforeEach(module('ECApp'));\n+    beforeEach(module('angularytics'));\n+    beforeEach(module('AnalyticsModule'));\n+...\n+```\n+\n+should have a file name AnalyticsModule_test.js\n+\n+This will produce test result with schema acceptable in sonar.\n+\n+Grunt file reporters property example:\n+```js\n+reporters: ['junit', 'coverage', 'progress'],\n+junitReporter: {\n+    outputDir: $junitResults,\n+    suite: 'models'\n+},\n+coverageReporter: {\n+    type: 'lcov',\n+    dir: $coverageOutputDir,\n+    subdir: '.'\n+},\n+preprocessors: {\n+    'src/main/webapp/public/js/ec3.3/**/*.js': 'coverage',\n+    'src/main/webapp/public/js/ec3/**/*.js': 'coverage'\n+},\n+plugins: [\n+    'karma-jasmine',\n+    'karma-phantomjs-launcher',\n+    'ec-karma-junit-reporter23',\n+    'karma-coverage'\n+]\n+```\n+\n+Sonar property example:\n+```\n+sonar.projectName=js\n+sonar.sources=site-main-php/src/main/webapp/public/js\n+sonar.projectBaseDir=.\n+sonar.exclusions=site-main-php/src/main/webapp/public/js/lib/*.js,site-main-php/src/main/webapp/public/js/tests/**/*.php,site-main-php/src/main/webapp/public/js/tests/**/*.js,site-main-php/src/main/webapp/public/js/ec3.3/vendor/**\n+sonar.javascript.lcov.reportPath=site-main-php/target/coverage/lcov.info\n",
+					"match": false,
+					"packageHash": "a5ed0b69432a04fe9de2fb3e86a07dc7b791811b158100eca40d60b648196f40",
+					"size": 157,
+					"sourceHash": "84f7747ee282deafded8fa6aae683f05120daf22b4fcda5db03ee709a867f7bc",
+					"status": "content"
+				},
+				"index.js": {
+					"diff": "--- published/index.js\n+++ rebuilt/index.js\n@@ -1,107 +1,266 @@\n-var os = require('os');\n-var path = require('path');\n-var fs = require('fs');\n-var builder = require('xmlbuilder');\n-\n-\n-var JUnitReporter = function(baseReporterDecorator, config, emitter, logger, helper, formatError) {\n-  var outputFile = config.outputFile;\n-  var pkgName = config.suite;\n-  var log = logger.create('reporter.junit');\n-\n-  var xml;\n-  var suites;\n-  var pendingFileWritings = 0;\n-  var fileWritingFinished = function() {};\n-  var allMessages = [];\n-\n-  baseReporterDecorator(this);\n-\n-  this.adapters = [function(msg) {\n-    allMessages.push(msg);\n-  }];\n-\n-  this.onRunStart = function(browsers) {\n-    suites = {};\n-    xml = builder.create('testsuites');\n-\n-    var suite;\n-    var timestamp = (new Date()).toISOString().substr(0, 19);\n-    browsers.forEach(function(browser) {\n-      suite = suites[browser.id] = xml.ele('testsuite', {\n-        name: browser.name, 'package': pkgName, timestamp: timestamp, id: 0, hostname: os.hostname()\n-      });\n-      suite.ele('properties').ele('property', {name: 'browser.fullName', value: browser.fullName});\n-    });\n-  };\n-\n-  this.onBrowserComplete = function(browser) {\n-    var suite = suites[browser.id];\n-    var result = browser.lastResult;\n-\n-    suite.att('tests', result.total);\n-    suite.att('errors', result.disconnected || result.error ? 1 : 0);\n-    suite.att('failures', result.failed);\n-    suite.att('time', result.netTime / 1000);\n-\n-    suite.ele('system-out').dat(allMessages.join() + '\\n');\n-    suite.ele('system-err');\n-  };\n-\n-  this.onRunComplete = function() {\n-    var xmlToOutput = xml;\n-\n-    pendingFileWritings++;\n-    helper.mkdirIfNotExists(path.dirname(outputFile), function() {\n-      fs.writeFile(outputFile, xmlToOutput.end({pretty: true}), function(err) {\n+var os = require('os')\n+var path = require('path')\n+var fs = require('fs')\n+var builder = require('xmlbuilder')\n+var pathIsAbsolute = require('path-is-absolute')\n+\n+/* XML schemas supported by the reporter: 'xmlVersion' in karma.conf.js,\n+   'XMLconfigValue' as variable here.\n+   0 = \"old\", original XML format. For example, SonarQube versions prior to 6.2\n+   1 = first amended version. Compatible with SonarQube starting from 6.2\n+*/\n+\n+// concatenate test suite(s) and test description by default\n+function defaultNameFormatter (browser, result) {\n+  return result.suite.join(' ') + ' ' + result.description\n+}\n+\n+var JUnitReporter = function (baseReporterDecorator, config, logger, helper, formatError) {\n+  var log = logger.create('reporter.junit')\n+  var reporterConfig = config.junitReporter || {}\n+  // All reporterConfig.something are for reading flags from the Karma config file\n+  var pkgName = reporterConfig.suite || ''\n+  var outputDir = reporterConfig.outputDir\n+  var outputFile = reporterConfig.outputFile\n+  var useBrowserName = reporterConfig.useBrowserName\n+  var nameFormatter = reporterConfig.nameFormatter || defaultNameFormatter\n+  var classNameFormatter = reporterConfig.classNameFormatter\n+  var properties = reporterConfig.properties\n+  // The below two variables have to do with adding support for new SonarQube XML format\n+  var XMLconfigValue = reporterConfig.xmlVersion\n+  var NEWXML\n+  // We need one global variable for the tag <file> to be visible to functions\n+  var exposee\n+  var suites = []\n+  var pendingFileWritings = 0\n+  var fileWritingFinished = function () {}\n+  var allMessages = []\n+\n+  // The NEWXML is just sugar, a flag. Remove it when there are more than 2\n+  // supported XML output formats.\n+  if (!XMLconfigValue) {\n",
+					"match": false,
+					"packageHash": "b02601388b621a01f81f12fc6f2daec72e9eeaed0363a0d38768e1482341f220",
+					"size": 3019,
+					"sourceHash": "2758f748a9fb67e4967e2953520ebb8aea55e4d98a3c2fdaccedecd81e48f242",
+					"status": "content"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -1,26 +1,98 @@\n {\n   \"name\": \"karma-junit-reporter\",\n-  \"version\": \"0.0.1\",\n+  \"version\": \"2.0.1\",\n   \"description\": \"A Karma plugin. Report results in junit xml format.\",\n   \"main\": \"index.js\",\n+  \"files\": [\n+    \"index.js\"\n+  ],\n   \"scripts\": {\n-    \"test\": \"echo \\\"Error: no test specified\\\" && exit 1\"\n+    \"test\": \"grunt\"\n   },\n   \"repository\": {\n     \"type\": \"git\",\n     \"url\": \"git://github.com/karma-runner/karma-junit-reporter.git\"\n   },\n   \"keywords\": [\n+    \"junit\",\n     \"karma-plugin\",\n-    \"reporter\",\n-    \"junit\"\n+    \"karma-reporter\"\n   ],\n   \"author\": \"Vojta Jina <vojta.jina@gmail.com>\",\n   \"dependencies\": {\n-    \"xmlbuilder\": \"0.4.2\"\n+    \"path-is-absolute\": \"^1.0.0\",\n+    \"xmlbuilder\": \"12.0.0\"\n   },\n   \"peerDependencies\": {\n-    \"karma\": \"~0.9\"\n+    \"karma\": \">=0.9\"\n+  },\n+  \"engines\": {\n+    \"node\": \">= 8\"\n+  },\n+  \"license\": \"MIT\",\n+  \"devDependencies\": {\n+    \"chai\": \"^3.5.0\",\n+    \"eslint\": \"^6.5.1\",\n+    \"eslint-config-standard\": \"^5.3.1\",\n+    \"eslint-plugin-promise\": \"^1.3.2\",\n+    \"eslint-plugin-standard\": \"^1.3.1\",\n+    \"grunt\": \"^1.0.1\",\n+    \"grunt-bump\": \"^0.8.0\",\n+    \"grunt-cli\": \"^1.2.0\",\n+    \"grunt-conventional-changelog\": \"^6.1.0\",\n+    \"grunt-conventional-github-releaser\": \"^1.0.0\",\n+    \"grunt-eslint\": \"^18.1.0\",\n+    \"grunt-npm\": \"^0.0.2\",\n+    \"grunt-simple-mocha\": \"^0.4.1\",\n+    \"libxmljs\": \"^0.19.5\",\n+    \"load-grunt-tasks\": \"^3.2.0\",\n+    \"mocha\": \"^3.2.0\",\n+    \"proxyquire\": \"^1.7.4\",\n+    \"sinon\": \"^1.17.3\",\n+    \"sinon-chai\": \"^2.8.0\"\n   },\n-  \"license\": \"MIT\"\n+  \"contributors\": [\n+    \"Friedel Ziegelmayer <dignifiedquire@gmail.com>\",\n+    \"Vojta Jina <vojta.jina@gmail.com>\",\n+    \"Mark Ethan Trostler <mark@zzo.com>\",\n+    \"johnjbarton <johnjbarton@johnjbarton.com>\",\n+    \"hicom150 <hicom150@gmail.com>\",\n+    \"Simen Bekkhus <sbekkhus91@gmail.com>\",\n+    \"Friedel Ziegelmayer <friedel.ziegelmayer@gmail.com>\",\n+    \"Floris Kraak <randakar@gmail.com>\",\n+    \"Julen Garcia Leunda <hicom150@gmail.com>\",\n+    \"Janek Lasocki-Biczysko <iamjanek@gmail.com>\",\n+    \"Craig Vermeer <craig@vermeers.net>\",\n+    \"greenkeeperio-bot <support@greenkeeper.io>\",\n+    \"Larry Myers <larry@larrymyers.com>\",\n+    \"Maksim Ryzhikov <rv.maksim@gmail.com>\",\n+    \"Martin Leonhartsberger <mschrott@splunk.com>\",\n+    \"Marvin Tam <thatmarvin@users.noreply.github.com>\",\n+    \"Matthias Oßwald <matz3@users.noreply.github.com>\",\n+    \"Mike Ng <mike.ng@optimizely.com>\",\n+    \"Nikita Shirin <shirin.nikita@gmail.com>\",\n+    \"Paweł Gesek <pgesek@soldevelo.com>\",\n+    \"Phillip Johnsen <johphi@gmail.com>\",\n+    \"Rob Richardson <robrich@robrich.org>\",\n+    \"Sylvain Hamel <sylvainhamel0@gmail.com>\",\n+    \"Trey Hyde <thyde@centraldesktop.com>\",\n+    \"Vladimir Alaev <scff@yandex-team.ru>\",\n+    \"budde377 <budde377@gmail.com>\",\n+    \"dependabot[bot] <49699333+dependabot[bot]@users.noreply.github.com>\",\n+    \"mon.asuncion <mon@englishcentral.com>\",\n+    \"Adriaan Thomas <athomas@xebia.com>\",\n+    \"sylvain-hamel <sylvainhamel0@gmail.com>\",\n+    \"Alex Alvarez <dominalexican@gmail.com>\",\n+    \"Brian Donovan <me@brian-donovan.com>\",\n+    \"Brian Meneses <brian.meneses@gmail.com>\",\n+    \"Cesar Andreu <cesarandreu@gmail.com>\",\n+    \"Christian Svensson <csvn.dev@gmail.com>\",\n+    \"César Suárez Ortega <suarez.ortega.cesar@gmail.com>\",\n",
+					"match": false,
+					"packageHash": "8039af82b1d63ae162b2225a3be676d7964ff4b014a85baeeeffeb5410285bb0",
+					"size": 579,
+					"sourceHash": "5d1d3e11e7ba76fac516d57232e76d2ec9400f58f4b03cfb79caace8f64930dd",
+					"status": "content"
+				}
+			},
+			"summary": {
+				"differentFiles": 4,
+				"matchingFiles": 0,
+				"missingInPackage": 0,
+				"missingInSource": 2,
+				"score": 0,
+				"totalFiles": 6
+			}
+		}
+	}
+]
