@@ -1,0 +1,111 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-06T15:51:11.609Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:11.7.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "jsonschema@0.4.0",
+			"name": "jsonschema",
+			"version": "0.4.0",
+			"location": "https://registry.npmjs.org/jsonschema/-/jsonschema-0.4.0.tgz",
+			"integrity": "sha512-vmqTTYn6ZxrPXnDED8ATVAJ35IvVHI0Ymx1Bhwbnj73PbPwvQ9PqYCeTqpKM3ZTIoJ0CxpofOKoCV4mIhFWPSg==",
+			"publishedAt": "2013-07-15T09:39:09.444Z",
+			"publishedWith": {
+				"node": null,
+				"npm": "1.2.15"
+			}
+		},
+		"source": {
+			"integrity": "sha512-woRgSBMVs6yPwoGA8qL/OOij5v8Nx84xNxkjS1p4PMffFzn5catp2JFDyspP4rdJ1gnfX/1s6kpMI5mrDy5QXw==",
+			"location": "git://github.com/tdegrunt/jsonschema.git",
+			"spec": "github:tdegrunt/jsonschema#HEAD"
+		},
+		"comparisonHash": "9ef46a5bd31291e57cbab41e2f17c57bd6da0b5b",
+		"diff": {
+			"files": {
+				".npmignore": {
+					"match": false,
+					"packageHash": "4b5b5c09f3d481e8622b8f9a2b866d81d66e6ce530612145b29ebf617632a058",
+					"size": 69,
+					"status": "missing-in-source"
+				},
+				"README.md": {
+					"diff": "--- published/README.md\n+++ rebuilt/README.md\n@@ -1,105 +1,245 @@\n-[![Build Status](https://secure.travis-ci.org/tdegrunt/jsonschema.png)](http://travis-ci.org/tdegrunt/jsonschema)\n+[![Build Status](https://secure.travis-ci.org/tdegrunt/jsonschema.svg)](http://travis-ci.org/tdegrunt/jsonschema)\n \n # jsonschema\n-Simple and fast [JSON schema](http://tools.ietf.org/html/draft-zyp-json-schema-03) validator.\n-The latest IETF published draft is v3. This library is v3 compatible, but has some v4 additions.\n-We aim to fully support v4 once it is is published.\n+\n+[JSON schema](http://json-schema.org/) validator, which is designed to be fast and simple to use. JSON Schema versions through draft-07 are fully supported.\n+\n+## Contributing & bugs\n+\n+Please fork the repository, make the changes in your fork and include tests. Once you're done making changes, send in a pull request.\n+\n+### Bug reports\n+\n+Please include a test which shows why the code fails.\n \n ## Usage\n \n ### Simple\n+\n Simple object validation using JSON schemas.\n \n ```javascript\n-  var Validator = require('jsonschema').Validator;\n-  var v = new Validator();\n-  var instance = 4;\n-  var schema = {\"type\": \"number\"};\n-  console.log(v.validate(instance, schema));\n+var Validator = require('jsonschema').Validator;\n+var v = new Validator();\n+var instance = 4;\n+var schema = {\"type\": \"number\"};\n+console.log(v.validate(instance, schema));\n ```\n \n ### Even simpler\n \n ```javascript\n-  var validate = require('jsonschema').validate;\n-  console.log(validate(4, {\"type\": \"number\"}));\n+var validate = require('jsonschema').validate;\n+console.log(validate(4, {\"type\": \"number\"}));\n ```\n \n ### Complex example, with split schemas and references\n \n ```javascript\n-  var Validator = require('jsonschema').Validator;\n-  var v = new Validator();\n+var Validator = require('jsonschema').Validator;\n+var v = new Validator();\n \n-  // Address, to be embedded on Person\n-  var addressSchema = {\n-    \"id\": \"/SimpleAddress\",\n-    \"type\": \"object\",\n-    \"properties\": {\n-      \"lines\": {\n-        \"type\": \"array\",\n-        \"items\": {\"type\": \"string\"}\n-      },\n-      \"zip\": {\"type\": \"string\"},\n-      \"city\": {\"type\": \"string\"},\n-      \"country\": {\"type\": \"string\", \"required\": true}\n-    }\n-  };\n+// Address, to be embedded on Person\n+var addressSchema = {\n+  \"id\": \"/SimpleAddress\",\n+  \"type\": \"object\",\n+  \"properties\": {\n+    \"lines\": {\n+      \"type\": \"array\",\n+      \"items\": {\"type\": \"string\"}\n+    },\n+    \"zip\": {\"type\": \"string\"},\n+    \"city\": {\"type\": \"string\"},\n+    \"country\": {\"type\": \"string\"}\n+  },\n+  \"required\": [\"country\"]\n+};\n+\n+// Person\n+var schema = {\n+  \"id\": \"/SimplePerson\",\n+  \"type\": \"object\",\n+  \"properties\": {\n+    \"name\": {\"type\": \"string\"},\n+    \"address\": {\"$ref\": \"/SimpleAddress\"},\n+    \"votes\": {\"type\": \"integer\", \"minimum\": 1}\n+  }\n+};\n \n-  // Person\n-  var schema = {\n",
+					"match": false,
+					"packageHash": "9599f20a03bce353bb099a4a53ed2d0ed845f70ea8271b178280f5222bbfe9cd",
+					"size": 5177,
+					"sourceHash": "dcc3da55f965d5e25afeb9039c17ce87c53b1c7a6168f12a6878c95426d84353",
+					"status": "content"
+				},
+				"lib/attribute.js": {
+					"diff": "--- published/lib/attribute.js\n+++ rebuilt/lib/attribute.js\n@@ -16,13 +16,13 @@\n   'description': true,\n   'title': true,\n   // arguments to other properties\n-  'exclusiveMinimum': true,\n-  'exclusiveMaximum': true,\n   'additionalItems': true,\n+  'then': true,\n+  'else': true,\n   // special-handled properties\n   '$schema': true,\n   '$ref': true,\n-  'extends': true\n+  'extends': true,\n };\n \n /**\n@@ -31,29 +31,48 @@\n var validators = attribute.validators = {};\n \n /**\n- * Validates whether the instance if of a certain type\n+ * Validates whether the instance is of a certain type\n  * @param instance\n  * @param schema\n  * @param options\n  * @param ctx\n- * @return {String|null}\n+ * @return {ValidatorResult|null}\n  */\n validators.type = function validateType (instance, schema, options, ctx) {\n   // Ignore undefined instances\n   if (instance === undefined) {\n     return null;\n   }\n-  var types = (schema.type instanceof Array) ? schema.type : [schema.type];\n+  var result = new ValidatorResult(instance, schema, options, ctx);\n+  var types = Array.isArray(schema.type) ? schema.type : [schema.type];\n   if (!types.some(this.testType.bind(this, instance, schema, options, ctx))) {\n-    return \"is not of a type(s) \" + types.map(function (v) {\n-      return v.id && ('<' + v.id + '>') || v.toString();\n+    var list = types.map(function (v) {\n+      if(!v) return;\n+      var id = v.$id || v.id;\n+      return id ? ('<' + id + '>') : (v+'');\n+    });\n+    result.addError({\n+      name: 'type',\n+      argument: list,\n+      message: \"is not of a type(s) \" + list,\n     });\n   }\n-  return null;\n+  return result;\n };\n \n-function testSchema(instance, options, ctx, schema){\n-\treturn this.validateSchema(instance, schema, options, ctx).valid;\n+function testSchemaNoThrow(instance, options, ctx, callback, schema){\n+  var throwError = options.throwError;\n+  var throwAll = options.throwAll;\n+  options.throwError = false;\n+  options.throwAll = false;\n+  var res = this.validateSchema(instance, schema, options, ctx);\n+  options.throwError = throwError;\n+  options.throwAll = throwAll;\n+\n+  if (!res.valid && callback instanceof Function) {\n+    callback(res);\n+  }\n+  return res.valid;\n }\n \n /**\n@@ -62,22 +81,37 @@\n  * @param schema\n  * @param options\n  * @param ctx\n- * @return {String|null}\n+ * @return {ValidatorResult|null}\n  */\n validators.anyOf = function validateAnyOf (instance, schema, options, ctx) {\n   // Ignore undefined instances\n   if (instance === undefined) {\n     return null;\n   }\n-  if (!(schema.anyOf instanceof Array)){\n+  var result = new ValidatorResult(instance, schema, options, ctx);\n+  var inner = new ValidatorResult(instance, schema, options, ctx);\n+  if (!Array.isArray(schema.anyOf)){\n     throw new SchemaError(\"anyOf must be an array\");\n   }\n-  if (!schema.anyOf.some(testSchema.bind(this, instance, options, ctx))) {\n-    return \"is not any of \" + schema.anyOf.map(function (v) {\n-      return v.id && ('<' + v.id + '>') || v.toString();\n+  if (!schema.anyOf.some(\n+    testSchemaNoThrow.bind(\n+      this, instance, options, ctx, function(res){inner.importErrors(res);}\n",
+					"match": false,
+					"packageHash": "60eed741ed81203ef63a21b090cc343477cb90ff97ea52e4bf072bb8f4dd97d9",
+					"size": 16707,
+					"sourceHash": "c51996de5ca59f985d1706b9a0573caf71eb82d4ee7e7c4959adef82a56d8ecd",
+					"status": "content"
+				},
+				"lib/helpers.js": {
+					"diff": "--- published/lib/helpers.js\n+++ rebuilt/lib/helpers.js\n@@ -1,24 +1,26 @@\n 'use strict';\n \n-var uri = require('url');\n-\n-var ValidationError = exports.ValidationError = function ValidationError (message, instance, schema, propertyPath) {\n-  if (propertyPath) {\n-    this.property = propertyPath;\n+var ValidationError = exports.ValidationError = function ValidationError (message, instance, schema, path, name, argument) {\n+  if(Array.isArray(path)){\n+    this.path = path;\n+    this.property = path.reduce(function(sum, item){\n+      return sum + makeSuffix(item);\n+    }, 'instance');\n+  }else if(path !== undefined){\n+    this.property = path;\n   }\n   if (message) {\n     this.message = message;\n   }\n   if (schema) {\n-    if (schema.id) {\n-      this.schema = schema.id;\n-    } else {\n-      this.schema = schema;\n-    }\n+    var id = schema.$id || schema.id;\n+    this.schema = id || schema;\n   }\n-  if (instance) {\n+  if (instance !== undefined) {\n     this.instance = instance;\n   }\n+  this.name = name;\n+  this.argument = argument;\n   this.stack = this.toString();\n };\n \n@@ -29,39 +31,69 @@\n var ValidatorResult = exports.ValidatorResult = function ValidatorResult(instance, schema, options, ctx) {\n   this.instance = instance;\n   this.schema = schema;\n+  this.options = options;\n+  this.path = ctx.path;\n   this.propertyPath = ctx.propertyPath;\n   this.errors = [];\n   this.throwError = options && options.throwError;\n+  this.throwFirst = options && options.throwFirst;\n+  this.throwAll = options && options.throwAll;\n+  this.disableFormat = options && options.disableFormat === true;\n };\n \n-ValidatorResult.prototype.addError = function addError(message) {\n-  var err = new ValidationError(message, this.instance, this.schema, this.propertyPath);\n-  if (this.throwError) {\n-    throw err;\n+ValidatorResult.prototype.addError = function addError(detail) {\n+  var err;\n+  if (typeof detail == 'string') {\n+    err = new ValidationError(detail, this.instance, this.schema, this.path);\n+  } else {\n+    if (!detail) throw new Error('Missing error detail');\n+    if (!detail.message) throw new Error('Missing error message');\n+    if (!detail.name) throw new Error('Missing validator type');\n+    err = new ValidationError(detail.message, this.instance, this.schema, this.path, detail.name, detail.argument);\n   }\n+\n   this.errors.push(err);\n+  if (this.throwFirst) {\n+    throw new ValidatorResultError(this);\n+  }else if(this.throwError){\n+    throw err;\n+  }\n   return err;\n };\n \n ValidatorResult.prototype.importErrors = function importErrors(res) {\n-  if (typeof res == 'string') {\n+  if (typeof res == 'string' || (res && res.validatorType)) {\n     this.addError(res);\n   } else if (res && res.errors) {\n-    var errs = this.errors;\n-    res.errors.forEach(function (v) {\n-      errs.push(v)\n-    });\n+    this.errors = this.errors.concat(res.errors);\n   }\n };\n \n+function stringizer (v,i){\n+  return i+': '+v.toString()+'\\n';\n+}\n ValidatorResult.prototype.toString = function toString(res) {\n-  return this.errors.map(function(v,i){ return i+': '+v.toString()+'\\n'; }).join('');\n+  return this.errors.map(stringizer).join('');\n };\n \n Object.defineProperty(ValidatorResult.prototype, \"valid\", { get: function() {\n",
+					"match": false,
+					"packageHash": "2d72600bd0fe9cad82a012daa2260fd56cc1f276e39f5adbfe2b5c030be1638f",
+					"size": 9133,
+					"sourceHash": "69fef90bacc712a7e19696997bfa7fe857341b2fec0718ae8ce7b27b3acb68e6",
+					"status": "content"
+				},
+				"lib/index.js": {
+					"diff": "--- published/lib/index.js\n+++ rebuilt/lib/index.js\n@@ -3,8 +3,11 @@\n var Validator = module.exports.Validator = require('./validator');\n \n module.exports.ValidatorResult = require('./helpers').ValidatorResult;\n+module.exports.ValidatorResultError = require('./helpers').ValidatorResultError;\n module.exports.ValidationError = require('./helpers').ValidationError;\n module.exports.SchemaError = require('./helpers').SchemaError;\n+module.exports.SchemaScanResult = require('./scan').SchemaScanResult;\n+module.exports.scan = require('./scan').scan;\n \n module.exports.validate = function (instance, schema, options) {\n   var v = new Validator();\n",
+					"match": false,
+					"packageHash": "81db7836b2eda56b8cc51b0312f093f864f150ac5b454352299e257752c65241",
+					"size": 432,
+					"sourceHash": "e0b8c4eacc1d1529b4d74255aead87ad13e4ca4c14b30355d07f3b8f6e75006e",
+					"status": "content"
+				},
+				"lib/validator.js": {
+					"diff": "--- published/lib/validator.js\n+++ rebuilt/lib/validator.js\n@@ -1,12 +1,14 @@\n 'use strict';\n \n-var urilib = require('url');\n-\n var attribute = require('./attribute');\n var helpers = require('./helpers');\n+var scanSchema = require('./scan').scan;\n var ValidatorResult = helpers.ValidatorResult;\n+var ValidatorResultError = helpers.ValidatorResultError;\n var SchemaError = helpers.SchemaError;\n var SchemaContext = helpers.SchemaContext;\n+//var anonymousBase = 'vnd.jsonschema:///';\n+var anonymousBase = '/';\n \n /**\n  * Creates a new Validator object\n@@ -14,6 +16,9 @@\n  * @constructor\n  */\n var Validator = function Validator () {\n+  // Allow a validator instance to override global custom formats or to have their\n+  // own custom formats.\n+  this.customFormats = Object.create(Validator.prototype.customFormats);\n   this.schemas = {};\n   this.unresolvedRefs = [];\n \n@@ -22,6 +27,9 @@\n   this.attributes = Object.create(attribute.validators);\n };\n \n+// Allow formats to be registered globally.\n+Validator.prototype.customFormats = {};\n+\n // Hint at the presence of a property\n Validator.prototype.schemas = null;\n Validator.prototype.types = null;\n@@ -34,65 +42,40 @@\n  * @param urn\n  * @return {Object}\n  */\n-Validator.prototype.addSchema = function addSchema (schema, uri) {\n+Validator.prototype.addSchema = function addSchema (schema, base) {\n+  var self = this;\n   if (!schema) {\n     return null;\n   }\n-  var ourUri = uri || schema.id;\n-  this.addSubSchema(ourUri, schema);\n-  if (ourUri) {\n-    this.schemas[ourUri] = schema;\n-  }\n-  return this.schemas[ourUri];\n-};\n-\n-Validator.prototype.addSubSchema = function addSubSchema(baseuri, schema) {\n-  if(!schema || typeof schema!='object') return;\n-  // Mark all referenced schemas so we can tell later which schemas are referred to, but never defined\n-  if(schema.$ref){\n-    var resolvedUri = urilib.resolve(baseuri, schema.$ref);\n-    this.schemas[resolvedUri] = null;\n-    this.unresolvedRefs.push(resolvedUri);\n-    return;\n-  }\n-  var ourUri = schema.id && urilib.resolve(baseuri, schema.id);\n-  var ourBase = ourUri || baseuri;\n-  if (ourUri) {\n-    if(this.schemas[ourUri]){\n-      if(!helpers.deepCompareStrict(this.schemas[ourUri], schema)){\n-        throw new Error('Schema <'+schema+'> already exists with different definition');\n-      }\n-      return this.schemas[ourUri];\n-    }\n-    this.schemas[ourUri] = schema;\n-  }\n-  this.addSubSchemaArray(ourBase, ((schema.items instanceof Array)?schema.items:[schema.items]));\n-  this.addSubSchema(ourBase, schema.additionalItems);\n-  this.addSubSchemaObject(ourBase, schema.properties);\n-  this.addSubSchema(ourBase, schema.additionalProperties);\n-  this.addSubSchemaObject(ourBase, schema.definitions);\n-  this.addSubSchemaObject(ourBase, schema.patternProperties);\n-  this.addSubSchemaObject(ourBase, schema.dependencies);\n-  this.addSubSchemaArray(ourBase, schema.allOf);\n-  this.addSubSchemaArray(ourBase, schema.anyOf);\n-  this.addSubSchemaArray(ourBase, schema.oneOf);\n-  this.addSubSchema(ourBase, schema.not);\n+  var scan = scanSchema(base||anonymousBase, schema);\n+  var ourUri = base || schema.$id || schema.id;\n+  for(var uri in scan.id){\n+    this.schemas[uri] = scan.id[uri];\n+  }\n+  for(var uri in scan.ref){\n+    // If this schema is already defined, it will be filtered out by the next step\n+    this.unresolvedRefs.push(uri);\n+  }\n+  // Remove newly defined schemas from unresolvedRefs\n+  this.unresolvedRefs = this.unresolvedRefs.filter(function(uri){\n+    return typeof self.schemas[uri]==='undefined';\n",
+					"match": false,
+					"packageHash": "165c531675186eb8e71ac901cf0861aefa5b938804a3ba34efc8d962cc9b8a96",
+					"size": 9612,
+					"sourceHash": "bba94419cf048bb70fe897d8095daf18e5fd7f629f0ab98069ad0ab07598a096",
+					"status": "content"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -1,13 +1,23 @@\n {\n   \"author\": \"Tom de Grunt <tom@degrunt.nl>\",\n   \"name\": \"jsonschema\",\n-  \"version\": \"0.4.0\",\n-  \"dependencies\": {\n-  },\n-  \"main\": \"./lib\",\n+  \"version\": \"1.5.0\",\n+  \"license\": \"MIT\",\n+  \"dependencies\": {},\n+  \"contributors\": [\n+    {\n+      \"name\": \"Austin Wright\"\n+    }\n+  ],\n+  \"main\": \"./lib/index.js\",\n+  \"typings\": \"./lib/index.d.ts\",\n   \"devDependencies\": {\n-    \"mocha\": \"~1.8.2\",\n-    \"chai\": \"~1.5.0\"\n+    \"@stryker-mutator/core\": \"^8.7.1\",\n+    \"@stryker-mutator/mocha-runner\": \"^8.7.1\",\n+    \"chai\": \"~4.2.0\",\n+    \"eslint\": \"^7.7.0\",\n+    \"json-metaschema\": \"^1.2.0\",\n+    \"mocha\": \"~11.0.1\"\n   },\n   \"optionalDependencies\": {},\n   \"engines\": {\n@@ -26,6 +36,7 @@\n   },\n   \"description\": \"A fast and easy to use JSON Schema validator\",\n   \"scripts\": {\n+    \"stryker\": \"stryker run\",\n     \"test\": \"./node_modules/.bin/mocha -R spec\"\n   }\n-}\n+}\n\\ No newline at end of file\n",
+					"match": false,
+					"packageHash": "725d518a3f56d2c9aea7c36838b96ff8dd3287c23948375ce38dbf5745c4c018",
+					"size": 604,
+					"sourceHash": "a6704e78715ac1ab60ac3896bc91de75a78942a08fbd477c9184439b5abd48f7",
+					"status": "content"
+				},
+				".editorconfig": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"LICENSE": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/index.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/scan.js": {
+					"match": false,
+					"status": "missing-in-package"
+				}
+			},
+			"summary": {
+				"differentFiles": 6,
+				"matchingFiles": 0,
+				"missingInPackage": 4,
+				"missingInSource": 1,
+				"score": 0,
+				"totalFiles": 11
+			}
+		}
+	}
+]
