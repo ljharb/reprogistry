@@ -1,0 +1,135 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-06T17:41:49.841Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:11.7.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "mockery@1.4.0",
+			"name": "mockery",
+			"version": "1.4.0",
+			"location": "https://registry.npmjs.org/mockery/-/mockery-1.4.0.tgz",
+			"integrity": "sha512-JoUDWErMSmHde77copTFWFxFEgWK23u4OLIi9FCMs1UoKr/rceKZky1VrKZt+xf/EZESvq5vnsd289q84rONhw==",
+			"publishedAt": "2012-12-29T02:19:33.935Z",
+			"publishedWith": {
+				"node": null,
+				"npm": "1.1.69"
+			}
+		},
+		"source": {
+			"integrity": null,
+			"location": "git://github.com/mfncooper/mockery.git",
+			"spec": "github:mfncooper/mockery#HEAD"
+		},
+		"comparisonHash": "9ef46a5bd31291e57cbab41e2f17c57bd6da0b5b",
+		"diff": {
+			"files": {
+				".npmignore": {
+					"match": false,
+					"packageHash": "16d30e4462189fb14dd611bdb708c510630c576a1f35b9383e89a4352da36c97",
+					"size": 13,
+					"status": "missing-in-source"
+				},
+				".travis.yml": {
+					"diff": "--- published/.travis.yml\n+++ rebuilt/.travis.yml\n@@ -1,4 +1,15 @@\n language: node_js\n+addons:\n+  apt:\n+    sources:\n+      - ubuntu-toolchain-r-test\n+    packages:\n+      - gcc-4.9\n+      - g++-4.9\n+env: CXX=g++-4.9 CC=gcc-4.9\n node_js:\n-  - 0.6\n-  - 0.8\n+  - \"0.10\"\n+  - \"0.11\"\n+  - \"0.12\"\n+  - \"4\"\n+  - \"6\"\n",
+					"match": false,
+					"packageHash": "070dffc7dc13bf0be3cefbef8f39ce015537ad397abb812e2cad8f1df9f459e1",
+					"size": 43,
+					"sourceHash": "605469c19a8a6fe9ad629af9fdf2466990448950bad332afe81132fa3e0575b4",
+					"status": "content"
+				},
+				"README.md": {
+					"diff": "--- published/README.md\n+++ rebuilt/README.md\n@@ -1,6 +1,6 @@\n # Mockery - Simplifying the use of mocks with Node.js\n \n-[![Build Status](https://secure.travis-ci.org/mfncooper/mockery.png)](http://travis-ci.org/mfncooper/mockery)\n+[![Build Status](https://secure.travis-ci.org/mfncooper/mockery.svg)](http://travis-ci.org/mfncooper/mockery)\n \n If you've tried working with mocks in Node.js, you've no doubt discovered that\n it's not so easy to get your mocks hooked up in the face of Node's module\n@@ -17,6 +17,17 @@\n framework of choice (or no framework) to get your mocks hooked in to all the\n right places in the code you need to test.\n \n+* [Installation](#installation)\n+* [Enabling mockery](#enabling-mockery)\n+* [Registering mocks](#registering-mocks)\n+* [Registering substitutes](#registering-substitutes)\n+* [Registering allowable modules](#registering-allowable-modules)\n+* [Deregistering everything](#deregistering-everything)\n+* [Controlling the module cache](#controlling-the-module-cache)\n+* [Disabling warnings](#disabling-warnings)\n+* [The name](#the-name)\n+* [License](#license)\n+\n ## Installation\n \n Just use npm:\n",
+					"match": false,
+					"packageHash": "744364b9473f3f48fda38ccb6c936fe78b6b1343e9a75f4402efad87adade0d9",
+					"size": 9334,
+					"sourceHash": "6d7e0b59fecd475e9d05642155c32ad35af90312ed98079e1bc8c921f0a58092",
+					"status": "content"
+				},
+				"mockery.js": {
+					"diff": "--- published/mockery.js\n+++ rebuilt/mockery.js\n@@ -32,8 +32,6 @@\n  * 'require' can be mocked out.\n  */\n \n-/*jslint nomen: true */\n-\n \"use strict\";\n \n var m = require('module'),\n@@ -68,21 +66,6 @@\n }\n \n /*\n- * The perils of using internal functions. The Node-internal _resolveFilename\n- * function was changed in commit 840229a8251955d2b791928875f36d35127dcad0\n- * (just prior to v0.6.10) such that it returns a string, whereas previously\n- * it returned an array. Instead of playing version number tricks, just check\n- * for an array and pull the filename from that if necessary.\n- */\n-function resolveFilename(request, parent) {\n-    var filename = m._resolveFilename(request, parent);\n-    if (Array.isArray(filename)) {\n-        filename = filename[1];\n-    }\n-    return filename;\n-}\n-\n-/*\n  * The (private) loader replacement that is used when hooking is enabled. It\n  * does the work of returning a mock or substitute when configured, reporting\n  * non-allowed modules, and invoking the original loader when appropriate.\n@@ -114,8 +97,8 @@\n     if (registeredAllowables.hasOwnProperty(request)) {\n         allow = registeredAllowables[request];\n         if (allow.unhook) {\n-            file = resolveFilename(request, parent);\n-            if (file.indexOf('/') !== -1 && allow.paths.indexOf(file) === -1) {\n+            file = m._resolveFilename(request, parent);\n+            if ((file.indexOf('/') !== -1 || file.indexOf('\\\\') !== -1) && allow.paths.indexOf(file) === -1) {\n                 allow.paths.push(file);\n             }\n         }\n@@ -144,6 +127,7 @@\n     if (options.useCleanCache) {\n         originalCache = m._cache;\n         m._cache = {};\n+        repopulateNative();\n     }\n \n     originalLoader = m._load;\n@@ -162,6 +146,17 @@\n     }\n \n     if (options.useCleanCache) {\n+        // Previously this just set m._cache to originalCache. This would make\n+        // node re-require native addons that were required while mockery was\n+        // enabled, which breaks it in node@>=0.12. Instead populate\n+        // originalCache with any native addons that were first required since\n+        // mockery was enabled.\n+        Object.keys(m._cache).forEach(function(k){\n+            if (k.indexOf('\\.node') > -1 && !originalCache[k]) {\n+                originalCache[k] = m._cache[k];\n+            }\n+        });\n+        removeParentReferences();\n         m._cache = originalCache;\n         originalCache = null;\n     }\n@@ -177,11 +172,26 @@\n  */\n function resetCache() {\n     if (options.useCleanCache && originalCache) {\n+        removeParentReferences();\n         m._cache = {};\n+        repopulateNative();\n     }\n }\n \n /*\n+ * Starting in node 0.12 node won't reload native modules\n+ * The reason is that native modules can register themselves to be loaded automatically\n+ * This will re-populate the cache with the native modules that have not been mocked\n+ */\n+function repopulateNative() {\n+  Object.keys(originalCache).forEach(function(k) {\n+      if (k.indexOf('\\.node') > -1 && !m._cache[k]) {\n+          m._cache[k] = originalCache[k];\n+      }\n+  });\n+}\n+\n+/*\n  * Enable or disable warnings to the console when previously registered mocks\n  * and subsitutes are replaced.\n  */\n@@ -322,6 +332,23 @@\n     registeredAllowables = {};\n }\n",
+					"match": false,
+					"packageHash": "a9265f43b83d8cbe7baddaed2280477238abb7b03c050000760018956f1831f3",
+					"size": 10811,
+					"sourceHash": "4b174b40a9770f8a62351ed3b65fce4ef1187b4296baf78d6fa38a0a994eb9e8",
+					"status": "content"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -1,16 +1,28 @@\n {\n   \"name\": \"mockery\",\n-  \"version\": \"1.4.0\",\n+  \"version\": \"2.1.0\",\n   \"description\": \"Simplifying the use of mocks with Node.js\",\n   \"keywords\": [\n-    \"mock\", \"stub\", \"require\", \"module\", \"cache\",\n-    \"unit\", \"test\", \"unittest\", \"testing\", \"tdd\"\n+    \"mock\",\n+    \"stub\",\n+    \"require\",\n+    \"module\",\n+    \"cache\",\n+    \"unit\",\n+    \"test\",\n+    \"unittest\",\n+    \"testing\",\n+    \"tdd\"\n   ],\n   \"author\": \"Martin Cooper <mfncooper@gmail.com>\",\n   \"contributors\": [\n     {\n       \"name\": \"Bryan Donovan\",\n       \"email\": \"bdondo@gmail.com\"\n+    },\n+    {\n+      \"name\": \"Dav Glass\",\n+      \"email\": \"davglass@gmail.com\"\n     }\n   ],\n   \"repository\": {\n@@ -18,24 +30,28 @@\n     \"url\": \"git://github.com/mfncooper/mockery.git\"\n   },\n   \"bugs\": {\n-    \"url\" : \"http://github.com/mfncooper/mockery/issues\"\n+    \"url\": \"http://github.com/mfncooper/mockery/issues\"\n   },\n   \"main\": \"mockery.js\",\n-  \"engines\": {\n-    \"node\": \">=0.4.5\"\n-  },\n   \"dependencies\": {},\n+  \"jshintConfig\": {\n+    \"node\": true\n+  },\n   \"devDependencies\": {\n-    \"nodeunit\" : \"0.6.x\",\n-    \"sinon\" : \"1.2.x\"\n+    \"istanbul\": \"~0.3.5\",\n+    \"jshint\": \"~2.6.0\",\n+    \"sinon\": \"1.2.x\",\n+    \"unix-dgram\": \"^0.2.3\",\n+    \"vows\": \"~0.8.1\"\n   },\n   \"scripts\": {\n-    \"test\": \"test/run.js\"\n+    \"pretest\": \"jshint mockery.js ./test/*.js\",\n+    \"test\": \"istanbul cover --print both -- vows --spec ./test/*.js\"\n   },\n-  \"licenses\" : [\n+  \"licenses\": [\n     {\n-      \"type\" : \"MIT\",\n-      \"url\" : \"http://github.com/mfncooper/mockery/raw/master/LICENSE\"\n+      \"type\": \"MIT\",\n+      \"url\": \"http://github.com/mfncooper/mockery/raw/master/LICENSE\"\n     }\n   ]\n }\n",
+					"match": false,
+					"packageHash": "e0c473bac38532f13b60c200d40e4130b67f02ae2889e3c507073ae1ee2b7e17",
+					"size": 886,
+					"sourceHash": "68eab64b0a0965a696c0b2833de98b3822733590efcaa9644beae4ef6f3e99a9",
+					"status": "content"
+				},
+				"test/mockery.functional.js": {
+					"match": false,
+					"packageHash": "0e4aa6cf860dbdcea8c6d7097f9c9f6eaf55a132772831daccff3d79c0385e77",
+					"size": 17933,
+					"status": "missing-in-source"
+				},
+				"test/run.js": {
+					"match": false,
+					"packageHash": "5d05fbb8271dd15aca62aa356004a172e99fa85f47db0033c1ac15348291829d",
+					"size": 131,
+					"status": "missing-in-source"
+				},
+				"examples/example1.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/1-general.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/allowable-unhook.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/intermediary.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/logging-allow-array.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/logging-allowable.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/logging.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/registered.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/self-register.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/substitute.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/warn-replace.js": {
+					"match": false,
+					"status": "missing-in-package"
+				}
+			},
+			"summary": {
+				"differentFiles": 4,
+				"matchingFiles": 5,
+				"missingInPackage": 11,
+				"missingInSource": 3,
+				"score": 0.21739130434782608,
+				"totalFiles": 23
+			}
+		}
+	}
+]

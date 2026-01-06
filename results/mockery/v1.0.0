@@ -1,0 +1,129 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-06T17:41:54.748Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:11.7.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "mockery@1.0.0",
+			"name": "mockery",
+			"version": "1.0.0",
+			"location": "https://registry.npmjs.org/mockery/-/mockery-1.0.0.tgz",
+			"integrity": "sha512-C4oC4fKVhNLrXkA+onm+8+lSKh8nZZPUew3gxit/K7AzQLalo3TxeJwTDba2sszDrAc643Wsg38wQN+G7Rywbg==",
+			"publishedAt": "2011-10-11T04:44:44.231Z",
+			"publishedWith": {
+				"node": "v0.4.12",
+				"npm": "1.0.94"
+			}
+		},
+		"source": {
+			"integrity": null,
+			"location": "git://github.com/mfncooper/mockery.git",
+			"spec": "github:mfncooper/mockery#HEAD"
+		},
+		"comparisonHash": "9ef46a5bd31291e57cbab41e2f17c57bd6da0b5b",
+		"diff": {
+			"files": {
+				"README.md": {
+					"diff": "--- published/README.md\n+++ rebuilt/README.md\n@@ -1,5 +1,7 @@\n # Mockery - Simplifying the use of mocks with Node.js\n \n+[![Build Status](https://secure.travis-ci.org/mfncooper/mockery.svg)](http://travis-ci.org/mfncooper/mockery)\n+\n If you've tried working with mocks in Node.js, you've no doubt discovered that\n it's not so easy to get your mocks hooked up in the face of Node's module\n loading system. When your source-under-test pulls in its dependencies through\n@@ -15,6 +17,17 @@\n framework of choice (or no framework) to get your mocks hooked in to all the\n right places in the code you need to test.\n \n+* [Installation](#installation)\n+* [Enabling mockery](#enabling-mockery)\n+* [Registering mocks](#registering-mocks)\n+* [Registering substitutes](#registering-substitutes)\n+* [Registering allowable modules](#registering-allowable-modules)\n+* [Deregistering everything](#deregistering-everything)\n+* [Controlling the module cache](#controlling-the-module-cache)\n+* [Disabling warnings](#disabling-warnings)\n+* [The name](#the-name)\n+* [License](#license)\n+\n ## Installation\n \n Just use npm:\n@@ -38,6 +51,31 @@\n         mockery.disable();\n     }\n \n+### Options\n+\n+You can set up some initial configuration by passing an options object to\n+`enable`. Omitting the options object, or any of the defined keys, causes the\n+standard defaults to be used.\n+\n+For example, to disable all warnings, you might use this:\n+\n+    mockery.enable({\n+        warnOnReplace: false,\n+        warnOnUnregistered: false\n+    });\n+\n+The available options are:\n+\n+* _useCleanCache_ determines whether a temporary module cache should be used\n+while Mockery is enabled. See [Controlling the module cache](#controlling-the-module-cache)\n+below. [Default: false]\n+* _warnOnReplace_ determines whether or not warnings are issued when a mock or\n+substitute is replaced without being first deregistered. This has the same\n+effect as the `warnOnReplace` function. [Default: true]\n+* _warnOnUnregistered_ determines whether or not warnings are issued when a\n+module is not mocked, substituted or allowed. This has the same effect as the\n+`warnOnUnregistered` function. [Default: true]\n+\n ## Registering mocks\n \n You register your mocks with Mockery to tell it which mocks to provide for which\n@@ -106,6 +144,15 @@\n \n     mockery.deregisterAllowable('./my-source-under-test');\n \n+Sometimes you'll find that you need to register several modules at once. A\n+convenience function lets you do this with a single call:\n+\n+    mockery.registerAllowables(['async', 'path', 'util']);\n+\n+and similarly to deregister several modules at once, as you would expect:\n+\n+    mockery.deregisterAllowables(['async', 'path', 'util']);\n+\n ### Unhooking\n \n By default, the Node module loader will load a given module only once, caching\n@@ -136,6 +183,61 @@\n This will deregister all mocks, substitutes, and allowable modules, as well as\n unhooking any hooked modules.\n \n+## Controlling the module cache\n+\n+One of the common problems that people encounter when trying to use mocks in\n+Node is that modules and their exports are almost always cached. This makes it\n+difficult to plug in a mock for testing if the module being mocked has already\n+been loaded elsewhere.\n+\n+Mockery provides a way for you to run your tests using a clean module cache, as\n+if no modules have been loaded. When this option is enabled, any previously\n+loaded modules will be \"forgotten\", and `require` calls will cause them to be\n+reloaded. This in turn allows your mocks to be picked up, and your tests to run\n+as expected.\n+\n+You tell Mockery to use a clean cache when you enable it, like this:\n+\n+    mockery.enable({ useCleanCache: true });\n+\n+Now all modules will be cached in this new clean cache, until you later disable\n+Mockery again. The new cache is temporary, and is discarded when Mockery is\n+disabled. The original cache is reinstated at that point, so you are back to\n",
+					"match": false,
+					"packageHash": "03125a4545d46d3771e22899d858629f0908540a6f24f0dbf0641f166c8138c9",
+					"size": 5463,
+					"sourceHash": "6d7e0b59fecd475e9d05642155c32ad35af90312ed98079e1bc8c921f0a58092",
+					"status": "content"
+				},
+				"mockery.js": {
+					"diff": "--- published/mockery.js\n+++ rebuilt/mockery.js\n@@ -4,7 +4,7 @@\n \n  MIT License\n \n- Copyright (c) 2011 Yahoo! Inc. All Rights Reserved.\n+ Copyright (c) 2011-2012 Yahoo! Inc. All Rights Reserved.\n \n  Permission is hereby granted, free of charge, to any person obtaining a copy\n  of this software and associated documentation files (the \"Software\"), to\n@@ -32,11 +32,38 @@\n  * 'require' can be mocked out.\n  */\n \n+\"use strict\";\n+\n var m = require('module'),\n     registeredMocks = {},\n     registeredSubstitutes = {},\n     registeredAllowables = {},\n-    originalLoader = null;\n+    originalLoader = null,\n+    originalCache = null,\n+    defaultOptions = {\n+        useCleanCache: false,\n+        warnOnReplace: true,\n+        warnOnUnregistered: true\n+    },\n+    options = {};\n+\n+/*\n+ * Merge the supplied options in with a new copy of the default options to get\n+ * the effective options, and return those.\n+ */\n+function getEffectiveOptions(opts) {\n+    var options = {};\n+\n+    Object.keys(defaultOptions).forEach(function (key) {\n+        options[key] = defaultOptions[key];\n+    });\n+    if (opts) {\n+        Object.keys(opts).forEach(function (key) {\n+            options[key] = opts[key];\n+        });\n+    }\n+    return options;\n+}\n \n /*\n  * The (private) loader replacement that is used when hooking is enabled. It\n@@ -54,7 +81,9 @@\n \n     if (registeredMocks.hasOwnProperty(request)) {\n         return registeredMocks[request];\n-    } else if (registeredSubstitutes.hasOwnProperty(request)) {\n+    }\n+\n+    if (registeredSubstitutes.hasOwnProperty(request)) {\n         subst = registeredSubstitutes[request];\n         if (!subst.module && subst.name) {\n             subst.module = originalLoader(subst.name, parent, isMain);\n@@ -63,20 +92,23 @@\n             throw new Error(\"Misconfigured substitute for '\" + request + \"'\");\n         }\n         return subst.module;\n+    }\n+\n+    if (registeredAllowables.hasOwnProperty(request)) {\n+        allow = registeredAllowables[request];\n+        if (allow.unhook) {\n+            file = m._resolveFilename(request, parent);\n+            if ((file.indexOf('/') !== -1 || file.indexOf('\\\\') !== -1) && allow.paths.indexOf(file) === -1) {\n+                allow.paths.push(file);\n+            }\n+        }\n     } else {\n-        if (!registeredAllowables.hasOwnProperty(request)) {\n+        if (options.warnOnUnregistered) {\n             console.warn(\"WARNING: loading non-allowed module: \" + request);\n-        } else {\n-            allow = registeredAllowables[request];\n-            if (allow.unhook) {\n-                file = m._resolveFilename(request, parent)[1];\n-                if (file.indexOf('/') !== -1 && allow.paths.indexOf(file) === -1) {\n-                    allow.paths.push(file);\n-                }\n-            }\n         }\n-        return originalLoader(request, parent, isMain);\n     }\n+\n+    return originalLoader(request, parent, isMain);\n }\n \n /*\n@@ -84,12 +116,20 @@\n  * 'require' invocations will be hooked until 'disable' is called. Calling this\n  * function more than once will have no ill effects.\n  */\n",
+					"match": false,
+					"packageHash": "b24c94e83c24b1d0a2fb5cd65f31faaf04e87deeb1da1c355abc3c2a2113fe2b",
+					"size": 7712,
+					"sourceHash": "4b174b40a9770f8a62351ed3b65fce4ef1187b4296baf78d6fa38a0a994eb9e8",
+					"status": "content"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -1,25 +1,57 @@\n {\n-  \"author\": \"Martin Cooper <mfncooper@gmail.com>\",\n   \"name\": \"mockery\",\n+  \"version\": \"2.1.0\",\n   \"description\": \"Simplifying the use of mocks with Node.js\",\n-  \"version\": \"1.0.0\",\n+  \"keywords\": [\n+    \"mock\",\n+    \"stub\",\n+    \"require\",\n+    \"module\",\n+    \"cache\",\n+    \"unit\",\n+    \"test\",\n+    \"unittest\",\n+    \"testing\",\n+    \"tdd\"\n+  ],\n+  \"author\": \"Martin Cooper <mfncooper@gmail.com>\",\n+  \"contributors\": [\n+    {\n+      \"name\": \"Bryan Donovan\",\n+      \"email\": \"bdondo@gmail.com\"\n+    },\n+    {\n+      \"name\": \"Dav Glass\",\n+      \"email\": \"davglass@gmail.com\"\n+    }\n+  ],\n   \"repository\": {\n     \"type\": \"git\",\n     \"url\": \"git://github.com/mfncooper/mockery.git\"\n   },\n   \"bugs\": {\n-    \"url\" : \"http://github.com/mfncooper/mockery/issues\"\n+    \"url\": \"http://github.com/mfncooper/mockery/issues\"\n   },\n   \"main\": \"mockery.js\",\n-  \"engines\": {\n-    \"node\": \">=0.4.5\"\n-  },\n   \"dependencies\": {},\n-  \"devDependencies\": {},\n-  \"licenses\" : [\n+  \"jshintConfig\": {\n+    \"node\": true\n+  },\n+  \"devDependencies\": {\n+    \"istanbul\": \"~0.3.5\",\n+    \"jshint\": \"~2.6.0\",\n+    \"sinon\": \"1.2.x\",\n+    \"unix-dgram\": \"^0.2.3\",\n+    \"vows\": \"~0.8.1\"\n+  },\n+  \"scripts\": {\n+    \"pretest\": \"jshint mockery.js ./test/*.js\",\n+    \"test\": \"istanbul cover --print both -- vows --spec ./test/*.js\"\n+  },\n+  \"licenses\": [\n     {\n-      \"type\" : \"MIT\",\n-      \"url\" : \"http://github.com/mfncooper/mockery/raw/master/LICENSE\"\n+      \"type\": \"MIT\",\n+      \"url\": \"http://github.com/mfncooper/mockery/raw/master/LICENSE\"\n     }\n   ]\n }\n",
+					"match": false,
+					"packageHash": "7b346ccf031f44043d8c1df2e76a6c5693b1b9e754d579921d89983e0c691035",
+					"size": 567,
+					"sourceHash": "68eab64b0a0965a696c0b2833de98b3822733590efcaa9644beae4ef6f3e99a9",
+					"status": "content"
+				},
+				".travis.yml": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"examples/example1.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/1-general.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/allowable-unhook.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/fixtures/fake_module.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/fixtures/fake_module_2.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/fixtures/intermediary.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/fixtures/substitute_fake_module.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/intermediary.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/logging-allow-array.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/logging-allowable.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/logging.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/registered.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/self-register.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/substitute.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/warn-replace.js": {
+					"match": false,
+					"status": "missing-in-package"
+				}
+			},
+			"summary": {
+				"differentFiles": 3,
+				"matchingFiles": 1,
+				"missingInPackage": 16,
+				"missingInSource": 0,
+				"score": 0.05,
+				"totalFiles": 20
+			}
+		}
+	}
+]
