@@ -1,0 +1,163 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-07T17:38:59.203Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:11.7.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "negotiator@0.4.1",
+			"name": "negotiator",
+			"version": "0.4.1",
+			"location": "https://registry.npmjs.org/negotiator/-/negotiator-0.4.1.tgz",
+			"integrity": "sha512-HyJge4an7ic67TGjtxT0tW0chbv7A2yTRlXkWy3NpilRFpW3aUi4Y8CmrZU8Vv2jZL9z/n5cVF7wSQjxVNZuVA==",
+			"publishedAt": "2014-01-16T17:02:25.226Z",
+			"publishedWith": {
+				"node": null,
+				"npm": "1.3.14"
+			},
+			"dependencies": {}
+		},
+		"source": {
+			"integrity": null,
+			"location": "git://github.com/federomero/negotiator.git",
+			"spec": "github:federomero/negotiator#HEAD"
+		},
+		"comparisonHash": "9ef46a5bd31291e57cbab41e2f17c57bd6da0b5b",
+		"diff": {
+			"files": {
+				"LICENSE": {
+					"diff": "--- published/LICENSE\n+++ rebuilt/LICENSE\n@@ -1,27 +1,24 @@\n-Original \"Negotiator\" program Copyright Federico Romero\n-Port to JavaScript Copyright Isaac Z. Schlueter\n+(The MIT License)\n \n-All rights reserved.\n+Copyright (c) 2012-2014 Federico Romero\n+Copyright (c) 2012-2014 Isaac Z. Schlueter\n+Copyright (c) 2014-2015 Douglas Christopher Wilson\n \n-MIT License\n-\n-Permission is hereby granted, free of charge, to any person\n-obtaining a copy of this software and associated documentation\n-files (the \"Software\"), to deal in the Software without\n-restriction, including without limitation the rights to use,\n-copy, modify, merge, publish, distribute, sublicense, and/or sell\n-copies of the Software, and to permit persons to whom the\n-Software is furnished to do so, subject to the following\n-conditions:\n+Permission is hereby granted, free of charge, to any person obtaining\n+a copy of this software and associated documentation files (the\n+'Software'), to deal in the Software without restriction, including\n+without limitation the rights to use, copy, modify, merge, publish,\n+distribute, sublicense, and/or sell copies of the Software, and to\n+permit persons to whom the Software is furnished to do so, subject to\n+the following conditions:\n \n The above copyright notice and this permission notice shall be\n included in all copies or substantial portions of the Software.\n \n-THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND,\n-EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES\n-OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND\n-NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT\n-HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,\n-WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING\n-FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR\n-OTHER DEALINGS IN THE SOFTWARE.\n+THE SOFTWARE IS PROVIDED 'AS IS', WITHOUT WARRANTY OF ANY KIND,\n+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF\n+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.\n+IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY\n+CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,\n+TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE\n+SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.\n",
+					"match": false,
+					"packageHash": "38af06cefff17a15d0943462afa99d0b3d7814b009847e43484befdfe022166b",
+					"size": 1163,
+					"sourceHash": "553d4d20029a24e315b428a1a54a9e109eaa340f2e958a4f50a92362c2c4070b",
+					"status": "content"
+				},
+				"examples/accept.js": {
+					"match": false,
+					"packageHash": "72d9626b81c538da1bb9886b85d6865af93aa3d39a550d2898023a4af1188906",
+					"size": 1228,
+					"status": "missing-in-source"
+				},
+				"examples/charset.js": {
+					"match": false,
+					"packageHash": "da7647807ef17c611918aae7e57308b8c9876a1d3dc8a12f7123ddccaac6c959",
+					"size": 1304,
+					"status": "missing-in-source"
+				},
+				"examples/encoding.js": {
+					"match": false,
+					"packageHash": "755386e26f09ff78af2d9367d63c59fc947a2b22f4974db530428b214bd14414",
+					"size": 1314,
+					"status": "missing-in-source"
+				},
+				"examples/language.js": {
+					"match": false,
+					"packageHash": "2c9efcf788f13b4fae68d266dd862fb427081951031f50cfaef864a68cf28613",
+					"size": 1104,
+					"status": "missing-in-source"
+				},
+				"lib/charset.js": {
+					"diff": "--- published/lib/charset.js\n+++ rebuilt/lib/charset.js\n@@ -1,24 +1,65 @@\n+/**\n+ * negotiator\n+ * Copyright(c) 2012 Isaac Z. Schlueter\n+ * Copyright(c) 2014 Federico Romero\n+ * Copyright(c) 2014-2015 Douglas Christopher Wilson\n+ * MIT Licensed\n+ */\n+\n+'use strict';\n+\n+/**\n+ * Module exports.\n+ * @public\n+ */\n+\n module.exports = preferredCharsets;\n-preferredCharsets.preferredCharsets = preferredCharsets;\n+module.exports.preferredCharsets = preferredCharsets;\n+\n+/**\n+ * Module variables.\n+ * @private\n+ */\n+\n+var simpleCharsetRegExp = /^\\s*([^\\s;]+)\\s*(?:;(.*))?$/;\n+\n+/**\n+ * Parse the Accept-Charset header.\n+ * @private\n+ */\n \n function parseAcceptCharset(accept) {\n-  return accept.split(',').map(function(e) {\n-    return parseCharset(e.trim());\n-  }).filter(function(e) {\n-    return e;\n-  });\n+  var accepts = accept.split(',');\n+\n+  for (var i = 0, j = 0; i < accepts.length; i++) {\n+    var charset = parseCharset(accepts[i].trim(), i);\n+\n+    if (charset) {\n+      accepts[j++] = charset;\n+    }\n+  }\n+\n+  // trim accepts\n+  accepts.length = j;\n+\n+  return accepts;\n }\n \n-function parseCharset(s) {\n-  var match = s.match(/^\\s*(\\S+?)\\s*(?:;(.*))?$/);\n+/**\n+ * Parse a charset from the Accept-Charset header.\n+ * @private\n+ */\n+\n+function parseCharset(str, i) {\n+  var match = simpleCharsetRegExp.exec(str);\n   if (!match) return null;\n \n   var charset = match[1];\n   var q = 1;\n   if (match[2]) {\n     var params = match[2].split(';')\n-    for (var i = 0; i < params.length; i ++) {\n-      var p = params[i].trim().split('=');\n+    for (var j = 0; j < params.length; j++) {\n+      var p = params[j].trim().split('=');\n       if (p[0] === 'q') {\n         q = parseFloat(p[1]);\n         break;\n@@ -28,54 +69,101 @@\n \n   return {\n     charset: charset,\n-    q: q\n+    q: q,\n+    i: i\n   };\n }\n \n-function getCharsetPriority(charset, accepted) {\n-  return (accepted.filter(function(a) {\n-    return specify(charset, a);\n-  }).sort(function (a, b) {\n-    // revsort\n-    return a.s > b.s ? -1 : 1;\n-  })[0] || {q:0}).q;\n+/**\n+ * Get the priority of a charset.\n+ * @private\n+ */\n+\n",
+					"match": false,
+					"packageHash": "bceb5ea136d4a4274fa3eefa485423ba431e4c5da83a786ad161dcef8848af30",
+					"size": 1732,
+					"sourceHash": "e6522a2df58f21a6cdf8d146f7e85b9a49bcaf68b813dec15068a8e84fc582c3",
+					"status": "content"
+				},
+				"lib/encoding.js": {
+					"diff": "--- published/lib/encoding.js\n+++ rebuilt/lib/encoding.js\n@@ -1,55 +1,81 @@\n+/**\n+ * negotiator\n+ * Copyright(c) 2012 Isaac Z. Schlueter\n+ * Copyright(c) 2014 Federico Romero\n+ * Copyright(c) 2014-2015 Douglas Christopher Wilson\n+ * MIT Licensed\n+ */\n+\n+'use strict';\n+\n+/**\n+ * Module exports.\n+ * @public\n+ */\n+\n module.exports = preferredEncodings;\n-preferredEncodings.preferredEncodings = preferredEncodings;\n+module.exports.preferredEncodings = preferredEncodings;\n \n-function parseAcceptEncoding(accept) {\n-  var acceptableEncodings;\n+/**\n+ * Module variables.\n+ * @private\n+ */\n+\n+var simpleEncodingRegExp = /^\\s*([^\\s;]+)\\s*(?:;(.*))?$/;\n+\n+/**\n+ * Parse the Accept-Encoding header.\n+ * @private\n+ */\n \n-  if (accept) {\n-    acceptableEncodings = accept.split(',').map(function(e) {\n-      return parseEncoding(e.trim());\n-    });\n-  } else {\n-    acceptableEncodings = [];\n+function parseAcceptEncoding(accept) {\n+  var accepts = accept.split(',');\n+  var hasIdentity = false;\n+  var minQuality = 1;\n+\n+  for (var i = 0, j = 0; i < accepts.length; i++) {\n+    var encoding = parseEncoding(accepts[i].trim(), i);\n+\n+    if (encoding) {\n+      accepts[j++] = encoding;\n+      hasIdentity = hasIdentity || specify('identity', encoding);\n+      minQuality = Math.min(minQuality, encoding.q || 1);\n+    }\n   }\n \n-  if (!acceptableEncodings.some(function(e) {\n-    return e && specify('identity', e);\n-  })) {\n+  if (!hasIdentity) {\n     /*\n      * If identity doesn't explicitly appear in the accept-encoding header,\n      * it's added to the list of acceptable encoding with the lowest q\n-     *\n      */\n-    var lowestQ = 1;\n-\n-    for(var i = 0; i < acceptableEncodings.length; i++){\n-      var e = acceptableEncodings[i];\n-      if(e && e.q < lowestQ){\n-        lowestQ = e.q;\n-      }\n-    }\n-    acceptableEncodings.push({\n+    accepts[j++] = {\n       encoding: 'identity',\n-      q: lowestQ / 2,\n-    });\n+      q: minQuality,\n+      i: i\n+    };\n   }\n \n-  return acceptableEncodings.filter(function(e) {\n-    return e;\n-  });\n+  // trim accepts\n+  accepts.length = j;\n+\n+  return accepts;\n }\n \n-function parseEncoding(s) {\n-  var match = s.match(/^\\s*(\\S+?)\\s*(?:;(.*))?$/);\n+/**\n+ * Parse an encoding from the Accept-Encoding header.\n+ * @private\n+ */\n \n",
+					"match": false,
+					"packageHash": "456f2532cdd40a7aa7ca48964cf65d4ebebb241ef6ad04117afdf842bdfedaea",
+					"size": 2493,
+					"sourceHash": "b1a7d9ac13dd4441361504233bcbb2ddd2ff0545910c3d42edfb5444b5d92437",
+					"status": "content"
+				},
+				"lib/language.js": {
+					"diff": "--- published/lib/language.js\n+++ rebuilt/lib/language.js\n@@ -1,29 +1,70 @@\n+/**\n+ * negotiator\n+ * Copyright(c) 2012 Isaac Z. Schlueter\n+ * Copyright(c) 2014 Federico Romero\n+ * Copyright(c) 2014-2015 Douglas Christopher Wilson\n+ * MIT Licensed\n+ */\n+\n+'use strict';\n+\n+/**\n+ * Module exports.\n+ * @public\n+ */\n+\n module.exports = preferredLanguages;\n-preferredLanguages.preferredLanguages = preferredLanguages;\n+module.exports.preferredLanguages = preferredLanguages;\n+\n+/**\n+ * Module variables.\n+ * @private\n+ */\n+\n+var simpleLanguageRegExp = /^\\s*([^\\s\\-;]+)(?:-([^\\s;]+))?\\s*(?:;(.*))?$/;\n+\n+/**\n+ * Parse the Accept-Language header.\n+ * @private\n+ */\n \n function parseAcceptLanguage(accept) {\n-  return accept.split(',').map(function(e) {\n-    return parseLanguage(e.trim());\n-  }).filter(function(e) {\n-    return e;\n-  });\n+  var accepts = accept.split(',');\n+\n+  for (var i = 0, j = 0; i < accepts.length; i++) {\n+    var language = parseLanguage(accepts[i].trim(), i);\n+\n+    if (language) {\n+      accepts[j++] = language;\n+    }\n+  }\n+\n+  // trim accepts\n+  accepts.length = j;\n+\n+  return accepts;\n }\n \n-function parseLanguage(s) {\n-  var match = s.match(/^\\s*(\\S+?)(?:-(\\S+?))?\\s*(?:;(.*))?$/);\n+/**\n+ * Parse a language from the Accept-Language header.\n+ * @private\n+ */\n+\n+function parseLanguage(str, i) {\n+  var match = simpleLanguageRegExp.exec(str);\n   if (!match) return null;\n \n-  var prefix = match[1],\n-      suffix = match[2],\n-      full = prefix;\n+  var prefix = match[1]\n+  var suffix = match[2]\n+  var full = prefix\n \n   if (suffix) full += \"-\" + suffix;\n \n   var q = 1;\n   if (match[3]) {\n     var params = match[3].split(';')\n-    for (var i = 0; i < params.length; i ++) {\n-      var p = params[i].split('=');\n+    for (var j = 0; j < params.length; j++) {\n+      var p = params[j].split('=');\n       if (p[0] === 'q') q = parseFloat(p[1]);\n     }\n   }\n@@ -32,64 +73,107 @@\n     prefix: prefix,\n     suffix: suffix,\n     q: q,\n+    i: i,\n     full: full\n   };\n }\n \n-function getLanguagePriority(language, accepted) {\n-  return (accepted.map(function(a){\n-    return specify(language, a);\n-  }).filter(function(a){\n-    return a;\n",
+					"match": false,
+					"packageHash": "38eee0381859d540b66ddeb04cd81cbdc6d44dd00bdd384cdc40ada7606849d9",
+					"size": 2036,
+					"sourceHash": "4aebb44da06094f2d56f0b20b4fbdd542cda00a4c9295e10bbe55203701c9024",
+					"status": "content"
+				},
+				"lib/mediaType.js": {
+					"diff": "--- published/lib/mediaType.js\n+++ rebuilt/lib/mediaType.js\n@@ -1,35 +1,84 @@\n+/**\n+ * negotiator\n+ * Copyright(c) 2012 Isaac Z. Schlueter\n+ * Copyright(c) 2014 Federico Romero\n+ * Copyright(c) 2014-2015 Douglas Christopher Wilson\n+ * MIT Licensed\n+ */\n+\n+'use strict';\n+\n+/**\n+ * Module exports.\n+ * @public\n+ */\n+\n module.exports = preferredMediaTypes;\n-preferredMediaTypes.preferredMediaTypes = preferredMediaTypes;\n+module.exports.preferredMediaTypes = preferredMediaTypes;\n+\n+/**\n+ * Module variables.\n+ * @private\n+ */\n+\n+var simpleMediaTypeRegExp = /^\\s*([^\\s\\/;]+)\\/([^;\\s]+)\\s*(?:;(.*))?$/;\n+\n+/**\n+ * Parse the Accept header.\n+ * @private\n+ */\n \n function parseAccept(accept) {\n-  return accept.split(',').map(function(e) {\n-    return parseMediaType(e.trim());\n-  }).filter(function(e) {\n-    return e;\n-  });\n-};\n+  var accepts = splitMediaTypes(accept);\n+\n+  for (var i = 0, j = 0; i < accepts.length; i++) {\n+    var mediaType = parseMediaType(accepts[i].trim(), i);\n+\n+    if (mediaType) {\n+      accepts[j++] = mediaType;\n+    }\n+  }\n+\n+  // trim accepts\n+  accepts.length = j;\n \n-function parseMediaType(s) {\n-  var match = s.match(/\\s*(\\S+)\\/([^;\\s]+)\\s*(?:;(.*))?/);\n+  return accepts;\n+}\n+\n+/**\n+ * Parse a media type from the Accept header.\n+ * @private\n+ */\n+\n+function parseMediaType(str, i) {\n+  var match = simpleMediaTypeRegExp.exec(str);\n   if (!match) return null;\n \n-  var type = match[1],\n-      subtype = match[2],\n-      full = \"\" + type + \"/\" + subtype,\n-      params = {},\n-      q = 1;\n+  var params = Object.create(null);\n+  var q = 1;\n+  var subtype = match[2];\n+  var type = match[1];\n \n   if (match[3]) {\n-    params = match[3].split(';').map(function(s) {\n-      return s.trim().split('=');\n-    }).reduce(function (set, p) {\n-      set[p[0]] = p[1];\n-      return set\n-    }, params);\n-\n-    if (params.q != null) {\n-      q = parseFloat(params.q);\n-      delete params.q;\n+    var kvps = splitParameters(match[3]).map(splitKeyValuePair);\n+\n+    for (var j = 0; j < kvps.length; j++) {\n+      var pair = kvps[j];\n+      var key = pair[0].toLowerCase();\n+      var val = pair[1];\n+\n+      // get the value, unwrapping quotes\n+      var value = val && val[0] === '\"' && val[val.length - 1] === '\"'\n+        ? val.slice(1, -1)\n+        : val;\n",
+					"match": false,
+					"packageHash": "27738e84a30b3598bdf0815c7e4142e4a7c569542245f2b462d41dca866302b2",
+					"size": 2302,
+					"sourceHash": "4ed7ff46904e6d4ccd292c7de5abab119ae39e90ccfe687dfdc243bbb595d580",
+					"status": "content"
+				},
+				"lib/negotiator.js": {
+					"match": false,
+					"packageHash": "980a801f5bae59d6a7de19e4aa9540e8b936c5739146c9cff2cf4852c2ab8035",
+					"size": 1077,
+					"status": "missing-in-source"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -1,13 +1,13 @@\n {\n   \"name\": \"negotiator\",\n   \"description\": \"HTTP content negotiation\",\n-  \"version\": \"0.4.1\",\n-  \"author\": \"Federico Romero <federico.romero@outboxlabs.com>\",\n-  \"contributors\": [\"Isaac Z. Schlueter <i@izs.me> (http://blog.izs.me/)\"],\n-  \"repository\": {\n-    \"type\": \"git\",\n-    \"url\": \"git://github.com/federomero/negotiator.git\"\n-  },\n+  \"version\": \"1.0.0\",\n+  \"contributors\": [\n+    \"Douglas Christopher Wilson <doug@somethingdoug.com>\",\n+    \"Federico Romero <federico.romero@outboxlabs.com>\",\n+    \"Isaac Z. Schlueter <i@izs.me> (http://blog.izs.me/)\"\n+  ],\n+  \"license\": \"MIT\",\n   \"keywords\": [\n     \"http\",\n     \"content negotiation\",\n@@ -16,17 +16,32 @@\n     \"accept-encoding\",\n     \"accept-charset\"\n   ],\n-  \"engine\": \"node >= 0.6\",\n-  \"license\": \"MIT\",\n-  \"devDependencies\": {\n-    \"nodeunit\": \"0.6.x\"\n+  \"repository\": \"jshttp/negotiator\",\n+  \"funding\": {\n+    \"type\": \"opencollective\",\n+    \"url\": \"https://opencollective.com/express\"\n   },\n-  \"scripts\": {\n-    \"test\": \"nodeunit test\"\n+  \"devDependencies\": {\n+    \"eslint\": \"7.32.0\",\n+    \"eslint-plugin-markdown\": \"2.2.1\",\n+    \"mocha\": \"^11.7.0\",\n+    \"nyc\": \"^17.1.0\"\n   },\n-  \"optionalDependencies\": {},\n+  \"files\": [\n+    \"lib/\",\n+    \"HISTORY.md\",\n+    \"LICENSE\",\n+    \"index.js\",\n+    \"README.md\"\n+  ],\n   \"engines\": {\n-    \"node\": \"*\"\n+    \"node\": \">=18\"\n   },\n-  \"main\": \"lib/negotiator.js\"\n+  \"scripts\": {\n+    \"lint\": \"eslint .\",\n+    \"test\": \"mocha --reporter spec --check-leaks test/\",\n+    \"test:debug\": \"mocha --reporter spec --check-leaks --inspect --inspect-brk test/\",\n+    \"test-ci\": \"nyc --reporter=lcovonly --reporter=text npm test\",\n+    \"test-cov\": \"nyc --reporter=html --reporter=text npm test\"\n+  }\n }\n",
+					"match": false,
+					"packageHash": "ed457722ff2d293227f2ed2e05417e0daf69a3d68577b3c883a69bf25768558a",
+					"size": 716,
+					"sourceHash": "f6a59dcf3bceee253be0da280438f982c27a910289b6feaf3f0b15002c4ec7a4",
+					"status": "content"
+				},
+				"readme.md": {
+					"match": false,
+					"packageHash": "b9f804fd96315cb3a01dc0a3814b66c286675099b0edc0c84b92f90b629f541d",
+					"size": 3240,
+					"status": "missing-in-source"
+				},
+				"test/charset.js": {
+					"match": false,
+					"packageHash": "43e2add470afc8fff1ff774e7aafe62747823cba301906ac844050619cbc952b",
+					"size": 1931,
+					"status": "missing-in-source"
+				},
+				"test/encoding.js": {
+					"match": false,
+					"packageHash": "be12d8740011c30b5db4be54718882df28c707f08ae49518af250b7802a40823",
+					"size": 2709,
+					"status": "missing-in-source"
+				},
+				"test/language.js": {
+					"match": false,
+					"packageHash": "8297f70b6131e862b44e7992a73c26dc7694fc57aaaa303ee8b156c3e67788e1",
+					"size": 2017,
+					"status": "missing-in-source"
+				},
+				"test/mediaType.js": {
+					"match": false,
+					"packageHash": "6cc4875e64e0f111f35f6b549a047aaea3404f1b717dfe4072bd9f93b987644f",
+					"size": 2455,
+					"status": "missing-in-source"
+				},
+				"HISTORY.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"README.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"index.js": {
+					"match": false,
+					"status": "missing-in-package"
+				}
+			},
+			"summary": {
+				"differentFiles": 6,
+				"matchingFiles": 0,
+				"missingInPackage": 3,
+				"missingInSource": 10,
+				"score": 0,
+				"totalFiles": 19
+			}
+		},
+		"prodDependencies": []
+	}
+]
