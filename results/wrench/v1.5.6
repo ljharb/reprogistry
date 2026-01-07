@@ -1,0 +1,81 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-07T21:37:06.813Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:11.7.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "wrench@1.5.6",
+			"name": "wrench",
+			"version": "1.5.6",
+			"location": "https://registry.npmjs.org/wrench/-/wrench-1.5.6.tgz",
+			"integrity": "sha512-vPMxxdjSeY0TRvbqLhMUWLK7vjajz0Nkw90qBgT9iwAcLPgcP9PuOK26RLvtMb64Bffhh6BdLA/Ed1QMs2HByQ==",
+			"publishedAt": "2014-01-18T03:12:17.214Z",
+			"publishedWith": {
+				"node": null,
+				"npm": "1.2.25"
+			},
+			"dependencies": {}
+		},
+		"source": {
+			"integrity": "sha512-saWrpbE0QuGqe48uqZrDo7VGyhgRruk6JfEzSlfiq4KemIuOV+tJn+BlGXbMn4pHMXwncFHyVn3JdAjNAs39Dg==",
+			"location": "https://ryanmcgrath@github.com/ryanmcgrath/wrench-js.git",
+			"spec": "github:ryanmcgrath/wrench-js#HEAD"
+		},
+		"comparisonHash": "9ef46a5bd31291e57cbab41e2f17c57bd6da0b5b",
+		"diff": {
+			"files": {
+				".npmignore": {
+					"match": false,
+					"packageHash": "2a8dfe8b518be5e65303bfa4dec70f5d807fe2c984b8d6d14841d93b74c5fed1",
+					"size": 33,
+					"status": "missing-in-source"
+				},
+				"lib/wrench.js": {
+					"diff": "--- published/lib/wrench.js\n+++ rebuilt/lib/wrench.js\n@@ -28,7 +28,7 @@\n             curFiles,\n             nextDirs,\n             isDir = function(fname){\n-                return fs.statSync( _path.join(baseDir, fname) ).isDirectory();\n+                return fs.existsSync(_path.join(baseDir, fname)) ? fs.statSync( _path.join(baseDir, fname) ).isDirectory() : false;\n             },\n             prependBaseDir = function(fname){\n                 return _path.join(baseDir, fname);\n@@ -252,6 +252,7 @@\n     var files = fs.readdirSync(sourceDir);\n     var hasFilter = opts.filter || opts.include || opts.exclude;\n     var preserveFiles = opts.preserveFiles === true;\n+    var preserveTimestamps = opts.preserveTimestamps === true;\n \n     for(var i = 0; i < files.length; i++) {\n         // ignores all files or directories which match the RegExp in opts.filter\n@@ -274,6 +275,9 @@\n             fs.writeFileSync(destFile, contents);\n             var stat =  fs.lstatSync(srcFile);\n             fs.chmodSync(destFile, stat.mode);\n+            if (preserveTimestamps) {\n+                fs.utimesSync(destFile, stat.atime, stat.mtime)\n+            }\n         };\n \n         if(currFile.isDirectory()) {\n@@ -281,18 +285,19 @@\n             exports.copyDirSyncRecursive(_path.join(sourceDir, files[i]), _path.join(newDirLocation, files[i]), opts);\n         } else if(currFile.isSymbolicLink()) {\n             var symlinkFull = fs.readlinkSync(_path.join(sourceDir, files[i]));\n+            symlinkFull = _path.resolve(fs.realpathSync(sourceDir), symlinkFull);\n \n             if (typeof opts !== 'undefined' && !opts.inflateSymlinks) {\n                 fs.symlinkSync(symlinkFull, _path.join(newDirLocation, files[i]));\n                 continue;\n             }\n \n-            var tmpCurrFile = fs.lstatSync(_path.join(sourceDir, symlinkFull));\n+            var tmpCurrFile = fs.lstatSync(symlinkFull);\n             if (tmpCurrFile.isDirectory()) {\n-                exports.copyDirSyncRecursive(_path.join(sourceDir, symlinkFull), _path.join(newDirLocation, files[i]), opts);\n+                exports.copyDirSyncRecursive(symlinkFull, _path.join(newDirLocation, files[i]), opts);\n             } else {\n                 /*  At this point, we've hit a file actually worth copying... so copy it on over. */\n-                fCopyFile(_path.join(sourceDir, symlinkFull), _path.join(newDirLocation, files[i]));\n+                fCopyFile(symlinkFull, _path.join(newDirLocation, files[i]));\n             }\n         } else {\n             /*  At this point, we've hit a file actually worth copying... so copy it on over. */\n@@ -432,14 +437,17 @@\n                             newFile = newDir+'/'+filename;\n \n                         fs.stat(file, function(err, fileStat){\n+                            if (err) return clbk(err);\n                             if (fileStat.isDirectory())\n-                                copyDirRecursive(file, newFile, copyFiles);\n+                                copyDirRecursive(file, newFile, copyFiles, clbk);\n                             else if (fileStat.isSymbolicLink())\n                                 fs.readlink(file, function(err, link){\n+                                    if (err) return clbk(err);\n                                     fs.symlink(link, newFile, copyFiles);\n                                 });\n                             else\n                                 fs.readFile(file, function(err, data){\n+                                    if (err) return clbk(err);\n                                     fs.writeFile(newFile, data, copyFiles);\n                                 });\n                         });\n",
+					"match": false,
+					"packageHash": "d3288bac7e23ad463462423b33a25e5f80199182d88f64fe72882d6e51bfe2ec",
+					"size": 17509,
+					"sourceHash": "11d9d89abdb62dcd9b75ba1cad840730d975cd2961211aff43b177ef17c61244",
+					"status": "content"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -1,7 +1,7 @@\n {\n   \"name\": \"wrench\",\n   \"description\": \"Recursive filesystem (and other) operations that Node *should* have.\",\n-  \"version\": \"1.5.6\",\n+  \"version\": \"1.5.9\",\n   \"author\": \"Ryan McGrath <ryan@venodesigns.net>\",\n \n   \"repository\": {\n",
+					"match": false,
+					"packageHash": "8c1dcfe6fee8b658ef5f9575da681b53b0e1bcc96acd88ce399311225da6e1d1",
+					"size": 751,
+					"sourceHash": "f651f8f11eed7b40d9f2411cf5d77f75bfb93a07962343741b63a2eec34e71c2",
+					"status": "content"
+				},
+				"readme.md": {
+					"diff": "--- published/readme.md\n+++ rebuilt/readme.md\n@@ -1,3 +1,15 @@\n+Warning: This Project Is Deprecated!\n+----------------------------------------------------------------------------\n+`wrench.js` is deprecated, and hasn't been updated in quite some time. **[I heavily recommend using fs-extra](https://github.com/jprichardson/node-fs-extra)** to do any extra filesystem operations.\n+\n+Wrench was built for the _early_ days of Node, and it solved a problem that needed solving. I'm proud of what it's done; at the time of writing this, it was still downloaded over 25,000 times yesterday, and over 500,000 times in the last month. The fact that it wound up being embedded in so many projects is humbling and a great source of fun for me, but I just don't have the time to keep up with this at the moment. No alternate maintainers have appeared, and fs-extra is very well maintained anyway - one community solution is likely better.\n+\n+So long, and thanks for all the fish. The original docs remain available here for anyone who may need them. If I could 301 a GitHub repository I'd do so.\n+\n+Cheers,\n+- Ryan McGrath\n+\n+\n wrench.js - Recursive file operations in Node.js\n ----------------------------------------------------------------------------\n While I love Node.js, I've found myself missing some functions. Things like\n@@ -65,6 +77,7 @@\n     forceDelete: bool, // Whether to overwrite existing directory or not\n     excludeHiddenUnix: bool, // Whether to copy hidden Unix files or not (preceding .)\n     preserveFiles: bool, // If we're overwriting something and the file already exists, keep the existing\n+    preserveTimestamps: bool, // Preserve the mtime and atime when copying files\n     inflateSymlinks: bool, // Whether to follow symlinks or not when copying files\n     filter: regexpOrFunction, // A filter to match files against; if matches, do nothing (exclude).\n     whitelist: bool, // if true every file or directory which doesn't match filter will be ignored\n",
+					"match": false,
+					"packageHash": "cf0c165cf8e967a8529f93e7a9d8f2d540c2d0c2b7cbe26f84758e6a17a6e8b6",
+					"size": 4357,
+					"sourceHash": "fada3d21d9b96497f08fce49d85818af85f2d4920e7cf470b948a7175b8753ea",
+					"status": "content"
+				},
+				"tests/copydirsync_unix.js": {
+					"diff": "--- published/tests/copydirsync_unix.js\n+++ rebuilt/tests/copydirsync_unix.js\n@@ -46,6 +46,21 @@\n     test.deepEqual(fs.lstatSync(path.join(__dirname, 'testdir/bar.txt')).isSymbolicLink(), false);\n }\n \n+function checkResultInflateAbsolute(test, files) {\n+    var check = [\n+        '.hidden',\n+        'absolute-bar.txt',\n+        'bar.txt',\n+        'test',\n+        path.join('.hidden', 'dolor.md')\n+    ];\n+\n+    test.deepEqual(files, check);\n+\n+    test.deepEqual(fs.lstatSync(path.join(__dirname, 'testdir/.hidden')).isSymbolicLink(), false);\n+    test.deepEqual(fs.lstatSync(path.join(__dirname, 'testdir/bar.txt')).isSymbolicLink(), false);\n+}\n+\n function checkResultDontInflate(test, files) {\n     var check = [\n         '.hidden',\n@@ -92,7 +107,6 @@\n \n         test.ok(fs.existsSync(dir), 'Folders should exist');\n \n-        wrench.mkdirSyncRecursive(testdir, 0777);\n         wrench.copyDirSyncRecursive(dir, testdir, { excludeHiddenUnix: false });\n \n         var files = wrench.readdirSyncRecursive(testdir);\n@@ -109,7 +123,6 @@\n \n         test.ok(fs.existsSync(dir), 'Folders should exist');\n \n-        wrench.mkdirSyncRecursive(testdir, 0777);\n         wrench.copyDirSyncRecursive(dir, testdir, { excludeHiddenUnix: true });\n \n         var files = wrench.readdirSyncRecursive(testdir);\n@@ -126,7 +139,6 @@\n \n         test.ok(fs.existsSync(dir), 'Folders should exist');\n \n-        wrench.mkdirSyncRecursive(testdir, 0777);\n         wrench.copyDirSyncRecursive(dir, testdir, { excludeHiddenUnix: false, inflateSymlinks: true });\n \n         var files = wrench.readdirSyncRecursive(testdir);\n@@ -137,13 +149,33 @@\n \n         test.done();\n     },\n+    test_copyDirSyncRecursiveInflateAbsoluteSymlinks: function(test) {\n+        var dir = path.join(__dirname, 'withsymlinks');\n+        var testdir = path.join(__dirname, 'testdir');\n+\n+        fs.symlinkSync(\n+            path.resolve(__dirname, 'shown/bar.txt'),\n+            path.join(dir, 'absolute-bar.txt')\n+        );\n+\n+        wrench.mkdirSyncRecursive(testdir, 0777);\n+        wrench.copyDirSyncRecursive(dir, testdir, { forceDelete: true, excludeHiddenUnix: false, inflateSymlinks: true });\n+\n+        var files = wrench.readdirSyncRecursive(testdir);\n+\n+        checkResultInflateAbsolute(test, files);\n+\n+        wrench.rmdirSyncRecursive(testdir);\n+        fs.unlinkSync(path.join(dir, 'absolute-bar.txt'));\n+\n+        test.done();\n+    },\n     test_copyDirSyncRecursiveDontInflate: function(test) {\n         var dir = path.join(__dirname, 'withsymlinks');\n         var testdir = path.join(__dirname, 'testdir');\n \n         test.ok(fs.existsSync(dir), 'Folders should exist');\n \n-        wrench.mkdirSyncRecursive(testdir, 0777);\n         wrench.copyDirSyncRecursive(dir, testdir, { excludeHiddenUnix: false, inflateSymlinks: false });\n \n         var files = wrench.readdirSyncRecursive(testdir);\n@@ -161,14 +193,14 @@\n \n         test.ok(fs.existsSync(dir), 'Folders should exist');\n \n-        wrench.mkdirSyncRecursive(testdir1, 0777);\n+        // wrench.mkdirSyncRecursive(testdir1, 0777);\n         wrench.copyDirSyncRecursive(dir, testdir1, { excludeHiddenUnix: false });\n         wrench.copyDirSyncRecursive(dir, testdir2, { excludeHiddenUnix: false });\n \n         fs.writeFileSync(path.join(testdir1, \".hidden.txt\"), 'just some text for .hidden.txt');\n         fs.writeFileSync(path.join(testdir1, \"bar.txt\"), 'just some text for bar.txt');\n \n-        wrench.copyDirSyncRecursive(testdir1, testdir2, { preserve: true, excludeHiddenUnix: false, preserveFiles: true });\n+        wrench.copyDirSyncRecursive(testdir1, testdir2, { excludeHiddenUnix: false, preserveFiles: true });\n \n         var files = wrench.readdirSyncRecursive(testdir2);\n \n",
+					"match": false,
+					"packageHash": "48d271ccf0032cee92206aab3735d6a9f4c02dc841dc399dd5fc75531e9cce7c",
+					"size": 7000,
+					"sourceHash": "6827317dae294defc34a0f93357b2a99cc3ad44ee94dcbf4deb8c20edbc5996b",
+					"status": "content"
+				}
+			},
+			"summary": {
+				"differentFiles": 4,
+				"matchingFiles": 16,
+				"missingInPackage": 0,
+				"missingInSource": 1,
+				"score": 0.7619047619047619,
+				"totalFiles": 21
+			}
+		},
+		"prodDependencies": []
+	}
+]

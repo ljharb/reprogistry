@@ -1,0 +1,139 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-07T21:25:47.672Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:11.7.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "wrench@1.3.6",
+			"name": "wrench",
+			"version": "1.3.6",
+			"location": "https://registry.npmjs.org/wrench/-/wrench-1.3.6.tgz",
+			"integrity": "sha512-yt/tAnxU7ym34c8Hc/2tm3GxcJwnaW1ot3SEfRnTXnifdOweugOdU8p0vYtrA2utQMM9aHSYpAI/NkftmDcqQA==",
+			"publishedAt": "2012-02-18T09:57:32.403Z",
+			"publishedWith": {
+				"node": "v0.5.0-pre",
+				"npm": "1.0.103"
+			},
+			"dependencies": {}
+		},
+		"source": {
+			"integrity": "sha512-saWrpbE0QuGqe48uqZrDo7VGyhgRruk6JfEzSlfiq4KemIuOV+tJn+BlGXbMn4pHMXwncFHyVn3JdAjNAs39Dg==",
+			"location": "git://github.com/ryanmcgrath/wrench-js.git",
+			"spec": "github:ryanmcgrath/wrench-js#HEAD"
+		},
+		"comparisonHash": "9ef46a5bd31291e57cbab41e2f17c57bd6da0b5b",
+		"diff": {
+			"files": {
+				".gitignore": {
+					"match": false,
+					"packageHash": "dba27c31aad935787bb275c3e5e4e957708f15386de599eff1db476022cd7e4c",
+					"size": 12,
+					"status": "missing-in-source"
+				},
+				"lib/wrench.js": {
+					"diff": "--- published/lib/wrench.js\n+++ rebuilt/lib/wrench.js\n@@ -12,8 +12,8 @@\n  */\n \n var fs = require(\"fs\"),\n-    _path = require(\"path\");\n-\n+    _path = require(\"path\"),\n+    isWindows = !!process.platform.match(/^win/);\n \n /*  wrench.readdirSyncRecursive(\"directory_path\");\n  *\n@@ -28,7 +28,7 @@\n             curFiles,\n             nextDirs,\n             isDir = function(fname){\n-                return fs.statSync( _path.join(baseDir, fname) ).isDirectory();\n+                return fs.existsSync(_path.join(baseDir, fname)) ? fs.statSync( _path.join(baseDir, fname) ).isDirectory() : false;\n             },\n             prependBaseDir = function(fname){\n                 return _path.join(baseDir, fname);\n@@ -49,7 +49,7 @@\n \n     // convert absolute paths to relative\n     var fileList = readdirSyncRecursive(baseDir).map(function(val){\n-        return val.replace(baseDir + '/', '');\n+        return _path.relative(baseDir, val);\n     });\n \n     return fileList;\n@@ -71,15 +71,16 @@\n     var waitCount = 0;\n \n     function readdirRecursive(curDir) {\n-        var files = [],\n-            curFiles,\n-            nextDirs,\n-            prependcurDir = function(fname){\n-                return _path.join(curDir, fname);\n-            };\n+        var prependcurDir = function(fname){\n+            return _path.join(curDir, fname);\n+        };\n \n         waitCount++;\n         fs.readdir(curDir, function(e, curFiles) {\n+            if (e) {\n+                fn(e);\n+                return;\n+            }\n             waitCount--;\n \n             curFiles = curFiles.map(prependcurDir);\n@@ -106,7 +107,7 @@\n \n             fn(null, curFiles.map(function(val) {\n                 // convert absolute paths to relative\n-                return val.replace(baseDir + '/', '');\n+                return _path.relative(baseDir, val);\n             }));\n \n             if (waitCount == 0) {\n@@ -120,7 +121,9 @@\n \n \n \n-/*  wrench.rmdirSyncRecursive(\"directory_path\", forceDelete, failSilent);\n+\n+\n+/*  wrench.rmdirSyncRecursive(\"directory_path\", failSilent);\n  *\n  *  Recursively dives through directories and obliterates everything about it. This is a\n  *  Sync-function, which blocks things until it's done. No idea why anybody would want an\n@@ -132,69 +135,173 @@\n     try {\n         files = fs.readdirSync(path);\n     } catch (err) {\n+\n         if(failSilent) return;\n         throw new Error(err.message);\n     }\n \n     /*  Loop through and delete everything in the sub-tree after checking it */\n     for(var i = 0; i < files.length; i++) {\n-        var currFile = fs.lstatSync(path + \"/\" + files[i]);\n+        var file = _path.join(path, files[i]);\n+        var currFile = fs.lstatSync(file);\n \n-        if(currFile.isDirectory()) // Recursive function back to the beginning\n-            exports.rmdirSyncRecursive(path + \"/\" + files[i]);\n+        if(currFile.isDirectory())  {\n+            // Recursive function back to the beginning\n+            exports.rmdirSyncRecursive(file);\n+        } else if(currFile.isSymbolicLink()) {\n+            // Unlink symlinks\n+            if (isWindows) {\n+                fs.chmodSync(file, 666) // Windows needs this unless joyent/node#3006 is resolved..\n+            }\n \n",
+					"match": false,
+					"packageHash": "dc6b470f5790b9aee39d1a9025f17430d0559b2434c885f98d75bd541cf46d4f",
+					"size": 13197,
+					"sourceHash": "11d9d89abdb62dcd9b75ba1cad840730d975cd2961211aff43b177ef17c61244",
+					"status": "content"
+				},
+				"lib/x.js": {
+					"match": false,
+					"packageHash": "9321fb5c25ecdbfae24eb4058c2817578313ccb922fe27cf5f6416b51dcf1038",
+					"size": 57,
+					"status": "missing-in-source"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -1,7 +1,7 @@\n {\n   \"name\": \"wrench\",\n   \"description\": \"Recursive filesystem (and other) operations that Node *should* have.\",\n-  \"version\": \"1.3.6\",\n+  \"version\": \"1.5.9\",\n   \"author\": \"Ryan McGrath <ryan@venodesigns.net>\",\n \n   \"repository\": {\n@@ -13,8 +13,6 @@\n     \"url\": \"http://github.com/ryanmcgrath/wrench-js/issues\"\n   },\n \n-  \"os\": [ \"linux\", \"darwin\", \"freebsd\" ],\n-\n   \"directories\": {\n     \"lib\": \"./lib/\"\n   },\n@@ -23,8 +21,7 @@\n   },\n \n   \"devDependencies\": {\n-      \"nodeunit\": \">= 0.6.4\",\n-      \"underscore\": \">= 1.3.1\"\n+      \"nodeunit\": \">= 0.6.4\"\n   },\n \n   \"main\": \"./lib/wrench\",\n@@ -33,7 +30,7 @@\n     \"node\": \">=0.1.97\"\n   },\n   \n-  \"scripts\": { \"test\": \"./node_modules/nodeunit/bin/nodeunit tests/runner.js\" },\n+  \"scripts\": { \"test\": \"nodeunit tests/runner.js\" },\n \n   \"licenses\": [{\n     \"type\" : \"MIT\",\n",
+					"match": false,
+					"packageHash": "2d4ce3f3c5854df17c624177e14795189f9ccbff72b884b6dacd6eb2f5becfeb",
+					"size": 854,
+					"sourceHash": "f651f8f11eed7b40d9f2411cf5d77f75bfb93a07962343741b63a2eec34e71c2",
+					"status": "content"
+				},
+				"readme.md": {
+					"diff": "--- published/readme.md\n+++ rebuilt/readme.md\n@@ -1,3 +1,15 @@\n+Warning: This Project Is Deprecated!\n+----------------------------------------------------------------------------\n+`wrench.js` is deprecated, and hasn't been updated in quite some time. **[I heavily recommend using fs-extra](https://github.com/jprichardson/node-fs-extra)** to do any extra filesystem operations.\n+\n+Wrench was built for the _early_ days of Node, and it solved a problem that needed solving. I'm proud of what it's done; at the time of writing this, it was still downloaded over 25,000 times yesterday, and over 500,000 times in the last month. The fact that it wound up being embedded in so many projects is humbling and a great source of fun for me, but I just don't have the time to keep up with this at the moment. No alternate maintainers have appeared, and fs-extra is very well maintained anyway - one community solution is likely better.\n+\n+So long, and thanks for all the fish. The original docs remain available here for anyone who may need them. If I could 301 a GitHub repository I'd do so.\n+\n+Cheers,\n+- Ryan McGrath\n+\n+\n wrench.js - Recursive file operations in Node.js\n ----------------------------------------------------------------------------\n While I love Node.js, I've found myself missing some functions. Things like\n@@ -8,6 +20,29 @@\n more formalized gets integrated into Node.js (*hint hint*). wrench.js is fairly simple\n to use - check out the documentation/examples below:\n \n+Possibly Breaking Change in v1.5.0\n+-----------------------------------------------------------------------------\n+In previous versions of Wrench, we went against the OS-default behavior of not\n+deleting a directory unless the operation is forced. In 1.5.0, this has been\n+changed to be the behavior people expect there to be - if you try to copy over\n+a directory that already exists, you'll get an Error returned or thrown stating\n+that you need to force it.\n+\n+Something like this will do the trick:\n+\n+``` javascript\n+wrench.copyDirSyncRecursive('directory_to_copy', 'location_where_copy_should_end_up', {\n+    forceDelete: true\n+});\n+```\n+\n+If you desire the older behavior of Wrench... hit up your package.json. If you\n+happen to find bugs in the 1.5.0 release please feel free to file them on the \n+GitHub issues tracker for this project, or send me a pull request and I'll get to\n+it as fast as I can. Thanks!\n+\n+**If this breaks enough projects I will consider rolling it back. Please hit me up if this seems to be the case.**\n+\n Installation\n -----------------------------------------------------------------------------\n \n@@ -38,13 +73,31 @@\n wrench.chownSyncRecursive(\"directory\", uid, gid);\n \n // Deep-copy an existing directory\n-wrench.copyDirSyncRecursive('directory_to_copy', 'location_where_copy_should_end_up');\n+wrench.copyDirSyncRecursive('directory_to_copy', 'location_where_copy_should_end_up', {\n+    forceDelete: bool, // Whether to overwrite existing directory or not\n+    excludeHiddenUnix: bool, // Whether to copy hidden Unix files or not (preceding .)\n+    preserveFiles: bool, // If we're overwriting something and the file already exists, keep the existing\n+    preserveTimestamps: bool, // Preserve the mtime and atime when copying files\n+    inflateSymlinks: bool, // Whether to follow symlinks or not when copying files\n+    filter: regexpOrFunction, // A filter to match files against; if matches, do nothing (exclude).\n+    whitelist: bool, // if true every file or directory which doesn't match filter will be ignored\n+    include: regexpOrFunction, // An include filter (either a regexp or a function)\n+    exclude: regexpOrFunction // An exclude filter (either a regexp or a function)\n+});\n+\n+// Note: If a RegExp is provided then then it will be matched against the filename. If a function is\n+//       provided then the signature should be the following:\n+//       function(filename, dir) { return result; }\n \n // Read lines in from a file until you hit the end\n var f = new wrench.LineReader('x.txt');\n while(f.hasNextLine()) {\n-\tutil.puts(x.getNextLine());\n+\tutil.puts(f.getNextLine());\n }\n+\n+// Note: You will need to close that above line reader at some point, otherwise\n+// you will run into a \"too many open files\" error. f.close() or fs.closeSync(f.fd) are\n+// your friends, as only you know when it is safe to close.\n ```\n \n ### Asynchronous operations\n@@ -52,13 +105,11 @@\n // Recursively read directories contents\n var files = [];\n wrench.readdirRecursive('my_directory_name', function(error, curFiles) {\n-    if (files) {\n-        files = files.concat(curFiles);\n-    } else {\n-        // files list contains all the directory contents now\n-    }\n+    // curFiles is what you want\n });\n \n+// If you're feeling somewhat masochistic\n+wrench.copyDirRecursive(srcDir, newDir, {forceDelete: bool /* See sync version */}, callbackfn);\n ```\n \n Questions, comments? Hit me up. (ryan [at] venodesigns.net | http://twitter.com/ryanmcgrath)\n",
+					"match": false,
+					"packageHash": "20336fed2de34ab289a4299d80f9a14e7401ba8a371a5b518dfef0f594dd8ced",
+					"size": 2142,
+					"sourceHash": "fada3d21d9b96497f08fce49d85818af85f2d4920e7cf470b948a7175b8753ea",
+					"status": "content"
+				},
+				"tests/mkdir.js": {
+					"diff": "--- published/tests/mkdir.js\n+++ rebuilt/tests/mkdir.js\n@@ -7,11 +7,11 @@\n     test_mkdirSyncRecursive: function(test) {\n         var dir = __dirname + '/_tmp/foo/bar';\n \n-        test.equals(path.existsSync(dir), false, 'Dir shouldn\\'t exist - clean it up manually?');\n+        test.equals(fs.existsSync(dir), false, 'Dir shouldn\\'t exist - clean it up manually?');\n \n         wrench.mkdirSyncRecursive(dir, 0777);\n \n-        test.equals(path.existsSync(dir), true, 'Dir should exist now');\n+        test.equals(fs.existsSync(dir), true, 'Dir should exist now');\n \n         // clean up\n         while (dir != __dirname) {\n",
+					"match": false,
+					"packageHash": "ebf1e5eaca4c5f2bd1651c9b9f694ca2c33c374c2c98dfea4f8c31468c53592c",
+					"size": 667,
+					"sourceHash": "36addb2b2d13f92f82310aa1b487612bc2332a1fee2060eaab9870c11c0ec6c0",
+					"status": "content"
+				},
+				"tests/readdir.js": {
+					"diff": "--- published/tests/readdir.js\n+++ rebuilt/tests/readdir.js\n@@ -2,33 +2,28 @@\n var fs = require('fs');\n var wrench = require('../lib/wrench');\n var path = require('path');\n-var _und = require(\"underscore\");\n \n \n function checkResult(test, files) {\n     var check = [\n             'bar.txt',\n             'foo',\n-            'foo/bar',\n-            'foo/dolor.md',\n-            'foo/lorem.txt',\n-            'foo/bar/ipsum.js'\n+            path.join('foo', 'bar'),\n+            path.join('foo', 'dolor.md'),\n+            path.join('foo', 'lorem.txt'),\n+            path.join('foo', 'bar', 'ipsum.js')\n         ];\n \n-    test.equals(files.length, check.length, 'number of paths is correct');\n-\n-    _und.each(check, function(it) {\n-        test.ok(_und.include(files, it), 'path ' + it + ' should be returned');\n-    });\n+    test.deepEqual(files, check);\n \n     test.done();\n }\n \n module.exports = testCase({\n     test_readdirSyncRecursive: function(test) {\n-        var dir = __dirname + '/readdir';\n+        var dir = path.join(__dirname, 'readdir');\n \n-        test.ok(path.existsSync(dir), 'Folders should exist');\n+        test.ok(fs.existsSync(dir), 'Folders should exist');\n \n         var files = wrench.readdirSyncRecursive(dir);\n \n@@ -36,9 +31,9 @@\n     },\n \n     test_readdirRecursive: function(test) {\n-        var dir = __dirname + '/readdir';\n+        var dir = path.join(__dirname, 'readdir');\n \n-        test.ok(path.existsSync(dir), 'Folders should exist');\n+        test.ok(fs.existsSync(dir), 'Folders should exist');\n \n         var allFiles = [];\n \n@@ -51,6 +46,15 @@\n                 checkResult(test, allFiles);\n             }\n         });\n+    },\n+\n+    test_readdirRecursiveWithNonExistentDirectory: function(test) {\n+        wrench.readdirRecursive('', function (e, files) {\n+            test.ok(e);\n+            test.equal(e.code, 'ENOENT');\n+            test.equal(files, null);\n+            test.done();\n+        });\n     }\n });\n \n",
+					"match": false,
+					"packageHash": "bfd6c9d07ef81772730cc16942bc62b2867eedcedd32d702969b007cc53cbd01",
+					"size": 1358,
+					"sourceHash": "4215517ed4e1a9ee95aa699b6e44a40b6cb2003e179ad4eedf3321df9bac107e",
+					"status": "content"
+				},
+				"tests/runner.js": {
+					"diff": "--- published/tests/runner.js\n+++ rebuilt/tests/runner.js\n@@ -3,5 +3,7 @@\n \n module.exports = {\n     group_mkdir: require('./mkdir'),\n-    group_readdir: require('./readdir')\n+    group_readdir: require('./readdir'),\n+    group_copydir: require('./copydirsync_unix'),\n+    group_rmdir: require('./rmdirSyncRecursive')\n };\n",
+					"match": false,
+					"packageHash": "73360fc14f684300103f679d6562820cfb61a5120eb40b5045c38f73d6ddce96",
+					"size": 153,
+					"sourceHash": "db8a6ed57bd5d187a9088b74e8037aa55546fc2e2a9d39199e56c42d5af54704",
+					"status": "content"
+				},
+				"tests/copydirsync_unix.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"tests/rmdirSyncRecursive.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"tests/shown/.hidden/dolor.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"tests/shown/.hidden.txt": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"tests/shown/bar.txt": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"tests/shown/foo/bar/ipsum.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"tests/shown/foo/dolor.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"tests/shown/foo/lorem.txt": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"tests/withsymlinks/test": {
+					"match": false,
+					"status": "missing-in-package"
+				}
+			},
+			"summary": {
+				"differentFiles": 6,
+				"matchingFiles": 5,
+				"missingInPackage": 9,
+				"missingInSource": 2,
+				"score": 0.22727272727272727,
+				"totalFiles": 22
+			}
+		},
+		"prodDependencies": []
+	}
+]
