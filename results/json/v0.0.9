@@ -1,0 +1,91 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-07T17:02:49.292Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:11.7.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "json@0.0.9",
+			"name": "json",
+			"version": "0.0.9",
+			"location": "https://registry.npmjs.org/json/-/json-0.0.9.tgz",
+			"integrity": "sha512-iPG6GK83ooJuQftTh8BgNNHA0IdoGShXaNAzXtSCcZ9e0Mq3LtWje58njuWuMIhKptYV40KVBlwQg/8w6KswoA==",
+			"publishedAt": "2011-12-28T23:48:34.577Z",
+			"publishedWith": {
+				"node": "v0.4.11",
+				"npm": "1.0.106"
+			},
+			"dependencies": {}
+		},
+		"source": {
+			"integrity": "sha512-bfOmtWVFJyK+BBYzEVMXByWZOn7qqa6GauoetG6cPBGb422nmvIRGtoOY3XaMnlgE7yIYAWWNnTIVDf5xEbEUQ==",
+			"location": "git://github.com/zpoley/json-command.git",
+			"spec": "github:zpoley/json-command#HEAD"
+		},
+		"comparisonHash": "9ef46a5bd31291e57cbab41e2f17c57bd6da0b5b",
+		"diff": {
+			"files": {
+				"README.md": {
+					"diff": "--- published/README.md\n+++ rebuilt/README.md\n@@ -30,19 +30,19 @@\n \n     curl http://search.twitter.com/search.json?q=node.js\n \n-    curl http://search.twitter.com/search.json?q=node.js 2> /dev/null | json\n+    curl -s http://search.twitter.com/search.json?q=node.js | json\n \n-    curl http://search.twitter.com/search.json?q=node.js 2> /dev/null | json -o results\n+    curl -s http://search.twitter.com/search.json?q=node.js | json -o results\n \n-    curl http://search.twitter.com/search.json?q=node.js 2> /dev/null | json -o results from_user metadata\n+    curl -s http://search.twitter.com/search.json?q=node.js | json -o results from_user metadata\n \n-    curl http://search.twitter.com/search.json?q=node.js 2> /dev/null | json -o results new_id=id\n+    curl -s http://search.twitter.com/search.json?q=node.js | json -o results new_id=id\n \n-    curl http://search.twitter.com/search.json?q=node.js 2> /dev/null | json -o results -C from_user from_user_id\n+    curl -s http://search.twitter.com/search.json?q=node.js | json -o results -C from_user from_user_id\n \n-    curl http://stream.twitter.com/1/statuses/sample.json -uAnyTwitterUser:Password 2> /dev/null | json user.name user.id\n+    curl -s http://stream.twitter.com/1/statuses/sample.json -uAnyTwitterUser:Password | json user.name user.id\n \n-    curl http://stream.twitter.com/1/statuses/sample.json -uAnyTwitterUser:Password 2> /dev/null | json user.name user.id -c \"entities.user_mentions.length > 0\"\n+    curl -s http://stream.twitter.com/1/statuses/sample.json -uAnyTwitterUser:Password | json user.name user.id -c \"entities.user_mentions.length > 0\"\n \n ## Synopsis\n \n@@ -70,7 +70,7 @@\n \n     -e \"js expression\"    execute arbitrary js in the context of each object.\n \n-    -i                    use node's sys.inspect instead of JSON.stringify.\n+    -i                    use node's util.inspect instead of JSON.stringify.\n \n     -H                    print headers, if they are supplied. Useful for output from curl -i.\n \n",
+					"match": false,
+					"packageHash": "057a1b0da38ee8af273f6ce882c89e93e5f7e71ba916debbd7804f12f0e4a765",
+					"size": 4075,
+					"sourceHash": "839c4c11d11e4bff4e74fcd2767bcdf2e028fb22cd0b9d3c8c953aae2298374e",
+					"status": "content"
+				},
+				"bin/json.js": {
+					"diff": "--- published/bin/json.js\n+++ rebuilt/bin/json.js\n@@ -1,7 +1,6 @@\n #!/usr/bin/env node\n \n-var sys = require(\"sys\"),\n-    jsonCommand = require(\"../lib/jsonCommand\");\n+var jsonCommand = require(\"../lib/jsonCommand\");\n \n var args = process.argv.slice(0);\n // shift off node and script name\n",
+					"match": false,
+					"packageHash": "f221c462a2112ad6c615eb113ac1d1120f5e348028a45946c2d7daa7f55e34d8",
+					"size": 234,
+					"sourceHash": "c002139498b7263b3284e62cbc2983857682fe3d8900629f0ff081682f6e5199",
+					"status": "content"
+				},
+				"lib/jsonCommand.js": {
+					"diff": "--- published/lib/jsonCommand.js\n+++ rebuilt/lib/jsonCommand.js\n@@ -1,4 +1,4 @@\n-var sys = require(\"sys\"),\n+var util = require(\"util\"),\n     vm = require(\"vm\");\n \n /*\n@@ -14,6 +14,7 @@\n   this.keys = [];\n   this.transformedKeys = [];\n   this.uglyOutput = false;\n+  this.leadingComma = false;\n   this.inspectOutput = false;\n   this.headerPassthrough = false;\n   this.columnOutput = false;\n@@ -30,45 +31,46 @@\n };\n \n JSON.Command.prototype.printhelp = function() {\n-  sys.puts(\"usage: stdout_generator | json [options] [fields]\");\n-  sys.puts(\"\");\n-  sys.puts(\"json processes standard input and parses json objects. json currently handles a\");\n-  sys.puts(\"few different standard input formats and provides a number of options tailored\");\n-  sys.puts(\"toward inspecting and transforming the parsed json objects.\");\n-  sys.puts(\"\");\n-  sys.puts(\"options:\\n\");  \n-  sys.puts(\"  -h                    print this help info and exit\\n\");\n-  sys.puts(\"  -v (-V | --version)   print version number and exit\\n\");\n-  sys.puts(\"  -u                    print ugly json output, each object on a single line\\n\");\n-  sys.puts(\"  -d                    print debugging output including exception messages\\n\");\n-  sys.puts(\"  -o object.path        specify the path to an array to be iterated on\\n\");\n-  sys.puts(\"  new.key=old_key       move old_key to new.key in output object\\n\");\n-  sys.puts(\"  -a                    input object is an array, process each element separately\\n\");\n-  sys.puts(\"  -c \\\"js conditional\\\"   js conditional to be run in the context of each object\");\n-  sys.puts(\"                         that determines whether an object is printed\\n\");\n-  sys.puts(\"  -C                    print the output fields as tab delimited columns in\");\n-  sys.puts(\"                         the order specified by fields\\n\");\n-  sys.puts(\"  -e \\\"js expression\\\"    execute arbitrary js in the context of each object.\\n\");\n-  sys.puts(\"  -i                    use node's sys.inspect instead of JSON.stringify\\n\");\n-  sys.puts(\"  -H                    print headers, if they are supplied.\");\n-  sys.puts(\"                        Useful for output from curl -i.\\n\");\n-\n-  sys.puts(\"examples:\\n\");\n-  sys.puts(\"  curl http://search.twitter.com/search.json?q=node.js 2> /dev/null |\");\n-  sys.puts(\"   json -o results\\n\");\n-  sys.puts(\"  curl http://search.twitter.com/search.json?q=node.js 2> /dev/null |\");\n-  sys.puts(\"   json -o results new_id=id\\n\");\n-  sys.puts(\"  curl http://search.twitter.com/search.json?q=node.js 2> /dev/null |\");\n-  sys.puts(\"   json -o results -C from_user from_user_id text\\n\");\n-  sys.puts(\"more help:\\n\");\n-  sys.puts(\"  use \\\"man json\\\" or visit http://github.com/zpoley/json-command\\n\");\n+  console.log(\"usage: stdout_generator | json [options] [fields]\");\n+  console.log(\"\");\n+  console.log(\"json processes standard input and parses json objects. json currently handles a\");\n+  console.log(\"few different standard input formats and provides a number of options tailored\");\n+  console.log(\"toward inspecting and transforming the parsed json objects.\");\n+  console.log(\"\");\n+  console.log(\"options:\\n\");\n+  console.log(\"  -h                    print this help info and exit\\n\");\n+  console.log(\"  -v (-V | --version)   print version number and exit\\n\");\n+  console.log(\"  -u                    print ugly json output, each object on a single line\\n\");\n+  console.log(\"  -,                    print leading-comma diff-friendly output, one line per property\\n\");\n+  console.log(\"  -d                    print debugging output including exception messages\\n\");\n+  console.log(\"  -o object.path        specify the path to an array to be iterated on\\n\");\n+  console.log(\"  new.key=old_key       move old_key to new.key in output object\\n\");\n+  console.log(\"  -a                    input object is an array, process each element separately\\n\");\n+  console.log(\"  -c \\\"js conditional\\\"   js conditional to be run in the context of each object\");\n+  console.log(\"                         that determines whether an object is printed\\n\");\n+  console.log(\"  -C                    print the output fields as tab delimited columns in\");\n+  console.log(\"                         the order specified by fields\\n\");\n+  console.log(\"  -e \\\"js expression\\\"    execute arbitrary js in the context of each object.\\n\");\n+  console.log(\"  -i                    use node's util.inspect instead of JSON.stringify\\n\");\n+  console.log(\"  -H                    print headers, if they are supplied.\");\n+  console.log(\"                        Useful for output from curl -i.\\n\");\n+\n+  console.log(\"examples:\\n\");\n+  console.log(\"  curl http://search.twitter.com/search.json?q=node.js 2> /dev/null |\");\n+  console.log(\"   json -o results\\n\");\n+  console.log(\"  curl http://search.twitter.com/search.json?q=node.js 2> /dev/null |\");\n+  console.log(\"   json -o results new_id=id\\n\");\n+  console.log(\"  curl http://search.twitter.com/search.json?q=node.js 2> /dev/null |\");\n+  console.log(\"   json -o results -C from_user from_user_id text\\n\");\n+  console.log(\"more help:\\n\");\n+  console.log(\"  use \\\"man json\\\" or visit http://github.com/zpoley/json-command\\n\");\n   process.exit();\n };\n \n JSON.Command.prototype.printversion = function() {\n   var npm = require(\"npm\");\n   npm.load([], function(er) {\n-    sys.print(\"json command line toolkit\\n version: \");\n+    console.log(\"json command line toolkit\\n version: \");\n     npm.commands.view([ \"json\", \"version\" ], function(er, data) {\n       process.exit();\n     });\n@@ -77,13 +79,20 @@\n \n \n JSON.Command.prototype.stringify = function(obj) {\n",
+					"match": false,
+					"packageHash": "2b389fc6e52ddc44af3d0901e5fd63ab57cc9963d1091a7948feeff2fc066c71",
+					"size": 14166,
+					"sourceHash": "0a0cf88871ab40fed4179bac30815e547ab7d44e6f1dad2e02653d6bcd72a58b",
+					"status": "content"
+				},
+				"man/json.1": {
+					"diff": "--- published/man/json.1\n+++ rebuilt/man/json.1\n@@ -40,7 +40,7 @@\n .IP \"-e js expression\"\n execute arbitrary javascript within the context of each object.\n .IP \"-i\"\n-use node's sys.inspect instead of JSON.stringify.\n+use node's util.inspect instead of JSON.stringify.\n .IP \"-H\"\n print headers, if they are supplied. Useful for output from curl -i.\n \\.\".IP -k\n",
+					"match": false,
+					"packageHash": "28840bd7da3b149b1b67d66874f9b9ea4d0498a0d60d41df54b943b616e80182",
+					"size": 3544,
+					"sourceHash": "288584e2647e959373a143a30c9098d6d3cd934a683eb68ef2c96cc07e7675bc",
+					"status": "content"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -1,9 +1,10 @@\n-{ \"name\": \"json\"\n-, \"version\": \"0.0.9\"\n+{ \"name\": \"json-command\"\n+, \"version\": \"0.0.14\"\n+, \"license\": \"MIT\"\n , \"engines\": [ \"node >=0.4.0\" ]\n , \"description\": \"JSON command line processing toolkit.\"\n , \"author\": \"Zachary Poley <zpoley@gmail.com> (http://zpoley.net)\"\n-, \"contributors\": [ \"Isaac Schlueter <i@izs.me> (http://blog.izs.me)\", \"Andrey Tarantsov <andreyvit@gmail.com> (http://www.tarantsov.com/)\" ]\n+, \"contributors\": [ \"Isaac Schlueter <i@izs.me> (http://blog.izs.me)\", \"Andrey Tarantsov <andreyvit@gmail.com> (http://www.tarantsov.com/)\", \"Niek Schmoller <niek.schmoller@helderberg.nl> (http://helderberg.nl)\", \"Ryunosuke SATO (http://d.hatena.ne.jp/tricknotes/)\", \"Johan Sundström (http://ecmanaut.blogspot.com/)\" ]\n , \"keywords\" : [ \"json\", \"command\", \"shell\" ]\n , \"man\" : \"./man/json.1\"\n , \"repository\":\n@@ -11,4 +12,7 @@\n   , \"url\" : \"https://github.com/zpoley/json-command.git\"\n   }\n , \"bin\" : { \"json\" : \"./bin/json.js\" }\n+, \"scripts\":\n+  { \"test\" : \"node test/test.js\"\n+  }\n }\n",
+					"match": false,
+					"packageHash": "79948760ac1a1ddc6234f1fd5e4905a367775ce576eab9deab933d546a2c9bd9",
+					"size": 544,
+					"sourceHash": "b8ce4420a63583106b95a6a823b6fe3b4c879fa2497fd8ab84beb3aae4688bc6",
+					"status": "content"
+				},
+				"test/test.js": {
+					"diff": "--- published/test/test.js\n+++ rebuilt/test/test.js\n@@ -1,5 +1,4 @@\n-var sys = require(\"sys\"),\n-    assert = require(\"assert\"),\n+var assert = require(\"assert\"),\n     jsonCommand = require(\"../lib/jsonCommand\");\n \n var testObj = {\n@@ -22,8 +21,8 @@\n };\n \n function printTestName(testName) {\n-  sys.puts(\"\\nRunning \" + testName + \":\");\n-  sys.puts(\"-----------------------------------------\");\n+  console.log(\"\\nRunning \" + testName + \":\");\n+  console.log(\"-----------------------------------------\");\n }\n \n (function testSimpleSetup() {\n@@ -57,6 +56,8 @@\n \n     assert.equal(testObj.zero, 0,\n       \"createRequestedKeys does not add null for 0 to object\");\n+\n+    delete testObj.newKey;\n   })();\n \n   (function testCheckConditionals() {\n@@ -68,7 +69,7 @@\n     assert.equal(jsonC.checkConditionals(testObj), false,\n       \"checkConditionals (name=='foo') is false\");\n \n-    var jsonC = new JSON.Command();\n+    jsonC = new JSON.Command();\n     jsonC.processArgs([ \"-c\", \"(user.name == 'foo')\"]);\n \n     assert.equal(jsonC.checkConditionals(testObj), true,\n@@ -140,6 +141,25 @@\n \n   })();\n \n+  (function testDiffFriendly() {\n+    printTestName(\"testLeadingComma\");\n+\n+    var jsonC = new JSON.Command();\n+    jsonC.processArgs([ \"-,\" ]);\n+\n+    assert.equal(jsonC.stringify(testObj),\n+      '{ \"id\": 19375093\\n, \"text\": \"who knows\"\\n, \"user\":\\n  { \"id\": 1310571\\n  , \"name\": \"foo\"\\n  }\\n, \"arr1\":\\n  [ \"a\"\\n  , \"b\"\\n  , \"c\"\\n  ]\\n, \"obj1\":\\n  { \"arr2\":\\n    [ \"d\"\\n    , \"e\"\\n    , \"f\"\\n    ]\\n  }\\n, \"created_at\": 127817599\\n, \"zero\": 0\\n}',\n+      \"Leading-comma output selection works and formats test object correctly\");\n+\n+    assert.equal(jsonC.stringify([[]]), \"[ []\\n]\",\n+      \"Leading-comma output nests arrays correctly\");\n+\n+    assert.equal(jsonC.stringify({\"\":[{\"deep\":{\"null\":null}}]}),\n+      '{ \"\":\\n  [ { \"deep\":\\n      { \"null\": null\\n      }\\n    }\\n  ]\\n}',\n+      \"Leading-comma output nests deep object/array combinations correctly\");\n+\n+  })();\n+\n })();\n \n-sys.puts(\"\\nAll tests passed!\\n\");\n+console.log(\"\\nAll tests passed!\\n\");\n",
+					"match": false,
+					"packageHash": "28bdbdae6ec6b7ea8ec609fa0c2a5785244d0194f9f98e8d49ae7add3aa31a73",
+					"size": 4229,
+					"sourceHash": "d4735972a5dd3df351b2b2cb8d15b57d8ecef7f70cec1ad2418028e42039249d",
+					"status": "content"
+				}
+			},
+			"summary": {
+				"differentFiles": 6,
+				"matchingFiles": 1,
+				"missingInPackage": 0,
+				"missingInSource": 0,
+				"score": 0.14285714285714285,
+				"totalFiles": 7
+			}
+		},
+		"prodDependencies": []
+	}
+]

@@ -1,0 +1,83 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-07T17:02:51.442Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:11.7.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "json@0.0.10",
+			"name": "json",
+			"version": "0.0.10",
+			"location": "https://registry.npmjs.org/json/-/json-0.0.10.tgz",
+			"integrity": "sha512-+Rk2iSSAuzanSxJESflHOUVeX7CTurgqSWFQfBe9pcO0FxxEKJK0wj7LaGTFICfRm86vteOHuA5zL7MERjUz/Q==",
+			"publishedAt": "2012-02-29T19:04:27.233Z",
+			"publishedWith": {
+				"node": "v0.4.11",
+				"npm": "1.0.106"
+			},
+			"dependencies": {}
+		},
+		"source": {
+			"integrity": "sha512-bfOmtWVFJyK+BBYzEVMXByWZOn7qqa6GauoetG6cPBGb422nmvIRGtoOY3XaMnlgE7yIYAWWNnTIVDf5xEbEUQ==",
+			"location": "git://github.com/zpoley/json-command.git",
+			"spec": "github:zpoley/json-command#HEAD"
+		},
+		"comparisonHash": "9ef46a5bd31291e57cbab41e2f17c57bd6da0b5b",
+		"diff": {
+			"files": {
+				"README.md": {
+					"diff": "--- published/README.md\n+++ rebuilt/README.md\n@@ -70,7 +70,7 @@\n \n     -e \"js expression\"    execute arbitrary js in the context of each object.\n \n-    -i                    use node's sys.inspect instead of JSON.stringify.\n+    -i                    use node's util.inspect instead of JSON.stringify.\n \n     -H                    print headers, if they are supplied. Useful for output from curl -i.\n \n",
+					"match": false,
+					"packageHash": "6b4cb124fa22cd73f8b161c91e357862db339d61cd12503f62013c33e6c0b372",
+					"size": 4005,
+					"sourceHash": "839c4c11d11e4bff4e74fcd2767bcdf2e028fb22cd0b9d3c8c953aae2298374e",
+					"status": "content"
+				},
+				"lib/jsonCommand.js": {
+					"diff": "--- published/lib/jsonCommand.js\n+++ rebuilt/lib/jsonCommand.js\n@@ -14,6 +14,7 @@\n   this.keys = [];\n   this.transformedKeys = [];\n   this.uglyOutput = false;\n+  this.leadingComma = false;\n   this.inspectOutput = false;\n   this.headerPassthrough = false;\n   this.columnOutput = false;\n@@ -40,6 +41,7 @@\n   console.log(\"  -h                    print this help info and exit\\n\");\n   console.log(\"  -v (-V | --version)   print version number and exit\\n\");\n   console.log(\"  -u                    print ugly json output, each object on a single line\\n\");\n+  console.log(\"  -,                    print leading-comma diff-friendly output, one line per property\\n\");\n   console.log(\"  -d                    print debugging output including exception messages\\n\");\n   console.log(\"  -o object.path        specify the path to an array to be iterated on\\n\");\n   console.log(\"  new.key=old_key       move old_key to new.key in output object\\n\");\n@@ -78,10 +80,17 @@\n \n JSON.Command.prototype.stringify = function(obj) {\n   return( this.inspectOutput ? util.inspect(obj, false, Infinity, true)\n+        : this.leadingComma ? this.diffFriendly(obj)\n         : this.uglyOutput ? JSON.stringify(obj)\n         : JSON.stringify(obj, null, 2) );\n };\n \n+JSON.Command.prototype.diffFriendly = function(obj) {\n+  return JSON.stringify(obj, null, 2)\n+    .replace(/ ?([[{,])\\n ( *)(?: )/gm, '\\n$2$1 ') // trailing->leading ,-{-[s\n+    .replace(/(^|[[{,] ?)\\n */gm, '$1'); // cuddle brackets/braces/array items\n+};\n+\n JSON.Command.prototype.debug = function(msg) {\n   if (this.debugOn) { console.log(msg); }\n };\n@@ -129,6 +138,9 @@\n       case \"-u\": // pretty printing (turn off)\n         this.uglyOutput = true;\n         break;\n+      case \"-,\": // diff-friendlier output\n+        this.leadingComma = true;\n+        break;\n       case \"-c\": // conditional\n         this.conditionals.push(a.shift());\n         break;\n@@ -217,7 +229,7 @@\n     for(var i = 0; (i < this.transformedKeys.length); i++) {\n       try { \n         vm.runInNewContext(this.transformedKeys[i].newKey +\n-          \" = \" + this.transformedKeys[i].oldKey, parsedObject)\n+          \" = \" + this.transformedKeys[i].oldKey, parsedObject);\n       }\n       catch (ex) {\n         this.printex(ex);\n@@ -452,10 +464,16 @@\n       }\n     });\n \n+    var handleEPIPE = function(e) {\n+      if (e.code !== \"EPIPE\") {\n+        process.emit(\"error\", e);\n+      }\n+    };\n+    process.stdout.on(\"error\", handleEPIPE);\n+\n     this.stdin.on(\"end\", function() {\n       this.jsonC.processObjects([this.jsonC.buffer, null]);\n+      process.stdout.removeListener(\"error\", handleEPIPE);\n     });\n   }\n };\n-\n-\n",
+					"match": false,
+					"packageHash": "7f1fcb7a1116f48c532da9a3ec67dad6b46da41a335ed1a92b2ab3f7a2938747",
+					"size": 14267,
+					"sourceHash": "0a0cf88871ab40fed4179bac30815e547ab7d44e6f1dad2e02653d6bcd72a58b",
+					"status": "content"
+				},
+				"man/json.1": {
+					"diff": "--- published/man/json.1\n+++ rebuilt/man/json.1\n@@ -40,7 +40,7 @@\n .IP \"-e js expression\"\n execute arbitrary javascript within the context of each object.\n .IP \"-i\"\n-use node's sys.inspect instead of JSON.stringify.\n+use node's util.inspect instead of JSON.stringify.\n .IP \"-H\"\n print headers, if they are supplied. Useful for output from curl -i.\n \\.\".IP -k\n",
+					"match": false,
+					"packageHash": "28840bd7da3b149b1b67d66874f9b9ea4d0498a0d60d41df54b943b616e80182",
+					"size": 3544,
+					"sourceHash": "288584e2647e959373a143a30c9098d6d3cd934a683eb68ef2c96cc07e7675bc",
+					"status": "content"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -1,9 +1,10 @@\n-{ \"name\": \"json\"\n-, \"version\": \"0.0.10\"\n+{ \"name\": \"json-command\"\n+, \"version\": \"0.0.14\"\n+, \"license\": \"MIT\"\n , \"engines\": [ \"node >=0.4.0\" ]\n , \"description\": \"JSON command line processing toolkit.\"\n , \"author\": \"Zachary Poley <zpoley@gmail.com> (http://zpoley.net)\"\n-, \"contributors\": [ \"Isaac Schlueter <i@izs.me> (http://blog.izs.me)\", \"Andrey Tarantsov <andreyvit@gmail.com> (http://www.tarantsov.com/)\", \"Niek Schmoller <niek.schmoller@helderberg.nl> (http://helderberg.nl)\" ]\n+, \"contributors\": [ \"Isaac Schlueter <i@izs.me> (http://blog.izs.me)\", \"Andrey Tarantsov <andreyvit@gmail.com> (http://www.tarantsov.com/)\", \"Niek Schmoller <niek.schmoller@helderberg.nl> (http://helderberg.nl)\", \"Ryunosuke SATO (http://d.hatena.ne.jp/tricknotes/)\", \"Johan Sundström (http://ecmanaut.blogspot.com/)\" ]\n , \"keywords\" : [ \"json\", \"command\", \"shell\" ]\n , \"man\" : \"./man/json.1\"\n , \"repository\":\n@@ -11,4 +12,7 @@\n   , \"url\" : \"https://github.com/zpoley/json-command.git\"\n   }\n , \"bin\" : { \"json\" : \"./bin/json.js\" }\n+, \"scripts\":\n+  { \"test\" : \"node test/test.js\"\n+  }\n }\n",
+					"match": false,
+					"packageHash": "f33b949df665d28c05cd1bc19eef31b1583b9c16a9085e492e5efd4c2594e80a",
+					"size": 617,
+					"sourceHash": "b8ce4420a63583106b95a6a823b6fe3b4c879fa2497fd8ab84beb3aae4688bc6",
+					"status": "content"
+				},
+				"test/test.js": {
+					"diff": "--- published/test/test.js\n+++ rebuilt/test/test.js\n@@ -1,5 +1,4 @@\n-var sys = require(\"sys\"),\n-    assert = require(\"assert\"),\n+var assert = require(\"assert\"),\n     jsonCommand = require(\"../lib/jsonCommand\");\n \n var testObj = {\n@@ -22,8 +21,8 @@\n };\n \n function printTestName(testName) {\n-  sys.puts(\"\\nRunning \" + testName + \":\");\n-  sys.puts(\"-----------------------------------------\");\n+  console.log(\"\\nRunning \" + testName + \":\");\n+  console.log(\"-----------------------------------------\");\n }\n \n (function testSimpleSetup() {\n@@ -57,6 +56,8 @@\n \n     assert.equal(testObj.zero, 0,\n       \"createRequestedKeys does not add null for 0 to object\");\n+\n+    delete testObj.newKey;\n   })();\n \n   (function testCheckConditionals() {\n@@ -68,7 +69,7 @@\n     assert.equal(jsonC.checkConditionals(testObj), false,\n       \"checkConditionals (name=='foo') is false\");\n \n-    var jsonC = new JSON.Command();\n+    jsonC = new JSON.Command();\n     jsonC.processArgs([ \"-c\", \"(user.name == 'foo')\"]);\n \n     assert.equal(jsonC.checkConditionals(testObj), true,\n@@ -140,6 +141,25 @@\n \n   })();\n \n+  (function testDiffFriendly() {\n+    printTestName(\"testLeadingComma\");\n+\n+    var jsonC = new JSON.Command();\n+    jsonC.processArgs([ \"-,\" ]);\n+\n+    assert.equal(jsonC.stringify(testObj),\n+      '{ \"id\": 19375093\\n, \"text\": \"who knows\"\\n, \"user\":\\n  { \"id\": 1310571\\n  , \"name\": \"foo\"\\n  }\\n, \"arr1\":\\n  [ \"a\"\\n  , \"b\"\\n  , \"c\"\\n  ]\\n, \"obj1\":\\n  { \"arr2\":\\n    [ \"d\"\\n    , \"e\"\\n    , \"f\"\\n    ]\\n  }\\n, \"created_at\": 127817599\\n, \"zero\": 0\\n}',\n+      \"Leading-comma output selection works and formats test object correctly\");\n+\n+    assert.equal(jsonC.stringify([[]]), \"[ []\\n]\",\n+      \"Leading-comma output nests arrays correctly\");\n+\n+    assert.equal(jsonC.stringify({\"\":[{\"deep\":{\"null\":null}}]}),\n+      '{ \"\":\\n  [ { \"deep\":\\n      { \"null\": null\\n      }\\n    }\\n  ]\\n}',\n+      \"Leading-comma output nests deep object/array combinations correctly\");\n+\n+  })();\n+\n })();\n \n-sys.puts(\"\\nAll tests passed!\\n\");\n+console.log(\"\\nAll tests passed!\\n\");\n",
+					"match": false,
+					"packageHash": "28bdbdae6ec6b7ea8ec609fa0c2a5785244d0194f9f98e8d49ae7add3aa31a73",
+					"size": 4229,
+					"sourceHash": "d4735972a5dd3df351b2b2cb8d15b57d8ecef7f70cec1ad2418028e42039249d",
+					"status": "content"
+				}
+			},
+			"summary": {
+				"differentFiles": 5,
+				"matchingFiles": 2,
+				"missingInPackage": 0,
+				"missingInSource": 0,
+				"score": 0.2857142857142857,
+				"totalFiles": 7
+			}
+		},
+		"prodDependencies": []
+	}
+]
