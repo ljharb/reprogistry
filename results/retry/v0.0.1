@@ -1,0 +1,111 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-07T19:35:33.775Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:11.7.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "retry@0.0.1",
+			"name": "retry",
+			"version": "0.0.1",
+			"location": "https://registry.npmjs.org/retry/-/retry-0.0.1.tgz",
+			"integrity": "sha512-b90A2rOTdhGMWnNmlUnimSOFVZtt5+rnRUqhL9Ce79E15/teiuWZPl81Qoxa7UOTyah6azAoXE8zZ6Z1zyZ/Xw==",
+			"publishedAt": "2011-05-13T11:26:53.515Z",
+			"publishedWith": {
+				"node": "v0.4.8-pre",
+				"npm": "1.0.5"
+			},
+			"dependencies": {}
+		},
+		"source": {
+			"integrity": "sha512-FDyg+mLMoa+VPLN+B1zb3Aa2OcQUXW8c9E3vlQc9whI+hP8MbJAFAGUz244OjcB1PxNqr326rpuT6ErVpvKLKA==",
+			"location": "git://github.com/felixge/node-retry.git",
+			"spec": "github:felixge/node-retry#HEAD"
+		},
+		"comparisonHash": "9ef46a5bd31291e57cbab41e2f17c57bd6da0b5b",
+		"diff": {
+			"files": {
+				"Readme.md": {
+					"diff": "--- published/Readme.md\n+++ rebuilt/Readme.md\n@@ -2,10 +2,13 @@\n \n Abstraction for exponential and custom retry strategies for failed operations.\n \n+## Installation\n+\n+    npm install retry\n+\n ## Current Status\n \n-At this point I'm just writing the Readme to get a feel for the API. Once I\n-like it, I'll implement it.\n+This module has been tested and is ready to be used.\n \n ## Tutorial\n \n@@ -20,13 +23,13 @@\n function faultTolerantResolve(address, cb) {\n   var operation = retry.operation();\n \n-  operation.try(function() {\n+  operation.attempt(function(currentAttempt) {\n     dns.resolve(address, function(err, addresses) {\n       if (operation.retry(err)) {\n         return;\n       }\n \n-      cb(operation.mainError, addresses);\n+      cb(operation.mainError(), addresses);\n     });\n   });\n }\n@@ -38,10 +41,11 @@\n \n Of course you can also configure the factors that go into the exponential\n backoff. See the API documentation below for all available settings.\n+currentAttempt is an int representing the number of attempts so far.\n \n ``` javascript\n var operation = retry.operation({\n-  times: 5,\n+  retries: 5,\n   factor: 3,\n   minTimeout: 1 * 1000,\n   maxTimeout: 60 * 1000,\n@@ -53,38 +57,46 @@\n \n ### retry.operation([options])\n \n-Creates a new `RetryOperation` object. If `options` is empty or a JS object,\n-it is passed to `retry.timeouts()` first. Otherwise it assumed to be an array\n-of timeouts.\n+Creates a new `RetryOperation` object. See the `retry.timeouts()` function\n+below for available `options`.\n \n ### retry.timeouts([options])\n \n Returns an array of timeouts. All time `options` and return values are in\n-milliseconds.\n+milliseconds. If `options` is an array, a copy of that array is returned.\n \n `options` is a JS object that can contain any of the following keys:\n \n-* `times`: The maximum amount of times to retry the operation. Default is `10`.\n+* `retries`: The maximum amount of times to retry the operation. Default is `10`.\n * `factor`: The exponential factor to use. Default is `2`.\n-* `minTimeout`: The minium amount of time between two retries. Usually only applies to the first retry. Default is `1000`.\n+* `minTimeout`: The amount of time before starting the first retry. Default is `1000`.\n * `maxTimeout`: The maximum amount of time between two retries. Default is `Infinity`.\n * `randomize`: Randomizes the timeouts by multiplying with a factor between `1` to `2`. Default is `false`.\n \n The formula used to calculate the individual timeouts is:\n \n ```\n-var timeout = (attempt === 0)\n-  ? 0\n-  : Math.min(random * minTimeout * Math.pow(factor, (attempt - 1)), maxTimeout);\n+var Math.min(random * minTimeout * Math.pow(factor, attempt), maxTimeout);\n ```\n \n Have a look at [this article][article] for a better explanation of approach.\n \n If you want to tune your `factor` / `times` settings to attempt the last retry\n after a certain amount of time, you can use wolfram alpha. For example in order\n-to tune for `10` attempts in `5 minutes`, you can use this query:\n+to tune for `10` attempts in `5 minutes`, you can use this equation:\n+\n+![screenshot](https://github.com/tim-kos/node-retry/raw/master/equation.gif)\n+\n+Explaining the various values from left to right:\n+\n+* `k = 0 ... 9`:  The `retries` value (10)\n+* `1000`: The `minTimeout` value in ms (1000)\n+* `x^k`: No need to change this, `x` will be your resulting factor\n+* `5 * 60 * 1000`: The desired total amount of time for retrying in ms (5 minutes)\n \n-[http://www.wolframalpha.com/input/?i=Sum%5Bx^k%2C+{k%2C+0%2C+10}%5D+%3D+5+*+60]()\n+To make this a little easier for you, use wolfram alpha to do the calculations:\n",
+					"match": false,
+					"packageHash": "74d5de36b7b3aa9789a8ddb4ecd6095503db28e7c5a58cbf1ad7e83c156a3215",
+					"size": 3794,
+					"sourceHash": "a1963083eaccaeeae9f9edf395bd2d0348efec22cd4af2288dd1931f11ae716a",
+					"status": "content"
+				},
+				"example/dns.js": {
+					"diff": "--- published/example/dns.js\n+++ rebuilt/example/dns.js\n@@ -2,9 +2,16 @@\n var retry = require('../lib/retry');\n \n function faultTolerantResolve(address, cb) {\n-  var operation = retry.operation();\n+  var opts = {\n+    times: 2,\n+    factor: 2,\n+    minTimeout: 1 * 1000,\n+    maxTimeout: 2 * 1000,\n+    randomize: true\n+  };\n+  var operation = retry.operation(opts);\n \n-  operation.try(function() {\n+  operation.attempt(function(currentAttempt) {\n     dns.resolve(address, function(err, addresses) {\n       if (operation.retry(err)) {\n         return;\n@@ -16,5 +23,9 @@\n }\n \n faultTolerantResolve('nodejs.org', function(err, errors, addresses) {\n-  console.log(err, errors, addresses);\n-});\n+  console.warn('err:');\n+  console.log(err);\n+\n+  console.warn('addresses:');\n+  console.log(addresses);\n+});\n\\ No newline at end of file\n",
+					"match": false,
+					"packageHash": "d8e98d55d88fd06c4b8219b5beaf8f33a5829d9e326ed5bd5c7330f6aacfc288",
+					"size": 481,
+					"sourceHash": "6903d8df6bfac53c89de93a1d47c7d3cd256f628de2e63d51ffdf3e4dde76494",
+					"status": "content"
+				},
+				"lib/retry.js": {
+					"diff": "--- published/lib/retry.js\n+++ rebuilt/lib/retry.js\n@@ -1,50 +1,44 @@\n var RetryOperation = require('./retry_operation');\n \n exports.operation = function(options) {\n-  // @TODO Check if options is an array, if so don't pass it through the function\n-  var timeouts = this.timeouts(options);\n-console.warn('timeouts:');\n-console.warn(timeouts);\n-  var operation = new RetryOperation(timeouts);\n-  return operation;\n+  var timeouts = exports.timeouts(options);\n+  return new RetryOperation(timeouts);\n };\n \n exports.timeouts = function(options) {\n+  if (options instanceof Array) {\n+    return [].concat(options);\n+  }\n+\n   var opts = {\n-    // @TODO Default should be 10\n-    times: 3,\n-    // @TODO Default should be 2\n-    factor: 3,\n+    retries: 10,\n+    factor: 2,\n     minTimeout: 1 * 1000,\n-    // @TODO Default should be Infinity\n-    maxTimeout: 60 * 1000,\n-    randomize: true\n+    maxTimeout: Infinity,\n+    randomize: false\n   };\n   for (var key in options) {\n     opts[key] = options[key];\n   }\n \n-  // Move into private function\n-  function createTimeout(num) {\n-    // @TODO Must be a value in between / including 1...2 !\n-    var random = opts.randomize ? Math.floor(Math.random() * 2 + 1) : 1;\n-    // @TODO better variable name would be timeout\n-    var result = 0;\n-\n-    // @TODO Make sure that first retry is always timeout === minTimeout\n-    if (num !== 0) {\n-      result = Math.min(\n-        random * opts.minTimeout * Math.pow(opts.factor, num - 1),\n-        opts.maxTimeout\n-      );\n-    }\n-    return result;\n+  if (opts.minTimeout > opts.maxTimeout) {\n+    throw new Error('minTimeout is greater than maxTimeout');\n   }\n \n   var timeouts = [];\n-  for (var i = 0; i < opts.times; i++) {\n-    var timeout = createTimeout(i);\n-    timeouts.push(timeout);\n+  for (var i = 0; i < opts.retries; i++) {\n+    timeouts.push(this._createTimeout(i, opts));\n   }\n   return timeouts;\n };\n+\n+exports._createTimeout = function(attempt, opts) {\n+  var random = (opts.randomize)\n+    ? (Math.random() + 1)\n+    : 1;\n+\n+  var timeout = Math.round(random * opts.minTimeout * Math.pow(opts.factor, attempt));\n+  timeout = Math.min(timeout, opts.maxTimeout);\n+\n+  return timeout;\n+}\n",
+					"match": false,
+					"packageHash": "45860dd3ed0167a0ff09475c6c8698b52b96e397a20f256f3711046f4ec2386c",
+					"size": 1340,
+					"sourceHash": "bea3cf6c14ec0f51e470341b4b953488a92cbe55732990cdb1864d68f7f783ce",
+					"status": "content"
+				},
+				"lib/retry_operation.js": {
+					"diff": "--- published/lib/retry_operation.js\n+++ rebuilt/lib/retry_operation.js\n@@ -1,75 +1,75 @@\n function RetryOperation(timeouts) {\n-  // @TODO Make those private\n-  this.timeouts = timeouts;\n-  this.fn = null;\n-  // @TODO Rename to _errors\n-  this.err = [];\n+  this._timeouts = timeouts;\n+  this._fn = null;\n+  this._errors = [];\n+  this._attempts = 1;\n }\n module.exports = RetryOperation;\n \n RetryOperation.prototype.retry = function(err) {\n   if (!err) {\n-    // @TODO return false instead of true, also fix below\n-    return true;\n+    return false;\n   }\n \n-  this.err.push(err);\n-\n-  var self = this;\n-  var timeout = this.timeouts.shift();\n+  this._errors.push(err);\n \n+  var timeout = this._timeouts.shift();\n   if (timeout === undefined) {\n-    return true;\n+    return false;\n   }\n \n-  // use bind?\n-  setTimeout(function() {\n-    self.fn();\n-  }, timeout);\n+  this._attempts++;\n+  setTimeout(this._fn.bind(this, this._attempts), timeout);\n+\n+  return true;\n+};\n \n-  return false;\n+RetryOperation.prototype.attempt = function(fn) {\n+  this._fn = fn;\n+  this._fn(this._attempts);\n };\n \n RetryOperation.prototype.try = function(fn) {\n-  this.fn = fn;\n-  // @TODO Remove this\n-  this.timeouts.shift();\n-  this.fn();\n+  console.log('Using RetryOperation.try() is deprecated');\n+  this.attempt(fn);\n };\n \n+RetryOperation.prototype.start = function(fn) {\n+  console.log('Using RetryOperation.start() is deprecated');\n+  this.attempt(fn);\n+};\n+\n+RetryOperation.prototype.start = RetryOperation.prototype.try;\n+\n RetryOperation.prototype.errors = function() {\n-  return this.err;\n+  return this._errors;\n+};\n+\n+RetryOperation.prototype.attempts = function() {\n+  return this._attempts;\n };\n \n RetryOperation.prototype.mainError = function() {\n-  if (this.err.length === 0) {\n+  if (this._errors.length === 0) {\n     return null;\n   }\n \n-  var errorMap = {};\n-\n-  // count occurrences of errors\n-  for (var i = 0; i < this.err.length; i++) {\n-    var msg = this.err[i].message;\n-    var error = {msg: msg};\n-\n-    if (!(msg in errorMap)) {\n-      error.occurrences = 1;\n-    } else {\n-      error.occurrences = errorMap[msg].occurrences + 1;\n+  var counts = {};\n+  var mainError = null;\n+  var mainErrorCount = 0;\n+\n+  for (var i = 0; i < this._errors.length; i++) {\n+    var error = this._errors[i];\n+    var message = error.message;\n",
+					"match": false,
+					"packageHash": "13a1418abe181b8ed1f5d769785fdc8ed56e6d48d69a0084e1aea0341f2837af",
+					"size": 1512,
+					"sourceHash": "da81eaf3d0625d999fcff0a0233ce67f30519b80aeff894f7e97b34267dddd9e",
+					"status": "content"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -2,7 +2,7 @@\n   \"author\": \"Tim Koschützki <tim@debuggable.com> (http://debuggable.com/)\",\n   \"name\": \"retry\",\n   \"description\": \"Abstraction for exponential and custom retry strategies for failed operations.\",\n-  \"version\": \"0.0.1\",\n+  \"version\": \"0.3.0\",\n   \"homepage\": \"https://github.com/felixge/node-retry\",\n   \"repository\": {\n     \"type\": \"git\",\n@@ -16,5 +16,8 @@\n     \"node\": \"*\"\n   },\n   \"dependencies\": {},\n-  \"devDependencies\": {}\n+  \"devDependencies\": {\n+    \"fake\": \"0.2.0\",\n+    \"far\": \"0.0.1\"\n+  }\n }\n\\ No newline at end of file\n",
+					"match": false,
+					"packageHash": "6542785cc18fb05f6ede147fc56144e39ac65dbf211d58ae98b98bd6bd95527d",
+					"size": 514,
+					"sourceHash": "3a8e4b1d23bd4ca3ec5fd345b34d20da54e7016ada9729a741cb777731cd4ee3",
+					"status": "content"
+				},
+				"License": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"Makefile": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"equation.gif": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/common.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/integration/test-retry-operation.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/integration/test-timeouts.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/runner.js": {
+					"match": false,
+					"status": "missing-in-package"
+				}
+			},
+			"summary": {
+				"differentFiles": 5,
+				"matchingFiles": 1,
+				"missingInPackage": 7,
+				"missingInSource": 0,
+				"score": 0.07692307692307693,
+				"totalFiles": 13
+			}
+		},
+		"prodDependencies": []
+	}
+]

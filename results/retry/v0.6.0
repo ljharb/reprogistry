@@ -1,0 +1,97 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-07T19:35:33.257Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:11.7.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "retry@0.6.0",
+			"name": "retry",
+			"version": "0.6.0",
+			"location": "https://registry.npmjs.org/retry/-/retry-0.6.0.tgz",
+			"integrity": "sha512-RgncoxLF1GqwAzTZs/K2YpZkWrdIYbXsmesdomi+iPilSzjUyr/wzNIuteoTVaWokzdwZIJ9NHRNQa/RUiOB2g==",
+			"publishedAt": "2012-02-14T08:34:18.028Z",
+			"publishedWith": {
+				"node": "v0.4.12",
+				"npm": "1.0.103"
+			},
+			"dependencies": {}
+		},
+		"source": {
+			"integrity": "sha512-FDyg+mLMoa+VPLN+B1zb3Aa2OcQUXW8c9E3vlQc9whI+hP8MbJAFAGUz244OjcB1PxNqr326rpuT6ErVpvKLKA==",
+			"location": "git://github.com/felixge/node-retry.git",
+			"spec": "github:felixge/node-retry#HEAD"
+		},
+		"comparisonHash": "9ef46a5bd31291e57cbab41e2f17c57bd6da0b5b",
+		"diff": {
+			"files": {
+				".gitignore": {
+					"match": false,
+					"packageHash": "3d61c65019f017525dcef4d0afe9a8a7d08052d0d59bd9bfeffbe0eecace9ba8",
+					"size": 16,
+					"status": "missing-in-source"
+				},
+				"Readme.md": {
+					"diff": "--- published/Readme.md\n+++ rebuilt/Readme.md\n@@ -120,15 +120,11 @@\n \n If no errors occured so far, the value is `null`.\n \n-#### retryOperation.attempt(fn, timeoutOps)\n+#### retryOperation.attempt(fn)\n \n Defines the function `fn` that is to be retried and executes it for the first\n time right away. The `fn` function can receive an optional `currentAttempt` callback that represents the number of attempts to execute `fn` so far.\n \n-Optionally defines `timeoutOps` which is an object having a property `timeout` in miliseconds and a property `cb` callback function.\n-Whenever your retry operation takes longer than `timeout` to execute, the timeout callback function `cb` is called.\n-\n-\n #### retryOperation.try(fn)\n \n This is an alias for `retryOperation.attempt(fn)`. This is deprecated.\n@@ -156,10 +152,6 @@\n \n #Changelog\n \n-0.6.0 Introduced optional timeOps parameter for the attempt() function which is an object having a property timeout in miliseconds and a property cb callback function. Whenever your retry operation takes longer than timeout to execute, the timeout callback function cb is called.\n-\n-0.5.0 Some minor refactorings.\n-\n 0.4.0 Changed retryOperation.try() to retryOperation.attempt(). Deprecated the aliases start() and try() for it.\n \n 0.3.0 Added retryOperation.start() which is an alias for retryOperation.try().\n",
+					"match": false,
+					"packageHash": "19946359209c88e6897fd2d208ad83721943b19dffd537160e2dab40426f805c",
+					"size": 5568,
+					"sourceHash": "a1963083eaccaeeae9f9edf395bd2d0348efec22cd4af2288dd1931f11ae716a",
+					"status": "content"
+				},
+				"lib/retry.js": {
+					"diff": "--- published/lib/retry.js\n+++ rebuilt/lib/retry.js\n@@ -29,12 +29,6 @@\n   for (var i = 0; i < opts.retries; i++) {\n     timeouts.push(this._createTimeout(i, opts));\n   }\n-\n-  // sort the array numerically ascending\n-  timeouts.sort(function(a,b) {\n-    return a - b;\n-  });\n-\n   return timeouts;\n };\n \n@@ -47,4 +41,4 @@\n   timeout = Math.min(timeout, opts.maxTimeout);\n \n   return timeout;\n-};\n\\ No newline at end of file\n+}\n",
+					"match": false,
+					"packageHash": "414bf2f0c9cddfc2309f34030fafce850bf466a8ff610150612974f808fc2e75",
+					"size": 1102,
+					"sourceHash": "bea3cf6c14ec0f51e470341b4b953488a92cbe55732990cdb1864d68f7f783ce",
+					"status": "content"
+				},
+				"lib/retry_operation.js": {
+					"diff": "--- published/lib/retry_operation.js\n+++ rebuilt/lib/retry_operation.js\n@@ -3,17 +3,10 @@\n   this._fn = null;\n   this._errors = [];\n   this._attempts = 1;\n-  this._operationTimeout = null;\n-  this._operationTimeoutCb = null;\n-  this._timeout = null;\n }\n module.exports = RetryOperation;\n \n RetryOperation.prototype.retry = function(err) {\n-  if (this._timeout) {\n-    clearTimeout(this._timeout);\n-  }\n-\n   if (!err) {\n     return false;\n   }\n@@ -26,41 +19,14 @@\n   }\n \n   this._attempts++;\n-\n-  var self = this;\n-  setTimeout(function() {\n-    self._fn(self._attempts);\n-\n-    if (self._operationTimeoutCb) {\n-      self._timeout = setTimeout(function() {\n-        self._operationTimeoutCb(self._attempts);\n-      }, self._operationTimeout);\n-    }\n-  }, timeout);\n+  setTimeout(this._fn.bind(this, this._attempts), timeout);\n \n   return true;\n };\n \n-RetryOperation.prototype.attempt = function(fn, timeoutOps) {\n+RetryOperation.prototype.attempt = function(fn) {\n   this._fn = fn;\n-\n-  if (timeoutOps) {\n-    if (timeoutOps.timeout) {\n-      this._operationTimeout = timeoutOps.timeout;\n-    }\n-    if (timeoutOps.cb) {\n-      this._operationTimeoutCb = timeoutOps.cb;\n-    }\n-  }\n-\n   this._fn(this._attempts);\n-\n-  var self = this;\n-  if (this._operationTimeoutCb) {\n-    this._timeout = setTimeout(function() {\n-      self._operationTimeoutCb();\n-    }, self._operationTimeout);\n-  }\n };\n \n RetryOperation.prototype.try = function(fn) {\n@@ -106,4 +72,4 @@\n   }\n \n   return mainError;\n-};\n\\ No newline at end of file\n+};\n",
+					"match": false,
+					"packageHash": "c16c3c27e0fb1171f4c45ad15c0b68217e9bf9ff62c01f0a295b0a49f23cfecb",
+					"size": 2267,
+					"sourceHash": "da81eaf3d0625d999fcff0a0233ce67f30519b80aeff894f7e97b34267dddd9e",
+					"status": "content"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -2,8 +2,8 @@\n   \"author\": \"Tim Koschützki <tim@debuggable.com> (http://debuggable.com/)\",\n   \"name\": \"retry\",\n   \"description\": \"Abstraction for exponential and custom retry strategies for failed operations.\",\n-  \"version\": \"0.6.0\",\n-  \"homepage\": \"https://github.com/tim-kos/node-retry\",\n+  \"version\": \"0.3.0\",\n+  \"homepage\": \"https://github.com/felixge/node-retry\",\n   \"repository\": {\n     \"type\": \"git\",\n     \"url\": \"git://github.com/felixge/node-retry.git\"\n",
+					"match": false,
+					"packageHash": "e68f90dcb39db5314f3a5e451fed5d39a6986a2f9a4fa73233437a00e0d57b8c",
+					"size": 557,
+					"sourceHash": "3a8e4b1d23bd4ca3ec5fd345b34d20da54e7016ada9729a741cb777731cd4ee3",
+					"status": "content"
+				},
+				"test/integration/test-retry-operation.js": {
+					"diff": "--- published/test/integration/test-retry-operation.js\n+++ rebuilt/test/integration/test-retry-operation.js\n@@ -37,19 +37,11 @@\n   assert.strictEqual(operation.mainError(), error2);\n })();\n \n-(function testAttempt() {\n+(function testTry() {\n   var operation = retry.operation();\n   var fn = new Function();\n-\n-  var timeoutOpts = {\n-    timeout: 1,\n-    cb: function() {}\n-  };\n-  operation.attempt(fn, timeoutOpts);\n-\n+  operation.attempt(fn);\n   assert.strictEqual(fn, operation._fn);\n-  assert.strictEqual(timeoutOpts.timeout, operation._operationTimeout);\n-  assert.strictEqual(timeoutOpts.cb, operation._operationTimeoutCb);\n })();\n \n (function testRetry() {\n@@ -77,4 +69,4 @@\n   };\n \n   fn();\n-})();\n\\ No newline at end of file\n+})();\n",
+					"match": false,
+					"packageHash": "81cec781f0e88b5ac8200f9ab47333cf8a2bbce7c5a9013d8782321ee5983428",
+					"size": 2091,
+					"sourceHash": "b1663e3d097f0a3669e75bd3107f243cef9385947fd80decff9e9b5f4389b047",
+					"status": "content"
+				},
+				"test/integration/test-timeouts.js": {
+					"diff": "--- published/test/integration/test-timeouts.js\n+++ rebuilt/test/integration/test-timeouts.js\n@@ -53,16 +53,6 @@\n   }\n })();\n \n-(function testTimeoutsAreIncrementalForFactorsLessThanOne() {\n-  var timeouts = retry.timeouts({\n-    retries: 3,\n-    factor: 0.5\n-  });\n-\n-  var expected = [250, 500, 1000];\n-  assert.deepEqual(expected, timeouts);\n-})();\n-\n (function testRetries() {\n   var timeouts = retry.timeouts({retries: 2});\n   assert.strictEqual(timeouts.length, 2);\n",
+					"match": false,
+					"packageHash": "48c08ff322d155dc9e2b33344429996d73da9335e6ca6056d778cc02e0fb71c6",
+					"size": 1779,
+					"sourceHash": "54f02cdb473b6c564e75504545149f906af96ae82a546de79cb060ef213a6096",
+					"status": "content"
+				}
+			},
+			"summary": {
+				"differentFiles": 6,
+				"matchingFiles": 7,
+				"missingInPackage": 0,
+				"missingInSource": 1,
+				"score": 0.5,
+				"totalFiles": 14
+			}
+		},
+		"prodDependencies": []
+	}
+]

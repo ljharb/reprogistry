@@ -1,0 +1,85 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-07T19:36:03.587Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:11.7.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "retry@0.3.0",
+			"name": "retry",
+			"version": "0.3.0",
+			"location": "https://registry.npmjs.org/retry/-/retry-0.3.0.tgz",
+			"integrity": "sha512-a08fczLoXqhlp25DdsyJRpNKQbUZrsu5INwNHKExq2685siC2yldC/Cu7R9aQxbGPziNuupxlkLuoOUWA5nQKg==",
+			"publishedAt": "2011-05-31T14:19:32.882Z",
+			"publishedWith": {
+				"node": "v0.4.8-pre",
+				"npm": "1.0.5"
+			},
+			"dependencies": {}
+		},
+		"source": {
+			"integrity": "sha512-FDyg+mLMoa+VPLN+B1zb3Aa2OcQUXW8c9E3vlQc9whI+hP8MbJAFAGUz244OjcB1PxNqr326rpuT6ErVpvKLKA==",
+			"location": "git://github.com/felixge/node-retry.git",
+			"spec": "github:felixge/node-retry#HEAD"
+		},
+		"comparisonHash": "9ef46a5bd31291e57cbab41e2f17c57bd6da0b5b",
+		"diff": {
+			"files": {
+				".gitignore": {
+					"match": false,
+					"packageHash": "3d61c65019f017525dcef4d0afe9a8a7d08052d0d59bd9bfeffbe0eecace9ba8",
+					"size": 16,
+					"status": "missing-in-source"
+				},
+				"Readme.md": {
+					"diff": "--- published/Readme.md\n+++ rebuilt/Readme.md\n@@ -23,7 +23,7 @@\n function faultTolerantResolve(address, cb) {\n   var operation = retry.operation();\n \n-  operation.try(function(currentAttempt) {\n+  operation.attempt(function(currentAttempt) {\n     dns.resolve(address, function(err, addresses) {\n       if (operation.retry(err)) {\n         return;\n@@ -83,9 +83,20 @@\n \n If you want to tune your `factor` / `times` settings to attempt the last retry\n after a certain amount of time, you can use wolfram alpha. For example in order\n-to tune for `10` attempts in `5 minutes`, you can use this query:\n+to tune for `10` attempts in `5 minutes`, you can use this equation:\n \n-[http://www.wolframalpha.com/input/?i=Sum%5Bx^k%2C+{k%2C+0%2C+9}%5D+%3D+5+*+60]()\n+![screenshot](https://github.com/tim-kos/node-retry/raw/master/equation.gif)\n+\n+Explaining the various values from left to right:\n+\n+* `k = 0 ... 9`:  The `retries` value (10)\n+* `1000`: The `minTimeout` value in ms (1000)\n+* `x^k`: No need to change this, `x` will be your resulting factor\n+* `5 * 60 * 1000`: The desired total amount of time for retrying in ms (5 minutes)\n+\n+To make this a little easier for you, use wolfram alpha to do the calculations:\n+\n+[http://www.wolframalpha.com/input/?i=Sum%5B1000*x^k%2C+{k%2C+0%2C+9}%5D+%3D+5+*+60+*+1000]()\n \n [article]: http://dthain.blogspot.com/2009/02/exponential-backoff-in-distributed.html\n \n@@ -109,14 +120,18 @@\n \n If no errors occured so far, the value is `null`.\n \n-#### retryOperation.try(fn)\n+#### retryOperation.attempt(fn)\n \n Defines the function `fn` that is to be retried and executes it for the first\n time right away. The `fn` function can receive an optional `currentAttempt` callback that represents the number of attempts to execute `fn` so far.\n \n+#### retryOperation.try(fn)\n+\n+This is an alias for `retryOperation.attempt(fn)`. This is deprecated.\n+\n #### retryOperation.start(fn)\n \n-This is an alias for `retryOperation.try(fn)`.\n+This is an alias for `retryOperation.attempt(fn)`. This is deprecated.\n \n #### retryOperation.retry(error)\n \n@@ -133,3 +148,12 @@\n ## License\n \n retry is licensed under the MIT license.\n+\n+\n+#Changelog\n+\n+0.4.0 Changed retryOperation.try() to retryOperation.attempt(). Deprecated the aliases start() and try() for it.\n+\n+0.3.0 Added retryOperation.start() which is an alias for retryOperation.try().\n+\n+0.2.0 Added attempts() function and parameter to retryOperation.try() representing the number of attempts it took to call fn().\n",
+					"match": false,
+					"packageHash": "fd5a1448cc2245f1dd14d1b6bf5f24869795b43c3003a776e5076be1c6010b95",
+					"size": 4058,
+					"sourceHash": "a1963083eaccaeeae9f9edf395bd2d0348efec22cd4af2288dd1931f11ae716a",
+					"status": "content"
+				},
+				"example/dns.js": {
+					"diff": "--- published/example/dns.js\n+++ rebuilt/example/dns.js\n@@ -11,7 +11,7 @@\n   };\n   var operation = retry.operation(opts);\n \n-  operation.try(function(currentAttempt) {\n+  operation.attempt(function(currentAttempt) {\n     dns.resolve(address, function(err, addresses) {\n       if (operation.retry(err)) {\n         return;\n",
+					"match": false,
+					"packageHash": "9d1802aaf0c6faf466d0b00204b6be9e3c23219efadeab6b59f9d7c1f04abe86",
+					"size": 681,
+					"sourceHash": "6903d8df6bfac53c89de93a1d47c7d3cd256f628de2e63d51ffdf3e4dde76494",
+					"status": "content"
+				},
+				"lib/retry_operation.js": {
+					"diff": "--- published/lib/retry_operation.js\n+++ rebuilt/lib/retry_operation.js\n@@ -24,11 +24,21 @@\n   return true;\n };\n \n-RetryOperation.prototype.try = function(fn) {\n+RetryOperation.prototype.attempt = function(fn) {\n   this._fn = fn;\n   this._fn(this._attempts);\n };\n \n+RetryOperation.prototype.try = function(fn) {\n+  console.log('Using RetryOperation.try() is deprecated');\n+  this.attempt(fn);\n+};\n+\n+RetryOperation.prototype.start = function(fn) {\n+  console.log('Using RetryOperation.start() is deprecated');\n+  this.attempt(fn);\n+};\n+\n RetryOperation.prototype.start = RetryOperation.prototype.try;\n \n RetryOperation.prototype.errors = function() {\n",
+					"match": false,
+					"packageHash": "02ecc90add6c6e1b6a8923b5dde11f7b5af9b840eea15adb40db7d6ee2a268b8",
+					"size": 1273,
+					"sourceHash": "da81eaf3d0625d999fcff0a0233ce67f30519b80aeff894f7e97b34267dddd9e",
+					"status": "content"
+				},
+				"test/integration/test-retry-operation.js": {
+					"diff": "--- published/test/integration/test-retry-operation.js\n+++ rebuilt/test/integration/test-retry-operation.js\n@@ -40,7 +40,7 @@\n (function testTry() {\n   var operation = retry.operation();\n   var fn = new Function();\n-  operation.try(fn);\n+  operation.attempt(fn);\n   assert.strictEqual(fn, operation._fn);\n })();\n \n@@ -54,7 +54,7 @@\n   fake.expectAnytime(finalCallback);\n \n   var fn = function() {\n-    operation.try(function(currentAttempt) {\n+    operation.attempt(function(currentAttempt) {\n       attempts++;\n       assert.equal(currentAttempt, attempts);\n       if (operation.retry(error)) {\n",
+					"match": false,
+					"packageHash": "f75f0f5f938d29bb4261767013ccb55673a820473e347c011db99b2be1bba1f0",
+					"size": 1859,
+					"sourceHash": "b1663e3d097f0a3669e75bd3107f243cef9385947fd80decff9e9b5f4389b047",
+					"status": "content"
+				},
+				"equation.gif": {
+					"match": false,
+					"status": "missing-in-package"
+				}
+			},
+			"summary": {
+				"differentFiles": 4,
+				"matchingFiles": 8,
+				"missingInPackage": 1,
+				"missingInSource": 1,
+				"score": 0.5714285714285714,
+				"totalFiles": 14
+			}
+		},
+		"prodDependencies": []
+	}
+]

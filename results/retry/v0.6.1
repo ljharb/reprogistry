@@ -1,0 +1,129 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-07T19:35:27.711Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:11.7.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "retry@0.6.1",
+			"name": "retry",
+			"version": "0.6.1",
+			"location": "https://registry.npmjs.org/retry/-/retry-0.6.1.tgz",
+			"integrity": "sha512-txv1qsctZq8ei9J/uCXgaKKFPjlBB0H2hvtnzw9rjKWFNUFtKh59WprXxpAeAey3/QeWwHdxMFqStPaOAgy+dA==",
+			"publishedAt": "2014-06-26T12:00:56.230Z",
+			"publishedWith": {
+				"node": null,
+				"npm": "1.4.9"
+			},
+			"dependencies": {}
+		},
+		"source": {
+			"integrity": null,
+			"location": "git://github.com/tim-kos/node-retry.git",
+			"spec": "github:tim-kos/node-retry#HEAD"
+		},
+		"comparisonHash": "9ef46a5bd31291e57cbab41e2f17c57bd6da0b5b",
+		"diff": {
+			"files": {
+				".npmignore": {
+					"match": false,
+					"packageHash": "3d61c65019f017525dcef4d0afe9a8a7d08052d0d59bd9bfeffbe0eecace9ba8",
+					"size": 16,
+					"status": "missing-in-source"
+				},
+				"Makefile": {
+					"match": false,
+					"packageHash": "fc484742c20833855d937e3b7e516dc7a74e0fc0d456a1c138aba09e88ff53de",
+					"size": 63,
+					"status": "missing-in-source"
+				},
+				"README.md": {
+					"diff": "--- published/README.md\n+++ rebuilt/README.md\n@@ -1,3 +1,8 @@\n+<!-- badges/ -->\n+[![Build Status](https://secure.travis-ci.org/tim-kos/node-retry.svg?branch=master)](http://travis-ci.org/tim-kos/node-retry \"Check this project's build status on TravisCI\")\n+[![codecov](https://codecov.io/gh/tim-kos/node-retry/branch/master/graph/badge.svg)](https://codecov.io/gh/tim-kos/node-retry)\n+<!-- /badges -->\n+\n # retry\n \n Abstraction for exponential and custom retry strategies for failed operations.\n@@ -53,12 +58,56 @@\n });\n ```\n \n+### Example with promises\n+\n+```javascript\n+const retry = require('retry')\n+const delay = require('delay')\n+\n+const isItGood = [false, false, true]\n+let numAttempt = 0\n+\n+function retryer() {\n+  let operation = retry.operation()\n+\n+  return new Promise((resolve, reject) => {\n+    operation.attempt(async currentAttempt => {\n+      console.log('Attempt #:', numAttempt)\n+      await delay(2000)\n+\n+      const err = !isItGood[numAttempt] ? true : null\n+      if (operation.retry(err)) {\n+        numAttempt++\n+        return\n+      }\n+\n+      if (isItGood[numAttempt]) {\n+        resolve('All good!')\n+      } else {\n+        reject(operation.mainError())\n+      }\n+    })\n+  })\n+}\n+\n+async function main() {\n+  console.log('Start')\n+  await retryer()\n+  console.log('End')\n+}\n+\n+main()\n+```\n+\n ## API\n \n ### retry.operation([options])\n \n-Creates a new `RetryOperation` object. See the `retry.timeouts()` function\n-below for available `options`.\n+Creates a new `RetryOperation` object. `options` is the same as `retry.timeouts()`'s `options`, with three additions:\n+\n+* `forever`: Whether to retry forever, defaults to `false`.\n+* `unref`: Whether to [unref](https://nodejs.org/api/timers.html#timers_unref) the setTimeout's, defaults to `false`.\n+* `maxRetryTime`: The maximum time (in milliseconds) that the retried operation is allowed to run. Default is `Infinity`.  \n \n ### retry.timeouts([options])\n \n@@ -67,7 +116,7 @@\n \n `options` is a JS object that can contain any of the following keys:\n \n-* `retries`: The maximum amount of times to retry the operation. Default is `10`.\n+* `retries`: The maximum amount of times to retry the operation. Default is `10`. Seting this to `1` means `do it once, then retry it once`.\n * `factor`: The exponential factor to use. Default is `2`.\n * `minTimeout`: The number of milliseconds before starting the first retry. Default is `1000`.\n * `maxTimeout`: The maximum number of milliseconds between two retries. Default is `Infinity`.\n@@ -76,7 +125,7 @@\n The formula used to calculate the individual timeouts is:\n \n ```\n-var Math.min(random * minTimeout * Math.pow(factor, attempt), maxTimeout);\n+Math.min(random * minTimeout * Math.pow(factor, attempt), maxTimeout)\n ```\n \n Have a look at [this article][article] for a better explanation of approach.\n@@ -96,19 +145,55 @@\n \n To make this a little easier for you, use wolfram alpha to do the calculations:\n \n-[http://www.wolframalpha.com/input/?i=Sum%5B1000*x^k%2C+{k%2C+0%2C+9}%5D+%3D+5+*+60+*+1000]()\n+<http://www.wolframalpha.com/input/?i=Sum%5B1000*x^k%2C+{k%2C+0%2C+9}%5D+%3D+5+*+60+*+1000>\n \n [article]: http://dthain.blogspot.com/2009/02/exponential-backoff-in-distributed.html\n \n-### new RetryOperation(timeouts)\n+### retry.createTimeout(attempt, opts)\n+\n",
+					"match": false,
+					"packageHash": "c0a80049cf0763c8c6570dcbe0012eee3109de452bd4b92513677277bd2e04b3",
+					"size": 5597,
+					"sourceHash": "5a626034d475dea4ecaf998f29e3a23399e6f0981a7a9b4f2d58e36dc9e23239",
+					"status": "content"
+				},
+				"equation.gif": {
+					"match": false,
+					"packageHash": "ea0b38ba378f11e2adb20e868061ded1bf0b4973c92aa3317bf2710724343c38",
+					"size": 1209,
+					"status": "missing-in-source"
+				},
+				"example/dns.js": {
+					"diff": "--- published/example/dns.js\n+++ rebuilt/example/dns.js\n@@ -3,7 +3,7 @@\n \n function faultTolerantResolve(address, cb) {\n   var opts = {\n-    times: 2,\n+    retries: 2,\n     factor: 2,\n     minTimeout: 1 * 1000,\n     maxTimeout: 2 * 1000,\n",
+					"match": false,
+					"packageHash": "6903d8df6bfac53c89de93a1d47c7d3cd256f628de2e63d51ffdf3e4dde76494",
+					"size": 685,
+					"sourceHash": "1ed998627ee1df8b49c48d158a0bda6c582c2f11b364c64b949cc3486a563e62",
+					"status": "content"
+				},
+				"lib/retry.js": {
+					"diff": "--- published/lib/retry.js\n+++ rebuilt/lib/retry.js\n@@ -2,7 +2,11 @@\n \n exports.operation = function(options) {\n   var timeouts = exports.timeouts(options);\n-  return new RetryOperation(timeouts);\n+  return new RetryOperation(timeouts, {\n+      forever: options && (options.forever || options.retries === Infinity),\n+      unref: options && options.unref,\n+      maxRetryTime: options && options.maxRetryTime\n+  });\n };\n \n exports.timeouts = function(options) {\n@@ -27,7 +31,11 @@\n \n   var timeouts = [];\n   for (var i = 0; i < opts.retries; i++) {\n-    timeouts.push(this._createTimeout(i, opts));\n+    timeouts.push(this.createTimeout(i, opts));\n+  }\n+\n+  if (options && options.forever && !timeouts.length) {\n+    timeouts.push(this.createTimeout(i, opts));\n   }\n \n   // sort the array numerically ascending\n@@ -38,13 +46,55 @@\n   return timeouts;\n };\n \n-exports._createTimeout = function(attempt, opts) {\n+exports.createTimeout = function(attempt, opts) {\n   var random = (opts.randomize)\n     ? (Math.random() + 1)\n     : 1;\n \n-  var timeout = Math.round(random * opts.minTimeout * Math.pow(opts.factor, attempt));\n+  var timeout = Math.round(random * Math.max(opts.minTimeout, 1) * Math.pow(opts.factor, attempt));\n   timeout = Math.min(timeout, opts.maxTimeout);\n \n   return timeout;\n-};\n\\ No newline at end of file\n+};\n+\n+exports.wrap = function(obj, options, methods) {\n+  if (options instanceof Array) {\n+    methods = options;\n+    options = null;\n+  }\n+\n+  if (!methods) {\n+    methods = [];\n+    for (var key in obj) {\n+      if (typeof obj[key] === 'function') {\n+        methods.push(key);\n+      }\n+    }\n+  }\n+\n+  for (var i = 0; i < methods.length; i++) {\n+    var method   = methods[i];\n+    var original = obj[method];\n+\n+    obj[method] = function retryWrapper(original) {\n+      var op       = exports.operation(options);\n+      var args     = Array.prototype.slice.call(arguments, 1);\n+      var callback = args.pop();\n+\n+      args.push(function(err) {\n+        if (op.retry(err)) {\n+          return;\n+        }\n+        if (err) {\n+          arguments[0] = op.mainError();\n+        }\n+        callback.apply(this, arguments);\n+      });\n+\n+      op.attempt(function() {\n+        original.apply(obj, args);\n+      });\n+    }.bind(obj, original);\n+    obj[method].options = options;\n+  }\n+};\n",
+					"match": false,
+					"packageHash": "414bf2f0c9cddfc2309f34030fafce850bf466a8ff610150612974f808fc2e75",
+					"size": 1102,
+					"sourceHash": "3142d1f03e5f1e78a0c0b00a25b4626c94a3de8389898c96bb26e96616277bcb",
+					"status": "content"
+				},
+				"lib/retry_operation.js": {
+					"diff": "--- published/lib/retry_operation.js\n+++ rebuilt/lib/retry_operation.js\n@@ -1,14 +1,45 @@\n-function RetryOperation(timeouts) {\n+function RetryOperation(timeouts, options) {\n+  // Compatibility for the old (timeouts, retryForever) signature\n+  if (typeof options === 'boolean') {\n+    options = { forever: options };\n+  }\n+\n+  this._originalTimeouts = JSON.parse(JSON.stringify(timeouts));\n   this._timeouts = timeouts;\n+  this._options = options || {};\n+  this._maxRetryTime = options && options.maxRetryTime || Infinity;\n   this._fn = null;\n   this._errors = [];\n   this._attempts = 1;\n   this._operationTimeout = null;\n   this._operationTimeoutCb = null;\n   this._timeout = null;\n+  this._operationStart = null;\n+  this._timer = null;\n+\n+  if (this._options.forever) {\n+    this._cachedTimeouts = this._timeouts.slice(0);\n+  }\n }\n module.exports = RetryOperation;\n \n+RetryOperation.prototype.reset = function() {\n+  this._attempts = 1;\n+  this._timeouts = this._originalTimeouts.slice(0);\n+}\n+\n+RetryOperation.prototype.stop = function() {\n+  if (this._timeout) {\n+    clearTimeout(this._timeout);\n+  }\n+  if (this._timer) {\n+    clearTimeout(this._timer);\n+  }\n+\n+  this._timeouts       = [];\n+  this._cachedTimeouts = null;\n+};\n+\n RetryOperation.prototype.retry = function(err) {\n   if (this._timeout) {\n     clearTimeout(this._timeout);\n@@ -17,27 +48,47 @@\n   if (!err) {\n     return false;\n   }\n+  var currentTime = new Date().getTime();\n+  if (err && currentTime - this._operationStart >= this._maxRetryTime) {\n+    this._errors.push(err);\n+    this._errors.unshift(new Error('RetryOperation timeout occurred'));\n+    return false;\n+  }\n \n   this._errors.push(err);\n \n   var timeout = this._timeouts.shift();\n   if (timeout === undefined) {\n-    return false;\n+    if (this._cachedTimeouts) {\n+      // retry forever, only keep last error\n+      this._errors.splice(0, this._errors.length - 1);\n+      timeout = this._cachedTimeouts.slice(-1);\n+    } else {\n+      return false;\n+    }\n   }\n \n-  this._attempts++;\n-\n   var self = this;\n-  setTimeout(function() {\n-    self._fn(self._attempts);\n+  this._timer = setTimeout(function() {\n+    self._attempts++;\n \n     if (self._operationTimeoutCb) {\n       self._timeout = setTimeout(function() {\n         self._operationTimeoutCb(self._attempts);\n       }, self._operationTimeout);\n+\n+      if (self._options.unref) {\n+          self._timeout.unref();\n+      }\n     }\n+\n+    self._fn(self._attempts);\n   }, timeout);\n \n+  if (this._options.unref) {\n+      this._timer.unref();\n+  }\n+\n   return true;\n",
+					"match": false,
+					"packageHash": "c16c3c27e0fb1171f4c45ad15c0b68217e9bf9ff62c01f0a295b0a49f23cfecb",
+					"size": 2267,
+					"sourceHash": "3cae72ed382f42ba21b75f2f8096803beef7fe208f9885794fb86cf4be5c93d4",
+					"status": "content"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -2,22 +2,36 @@\n   \"author\": \"Tim Koschützki <tim@debuggable.com> (http://debuggable.com/)\",\n   \"name\": \"retry\",\n   \"description\": \"Abstraction for exponential and custom retry strategies for failed operations.\",\n-  \"version\": \"0.6.1\",\n+  \"keywords\": \"retry, exponential backoff, auto-retry, multiple attempts, custom retry\",\n+  \"license\": \"MIT\",\n+  \"version\": \"0.13.1\",\n   \"homepage\": \"https://github.com/tim-kos/node-retry\",\n   \"repository\": {\n     \"type\": \"git\",\n     \"url\": \"git://github.com/tim-kos/node-retry.git\"\n   },\n+  \"files\": [\n+    \"lib\",\n+    \"example\"\n+  ],\n   \"directories\": {\n     \"lib\": \"./lib\"\n   },\n-  \"main\": \"index\",\n+  \"main\": \"index.js\",\n   \"engines\": {\n-    \"node\": \"*\"\n+    \"node\": \">= 4\"\n   },\n   \"dependencies\": {},\n   \"devDependencies\": {\n     \"fake\": \"0.2.0\",\n-    \"far\": \"0.0.1\"\n+    \"istanbul\": \"^0.4.5\",\n+    \"tape\": \"^4.8.0\"\n+  },\n+  \"scripts\": {\n+    \"test\": \"./node_modules/.bin/istanbul cover ./node_modules/tape/bin/tape ./test/integration/*.js\",\n+    \"release:major\": \"env SEMANTIC=major npm run release\",\n+    \"release:minor\": \"env SEMANTIC=minor npm run release\",\n+    \"release:patch\": \"env SEMANTIC=patch npm run release\",\n+    \"release\": \"npm version ${SEMANTIC:-patch} -m \\\"Release %s\\\" && git push && git push --tags && npm publish\"\n   }\n }\n",
+					"match": false,
+					"packageHash": "d776e231e6a86e4fb0d8ff38c4a79b8a22eb025812d82b814cf3ef7635621aa8",
+					"size": 558,
+					"sourceHash": "290ca6cc6325cc44cf15f410e7233f7cb6e16941908b45e619d4a3e4863e0af0",
+					"status": "content"
+				},
+				"test/common.js": {
+					"match": false,
+					"packageHash": "009708c033e269c1d8537cc3289b033ae5008f6c34ae55b944d7c906de89c0da",
+					"size": 208,
+					"status": "missing-in-source"
+				},
+				"test/integration/test-retry-operation.js": {
+					"match": false,
+					"packageHash": "81cec781f0e88b5ac8200f9ab47333cf8a2bbce7c5a9013d8782321ee5983428",
+					"size": 2091,
+					"status": "missing-in-source"
+				},
+				"test/integration/test-timeouts.js": {
+					"match": false,
+					"packageHash": "48c08ff322d155dc9e2b33344429996d73da9335e6ca6056d778cc02e0fb71c6",
+					"size": 1779,
+					"status": "missing-in-source"
+				},
+				"test/runner.js": {
+					"match": false,
+					"packageHash": "3eeaf89fc93503ebce0c55f93ba74528b5338a57d2f29c68cc2b641e3ceac414",
+					"size": 102,
+					"status": "missing-in-source"
+				},
+				"example/stop.js": {
+					"match": false,
+					"status": "missing-in-package"
+				}
+			},
+			"summary": {
+				"differentFiles": 5,
+				"matchingFiles": 2,
+				"missingInPackage": 1,
+				"missingInSource": 7,
+				"score": 0.13333333333333333,
+				"totalFiles": 15
+			}
+		},
+		"prodDependencies": []
+	}
+]

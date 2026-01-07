@@ -1,0 +1,93 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-07T19:35:31.568Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:11.7.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "retry@0.1.0",
+			"name": "retry",
+			"version": "0.1.0",
+			"location": "https://registry.npmjs.org/retry/-/retry-0.1.0.tgz",
+			"integrity": "sha512-Q6rGTLzxPPcCnPIbk9/D2T9J7r+p1VP37lzyqZuueUfGwTSqs0zU4GArXAP2oVbuJ47hlvCmdQjTKiSv1uoCIQ==",
+			"publishedAt": "2011-05-16T08:10:27.648Z",
+			"publishedWith": {
+				"node": "v0.4.8-pre",
+				"npm": "1.0.5"
+			},
+			"dependencies": {}
+		},
+		"source": {
+			"integrity": "sha512-FDyg+mLMoa+VPLN+B1zb3Aa2OcQUXW8c9E3vlQc9whI+hP8MbJAFAGUz244OjcB1PxNqr326rpuT6ErVpvKLKA==",
+			"location": "git://github.com/felixge/node-retry.git",
+			"spec": "github:felixge/node-retry#HEAD"
+		},
+		"comparisonHash": "9ef46a5bd31291e57cbab41e2f17c57bd6da0b5b",
+		"diff": {
+			"files": {
+				".gitignore": {
+					"match": false,
+					"packageHash": "3d61c65019f017525dcef4d0afe9a8a7d08052d0d59bd9bfeffbe0eecace9ba8",
+					"size": 16,
+					"status": "missing-in-source"
+				},
+				"Readme.md": {
+					"diff": "--- published/Readme.md\n+++ rebuilt/Readme.md\n@@ -4,7 +4,7 @@\n \n ## Installation\n \n-    npm install mysql\n+    npm install retry\n \n ## Current Status\n \n@@ -23,7 +23,7 @@\n function faultTolerantResolve(address, cb) {\n   var operation = retry.operation();\n \n-  operation.try(function() {\n+  operation.attempt(function(currentAttempt) {\n     dns.resolve(address, function(err, addresses) {\n       if (operation.retry(err)) {\n         return;\n@@ -41,6 +41,7 @@\n \n Of course you can also configure the factors that go into the exponential\n backoff. See the API documentation below for all available settings.\n+currentAttempt is an int representing the number of attempts so far.\n \n ``` javascript\n var operation = retry.operation({\n@@ -82,9 +83,20 @@\n \n If you want to tune your `factor` / `times` settings to attempt the last retry\n after a certain amount of time, you can use wolfram alpha. For example in order\n-to tune for `10` attempts in `5 minutes`, you can use this query:\n+to tune for `10` attempts in `5 minutes`, you can use this equation:\n \n-[http://www.wolframalpha.com/input/?i=Sum%5Bx^k%2C+{k%2C+0%2C+9}%5D+%3D+5+*+60]()\n+![screenshot](https://github.com/tim-kos/node-retry/raw/master/equation.gif)\n+\n+Explaining the various values from left to right:\n+\n+* `k = 0 ... 9`:  The `retries` value (10)\n+* `1000`: The `minTimeout` value in ms (1000)\n+* `x^k`: No need to change this, `x` will be your resulting factor\n+* `5 * 60 * 1000`: The desired total amount of time for retrying in ms (5 minutes)\n+\n+To make this a little easier for you, use wolfram alpha to do the calculations:\n+\n+[http://www.wolframalpha.com/input/?i=Sum%5B1000*x^k%2C+{k%2C+0%2C+9}%5D+%3D+5+*+60+*+1000]()\n \n [article]: http://dthain.blogspot.com/2009/02/exponential-backoff-in-distributed.html\n \n@@ -108,10 +120,18 @@\n \n If no errors occured so far, the value is `null`.\n \n-#### retryOperation.try(fn)\n+#### retryOperation.attempt(fn)\n \n Defines the function `fn` that is to be retried and executes it for the first\n-time right away.\n+time right away. The `fn` function can receive an optional `currentAttempt` callback that represents the number of attempts to execute `fn` so far.\n+\n+#### retryOperation.try(fn)\n+\n+This is an alias for `retryOperation.attempt(fn)`. This is deprecated.\n+\n+#### retryOperation.start(fn)\n+\n+This is an alias for `retryOperation.attempt(fn)`. This is deprecated.\n \n #### retryOperation.retry(error)\n \n@@ -121,6 +141,19 @@\n Otherwise it returns `true`, and retries the operation after the timeout for\n the current attempt number.\n \n+#### retryOperation.attempts()\n+\n+Returns an int representing the number of attempts it took to call `fn` before it was successful.\n+\n ## License\n \n retry is licensed under the MIT license.\n+\n+\n+#Changelog\n+\n+0.4.0 Changed retryOperation.try() to retryOperation.attempt(). Deprecated the aliases start() and try() for it.\n+\n+0.3.0 Added retryOperation.start() which is an alias for retryOperation.try().\n+\n+0.2.0 Added attempts() function and parameter to retryOperation.try() representing the number of attempts it took to call fn().\n",
+					"match": false,
+					"packageHash": "524dd0a4e3aabdcafa033fc4eac3e2ebad6486768dee5d06c0f875e2aa4bc01b",
+					"size": 3634,
+					"sourceHash": "a1963083eaccaeeae9f9edf395bd2d0348efec22cd4af2288dd1931f11ae716a",
+					"status": "content"
+				},
+				"example/dns.js": {
+					"diff": "--- published/example/dns.js\n+++ rebuilt/example/dns.js\n@@ -11,7 +11,7 @@\n   };\n   var operation = retry.operation(opts);\n \n-  operation.try(function() {\n+  operation.attempt(function(currentAttempt) {\n     dns.resolve(address, function(err, addresses) {\n       if (operation.retry(err)) {\n         return;\n",
+					"match": false,
+					"packageHash": "c1b61254517ebfa986aa9cc44afa35d3d4ccae2b3d0ae46cd7aa0a4077195408",
+					"size": 667,
+					"sourceHash": "6903d8df6bfac53c89de93a1d47c7d3cd256f628de2e63d51ffdf3e4dde76494",
+					"status": "content"
+				},
+				"lib/retry_operation.js": {
+					"diff": "--- published/lib/retry_operation.js\n+++ rebuilt/lib/retry_operation.js\n@@ -2,6 +2,7 @@\n   this._timeouts = timeouts;\n   this._fn = null;\n   this._errors = [];\n+  this._attempts = 1;\n }\n module.exports = RetryOperation;\n \n@@ -17,20 +18,37 @@\n     return false;\n   }\n \n-  setTimeout(this._fn.bind(this), timeout);\n+  this._attempts++;\n+  setTimeout(this._fn.bind(this, this._attempts), timeout);\n \n   return true;\n };\n \n-RetryOperation.prototype.try = function(fn) {\n+RetryOperation.prototype.attempt = function(fn) {\n   this._fn = fn;\n-  this._fn();\n+  this._fn(this._attempts);\n };\n \n+RetryOperation.prototype.try = function(fn) {\n+  console.log('Using RetryOperation.try() is deprecated');\n+  this.attempt(fn);\n+};\n+\n+RetryOperation.prototype.start = function(fn) {\n+  console.log('Using RetryOperation.start() is deprecated');\n+  this.attempt(fn);\n+};\n+\n+RetryOperation.prototype.start = RetryOperation.prototype.try;\n+\n RetryOperation.prototype.errors = function() {\n   return this._errors;\n };\n \n+RetryOperation.prototype.attempts = function() {\n+  return this._attempts;\n+};\n+\n RetryOperation.prototype.mainError = function() {\n   if (this._errors.length === 0) {\n     return null;\n",
+					"match": false,
+					"packageHash": "e2ee698e3d77fee5bd879d84cd84e40648b037931985542600931d969da75b09",
+					"size": 1059,
+					"sourceHash": "da81eaf3d0625d999fcff0a0233ce67f30519b80aeff894f7e97b34267dddd9e",
+					"status": "content"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -2,7 +2,7 @@\n   \"author\": \"Tim Koschützki <tim@debuggable.com> (http://debuggable.com/)\",\n   \"name\": \"retry\",\n   \"description\": \"Abstraction for exponential and custom retry strategies for failed operations.\",\n-  \"version\": \"0.1.0\",\n+  \"version\": \"0.3.0\",\n   \"homepage\": \"https://github.com/felixge/node-retry\",\n   \"repository\": {\n     \"type\": \"git\",\n",
+					"match": false,
+					"packageHash": "f65cc44521e2a7da19f12b82c8fae6624d191a34de1e5424d7ee2369576ef769",
+					"size": 557,
+					"sourceHash": "3a8e4b1d23bd4ca3ec5fd345b34d20da54e7016ada9729a741cb777731cd4ee3",
+					"status": "content"
+				},
+				"test/integration/test-retry-operation.js": {
+					"diff": "--- published/test/integration/test-retry-operation.js\n+++ rebuilt/test/integration/test-retry-operation.js\n@@ -40,7 +40,7 @@\n (function testTry() {\n   var operation = retry.operation();\n   var fn = new Function();\n-  operation.try(fn);\n+  operation.attempt(fn);\n   assert.strictEqual(fn, operation._fn);\n })();\n \n@@ -48,19 +48,21 @@\n   var times = 3;\n   var error = new Error('some error');\n   var operation = retry.operation([1, 2, 3]);\n-  var retries = 0;\n+  var attempts = 0;\n \n   var finalCallback = fake.callback('finalCallback');\n   fake.expectAnytime(finalCallback);\n \n   var fn = function() {\n-    operation.try(function() {\n+    operation.attempt(function(currentAttempt) {\n+      attempts++;\n+      assert.equal(currentAttempt, attempts);\n       if (operation.retry(error)) {\n-        retries++;\n         return;\n       }\n \n-      assert.strictEqual(retries, 3);\n+      assert.strictEqual(attempts, 4);\n+      assert.strictEqual(operation.attempts(), attempts);\n       assert.strictEqual(operation.mainError(), error);\n       finalCallback();\n     });\n",
+					"match": false,
+					"packageHash": "4f338bc0f2c47d95119fdc329e9406b3bcf06c5d1d3cd9dd500b438059bff0b9",
+					"size": 1740,
+					"sourceHash": "b1663e3d097f0a3669e75bd3107f243cef9385947fd80decff9e9b5f4389b047",
+					"status": "content"
+				},
+				"equation.gif": {
+					"match": false,
+					"status": "missing-in-package"
+				}
+			},
+			"summary": {
+				"differentFiles": 5,
+				"matchingFiles": 7,
+				"missingInPackage": 1,
+				"missingInSource": 1,
+				"score": 0.5,
+				"totalFiles": 14
+			}
+		},
+		"prodDependencies": []
+	}
+]
