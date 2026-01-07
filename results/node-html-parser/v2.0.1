@@ -1,0 +1,320 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-07T18:06:18.114Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:11.7.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "node-html-parser@2.0.1",
+			"name": "node-html-parser",
+			"version": "2.0.1",
+			"location": "https://registry.npmjs.org/node-html-parser/-/node-html-parser-2.0.1.tgz",
+			"integrity": "sha512-CE0K6zALs+pS+SsQd8oKKF51cNrpwZ6gj/8OSzjhQ2vTfCOnlNtZakgv0MKuEOAZ4kBiKRgJBUicvjAxaFM4Hw==",
+			"publishedAt": "2020-12-30T02:13:04.399Z",
+			"publishedWith": {
+				"node": null,
+				"npm": null
+			},
+			"dependencies": {
+				"he": "1.2.0"
+			}
+		},
+		"source": {
+			"integrity": null,
+			"location": "https://github.com/taoqf/node-fast-html-parser.git",
+			"spec": "github:taoqf/node-fast-html-parser#HEAD"
+		},
+		"comparisonHash": "9ef46a5bd31291e57cbab41e2f17c57bd6da0b5b",
+		"diff": {
+			"files": {
+				".eslintignore": {
+					"match": false,
+					"packageHash": "3da5a7cec5e8f74f317eafe75f33b71ac37be7e6801eaa668f33e0e3ccdd681a",
+					"size": 26,
+					"status": "missing-in-source"
+				},
+				".eslintrc.json": {
+					"match": false,
+					"packageHash": "c56116595d4ef4757ed6f120b6d89820eb31f76b0fad8f3942c1fc4ca2425d40",
+					"size": 5112,
+					"status": "missing-in-source"
+				},
+				".mocharc.yaml": {
+					"match": false,
+					"packageHash": "b37a469915a5419a6eb4c13b52cfc68e6647fa9943272bb6e7796ebbf6edb647",
+					"size": 29,
+					"status": "missing-in-source"
+				},
+				"README.md": {
+					"diff": "--- published/README.md\n+++ rebuilt/README.md\n@@ -1,12 +1,12 @@\n-# Fast HTML Parser [![NPM version](https://badge.fury.io/js/node-html-parser.png)](http://badge.fury.io/js/node-html-parser) [![Build Status](https://travis-ci.org/taoqf/node-html-parser.svg?branch=master)](https://travis-ci.org/taoqf/node-html-parser)\n+# Fast HTML Parser [![NPM version](https://badge.fury.io/js/node-html-parser.png)](http://badge.fury.io/js/node-html-parser) [![Build Status](https://img.shields.io/endpoint.svg?url=https%3A%2F%2Factions-badge.atrox.dev%2Ftaoqf%2Fnode-html-parser%2Fbadge%3Fref%3Dmain&style=flat)](https://actions-badge.atrox.dev/taoqf/node-html-parser/goto?ref=main)\n \n Fast HTML Parser is a _very fast_ HTML parser. Which will generate a simplified\n-DOM tree, with basic element query support.\n+DOM tree, with element query support.\n \n Per the design, it intends to parse massive HTML files in lowest price, thus the\n performance is the top priority.  For this reason, some malformatted HTML may not\n be able to parse correctly, but most usual errors are covered (eg. HTML4 style\n-no closing `<li>`, `<td>` etc).\n+no closing `<td>` etc).\n \n ## Install\n \n@@ -14,16 +14,24 @@\n npm install --save node-html-parser\n ```\n \n+> Note: when using Fast HTML Parser in a Typescript project the minimum Typescript version supported is `^4.1.2`.\n+\n ## Performance\n \n-Faster than htmlparser2!\n+-- 2022-08-10\n \n ```shell\n-node-html-parser:2.02346 ms/file ± 2.21481\n-htmlparser      :26.0810 ms/file ± 171.313\n-htmlparser2     :4.49111 ms/file ± 6.85512\n-parse5          :14.8590 ms/file ± 10.9427\n-high5           :7.71818 ms/file ± 4.88375\n+html-parser     :24.1595 ms/file ± 18.7667\n+htmljs-parser   :4.72064 ms/file ± 5.67689\n+html-dom-parser :2.18055 ms/file ± 2.96136\n+html5parser     :1.69639 ms/file ± 2.17111\n+cheerio         :12.2122 ms/file ± 8.10916\n+parse5          :6.50626 ms/file ± 4.02352\n+htmlparser2     :2.38179 ms/file ± 3.42389\n+htmlparser      :17.4820 ms/file ± 128.041\n+high5           :3.95188 ms/file ± 2.52313\n+node-html-parser:2.04288 ms/file ± 1.25203\n+node-html-parser (last release):2.00527 ms/file ± 1.21317\n ```\n \n Tested with [htmlparser-benchmark](https://github.com/AndreasMadsen/htmlparser-benchmark).\n@@ -35,6 +43,7 @@\n \n const root = parse('<ul id=\"list\"><li>Hello World</li></ul>');\n \n+// parse() adds a wrapper node, so the input data's first node is the root's first child node\n console.log(root.firstChild.structure);\n // ul#list\n //   li\n@@ -66,18 +75,24 @@\n \n ### parse(data[, options])\n \n-Parse given data, and return root of the generated DOM.\n+Parse the data provided, wrap the result in a new node, and return the root of the generated DOM.\n \n - **data**, data to parse\n - **options**, parse options\n \n   ```js\n   {\n-    lowerCaseTagName: false,  // convert tag name to lower case (hurt performance heavily)\n-    comment: false            // retrieve comments (hurt performance slightly)\n+    lowerCaseTagName: false,\t\t// convert tag name to lower case (hurts performance heavily)\n+    comment: false,           \t\t// retrieve comments (hurts performance slightly)\n+    fixNestedATags: false,    \t\t// fix invalid nested <a> HTML tags \n+    parseNoneClosedTags: false, \t// close none closed HTML tags instead of removing them \n+    voidTag: {\n+      tags: ['area', 'base', 'br', 'col', 'embed', 'hr', 'img', 'input', 'link', 'meta', 'param', 'source', 'track', 'wbr'],\t// optional and case insensitive, default value is ['area', 'base', 'br', 'col', 'embed', 'hr', 'img', 'input', 'link', 'meta', 'param', 'source', 'track', 'wbr']\n+      closingSlash: true\t// optional, default false. void tag serialisation, add a final slash <br/>\n+    },\n     blockTextElements: {\n-      script: true,\t// keep text content when parsing\n-      noscript: true,\t// keep text content when parsing\n+      script: true,\t\t// keep text content when parsing\n+      noscript: true,\t\t// keep text content when parsing\n       style: true,\t\t// keep text content when parsing\n       pre: true\t\t\t// keep text content when parsing\n     }\n@@ -86,110 +101,305 @@\n \n ### valid(data[, options])\n \n-Parse given data, return true if the givent data is valid, and return false if not.\n+Parse the data provided, return true if the given data is valid, and return false if not.\n+\n+## Class\n+\n+```mermaid\n+classDiagram\n+direction TB\n+class HTMLElement{\n",
+					"match": false,
+					"packageHash": "00182f10a6c3ea1e807aaf987c4bb49278348b6911f34cc79be4ec787562c690",
+					"size": 4734,
+					"sourceHash": "3650ff5182ac8c54b6198d592365a5e1f88163b0e096b3153f8824afa889fd6f",
+					"status": "content"
+				},
+				"dist/esm/back.js": {
+					"match": false,
+					"packageHash": "aef9204fdb1269265acce807a7c468f32ff0db627b098d64db959e6ab12aa65d",
+					"size": 74,
+					"status": "missing-in-source"
+				},
+				"dist/esm/index.js": {
+					"match": false,
+					"packageHash": "829e78dae151d9ff82f308409d83dbaab72031aa3d0f8eb2e1f40dc382e69316",
+					"size": 362,
+					"status": "missing-in-source"
+				},
+				"dist/esm/matcher.js": {
+					"match": false,
+					"packageHash": "bed838a67d462c767587c6f2c1db622f593886d263ca38f7cafd6572ff84837a",
+					"size": 7804,
+					"status": "missing-in-source"
+				},
+				"dist/esm/nodes/comment.js": {
+					"match": false,
+					"packageHash": "84328c32eb4025c6f064b7ab406f946339b89a3bf78ce8d2f892dd4a655dea53",
+					"size": 556,
+					"status": "missing-in-source"
+				},
+				"dist/esm/nodes/html.js": {
+					"match": false,
+					"packageHash": "0571f668b307e9c282848c8c748ddf1768092c73134a77c42ffe45e4b6148bcd",
+					"size": 26980,
+					"status": "missing-in-source"
+				},
+				"dist/esm/nodes/node.js": {
+					"match": false,
+					"packageHash": "04aa3bcd5d5a624ce36ca4e889e169d5d52a8c8242532d242c98f3e545b43ca4",
+					"size": 209,
+					"status": "missing-in-source"
+				},
+				"dist/esm/nodes/text.js": {
+					"match": false,
+					"packageHash": "e234af0ae673a83cebfbaff96a2e79e2c1282a3f0d9076a538361bd0e798ded3",
+					"size": 807,
+					"status": "missing-in-source"
+				},
+				"dist/esm/nodes/type.js": {
+					"match": false,
+					"packageHash": "e8eef2cf9e9247f2afe2eae1d4f14f6e0eb870b3e54b4e79b82c2a3754f5289a",
+					"size": 272,
+					"status": "missing-in-source"
+				},
+				"dist/esm/parse.js": {
+					"match": false,
+					"packageHash": "b8eda2ccf8697fb6bc4e0b4f517fd8bdf26c865ce9961a22d611b26fb1834283",
+					"size": 1442,
+					"status": "missing-in-source"
+				},
+				"dist/esm/valid.js": {
+					"match": false,
+					"packageHash": "52b60c1ae268b9ab43baa780468324bf02af2532864a1341ee6b5ed4e64926a3",
+					"size": 306,
+					"status": "missing-in-source"
+				},
+				"dist/index.d.ts": {
+					"diff": "--- published/dist/index.d.ts\n+++ rebuilt/dist/index.d.ts\n@@ -1,7 +1,20 @@\n-export { default as CommentNode } from './nodes/comment';\n-export { default as HTMLElement, Options } from './nodes/html';\n-export { default as parse, default } from './parse';\n-export { default as valid } from './valid';\n-export { default as Node } from './nodes/node';\n-export { default as TextNode } from './nodes/text';\n-export { default as NodeType } from './nodes/type';\n+import CommentNode from './nodes/comment';\n+import HTMLElement, { Options } from './nodes/html';\n+import Node from './nodes/node';\n+import TextNode from './nodes/text';\n+import NodeType from './nodes/type';\n+import baseParse from './parse';\n+import valid from './valid';\n+export { Options } from './nodes/html';\n+export { parse, HTMLElement, CommentNode, valid, Node, TextNode, NodeType };\n+declare function parse(data: string, options?: Partial<Options>): HTMLElement;\n+declare namespace parse {\n+    var parse: typeof baseParse;\n+    var HTMLElement: typeof import(\"./nodes/html\").default;\n+    var CommentNode: typeof import(\"./nodes/comment\").default;\n+    var valid: typeof import(\"./valid\").default;\n+    var Node: typeof import(\"./nodes/node\").default;\n+    var TextNode: typeof import(\"./nodes/text\").default;\n+    var NodeType: typeof import(\"./nodes/type\").default;\n+}\n+export default parse;\n",
+					"match": false,
+					"packageHash": "42f89918592edc388f99a2a18aaf92b9e9be279485329b44919a706e32897515",
+					"size": 371,
+					"sourceHash": "0b405601d4da11d9ccbdea90129027f546f557a365c127136c4284f459b68230",
+					"status": "content"
+				},
+				"dist/index.js": {
+					"diff": "--- published/dist/index.js\n+++ rebuilt/dist/index.js\n@@ -3,19 +3,29 @@\n     return (mod && mod.__esModule) ? mod : { \"default\": mod };\n };\n Object.defineProperty(exports, \"__esModule\", { value: true });\n-exports.NodeType = exports.TextNode = exports.Node = exports.valid = exports.default = exports.parse = exports.HTMLElement = exports.CommentNode = void 0;\n-var comment_1 = require(\"./nodes/comment\");\n-Object.defineProperty(exports, \"CommentNode\", { enumerable: true, get: function () { return __importDefault(comment_1).default; } });\n-var html_1 = require(\"./nodes/html\");\n-Object.defineProperty(exports, \"HTMLElement\", { enumerable: true, get: function () { return __importDefault(html_1).default; } });\n-var parse_1 = require(\"./parse\");\n-Object.defineProperty(exports, \"parse\", { enumerable: true, get: function () { return __importDefault(parse_1).default; } });\n-Object.defineProperty(exports, \"default\", { enumerable: true, get: function () { return __importDefault(parse_1).default; } });\n-var valid_1 = require(\"./valid\");\n-Object.defineProperty(exports, \"valid\", { enumerable: true, get: function () { return __importDefault(valid_1).default; } });\n-var node_1 = require(\"./nodes/node\");\n-Object.defineProperty(exports, \"Node\", { enumerable: true, get: function () { return __importDefault(node_1).default; } });\n-var text_1 = require(\"./nodes/text\");\n-Object.defineProperty(exports, \"TextNode\", { enumerable: true, get: function () { return __importDefault(text_1).default; } });\n-var type_1 = require(\"./nodes/type\");\n-Object.defineProperty(exports, \"NodeType\", { enumerable: true, get: function () { return __importDefault(type_1).default; } });\n+exports.NodeType = exports.TextNode = exports.Node = exports.valid = exports.CommentNode = exports.HTMLElement = exports.parse = void 0;\n+const comment_1 = __importDefault(require(\"./nodes/comment\"));\n+exports.CommentNode = comment_1.default;\n+const html_1 = __importDefault(require(\"./nodes/html\"));\n+exports.HTMLElement = html_1.default;\n+const node_1 = __importDefault(require(\"./nodes/node\"));\n+exports.Node = node_1.default;\n+const text_1 = __importDefault(require(\"./nodes/text\"));\n+exports.TextNode = text_1.default;\n+const type_1 = __importDefault(require(\"./nodes/type\"));\n+exports.NodeType = type_1.default;\n+const parse_1 = __importDefault(require(\"./parse\"));\n+const valid_1 = __importDefault(require(\"./valid\"));\n+exports.valid = valid_1.default;\n+function parse(data, options = {}) {\n+    return (0, parse_1.default)(data, options);\n+}\n+exports.default = parse;\n+exports.parse = parse;\n+parse.parse = parse_1.default;\n+parse.HTMLElement = html_1.default;\n+parse.CommentNode = comment_1.default;\n+parse.valid = valid_1.default;\n+parse.Node = node_1.default;\n+parse.TextNode = text_1.default;\n+parse.NodeType = type_1.default;\n",
+					"match": false,
+					"packageHash": "5d5d0ca50822707ba238cd4517cc10d62961ce54e08b1faf124b13f265c469d7",
+					"size": 1660,
+					"sourceHash": "87f785ddedf9bc8e3a02de4edd528ae7188e9c42210bec4c0503186c0bd70cbf",
+					"status": "content"
+				},
+				"dist/main.js": {
+					"diff": "--- published/dist/main.js\n+++ rebuilt/dist/main.js\n@@ -1,3 +1,6 @@\n+var __importDefault = (this && this.__importDefault) || function (mod) {\n+    return (mod && mod.__esModule) ? mod : { \"default\": mod };\n+};\n var __extends = (this && this.__extends) || (function () {\n     var extendStatics = function (d, b) {\n         extendStatics = Object.setPrototypeOf ||\n@@ -6,20 +9,32 @@\n         return extendStatics(d, b);\n     };\n     return function (d, b) {\n+        if (typeof b !== \"function\" && b !== null)\n+            throw new TypeError(\"Class extends value \" + String(b) + \" is not a constructor or null\");\n         extendStatics(d, b);\n         function __() { this.constructor = d; }\n         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());\n     };\n })();\n-var __importDefault = (this && this.__importDefault) || function (mod) {\n-    return (mod && mod.__esModule) ? mod : { \"default\": mod };\n+var __assign = (this && this.__assign) || function () {\n+    __assign = Object.assign || function(t) {\n+        for (var s, i = 1, n = arguments.length; i < n; i++) {\n+            s = arguments[i];\n+            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))\n+                t[p] = s[p];\n+        }\n+        return t;\n+    };\n+    return __assign.apply(this, arguments);\n };\n-var __spreadArrays = (this && this.__spreadArrays) || function () {\n-    for (var s = 0, i = 0, il = arguments.length; i < il; i++) s += arguments[i].length;\n-    for (var r = Array(s), k = 0, i = 0; i < il; i++)\n-        for (var a = arguments[i], j = 0, jl = a.length; j < jl; j++, k++)\n-            r[k] = a[j];\n-    return r;\n+var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {\n+    if (pack || arguments.length === 2) for (var i = 0, l = from.length, ar; i < l; i++) {\n+        if (ar || !(i in from)) {\n+            if (!ar) ar = Array.prototype.slice.call(from, 0, i);\n+            ar[i] = from[i];\n+        }\n+    }\n+    return to.concat(ar || Array.prototype.slice.call(from));\n };\n define(\"back\", [\"require\", \"exports\"], function (require, exports) {\n     \"use strict\";\n@@ -40,16 +55,38 @@\n     })(NodeType || (NodeType = {}));\n     exports.default = NodeType;\n });\n-define(\"nodes/node\", [\"require\", \"exports\"], function (require, exports) {\n+define(\"nodes/node\", [\"require\", \"exports\", \"he\"], function (require, exports, he_1) {\n     \"use strict\";\n     Object.defineProperty(exports, \"__esModule\", { value: true });\n     /**\n      * Node Class as base class for TextNode and HTMLElement.\n      */\n     var Node = /** @class */ (function () {\n-        function Node() {\n+        function Node(parentNode, range) {\n+            if (parentNode === void 0) { parentNode = null; }\n+            this.parentNode = parentNode;\n             this.childNodes = [];\n+            Object.defineProperty(this, 'range', {\n+                enumerable: false,\n+                writable: true,\n+                configurable: true,\n+                value: range !== null && range !== void 0 ? range : [-1, -1]\n+            });\n         }\n+        /**\n+         * Remove current node\n+         */\n+        Node.prototype.remove = function () {\n+            var _this = this;\n+            if (this.parentNode) {\n+                var children = this.parentNode.childNodes;\n+                this.parentNode.childNodes = children.filter(function (child) {\n+                    return _this !== child;\n+                });\n+                this.parentNode = null;\n+            }\n+            return this;\n+        };\n         Object.defineProperty(Node.prototype, \"innerText\", {\n             get: function () {\n                 return this.rawText;\n@@ -57,73 +94,230 @@\n             enumerable: false,\n             configurable: true\n         });\n+        Object.defineProperty(Node.prototype, \"textContent\", {\n+            get: function () {\n+                return (0, he_1.decode)(this.rawText);\n+            },\n+            set: function (val) {\n",
+					"match": false,
+					"packageHash": "d5785aa8252ccd31834ca0351ed370bdba9878d1c460ccb45a49c8efa613d06d",
+					"size": 53707,
+					"sourceHash": "39ad224f9b630633dbebfc185f08981d7fd96b09b0e81c57c13255dfdc7c1e5c",
+					"status": "content"
+				},
+				"dist/matcher.d.ts": {
+					"diff": "--- published/dist/matcher.d.ts\n+++ rebuilt/dist/matcher.d.ts\n@@ -1,41 +1,6 @@\n+import { Adapter } from 'css-select/lib/types';\n import HTMLElement from './nodes/html';\n-/**\n- * Matcher class to make CSS match\n- *\n- * @class Matcher\n- */\n-export default class Matcher {\n-    private matchers;\n-    private nextMatch;\n-    /**\n-     * Creates an instance of Matcher.\n-     * @param {string} selector\n-     *\n-     * @memberof Matcher\n-     */\n-    constructor(selector: string);\n-    /**\n-     * Trying to advance match pointer\n-     * @param  {HTMLElement} el element to make the match\n-     * @return {bool}           true when pointer advanced.\n-     */\n-    advance(el: HTMLElement): boolean;\n-    /**\n-     * Rewind the match pointer\n-     */\n-    rewind(): void;\n-    /**\n-     * Trying to determine if match made.\n-     * @return {bool} true when the match is made\n-     */\n-    get matched(): boolean;\n-    /**\n-     * Rest match pointer.\n-     * @return {[type]} [description]\n-     */\n-    reset(): void;\n-    /**\n-     * flush cache to free memory\n-     */\n-    flushCache(): void;\n-}\n+import Node from './nodes/node';\n+export declare type Predicate = (node: Node) => node is HTMLElement;\n+declare const _default: Adapter<Node, HTMLElement>;\n+export default _default;\n",
+					"match": false,
+					"packageHash": "e56d23f455b13c1eff2747735435f750c3e4fd78da7648d9836c2d53d8bc458c",
+					"size": 926,
+					"sourceHash": "b90a2c501e2c5f32a26f64577bfe2c4b6628f0b76225a623b88a3a191415cdbb",
+					"status": "content"
+				},
+				"dist/matcher.js": {
+					"diff": "--- published/dist/matcher.js\n+++ rebuilt/dist/matcher.js\n@@ -1,249 +1,106 @@\n \"use strict\";\n+var __importDefault = (this && this.__importDefault) || function (mod) {\n+    return (mod && mod.__esModule) ? mod : { \"default\": mod };\n+};\n Object.defineProperty(exports, \"__esModule\", { value: true });\n-/**\n- * Cache to store generated match functions\n- * @type {Object}\n- */\n-var pMatchFunctionCache = {};\n-function compare_tagname(tag1, tag2) {\n-    if (!tag1) {\n-        return !tag2;\n-    }\n-    if (!tag2) {\n-        return !tag1;\n-    }\n-    return tag1.toLowerCase() === tag2.toLowerCase();\n+const type_1 = __importDefault(require(\"./nodes/type\"));\n+function isTag(node) {\n+    return node && node.nodeType === type_1.default.ELEMENT_NODE;\n }\n-/**\n- * Function cache\n- */\n-var functionCache = {\n-    f145: function (el, tagName, classes) {\n-        'use strict';\n-        tagName = tagName || '';\n-        classes = classes || [];\n-        if (el.id !== tagName.substr(1)) {\n-            return false;\n-        }\n-        for (var cls = classes, i = 0; i < cls.length; i++) {\n-            if (el.classNames.indexOf(cls[i]) === -1) {\n-                return false;\n-            }\n-        }\n-        return true;\n-    },\n-    f45: function (el, tagName, classes) {\n-        'use strict';\n-        tagName = tagName || '';\n-        classes = classes || [];\n-        for (var cls = classes, i = 0; i < cls.length; i++) {\n-            if (el.classNames.indexOf(cls[i]) === -1) {\n-                return false;\n-            }\n-        }\n-        return true;\n-    },\n-    f15: function (el, tagName) {\n-        'use strict';\n-        tagName = tagName || '';\n-        if (el.id !== tagName.substr(1)) {\n-            return false;\n-        }\n-        return true;\n-    },\n-    f1: function (el, tagName) {\n-        'use strict';\n-        tagName = tagName || '';\n-        if (el.id !== tagName.substr(1)) {\n-            return false;\n-        }\n-    },\n-    f5: function () {\n-        'use strict';\n-        return true;\n-    },\n-    f55: function (el, tagName, classes, attr_key) {\n-        'use strict';\n-        tagName = tagName || '';\n-        classes = classes || [];\n-        attr_key = attr_key || '';\n-        var attrs = el.attributes;\n-        return attrs.hasOwnProperty(attr_key);\n-    },\n-    f245: function (el, tagName, classes, attr_key, value) {\n-        'use strict';\n-        tagName = tagName || '';\n-        classes = classes || [];\n-        attr_key = (attr_key || '').toLowerCase();\n-        value = value || '';\n-        var attrs = el.attributes;\n-        return Object.keys(attrs).some(function (key) {\n-            var val = attrs[key];\n-            return key.toLowerCase() === attr_key && val === value;\n-        });\n-        // for (let cls = classes, i = 0; i < cls.length; i++) {if (el.classNames.indexOf(cls[i]) === -1){ return false;}}\n-        // return true;\n-    },\n-    f25: function (el, tagName, classes, attr_key, value) {\n-        'use strict';\n-        tagName = tagName || '';\n-        classes = classes || [];\n-        attr_key = (attr_key || '').toLowerCase();\n",
+					"match": false,
+					"packageHash": "580f77808adfef5feab571e3d1f9b20b303e00b71cb90818263bcde00814a795",
+					"size": 8355,
+					"sourceHash": "c28dece470b67eb6231f82907ca0d9ee81be952b2406b1cabf9b5b7aff5e78a4",
+					"status": "content"
+				},
+				"dist/nodes/comment.d.ts": {
+					"diff": "--- published/dist/nodes/comment.d.ts\n+++ rebuilt/dist/nodes/comment.d.ts\n@@ -1,8 +1,11 @@\n+import HTMLElement from './html';\n import Node from './node';\n import NodeType from './type';\n export default class CommentNode extends Node {\n     rawText: string;\n-    constructor(rawText: string);\n+    rawTagName: string;\n+    clone(): CommentNode;\n+    constructor(rawText: string, parentNode?: HTMLElement, range?: [number, number], rawTagName?: string);\n     /**\n      * Node Type declaration.\n      * @type {Number}\n",
+					"match": false,
+					"packageHash": "7a437c0925589cfc0cac6337a047066f6ba52cd384d0012a0eea68c051011ac7",
+					"size": 422,
+					"sourceHash": "29a11c38f08bc4725aa6a978df669f615f3330121f5cd0c3bc9801c8b0ba9c74",
+					"status": "content"
+				},
+				"dist/nodes/comment.js": {
+					"diff": "--- published/dist/nodes/comment.js\n+++ rebuilt/dist/nodes/comment.js\n@@ -1,49 +1,33 @@\n \"use strict\";\n-var __extends = (this && this.__extends) || (function () {\n-    var extendStatics = function (d, b) {\n-        extendStatics = Object.setPrototypeOf ||\n-            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||\n-            function (d, b) { for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p]; };\n-        return extendStatics(d, b);\n-    };\n-    return function (d, b) {\n-        extendStatics(d, b);\n-        function __() { this.constructor = d; }\n-        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());\n-    };\n-})();\n var __importDefault = (this && this.__importDefault) || function (mod) {\n     return (mod && mod.__esModule) ? mod : { \"default\": mod };\n };\n Object.defineProperty(exports, \"__esModule\", { value: true });\n-var node_1 = __importDefault(require(\"./node\"));\n-var type_1 = __importDefault(require(\"./type\"));\n-var CommentNode = /** @class */ (function (_super) {\n-    __extends(CommentNode, _super);\n-    function CommentNode(rawText) {\n-        var _this = _super.call(this) || this;\n-        _this.rawText = rawText;\n+const node_1 = __importDefault(require(\"./node\"));\n+const type_1 = __importDefault(require(\"./type\"));\n+class CommentNode extends node_1.default {\n+    clone() {\n+        return new CommentNode(this.rawText, null, undefined, this.rawTagName);\n+    }\n+    constructor(rawText, parentNode = null, range, rawTagName = '!--') {\n+        super(parentNode, range);\n+        this.rawText = rawText;\n+        this.rawTagName = rawTagName;\n         /**\n          * Node Type declaration.\n          * @type {Number}\n          */\n-        _this.nodeType = type_1.default.COMMENT_NODE;\n-        return _this;\n+        this.nodeType = type_1.default.COMMENT_NODE;\n     }\n-    Object.defineProperty(CommentNode.prototype, \"text\", {\n-        /**\n-         * Get unescaped text value of current node and its children.\n-         * @return {string} text content\n-         */\n-        get: function () {\n-            return this.rawText;\n-        },\n-        enumerable: false,\n-        configurable: true\n-    });\n-    CommentNode.prototype.toString = function () {\n-        return \"<!--\" + this.rawText + \"-->\";\n-    };\n-    return CommentNode;\n-}(node_1.default));\n+    /**\n+     * Get unescaped text value of current node and its children.\n+     * @return {string} text content\n+     */\n+    get text() {\n+        return this.rawText;\n+    }\n+    toString() {\n+        return `<!--${this.rawText}-->`;\n+    }\n+}\n exports.default = CommentNode;\n",
+					"match": false,
+					"packageHash": "4aa5aa14a6b679276a75656b4bdaa5dd266b9083457618eb9c601982f7c0ffb0",
+					"size": 1800,
+					"sourceHash": "fa6e3d160ba409bc654172554371b65d7e3c88df4b8bc0e152e38975020a303f",
+					"status": "content"
+				},
+				"dist/nodes/html.d.ts": {
+					"diff": "--- published/dist/nodes/html.d.ts\n+++ rebuilt/dist/nodes/html.d.ts\n@@ -1,6 +1,6 @@\n+import VoidTag from '../void-tag';\n import Node from './node';\n import NodeType from './type';\n-import Matcher from '../matcher';\n export interface KeyAttributes {\n     id?: string;\n     class?: string;\n@@ -11,7 +11,23 @@\n export interface RawAttributes {\n     [key: string]: string;\n }\n-export declare type InsertPosition = 'beforebegin' | 'afterbegin' | 'beforeend' | 'afterend';\n+export type InsertPosition = 'beforebegin' | 'afterbegin' | 'beforeend' | 'afterend';\n+export type NodeInsertable = Node | string;\n+declare class DOMTokenList {\n+    private _set;\n+    private _afterUpdate;\n+    private _validate;\n+    constructor(valuesInit?: string[], afterUpdate?: (t: DOMTokenList) => void);\n+    add(c: string): void;\n+    replace(c1: string, c2: string): void;\n+    remove(c: string): void;\n+    toggle(c: string): void;\n+    contains(c: string): boolean;\n+    get length(): number;\n+    values(): IterableIterator<string>;\n+    get value(): string[];\n+    toString(): string;\n+}\n /**\n  * HTMLElement, which contains a set of children.\n  *\n@@ -22,46 +38,56 @@\n  * @extends {Node}\n  */\n export default class HTMLElement extends Node {\n-    private rawAttrs;\n-    parentNode: HTMLElement;\n+    rawAttrs: string;\n+    private voidTag;\n     private _attrs;\n     private _rawAttrs;\n+    private _parseOptions;\n+    private _id;\n     rawTagName: string;\n-    id: string;\n-    classNames: string[];\n+    classList: DOMTokenList;\n     /**\n      * Node Type declaration.\n      */\n     nodeType: NodeType;\n     /**\n+     * Quote attribute values\n+     * @param attr attribute value\n+     * @returns {string} quoted value\n+     */\n+    private quoteAttribute;\n+    /**\n      * Creates an instance of HTMLElement.\n      * @param keyAttrs\tid and class attribute\n      * @param [rawAttrs]\tattributes in string\n      *\n      * @memberof HTMLElement\n      */\n-    constructor(tagName: string, keyAttrs: KeyAttributes, rawAttrs?: string, parentNode?: HTMLElement);\n-    /**\n-     * Remove current element\n-     */\n-    remove(): void;\n+    constructor(tagName: string, keyAttrs: KeyAttributes, rawAttrs?: string, parentNode?: HTMLElement, range?: [number, number], voidTag?: VoidTag, _parseOptions?: Partial<Options>);\n     /**\n      * Remove Child element from childNodes array\n      * @param {HTMLElement} node     node to remove\n      */\n-    removeChild(node: Node): void;\n+    removeChild(node: Node): this;\n     /**\n      * Exchanges given child with new child\n      * @param {HTMLElement} oldNode     node to exchange\n      * @param {HTMLElement} newNode     new node\n      */\n-    exchangeChild(oldNode: Node, newNode: Node): void;\n+    exchangeChild(oldNode: Node, newNode: Node): this;\n     get tagName(): string;\n+    set tagName(newname: string);\n+    get localName(): string;\n+    get isVoidElement(): boolean;\n+    get id(): string;\n+    set id(newid: string);\n     /**\n      * Get escpaed (as-it) text value of current node and its children.\n      * @return {string} text content\n      */\n     get rawText(): string;\n+    get textContent(): string;\n+    set textContent(val: string);\n",
+					"match": false,
+					"packageHash": "b5d60c2b09ab2b94a74650305386670df7c0b64e5c392bd1a0211afe28c188a2",
+					"size": 5217,
+					"sourceHash": "51d87883eee51dbd4a05965b0667aca7c0514e262371625f55c82c64f2ad5f5f",
+					"status": "content"
+				},
+				"dist/nodes/html.js": {
+					"diff": "--- published/dist/nodes/html.js\n+++ rebuilt/dist/nodes/html.js\n@@ -1,54 +1,89 @@\n \"use strict\";\n-var __extends = (this && this.__extends) || (function () {\n-    var extendStatics = function (d, b) {\n-        extendStatics = Object.setPrototypeOf ||\n-            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||\n-            function (d, b) { for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p]; };\n-        return extendStatics(d, b);\n-    };\n-    return function (d, b) {\n-        extendStatics(d, b);\n-        function __() { this.constructor = d; }\n-        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());\n-    };\n-})();\n-var __spreadArrays = (this && this.__spreadArrays) || function () {\n-    for (var s = 0, i = 0, il = arguments.length; i < il; i++) s += arguments[i].length;\n-    for (var r = Array(s), k = 0, i = 0; i < il; i++)\n-        for (var a = arguments[i], j = 0, jl = a.length; j < jl; j++, k++)\n-            r[k] = a[j];\n-    return r;\n-};\n var __importDefault = (this && this.__importDefault) || function (mod) {\n     return (mod && mod.__esModule) ? mod : { \"default\": mod };\n };\n Object.defineProperty(exports, \"__esModule\", { value: true });\n-exports.base_parse = void 0;\n-var he_1 = require(\"he\");\n-var node_1 = __importDefault(require(\"./node\"));\n-var type_1 = __importDefault(require(\"./type\"));\n-var text_1 = __importDefault(require(\"./text\"));\n-var matcher_1 = __importDefault(require(\"../matcher\"));\n-var back_1 = __importDefault(require(\"../back\"));\n-var comment_1 = __importDefault(require(\"./comment\"));\n-var parse_1 = __importDefault(require(\"../parse\"));\n-var kBlockElements = new Map();\n-kBlockElements.set('DIV', true);\n-kBlockElements.set('div', true);\n-kBlockElements.set('P', true);\n-kBlockElements.set('p', true);\n-// ul: true,\n-// ol: true,\n-kBlockElements.set('LI', true);\n-kBlockElements.set('li', true);\n-// table: true,\n-// tr: true,\n-kBlockElements.set('TD', true);\n-kBlockElements.set('td', true);\n-kBlockElements.set('SECTION', true);\n-kBlockElements.set('section', true);\n-kBlockElements.set('BR', true);\n-kBlockElements.set('br', true);\n+exports.parse = exports.base_parse = void 0;\n+const css_select_1 = require(\"css-select\");\n+const he_1 = __importDefault(require(\"he\"));\n+const back_1 = __importDefault(require(\"../back\"));\n+const matcher_1 = __importDefault(require(\"../matcher\"));\n+const void_tag_1 = __importDefault(require(\"../void-tag\"));\n+const comment_1 = __importDefault(require(\"./comment\"));\n+const node_1 = __importDefault(require(\"./node\"));\n+const text_1 = __importDefault(require(\"./text\"));\n+const type_1 = __importDefault(require(\"./type\"));\n+function decode(val) {\n+    // clone string\n+    return JSON.parse(JSON.stringify(he_1.default.decode(val)));\n+}\n+// https://developer.mozilla.org/en-US/docs/Web/HTML/Block-level_elements\n+const Htags = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'header', 'hgroup'];\n+const Dtags = ['details', 'dialog', 'dd', 'div', 'dt'];\n+const Ftags = ['fieldset', 'figcaption', 'figure', 'footer', 'form'];\n+const tableTags = ['table', 'td', 'tr'];\n+const htmlTags = ['address', 'article', 'aside', 'blockquote', 'br', 'hr', 'li', 'main', 'nav', 'ol', 'p', 'pre', 'section', 'ul'];\n+const kBlockElements = new Set();\n+function addToKBlockElement(...args) {\n+    const addToSet = (array) => {\n+        for (let index = 0; index < array.length; index++) {\n+            const element = array[index];\n+            kBlockElements.add(element);\n+            kBlockElements.add(element.toUpperCase());\n+        }\n+    };\n+    for (const arg of args)\n+        addToSet(arg);\n+}\n+addToKBlockElement(Htags, Dtags, Ftags, tableTags, htmlTags);\n+class DOMTokenList {\n+    _validate(c) {\n+        if (/\\s/.test(c)) {\n+            throw new Error(`DOMException in DOMTokenList.add: The token '${c}' contains HTML space characters, which are not valid in tokens.`);\n+        }\n+    }\n+    constructor(valuesInit = [], afterUpdate = () => null) {\n+        this._set = new Set(valuesInit);\n+        this._afterUpdate = afterUpdate;\n+    }\n+    add(c) {\n+        this._validate(c);\n+        this._set.add(c);\n",
+					"match": false,
+					"packageHash": "5e94a90a6615bfc8f2a425c5c9d02ab760fa51c248bb50a1bd55469ced2250c7",
+					"size": 32333,
+					"sourceHash": "511cda9c0df4e3d003a066ee1ac2c2c0c8580de07a00ae7a8d90f00542a24ae3",
+					"status": "content"
+				},
+				"dist/nodes/node.d.ts": {
+					"diff": "--- published/dist/nodes/node.d.ts\n+++ rebuilt/dist/nodes/node.d.ts\n@@ -1,12 +1,24 @@\n import NodeType from './type';\n+import HTMLElement from './html';\n /**\n  * Node Class as base class for TextNode and HTMLElement.\n  */\n export default abstract class Node {\n+    parentNode: HTMLElement;\n+    abstract rawTagName: string;\n     abstract nodeType: NodeType;\n     childNodes: Node[];\n+    range: readonly [number, number];\n     abstract text: string;\n     abstract rawText: string;\n     abstract toString(): string;\n+    abstract clone(): Node;\n+    constructor(parentNode?: HTMLElement, range?: [number, number]);\n+    /**\n+     * Remove current node\n+     */\n+    remove(): this;\n     get innerText(): string;\n+    get textContent(): string;\n+    set textContent(val: string);\n }\n",
+					"match": false,
+					"packageHash": "e7113d9872837e7a2cc2aaae7033ff4b16afd013ccab83f2053f918c826beea1",
+					"size": 312,
+					"sourceHash": "b727ad05807250720f240d13f26990dfb786bc528b29fd80424df18e38475b21",
+					"status": "content"
+				},
+				"dist/nodes/node.js": {
+					"diff": "--- published/dist/nodes/node.js\n+++ rebuilt/dist/nodes/node.js\n@@ -1,19 +1,41 @@\n \"use strict\";\n Object.defineProperty(exports, \"__esModule\", { value: true });\n+const he_1 = require(\"he\");\n /**\n  * Node Class as base class for TextNode and HTMLElement.\n  */\n-var Node = /** @class */ (function () {\n-    function Node() {\n+class Node {\n+    constructor(parentNode = null, range) {\n+        this.parentNode = parentNode;\n         this.childNodes = [];\n+        Object.defineProperty(this, 'range', {\n+            enumerable: false,\n+            writable: true,\n+            configurable: true,\n+            value: range !== null && range !== void 0 ? range : [-1, -1]\n+        });\n     }\n-    Object.defineProperty(Node.prototype, \"innerText\", {\n-        get: function () {\n-            return this.rawText;\n-        },\n-        enumerable: false,\n-        configurable: true\n-    });\n-    return Node;\n-}());\n+    /**\n+     * Remove current node\n+     */\n+    remove() {\n+        if (this.parentNode) {\n+            const children = this.parentNode.childNodes;\n+            this.parentNode.childNodes = children.filter((child) => {\n+                return this !== child;\n+            });\n+            this.parentNode = null;\n+        }\n+        return this;\n+    }\n+    get innerText() {\n+        return this.rawText;\n+    }\n+    get textContent() {\n+        return (0, he_1.decode)(this.rawText);\n+    }\n+    set textContent(val) {\n+        this.rawText = (0, he_1.encode)(val);\n+    }\n+}\n exports.default = Node;\n",
+					"match": false,
+					"packageHash": "dd47d547484d26b8176fc42ab3d12e7e9a6cbdbc4cea80ce90943953b5fe3327",
+					"size": 478,
+					"sourceHash": "99e681b90a1fdf7ba7b6512f6598606d5f8cf5349f86abb2581625b7e3913eeb",
+					"status": "content"
+				},
+				"dist/nodes/text.d.ts": {
+					"diff": "--- published/dist/nodes/text.d.ts\n+++ rebuilt/dist/nodes/text.d.ts\n@@ -1,17 +1,35 @@\n-import NodeType from './type';\n+import HTMLElement from './html';\n import Node from './node';\n+import NodeType from './type';\n /**\n  * TextNode to contain a text element in DOM tree.\n  * @param {string} value [description]\n  */\n export default class TextNode extends Node {\n-    rawText: string;\n-    constructor(rawText: string);\n+    clone(): TextNode;\n+    constructor(rawText: string, parentNode?: HTMLElement, range?: [number, number]);\n     /**\n      * Node Type declaration.\n      * @type {Number}\n      */\n     nodeType: NodeType;\n+    rawTagName: string;\n+    private _rawText;\n+    private _trimmedRawText?;\n+    private _trimmedText?;\n+    get rawText(): string;\n+    /**\n+     * Set rawText and invalidate trimmed caches\n+     */\n+    set rawText(text: string);\n+    /**\n+     * Returns raw text with all whitespace trimmed except single leading/trailing non-breaking space\n+     */\n+    get trimmedRawText(): string;\n+    /**\n+     * Returns text with all whitespace trimmed except single leading/trailing non-breaking space\n+     */\n+    get trimmedText(): string;\n     /**\n      * Get unescaped text value of current node and its children.\n      * @return {string} text content\n@@ -19,7 +37,7 @@\n     get text(): string;\n     /**\n      * Detect if the node contains only white space.\n-     * @return {bool}\n+     * @return {boolean}\n      */\n     get isWhitespace(): boolean;\n     toString(): string;\n",
+					"match": false,
+					"packageHash": "8c830d50f06337f2efb94d9b01014cd4b242029fc000d84b4f188db87e440372",
+					"size": 641,
+					"sourceHash": "a8b248af4eb6efbd68b842b7b9919c256a6c8bf68a179397ef9eeefb490e908a",
+					"status": "content"
+				},
+				"dist/nodes/text.js": {
+					"diff": "--- published/dist/nodes/text.js\n+++ rebuilt/dist/nodes/text.js\n@@ -1,64 +1,105 @@\n \"use strict\";\n-var __extends = (this && this.__extends) || (function () {\n-    var extendStatics = function (d, b) {\n-        extendStatics = Object.setPrototypeOf ||\n-            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||\n-            function (d, b) { for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p]; };\n-        return extendStatics(d, b);\n-    };\n-    return function (d, b) {\n-        extendStatics(d, b);\n-        function __() { this.constructor = d; }\n-        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());\n-    };\n-})();\n var __importDefault = (this && this.__importDefault) || function (mod) {\n     return (mod && mod.__esModule) ? mod : { \"default\": mod };\n };\n Object.defineProperty(exports, \"__esModule\", { value: true });\n-var type_1 = __importDefault(require(\"./type\"));\n-var node_1 = __importDefault(require(\"./node\"));\n+const he_1 = require(\"he\");\n+const node_1 = __importDefault(require(\"./node\"));\n+const type_1 = __importDefault(require(\"./type\"));\n /**\n  * TextNode to contain a text element in DOM tree.\n  * @param {string} value [description]\n  */\n-var TextNode = /** @class */ (function (_super) {\n-    __extends(TextNode, _super);\n-    function TextNode(rawText) {\n-        var _this = _super.call(this) || this;\n-        _this.rawText = rawText;\n+class TextNode extends node_1.default {\n+    clone() {\n+        return new TextNode(this._rawText, null);\n+    }\n+    constructor(rawText, parentNode = null, range) {\n+        super(parentNode, range);\n         /**\n          * Node Type declaration.\n          * @type {Number}\n          */\n-        _this.nodeType = type_1.default.TEXT_NODE;\n-        return _this;\n+        this.nodeType = type_1.default.TEXT_NODE;\n+        this.rawTagName = '';\n+        this._rawText = rawText;\n     }\n-    Object.defineProperty(TextNode.prototype, \"text\", {\n-        /**\n-         * Get unescaped text value of current node and its children.\n-         * @return {string} text content\n-         */\n-        get: function () {\n-            return this.rawText;\n-        },\n-        enumerable: false,\n-        configurable: true\n-    });\n-    Object.defineProperty(TextNode.prototype, \"isWhitespace\", {\n-        /**\n-         * Detect if the node contains only white space.\n-         * @return {bool}\n-         */\n-        get: function () {\n-            return /^(\\s|&nbsp;)*$/.test(this.rawText);\n-        },\n-        enumerable: false,\n-        configurable: true\n-    });\n-    TextNode.prototype.toString = function () {\n-        return this.text;\n-    };\n-    return TextNode;\n-}(node_1.default));\n+    get rawText() {\n+        return this._rawText;\n+    }\n+    /**\n+     * Set rawText and invalidate trimmed caches\n+     */\n+    set rawText(text) {\n+        this._rawText = text;\n+        this._trimmedRawText = void 0;\n+        this._trimmedText = void 0;\n+    }\n+    /**\n+     * Returns raw text with all whitespace trimmed except single leading/trailing non-breaking space\n+     */\n+    get trimmedRawText() {\n+        if (this._trimmedRawText !== undefined)\n+            return this._trimmedRawText;\n+        this._trimmedRawText = trimText(this.rawText);\n+        return this._trimmedRawText;\n+    }\n+    /**\n+     * Returns text with all whitespace trimmed except single leading/trailing non-breaking space\n",
+					"match": false,
+					"packageHash": "06cd2a039ede89f9b49ca7a6be156ad9d4ed51e3ccfc57ec283b2a0e7dd66227",
+					"size": 2181,
+					"sourceHash": "d0199a4687c7e24a48c7b5402d48da6d77603ebb135f88bfb3ffdb279d5ca51c",
+					"status": "content"
+				},
+				"dist/parse.d.ts": {
+					"diff": "--- published/dist/parse.d.ts\n+++ rebuilt/dist/parse.d.ts\n@@ -1,6 +1 @@\n-import { Options } from './nodes/html';\n-/**\n- * Parses HTML and returns a root element\n- * Parse a chuck of HTML source.\n- */\n-export default function parse(data: string, options?: Partial<Options>): import(\"./nodes/html\").default;\n+export { parse as default } from './nodes/html';\n",
+					"match": false,
+					"packageHash": "2f917b00067815de93b5b05f5a1092351eccfb18561ad2b32a3747ecce68e779",
+					"size": 228,
+					"sourceHash": "a27830571004b47d0dbdb8a23ef6c634716735bde15c49c5c687a5d2ea1a988c",
+					"status": "content"
+				},
+				"dist/parse.js": {
+					"diff": "--- published/dist/parse.js\n+++ rebuilt/dist/parse.js\n@@ -1,51 +1,5 @@\n \"use strict\";\n-var __importDefault = (this && this.__importDefault) || function (mod) {\n-    return (mod && mod.__esModule) ? mod : { \"default\": mod };\n-};\n Object.defineProperty(exports, \"__esModule\", { value: true });\n-var back_1 = __importDefault(require(\"./back\"));\n+exports.default = void 0;\n var html_1 = require(\"./nodes/html\");\n-/**\n- * Parses HTML and returns a root element\n- * Parse a chuck of HTML source.\n- */\n-function parse(data, options) {\n-    if (options === void 0) { options = { lowerCaseTagName: false, comment: false }; }\n-    var stack = html_1.base_parse(data, options);\n-    var root = stack[0];\n-    var _loop_1 = function () {\n-        // Handle each error elements.\n-        var last = stack.pop();\n-        var oneBefore = back_1.default(stack);\n-        if (last.parentNode && last.parentNode.parentNode) {\n-            if (last.parentNode === oneBefore && last.tagName === oneBefore.tagName) {\n-                // Pair error case <h3> <h3> handle : Fixes to <h3> </h3>\n-                oneBefore.removeChild(last);\n-                last.childNodes.forEach(function (child) {\n-                    oneBefore.parentNode.appendChild(child);\n-                });\n-                stack.pop();\n-            }\n-            else {\n-                // Single error  <div> <h3> </div> handle: Just removes <h3>\n-                oneBefore.removeChild(last);\n-                last.childNodes.forEach(function (child) {\n-                    oneBefore.appendChild(child);\n-                });\n-            }\n-        }\n-        else {\n-            // If it's final element just skip.\n-        }\n-    };\n-    while (stack.length > 1) {\n-        _loop_1();\n-    }\n-    // response.childNodes.forEach((node) => {\n-    // \tif (node instanceof HTMLElement) {\n-    // \t\tnode.parentNode = null;\n-    // \t}\n-    // });\n-    return root;\n-}\n-exports.default = parse;\n+Object.defineProperty(exports, \"default\", { enumerable: true, get: function () { return html_1.parse; } });\n",
+					"match": false,
+					"packageHash": "6c93c5b8512d79d5cab567d765e7d7bb41774361509a881484390a4419c388f8",
+					"size": 1798,
+					"sourceHash": "a4b0b5a1f466362ed8398713d232c269960aa370dcc3ca6595aa8086a15b2e2e",
+					"status": "content"
+				},
+				"dist/valid.js": {
+					"diff": "--- published/dist/valid.js\n+++ rebuilt/dist/valid.js\n@@ -1,13 +1,12 @@\n \"use strict\";\n Object.defineProperty(exports, \"__esModule\", { value: true });\n-var html_1 = require(\"./nodes/html\");\n+const html_1 = require(\"./nodes/html\");\n /**\n  * Parses HTML and returns a root element\n  * Parse a chuck of HTML source.\n  */\n-function valid(data, options) {\n-    if (options === void 0) { options = { lowerCaseTagName: false, comment: false }; }\n-    var stack = html_1.base_parse(data, options);\n+function valid(data, options = {}) {\n+    const stack = (0, html_1.base_parse)(data, options);\n     return Boolean(stack.length === 1);\n }\n exports.default = valid;\n",
+					"match": false,
+					"packageHash": "d80d99dd337951c36680c32fb584930475b806141277f912fbdeb25b6607a259",
+					"size": 434,
+					"sourceHash": "b47824132864801c06e0a59346fc60aac7b8ddc438fdbd1e6afa60b54d93d8c9",
+					"status": "content"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -1,33 +1,56 @@\n {\n \t\"name\": \"node-html-parser\",\n-\t\"version\": \"2.0.1\",\n+\t\"version\": \"7.0.2\",\n \t\"description\": \"A very fast HTML parser, generating a simplified DOM, with basic element query support.\",\n \t\"main\": \"dist/index.js\",\n-\t\"module\": \"dist/esm/index.js\",\n \t\"types\": \"dist/index.d.ts\",\n \t\"scripts\": {\n-\t\t\"test\": \"mocha\",\n+\t\t\"compile\": \"tsc\",\n+\t\t\"build\": \"npm run lint && npm run clean && npm run compile:cjs && npm run compile:amd\",\n+\t\t\"compile:cjs\": \"tsc -m commonjs\",\n+\t\t\"watch\": \"npx tsc -m commonjs --watch --preserveWatchOutput\",\n+\t\t\"compile:amd\": \"tsc -t es5 -m amd -d false --outFile ./dist/main.js\",\n \t\t\"lint\": \"eslint ./src/*.ts ./src/**/*.ts\",\n-\t\t\"clean\": \"del-cli ./dist/\",\n-\t\t\"ts:cjs\": \"tsc -m commonjs\",\n-\t\t\"ts:amd\": \"tsc -t es5 -m amd -d false --outFile ./dist/main.js\",\n-\t\t\"ts:esm\": \"tsc -t esnext -m esnext -d false --outDir ./dist/esm/\",\n-\t\t\"build\": \"npm run lint && npm run clean && npm run ts:cjs && npm run ts:amd && npm run ts:esm\",\n-\t\t\"dev\": \"tsc -w & mocha -w ./test/*.js\",\n-\t\t\"pretest\": \"tsc -m commonjs\"\n+\t\t\"---------------\": \"\",\n+\t\t\"pretest\": \"cd ./test/ && yarn install && cd ..\",\n+\t\t\"test\": \"yarn run test:target\",\n+\t\t\"test:src\": \"cross-env TEST_TARGET=src yarn run test\",\n+\t\t\"test:dist\": \"cross-env TEST_TARGET=dist yarn run test\",\n+\t\t\"benchmark\": \"node ./test/benchmark/compare.mjs\",\n+\t\t\"---------------  \": \"\",\n+\t\t\"clean\": \"npx rimraf ./dist/\",\n+\t\t\"clean:global\": \"yarn run clean && npx rimraf yarn.lock test/yarn.lock test/node_modules node_modules\",\n+\t\t\"reset\": \"yarn run clean:global && yarn install && yarn build\",\n+\t\t\"--------------- \": \"\",\n+\t\t\"test:target\": \"mocha --recursive \\\"./test/tests\\\"\",\n+\t\t\"test:ci\": \"cd test && yarn install && cd .. && cross-env TEST_TARGET=dist yarn run test:target\",\n+\t\t\"posttest\": \"yarn run benchmark\",\n+\t\t\"prepare\": \"npm run build\",\n+\t\t\"release\": \"standard-version && git push --follow-tags origin main\"\n \t},\n \t\"keywords\": [\n-\t\t\"parser\",\n \t\t\"html\",\n+\t\t\"parser\",\n \t\t\"nodejs\",\n \t\t\"typescript\"\n \t],\n+\t\"files\": [\n+\t\t\"dist\",\n+\t\t\"README.md\",\n+\t\t\"LICENSE\",\n+\t\t\"CHANGELOG.md\"\n+\t],\n \t\"author\": \"Xiaoyi Shi <ashi009@gmail.com>\",\n \t\"contributors\": [\n-\t\t\"taoqf<tao_qiufeng@126.com>\"\n+\t\t\"taoqf <tao_qiufeng@126.com>\",\n+\t\t\"Ron S. <ron@nonara.com>\"\n \t],\n \t\"license\": \"MIT\",\n+\t\"publishConfig\": {\n+\t\t\"registry\": \"https://registry.npmjs.org\"\n+\t},\n \t\"dependencies\": {\n+\t\t\"css-select\": \"^5.1.0\",\n \t\t\"he\": \"1.2.0\"\n \t},\n \t\"devDependencies\": {\n@@ -38,20 +61,34 @@\n \t\t\"@typescript-eslint/eslint-plugin-tslint\": \"latest\",\n \t\t\"@typescript-eslint/parser\": \"latest\",\n \t\t\"blanket\": \"latest\",\n-\t\t\"del-cli\": \"latest\",\n-\t\t\"eslint\": \"latest\",\n+\t\t\"boolbase\": \"^1.0.0\",\n+\t\t\"cheerio\": \"^1.0.0-rc.12\",\n+\t\t\"cross-env\": \"^7.0.3\",\n+\t\t\"eslint\": \"^8.23.1\",\n \t\t\"eslint-config-prettier\": \"latest\",\n \t\t\"eslint-plugin-import\": \"latest\",\n \t\t\"high5\": \"^1.0.0\",\n+\t\t\"html-dom-parser\": \"^3.1.2\",\n+\t\t\"html-parser\": \"^0.11.0\",\n+\t\t\"html5parser\": \"^2.0.2\",\n+\t\t\"htmljs-parser\": \"^5.1.4\",\n \t\t\"htmlparser\": \"^1.7.7\",\n \t\t\"htmlparser-benchmark\": \"^1.1.3\",\n-\t\t\"htmlparser2\": \"^5.0.0\",\n+\t\t\"htmlparser2\": \"^8.0.1\",\n \t\t\"mocha\": \"latest\",\n-\t\t\"parse5\": \"^6.0.1\",\n+\t\t\"mocha-each\": \"^2.0.1\",\n+\t\t\"neutron-html5parser\": \"^0.2.0\",\n+\t\t\"np\": \"latest\",\n+\t\t\"parse5\": \"^7.1.1\",\n+\t\t\"rimraf\": \"^3.0.2\",\n+\t\t\"saxes\": \"^6.0.0\",\n",
+					"match": false,
+					"packageHash": "684bd40e340e63925f0b5bb250ca312f3551b7c238ebe17b7d31c177e630d500",
+					"size": 2003,
+					"sourceHash": "057ffa37fc3efec69f204590026fc492c61bc88236bcec6f7828bec0f7e348dc",
+					"status": "content"
+				},
+				"CHANGELOG.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"dist/void-tag.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"dist/void-tag.js": {
+					"match": false,
+					"status": "missing-in-package"
+				}
+			},
+			"summary": {
+				"differentFiles": 18,
+				"matchingFiles": 6,
+				"missingInPackage": 3,
+				"missingInSource": 13,
+				"score": 0.15,
+				"totalFiles": 40
+			}
+		},
+		"prodDependencies": [
+			{
+				"name": "boolbase",
+				"version": "1.0.0"
+			},
+			{
+				"name": "css-select",
+				"version": "5.1.0"
+			},
+			{
+				"name": "css-what",
+				"version": "6.1.0"
+			},
+			{
+				"name": "dom-serializer",
+				"version": "2.0.0"
+			},
+			{
+				"name": "domelementtype",
+				"version": "2.3.0"
+			},
+			{
+				"name": "domhandler",
+				"version": "5.0.3"
+			},
+			{
+				"name": "domutils",
+				"version": "3.1.0"
+			},
+			{
+				"name": "entities",
+				"version": "4.5.0"
+			},
+			{
+				"name": "he",
+				"version": "1.2.0"
+			},
+			{
+				"name": "nth-check",
+				"version": "2.1.1"
+			}
+		]
+	}
+]

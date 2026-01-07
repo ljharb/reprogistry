@@ -1,0 +1,212 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-07T17:54:37.962Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:11.7.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "node-html-parser@1.1.18",
+			"name": "node-html-parser",
+			"version": "1.1.18",
+			"location": "https://registry.npmjs.org/node-html-parser/-/node-html-parser-1.1.18.tgz",
+			"integrity": "sha512-aMMHT8E0Luj3wcgefp+r4bvsKzDtZr5kBCm8e9PwhRlyx1FswXOYie7WaRYOXbw+jwzLXFeu1W9b1GNRkS4G0A==",
+			"publishedAt": "2020-01-14T04:16:26.549Z",
+			"publishedWith": {
+				"node": "13.6.0",
+				"npm": "6.13.4"
+			},
+			"dependencies": {
+				"he": "1.1.1"
+			}
+		},
+		"source": {
+			"integrity": null,
+			"location": "git+https://github.com/taoqf/node-fast-html-parser.git",
+			"spec": "github:taoqf/node-fast-html-parser#a1feca5515096480e2b92ed45f66ee2273cc0452"
+		},
+		"comparisonHash": "9ef46a5bd31291e57cbab41e2f17c57bd6da0b5b",
+		"diff": {
+			"files": {
+				"README.md": {
+					"diff": "--- published/README.md\n+++ rebuilt/README.md\n@@ -1,12 +1,12 @@\n-# Fast HTML Parser [![NPM version](https://badge.fury.io/js/node-html-parser.png)](http://badge.fury.io/js/node-html-parser) [![Build Status](https://travis-ci.org/taoqf/node-html-parser.svg?branch=master)](https://travis-ci.org/taoqf/node-html-parser)\n+# Fast HTML Parser [![NPM version](https://badge.fury.io/js/node-html-parser.png)](http://badge.fury.io/js/node-html-parser) [![Build Status](https://img.shields.io/endpoint.svg?url=https%3A%2F%2Factions-badge.atrox.dev%2Ftaoqf%2Fnode-html-parser%2Fbadge%3Fref%3Dmain&style=flat)](https://actions-badge.atrox.dev/taoqf/node-html-parser/goto?ref=main)\n \n Fast HTML Parser is a _very fast_ HTML parser. Which will generate a simplified\n-DOM tree, with basic element query support.\n+DOM tree, with element query support.\n \n Per the design, it intends to parse massive HTML files in lowest price, thus the\n performance is the top priority.  For this reason, some malformatted HTML may not\n be able to parse correctly, but most usual errors are covered (eg. HTML4 style\n-no closing `<li>`, `<td>` etc).\n+no closing `<td>` etc).\n \n ## Install\n \n@@ -14,19 +14,24 @@\n npm install --save node-html-parser\n ```\n \n+> Note: when using Fast HTML Parser in a Typescript project the minimum Typescript version supported is `^4.1.2`.\n+\n ## Performance\n \n-Faster than htmlparser2!\n+-- 2022-08-10\n \n ```shell\n-fast-html-parser: 2.18409 ms/file ± 1.37431\n-high5           : 4.55435 ms/file ± 2.51132\n-htmlparser      : 27.6920 ms/file ± 171.588\n-htmlparser2-dom : 6.22320 ms/file ± 3.48772\n-htmlparser2     : 3.58360 ms/file ± 2.23658\n-hubbub          : 16.1774 ms/file ± 8.95079\n-libxmljs        : 7.19406 ms/file ± 7.04495\n-parse5          : 10.7590 ms/file ± 8.09687\n+html-parser     :24.1595 ms/file ± 18.7667\n+htmljs-parser   :4.72064 ms/file ± 5.67689\n+html-dom-parser :2.18055 ms/file ± 2.96136\n+html5parser     :1.69639 ms/file ± 2.17111\n+cheerio         :12.2122 ms/file ± 8.10916\n+parse5          :6.50626 ms/file ± 4.02352\n+htmlparser2     :2.38179 ms/file ± 3.42389\n+htmlparser      :17.4820 ms/file ± 128.041\n+high5           :3.95188 ms/file ± 2.52313\n+node-html-parser:2.04288 ms/file ± 1.25203\n+node-html-parser (last release):2.00527 ms/file ± 1.21317\n ```\n \n Tested with [htmlparser-benchmark](https://github.com/AndreasMadsen/htmlparser-benchmark).\n@@ -38,6 +43,7 @@\n \n const root = parse('<ul id=\"list\"><li>Hello World</li></ul>');\n \n+// parse() adds a wrapper node, so the input data's first node is the root's first child node\n console.log(root.firstChild.structure);\n // ul#list\n //   li\n@@ -65,90 +71,335 @@\n var root = HTMLParser.parse('<ul id=\"list\"><li>Hello World</li></ul>');\n ```\n \n-## API\n+## Global Methods\n \n ### parse(data[, options])\n \n-Parse given data, and return root of the generated DOM.\n+Parse the data provided, wrap the result in a new node, and return the root of the generated DOM.\n \n - **data**, data to parse\n - **options**, parse options\n \n   ```js\n   {\n-    lowerCaseTagName: false,  // convert tag name to lower case (hurt performance heavily)\n-    script: false,            // retrieve content in <script> (hurt performance slightly)\n-    style: false,             // retrieve content in <style> (hurt performance slightly)\n-    pre: false,               // retrieve content in <pre> (hurt performance slightly)\n-    comment: false            // retrieve comments (hurt performance slightly)\n+    lowerCaseTagName: false,\t\t// convert tag name to lower case (hurts performance heavily)\n+    comment: false,           \t\t// retrieve comments (hurts performance slightly)\n+    fixNestedATags: false,    \t\t// fix invalid nested <a> HTML tags \n+    parseNoneClosedTags: false, \t// close none closed HTML tags instead of removing them \n+    voidTag: {\n+      tags: ['area', 'base', 'br', 'col', 'embed', 'hr', 'img', 'input', 'link', 'meta', 'param', 'source', 'track', 'wbr'],\t// optional and case insensitive, default value is ['area', 'base', 'br', 'col', 'embed', 'hr', 'img', 'input', 'link', 'meta', 'param', 'source', 'track', 'wbr']\n+      closingSlash: true\t// optional, default false. void tag serialisation, add a final slash <br/>\n+    },\n+    blockTextElements: {\n+      script: true,\t\t// keep text content when parsing\n+      noscript: true,\t\t// keep text content when parsing\n+      style: true,\t\t// keep text content when parsing\n+      pre: true\t\t\t// keep text content when parsing\n+    }\n   }\n   ```\n \n-### HTMLElement#text\n",
+					"match": false,
+					"packageHash": "016e320dd11fbf536b0bd8d5f45447b03116af8f8f912e73f548c56c456c7198",
+					"size": 4000,
+					"sourceHash": "3650ff5182ac8c54b6198d592365a5e1f88163b0e096b3153f8824afa889fd6f",
+					"status": "content"
+				},
+				"dist/index.d.ts": {
+					"diff": "--- published/dist/index.d.ts\n+++ rebuilt/dist/index.d.ts\n@@ -1,236 +1,20 @@\n-export declare enum NodeType {\n-    ELEMENT_NODE = 1,\n-    TEXT_NODE = 3,\n-    COMMENT_NODE = 8\n+import CommentNode from './nodes/comment';\n+import HTMLElement, { Options } from './nodes/html';\n+import Node from './nodes/node';\n+import TextNode from './nodes/text';\n+import NodeType from './nodes/type';\n+import baseParse from './parse';\n+import valid from './valid';\n+export { Options } from './nodes/html';\n+export { parse, HTMLElement, CommentNode, valid, Node, TextNode, NodeType };\n+declare function parse(data: string, options?: Partial<Options>): HTMLElement;\n+declare namespace parse {\n+    var parse: typeof baseParse;\n+    var HTMLElement: typeof import(\"./nodes/html\").default;\n+    var CommentNode: typeof import(\"./nodes/comment\").default;\n+    var valid: typeof import(\"./valid\").default;\n+    var Node: typeof import(\"./nodes/node\").default;\n+    var TextNode: typeof import(\"./nodes/text\").default;\n+    var NodeType: typeof import(\"./nodes/type\").default;\n }\n-/**\n- * Node Class as base class for TextNode and HTMLElement.\n- */\n-export declare abstract class Node {\n-    nodeType: NodeType;\n-    childNodes: Node[];\n-    text: string;\n-    rawText: string;\n-    abstract toString(): String;\n-}\n-/**\n- * TextNode to contain a text element in DOM tree.\n- * @param {string} value [description]\n- */\n-export declare class TextNode extends Node {\n-    constructor(value: string);\n-    /**\n-     * Node Type declaration.\n-     * @type {Number}\n-     */\n-    nodeType: NodeType;\n-    /**\n-     * Get unescaped text value of current node and its children.\n-     * @return {string} text content\n-     */\n-    get text(): string;\n-    /**\n-     * Detect if the node contains only white space.\n-     * @return {bool}\n-     */\n-    get isWhitespace(): boolean;\n-    toString(): string;\n-}\n-export declare class CommentNode extends Node {\n-    constructor(value: string);\n-    /**\n-     * Node Type declaration.\n-     * @type {Number}\n-     */\n-    nodeType: NodeType;\n-    /**\n-     * Get unescaped text value of current node and its children.\n-     * @return {string} text content\n-     */\n-    get text(): string;\n-    toString(): string;\n-}\n-export interface KeyAttributes {\n-    id?: string;\n-    class?: string;\n-}\n-export interface Attributes {\n-    [key: string]: string;\n-}\n-export interface RawAttributes {\n-    [key: string]: string;\n-}\n-/**\n- * HTMLElement, which contains a set of children.\n- *\n- * Note: this is a minimalist implementation, no complete tree\n- *   structure provided (no parentNode, nextSibling,\n- *   previousSibling etc).\n- * @class HTMLElement\n- * @extends {Node}\n- */\n-export declare class HTMLElement extends Node {\n-    tagName: string;\n-    private rawAttrs;\n-    parentNode: Node;\n-    private _attrs;\n-    private _rawAttrs;\n-    id: string;\n-    classNames: string[];\n",
+					"match": false,
+					"packageHash": "3163a3da96a2c35a753ddd690664ac5896344f4246832c79728be13833492523",
+					"size": 6226,
+					"sourceHash": "0b405601d4da11d9ccbdea90129027f546f557a365c127136c4284f459b68230",
+					"status": "content"
+				},
+				"dist/index.js": {
+					"diff": "--- published/dist/index.js\n+++ rebuilt/dist/index.js\n@@ -1,1004 +1,31 @@\n \"use strict\";\n-var __extends = (this && this.__extends) || (function () {\n-    var extendStatics = function (d, b) {\n-        extendStatics = Object.setPrototypeOf ||\n-            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||\n-            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };\n-        return extendStatics(d, b);\n-    };\n-    return function (d, b) {\n-        extendStatics(d, b);\n-        function __() { this.constructor = d; }\n-        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());\n-    };\n-})();\n-Object.defineProperty(exports, \"__esModule\", { value: true });\n-var he_1 = require(\"he\");\n-var NodeType;\n-(function (NodeType) {\n-    NodeType[NodeType[\"ELEMENT_NODE\"] = 1] = \"ELEMENT_NODE\";\n-    NodeType[NodeType[\"TEXT_NODE\"] = 3] = \"TEXT_NODE\";\n-    NodeType[NodeType[\"COMMENT_NODE\"] = 8] = \"COMMENT_NODE\";\n-})(NodeType = exports.NodeType || (exports.NodeType = {}));\n-/**\n- * Node Class as base class for TextNode and HTMLElement.\n- */\n-var Node = /** @class */ (function () {\n-    function Node() {\n-        this.childNodes = [];\n-    }\n-    return Node;\n-}());\n-exports.Node = Node;\n-/**\n- * TextNode to contain a text element in DOM tree.\n- * @param {string} value [description]\n- */\n-var TextNode = /** @class */ (function (_super) {\n-    __extends(TextNode, _super);\n-    function TextNode(value) {\n-        var _this = _super.call(this) || this;\n-        /**\n-         * Node Type declaration.\n-         * @type {Number}\n-         */\n-        _this.nodeType = NodeType.TEXT_NODE;\n-        _this.rawText = value;\n-        return _this;\n-    }\n-    Object.defineProperty(TextNode.prototype, \"text\", {\n-        /**\n-         * Get unescaped text value of current node and its children.\n-         * @return {string} text content\n-         */\n-        get: function () {\n-            return he_1.decode(this.rawText);\n-        },\n-        enumerable: true,\n-        configurable: true\n-    });\n-    Object.defineProperty(TextNode.prototype, \"isWhitespace\", {\n-        /**\n-         * Detect if the node contains only white space.\n-         * @return {bool}\n-         */\n-        get: function () {\n-            return /^(\\s|&nbsp;)*$/.test(this.rawText);\n-        },\n-        enumerable: true,\n-        configurable: true\n-    });\n-    TextNode.prototype.toString = function () {\n-        return this.text;\n-    };\n-    return TextNode;\n-}(Node));\n-exports.TextNode = TextNode;\n-var CommentNode = /** @class */ (function (_super) {\n-    __extends(CommentNode, _super);\n-    function CommentNode(value) {\n-        var _this = _super.call(this) || this;\n-        /**\n-         * Node Type declaration.\n-         * @type {Number}\n-         */\n-        _this.nodeType = NodeType.COMMENT_NODE;\n-        _this.rawText = value;\n-        return _this;\n-    }\n-    Object.defineProperty(CommentNode.prototype, \"text\", {\n-        /**\n-         * Get unescaped text value of current node and its children.\n-         * @return {string} text content\n-         */\n-        get: function () {\n-            return he_1.decode(this.rawText);\n-        },\n-        enumerable: true,\n",
+					"match": false,
+					"packageHash": "a6ccb54b2cde1dd9dcc2dce69ebfaef576a7cfef5a0f5a4938359514e7e76f31",
+					"size": 34014,
+					"sourceHash": "87f785ddedf9bc8e3a02de4edd528ae7188e9c42210bec4c0503186c0bd70cbf",
+					"status": "content"
+				},
+				"dist/umd/index.js": {
+					"match": false,
+					"packageHash": "4f674e01c984b1cb338d575bc212a273e44ed3e90f9492d85fc9dc5ec40394ae",
+					"size": 38331,
+					"status": "missing-in-source"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -1,40 +1,94 @@\n {\n \t\"name\": \"node-html-parser\",\n-\t\"version\": \"1.1.18\",\n+\t\"version\": \"7.0.2\",\n \t\"description\": \"A very fast HTML parser, generating a simplified DOM, with basic element query support.\",\n \t\"main\": \"dist/index.js\",\n \t\"types\": \"dist/index.d.ts\",\n \t\"scripts\": {\n-\t\t\"test\": \"mocha\",\n-\t\t\"clean\": \"del-cli ./dist/\",\n-\t\t\"ts:cjs\": \"tsc -m commonjs\",\n-\t\t\"ts:umd\": \"tsc -t es5 -m umd -d false --outDir ./dist/umd/\",\n-\t\t\"build\": \"npm run clean && npm run ts:cjs && npm run ts:umd\",\n-\t\t\"dev\": \"tsc -w\",\n-\t\t\"pretest\": \"tsc -m commonjs\"\n+\t\t\"compile\": \"tsc\",\n+\t\t\"build\": \"npm run lint && npm run clean && npm run compile:cjs && npm run compile:amd\",\n+\t\t\"compile:cjs\": \"tsc -m commonjs\",\n+\t\t\"watch\": \"npx tsc -m commonjs --watch --preserveWatchOutput\",\n+\t\t\"compile:amd\": \"tsc -t es5 -m amd -d false --outFile ./dist/main.js\",\n+\t\t\"lint\": \"eslint ./src/*.ts ./src/**/*.ts\",\n+\t\t\"---------------\": \"\",\n+\t\t\"pretest\": \"cd ./test/ && yarn install && cd ..\",\n+\t\t\"test\": \"yarn run test:target\",\n+\t\t\"test:src\": \"cross-env TEST_TARGET=src yarn run test\",\n+\t\t\"test:dist\": \"cross-env TEST_TARGET=dist yarn run test\",\n+\t\t\"benchmark\": \"node ./test/benchmark/compare.mjs\",\n+\t\t\"---------------  \": \"\",\n+\t\t\"clean\": \"npx rimraf ./dist/\",\n+\t\t\"clean:global\": \"yarn run clean && npx rimraf yarn.lock test/yarn.lock test/node_modules node_modules\",\n+\t\t\"reset\": \"yarn run clean:global && yarn install && yarn build\",\n+\t\t\"--------------- \": \"\",\n+\t\t\"test:target\": \"mocha --recursive \\\"./test/tests\\\"\",\n+\t\t\"test:ci\": \"cd test && yarn install && cd .. && cross-env TEST_TARGET=dist yarn run test:target\",\n+\t\t\"posttest\": \"yarn run benchmark\",\n+\t\t\"prepare\": \"npm run build\",\n+\t\t\"release\": \"standard-version && git push --follow-tags origin main\"\n \t},\n \t\"keywords\": [\n-\t\t\"fast html parser nodejs typescript\"\n+\t\t\"html\",\n+\t\t\"parser\",\n+\t\t\"nodejs\",\n+\t\t\"typescript\"\n+\t],\n+\t\"files\": [\n+\t\t\"dist\",\n+\t\t\"README.md\",\n+\t\t\"LICENSE\",\n+\t\t\"CHANGELOG.md\"\n \t],\n \t\"author\": \"Xiaoyi Shi <ashi009@gmail.com>\",\n \t\"contributors\": [\n-\t\t\"taoqf<tao_qiufeng@126.com>\"\n+\t\t\"taoqf <tao_qiufeng@126.com>\",\n+\t\t\"Ron S. <ron@nonara.com>\"\n \t],\n \t\"license\": \"MIT\",\n+\t\"publishConfig\": {\n+\t\t\"registry\": \"https://registry.npmjs.org\"\n+\t},\n \t\"dependencies\": {\n-\t\t\"he\": \"1.1.1\"\n+\t\t\"css-select\": \"^5.1.0\",\n+\t\t\"he\": \"1.2.0\"\n \t},\n \t\"devDependencies\": {\n \t\t\"@types/entities\": \"latest\",\n \t\t\"@types/he\": \"latest\",\n \t\t\"@types/node\": \"latest\",\n+\t\t\"@typescript-eslint/eslint-plugin\": \"latest\",\n+\t\t\"@typescript-eslint/eslint-plugin-tslint\": \"latest\",\n+\t\t\"@typescript-eslint/parser\": \"latest\",\n \t\t\"blanket\": \"latest\",\n-\t\t\"del-cli\": \"latest\",\n+\t\t\"boolbase\": \"^1.0.0\",\n+\t\t\"cheerio\": \"^1.0.0-rc.12\",\n+\t\t\"cross-env\": \"^7.0.3\",\n+\t\t\"eslint\": \"^8.23.1\",\n+\t\t\"eslint-config-prettier\": \"latest\",\n+\t\t\"eslint-plugin-import\": \"latest\",\n+\t\t\"high5\": \"^1.0.0\",\n+\t\t\"html-dom-parser\": \"^3.1.2\",\n+\t\t\"html-parser\": \"^0.11.0\",\n+\t\t\"html5parser\": \"^2.0.2\",\n+\t\t\"htmljs-parser\": \"^5.1.4\",\n+\t\t\"htmlparser\": \"^1.7.7\",\n+\t\t\"htmlparser-benchmark\": \"^1.1.3\",\n+\t\t\"htmlparser2\": \"^8.0.1\",\n \t\t\"mocha\": \"latest\",\n+\t\t\"mocha-each\": \"^2.0.1\",\n+\t\t\"neutron-html5parser\": \"^0.2.0\",\n+\t\t\"np\": \"latest\",\n+\t\t\"parse5\": \"^7.1.1\",\n+\t\t\"rimraf\": \"^3.0.2\",\n+\t\t\"saxes\": \"^6.0.0\",\n \t\t\"should\": \"latest\",\n",
+					"match": false,
+					"packageHash": "32e21444838268f1acd07b5c2dc9b87091bd285766cfa9e3003910c0fbf9c8d3",
+					"size": 1415,
+					"sourceHash": "057ffa37fc3efec69f204590026fc492c61bc88236bcec6f7828bec0f7e348dc",
+					"status": "content"
+				},
+				"CHANGELOG.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"dist/back.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"dist/back.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"dist/main.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"dist/matcher.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"dist/matcher.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"dist/nodes/comment.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"dist/nodes/comment.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"dist/nodes/html.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"dist/nodes/html.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"dist/nodes/node.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"dist/nodes/node.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"dist/nodes/text.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"dist/nodes/text.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"dist/nodes/type.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"dist/nodes/type.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"dist/parse.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"dist/parse.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"dist/valid.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"dist/valid.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"dist/void-tag.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"dist/void-tag.js": {
+					"match": false,
+					"status": "missing-in-package"
+				}
+			},
+			"summary": {
+				"differentFiles": 4,
+				"matchingFiles": 1,
+				"missingInPackage": 22,
+				"missingInSource": 1,
+				"score": 0.03571428571428571,
+				"totalFiles": 28
+			}
+		},
+		"prodDependencies": [
+			{
+				"name": "boolbase",
+				"version": "1.0.0"
+			},
+			{
+				"name": "css-select",
+				"version": "5.1.0"
+			},
+			{
+				"name": "css-what",
+				"version": "6.1.0"
+			},
+			{
+				"name": "dom-serializer",
+				"version": "2.0.0"
+			},
+			{
+				"name": "domelementtype",
+				"version": "2.3.0"
+			},
+			{
+				"name": "domhandler",
+				"version": "5.0.3"
+			},
+			{
+				"name": "domutils",
+				"version": "3.1.0"
+			},
+			{
+				"name": "entities",
+				"version": "4.5.0"
+			},
+			{
+				"name": "he",
+				"version": "1.2.0"
+			},
+			{
+				"name": "nth-check",
+				"version": "2.1.1"
+			}
+		]
+	}
+]
