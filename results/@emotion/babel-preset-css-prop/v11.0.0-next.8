@@ -1,0 +1,106 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-07T22:19:42.655Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:11.7.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "@emotion/babel-preset-css-prop@11.0.0-next.8",
+			"name": "@emotion/babel-preset-css-prop",
+			"version": "11.0.0-next.8",
+			"location": "https://registry.npmjs.org/@emotion/babel-preset-css-prop/-/babel-preset-css-prop-11.0.0-next.8.tgz",
+			"integrity": "sha512-EvG9Bmnk7g5b0bQsDwOu+G2fwx8WxWgHFeSgw7hSaJ+CzeYfqzdInJlDL1r0MYmHTCK9xQjokkFRTEqpjPzJtw==",
+			"publishedAt": "2019-12-07T21:16:08.531Z",
+			"publishedWith": {
+				"node": "10.17.0",
+				"npm": "6.10.2"
+			},
+			"dependencies": {
+				"@babel/runtime": "^7.7.2",
+				"babel-plugin-emotion": "^11.0.0-next.8",
+				"@babel/plugin-transform-react-jsx": "^7.7.0",
+				"@emotion/babel-plugin-jsx-pragmatic": "^0.1.4"
+			}
+		},
+		"source": {
+			"integrity": null,
+			"location": "https://github.com/emotion-js/emotion/tree/master/packages/babel-preset-css-prop",
+			"spec": "github:emotion-js/emotion/tree/master/packages/babel-preset-css-prop#HEAD"
+		},
+		"comparisonHash": "9ef46a5bd31291e57cbab41e2f17c57bd6da0b5b",
+		"diff": {
+			"files": {
+				"CHANGELOG.md": {
+					"match": false,
+					"packageHash": "a223f4decc4bb35765e37bf635e477551da7db4fd602dcde68240c0a9a2245c1",
+					"size": 4936,
+					"status": "missing-in-source"
+				},
+				"README.md": {
+					"diff": "--- published/README.md\n+++ rebuilt/README.md\n@@ -1,11 +1,16 @@\n # @emotion/babel-preset-css-prop\n \n-> A babel preset to automatically enable emotion's css prop\n+> A Babel preset to automatically enable Emotion's css prop when using the classic JSX runtime. If you want to use [the new JSX runtimes](https://reactjs.org/blog/2020/09/22/introducing-the-new-jsx-transform.html) please do not use this preset but rather just include our [`@emotion/babel-plugin`](/packages/babel-plugin) directly and follow instructions for configuring the new JSX runtimes [here](/docs/css-prop.mdx#babel-preset).\n \n-- [Install](#install)\n-- [Usage](#usage)\n-- [Features](#features)\n-- [Options](#options)\n+- [@emotion/babel-preset-css-prop](#emotionbabel-preset-css-prop)\n+  - [Install](#install)\n+  - [Usage](#usage)\n+    - [Via CLI](#via-cli)\n+    - [Via Node API](#via-node-api)\n+  - [Features](#features)\n+  - [Example](#example)\n+  - [Options](#options)\n+    - [Examples](#examples)\n \n ## Install\n \n@@ -15,6 +20,10 @@\n \n ## Usage\n \n+> Note:\n+>\n+> This plugin is not compatible with `@babel/plugin-transform-react-inline-elements`. If you use both then your `css` prop styles won't be applied correctly.\n+\n **.babelrc**\n \n ```json\n@@ -23,7 +32,7 @@\n }\n ```\n \n-`@emotion/babel-preset-css-prop` includes the emotion plugin. The `babel-plugin-emotion` entry should be be removed from your config and any options moved to the preset. If you use `@babel/preset-react` or `@babel/preset-typescript` ensure that `@emotion/babel-preset-css-prop` is inserted after them in your babel config.\n+`@emotion/babel-preset-css-prop` includes the emotion plugin. The `@emotion/babel-plugin` entry should be removed from your config and any options moved to the preset. If you use `@babel/preset-react` or `@babel/preset-typescript` ensure that `@emotion/babel-preset-css-prop` is inserted after them in your babel config.\n \n ```diff\n {\n@@ -31,16 +40,16 @@\n +   [\n +     \"@emotion/babel-preset-css-prop\",\n +     {\n-+       \"autoLabel\": true,\n++       \"autoLabel\": \"dev-only\",\n +       \"labelFormat\": \"[local]\"\n +     }\n +   ]\n + ],\n - \"plugins\": [\n -   [\n--     \"emotion\",\n+-     \"@emotion\",\n -     {\n--       \"autoLabel\": true,\n+-       \"autoLabel\": \"dev-only\",\n -       \"labelFormat\": \"[local]\"\n -     }\n -   ]\n@@ -66,14 +75,14 @@\n \n ## Features\n \n-This preset enables the `css` prop for an entire project via a single entry to the babel configuration. After adding the preset, compiled jsx code will use emotion's `jsx` function instead of `React.createElement`.\n+This preset enables the `css` prop for an entire project via a single entry to the babel configuration. After adding the preset, compiled JSX code will use Emotion's `jsx` function instead of `React.createElement`.\n \n |        | Input                      | Output                                              |\n | ------ | -------------------------- | --------------------------------------------------- |\n | Before | `<img src=\"avatar.png\" />` | `React.createElement('img', { src: 'avatar.png' })` |\n | After  | `<img src=\"avatar.png\" />` | `jsx('img', { src: 'avatar.png' })`                 |\n \n-`import { jsx } from '@emotion/core'` is automatically added to the top of files where required.\n+`import { jsx } from '@emotion/react'` is automatically added to the top of files where required.\n \n ## Example\n \n@@ -96,7 +105,7 @@\n **Out**\n \n ```javascript\n-import { jsx as ___EmotionJSX } from '@emotion/core'\n+import { jsx as ___EmotionJSX } from '@emotion/react'\n \n function _extends() {\n   /* babel Object.assign polyfill */\n@@ -111,8 +120,7 @@\n     : {\n         name: '1fpk7dx-Link',\n         styles: 'color:hotpink;&:hover{color:darkorchid;}label:Link;',\n-        map:\n-          '/*# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbImF1dG9tYXRpYy1pbXBvcnQuanMiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6IkFBRUkiLCJmaWxlIjoiYXV0b21hdGljLWltcG9ydC5qcyIsInNvdXJjZXNDb250ZW50IjpbImNvbnN0IExpbmsgPSBwcm9wcyA9PiAoXG4gIDxhXG4gICAgY3NzPXt7XG4gICAgICBjb2xvcjogJ2hvdHBpbmsnLFxuICAgICAgJyY6aG92ZXInOiB7XG4gICAgICAgIGNvbG9yOiAnZGFya29yY2hpZCdcbiAgICAgIH1cbiAgICB9fVxuICAgIHsuLi5wcm9wc31cbiAgLz5cbilcbiJdfQ== */'\n+        map: '/*# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbImF1dG9tYXRpYy1pbXBvcnQuanMiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6IkFBRUkiLCJmaWxlIjoiYXV0b21hdGljLWltcG9ydC5qcyIsInNvdXJjZXNDb250ZW50IjpbImNvbnN0IExpbmsgPSBwcm9wcyA9PiAoXG4gIDxhXG4gICAgY3NzPXt7XG4gICAgICBjb2xvcjogJ2hvdHBpbmsnLFxuICAgICAgJyY6aG92ZXInOiB7XG4gICAgICAgIGNvbG9yOiAnZGFya29yY2hpZCdcbiAgICAgIH1cbiAgICB9fVxuICAgIHsuLi5wcm9wc31cbiAgLz5cbilcbiJdfQ== */'\n       }\n \n const Link = props =>\n",
+					"match": false,
+					"packageHash": "fd8d7626191330818650ca2102215fd618c6f72ba6d1141fda627e95b85e17a3",
+					"size": 3932,
+					"sourceHash": "7081ee2bcf52cb6262c191f9fde39d1892395f94c4410f776ff3b656273d6a85",
+					"status": "content"
+				},
+				"dist/babel-preset-css-prop.cjs.dev.js": {
+					"match": false,
+					"packageHash": "9fbeb0246dd5718dbe63a6f486af346b393890f70c20892bda90e611f21f5948",
+					"size": 1729,
+					"status": "missing-in-source"
+				},
+				"dist/babel-preset-css-prop.cjs.js": {
+					"match": false,
+					"packageHash": "acda93a02f4993ffddff2bcfd2c21f3109a4a911229bf15d826fd3ec1503c61f",
+					"size": 204,
+					"status": "missing-in-source"
+				},
+				"dist/babel-preset-css-prop.cjs.prod.js": {
+					"match": false,
+					"packageHash": "251a244d25e322f4dd1afdff7694893dd76814c9d0185e3cca171d353b42c669",
+					"size": 1361,
+					"status": "missing-in-source"
+				},
+				"dist/babel-preset-css-prop.esm.js": {
+					"match": false,
+					"packageHash": "c7d889f1a3e28fc5082ed58601fec46f84d6210fdf0cabf174a035609f0a2137",
+					"size": 1439,
+					"status": "missing-in-source"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -1,19 +1,28 @@\n {\n   \"name\": \"@emotion/babel-preset-css-prop\",\n-  \"version\": \"11.0.0-next.8\",\n+  \"version\": \"11.12.0\",\n   \"description\": \"A babel preset to automatically enable emotion's css prop\",\n-  \"main\": \"dist/babel-preset-css-prop.cjs.js\",\n-  \"module\": \"dist/babel-preset-css-prop.esm.js\",\n-  \"license\": \"MIT\",\n-  \"repository\": \"https://github.com/emotion-js/emotion/tree/master/packages/babel-preset-css-prop\",\n-  \"scripts\": {\n-    \"test:typescript\": \"exit 0\"\n+  \"main\": \"dist/emotion-babel-preset-css-prop.cjs.js\",\n+  \"module\": \"dist/emotion-babel-preset-css-prop.esm.js\",\n+  \"exports\": {\n+    \".\": {\n+      \"types\": {\n+        \"import\": \"./dist/emotion-babel-preset-css-prop.cjs.mjs\",\n+        \"default\": \"./dist/emotion-babel-preset-css-prop.cjs.js\"\n+      },\n+      \"module\": \"./dist/emotion-babel-preset-css-prop.esm.js\",\n+      \"import\": \"./dist/emotion-babel-preset-css-prop.cjs.mjs\",\n+      \"default\": \"./dist/emotion-babel-preset-css-prop.cjs.js\"\n+    },\n+    \"./package.json\": \"./package.json\"\n   },\n+  \"license\": \"MIT\",\n+  \"repository\": \"https://github.com/emotion-js/emotion/tree/main/packages/babel-preset-css-prop\",\n   \"dependencies\": {\n-    \"@babel/plugin-transform-react-jsx\": \"^7.7.0\",\n-    \"@babel/runtime\": \"^7.7.2\",\n-    \"@emotion/babel-plugin-jsx-pragmatic\": \"^0.1.4\",\n-    \"babel-plugin-emotion\": \"^11.0.0-next.8\"\n+    \"@babel/plugin-transform-react-jsx\": \"^7.17.12\",\n+    \"@babel/runtime\": \"^7.18.3\",\n+    \"@emotion/babel-plugin\": \"^11.12.0\",\n+    \"@emotion/babel-plugin-jsx-pragmatic\": \"^0.3.0\"\n   },\n   \"peerDependencies\": {\n     \"@babel/core\": \"^7.0.0\"\n@@ -26,6 +35,6 @@\n     \"dist\"\n   ],\n   \"devDependencies\": {\n-    \"@babel/core\": \"^7.7.2\"\n+    \"@babel/core\": \"^7.18.5\"\n   }\n }\n",
+					"match": false,
+					"packageHash": "6f56b4138a03e3f1496587c023da3c17ec6597c5319d0509207c05fbfbc2e735",
+					"size": 831,
+					"sourceHash": "930ddd8b7efa1100b6987ee669dc0d38f057f27608f88fa9e232ec79d008a9e4",
+					"status": "content"
+				},
+				"src/index.js": {
+					"diff": "--- published/src/index.js\n+++ rebuilt/src/index.js\n@@ -1,29 +1,42 @@\n import jsx from '@babel/plugin-transform-react-jsx'\n import pragmatic from '@emotion/babel-plugin-jsx-pragmatic'\n-import emotion from 'babel-plugin-emotion'\n+import emotion from '@emotion/babel-plugin'\n \n let pragmaName = '___EmotionJSX'\n \n // pull out the emotion options and pass everything else to the jsx transformer\n // this means if @babel/plugin-transform-react-jsx adds more options, it'll just work\n-// and if babel-plugin-emotion adds more options we can add them since this lives in\n-// the same repo as babel-plugin-emotion\n+// and if @emotion/babel-plugin adds more options we can add them since this lives in\n+// the same repo as @emotion/babel-plugin\n \n export default (\n   api,\n   { pragma, sourceMap, autoLabel, labelFormat, importMap, ...options } = {}\n ) => {\n+  if (options.runtime) {\n+    throw new Error(\n+      'The `runtime` option has been removed. If you want to configure `runtime: \"automatic\"`, replace `@emotion/babel-preset-css-prop` with `@babel/preset-react` and `@emotion/babel-plugin`. You can find out how to configure things properly here: https://emotion.sh/docs/css-prop#babel-preset'\n+    )\n+  }\n+\n   return {\n     plugins: [\n       [\n         pragmatic,\n         {\n           export: 'jsx',\n-          module: '@emotion/core',\n+          module: '@emotion/react',\n           import: pragmaName\n         }\n       ],\n-      [jsx, { pragma: pragmaName, pragmaFrag: 'React.Fragment', ...options }],\n+      [\n+        jsx,\n+        {\n+          pragma: pragmaName,\n+          pragmaFrag: 'React.Fragment',\n+          ...options\n+        }\n+      ],\n       [\n         emotion,\n         {\n",
+					"match": false,
+					"packageHash": "6731247d454a4b5899fc02752d42cec7672b63e7c5384070be36bdee7b0f2c81",
+					"size": 1027,
+					"sourceHash": "5a08757661169d95cd461f10e2d1348672d9cd128c0575dcececeeccce472580",
+					"status": "content"
+				},
+				"LICENSE": {
+					"match": false,
+					"status": "missing-in-package"
+				}
+			},
+			"summary": {
+				"differentFiles": 3,
+				"matchingFiles": 0,
+				"missingInPackage": 1,
+				"missingInSource": 5,
+				"score": 0,
+				"totalFiles": 9
+			}
+		},
+		"prodDependencies": []
+	}
+]
