@@ -5,6 +5,12 @@ on:
     # Run every 2 minutes
     - cron: '*/2 * * * *'
   workflow_dispatch:
+    inputs:
+      batch_size:
+        description: 'Number of packages to process in this run'
+        required: false
+        default: '3'
+        type: string
 
 permissions:
   contents: write
@@ -15,6 +21,9 @@ jobs:
     concurrency:
       group: cache-queue-processor
       cancel-in-progress: false
+    outputs:
+      tasks: ${{ steps.get-tasks.outputs.tasks }}
+      empty: ${{ steps.get-tasks.outputs.empty }}
 
     steps:
       - uses: actions/checkout@v6
@@ -23,100 +32,128 @@ jobs:
           ref: queue
           persist-credentials: true
 
-      - name: Get next cache task
-        id: get-task
+      - name: Get next cache tasks
+        id: get-tasks
         run: |
           QUEUE_FILE="cache-queue.txt"
-          MAX_VERSIONS=200  # Limit to avoid payload size issues
+          MAX_VERSIONS=200  # Limit per package to avoid payload size issues
+          BATCH_SIZE="${{ inputs.batch_size || '3' }}"
 
           if [ ! -f "${QUEUE_FILE}" ] || [ ! -s "${QUEUE_FILE}" ]; then
             echo "::notice::Cache queue is empty"
             echo "empty=true" >> $GITHUB_OUTPUT
+            echo "tasks=[]" >> $GITHUB_OUTPUT
             exit 0
           fi
 
           # Remove any leading empty lines first
           sed -i '/./,$!d' "${QUEUE_FILE}"
 
-          # Get the first non-empty line
-          TASK=$(grep -m 1 '.' "${QUEUE_FILE}" || true)
+          # Initialize arrays for JSON output
+          TASKS_JSON="["
+          REQUEUE_LINES=""
+          PROCESSED=0
 
-          if [ -z "${TASK}" ]; then
-            echo "::notice::Cache queue is empty"
+          # Process up to BATCH_SIZE packages
+          while [ "${PROCESSED}" -lt "${BATCH_SIZE}" ]; do
+            # Get the first non-empty line
+            TASK=$(head -n 1 "${QUEUE_FILE}" | grep '.' || true)
+
+            if [ -z "${TASK}" ]; then
+              break
+            fi
+
+            # Remove the line from queue immediately
+            tail -n +2 "${QUEUE_FILE}" > "${QUEUE_FILE}.tmp"
+            mv "${QUEUE_FILE}.tmp" "${QUEUE_FILE}"
+
+            # Split package||versions
+            PACKAGE=$(echo "${TASK}" | awk -F'\\|\\|' '{print $1}')
+            ALL_VERSIONS=$(echo "${TASK}" | awk -F'\\|\\|' '{for(i=2;i<=NF;i++) printf "%s%s", (i>2?"||":""), $i}')
+
+            # Validate package name
+            if [ -z "${PACKAGE}" ] || [ "${PACKAGE:0:1}" = "-" ]; then
+              echo "::warning::Skipping invalid package name: ${PACKAGE}"
+              continue
+            fi
+
+            # Count versions and split if needed
+            VERSION_COUNT=$(echo "${ALL_VERSIONS}" | tr '|' '\n' | grep -c . || echo 0)
+            echo "::notice::Package ${PACKAGE} has ${VERSION_COUNT} versions"
+
+            if [ "${VERSION_COUNT}" -gt "${MAX_VERSIONS}" ]; then
+              VERSIONS=$(echo "${ALL_VERSIONS}" | tr '|' '\n' | head -n "${MAX_VERSIONS}" | tr '\n' '|' | sed 's/|$//' | sed 's/||*$//')
+              REMAINING_VERSIONS=$(echo "${ALL_VERSIONS}" | tr '|' '\n' | tail -n +$((MAX_VERSIONS + 1)) | tr '\n' '|' | sed 's/|$//' | sed 's/||*$//')
+              REQUEUE_LINES="${REQUEUE_LINES}${PACKAGE}||${REMAINING_VERSIONS}\n"
+              echo "::notice::Processing first ${MAX_VERSIONS} versions, requeueing $((VERSION_COUNT - MAX_VERSIONS)) remaining"
+            else
+              VERSIONS="${ALL_VERSIONS}"
+            fi
+
+            # Add to JSON array (escape special chars)
+            PACKAGE_ESC=$(echo "${PACKAGE}" | sed 's/"/\\"/g')
+            VERSIONS_ESC=$(echo "${VERSIONS}" | sed 's/"/\\"/g')
+            if [ "${PROCESSED}" -gt 0 ]; then
+              TASKS_JSON="${TASKS_JSON},"
+            fi
+            TASKS_JSON="${TASKS_JSON}{\"package\":\"${PACKAGE_ESC}\",\"versions\":\"${VERSIONS_ESC}\"}"
+
+            PROCESSED=$((PROCESSED + 1))
+            echo "::notice::Queued ${PACKAGE} for processing"
+          done
+
+          TASKS_JSON="${TASKS_JSON}]"
+
+          if [ "${PROCESSED}" -eq 0 ]; then
+            echo "::notice::No valid tasks found"
             echo "empty=true" >> $GITHUB_OUTPUT
+            echo "tasks=[]" >> $GITHUB_OUTPUT
             exit 0
           fi
 
-          # Split package||versions (using awk since || is two characters)
-          PACKAGE=$(echo "${TASK}" | awk -F'\\|\\|' '{print $1}')
-          ALL_VERSIONS=$(echo "${TASK}" | awk -F'\\|\\|' '{for(i=2;i<=NF;i++) printf "%s%s", (i>2?"||":""), $i}')
+          # Save requeue lines for later
+          echo -e "${REQUEUE_LINES}" > /tmp/requeue.txt
 
-          # Validate package name (must not be empty or start with -)
-          if [ -z "${PACKAGE}" ] || [ "${PACKAGE:0:1}" = "-" ]; then
-            echo "::warning::Skipping invalid package name: ${PACKAGE}"
-            # Remove the malformed line and exit - next run will process next task
-            echo "empty=true" >> $GITHUB_OUTPUT
-            exit 0
-          fi
-
-          # Count versions and split if needed
-          VERSION_COUNT=$(echo "${ALL_VERSIONS}" | tr '|' '\n' | grep -c . || echo 0)
-          echo "::notice::Package ${PACKAGE} has ${VERSION_COUNT} versions"
-
-          if [ "${VERSION_COUNT}" -gt "${MAX_VERSIONS}" ]; then
-            # Take first MAX_VERSIONS versions
-            VERSIONS=$(echo "${ALL_VERSIONS}" | tr '|' '\n' | head -n "${MAX_VERSIONS}" | tr '\n' '|' | sed 's/|$//' | sed 's/||*$//')
-            # Get remaining versions for requeue
-            REMAINING_VERSIONS=$(echo "${ALL_VERSIONS}" | tr '|' '\n' | tail -n +$((MAX_VERSIONS + 1)) | tr '\n' '|' | sed 's/|$//' | sed 's/||*$//')
-            echo "requeue=${PACKAGE}||${REMAINING_VERSIONS}" >> $GITHUB_OUTPUT
-            echo "::notice::Processing first ${MAX_VERSIONS} versions, requeueing $((VERSION_COUNT - MAX_VERSIONS)) remaining"
-          else
-            VERSIONS="${ALL_VERSIONS}"
-            echo "requeue=" >> $GITHUB_OUTPUT
-          fi
-
-          echo "package=${PACKAGE}" >> $GITHUB_OUTPUT
-          echo "versions=${VERSIONS}" >> $GITHUB_OUTPUT
+          echo "tasks=${TASKS_JSON}" >> $GITHUB_OUTPUT
           echo "empty=false" >> $GITHUB_OUTPUT
 
-          echo "::notice::Processing cache task for package: ${PACKAGE}"
-
-          # Remove the first line from queue
-          tail -n +2 "${QUEUE_FILE}" > "${QUEUE_FILE}.tmp"
-          mv "${QUEUE_FILE}.tmp" "${QUEUE_FILE}"
-
           REMAINING=$(wc -l < "${QUEUE_FILE}")
-          echo "::notice::Tasks remaining in cache queue: ${REMAINING}"
+          echo "::notice::Processed ${PROCESSED} packages, ${REMAINING} tasks remaining in queue"
 
       - name: Commit updated queue
-        if: steps.get-task.outputs.empty == 'false'
+        if: steps.get-tasks.outputs.empty == 'false'
         run: |
           git config --global user.email "${GITHUB_ACTOR}@users.noreply.github.com"
           git config --global user.name "${GITHUB_ACTOR}"
+
+          # Add requeue entries if any
+          if [ -s /tmp/requeue.txt ]; then
+            cat /tmp/requeue.txt >> cache-queue.txt
+          fi
+
           git add cache-queue.txt
-          git commit -m 'queue: remove processed cache task' || true
+          git commit -m 'queue: process batch of cache tasks' || true
           git fetch origin queue
           git rebase origin/queue || (git rebase --abort && git merge origin/queue)
           git push
 
-      - name: Requeue remaining versions
-        if: steps.get-task.outputs.empty == 'false' && steps.get-task.outputs.requeue != ''
-        run: |
-          echo "${{ steps.get-task.outputs.requeue }}" >> cache-queue.txt
-          git add cache-queue.txt
-          git commit -m 'queue: requeue overflow versions for `${{ steps.get-task.outputs.package }}`'
-          git fetch origin queue
-          git rebase origin/queue || (git rebase --abort && git merge origin/queue)
-          git push
+  dispatch-tasks:
+    needs: process-queue
+    if: needs.process-queue.outputs.empty == 'false'
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        task: ${{ fromJson(needs.process-queue.outputs.tasks) }}
 
+    steps:
       - name: Dispatch to cache workflow
-        if: steps.get-task.outputs.empty == 'false'
         uses: peter-evans/repository-dispatch@v3
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           event-type: version-results
           client-payload: |
             {
-              "package": "${{ steps.get-task.outputs.package }}",
-              "versions": "${{ steps.get-task.outputs.versions }}"
+              "package": "${{ matrix.task.package }}",
+              "versions": "${{ matrix.task.versions }}"
             }
