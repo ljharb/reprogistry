@@ -1,0 +1,116 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-07T13:11:53.662Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:11.7.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "clone-deep@0.2.3",
+			"name": "clone-deep",
+			"version": "0.2.3",
+			"location": "https://registry.npmjs.org/clone-deep/-/clone-deep-0.2.3.tgz",
+			"integrity": "sha512-tjCqSb0b2pGnCZT7pTaHRxyvXVQeAunsViCw81OBEU/n77Y+Ci4aGoOLI9oWR6JUWKuzFFlmjrMAnLggljuwcQ==",
+			"publishedAt": "2015-10-10T20:47:39.683Z",
+			"publishedWith": {
+				"node": "4.1.1",
+				"npm": "2.14.4"
+			},
+			"dependencies": {
+				"for-own": "^0.1.3",
+				"is-plain-object": "^2.0.1",
+				"kind-of": "^2.0.1",
+				"lazy-cache": "^0.2.3",
+				"shallow-clone": "^0.1.1"
+			}
+		},
+		"source": {
+			"integrity": "sha512-CYqFBqSXCJCGxnS8bqUQCvjFmUroJTNJvHbMLop5mPF3e/bTI6l890OA/lJi6w2aEfBV+S0fTJBDNSvxamN55A==",
+			"location": "git+https://github.com/jonschlinkert/clone-deep.git",
+			"spec": "github:jonschlinkert/clone-deep#1fdd57f537ac7f44c8f864693ccd2d722149f3ce"
+		},
+		"comparisonHash": "9ef46a5bd31291e57cbab41e2f17c57bd6da0b5b",
+		"diff": {
+			"files": {
+				"index.js": {
+					"diff": "--- published/index.js\n+++ rebuilt/index.js\n@@ -4,27 +4,31 @@\n  * Module dependenices\n  */\n \n-var utils = require('./utils');\n+var lazy = require('lazy-cache')(require);\n+lazy('is-plain-object', 'isObject');\n+lazy('shallow-clone', 'clone');\n+lazy('for-own', 'forOwn');\n+lazy('kind-of', 'typeOf');\n \n /**\n  * Recursively clone native types.\n  */\n \n function cloneDeep(val, instanceClone) {\n-  switch (utils.typeOf(val)) {\n+  switch (lazy.typeOf(val)) {\n     case 'object':\n       return cloneObjectDeep(val, instanceClone);\n     case 'array':\n       return cloneArrayDeep(val, instanceClone);\n     default:\n-      return utils.clone(val);\n+      return lazy.clone(val);\n   }\n }\n \n function cloneObjectDeep(obj, instanceClone) {\n-  if (utils.isObject(obj)) {\n+  if (lazy.isObject(obj)) {\n     var res = {};\n-    utils.forOwn(obj, function (obj, key) {\n+    lazy.forOwn(obj, function (obj, key) {\n       this[key] = cloneDeep(obj, instanceClone);\n     }, res);\n     return res;\n",
+					"match": false,
+					"packageHash": "5c7fc57f890f37d06062c854ecd6de8406208970aa052265b473a620b5fc5a1d",
+					"size": 937,
+					"sourceHash": "f6445f08ddca449b2bc84054f8e13bb6e0e64648ddee4e2d9c95153f07f131c1",
+					"status": "content"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -1,17 +1,22 @@\n {\n   \"name\": \"clone-deep\",\n   \"description\": \"Recursively (deep) clone JavaScript native types, like Object, Array, RegExp, Date as well as primitives.\",\n-  \"version\": \"0.2.3\",\n+  \"version\": \"0.2.2\",\n   \"homepage\": \"https://github.com/jonschlinkert/clone-deep\",\n-  \"author\": \"Jon Schlinkert (https://github.com/jonschlinkert)\",\n-  \"repository\": \"jonschlinkert/clone-deep\",\n+  \"author\": {\n+    \"name\": \"Jon Schlinkert\",\n+    \"url\": \"https://github.com/jonschlinkert\"\n+  },\n+  \"repository\": {\n+    \"type\": \"git\",\n+    \"url\": \"git://github.com/jonschlinkert/clone-deep.git\"\n+  },\n   \"bugs\": {\n     \"url\": \"https://github.com/jonschlinkert/clone-deep/issues\"\n   },\n   \"license\": \"MIT\",\n   \"files\": [\n-    \"index.js\",\n-    \"utils.js\"\n+    \"index.js\"\n   ],\n   \"main\": \"index.js\",\n   \"engines\": {\n@@ -23,7 +28,7 @@\n   \"dependencies\": {\n     \"for-own\": \"^0.1.3\",\n     \"is-plain-object\": \"^2.0.1\",\n-    \"kind-of\": \"^2.0.1\",\n+    \"kind-of\": \"^2.0.0\",\n     \"lazy-cache\": \"^0.2.3\",\n     \"shallow-clone\": \"^0.1.1\"\n   },\n",
+					"match": false,
+					"packageHash": "0e3719e7508da4a389484a5dbdac877c8f04ecec959ff6b76410bf0a5fa66455",
+					"size": 1210,
+					"sourceHash": "a1228ffef0a31a665c8757e3c17fefcbef78134f092b01fd38db34a7ffedf83a",
+					"status": "content"
+				},
+				"utils.js": {
+					"match": false,
+					"packageHash": "d32b6f0da354767635dbd887a4c941035d50f744a4c666a8486574aaf442f7d4",
+					"size": 334,
+					"status": "missing-in-source"
+				}
+			},
+			"summary": {
+				"differentFiles": 2,
+				"matchingFiles": 2,
+				"missingInPackage": 0,
+				"missingInSource": 1,
+				"score": 0.4,
+				"totalFiles": 5
+			}
+		},
+		"prodDependencies": [
+			{
+				"name": "for-in",
+				"version": "1.0.2"
+			},
+			{
+				"name": "for-own",
+				"version": "0.1.5"
+			},
+			{
+				"name": "is-buffer",
+				"version": "1.1.6"
+			},
+			{
+				"name": "is-extendable",
+				"version": "0.1.1"
+			},
+			{
+				"name": "is-plain-object",
+				"version": "2.0.4"
+			},
+			{
+				"name": "isobject",
+				"version": "3.0.1"
+			},
+			{
+				"name": "kind-of",
+				"version": "2.0.1"
+			},
+			{
+				"name": "lazy-cache",
+				"version": "0.2.7"
+			},
+			{
+				"name": "mixin-object",
+				"version": "2.0.1"
+			},
+			{
+				"name": "for-in",
+				"version": "0.1.8"
+			},
+			{
+				"name": "shallow-clone",
+				"version": "0.1.2"
+			}
+		]
+	}
+]
