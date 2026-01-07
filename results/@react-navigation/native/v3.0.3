@@ -1,0 +1,209 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-07T09:34:28.225Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:11.7.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "@react-navigation/native@3.0.3",
+			"name": "@react-navigation/native",
+			"version": "3.0.3",
+			"location": "https://registry.npmjs.org/@react-navigation/native/-/native-3.0.3.tgz",
+			"integrity": "sha512-1T3OnI6DpHPYvrb6OSMvdpcou0NAZKYBeOs66Uimy6oT5tkkj8jwaksAwuSCTIMxaRl1nROPd22yXYq6gBnUVA==",
+			"publishedAt": "2018-12-04T00:06:21.976Z",
+			"publishedWith": {
+				"node": "10.9.0",
+				"npm": "6.2.0"
+			},
+			"dependencies": {
+				"react-native-screens": "^1.0.0 || ^1.0.0-alpha",
+				"hoist-non-react-statics": "^3.0.1",
+				"react-native-safe-area-view": "^0.11.0",
+				"react-native-gesture-handler": "^1.0.0"
+			}
+		},
+		"source": {
+			"integrity": null,
+			"location": "git+https://github.com/react-navigation/react-navigation-native.git",
+			"spec": "github:react-navigation/react-navigation-native#c389f7bee1166e0ca8f99bb156c2e8c091a69ecc"
+		},
+		"comparisonHash": "9ef46a5bd31291e57cbab41e2f17c57bd6da0b5b",
+		"diff": {
+			"files": {
+				"README.md": {
+					"diff": "--- published/README.md\n+++ rebuilt/README.md\n@@ -1,6 +1,6 @@\n # React Navigation Native\n \n-[![npm version](https://badge.fury.io/js/%40react-navigation%2Fnative.svg)](https://badge.fury.io/js/%40react-navigation%2Fnative) [![CircleCI badge](https://circleci.com/gh/react-navigation/react-navigation-native/tree/master.svg?style=shield)](https://circleci.com/gh/react-navigation/react-navigation-native/tree/master) [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://reactnavigation.org/docs/contributing.html)\n+[![npm version](https://badge.fury.io/js/%40react-navigation%2Fnative.svg)](https://badge.fury.io/js/%40react-navigation%2Fnative) [![CircleCI badge](https://circleci.com/gh/react-navigation/native/tree/master.svg?style=shield)](https://circleci.com/gh/react-navigation/react-navigation-native/tree/master) [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://reactnavigation.org/docs/contributing.html)\n \n React Native support for React Navigation\n \n",
+					"match": false,
+					"packageHash": "cf43c403f07c06bab5e93f6520a757674abb2af63c34541cb87b67d0d049fd6f",
+					"size": 648,
+					"sourceHash": "8662fe53d9b10cf861d35a11543795a162fae2e0a94a1daccc88d42dfbc68493",
+					"status": "content"
+				},
+				"dist/ResourceSavingSceneView.js": {
+					"diff": "--- published/dist/ResourceSavingSceneView.js\n+++ rebuilt/dist/ResourceSavingSceneView.js\n@@ -1,7 +1,5 @@\n import React from 'react';\n import { Platform, StyleSheet, View } from 'react-native';\n-import { polyfill } from 'react-lifecycles-compat';\n-\n import { SceneView } from '@react-navigation/core';\n \n const FAR_FAR_AWAY = 3000; // this should be big enough to move the whole view out of its container\n@@ -58,4 +56,4 @@\n   }\n });\n \n-export default polyfill(ResourceSavingSceneView);\n\\ No newline at end of file\n+export default ResourceSavingSceneView;\n\\ No newline at end of file\n",
+					"match": false,
+					"packageHash": "bd6da9c1549d8a9532a49f0fe1360dece6add2d389ab0dddc0337dd289dd317c",
+					"size": 1563,
+					"sourceHash": "6476bdca965ee0c820ed2c262e43251f6ba1cfd2cc5ab559e9056a81b0cc37f8",
+					"status": "content"
+				},
+				"dist/Scrollables.js": {
+					"diff": "--- published/dist/Scrollables.js\n+++ rebuilt/dist/Scrollables.js\n@@ -1,13 +1,35 @@\n import React from 'react';\n-import { FlatList, SectionList } from 'react-native';\n-import { ScrollView } from 'react-native-gesture-handler';\n+import { ScrollView, Platform, FlatList, SectionList, RefreshControl } from 'react-native';\n+import { ScrollView as GHScrollView } from 'react-native-gesture-handler';\n import createNavigationAwareScrollable from './createNavigationAwareScrollable';\n+import invariant from './utils/invariant';\n \n-const WrappedScrollView = createNavigationAwareScrollable(ScrollView);\n+let WrappedScrollView;\n+if (Platform.OS === 'android') {\n+  // @todo: use GHScrollView again when\n+  // https://github.com/kmagiera/react-native-gesture-handler/issues/560 has\n+  // been fixed.\n+  WrappedScrollView = createNavigationAwareScrollable(ScrollView);\n+} else {\n+  WrappedScrollView = createNavigationAwareScrollable(GHScrollView);\n+}\n \n-const WrappedFlatList = React.forwardRef((props, ref) => <FlatList ref={ref} {...props} renderScrollComponent={props => <WrappedScrollView {...props} />} />);\n+function propsMaybeWithRefreshControl(props) {\n+  const onRefresh = props.onRefresh;\n+  if (onRefresh) {\n+    invariant(typeof props.refreshing === 'boolean', '`refreshing` prop must be set as a boolean in order to use `onRefresh`, but got `' + JSON.stringify(props.refreshing) + '`');\n+    return {\n+      ...props,\n+      refreshControl: props.refreshControl == null ? <RefreshControl refreshing={props.refreshing} onRefresh={onRefresh} progressViewOffset={props.progressViewOffset} /> : props.refreshControl\n+    };\n+  } else {\n+    return props;\n+  }\n+}\n \n-const WrappedSectionList = React.forwardRef((props, ref) => <SectionList ref={ref} {...props} renderScrollComponent={props => <WrappedScrollView {...props} />} />);\n+const WrappedFlatList = React.forwardRef((props, ref) => <FlatList ref={ref} {...props} renderScrollComponent={props => <WrappedScrollView {...propsMaybeWithRefreshControl(props)} />} />);\n+\n+const WrappedSectionList = React.forwardRef((props, ref) => <SectionList ref={ref} {...props} renderScrollComponent={props => <WrappedScrollView {...propsMaybeWithRefreshControl(props)} />} />);\n \n // eslint-disable-next-line import/no-commonjs\n module.exports = {\n",
+					"match": false,
+					"packageHash": "0309d8caebff2aba93e422647c912f789b44f01cc3fc1d678266c9f730e33e56",
+					"size": 784,
+					"sourceHash": "42249c1ba187c13e15b229525a31d17dfded69f5bdbc7265e3193cb9c12a2328",
+					"status": "content"
+				},
+				"dist/createAppContainer.js": {
+					"diff": "--- published/dist/createAppContainer.js\n+++ rebuilt/dist/createAppContainer.js\n@@ -1,8 +1,6 @@\n import React from 'react';\n-import { AsyncStorage, Linking, Platform, BackHandler } from 'react-native';\n-import { polyfill } from 'react-lifecycles-compat';\n-\n-import { NavigationActions, pathUtils, getNavigation, NavigationProvider } from '@react-navigation/core';\n+import { Linking, Platform, BackHandler } from 'react-native';\n+import { NavigationActions, ThemeProvider, pathUtils, getNavigation, NavigationProvider } from '@react-navigation/core';\n import invariant from './utils/invariant';\n import docsUrl from './utils/docsUrl';\n \n@@ -13,17 +11,29 @@\n }\n \n function validateProps(props) {\n+  if (props.persistenceKey) {\n+    console.warn('You passed persistenceKey prop to a navigator. ' + 'The persistenceKey prop was replaced by a more flexible persistence mechanism, ' + 'please see the navigation state persistence docs for more information. ' + 'Passing the persistenceKey prop is a no-op.');\n+  }\n   if (isStateful(props)) {\n     return;\n   }\n-  // eslint-disable-next-line no-unused-vars\n-  const { navigation, screenProps, ...containerProps } = props;\n+  /* eslint-disable no-unused-vars */\n+  const {\n+    navigation,\n+    screenProps,\n+    persistNavigationState,\n+    loadNavigationState,\n+    theme,\n+    ...containerProps\n+  } = props;\n+  /* eslint-enable no-unused-vars */\n \n   const keys = Object.keys(containerProps);\n \n   if (keys.length !== 0) {\n     throw new Error('This navigator has both navigation and container props, so it is ' + `unclear if it should own its own state. Remove props: \"${keys.join(', ')}\" ` + 'if the navigator should get its state from the navigation prop. If the ' + 'navigator should maintain its own state, do not pass a navigation prop.');\n   }\n+  invariant(persistNavigationState === undefined && loadNavigationState === undefined || typeof persistNavigationState === 'function' && typeof loadNavigationState === 'function', 'both persistNavigationState and loadNavigationState must either be undefined, or be functions');\n }\n \n // Track the number of stateful container instances. Warn if >0 and not using the\n@@ -56,6 +66,10 @@\n     static router = Component.router;\n     static navigationOptions = null;\n \n+    static defaultProps = {\n+      theme: 'light'\n+    };\n+\n     static getDerivedStateFromProps(nextProps) {\n       validateProps(nextProps);\n       return null;\n@@ -70,7 +84,7 @@\n \n       this._initialAction = NavigationActions.init();\n \n-      if (this._isStateful()) {\n+      if (this._isStateful() && BackHandler && typeof BackHandler.addEventListener === 'function') {\n         this.subs = BackHandler.addEventListener('hardwareBackPress', () => {\n           if (!this._isMounted) {\n             this.subs && this.subs.remove();\n@@ -84,7 +98,7 @@\n       }\n \n       this.state = {\n-        nav: this._isStateful() && !props.persistenceKey ? Component.router.getStateForAction(this._initialAction) : null\n+        nav: this._isStateful() && !props.loadNavigationState ? Component.router.getStateForAction(this._initialAction) : null\n       };\n     }\n \n@@ -96,21 +110,6 @@\n       return isStateful(this.props);\n     }\n \n-    _validateProps(props) {\n-      if (this._isStateful()) {\n-        return;\n-      }\n-\n-      // eslint-disable-next-line no-unused-vars\n-      const { navigation, screenProps, ...containerProps } = props;\n-\n-      const keys = Object.keys(containerProps);\n-\n-      if (keys.length !== 0) {\n-        throw new Error('This navigator has both navigation and container props, so it is ' + `unclear if it should own its own state. Remove props: \"${keys.join(', ')}\" ` + 'if the navigator should get its state from the navigation prop. If the ' + 'navigator should maintain its own state, do not pass a navigation prop.');\n-      }\n-    }\n-\n     _handleOpenURL = ({ url }) => {\n       const { enableURLHandling, uriPrefix } = this.props;\n       if (enableURLHandling === false) {\n@@ -175,13 +174,13 @@\n       Linking.addEventListener('url', this._handleOpenURL);\n \n       // Pull out anything that can impact state\n",
+					"match": false,
+					"packageHash": "9efade5847f64f94c051eff09deb49fe8812299117e26cae7b584f119a488125",
+					"size": 11789,
+					"sourceHash": "a1df5e293e07379bf33d2915ba502e09dbba0e449adbe79bd89ee5454c521e56",
+					"status": "content"
+				},
+				"dist/createKeyboardAwareNavigator.js": {
+					"diff": "--- published/dist/createKeyboardAwareNavigator.js\n+++ rebuilt/dist/createKeyboardAwareNavigator.js\n@@ -7,7 +7,7 @@\n   _previouslyFocusedTextInput = null;\n \n   render() {\n-    return <Navigator {...this.props} onGestureBegin={this._handleGestureBegin} onGestureCanceled={this._handleGestureCanceled} onGestureFinish={this._handleGestureFinish} onTransitionStart={this._handleTransitionStart} />;\n+    return <Navigator {...this.props} onGestureBegin={this._handleGestureBegin} onGestureCanceled={this._handleGestureCanceled} onGestureEnd={this._handleGestureEnd} onTransitionStart={this._handleTransitionStart} />;\n   }\n \n   _handleGestureBegin = () => {\n@@ -25,7 +25,7 @@\n     this.props.onGestureCanceled && this.props.onGestureCanceled();\n   };\n \n-  _handleGestureFinish = () => {\n+  _handleGestureEnd = () => {\n     this._previouslyFocusedTextInput = null;\n     this.props.onGestureFinish && this.props.onGestureFinish();\n   };\n",
+					"match": false,
+					"packageHash": "17ee569c27d561744827c670b5bd274c9cb5254b9d312834626e82bda913d4fc",
+					"size": 1895,
+					"sourceHash": "f5eac34148244e529106900122c1260922de8c86356eb9d324c9a1256bb36e96",
+					"status": "content"
+				},
+				"dist/createNavigationAwareScrollable.js": {
+					"diff": "--- published/dist/createNavigationAwareScrollable.js\n+++ rebuilt/dist/createNavigationAwareScrollable.js\n@@ -14,6 +14,8 @@\n             scrollableNode.scrollToTop();\n           } else if (scrollableNode.scrollTo != null) {\n             scrollableNode.scrollTo({ y: 0 });\n+          } else if (scrollableNode.scrollResponderScrollTo != null) {\n+            scrollableNode.scrollResponderScrollTo({ y: 0 });\n           }\n         }\n       });\n",
+					"match": false,
+					"packageHash": "e1cd06d01959afb81d00706e324fd50333121c5438c74cd5bb3873c5bf700155",
+					"size": 2792,
+					"sourceHash": "c764117fcaa7e582d68491a57605420d69a430df9ffc25aa970e04ef9ec3975f",
+					"status": "content"
+				},
+				"dist/index.js": {
+					"diff": "--- published/dist/index.js\n+++ rebuilt/dist/index.js\n@@ -35,5 +35,15 @@\n \n   get SectionList() {\n     return require('./Scrollables').SectionList;\n+  },\n+  get Themed() {\n+    return require('./Themed').default;\n+  },\n+\n+  get createNavigationFactory() {\n+    return require('./throwIfWrongVersion').default;\n+  },\n+  get NavigationContainer() {\n+    return require('./throwIfWrongVersion').default;\n   }\n };\n\\ No newline at end of file\n",
+					"match": false,
+					"packageHash": "ca9011d63968de129dd85a6428f9067d9c85d99679447103907b366da17316ec",
+					"size": 856,
+					"sourceHash": "cc2e72f99b8ae974f5db6212050f4f62290c62310535df2ce985e2f210f5e172",
+					"status": "content"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -1,6 +1,6 @@\n {\n   \"name\": \"@react-navigation/native\",\n-  \"version\": \"3.0.3\",\n+  \"version\": \"3.6.5\",\n   \"description\": \"React Native support for React Navigation\",\n   \"main\": \"dist/index.js\",\n   \"files\": [\n@@ -14,7 +14,9 @@\n     \"test\": \"jest\",\n     \"lint\": \"eslint .\",\n     \"format\": \"eslint . --fix\",\n-    \"build\": \"babel --no-babelrc --plugins=syntax-jsx,syntax-class-properties,syntax-object-rest-spread,transform-flow-strip-types src --copy-files --out-dir dist --ignore '**/__tests__/**'\",\n+    \"babel\": \"babel --no-babelrc --plugins=syntax-jsx,syntax-class-properties,syntax-object-rest-spread,transform-flow-strip-types src --copy-files --ignore '**/__tests__/**'\",\n+    \"build\": \"yarn babel --out-dir dist\",\n+    \"dev\": \"yarn babel --watch src --out-dir example/node_modules/@react-navigation/native/dist\",\n     \"prepare\": \"yarn build\",\n     \"release\": \"release-it\"\n   },\n@@ -37,9 +39,13 @@\n     \"url\": \"https://github.com/react-navigation/react-navigation-native/issues\"\n   },\n   \"homepage\": \"https://github.com/react-navigation/react-navigation-native#readme\",\n+  \"dependencies\": {\n+    \"hoist-non-react-statics\": \"^3.3.2\",\n+    \"react-native-safe-area-view\": \"^0.14.8\"\n+  },\n   \"devDependencies\": {\n     \"@expo/vector-icons\": \"^6.2.0\",\n-    \"@react-navigation/core\": \"^3.0.0-alpha\",\n+    \"@react-navigation/core\": \"^3.5.0-alpha.4\",\n     \"babel-cli\": \"^6.26.0\",\n     \"babel-jest\": \"^22.4.1\",\n     \"babel-plugin-syntax-class-properties\": \"^6.13.0\",\n@@ -47,24 +53,26 @@\n     \"babel-plugin-syntax-object-rest-spread\": \"^6.13.0\",\n     \"babel-plugin-transform-flow-strip-types\": \"^6.22.0\",\n     \"babel-preset-react-native\": \"^4.0.0\",\n-    \"conventional-changelog-cli\": \"^2.0.5\",\n+    \"del-cli\": \"^1.1.0\",\n     \"eslint\": \"^4.12.1\",\n     \"eslint-config-satya164\": \"^1.0.1\",\n     \"eslint-plugin-react-native-globals\": \"^0.1.0\",\n     \"husky\": \"^0.14.3\",\n-    \"jest\": \"^22.1.3\",\n+    \"jest\": \"^23.6.0\",\n     \"prettier\": \"^1.8.2\",\n-    \"react\": \"16.3.1\",\n-    \"react-dom\": \"16.3.1\",\n-    \"react-native\": \"~0.55.4\",\n+    \"react\": \"16.6.3\",\n+    \"react-dom\": \"16.3.2\",\n+    \"react-native\": \"^0.57.7\",\n+    \"react-native-screens\": \"^2.0.0-alpha.32\",\n     \"react-navigation\": \"^2.11.2\",\n-    \"react-test-renderer\": \"16.3.1\",\n+    \"react-test-renderer\": \"16.6.3\",\n     \"release-it\": \"^7.6.1\"\n   },\n   \"peerDependencies\": {\n     \"@react-navigation/core\": \"^3.0.0\",\n     \"react\": \"*\",\n-    \"react-native\": \"*\"\n+    \"react-native\": \"*\",\n+    \"react-native-gesture-handler\": \"*\"\n   },\n   \"jest\": {\n     \"preset\": \"react-native\",\n@@ -85,11 +93,5 @@\n   \"prettier\": {\n     \"trailingComma\": \"es5\",\n     \"singleQuote\": true\n-  },\n-  \"dependencies\": {\n-    \"hoist-non-react-statics\": \"^3.0.1\",\n-    \"react-native-safe-area-view\": \"^0.11.0\",\n-    \"react-native-gesture-handler\": \"^1.0.0\",\n-    \"react-native-screens\": \"^1.0.0 || ^1.0.0-alpha\"\n   }\n }\n",
+					"match": false,
+					"packageHash": "7946dc442adc7324f3c38b583d931d91db706734db57bf84718ad6538e0c63b6",
+					"size": 2826,
+					"sourceHash": "248a33fbe3ef99300ad7583ce249bbf12cf006a5a36e7fd813009e1cc3668db9",
+					"status": "content"
+				},
+				"src/ResourceSavingSceneView.js": {
+					"diff": "--- published/src/ResourceSavingSceneView.js\n+++ rebuilt/src/ResourceSavingSceneView.js\n@@ -1,7 +1,5 @@\n import React from 'react';\n import { Platform, StyleSheet, View } from 'react-native';\n-import { polyfill } from 'react-lifecycles-compat';\n-\n import { SceneView } from '@react-navigation/core';\n \n const FAR_FAR_AWAY = 3000; // this should be big enough to move the whole view out of its container\n@@ -74,4 +72,4 @@\n   },\n });\n \n-export default polyfill(ResourceSavingSceneView);\n+export default ResourceSavingSceneView;\n",
+					"match": false,
+					"packageHash": "80b824d46e8d592f7fbde2e3822812f318c28df0474cd0d0e16262ca68aa73ea",
+					"size": 1729,
+					"sourceHash": "a0ea258b8671d401549dc6e19c9d93cc4da0df7a0bb8a101a7363a38107bd33a",
+					"status": "content"
+				},
+				"src/Scrollables.js": {
+					"diff": "--- published/src/Scrollables.js\n+++ rebuilt/src/Scrollables.js\n@@ -1,15 +1,59 @@\n import React from 'react';\n-import { FlatList, SectionList } from 'react-native';\n-import { ScrollView } from 'react-native-gesture-handler';\n+import {\n+  ScrollView,\n+  Platform,\n+  FlatList,\n+  SectionList,\n+  RefreshControl,\n+} from 'react-native';\n+import { ScrollView as GHScrollView } from 'react-native-gesture-handler';\n import createNavigationAwareScrollable from './createNavigationAwareScrollable';\n+import invariant from './utils/invariant';\n \n-const WrappedScrollView = createNavigationAwareScrollable(ScrollView);\n+let WrappedScrollView;\n+if (Platform.OS === 'android') {\n+  // @todo: use GHScrollView again when\n+  // https://github.com/kmagiera/react-native-gesture-handler/issues/560 has\n+  // been fixed.\n+  WrappedScrollView = createNavigationAwareScrollable(ScrollView);\n+} else {\n+  WrappedScrollView = createNavigationAwareScrollable(GHScrollView);\n+}\n+\n+function propsMaybeWithRefreshControl(props) {\n+  const onRefresh = props.onRefresh;\n+  if (onRefresh) {\n+    invariant(\n+      typeof props.refreshing === 'boolean',\n+      '`refreshing` prop must be set as a boolean in order to use `onRefresh`, but got `' +\n+        JSON.stringify(props.refreshing) +\n+        '`'\n+    );\n+    return {\n+      ...props,\n+      refreshControl:\n+        props.refreshControl == null ? (\n+          <RefreshControl\n+            refreshing={props.refreshing}\n+            onRefresh={onRefresh}\n+            progressViewOffset={props.progressViewOffset}\n+          />\n+        ) : (\n+          props.refreshControl\n+        ),\n+    };\n+  } else {\n+    return props;\n+  }\n+}\n \n const WrappedFlatList = React.forwardRef((props, ref) => (\n   <FlatList\n     ref={ref}\n     {...props}\n-    renderScrollComponent={props => <WrappedScrollView {...props} />}\n+    renderScrollComponent={props => (\n+      <WrappedScrollView {...propsMaybeWithRefreshControl(props)} />\n+    )}\n   />\n ));\n \n@@ -17,7 +61,9 @@\n   <SectionList\n     ref={ref}\n     {...props}\n-    renderScrollComponent={props => <WrappedScrollView {...props} />}\n+    renderScrollComponent={props => (\n+      <WrappedScrollView {...propsMaybeWithRefreshControl(props)} />\n+    )}\n   />\n ));\n \n",
+					"match": false,
+					"packageHash": "d3fed620cd895d7c43055138aad54f4c7bfc208b28b7610863e71f93e095da64",
+					"size": 826,
+					"sourceHash": "6342a8887eb0eae807aa94a6c442640cdb28959438fee1b000f97d6257f54ce1",
+					"status": "content"
+				},
+				"src/__tests__/__snapshots__/createAppContainer-test.js.snap": {
+					"diff": "--- published/src/__tests__/__snapshots__/createAppContainer-test.js.snap\n+++ rebuilt/src/__tests__/__snapshots__/createAppContainer-test.js.snap\n@@ -8,6 +8,12 @@\n         \"You should only render one navigator explicitly in your app, and other navigators should be rendered by including them in that navigator. Full details at: https://reactnavigation.org/docs/common-mistakes.html#explicitly-rendering-more-than-one-navigator\",\n       ],\n     ],\n+    \"results\": Array [\n+      Object {\n+        \"isThrow\": false,\n+        \"value\": undefined,\n+      },\n+    ],\n   },\n }\n `;\n",
+					"match": false,
+					"packageHash": "74a49e29b2bf983c74b65d581f8e5f119aa24af52302c50b20c328e19c587a0c",
+					"size": 532,
+					"sourceHash": "40a90be0267ed078cb50a124b73fb3b16871b4e9a45aced420a194e1bed12b6c",
+					"status": "content"
+				},
+				"src/__tests__/createAppContainer-test.js": {
+					"diff": "--- published/src/__tests__/createAppContainer-test.js\n+++ rebuilt/src/__tests__/createAppContainer-test.js\n@@ -272,4 +272,132 @@\n       });\n     });\n   });\n+\n+  // https://github.com/facebook/jest/issues/2157#issuecomment-279171856\n+  const flushPromises = () => new Promise(resolve => setImmediate(resolve));\n+\n+  describe('state persistence', () => {\n+    async function createPersistenceEnabledContainer(\n+      loadNavigationState,\n+      persistNavigationState = jest.fn()\n+    ) {\n+      const navContainer = renderer\n+        .create(\n+          <NavigationContainer\n+            persistNavigationState={persistNavigationState}\n+            loadNavigationState={loadNavigationState}\n+          />\n+        )\n+        .getInstance();\n+\n+      // wait for loadNavigationState() to resolve\n+      await flushPromises();\n+      return navContainer;\n+    }\n+\n+    it('loadNavigationState is called upon mount and persistNavigationState is called on a nav state change', async () => {\n+      const persistNavigationState = jest.fn();\n+      const loadNavigationState = jest.fn().mockResolvedValue({\n+        index: 1,\n+        routes: [{ routeName: 'foo' }, { routeName: 'bar' }],\n+      });\n+\n+      const navigationContainer = await createPersistenceEnabledContainer(\n+        loadNavigationState,\n+        persistNavigationState\n+      );\n+      expect(loadNavigationState).toHaveBeenCalled();\n+\n+      // wait for setState done\n+      jest.runOnlyPendingTimers();\n+\n+      navigationContainer.dispatch(\n+        NavigationActions.navigate({ routeName: 'foo' })\n+      );\n+      jest.runOnlyPendingTimers();\n+      expect(persistNavigationState).toHaveBeenCalledWith({\n+        index: 0,\n+        isTransitioning: true,\n+        routes: [{ routeName: 'foo' }],\n+      });\n+    });\n+\n+    it('when persistNavigationState rejects, a console warning is shown', async () => {\n+      const consoleSpy = jest.spyOn(console, 'warn');\n+      const persistNavigationState = jest\n+        .fn()\n+        .mockRejectedValue(new Error('serialization failed'));\n+      const loadNavigationState = jest.fn().mockResolvedValue(null);\n+\n+      const navigationContainer = await createPersistenceEnabledContainer(\n+        loadNavigationState,\n+        persistNavigationState\n+      );\n+\n+      // wait for setState done\n+      jest.runOnlyPendingTimers();\n+\n+      navigationContainer.dispatch(\n+        NavigationActions.navigate({ routeName: 'baz' })\n+      );\n+      jest.runOnlyPendingTimers();\n+      await flushPromises();\n+\n+      expect(consoleSpy).toHaveBeenCalledWith(expect.any(String));\n+    });\n+\n+    it('when loadNavigationState rejects, navigator ignores the rejection and starts from the initial state', async () => {\n+      const loadNavigationState = jest\n+        .fn()\n+        .mockRejectedValue(new Error('deserialization failed'));\n+\n+      const navigationContainer = await createPersistenceEnabledContainer(\n+        loadNavigationState\n+      );\n+\n+      expect(loadNavigationState).toHaveBeenCalled();\n+\n+      // wait for setState done\n+      jest.runOnlyPendingTimers();\n+\n+      expect(navigationContainer.state.nav).toMatchObject({\n+        index: 0,\n+        isTransitioning: false,\n+        key: 'StackRouterRoot',\n+        routes: [{ routeName: 'foo' }],\n+      });\n",
+					"match": false,
+					"packageHash": "54fd00c9ea2d20a827c673c7465f1dafa04acf84856fab6a352adf43d1690485",
+					"size": 7167,
+					"sourceHash": "48e73cd2430eaf94c18862084d85e11c266bde1cce68d4f88265f073cdc7e34f",
+					"status": "content"
+				},
+				"src/createAppContainer.js": {
+					"diff": "--- published/src/createAppContainer.js\n+++ rebuilt/src/createAppContainer.js\n@@ -1,9 +1,8 @@\n import React from 'react';\n-import { AsyncStorage, Linking, Platform, BackHandler } from 'react-native';\n-import { polyfill } from 'react-lifecycles-compat';\n-\n+import { Linking, Platform, BackHandler } from 'react-native';\n import {\n   NavigationActions,\n+  ThemeProvider,\n   pathUtils,\n   getNavigation,\n   NavigationProvider,\n@@ -18,11 +17,27 @@\n }\n \n function validateProps(props) {\n+  if (props.persistenceKey) {\n+    console.warn(\n+      'You passed persistenceKey prop to a navigator. ' +\n+        'The persistenceKey prop was replaced by a more flexible persistence mechanism, ' +\n+        'please see the navigation state persistence docs for more information. ' +\n+        'Passing the persistenceKey prop is a no-op.'\n+    );\n+  }\n   if (isStateful(props)) {\n     return;\n   }\n-  // eslint-disable-next-line no-unused-vars\n-  const { navigation, screenProps, ...containerProps } = props;\n+  /* eslint-disable no-unused-vars */\n+  const {\n+    navigation,\n+    screenProps,\n+    persistNavigationState,\n+    loadNavigationState,\n+    theme,\n+    ...containerProps\n+  } = props;\n+  /* eslint-enable no-unused-vars */\n \n   const keys = Object.keys(containerProps);\n \n@@ -36,6 +51,13 @@\n         'navigator should maintain its own state, do not pass a navigation prop.'\n     );\n   }\n+  invariant(\n+    (persistNavigationState === undefined &&\n+      loadNavigationState === undefined) ||\n+      (typeof persistNavigationState === 'function' &&\n+        typeof loadNavigationState === 'function'),\n+    'both persistNavigationState and loadNavigationState must either be undefined, or be functions'\n+  );\n }\n \n // Track the number of stateful container instances. Warn if >0 and not using the\n@@ -68,6 +90,10 @@\n     static router = Component.router;\n     static navigationOptions = null;\n \n+    static defaultProps = {\n+      theme: 'light',\n+    };\n+\n     static getDerivedStateFromProps(nextProps) {\n       validateProps(nextProps);\n       return null;\n@@ -82,7 +108,11 @@\n \n       this._initialAction = NavigationActions.init();\n \n-      if (this._isStateful()) {\n+      if (\n+        this._isStateful() &&\n+        BackHandler &&\n+        typeof BackHandler.addEventListener === 'function'\n+      ) {\n         this.subs = BackHandler.addEventListener('hardwareBackPress', () => {\n           if (!this._isMounted) {\n             this.subs && this.subs.remove();\n@@ -97,7 +127,7 @@\n \n       this.state = {\n         nav:\n-          this._isStateful() && !props.persistenceKey\n+          this._isStateful() && !props.loadNavigationState\n             ? Component.router.getStateForAction(this._initialAction)\n             : null,\n       };\n@@ -113,28 +143,6 @@\n       return isStateful(this.props);\n     }\n \n-    _validateProps(props) {\n-      if (this._isStateful()) {\n-        return;\n-      }\n-\n",
+					"match": false,
+					"packageHash": "51b7c1342b828c96a0e40238486384f919fdd9ecc22bf0d0538de6d0872d5e0d",
+					"size": 12447,
+					"sourceHash": "093ef2eac87f46547ef6c546c8fe163596caac31cc9e6e5563f1ca92b9ad5406",
+					"status": "content"
+				},
+				"src/createKeyboardAwareNavigator.js": {
+					"diff": "--- published/src/createKeyboardAwareNavigator.js\n+++ rebuilt/src/createKeyboardAwareNavigator.js\n@@ -13,7 +13,7 @@\n           {...this.props}\n           onGestureBegin={this._handleGestureBegin}\n           onGestureCanceled={this._handleGestureCanceled}\n-          onGestureFinish={this._handleGestureFinish}\n+          onGestureEnd={this._handleGestureEnd}\n           onTransitionStart={this._handleTransitionStart}\n         />\n       );\n@@ -34,7 +34,7 @@\n       this.props.onGestureCanceled && this.props.onGestureCanceled();\n     };\n \n-    _handleGestureFinish = () => {\n+    _handleGestureEnd = () => {\n       this._previouslyFocusedTextInput = null;\n       this.props.onGestureFinish && this.props.onGestureFinish();\n     };\n",
+					"match": false,
+					"packageHash": "fa2020faf666b8329c963d5627ec1d7941e9ace0f38e14efa101241a2bb03416",
+					"size": 2062,
+					"sourceHash": "3d06ee760673a444cb9fca72365d3352730d2ccf2423914349607137cc0a6dad",
+					"status": "content"
+				},
+				"src/createNavigationAwareScrollable.js": {
+					"diff": "--- published/src/createNavigationAwareScrollable.js\n+++ rebuilt/src/createNavigationAwareScrollable.js\n@@ -20,6 +20,8 @@\n                 scrollableNode.scrollToTop();\n               } else if (scrollableNode.scrollTo != null) {\n                 scrollableNode.scrollTo({ y: 0 });\n+              } else if (scrollableNode.scrollResponderScrollTo != null) {\n+                scrollableNode.scrollResponderScrollTo({ y: 0 });\n               }\n             }\n           }\n",
+					"match": false,
+					"packageHash": "240194e0c76a98b6709fd5b1aeb8ed912197bf205d54101e99ed8f8a1b87c3b1",
+					"size": 3087,
+					"sourceHash": "4af8c6295f0bff42b4df7e2218a57fa24acad32737eb19763c9afe6de9efab5a",
+					"status": "content"
+				},
+				"src/index.js": {
+					"diff": "--- published/src/index.js\n+++ rebuilt/src/index.js\n@@ -36,4 +36,14 @@\n   get SectionList() {\n     return require('./Scrollables').SectionList;\n   },\n+  get Themed() {\n+    return require('./Themed').default;\n+  },\n+\n+  get createNavigationFactory() {\n+    return require('./throwIfWrongVersion').default;\n+  },\n+  get NavigationContainer() {\n+    return require('./throwIfWrongVersion').default;\n+  },\n };\n",
+					"match": false,
+					"packageHash": "684fd234f2d802c6daf06b8da82038e2b7340c625cbd84035f2bca19e120f445",
+					"size": 858,
+					"sourceHash": "f5b804057b644e963ff26701dec50c519172e537b394e97a291f4fe4061011e6",
+					"status": "content"
+				},
+				"dist/Themed.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"dist/throwIfWrongVersion.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/Themed.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/throwIfWrongVersion.js": {
+					"match": false,
+					"status": "missing-in-package"
+				}
+			},
+			"summary": {
+				"differentFiles": 16,
+				"matchingFiles": 9,
+				"missingInPackage": 4,
+				"missingInSource": 0,
+				"score": 0.3103448275862069,
+				"totalFiles": 29
+			}
+		},
+		"prodDependencies": [
+			{
+				"name": "hoist-non-react-statics",
+				"version": "3.3.2"
+			},
+			{
+				"name": "react-is",
+				"version": "16.9.0"
+			},
+			{
+				"name": "react-native-safe-area-view",
+				"version": "0.14.8"
+			},
+			{
+				"name": "hoist-non-react-statics",
+				"version": "2.5.5"
+			}
+		]
+	}
+]

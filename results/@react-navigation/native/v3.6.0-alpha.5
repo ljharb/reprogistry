@@ -1,0 +1,112 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-07T09:57:22.248Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:11.7.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "@react-navigation/native@3.6.0-alpha.5",
+			"name": "@react-navigation/native",
+			"version": "3.6.0-alpha.5",
+			"location": "https://registry.npmjs.org/@react-navigation/native/-/native-3.6.0-alpha.5.tgz",
+			"integrity": "sha512-3ZvfUSaVPKqr/B7D9YP2ZGqkBBZvOj8xVW3d8kRo1PUZQleZiHrYrP37kZjsETjTDC/o57aU3yKfjvq7Ee2PbA==",
+			"publishedAt": "2019-08-14T23:22:25.193Z",
+			"publishedWith": {
+				"node": "12.3.1",
+				"npm": "6.9.0"
+			},
+			"dependencies": {
+				"react-native-screens": "^1.0.0 || ^1.0.0-alpha",
+				"hoist-non-react-statics": "^3.0.1",
+				"react-native-safe-area-view": "^0.14.1"
+			}
+		},
+		"source": {
+			"integrity": null,
+			"location": "git+https://github.com/react-navigation/react-navigation-native.git",
+			"spec": "github:react-navigation/react-navigation-native#bd3e41ec479e9f0a514f2d564c8d4bd62abe99ed"
+		},
+		"comparisonHash": "9ef46a5bd31291e57cbab41e2f17c57bd6da0b5b",
+		"diff": {
+			"files": {
+				"dist/createAppContainer.js": {
+					"diff": "--- published/dist/createAppContainer.js\n+++ rebuilt/dist/createAppContainer.js\n@@ -23,6 +23,7 @@\n     screenProps,\n     persistNavigationState,\n     loadNavigationState,\n+    theme,\n     ...containerProps\n   } = props;\n   /* eslint-enable no-unused-vars */\n@@ -65,6 +66,10 @@\n     static router = Component.router;\n     static navigationOptions = null;\n \n+    static defaultProps = {\n+      theme: 'light'\n+    };\n+\n     static getDerivedStateFromProps(nextProps) {\n       validateProps(nextProps);\n       return null;\n@@ -105,21 +110,6 @@\n       return isStateful(this.props);\n     }\n \n-    _validateProps(props) {\n-      if (this._isStateful()) {\n-        return;\n-      }\n-\n-      // eslint-disable-next-line no-unused-vars\n-      const { navigation, screenProps, ...containerProps } = props;\n-\n-      const keys = Object.keys(containerProps);\n-\n-      if (keys.length !== 0) {\n-        throw new Error('This navigator has both navigation and container props, so it is ' + `unclear if it should own its own state. Remove props: \"${keys.join(', ')}\" ` + 'if the navigator should get its state from the navigation prop. If the ' + 'navigator should maintain its own state, do not pass a navigation prop.');\n-      }\n-    }\n-\n     _handleOpenURL = ({ url }) => {\n       const { enableURLHandling, uriPrefix } = this.props;\n       if (enableURLHandling === false) {\n@@ -334,6 +324,8 @@\n     _getTheme = () => {\n       if (this.props.theme === 'light' || this.props.theme === 'dark') {\n         return this.props.theme;\n+      } else if (this.props.theme === 'no-preference') {\n+        return 'light';\n       } else {\n         console.warn(`Invalid theme provided: ${this.props.theme}. Only 'light' and 'dark' are supported. Falling back to 'light'`);\n         return 'light';\n",
+					"match": false,
+					"packageHash": "e4e7c60594909add1c7129fd34aac13113e403b9644378e1ae4214655d115f15",
+					"size": 13360,
+					"sourceHash": "a1df5e293e07379bf33d2915ba502e09dbba0e449adbe79bd89ee5454c521e56",
+					"status": "content"
+				},
+				"dist/index.js": {
+					"diff": "--- published/dist/index.js\n+++ rebuilt/dist/index.js\n@@ -38,5 +38,12 @@\n   },\n   get Themed() {\n     return require('./Themed').default;\n+  },\n+\n+  get createNavigationFactory() {\n+    return require('./throwIfWrongVersion').default;\n+  },\n+  get NavigationContainer() {\n+    return require('./throwIfWrongVersion').default;\n   }\n };\n\\ No newline at end of file\n",
+					"match": false,
+					"packageHash": "e89e28c477fe5278a171a5780bc46a25bc90f3f3f4e45b4685f38afcf48c21fc",
+					"size": 918,
+					"sourceHash": "cc2e72f99b8ae974f5db6212050f4f62290c62310535df2ce985e2f210f5e172",
+					"status": "content"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -1,6 +1,6 @@\n {\n   \"name\": \"@react-navigation/native\",\n-  \"version\": \"3.6.0-alpha.5\",\n+  \"version\": \"3.6.5\",\n   \"description\": \"React Native support for React Navigation\",\n   \"main\": \"dist/index.js\",\n   \"files\": [\n@@ -39,6 +39,10 @@\n     \"url\": \"https://github.com/react-navigation/react-navigation-native/issues\"\n   },\n   \"homepage\": \"https://github.com/react-navigation/react-navigation-native#readme\",\n+  \"dependencies\": {\n+    \"hoist-non-react-statics\": \"^3.3.2\",\n+    \"react-native-safe-area-view\": \"^0.14.8\"\n+  },\n   \"devDependencies\": {\n     \"@expo/vector-icons\": \"^6.2.0\",\n     \"@react-navigation/core\": \"^3.5.0-alpha.4\",\n@@ -59,6 +63,7 @@\n     \"react\": \"16.6.3\",\n     \"react-dom\": \"16.3.2\",\n     \"react-native\": \"^0.57.7\",\n+    \"react-native-screens\": \"^2.0.0-alpha.32\",\n     \"react-navigation\": \"^2.11.2\",\n     \"react-test-renderer\": \"16.6.3\",\n     \"release-it\": \"^7.6.1\"\n@@ -88,10 +93,5 @@\n   \"prettier\": {\n     \"trailingComma\": \"es5\",\n     \"singleQuote\": true\n-  },\n-  \"dependencies\": {\n-    \"hoist-non-react-statics\": \"^3.0.1\",\n-    \"react-native-safe-area-view\": \"^0.14.1\",\n-    \"react-native-screens\": \"^1.0.0 || ^1.0.0-alpha\"\n   }\n }\n",
+					"match": false,
+					"packageHash": "e44b5d953fe0619f9551de4a7e4ad1723ac7e9d2ca5eddd666e2080438557488",
+					"size": 2937,
+					"sourceHash": "248a33fbe3ef99300ad7583ce249bbf12cf006a5a36e7fd813009e1cc3668db9",
+					"status": "content"
+				},
+				"src/createAppContainer.js": {
+					"diff": "--- published/src/createAppContainer.js\n+++ rebuilt/src/createAppContainer.js\n@@ -34,6 +34,7 @@\n     screenProps,\n     persistNavigationState,\n     loadNavigationState,\n+    theme,\n     ...containerProps\n   } = props;\n   /* eslint-enable no-unused-vars */\n@@ -89,6 +90,10 @@\n     static router = Component.router;\n     static navigationOptions = null;\n \n+    static defaultProps = {\n+      theme: 'light',\n+    };\n+\n     static getDerivedStateFromProps(nextProps) {\n       validateProps(nextProps);\n       return null;\n@@ -138,28 +143,6 @@\n       return isStateful(this.props);\n     }\n \n-    _validateProps(props) {\n-      if (this._isStateful()) {\n-        return;\n-      }\n-\n-      // eslint-disable-next-line no-unused-vars\n-      const { navigation, screenProps, ...containerProps } = props;\n-\n-      const keys = Object.keys(containerProps);\n-\n-      if (keys.length !== 0) {\n-        throw new Error(\n-          'This navigator has both navigation and container props, so it is ' +\n-            `unclear if it should own its own state. Remove props: \"${keys.join(\n-              ', '\n-            )}\" ` +\n-            'if the navigator should get its state from the navigation prop. If the ' +\n-            'navigator should maintain its own state, do not pass a navigation prop.'\n-        );\n-      }\n-    }\n-\n     _handleOpenURL = ({ url }) => {\n       const { enableURLHandling, uriPrefix } = this.props;\n       if (enableURLHandling === false) {\n@@ -408,6 +391,8 @@\n     _getTheme = () => {\n       if (this.props.theme === 'light' || this.props.theme === 'dark') {\n         return this.props.theme;\n+      } else if (this.props.theme === 'no-preference') {\n+        return 'light';\n       } else {\n         console.warn(\n           `Invalid theme provided: ${\n",
+					"match": false,
+					"packageHash": "09f3a90b6ac493f39f4be9208a91ff5335c6972fcccef1dd5e8127e65eed0119",
+					"size": 14215,
+					"sourceHash": "093ef2eac87f46547ef6c546c8fe163596caac31cc9e6e5563f1ca92b9ad5406",
+					"status": "content"
+				},
+				"src/index.js": {
+					"diff": "--- published/src/index.js\n+++ rebuilt/src/index.js\n@@ -39,4 +39,11 @@\n   get Themed() {\n     return require('./Themed').default;\n   },\n+\n+  get createNavigationFactory() {\n+    return require('./throwIfWrongVersion').default;\n+  },\n+  get NavigationContainer() {\n+    return require('./throwIfWrongVersion').default;\n+  },\n };\n",
+					"match": false,
+					"packageHash": "a3584bf0ea83a68c3543b03a16ca146edb764003890333a6d25ab90923579ef2",
+					"size": 920,
+					"sourceHash": "f5b804057b644e963ff26701dec50c519172e537b394e97a291f4fe4061011e6",
+					"status": "content"
+				},
+				"dist/throwIfWrongVersion.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/throwIfWrongVersion.js": {
+					"match": false,
+					"status": "missing-in-package"
+				}
+			},
+			"summary": {
+				"differentFiles": 5,
+				"matchingFiles": 22,
+				"missingInPackage": 2,
+				"missingInSource": 0,
+				"score": 0.7586206896551724,
+				"totalFiles": 29
+			}
+		},
+		"prodDependencies": [
+			{
+				"name": "hoist-non-react-statics",
+				"version": "3.3.2"
+			},
+			{
+				"name": "react-is",
+				"version": "16.9.0"
+			},
+			{
+				"name": "react-native-safe-area-view",
+				"version": "0.14.8"
+			},
+			{
+				"name": "hoist-non-react-statics",
+				"version": "2.5.5"
+			}
+		]
+	}
+]
