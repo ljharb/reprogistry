@@ -1,0 +1,69 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-07T06:44:05.398Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:11.7.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "node-static@0.6.0",
+			"name": "node-static",
+			"version": "0.6.0",
+			"location": "https://registry.npmjs.org/node-static/-/node-static-0.6.0.tgz",
+			"integrity": "sha512-NsgY7tiTsyeuIyC+thAhAcdhP9fuDKoONSOtHhXKimgw8KeYjeqyRxwEmvig86simJ+8eWCXlelz953bKJol5g==",
+			"publishedAt": "2012-06-28T17:57:17.507Z",
+			"publishedWith": {
+				"node": "v0.6.19",
+				"npm": "1.1.25"
+			}
+		},
+		"source": {
+			"integrity": "sha512-5346HEmU+Jj+LIH7axZC1hTWgo89I0Es2uGtq8qfQAVm/nVTenSBBY+GcyVVb6Yo4tYq6YbYFGjnf5UULzYuHg==",
+			"location": "git://github.com/cloudhead/node-static.git",
+			"spec": "github:cloudhead/node-static#v0.6.0"
+		},
+		"comparisonHash": "9ef46a5bd31291e57cbab41e2f17c57bd6da0b5b",
+		"diff": {
+			"files": {
+				"lib/node-static.js": {
+					"diff": "--- published/lib/node-static.js\n+++ rebuilt/lib/node-static.js\n@@ -157,7 +157,7 @@\n this.Server.prototype.serve = function (req, res, callback) {\n     var that = this,\n         promise = new(events.EventEmitter);\n-    \n+\n     var pathname = decodeURI(url.parse(req.url).pathname);\n \n     var finish = function (status, headers) {\n@@ -182,18 +182,16 @@\n     // Copy default headers\n     for (var k in this.options.headers) {  headers[k] = this.options.headers[k] }\n \n-    headers['Etag']          = JSON.stringify([stat.ino, stat.size, mtime].join('-'));\n+    headers['ETag']          = JSON.stringify([stat.ino, stat.size, mtime].join('-'));\n     headers['Date']          = new(Date)().toUTCString();\n     headers['Last-Modified'] = new(Date)(stat.mtime).toUTCString();\n \n     // Conditional GET\n     // If the \"If-Modified-Since\" or \"If-None-Match\" headers\n     // match the conditions, send a 304 Not Modified.\n-    if (req.headers['if-none-match'] === headers['Etag'] ||\n+    if (req.headers['if-none-match'] === headers['ETag'] ||\n         Date.parse(req.headers['if-modified-since']) >= mtime) {\n         finish(304, headers);\n-    } else if (req.method === 'HEAD') {\n-        finish(200, headers);\n     } else {\n         var fileExtension = path.extname(files[0]).slice(1).toLowerCase();\n         headers['Content-Length'] = stat.size;\n@@ -204,6 +202,11 @@\n \n         res.writeHead(status, headers);\n \n+        if (req.method === 'HEAD') {\n+            finish(200, headers);\n+            return;\n+        }\n+\n         // If the file was cached and it's not older\n         // than what's on disk, serve the cached version.\n         if (this.cache && (key in exports.store) &&\n",
+					"match": false,
+					"packageHash": "352c597554d918ae260c7acb1e5ccad9dd31437b6dbca53d32dec1ab6f0db0c0",
+					"size": 8411,
+					"sourceHash": "f445385e98b166d79cdbc175383fafd6df1c33a65e03370557d873d03a6626d5",
+					"status": "content"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -1,10 +1,10 @@\n {\n-  \"name\"          : \"node-static\",\n-  \"description\"   : \"simple, compliant file streaming module for node\",\n-  \"url\"           : \"http://github.com/cloudhead/node-static\",\n-  \"keywords\"      : [\"http\", \"static\", \"file\", \"server\"],\n-  \"author\"        : \"Alexis Sellier <self@cloudhead.net>\",\n-  \"contributors\"  : [\n+  \"name\" : \"node-static\",\n+  \"description\" : \"simple, compliant file streaming module for node\",\n+  \"url\" : \"http://github.com/cloudhead/node-static\",\n+  \"keywords\" : [\"http\", \"static\", \"file\", \"server\"],\n+  \"author\" : \"Alexis Sellier <self@cloudhead.net>\",\n+  \"contributors\" : [\n \t\t{\n \t\t\t\"name\": \"Pablo Cantero\",\n \t\t\t\"email\": \"pablo@pablocantero.com\"\n@@ -14,9 +14,16 @@\n     \"type\": \"git\",\n     \"url\": \"http://github.com/cloudhead/node-static\"\n   },\n-  \"main\"          : \"./lib/node-static\",\n-  \"license\"      : \"MIT\",\n-  \"dependencies\"  : {},\n-  \"version\"       : \"0.6.0\",\n-  \"engines\"       : { \"node\": \">= 0.4.1\" }\n+  \"main\" : \"./lib/node-static\",\n+  \"scripts\": {\n+    \"test\": \"vows --spec --isolate\"\n+  },\n+  \"license\" : \"MIT\",\n+  \"dependencies\" : {},\n+\t\"devDependencies\" : {\n+\t\t\"request\": \"latest\",\n+\t\t\"vows\": \"latest\"\n+\t},\n+  \"version\" : \"0.6.0\",\n+  \"engines\" : { \"node\": \">= 0.4.1\" }\n }\n",
+					"match": false,
+					"packageHash": "4051d069f4d6c3ddc9f0c46a4a9c72ba8328951ca162fb5762268cd8ace11618",
+					"size": 647,
+					"sourceHash": "bf7f5ab00fd653f7c684eba9c61854f3f834b638d98a264127d0664ef00b7b40",
+					"status": "content"
+				},
+				"test/fixtures/hello.txt": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/fixtures/index.html": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/integration/node-static-test.js": {
+					"match": false,
+					"status": "missing-in-package"
+				}
+			},
+			"summary": {
+				"differentFiles": 2,
+				"matchingFiles": 6,
+				"missingInPackage": 3,
+				"missingInSource": 0,
+				"score": 0.5454545454545454,
+				"totalFiles": 11
+			}
+		}
+	}
+]
