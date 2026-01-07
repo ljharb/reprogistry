@@ -1,0 +1,111 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-07T03:00:58.384Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:11.7.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "typescript-eslint-parser@0.1.2",
+			"name": "typescript-eslint-parser",
+			"version": "0.1.2",
+			"location": "https://registry.npmjs.org/typescript-eslint-parser/-/typescript-eslint-parser-0.1.2.tgz",
+			"integrity": "sha512-6hkqBOWtFLgD0pGx/DnzSrwKVMl/AaqdGyMyzHyX1z/dSziWGZTn5//y1asP3sQIkTEwVJ7+Dg2YTLM2/QQ0Qw==",
+			"publishedAt": "2016-08-21T16:34:27.665Z",
+			"publishedWith": {
+				"node": "4.4.7",
+				"npm": "2.15.8"
+			}
+		},
+		"source": {
+			"integrity": null,
+			"location": "git+https://github.com/eslint/typescript-eslint-parser.git",
+			"spec": "github:eslint/typescript-eslint-parser#f2aff6fc3562c14f6d1de170c47d7f3dc27192b7"
+		},
+		"comparisonHash": "9ef46a5bd31291e57cbab41e2f17c57bd6da0b5b",
+		"diff": {
+			"files": {
+				"CHANGELOG.md": {
+					"match": false,
+					"packageHash": "c5f52e2850e61335fe8ad973b4ba511a27bce057ec9e19dfbfb726ae9e6dc9c0",
+					"size": 2205,
+					"status": "missing-in-source"
+				},
+				"LICENSE": {
+					"diff": "--- published/LICENSE\n+++ rebuilt/LICENSE\n@@ -1,5 +1,5 @@\n TypeScript ESLint Parser\n-Copyright jQuery Foundation and other contributors, https://jquery.org/\n+Copyright JS Foundation and other contributors, https://js.foundation\n \n Redistribution and use in source and binary forms, with or without\n modification, are permitted provided that the following conditions are met:\n",
+					"match": false,
+					"packageHash": "644873b419aeaac01e441bd8f13210af81fd59be4e7be72cb4aee94917e1d430",
+					"size": 1329,
+					"sourceHash": "e2fc706570305bcb7dfadb1cac951d5934ce0d7331a7a7ff1bbc254dbe1d9ef8",
+					"status": "content"
+				},
+				"README.md": {
+					"diff": "--- published/README.md\n+++ rebuilt/README.md\n@@ -1,46 +1,104 @@\n-# TypeScript ESLint Parser (Experimental)\n+# Deprecated: TypeScript ESLint Parser\n \n-A parser that converts TypeScript into an [ESTree](https://github.com/estree/estree)-compatible form so it can be used in ESLint. The goal is to allow TypeScript files to be parsed by ESLint (though not necessarily pass all ESLint rules).\n+**Important:** This repository is no longer maintained and `typescript-eslint-parser` will not receive any future updates. There is an actively maintained fork of this project available at https://typescript-eslint.io and published on npm as `@typescript-eslint/parser`.\n \n-**Important:** This parser is still in the very early stages and is considered experimental. There are likely a lot of bugs. You should not rely on this in a production environment yet.\n+```diff\n+- typescript-eslint-parser\n++ @typescript-eslint/parser\n+```\n \n-## Usage\n+---\n \n-Install:\n+An ESLint custom parser which leverages [TypeScript ESTree](https://github.com/JamesHenry/typescript-estree) to allow for ESLint to lint TypeScript source code.\n \n+\n+## Installation:\n+\n+```sh\n+npm install --save-dev typescript-eslint-parser\n ```\n-npm i typescript-eslint-parser --save\n-```\n \n-And in your ESLint configuration file:\n+## Usage\n+\n+In your ESLint configuration file, set the `parser` property:\n \n+```json\n+{\n+    \"parser\": \"typescript-eslint-parser\"\n+}\n ```\n-\"parser\": \"typescript-eslint-parser\"\n+\n+There is sometimes an incorrect assumption that the parser itself is what does everything necessary to facilitate the use of ESLint with TypeScript. In actuality, it is the combination of the parser _and_ one or more plugins which allow you to maximize your usage of ESLint with TypeScript.\n+\n+For example, once this parser successfully produces an AST for the TypeScript source code, it might well contain some information which simply does not exist in a standard JavaScript context, such as the data for a TypeScript-specific construct, like an `interface`.\n+\n+The core rules built into ESLint, such as `indent` have no knowledge of such constructs, so it is impossible to expect them to work out of the box with them.\n+\n+Instead, you also need to make use of one more plugins which will add or extend rules with TypeScript-specific features.\n+\n+By far the most common case will be installing the [eslint-plugin-typescript](https://github.com/nzakas/eslint-plugin-typescript) plugin, but there are also other relevant options available such a [eslint-plugin-tslint](https://github.com/JamesHenry/eslint-plugin-tslint).\n+\n+## Configuration\n+\n+The following additional configuration options are available by specifying them in [`parserOptions`](https://eslint.org/docs/user-guide/configuring#specifying-parser-options) in your ESLint configuration file.\n+\n+- **`jsx`** - default `false`. Enable parsing JSX when `true`. More details can be found [here](https://www.typescriptlang.org/docs/handbook/jsx.html).\n+    - It's `false` on `*.ts` files regardless of this option.\n+    - It's `true` on `*.tsx` files regardless of this option.\n+    - Otherwise, it respects this option.\n+\n+- **`useJSXTextNode`** - default `true`. Please set `false` if you use this parser on ESLint v4. If this is `false`, the parser creates the AST of JSX texts as the legacy style.\n+\n+### .eslintrc.json\n+\n+```json\n+{\n+    \"parser\": \"typescript-eslint-parser\",\n+    \"parserOptions\": {\n+        \"jsx\": true,\n+        \"useJSXTextNode\": true\n+    }\n+}\n ```\n \n-## Help Wanted!\n+## Supported TypeScript Version\n+\n+We will always endeavor to support the latest stable version of TypeScript.\n+\n+The version of TypeScript currently supported by this parser is `~3.2.1`. This is reflected in the `devDependency` requirement within the package.json file, and it is what the tests will be run against. We have an open `peerDependency` requirement in order to allow for experimentation on newer/beta versions of TypeScript.\n+\n+If you use a non-supported version of TypeScript, the parser will log a warning to the console.\n \n-If you're familiar with TypeScript and ESLint, and you'd like to see this project progress, please consider contributing. We need people with a good knowledge of TypeScript to ensure this parser is useful.\n+**Please ensure that you are using a supported version before submitting any issues/bug reports.**\n \n-## Reporting Bugs\n+## Integration Tests\n \n-**Do not** file bugs about ESLint rule failures. This is expected because ESLint doesn't know anything about TypeScript syntax. It's likely that many ESLint rules will have failures as a result. Longer-term, it's likely we'll need to create a custom set of ESLint rules that are TypeScript-specific.\n+We have a very flexible way of running integration tests which connects all of the moving parts of the usage of this parser in the ESLint ecosystem.\n \n-Bugs should be filed for:\n+We run each test within its own docker container, and so each one has complete autonomy over what dependencies/plugins are installed and what versions are used. This also has the benefit of not bloating the `package.json` and `node_modules` of the parser project itself.\n \n-1. TypeScript syntax that fails to parse.\n-1. TypeScript syntax that produces an unexpected AST.\n+> If you are going to submit an issue related to the usage of this parser with ESLint, please consider creating a failing integration test which clearly demonstrates the behavior. It's honestly super quick!\n \n",
+					"match": false,
+					"packageHash": "7a35b2843c711b1868a599eb98c8f70f89ed4ce13fb59929bb2061405f122bdb",
+					"size": 1856,
+					"sourceHash": "0782743895d44e3bdabbde11b9ea4a93ab6124c4b3d117ac61d49d3fca3f98a8",
+					"status": "content"
+				},
+				"lib/ast-converter.js": {
+					"match": false,
+					"packageHash": "0148d6a64248c68b84857b6c42c682b2ca7553b733c25f58e4080b08c4139437",
+					"size": 64793,
+					"status": "missing-in-source"
+				},
+				"lib/ast-node-types.js": {
+					"match": false,
+					"packageHash": "3c02291a858a2063e339e8490ceea49f9a9a7a64043adf6324365ead2d0a2653",
+					"size": 3785,
+					"status": "missing-in-source"
+				},
+				"lib/features.js": {
+					"match": false,
+					"packageHash": "ac877d5266c632183a64b20795246433eb22666149ff7316bbf8f6b71183a08c",
+					"size": 2385,
+					"status": "missing-in-source"
+				},
+				"lib/token-translator.js": {
+					"match": false,
+					"packageHash": "4820798a913b85a496ea724815f48491d2c6a12ab889c501d263f180470cc7f5",
+					"size": 7693,
+					"status": "missing-in-source"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -1,36 +1,23 @@\n {\n   \"name\": \"typescript-eslint-parser\",\n-  \"description\": \"An Esprima-style parser for TypeScript\",\n+  \"description\": \"An ESLint custom parser which leverages TypeScript ESTree\",\n   \"author\": \"Nicholas C. Zakas <nicholas+npm@nczconsulting.com>\",\n   \"homepage\": \"https://github.com/eslint/typescript-eslint-parser\",\n   \"main\": \"parser.js\",\n-  \"version\": \"0.1.2\",\n+  \"version\": \"22.0.0\",\n   \"files\": [\n-    \"lib\",\n-    \"parser.js\"\n+    \"parser.js\",\n+    \"analyze-scope.js\",\n+    \"visitor-keys.js\"\n   ],\n   \"engines\": {\n-    \"node\": \">=0.10.0\"\n+    \"node\": \">=6.14.0\"\n   },\n   \"repository\": \"eslint/typescript-eslint-parser\",\n   \"bugs\": {\n     \"url\": \"https://github.com/eslint/typescript-eslint-parser/issues\"\n   },\n   \"license\": \"BSD-2-Clause\",\n-  \"devDependencies\": {\n-    \"chai\": \"^1.10.0\",\n-    \"dateformat\": \"^1.0.11\",\n-    \"eslint\": \"^2.2.0\",\n-    \"eslint-config-eslint\": \"^3.0.0\",\n-    \"eslint-release\": \"^0.9.2\",\n-    \"istanbul\": \"~0.2.6\",\n-    \"leche\": \"^1.0.1\",\n-    \"mocha\": \"^2.0.1\",\n-    \"npm-license\": \"^0.2.3\",\n-    \"semver\": \"^4.1.1\",\n-    \"shelljs\": \"^0.3.0\",\n-    \"shelljs-nodecli\": \"^0.1.1\"\n-  },\n   \"keywords\": [\n     \"ast\",\n     \"ecmascript\",\n@@ -42,18 +29,43 @@\n   ],\n   \"scripts\": {\n     \"test\": \"node Makefile.js test\",\n+    \"jest\": \"jest\",\n+    \"integration-tests\": \"docker-compose -f tests/integration/docker-compose.yml up\",\n+    \"kill-integration-test-containers\": \"docker-compose -f tests/integration/docker-compose.yml down -v --rmi local\",\n     \"lint\": \"node Makefile.js lint\",\n-    \"release\": \"eslint-release\",\n-    \"ci-release\": \"eslint-ci-release\",\n-    \"gh-release\": \"eslint-gh-release\",\n-    \"alpharelease\": \"eslint-prerelease alpha\",\n-    \"betarelease\": \"eslint-prerelease beta\"\n+    \"generate-release\": \"eslint-generate-release\",\n+    \"generate-alpharelease\": \"eslint-generate-prerelease alpha\",\n+    \"generate-betarelease\": \"eslint-generate-prerelease beta\",\n+    \"generate-rcrelease\": \"eslint-generate-prerelease rc\",\n+    \"publish-release\": \"eslint-publish-release\"\n+  },\n+  \"peerDependencies\": {\n+    \"eslint\": \">=4.19.1\",\n+    \"typescript\": \"*\"\n   },\n   \"dependencies\": {\n-    \"lodash.unescape\": \"4.0.0\",\n-    \"object-assign\": \"^4.0.1\"\n+    \"eslint-scope\": \"^4.0.0\",\n+    \"eslint-visitor-keys\": \"^1.0.0\",\n+    \"typescript-estree\": \"18.0.0\"\n   },\n-  \"peerDependencies\": {\n-    \"typescript\": \"^1.7.3\"\n+  \"devDependencies\": {\n+    \"eslint\": \"^4.19.1\",\n+    \"eslint-config-eslint\": \"4.0.0\",\n+    \"eslint-plugin-node\": \"6.0.1\",\n+    \"eslint-release\": \"1.2.0\",\n+    \"jest\": \"23.1.0\",\n+    \"npm-license\": \"0.3.3\",\n+    \"shelljs\": \"0.8.2\",\n+    \"shelljs-nodecli\": \"0.1.1\",\n+    \"typescript\": \"~3.2.1\"\n+  },\n+  \"jest\": {\n+    \"testEnvironment\": \"node\",\n+    \"testRegex\": \"tests/lib/.+\\\\.js$\",\n+    \"testPathIgnorePatterns\": [],\n+    \"collectCoverage\": true,\n+    \"coverageReporters\": [\n+      \"text-summary\"\n+    ]\n   }\n }\n",
+					"match": false,
+					"packageHash": "928d870692ec24cf49b2c1c04ac0f6c4487bba7f4c2dd87acb565a89524598d2",
+					"size": 1457,
+					"sourceHash": "11b1aeb7daf1bfd976fc6c53f68be07c4889e91fe560c8be9b30aafc2872c8b4",
+					"status": "content"
+				},
+				"parser.js": {
+					"diff": "--- published/parser.js\n+++ rebuilt/parser.js\n@@ -1,237 +1,75 @@\n /**\n  * @fileoverview Parser that converts TypeScript into ESTree format.\n  * @author Nicholas C. Zakas\n+ * @author James Henry <https://github.com/JamesHenry>\n  * @copyright jQuery Foundation and other contributors, https://jquery.org/\n  * MIT License\n  */\n-/* eslint no-undefined:0, no-use-before-define: 0 */\n \n \"use strict\";\n \n-var astNodeTypes = require(\"./lib/ast-node-types\"),\n-    ts = require(\"typescript\");\n-\n-var extra;\n-\n-/**\n- * Resets the extra config object\n- * @returns {void}\n- */\n-function resetExtra() {\n-    extra = {\n-        tokens: null,\n-        range: false,\n-        loc: false,\n-        comment: false,\n-        comments: [],\n-        tolerant: false,\n-        errors: [],\n-        strict: false,\n-        ecmaFeatures: {}\n-    };\n-}\n-\n-/**\n- * Converts a TypeScript comment to an Esprima comment.\n- * @param {boolean} block True if it's a block comment, false if not.\n- * @param {string} text The text of the comment.\n- * @param {int} start The index at which the comment starts.\n- * @param {int} end The index at which the comment ends.\n- * @param {Location} startLoc The location at which the comment starts.\n- * @param {Location} endLoc The location at which the comment ends.\n- * @returns {Object} The comment object.\n- * @private\n- */\n-function convertTypeScriptCommentToEsprimaComment(block, text, start, end, startLoc, endLoc) {\n-    var comment = {\n-        type: block ? \"Block\" : \"Line\",\n-        value: text\n-    };\n-\n-    if (typeof start === \"number\") {\n-        comment.range = [start, end];\n-    }\n-\n-    if (typeof startLoc === \"object\") {\n-        comment.loc = {\n-            start: startLoc,\n-            end: endLoc\n-        };\n-    }\n-\n-    return comment;\n-}\n-\n-/**\n- * Returns line and column data for the given start and end positions,\n- * for the given AST\n- * @param  {Object} start start data\n- * @param  {Object} end   end data\n- * @param  {Object} ast   the AST object\n- * @returns {Object}       the loc data\n- */\n-function getLocFor(start, end, ast) {\n-    var startLoc = ast.getLineAndCharacterOfPosition(start),\n-        endLoc = ast.getLineAndCharacterOfPosition(end);\n-\n-    return {\n-        start: {\n-            line: startLoc.line + 1,\n-            column: startLoc.character\n-        },\n-        end: {\n-            line: endLoc.line + 1,\n-            column: endLoc.character\n-        }\n-    };\n-}\n+const parse = require(\"typescript-estree\").parse;\n+const astNodeTypes = require(\"typescript-estree\").AST_NODE_TYPES;\n+const traverser = require(\"eslint/lib/util/traverser\");\n+const analyzeScope = require(\"./analyze-scope\");\n+const visitorKeys = require(\"./visitor-keys\");\n \n //------------------------------------------------------------------------------\n-// Parser\n+// Public\n",
+					"match": false,
+					"packageHash": "02ead811964202f8422288d1df773697a591437a5f7c44a27151800b8894da23",
+					"size": 7497,
+					"sourceHash": "dcd525d80a17eee8cf509817dae6469f83c7a397dbbab2ace35c648d791575bb",
+					"status": "content"
+				},
+				"analyze-scope.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"visitor-keys.js": {
+					"match": false,
+					"status": "missing-in-package"
+				}
+			},
+			"summary": {
+				"differentFiles": 4,
+				"matchingFiles": 0,
+				"missingInPackage": 2,
+				"missingInSource": 5,
+				"score": 0,
+				"totalFiles": 11
+			}
+		}
+	}
+]
