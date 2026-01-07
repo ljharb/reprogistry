@@ -1,0 +1,147 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-07T04:06:42.925Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:11.7.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "uvu@0.4.0-next.3",
+			"name": "uvu",
+			"version": "0.4.0-next.3",
+			"location": "https://registry.npmjs.org/uvu/-/uvu-0.4.0-next.3.tgz",
+			"integrity": "sha512-8QNWF86OZXXvTKDkMu0kmnfVxDOh90IkawkwAqJb+Js80LYwhwM+pz7PXJUN5CUmvZ7PkiJzd0g3Q37fnfwZAA==",
+			"publishedAt": "2020-08-11T16:32:56.450Z",
+			"publishedWith": {
+				"node": "12.18.3",
+				"npm": "6.14.6"
+			}
+		},
+		"source": {
+			"integrity": null,
+			"location": "git+https://github.com/lukeed/uvu.git",
+			"spec": "github:lukeed/uvu#992fefcbc417c954dc63a5d8cf1a6047aa53edf9"
+		},
+		"comparisonHash": "9ef46a5bd31291e57cbab41e2f17c57bd6da0b5b",
+		"diff": {
+			"files": {
+				"assert/index.js": {
+					"match": false,
+					"packageHash": "bf0503aad60c9d913d1e00f906e8469a7ec5ff7d234999158692de09001beaad",
+					"size": 5583,
+					"status": "missing-in-source"
+				},
+				"assert/index.mjs": {
+					"match": false,
+					"packageHash": "3e4062b32c871e3d12222f59580f89240b9507b2eabf74e781be58c1b2f5c7db",
+					"size": 5361,
+					"status": "missing-in-source"
+				},
+				"bin.js": {
+					"diff": "--- published/bin.js\n+++ rebuilt/bin.js\n@@ -1,7 +1,9 @@\n #!/usr/bin/env node\n const sade = require('sade');\n-const parse = require('./parse');\n const pkg = require('./package');\n+const { parse } = require('./parse');\n+\n+const dimport = x => new Function(`return import(${ JSON.stringify(x) })`).call(0);\n \n const hasImport = (() => {\n \ttry { new Function('import').call(0) }\n@@ -16,14 +18,18 @@\n \t.option('-C, --cwd', 'The current directory to resolve from', '.')\n \t.option('-c, --color', 'Print colorized output', true)\n \t.action(async (dir, pattern, opts) => {\n-\t\tif (opts.color) process.env.FORCE_COLOR = '1';\n-\t\tlet { suites } = await parse(dir, pattern, opts);\n-\t\tlet { exec, QUEUE } = require('.');\n+\t\ttry {\n+\t\t\tif (opts.color) process.env.FORCE_COLOR = '1';\n+\t\t\tlet ctx = await parse(dir, pattern, opts);\n \n-\t\tif (hasImport) {\n-\t\t\tawait import('uvu/run').then(m => m.default(suites, opts));\n-\t\t} else {\n-\t\t\tawait require('uvu/run')(suites, opts);\n+\t\t\tif (!ctx.requires && hasImport) {\n+\t\t\t\tawait dimport('uvu/run').then(m => m.run(ctx.suites, opts));\n+\t\t\t} else {\n+\t\t\t\tawait require('uvu/run').run(ctx.suites, opts);\n+\t\t\t}\n+\t\t} catch (err) {\n+\t\t\tconsole.error(err.stack || err.message);\n+\t\t\tprocess.exit(1);\n \t\t}\n \t})\n \t.parse(process.argv);\n",
+					"match": false,
+					"packageHash": "7153bdc6601708bc90a1673a5ea98e18c1233e22f35adb0d4f357b0ad60b92ca",
+					"size": 938,
+					"sourceHash": "947efa34173de960ab95e58ec8854ab427767768ef940c10fdb031ab16dfdfb9",
+					"status": "content"
+				},
+				"diff/index.js": {
+					"match": false,
+					"packageHash": "5e4d8466d20149e7447c01ad358878a443c3532691ed109ffead2cc274b77a44",
+					"size": 6079,
+					"status": "missing-in-source"
+				},
+				"diff/index.mjs": {
+					"match": false,
+					"packageHash": "2f046013fc248903372f0df062f470857375e390e8ce401e5e8006f60f737ad8",
+					"size": 5926,
+					"status": "missing-in-source"
+				},
+				"dist/index.js": {
+					"match": false,
+					"packageHash": "f492116b1b351002f0e380a65ced02fcae0aad87d979d19ce74a956d1316ffe4",
+					"size": 5021,
+					"status": "missing-in-source"
+				},
+				"dist/index.mjs": {
+					"match": false,
+					"packageHash": "e6d91ab5e17e2265b15cf1ef1684753a2775dbb6e1087a36aaa3f4554575fd9f",
+					"size": 4951,
+					"status": "missing-in-source"
+				},
+				"index.d.ts": {
+					"match": false,
+					"packageHash": "17b4b2f350918515c532a3329187d71bd779467d9aeebb6793a109fb865add59",
+					"size": 3532,
+					"status": "missing-in-source"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -1,6 +1,6 @@\n {\n   \"name\": \"uvu\",\n-  \"version\": \"0.4.0-next.3\",\n+  \"version\": \"0.5.6\",\n   \"repository\": \"lukeed/uvu\",\n   \"description\": \"uvu is an extremely fast and lightweight test runner for Node.js and the browser\",\n   \"module\": \"dist/index.mjs\",\n@@ -12,22 +12,27 @@\n   },\n   \"exports\": {\n     \".\": {\n+      \"types\": \"./index.d.ts\",\n       \"require\": \"./dist/index.js\",\n       \"import\": \"./dist/index.mjs\"\n     },\n     \"./assert\": {\n+      \"types\": \"./assert/index.d.ts\",\n       \"require\": \"./assert/index.js\",\n       \"import\": \"./assert/index.mjs\"\n     },\n     \"./diff\": {\n+      \"types\": \"./diff/index.d.ts\",\n       \"require\": \"./diff/index.js\",\n       \"import\": \"./diff/index.mjs\"\n     },\n     \"./parse\": {\n+      \"types\": \"./parse/index.d.ts\",\n       \"require\": \"./parse/index.js\",\n       \"import\": \"./parse/index.mjs\"\n     },\n     \"./run\": {\n+      \"types\": \"./run/index.d.ts\",\n       \"require\": \"./run/index.js\",\n       \"import\": \"./run/index.mjs\"\n     }\n@@ -43,7 +48,6 @@\n   ],\n   \"modes\": {\n     \"diff\": \"src/diff.js\",\n-    \"parse\": \"src/parse.js\",\n     \"assert\": \"src/assert.js\",\n     \"default\": \"src/index.js\"\n   },\n@@ -62,16 +66,16 @@\n     \"test\"\n   ],\n   \"dependencies\": {\n-    \"dequal\": \"^1.0.0\",\n-    \"diff\": \"^4.0.2\",\n+    \"dequal\": \"^2.0.0\",\n+    \"diff\": \"^5.0.0\",\n     \"kleur\": \"^4.0.3\",\n-    \"sade\": \"^1.7.3\",\n-    \"totalist\": \"^1.1.0\"\n+    \"sade\": \"^1.7.3\"\n   },\n   \"devDependencies\": {\n-    \"bundt\": \"1.0.1\",\n+    \"bundt\": \"1.1.1\",\n     \"esm\": \"3.2.25\",\n-    \"module-alias\": \"2.2.2\"\n+    \"module-alias\": \"2.2.2\",\n+    \"totalist\": \"2.0.0\"\n   },\n   \"_moduleAliases\": {\n     \"uvu\": \"src/index.js\",\n",
+					"match": false,
+					"packageHash": "8e97ca7e3de447f4d145fbfb2bee8e5b57782bd9a0c0ffb5dbf32d12d84f7e1c",
+					"size": 1600,
+					"sourceHash": "ae4f0190dd01853b9e1e7e08c926455305fb3479bdd156b1060b2ddc824a1351",
+					"status": "content"
+				},
+				"parse/index.js": {
+					"diff": "--- published/parse/index.js\n+++ rebuilt/parse/index.js\n@@ -1,39 +1,50 @@\n-const { resolve } = require('path');\n-const tlist = require('totalist');\n+// @ts-check\n+const { readdir, stat } = require('fs');\n+const { resolve, join } = require('path');\n+const { promisify } = require('util');\n \n+const ls = promisify(readdir);\n+const toStat = promisify(stat);\n const toRegex = x => new RegExp(x, 'i');\n \n-function exists(dep) {\n-\ttry {\n-\t\treturn require.resolve(dep);\n-\t} catch (err) {\n-\t\treturn false;\n-\t}\n-}\n-\n-module.exports = async function (dir, pattern, opts = {}) {\n+async function parse(dir, pattern, opts = {}) {\n \tif (pattern) pattern = toRegex(pattern);\n \telse if (dir) pattern = /(((?:[^\\/]*(?:\\/|$))*)[\\\\\\/])?\\w+\\.([mc]js|[jt]sx?)$/;\n \telse pattern = /((\\/|^)(tests?|__tests?__)\\/.*|\\.(tests?|spec)|^\\/?tests?)\\.([mc]js|[jt]sx?)$/i;\n-\tdir = resolve(opts.cwd, dir || '.');\n-\n-\t[].concat(opts.require || []).filter(Boolean).forEach(name => {\n-\t\tlet tmp = exists(name);\n-\t\tif (tmp) return require(tmp);\n-\t\tif (tmp = exists(resolve(name))) return require(tmp);\n-\t\tthrow new Error(`Cannot find module '${name}'`);\n-\t});\n+\tdir = resolve(opts.cwd || '.', dir || '.');\n \n \tlet suites = [];\n-\tlet ignores = ['node_modules'].concat(opts.ignore || []).map(toRegex);\n+\tlet requires = [].concat(opts.require || []).filter(Boolean);\n+\tlet ignores = ['^.git', 'node_modules'].concat(opts.ignore || []).map(toRegex);\n \n-\tawait tlist(dir, (rel, abs) => {\n-\t\tif (pattern.test(rel) && !ignores.some(x => x.test(rel))) {\n-\t\t\tsuites.push({ name: rel, file: abs });\n-\t\t}\n+\trequires.forEach(name => {\n+\t\ttry { return require(name) }\n+\t\tcatch (e) { throw new Error(`Cannot find module \"${name}\"`) }\n \t});\n \n+\t// NOTE: Node 8.x support\n+\t// @modified lukeed/totalist\n+\tawait (async function collect(d, p) {\n+\t\tawait ls(d).then(files => {\n+\t\t\treturn Promise.all(\n+\t\t\t\tfiles.map(async str => {\n+\t\t\t\t\tlet name = join(p, str);\n+\t\t\t\t\tfor (let i = ignores.length; i--;) {\n+\t\t\t\t\t\tif (ignores[i].test(name)) return;\n+\t\t\t\t\t}\n+\n+\t\t\t\t\tlet file = join(d, str);\n+\t\t\t\t\tlet stats = await toStat(file);\n+\t\t\t\t\tif (stats.isDirectory()) return collect(file, name);\n+\t\t\t\t\telse if (pattern.test(name)) suites.push({ name, file });\n+\t\t\t\t})\n+\t\t\t);\n+\t\t});\n+\t})(dir, '');\n+\n \tsuites.sort((a, b) => a.name.localeCompare(b.name));\n \n-\treturn { dir, suites };\n+\treturn { dir, suites, requires: requires.length > 0 };\n }\n+\n+exports.parse = parse;\n",
+					"match": false,
+					"packageHash": "a778b2a176c93251a65b3aad1f4c9b918f805fa2f331e916850add524a8d57f4",
+					"size": 1092,
+					"sourceHash": "5f06edda46d3a0bd04eca5df0b6163e3d47ad40a14ed12aca8aab8472924a591",
+					"status": "content"
+				},
+				"parse/index.mjs": {
+					"diff": "--- published/parse/index.mjs\n+++ rebuilt/parse/index.mjs\n@@ -1,39 +1,51 @@\n-import { resolve } from 'path';\n-import tlist from 'totalist';\n+import { readdir, stat } from 'fs';\n+import { createRequire } from 'module';\n+import { resolve, join } from 'path';\n+import { promisify } from 'util';\n \n+const ls = promisify(readdir);\n+const toStat = promisify(stat);\n const toRegex = x => new RegExp(x, 'i');\n \n-function exists(dep) {\n-\ttry {\n-\t\treturn require.resolve(dep);\n-\t} catch (err) {\n-\t\treturn false;\n-\t}\n-}\n-\n-export default async function (dir, pattern, opts = {}) {\n+export async function parse(dir, pattern, opts = {}) {\n \tif (pattern) pattern = toRegex(pattern);\n \telse if (dir) pattern = /(((?:[^\\/]*(?:\\/|$))*)[\\\\\\/])?\\w+\\.([mc]js|[jt]sx?)$/;\n \telse pattern = /((\\/|^)(tests?|__tests?__)\\/.*|\\.(tests?|spec)|^\\/?tests?)\\.([mc]js|[jt]sx?)$/i;\n-\tdir = resolve(opts.cwd, dir || '.');\n-\n-\t[].concat(opts.require || []).filter(Boolean).forEach(name => {\n-\t\tlet tmp = exists(name);\n-\t\tif (tmp) return require(tmp);\n-\t\tif (tmp = exists(resolve(name))) return require(tmp);\n-\t\tthrow new Error(`Cannot find module '${name}'`);\n-\t});\n+\tdir = resolve(opts.cwd || '.', dir || '.');\n \n \tlet suites = [];\n-\tlet ignores = ['node_modules'].concat(opts.ignore || []).map(toRegex);\n+\tlet requires = [].concat(opts.require || []).filter(Boolean);\n+\tlet ignores = ['^.git', 'node_modules'].concat(opts.ignore || []).map(toRegex);\n+\n+\tif (requires.length) {\n+\t\tlet $require = createRequire(import.meta.url);\n+\t\trequires.forEach(name => {\n+\t\t\ttry { return $require(name) }\n+\t\t\tcatch (e) { throw new Error(`Cannot find module \"${name}\"`) }\n+\t\t});\n+\t}\n \n-\tawait tlist(dir, (rel, abs) => {\n-\t\tif (pattern.test(rel) && !ignores.some(x => x.test(rel))) {\n-\t\t\tsuites.push({ name: rel, file: abs });\n-\t\t}\n-\t});\n+\t// NOTE: Node 8.x support\n+\t// @modified lukeed/totalist\n+\tawait (async function collect(d, p) {\n+\t\tawait ls(d).then(files => {\n+\t\t\treturn Promise.all(\n+\t\t\t\tfiles.map(async str => {\n+\t\t\t\t\tlet name = join(p, str);\n+\t\t\t\t\tfor (let i = ignores.length; i--;) {\n+\t\t\t\t\t\tif (ignores[i].test(name)) return;\n+\t\t\t\t\t}\n+\n+\t\t\t\t\tlet file = join(d, str);\n+\t\t\t\t\tlet stats = await toStat(file);\n+\t\t\t\t\tif (stats.isDirectory()) return collect(file, name);\n+\t\t\t\t\telse if (pattern.test(name)) suites.push({ name, file });\n+\t\t\t\t})\n+\t\t\t);\n+\t\t});\n+\t})(dir, '');\n \n \tsuites.sort((a, b) => a.name.localeCompare(b.name));\n \n-\treturn { dir, suites };\n+\treturn { dir, suites, requires: requires.length > 0 };\n }\n",
+					"match": false,
+					"packageHash": "9d11c6f94f595642ccf72877b7c96a5daea78169611f2b1003505a65543f43b5",
+					"size": 1080,
+					"sourceHash": "0b29fa5a924d576ed9a885a656e86d32ac1d0c2892dfe18e78b5c6a1b5af2a31",
+					"status": "content"
+				},
+				"readme.md": {
+					"diff": "--- published/readme.md\n+++ rebuilt/readme.md\n@@ -9,12 +9,12 @@\n   <a href=\"https://github.com/lukeed/uvu/actions\">\n     <img src=\"https://github.com/lukeed/uvu/workflows/CI/badge.svg\" alt=\"CI\" />\n   </a>\n+  <a href=\"https://licenses.dev/npm/uvu\">\n+    <img src=\"https://licenses.dev/b/npm/uvu\" alt=\"licenses\" />\n+  </a>\n   <a href=\"https://npmjs.org/package/uvu\">\n     <img src=\"https://badgen.now.sh/npm/dm/uvu\" alt=\"downloads\" />\n   </a>\n-  <a href=\"https://packagephobia.now.sh/result?p=uvu\">\n-    <img src=\"https://packagephobia.now.sh/badge?p=uvu\" alt=\"install size\" />\n-  </a>\n </div>\n \n <div align=\"center\">\n@@ -26,7 +26,7 @@\n \n ## Features\n \n-* Super [lightweight](https://npm.anvaka.com/#!/view/2d/uvu)\n+* Super [lightweight](https://npm.anvaka.com/#/view/2d/uvu)\n * Extremely [performant](#benchmarks)\n * Individually executable test files\n * Supports `async`/`await` tests\n@@ -82,6 +82,8 @@\n $ node -r esm tests/demo.js\n ```\n \n+> **Note:** The `-r esm` is for legacy Node.js versions. [Learn More](/docs/esm.md)\n+\n > [View the `uvu` CLI documentation](/docs/cli.md)\n \n \n",
+					"match": false,
+					"packageHash": "90dfa05eecca2dd1927d7a076e7ead51d795f54a3af564e69296abaa1af19534",
+					"size": 3461,
+					"sourceHash": "22cdb9856359e11d2fca40354d0c6f2b4b9911a73b28f5c9681ef6167ddf5174",
+					"status": "content"
+				},
+				"run/index.js": {
+					"diff": "--- published/run/index.js\n+++ rebuilt/run/index.js\n@@ -1,13 +1,12 @@\n-const { exec, QUEUE } = require('uvu');\n-\n-module.exports = async function (suites, opts={}) {\n+exports.run = async function (suites, opts={}) {\n \tglobalThis.UVU_DEFER = 1;\n+\tconst uvu = require('uvu');\n \n \tsuites.forEach((suite, idx) => {\n+\t\tglobalThis.UVU_QUEUE.push([suite.name]);\n \t\tglobalThis.UVU_INDEX = idx;\n-\t\tQUEUE.push([suite.name]);\n \t\trequire(suite.file);\n \t});\n \n-\tawait exec(opts.bail);\n+\tawait uvu.exec(opts.bail);\n }\n",
+					"match": false,
+					"packageHash": "e3ebc736ba0d3291896e9aaf74edf3841788514ecb0751f4a3c2e8fa293c04d2",
+					"size": 268,
+					"sourceHash": "92504f45ea8b65b63f27669ce73ea459aeb74c59528a710bd40d8283472e3ff3",
+					"status": "content"
+				},
+				"run/index.mjs": {
+					"diff": "--- published/run/index.mjs\n+++ rebuilt/run/index.mjs\n@@ -1,14 +1,13 @@\n-import { exec, QUEUE } from 'uvu';\n-\n-export default async function (suites, opts={}) {\n-\tlet suite, idx=0;\n+export async function run(suites, opts={}) {\n \tglobalThis.UVU_DEFER = 1;\n+\tconst uvu = await import('uvu');\n \n+\tlet suite, idx=0;\n \tfor (suite of suites) {\n-\t\tQUEUE.push([suite.name]);\n \t\tglobalThis.UVU_INDEX = idx++;\n+\t\tglobalThis.UVU_QUEUE.push([suite.name]);\n \t\tawait import('file:///' + suite.file);\n \t}\n \n-\tawait exec(opts.bail);\n+\tawait uvu.exec(opts.bail);\n }\n",
+					"match": false,
+					"packageHash": "55203a030cdc3597fc8d03bf225369da03a2fe0d3025ce0641fcf943c2f3bca7",
+					"size": 289,
+					"sourceHash": "34934fbfc0c4bc68deb98ccb9caba4512541ebd401a2dc6f7bc7fbf409b4650c",
+					"status": "content"
+				},
+				"parse/index.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"run/index.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				}
+			},
+			"summary": {
+				"differentFiles": 7,
+				"matchingFiles": 1,
+				"missingInPackage": 2,
+				"missingInSource": 7,
+				"score": 0.058823529411764705,
+				"totalFiles": 17
+			}
+		}
+	}
+]
