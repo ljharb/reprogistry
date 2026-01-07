@@ -1,0 +1,276 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-07T15:51:57.152Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:11.7.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "happypack@2.0.4",
+			"name": "happypack",
+			"version": "2.0.4",
+			"location": "https://registry.npmjs.org/happypack/-/happypack-2.0.4.tgz",
+			"integrity": "sha512-QWhlem8b61PJlm6LgaVtgOIZmxOYJZ/5ef6JXfLR4Ch7IeqmKlmDpTt2orWUjRbvDUozCStJ30wxRiCAoKrSYQ==",
+			"publishedAt": "2016-04-20T11:37:02.056Z",
+			"publishedWith": {
+				"node": "5.9.1",
+				"npm": "3.7.3"
+			},
+			"dependencies": {
+				"async": "^1.5.0",
+				"json-stringify-safe": "^5.0.1"
+			}
+		},
+		"source": {
+			"integrity": null,
+			"location": "git+ssh://git@github.com/amireh/happypack.git",
+			"spec": "github:amireh/happypack#7524fd417304c992d3a41e631b7c271c64df4574"
+		},
+		"comparisonHash": "9ef46a5bd31291e57cbab41e2f17c57bd6da0b5b",
+		"diff": {
+			"files": {
+				".eslintignore": {
+					"match": false,
+					"packageHash": "0fd4118f824f3173112956844c871b827c7bab15bcf78fa3fd955dc9f23d418c",
+					"size": 50,
+					"status": "missing-in-source"
+				},
+				".eslintrc": {
+					"match": false,
+					"packageHash": "831cef5a3c5787b11b63efac5a08410cadaf5a89f1fd8659ae88e227b52becc8",
+					"size": 2049,
+					"status": "missing-in-source"
+				},
+				".npmignore": {
+					"match": false,
+					"packageHash": "450b905b56304ea27818d3ae0f3010d92b231f2749be1d96b49ef4ad62495d50",
+					"size": 120,
+					"status": "missing-in-source"
+				},
+				".nvmrc": {
+					"match": false,
+					"packageHash": "c6ba6b1986efedca0c9285ecfd1ba5474807a09ed59b2125d355b78cd654786b",
+					"size": 7,
+					"status": "missing-in-source"
+				},
+				"README.md": {
+					"diff": "--- published/README.md\n+++ rebuilt/README.md\n@@ -1,136 +1,134 @@\n-# HappyPack (beta) [![Build Status](https://travis-ci.org/amireh/happypack.svg?branch=master)](https://travis-ci.org/amireh/happypack) [![codecov.io](https://codecov.io/github/amireh/happypack/coverage.svg?branch=master)](https://codecov.io/github/amireh/happypack?branch=master)\n+# HappyPack [![Build Status](https://travis-ci.org/amireh/happypack.svg?branch=master)](https://travis-ci.org/amireh/happypack) [![codecov.io](https://codecov.io/github/amireh/happypack/coverage.svg?branch=master)](https://codecov.io/github/amireh/happypack?branch=master)\n \n-_In a nutshell:_\n+HappyPack makes initial webpack builds faster by transforming files [in\n+parallel](#how-it-works).\n \n-HappyPack makes webpack builds faster by allowing you to transform multiple\n-files _in parallel_.\n-\n-See \"How it works\" below for more details.\n-\n-## Motivation\n-\n-- webpack initial build times are horrifying in large codebases (3k+ modules)\n-- something that works against both a one-time build (e.g. for a CI) and \n-  continuous builds (i.e. `--watch` during development)\n+> **Maintenance mode notice**\n+>\n+> My interest in the project is fading away mainly because I'm not using\n+> JavaScript as much as I was in the past. Additionally, Webpack's native\n+> performance is improving and (I hope) it will soon make this plugin\n+> unnecessary.\n+>\n+> See the FAQ entry about Webpack 4 and [thread-loader][thread-loader].\n+>\n+> Contributions are always welcome. Changes I make from this point will be\n+> restricted to bug-fixing. If someone wants to take over, feel free to get\n+> in touch.\n+>\n+> Thanks to everyone who used the library, contributed to it and helped in\n+> refining it!!!\n \n ## Usage\n \n-```\n+```shell\n npm install --save-dev happypack\n ```\n \n-In your `webpack.config.js`, you need to use the plugin and tell it of the\n-loaders it should use to transform the sources. ~~Note that you must specify\n-the absolute paths for these loaders as we do not use webpack's loader resolver\n-at this point.~~\n-\n-```javascript\n-var HappyPack = require('happypack');\n+HappyPack provides both a plugin and a loader in order to do its job so you\n+must use both to enable it.\n \n-exports.plugins = [\n-  new HappyPack({ \n-    // loaders is the only required parameter:\n-    loaders: [ 'babel?presets[]=es2015' ],\n-\n-    // customize as needed, see Configuration below\n-  })\n-];\n-```\n+Normally, you define loader rules to tell webpack how to process certain files.\n+With HappyPack, you switch things around so that you pass the loaders to\n+HappyPack's plugin and instead tell webpack to use `happypack/loader`.\n \n-Now you replace your current loaders with HappyPack's loader (possibly use an \n-env variable to enable HappyPack):\n+Below is a sample configuration that shows those steps in action.\n \n ```javascript\n+// @file: webpack.config.js\n+const HappyPack = require('happypack');\n+\n exports.module = {\n-  loaders: {\n-    test: /.js$/,\n-    loader: 'happypack/loader',\n-    include: [\n-      // ...\n-    ],\n-  }\n+  rules: [\n+    {\n+      test: /.js$/,\n+      // 1) replace your original list of loaders with \"happypack/loader\":\n+      // loaders: [ 'babel-loader?presets[]=es2015' ],\n+      use: 'happypack/loader',\n+      include: [ /* ... */ ],\n+      exclude: [ /* ... */ ]\n+    }\n+  ]\n };\n+\n+exports.plugins = [\n+  // 2) create the plugin:\n+  new HappyPack({\n+    // 3) re-add the loaders you replaced above in #1:\n+    loaders: [ 'babel-loader?presets[]=es2015' ]\n+  })\n",
+					"match": false,
+					"packageHash": "fdcfb8373d9437dd6582508bba04dd48d1dc0ab10727111e9d0f92e28928e0ec",
+					"size": 10860,
+					"sourceHash": "5ec402391eababff3f4fc2d8b4080f35b56445395673bceb6a5605cb51c24820",
+					"status": "content"
+				},
+				"lib/HappyFSCache.js": {
+					"match": false,
+					"packageHash": "88283b8d1b6b937d3fda553b230b1d1da99be451685c77102f2d5442a9557ad5",
+					"size": 3819,
+					"status": "missing-in-source"
+				},
+				"lib/HappyFakeCompiler.js": {
+					"diff": "--- published/lib/HappyFakeCompiler.js\n+++ rebuilt/lib/HappyFakeCompiler.js\n@@ -1,13 +1,29 @@\n var assert = require('assert');\n+var fs = require('fs');\n \n-function HappyFakeCompiler(id, sendMessageImpl) {\n-  assert(typeof sendMessageImpl === 'function');\n-\n-  this._id = id;\n-  this._sendMessageImpl = sendMessageImpl;\n+/**\n+ * @param {String} params.id\n+ * @param {String} params.compilerId\n+ * @param {Function} params.send\n+ */\n+function HappyFakeCompiler(params) {\n+  assert(typeof params.id === 'string',\n+    \"id must be assigned to a HappyFakeCompiler.\");\n+\n+  assert(typeof params.compilerId === 'string',\n+    \"compilerId must be assigned to a HappyFakeCompiler.\");\n+\n+  assert(typeof params.send === 'function',\n+    \"send implementation must be assigned to a HappyFakeCompiler.\");\n+\n+  this._id = 'FakeCompiler::' + params.id.toString() + '-' + params.compilerId.toString();\n+  this._compilerId = params.compilerId;\n+  this._sendMessageImpl = params.send;\n   this._requests = {};\n   this._messageId = 0;\n   this.options = {};\n+  this.context = null;\n+  this.inputFileSystem = fs;\n }\n \n var HFCPt = HappyFakeCompiler.prototype;\n@@ -16,6 +32,7 @@\n   assert(compilerOptions && typeof compilerOptions === 'object');\n \n   this.options = compilerOptions;\n+  this.context = compilerOptions.context;\n };\n \n /**\n@@ -39,10 +56,10 @@\n };\n \n // @private\n-HFCPt._handleResponse = function(message) {\n+HFCPt._handleResponse = function(id, message) {\n   var callback;\n \n-  if (!message.id || !this._requests[message.id]) return; // not for us\n+  if (!this._requests[id]) return; // not for us\n \n   assert(message.payload.hasOwnProperty('error'),\n     \"Compiler message payload must contain an @error field!\");\n@@ -50,22 +67,23 @@\n   assert(message.payload.hasOwnProperty('result'),\n     \"Compiler message payload must contain a @result field!\");\n \n-  callback = this._requests[message.id];\n-  delete this._requests[message.id];\n+  callback = this._requests[id];\n+  delete this._requests[id];\n \n   callback(message.payload.error, message.payload.result);\n };\n \n // @private\n HFCPt._sendMessage = function(type, payload, done) {\n-  var messageId = [ this._id, ++this._messageId ].join('__');\n+  var messageId = this._id + ':' + (++this._messageId).toString();\n \n   this._requests[messageId] = done;\n   this._sendMessageImpl({\n+    id: messageId,\n     name: 'COMPILER_REQUEST',\n     data: {\n-      id: messageId,\n       type: type,\n+      compilerId: this._compilerId,\n       payload: payload,\n     }\n   });\n",
+					"match": false,
+					"packageHash": "ad6a932717539fad6ac3f69d2f8940cc9271acf8b8647a529869785e1435483b",
+					"size": 1722,
+					"sourceHash": "80b69bc13c0da3c60b5f72d00913961f379a60ca9b5c5394d2b9f946675acb3d",
+					"status": "content"
+				},
+				"lib/HappyFakeLoaderContext.js": {
+					"diff": "--- published/lib/HappyFakeLoaderContext.js\n+++ rebuilt/lib/HappyFakeLoaderContext.js\n@@ -1,3 +1,7 @@\n+var ErrorSerializer = require('./ErrorSerializer');\n+var resolveSyncNotSupported = NotSupported('this.resolveSync()');\n+var execNotSupported = NotSupported('this.exec()');\n+\n function HappyFakeLoaderContext(initialValues) {\n   var loader = {};\n \n@@ -8,6 +12,7 @@\n   loader._remoteLoaderId = null;\n \n   loader.version = 1; // https://webpack.github.io/docs/loaders.html#version\n+  loader.webpack = false;\n   loader.request = null;\n   loader.query = null;\n \n@@ -23,26 +28,29 @@\n   loader.options = null; // TODO: we should read this from compiler options\n   loader.result = null;\n \n+  loader.sourceMap = false;\n+  loader.fs = null;\n+  loader.target = 'web';\n+  loader.minimize = undefined; // keep it as undefined by default just like without happypack, to make sure there is no accident...\n+\n   // TODO\n   loader.cacheable = function() {};\n   loader.callback = null; // will be defined at runtime\n   loader.async = null; // will be defined at runtime\n \n-  loader.exec = function() {\n-    throw new Error('HappyPack: this.exec() is not supported for happy loaders.');\n-  };\n+  loader.exec = execNotSupported;\n \n   loader.emitWarning = function(message) {\n     loader._compiler._sendMessage('emitWarning', {\n       remoteLoaderId: loader._remoteLoaderId,\n-      message: message\n+      message: ErrorSerializer.serialize(message)\n     });\n   };\n \n   loader.emitError = function(message) {\n     loader._compiler._sendMessage('emitError', {\n       remoteLoaderId: loader._remoteLoaderId,\n-      message: message\n+      message: ErrorSerializer.serialize(message)\n     });\n   };\n \n@@ -50,6 +58,8 @@\n     loader._compiler.resolve(context, resource, done);\n   };\n \n+  loader.resolveSync = resolveSyncNotSupported;\n+\n   loader.addDependency = function(file) {\n     loader._compiler._sendMessage('addDependency', {\n       remoteLoaderId: loader._remoteLoaderId,\n@@ -70,6 +80,14 @@\n     });\n   };\n \n+  loader.getDependencies = function() {\n+    return initialValues._dependencies;\n+  };\n+\n+  loader.getContextDependencies = function() {\n+    return initialValues._contextDependencies;\n+  };\n+\n   loader.emitFile = function(name, contents, sourceMap) {\n     loader._compiler._sendMessage('emitFile', {\n       remoteLoaderId: loader._remoteLoaderId,\n@@ -79,18 +97,26 @@\n     });\n   };\n \n+  loader.loadModule = function(resource, done) {\n+    loader._compiler._sendMessage('loadModule', {\n+      remoteLoaderId: loader._remoteLoaderId,\n+      file: resource,\n+    }, done);\n+  };\n+\n   // alias\n   loader.dependency = loader.addDependency;\n \n   Object.keys(initialValues || {}).forEach(function(key) {\n-    if (!loader.hasOwnProperty(key)) {\n-      console.warn('Unrecognized fake loader context attribute \"%s\".', key);\n-    }\n-\n     loader[key] = initialValues[key];\n   });\n \n   return loader;\n",
+					"match": false,
+					"packageHash": "b700a900ad618c0807ed8b82b889d4050ce569a87ad190496e8ff4b0d89021f8",
+					"size": 2491,
+					"sourceHash": "54ecb02e95e14765798ec5510545211172e74c89fc60f46edc35dd403903a6de",
+					"status": "content"
+				},
+				"lib/HappyLoader.js": {
+					"diff": "--- published/lib/HappyLoader.js\n+++ rebuilt/lib/HappyLoader.js\n@@ -1,54 +1,87 @@\n var assert = require('assert');\n-var HappyRPCHandler = require('./HappyRPCHandler');\n+var loaderUtils = require('loader-utils');\n+var DEFAULT_COMPILER_ID = require('./constants').DEFAULT_COMPILER_ID;\n+var DEFAULT_LOADER_ID = require('./constants').DEFAULT_LOADER_ID;\n \n-function HappyLoader() {\n+function HappyLoader(sourceCode, sourceMap) {\n+  var query, compilerId, loaderId, remoteLoaderId, happyPlugin;\n   var callback = this.async();\n-  var id = getId(this.query);\n-  var remoteLoaderId = [ id, this.resource ].join(':');\n-  var happyPlugin;\n+  var pluginList = locatePluginList(this);\n \n   assert(callback, \"HappyPack only works when asynchronous loaders are allowed!\");\n+  assert(pluginList && Array.isArray(pluginList),\n+    \"HappyPack: unable to locate the plugin list! \" +\n+    \"This most likely indicates an internal error.\"\n+  );\n \n   this.cacheable();\n \n-  happyPlugin = this.options.plugins.filter(isHappy(id))[0];\n+  query = loaderUtils.getOptions(this) || {};\n+  compilerId = query.compilerId || DEFAULT_COMPILER_ID;\n+  loaderId = query.id || DEFAULT_LOADER_ID;\n+  remoteLoaderId = 'Loader::' + compilerId + loaderId.toString() + ':' + this.resource;\n+\n+  happyPlugin = pluginList.filter(isHappy(loaderId))[0];\n \n   assert(!!happyPlugin,\n-    \"HappyPack: plugin for the loader '\" + id + \"' could not be found! \" +\n+    \"HappyPack: plugin for the loader '\" + loaderId + \"' could not be found! \" +\n     \"Did you forget to add it to the plugin list?\"\n   );\n \n-  HappyRPCHandler.registerActiveLoader(remoteLoaderId, this);\n-\n-  happyPlugin.compile({\n-    remoteLoaderId: remoteLoaderId,\n-\n-    // TODO: maybe too much data being pushed down the drain here? we can infer\n-    // all of this from `this.request`\n+  happyPlugin.compile(this, addWebpack2Context(this, {\n+    compilerId: compilerId,\n     context: this.context,\n+    minimize: this.minimize,\n+    remoteLoaderId: remoteLoaderId,\n     request: happyPlugin.generateRequest(this.resource),\n     resource: this.resource,\n     resourcePath: this.resourcePath,\n     resourceQuery: this.resourceQuery,\n-  }, function(err, code, map) {\n-    HappyRPCHandler.unregisterActiveLoader(remoteLoaderId);\n+    sourceCode: sourceCode,\n+    sourceMap: sourceMap,\n+    target: this.target,\n+    useSourceMap: this._module.useSourceMap,\n+  }), callback);\n+}\n \n-    if (err) {\n-      return callback(new Error(err));\n-    }\n+module.exports = HappyLoader;\n \n-    callback(null, code, map);\n-  });\n+function addWebpack2Context(loader, context) {\n+  if (typeof loader.getDependencies === 'function') {\n+    return Object.assign(context, {\n+      _dependencies: loader.getDependencies(),\n+      _contextDependencies: loader.getContextDependencies(),\n+    })\n+  }\n+  else {\n+    return context;\n+  }\n }\n \n-module.exports = HappyLoader;\n+function locatePluginList(loader) {\n+  // webpack 1 + webpack 4:\n+  if (\n+    loader._compiler &&\n+    loader._compiler.options &&\n+    loader._compiler.options.plugins\n+  ) {\n+    return loader._compiler.options.plugins;\n+  }\n+  // webpack 2 + 3:\n+  else if (loader.options && Array.isArray(loader.options.plugins)) {\n+    return loader.options.plugins;\n+  }\n+  else if (loader.options && typeof loader.options.plugins === 'function') {\n+    return loader.options.plugins();\n",
+					"match": false,
+					"packageHash": "8b75a98d8d0b1f59afa3268fad5a7039f07bcfa6c2b2a65a4fb86d731497133e",
+					"size": 1436,
+					"sourceHash": "03c71861b0b5ee277d800b4e38013f35f149e385ffbc9a2776e20a3f16f38c15",
+					"status": "content"
+				},
+				"lib/HappyLogger.js": {
+					"match": false,
+					"packageHash": "2afd84c60da2305fe6d2470084394415fdf662235b7af05a480167d1d1c72f8b",
+					"size": 220,
+					"status": "missing-in-source"
+				},
+				"lib/HappyMessage.js": {
+					"diff": "--- published/lib/HappyMessage.js\n+++ rebuilt/lib/HappyMessage.js\n@@ -26,6 +26,7 @@\n // COMPILE\n //\n //     shape({\n+//       id: string.isRequired,\n //       sourcePath: string,\n //       compiledPath: string,\n //       loaderContext: object,\n@@ -34,6 +35,7 @@\n // COMPILE_DONE\n //\n //     shape({\n+//       id: string.isRequired,\n //       sourcePath: string,\n //       compiledPath: string,\n //       success: bool,\n@@ -42,8 +44,8 @@\n // COMPILER_REQUEST\n //\n //     shape({\n+//       id: string.isRequired,\n //       data: shape({\n-//         id: string.isRequired,\n //         type: oneOf([ 'resolve' ]).isRequired,\n //\n //         payload: oneOfType([\n@@ -59,9 +61,8 @@\n // COMPILER_RESPONSE\n //\n //     shape({\n+//       id: string.isRequired,\n //       data: shape({\n-//         id: string.isRequired,\n-//\n //         payload: shape({\n //           error: string,\n //           result: object,\n",
+					"match": false,
+					"packageHash": "2150fd489abafd7423185d3e174990be2fd2f6e384c22e10994cbb20cda2b7ee",
+					"size": 1393,
+					"sourceHash": "ad3ec5ef65641d43a6a1d97a6b0784e69a0a1ac3102db5e8521a21837186b611",
+					"status": "content"
+				},
+				"lib/HappyPlugin.js": {
+					"diff": "--- published/lib/HappyPlugin.js\n+++ rebuilt/lib/HappyPlugin.js\n@@ -1,47 +1,50 @@\n-var fs = require('fs');\n-var path = require('path');\n var async = require('async');\n-var assert = require('assert');\n var HappyThreadPool = require('./HappyThreadPool');\n-var HappyRPCHandler = require('./HappyRPCHandler');\n-var HappyFSCache = require('./HappyFSCache');\n-var HappyUtils = require('./HappyUtils');\n-var HappyWorker = require('./HappyWorker');\n-var HappyFakeCompiler = require('./HappyFakeCompiler');\n+var HappyForegroundThreadPool = require('./HappyForegroundThreadPool');\n var WebpackUtils = require('./WebpackUtils');\n var OptionParser = require('./OptionParser');\n var JSONSerializer = require('./JSONSerializer');\n+var SourceMapSerializer = require('./SourceMapSerializer');\n var fnOnce = require('./fnOnce');\n+var ErrorSerializer = require('./ErrorSerializer');\n+var pick = require('./pick');\n var pkg = require('../package.json');\n-var uid = 0;\n \n function HappyPlugin(userConfig) {\n   if (!(this instanceof HappyPlugin)) {\n     return new HappyPlugin(userConfig);\n   }\n \n-  this.id = String(userConfig.id || ++uid);\n   this.name = 'HappyPack';\n   this.state = {\n-    started: false,\n     loaders: [],\n     baseLoaderRequest: '',\n-    foregroundWorker: null,\n+    foregroundThreadPool: null,\n+    verbose: false,\n+    debug: false,\n   };\n \n   this.config = OptionParser(userConfig, {\n-    id:                 { type: 'string' },\n-    tempDir:            { type: 'string', default: '.happypack' },\n-    threads:            { type: 'number', default: 3 },\n-    threadPool:         { type: 'object', default: null },\n-    cache:              { type: 'boolean', default: true },\n-    cacheContext:       { default: {} },\n-    cachePath:          { type: 'string' },\n-    inferLoaders:       { type: 'boolean', default: false },\n-    verbose:            { type: 'boolean', default: true },\n-    enabled:            { type: 'boolean', default: true },\n-    loaders:            {\n-      validate: function(value) {\n+    id:                       { type: 'string', default: '1' },\n+    compilerId:               { type: 'string', default: 'default' },\n+    tempDir:                  { deprecated: true },\n+    threads:                  { type: 'number', default: 3 },\n+    threadPool:               { type: 'object', default: null },\n+    cache:                    { deprecated: true },\n+    cachePath:                { deprecated: true },\n+    cacheContext:             { deprecated: true },\n+    cacheSignatureGenerator:  { deprecated: true },\n+    verbose:                  { type: 'boolean', default: true },\n+    verboseWhenProfiling:     { type: 'boolean', default: false },\n+    debug:                    { type: 'boolean', default: process.env.DEBUG === '1' },\n+    enabled:                  { deprecated: true },\n+    // we don't want this to be documented / exposed since it's an\n+    // implementation detail + not having it on means a bug, but we're making it\n+    // configurable for testing purposes\n+    bufferedMessaging:        { type: 'boolean', default: process.platform === 'win32' },\n+    loaders:                  {\n+      alias: 'use',\n+      validate: value => {\n         if (!Array.isArray(value)) {\n           return 'Loaders must be an array!';\n         }\n@@ -49,53 +52,48 @@\n           return 'You must specify at least one loader!';\n         }\n         else if (value.some(function(loader) {\n-          return typeof loader !== 'string' && !loader.path;\n+          return typeof loader !== 'string' && !loader.path && !loader.loader;\n         })) {\n-          return 'Loader must have a @path property or be a string.'\n+          return 'Loader must have a @path or @loader property or be a string.'\n         }\n-      },\n+      }\n     }\n-  }, \"HappyPack[\" + this.id + \"]\");\n-\n-  this.threadPool = this.config.threadPool || HappyThreadPool({\n-    size: this.config.threads\n-  });\n-\n-  this.cache = HappyFSCache(this.id, this.config.cachePath ?\n-    path.resolve(this.config.cachePath.replace(/\\[id\\]/g, this.id)) :\n-    path.resolve(this.config.tempDir, 'cache--' + this.id + '.json'),\n-    this.config.verbose\n",
+					"match": false,
+					"packageHash": "7a8503d3f399545e4f0a9244590b71beef70140d2faac4a9c5d5a778e7c975c3",
+					"size": 10254,
+					"sourceHash": "6fa933f627f466a4fdfd83fc89e61a381f182b0cdac91799f588f5c9eff9d9f9",
+					"status": "content"
+				},
+				"lib/HappyRPCHandler.js": {
+					"diff": "--- published/lib/HappyRPCHandler.js\n+++ rebuilt/lib/HappyRPCHandler.js\n@@ -1,68 +1,127 @@\n var assert = require('assert');\n-var activeLoaders = {};\n-var activeCompiler = null;\n-\n-var HappyRPCHandler = exports;\n+var SourceMapSerializer = require('./SourceMapSerializer');\n+var ErrorSerializer = require('./ErrorSerializer');\n+var SharedPtrMap = require('./SharedPtrMap');\n+var COMPILER_RPCs, LOADER_RPCS;\n+var DEFAULT_COMPILER_ID = require('./constants').DEFAULT_COMPILER_ID;\n+var DEFAULT_LOADER_ID = require('./constants').DEFAULT_LOADER_ID;\n+\n+function HappyRPCHandler() {\n+  this.activeLoaders = new SharedPtrMap();\n+  this.activeCompilers = new SharedPtrMap();\n+}\n \n-HappyRPCHandler.registerActiveCompiler = function(compiler) {\n-  activeCompiler = compiler;\n+HappyRPCHandler.prototype.registerActiveCompiler = function(id, compiler) {\n+  this.activeCompilers.set(id || DEFAULT_COMPILER_ID, compiler);\n };\n \n-HappyRPCHandler.registerActiveLoader = function(id, instance) {\n-  activeLoaders[id] = instance;\n+HappyRPCHandler.prototype.isActive = function() {\n+  return this.activeCompilers.getSize() > 0;\n };\n \n-HappyRPCHandler.unregisterActiveLoader = function(id) {\n-  delete activeLoaders[id];\n+HappyRPCHandler.prototype.unregisterActiveCompiler = function(id) {\n+  this.activeCompilers.delete(id || DEFAULT_COMPILER_ID);\n };\n \n-HappyRPCHandler.execute = function(type, payload, done) {\n-  var loader;\n+HappyRPCHandler.prototype.registerActiveLoader = function(id, instance) {\n+  this.activeLoaders.set(id || DEFAULT_LOADER_ID, instance);\n+};\n \n-  if (type === 'resolve') {\n-    assertCompilerIsActive();\n+HappyRPCHandler.prototype.unregisterActiveLoader = function(id) {\n+  this.activeLoaders.delete(id || DEFAULT_LOADER_ID);\n+};\n \n-    activeCompiler.resolvers.normal.resolve(payload.context, payload.resource, done);\n-  }\n-  else { // a loader RPC:\n-    assertLoaderIsActive(payload.remoteLoaderId);\n-    loader = activeLoaders[payload.remoteLoaderId];\n+HappyRPCHandler.prototype.execute = function(type, payload, done) {\n+  var compiler, loader;\n \n-    if (type === 'emitWarning') {\n-      loader.emitWarning(payload.message);\n-    }\n-    else if (type === 'emitError') {\n-      loader.emitError(payload.message);\n-    }\n-    else if (type === 'emitFile') {\n-      loader.emitFile(payload.name, payload.contents, JSON.parse(payload.sourceMap));\n-    }\n-    else if (type === 'addDependency') {\n-      loader.addDependency(payload.file);\n-    }\n-    else if (type === 'addContextDependency') {\n-      loader.addContextDependency(payload.file);\n-    }\n-    else if (type === 'clearDependencies') {\n-      loader.clearDependencies();\n+  if (COMPILER_RPCs.hasOwnProperty(type)) {\n+    if (payload.compilerId) {\n+      compiler = this.activeCompilers.get(payload.compilerId);\n     }\n     else {\n-      assert(false, \"Unrecognized RPC '\" + type + '\"');\n+      compiler = this.activeCompilers.get('default');\n     }\n \n+    assert(!!compiler,\n+      \"A compiler RPC was dispatched, but no compiler instance was registered!\"\n+    );\n+\n+    COMPILER_RPCs[type](compiler, payload, done);\n+  }\n+  else if (LOADER_RPCS.hasOwnProperty(type)) {\n+    loader = this.activeLoaders.get(payload.remoteLoaderId);\n+\n+    assert(!!loader,\n+      \"A loader RPC was dispatched to HappyLoader[\" + payload.remoteLoaderId +\n+      \"] but no such loader is active!\"\n+    );\n+\n+    LOADER_RPCS[type](loader, payload, done);\n+  }\n",
+					"match": false,
+					"packageHash": "0abd7cc5472002b8fc2084d741118ea625875e8d4bbdf46bc3b00c48ba7c9238",
+					"size": 1765,
+					"sourceHash": "d1c8ddb2268a652c31e14c91ecbe5bd36936fcb0c72e4bd4e3300cc066f0f83b",
+					"status": "content"
+				},
+				"lib/HappyTestUtils.js": {
+					"match": false,
+					"packageHash": "fce6ce195807eb5948525c021d28ac08e8ef0033b260a65c9574807ecf85efef",
+					"size": 4237,
+					"status": "missing-in-source"
+				},
+				"lib/HappyThread.js": {
+					"diff": "--- published/lib/HappyThread.js\n+++ rebuilt/lib/HappyThread.js\n@@ -1,20 +1,53 @@\n var path = require('path');\n var fork = require('child_process').fork;\n var assert = require('assert');\n-var HappyLogger = require('./HappyLogger');\n-var HappyRPCHandler = require('./HappyRPCHandler');\n var Once = require('./fnOnce');\n var WORKER_BIN = path.resolve(__dirname, 'HappyWorkerChannel.js');\n+var BufferedFd = require('./BufferedFd')\n+var UnbufferedFd = require('./UnbufferedFd')\n \n-function HappyThread(id) {\n-  var fd;\n+/**\n+ * @param {String|Number} id\n+ * @param {Object?} config\n+ * @param {Boolean} [config.verbose=false]\n+ * @param {Boolean} [config.debug=false]\n+ * @param {Boolean} [config.buffered=false]\n+ */\n+function HappyThread(id, happyRPCHandler, _config) {\n+  var fd, bfd;\n+  var config = _config || {};\n+  var BufferedFdImpl = config.buffered ? BufferedFd : UnbufferedFd;\n   var callbacks = {};\n+  var generateMessageId = (function() {\n+    var counter = 0;\n+\n+    return function() {\n+      var nextId = ++counter;\n+\n+      return 'Thread::' + id.toString() + ':' + nextId.toString();\n+    }\n+  }());\n+\n+  var logSendError = function(err) {\n+    if (err) {\n+      console.error('HappyThread[%s]: unable to send to worker!', id, err)\n+    }\n+  }\n+\n+  var send = function(message) {\n+    BufferedFdImpl.send(bfd, message, logSendError)\n+  }\n \n   return {\n     open: function(onReady) {\n       var emitReady = Once(onReady);\n \n-      fd = fork(WORKER_BIN, [id]);\n+      fd = fork(WORKER_BIN, [id, JSON.stringify({ buffered: config.buffered })], {\n+        // Do not pass through any arguments that were passed to the main\n+        // process (webpack or node) because they could have unwanted\n+        // side-effects, see issue #47\n+        execArgv: [],\n+      });\n \n       fd.on('error', throwError);\n       fd.on('exit', function(exitCode) {\n@@ -23,36 +56,48 @@\n         }\n       });\n \n-      fd.on('message', function acceptMessageFromWorker(message) {\n+      bfd = BufferedFdImpl.of(fd)\n+\n+      fd.on('message', function(message) {\n         if (message.name === 'READY') {\n-          HappyLogger.info('Happy thread[%d] is now open.', id);\n+          if (config.debug) {\n+            console.info('HappyThread[%s] is now open.', id);\n+          }\n \n           emitReady();\n         }\n-        else if (message.name === 'COMPILED') {\n-          var filePath = message.sourcePath;\n+        else if (message.name === 'CONFIGURE_DONE') {\n+          assert(typeof callbacks[message.id] === 'function',\n+            \"HappyThread: expected plugin to be awaiting a configuration ACK.\"\n+          );\n \n-          HappyLogger.info('Thread[%d]: a file has been compiled.', id, filePath);\n+          callbacks[message.id]();\n+          delete callbacks[message.id];\n+        }\n+        else if (message.name === 'COMPILED') {\n+          if (config.debug) {\n+            console.log('HappyThread[%s]: a file has been compiled. (request=%s)', id, message.id);\n+          }\n \n-          assert(typeof callbacks[filePath] === 'function',\n-            \"HappyThread: expected loader to be pending on source file '\" +\n-            filePath + \"'\" + \" (this is likely an internal error!)\"\n+          assert(typeof callbacks[message.id] === 'function',\n+            \"HappyThread: expected loader to be pending on source file but wasn't! (this is likely an internal error!)\"\n           );\n \n",
+					"match": false,
+					"packageHash": "df6e12e10586bfa927c1b88174d8403c8910f42537fdfc1886fbf2327a8b9e85",
+					"size": 3302,
+					"sourceHash": "febb6a4359ffee026069ef06990cba958fd4697c6ff226be8a31988c74645182",
+					"status": "content"
+				},
+				"lib/HappyThreadPool.js": {
+					"diff": "--- published/lib/HappyThreadPool.js\n+++ rebuilt/lib/HappyThreadPool.js\n@@ -1,16 +1,36 @@\n var async = require('async');\n var assert = require('assert');\n+var HappyRPCHandler = require('./HappyRPCHandler');\n var HappyThread = require('./HappyThread');\n \n /**\n+ * Create a thread pool that can be shared between multiple plugin instances.\n  *\n  * @param {Object} config\n- * @param {Number} config.threads\n- * @param {String} config.optionsPath\n+ * @param {Number!} config.size\n+ *        The number of background threads to spawn for running loaders.\n  *\n- * @return {[type]}        [description]\n+ * @param {String?} config.id\n+ *        Used for prefixing the thread IDs. This is only used for logging\n+ *        purposes and does not affect the functionality.\n+ *\n+ * @param {Boolean?} [config.verbose=false]\n+ *        Allow this module and threads to log information to the console.\n+ *\n+ * @param {Boolean?} [config.debug=false]\n+ *        Allow this module and threads to log debugging information to the\n+ *        console.\n+ *\n+ * @param {Boolean?} [config.bufferedMessaging=false]\n+ *        Compatibility mode for fork() on Windows where message exchange\n+ *        between the master and worker processes is done serially.\n+ *\n+ *        This should be turned on if you're on Windows otherwise the process\n+ *        could hang!\n  */\n module.exports = function HappyThreadPool(config) {\n+  var rpcHandler = new HappyRPCHandler();\n+\n   assert(!isNaN(config.size),\n     \"ArgumentError: HappyThreadPool requires a valid integer for its size, but got NaN.\"\n   );\n@@ -20,44 +40,68 @@\n     \", but got {\" + config.size + \"}.\"\n   );\n \n-  var threads = createThreads(config.size, config);\n+  var threads = createThreads(config.size, rpcHandler, {\n+    id: config.id,\n+    verbose: config.verbose,\n+    debug: config.debug,\n+    buffered: config.hasOwnProperty('bufferedMessaging') ?\n+      config.bufferedMessaging :\n+      process.platform === 'win32',\n+  });\n+\n+  var getThread = RoundRobinThreadPool(threads);\n \n   return {\n     size: config.size,\n \n-    start: function(done) {\n-      async.parallel(threads.filter(not(send('isOpen'))).map(get('open')), done);\n-    },\n+    start: function(compilerId, compiler, compilerOptions, done) {\n+      rpcHandler.registerActiveCompiler(compilerId, compiler);\n \n-    configure: function(compilerOptions, done) {\n-      assert(!threads.some(not(send('isOpen'))),\n-        \"ThreadPool must be started before attempting to configure it!\"\n-      );\n-\n-      async.parallel(threads.map(function(thread) {\n-        return function(callback) {\n-          thread.configure(compilerOptions, callback);\n+      async.parallel(threads.filter(not(send('isOpen'))).map(get('open')), function(err) {\n+        if (err) {\n+          return done(err);\n         }\n-      }), done);\n+\n+        async.parallel(threads.map(function(thread) {\n+          return function(callback) {\n+            thread.configure(compilerId, compilerOptions, callback);\n+          }\n+        }), done);\n+      });\n     },\n \n     isRunning: function() {\n       return !threads.some(not(send('isOpen')));\n     },\n \n-    stop: function() {\n-      threads.filter(send('isOpen')).map(send('close'));\n+    compile: function(loaderId, loader, params, done) {\n+      var worker = getThread();\n+\n+      rpcHandler.registerActiveLoader(loaderId, loader);\n+\n",
+					"match": false,
+					"packageHash": "48f0564635c04baadfb442fe3379840800b7084a4cc2abf6f922f861838d05e4",
+					"size": 2084,
+					"sourceHash": "2ee3b7cb4318dc4ecc15a848577b707ac6a229af072d675c439a42564e8857df",
+					"status": "content"
+				},
+				"lib/HappyUtils.js": {
+					"match": false,
+					"packageHash": "ea9e747a347b6197974db07405330085e79fa2ceda4f08a631aaa5a7b5635438",
+					"size": 1245,
+					"status": "missing-in-source"
+				},
+				"lib/HappyWorker.js": {
+					"diff": "--- published/lib/HappyWorker.js\n+++ rebuilt/lib/HappyWorker.js\n@@ -1,7 +1,7 @@\n-var fs = require('fs');\n var assert = require('assert');\n var applyLoaders = require('./applyLoaders');\n-var serializeError = require('./serializeError');\n+var ErrorSerializer = require('./ErrorSerializer');\n+var SourceMapSerializer = require('./SourceMapSerializer');\n \n function HappyWorker(params) {\n   this._compiler = params.compiler;\n@@ -10,8 +10,8 @@\n /**\n  * @param  {Object} params\n  * @param  {Object} params.loaderContext\n- * @param  {String} params.loaderContext.resourcePath\n- * @param  {String} params.compiledPath\n+ * @param  {String} params.loaderContext.sourceCode\n+ * @param  {?String|?Object} params.loaderContext.sourceMap\n  * @param  {Array.<String>} params.loaders\n  * @param  {Function} done\n  */\n@@ -20,38 +20,24 @@\n     \"ArgumentError: expected params.sourcePath to contain path to the source file.\"\n   );\n \n-  assert(typeof params.compiledPath === 'string',\n-    \"ArgumentError: expected params.compiledPath to contain path to the compiled file.\"\n-  );\n-\n   assert(Array.isArray(params.loaders),\n     \"ArgumentError: expected params.loaders to contain a list of loaders.\"\n   );\n \n-  var sourcePath = params.loaderContext.resourcePath;\n-  var compiledPath = params.compiledPath;\n-  var success = false;\n-  var source = fs.readFileSync(sourcePath, 'utf-8');\n-\n   applyLoaders({\n     compiler: this._compiler,\n     loaders: params.loaders,\n     loaderContext: params.loaderContext,\n-  }, source, null, function(err, code/*, map*/) {\n+  }, params.loaderContext.sourceCode, params.loaderContext.sourceMap, function(err, source, sourceMap) {\n     if (err) {\n-      console.error(err);\n-      fs.writeFileSync(compiledPath, serializeError(err), 'utf-8');\n+      done(ErrorSerializer.serialize(err))\n     }\n     else {\n-      fs.writeFileSync(compiledPath, code /* TODO sourcemap */);\n-      success = true;\n+      done(null, {\n+        compiledSource: source,\n+        compiledMap: SourceMapSerializer.serialize(sourceMap)\n+      });\n     }\n-\n-    done({\n-      sourcePath: sourcePath,\n-      compiledPath: compiledPath,\n-      success: success\n-    });\n   });\n };\n \n",
+					"match": false,
+					"packageHash": "4caf2f8bc48b4c229e6a5dc14bc57e6ac64fb190871fcb3a947bade3a418e3f8",
+					"size": 1645,
+					"sourceHash": "b256a556eb898a193afcbad08949c0402064722487c1279675c3508305c66ad1",
+					"status": "content"
+				},
+				"lib/HappyWorkerChannel.js": {
+					"diff": "--- published/lib/HappyWorkerChannel.js\n+++ rebuilt/lib/HappyWorkerChannel.js\n@@ -3,47 +3,102 @@\n var JSONSerializer = require('./JSONSerializer');\n var HappyFakeCompiler = require('./HappyFakeCompiler');\n var HappyWorker = require('./HappyWorker');\n+var BufferedFd = require('./BufferedFd')\n+var UnbufferedFd = require('./UnbufferedFd')\n \n if (process.argv[1] === __filename) {\n   startAsWorker();\n }\n \n function startAsWorker() {\n-  HappyWorkerChannel(String(process.argv[2]), process);\n+  HappyWorkerChannel(String(process.argv[2]), process, JSON.parse(process.argv[3] || '{}'));\n }\n \n-function HappyWorkerChannel(id, stream) {\n-  var fakeCompiler = new HappyFakeCompiler(id, stream.send.bind(stream));\n-  var worker = new HappyWorker({ compiler: fakeCompiler });\n+function HappyWorkerChannel(id, fd, config) {\n+  var BufferedFdImpl = config && config.buffered ? BufferedFd : UnbufferedFd;\n+  var bfd = BufferedFdImpl.of(fd)\n+  var fakeCompilers = {};\n+  var workers = {};\n+  var logSendError = function(err) {\n+    if (err) {\n+      console.warn('HappyWorker[%s]: unable to send to master!', id, err)\n+    }\n+  }\n \n-  stream.on('message', accept);\n-  stream.send({ name: 'READY' });\n+  var send = function(message) {\n+    BufferedFdImpl.send(bfd, message, logSendError)\n+  }\n \n-  function accept(message) {\n-    if (message.name === 'COMPILE') {\n-      worker.compile(message.data, function(result) {\n-        stream.send({\n-          name: 'COMPILED',\n-          sourcePath: result.sourcePath,\n-          compiledPath: result.compiledPath,\n-          success: result.success\n-        });\n-      });\n-    }\n-    else if (message.name === 'COMPILER_RESPONSE') {\n-      fakeCompiler._handleResponse(message.data);\n-    }\n-    else if (message.name === 'CONFIGURE') {\n-      fakeCompiler.configure(JSONSerializer.deserialize(message.data.compilerOptions));\n+  var handlers = {\n+    CONFIGURE: function(message) {\n+      findOrCreateFakeCompiler(message.data.compilerId)\n+        .configure(JSONSerializer.deserialize(message.data.compilerOptions))\n+      ;\n \n-      stream.send({\n+      send({\n+        id: message.id,\n         name: 'CONFIGURE_DONE'\n       });\n+    },\n+\n+    COMPILE: function(message) {\n+      getWorker(message.data.loaderContext.compilerId)\n+        .compile(message.data, function(err, data) {\n+          send({\n+            id: message.id,\n+            name: 'COMPILED',\n+            error: err,\n+            data: data\n+          });\n+        })\n+      ;\n+    },\n+\n+    COMPILER_RESPONSE: function(message) {\n+      getFakeCompiler(message.data.compilerId)\n+        ._handleResponse(message.id, message.data)\n+      ;\n+    },\n+  };\n+\n+  fd.on('message', accept)\n+\n+  send({ name: 'READY' });\n+\n+  function accept(message) {\n+    var handler = handlers[message.name];\n+\n+    if (!handler) {\n+      console.warn('ignoring unknown message:', message);\n     }\n     else {\n-      console.warn('ignoring unknown message:', message);\n+      handler(message);\n",
+					"match": false,
+					"packageHash": "30a531d18c95caf5f6a59acad8fe83380ab0fde405547504b97470222b4df76c",
+					"size": 1309,
+					"sourceHash": "af5e1e76235575973f9369934cf7f5637fe2b536ebf7dfc8fe54304f21a2a915",
+					"status": "content"
+				},
+				"lib/JSONSerializer.js": {
+					"diff": "--- published/lib/JSONSerializer.js\n+++ rebuilt/lib/JSONSerializer.js\n@@ -31,13 +31,13 @@\n   // Creates a JSON string representation of the object and uses placeholders\n   // for functions and regexps (identified by index) which are later\n   // replaced.\n-  str = stringify(obj, function (key, value) {\n+  str = stringify(obj, function(key, value) {\n     if (typeof value === 'object' && isRegExp(value)) {\n       return '@__REGEXP{' + (regexps.push(value) - 1) + '}@';\n     }\n \n     return value;\n-  });\n+  }, 0, Function.prototype /* prune circular refs */);\n \n   // Protects against `JSON.stringify()` returning `undefined`, by serializing\n   // to the literal string: \"undefined\".\n@@ -60,11 +60,7 @@\n   // string with their string representations. If the original value can not\n   // be found, then `undefined` is used.\n   return str.replace(PLACE_HOLDER_REGEXP, function (match, type, valueIndex) {\n-    if (type === 'REGEXP') {\n-      return JSON.stringify(serializeRegExp(regexps[valueIndex]));\n-    }\n-\n-    return match;\n+    return JSON.stringify(serializeRegExp(regexps[valueIndex]));\n   }, 0, function() {});\n }\n \n",
+					"match": false,
+					"packageHash": "676debe90b2b234c994699f3095214cd273aa0dec25b0f4696ca637b7b291766",
+					"size": 2739,
+					"sourceHash": "102f7f14b2a971465b50df9da554105be904d86fde1b6946204b8e1ce40c9d7d",
+					"status": "content"
+				},
+				"lib/OptionParser.js": {
+					"diff": "--- published/lib/OptionParser.js\n+++ rebuilt/lib/OptionParser.js\n@@ -16,14 +16,38 @@\n     })\n   ;\n \n+  const aliased = Object.keys(schema).reduce(function(map, key) {\n+    const def = schema[key];\n+\n+    map[key] = def;\n+\n+    if (def.alias) {\n+      map[def.alias] = def;\n+    }\n+\n+    return map;\n+  }, {})\n+\n   return Object.keys(params).reduce(function(hsh, key) {\n-    var spec = schema[key];\n+    assert(aliased.hasOwnProperty(key),\n+      format(\"Unrecognized option '\" + key + \"'\")\n+    );\n+\n+    var spec = aliased[key];\n     var value = params[key];\n     var validationError;\n \n-    assert(schema.hasOwnProperty(key),\n-      format(\"Unrecognized option '\" + key + \"'\")\n-    );\n+    if (spec.deprecated === true) {\n+      console.warn(\n+        format(\n+          \"Option '%s' has been deprecated. Configuring it will \" +\n+          \"cause an error to be thrown in future versions.\"\n+        ),\n+        key\n+      );\n+\n+      return hsh;\n+    }\n \n     if (spec.validate) {\n       validationError = spec.validate(value);\n",
+					"match": false,
+					"packageHash": "c33aa7f3fb34d98d81873c2eadb6a9b4b0af9a272e200f585e56c3d83f92aafb",
+					"size": 1526,
+					"sourceHash": "2f3e30cf06fb6066be3b82f02b7f08d89fbf8f146c17360c9109ae6bf60651e5",
+					"status": "content"
+				},
+				"lib/WebpackUtils.js": {
+					"diff": "--- published/lib/WebpackUtils.js\n+++ rebuilt/lib/WebpackUtils.js\n@@ -1,17 +1,125 @@\n var async = require('async');\n var assert = require('assert');\n \n-exports.disectLoaderString = function disectLoaderString(string) {\n-  if (typeof string === 'object' && string && string.path) {\n-    return string;\n+exports.normalizeLoader = function(input) {\n+  var normals;\n+\n+  // happypack variant:\n+  if (typeof input === 'object' && input.hasOwnProperty('path')) {\n+    normals = [ Object.assign({}, input) ];\n+  }\n+  // webpack object variant:\n+  else if (typeof input === 'object') {\n+    normals = [].concat(extractLoaders(input));\n   }\n+  // webpack/happypack string loader(s):\n+  else if (typeof input === 'string') {\n+    normals = [].concat(extractPathAndQueryFromString(input));\n+  }\n+\n+  return normals.map(function(loader) {\n+    // normalize the query so that it is always a string prefixed by '?'\n+    if (loader.query) {\n+      if (typeof loader.query === 'object') {\n+        loader.query = '?' + JSON.stringify(loader.query);\n+      }\n+      else if (typeof loader.query === 'string') {\n+        loader.query = ensureHasLeadingMarker(loader.query);\n+      }\n+    }\n \n-  var loaderStrings = string.split('!');\n-  if (loaderStrings.length === 1) {\n-    return extractPathAndQuery(loaderStrings[0]);\n+    // be compatible with webpack's syntax within our own: if they specify\n+    // a loader's path using a \"loader\" attribute, map it to the \"path\" one\n+    if (loader.loader) {\n+      loader.path = loader.loader;\n+      delete loader.loader;\n+    }\n+\n+    return loader;\n+  });\n+};\n+\n+/**\n+ * Extract the set of loaders (one or more) from a given a \"module.loaders\"\n+ * webpack config entry.\n+ *\n+ * This does NOT perform any normalization on the query, so the query may be\n+ * a string (prefixed by '?' or not) or it may be an object.\n+ *\n+ * Example inputs/outputs:\n+ *\n+ *     // a loader chain\n+ *     {\n+ *       loaders: [ 'style', 'css' ]\n+ *     }\n+ *     // => [ \"style\", \"css\" ]\n+ *\n+ *     // another loader chain\n+ *     {\n+ *       loaders: [ 'style!css' ]\n+ *     }\n+ *     // => [ \"style!css\" ]\n+ *\n+ *     // a single loader, no query:\n+ *     {\n+ *       loader: 'babel'\n+ *     }\n+ *     // => [ \"babel\" ]\n+ *\n+ *     // a single loader with inline query:\n+ *     {\n+ *       loader: 'babel?presets[]=react'\n+ *     }\n+ *     // => [ \"babel?presets[]=react\" ]\n+ *\n+ *     // a single loader with a query object:\n+ *     {\n+ *       loader: 'babel',\n+ *       query: { presets: [ 'react' ] }\n+ *     }\n+ *     // => [ \"babel?presets[]=react\" ]\n+ *\n+ *     // webpack 2: multiple loaders with object / string combinations:\n+ *     {\n+ *       loaders: [\n+ *         'react-hot',\n+ *         { loader: 'babel', query: { presets: [ 'react' ] } },\n+ *       ]\n+ *     }\n+ *\n+ * @param  {Object|String} entry\n+ * @param  {?Array.<String|Object>} entry.loaders\n",
+					"match": false,
+					"packageHash": "77968e71317ebfd2d8cb8e055be3bc5aca661f91c248bc2c0cffbfc43376972f",
+					"size": 2008,
+					"sourceHash": "f364b97ddccc55d599e1a3e1f3528df621b07e28bc22f911bb02aacaf692beed",
+					"status": "content"
+				},
+				"lib/applyLoaders.js": {
+					"diff": "--- published/lib/applyLoaders.js\n+++ rebuilt/lib/applyLoaders.js\n@@ -67,13 +67,12 @@\n  *        The resource query.\n  *\n  * @param {String}            sourceCode\n- * @param {String}            sourceMap\n+ * @param {Object}            sourceMap\n  *\n  * @param {Function}          done\n  * @param {String|Error}      done.err\n- * @param {String}            done.code\n- * @param {?}                 done.map\n- *        Not implemented yet.\n+ * @param {String}            done.sourceCode\n+ * @param {Object}            done.sourceMap\n  */\n module.exports = function applyLoaders(runContext, sourceCode, sourceMap, done) {\n   assert(runContext.compiler, \"Missing webpack compiler instance!\");\n@@ -91,6 +90,7 @@\n       context: HappyFakeLoaderContext({\n         _compiler: runContext.compiler, // for compiler RPCs\n         _remoteLoaderId: runContext.loaderContext.remoteLoaderId, // for loader RPCs\n+        fs: runContext.compiler.inputFileSystem,\n \n         query: loader.query,\n         options: runContext.compiler.options,\n@@ -100,6 +100,13 @@\n         resourcePath: runContext.loaderContext.resourcePath,\n         resourceQuery: runContext.loaderContext.resourceQuery,\n         context: runContext.loaderContext.context,\n+\n+        _dependencies: runContext.loaderContext._dependencies,\n+        _contextDependencies: runContext.loaderContext._contextDependencies,\n+\n+        sourceMap: Boolean(runContext.loaderContext.useSourceMap),\n+        target: runContext.loaderContext.target,\n+        minimize: runContext.loaderContext.minimize,\n       })\n     };\n   });\n@@ -119,8 +126,8 @@\n \n     // pitching phase did yield something so we skip the loaders to the right\n     // and use the yielded code as the starting sourceCode\n-    if (pitchResult.code) {\n-      apply(pitchResult.cursor - 1, pitchResult.code, pitchResult.map);\n+    if (pitchResult.sourceCode) {\n+      apply(pitchResult.cursor - 1, pitchResult.sourceCode, pitchResult.sourceMap);\n     }\n     // otherwise, we just start from the right-most loader using the input\n     // source code and map:\n@@ -180,8 +187,8 @@\n     if (!loader) {\n       return done(null, {\n         cursor: null,\n-        code: null,\n-        map: null,\n+        sourceCode: null,\n+        sourceMap: null,\n         dataMap: dataMap,\n       });\n     }\n@@ -199,15 +206,15 @@\n         requestFragments.slice(cursor+1).join('!'),\n         requestFragments.slice(0, cursor).join('!'),\n         dataMap[cursor]\n-      ], function(err, code, map) {\n+      ], function(err, sourceCode, sourceMap) {\n         if (err) {\n           done(err);\n         }\n-        else if (code) {\n+        else if (sourceCode) {\n           done(null, {\n             cursor: cursor,\n-            code: code,\n-            map: map,\n+            sourceCode: sourceCode,\n+            sourceMap: sourceMap,\n             dataMap: dataMap,\n           });\n         }\n@@ -223,7 +230,7 @@\n // non-pitching.)\n //\n // Normal loaders are applied from right-to-left and may yield one or both of\n-// \"code\" and \"map\" values.\n+// \"sourceCode\" and \"sourceMap\" values.\n //\n // Each application will forward a state variable called \"inputValues\" to the\n // succeeding loader, which gets populated as \"values\" in the preceding one.\n@@ -250,25 +257,32 @@\n //        after the loaders in the @loaders array.\n //\n function NormalLoaderApplier(loaders, dataMap, done) {\n-  return function apply(cursor, code, map, inputValues) {\n+  return function apply(cursor, sourceCode, sourceMap, inputValues) {\n     var loader = loaders[cursor];\n     var context;\n",
+					"match": false,
+					"packageHash": "cbab3d6222064acc95e98ca6a1cf9bbdd218e41150e637ffd6f03e312ab5cdaa",
+					"size": 10930,
+					"sourceHash": "26fbc9dee9887cdebc7e8f28fef88d67df93f392fc0bc00a865d6c0cab423525",
+					"status": "content"
+				},
+				"lib/serializeError.js": {
+					"match": false,
+					"packageHash": "db7da9debdc5f966a8d97ca286e78e757935436c5e08618b9436eea9e3ba0fc1",
+					"size": 288,
+					"status": "missing-in-source"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -2,14 +2,23 @@\n   \"name\": \"happypack\",\n   \"main\": \"./lib/HappyPlugin.js\",\n   \"description\": \"webpack speed booster, makes you happy!\",\n-  \"version\": \"2.0.4\",\n+  \"version\": \"5.0.1\",\n   \"scripts\": {\n-    \"lint\": \"./node_modules/.bin/eslint lib\",\n-    \"test\": \"node --harmony --harmony_destructuring ./node_modules/.bin/_mocha 'lib/**/*.test.js'\",\n-    \"test-examples\": \"./examples/build-all.sh\",\n-    \"coverage\": \"node --harmony --harmony_destructuring ./node_modules/.bin/istanbul cover ./node_modules/.bin/_mocha 'lib/**/*.test.js'\",\n-    \"coverage_ci\": \"npm run coverage && ./node_modules/.bin/codecov\",\n-    \"prepublish\": \"npm run lint && npm run test && npm run test-examples\"\n+    \"lint\": \"eslint lib\",\n+    \"test\": \"npm run test:webpack1\",\n+    \"test:webpack1\": \"NODE_PATH='./packages:./upstream/webpack1/node_modules' mocha --opts .mocha\",\n+    \"test:webpack2\": \"NODE_PATH='./packages:./upstream/webpack2/node_modules' mocha --opts .mocha\",\n+    \"test:webpack3\": \"NODE_PATH='./packages:./upstream/webpack3/node_modules' mocha --opts .mocha\",\n+    \"test:webpack4\": \"NODE_PATH='./packages:./upstream/webpack4/node_modules' mocha --opts .mocha\",\n+    \"test:coverage\": \"nyc --silent npm run test:webpack1 && nyc --silent --no-clean npm run test:webpack2 && nyc --silent --no-clean npm run test:webpack3 && nyc --no-clean npm run test:webpack4\",\n+    \"test:examples\": \"./examples/build-all.sh\",\n+    \"coverage\": \"nyc report\",\n+    \"coverage:html\": \"nyc report --reporter html\",\n+    \"coverage:ci\": \"nyc report --reporter=text-lcov > tmp/coverage.lcov && codecov --disable search -f tmp/coverage.lcov\",\n+    \"prepublishOnly\": \"npm run lint && npm run test:webpack1 && npm run test:webpack2 && npm run test:webpack3 && npm run test:webpack4 && npm run test:examples\"\n+  },\n+  \"engines\": {\n+    \"node\": \">=6.11.5\"\n   },\n   \"repository\": {\n     \"type\": \"git\",\n@@ -20,6 +29,7 @@\n     \"plugin\",\n     \"fast\",\n     \"speed\",\n+    \"performance\",\n     \"compilation\",\n     \"transformer\",\n     \"loader\",\n@@ -33,19 +43,31 @@\n   },\n   \"homepage\": \"https://github.com/amireh/happypack#readme\",\n   \"devDependencies\": {\n-    \"chai\": \"^3.4.1\",\n-    \"codecov\": \"^1.0.1\",\n-    \"eslint\": \"^1.10.3\",\n-    \"fs-extra\": \"^0.26.4\",\n-    \"istanbul\": \"^1.0.0-alpha.2\",\n-    \"mocha\": \"^2.3.4\",\n-    \"multiline-slash\": \"^1.0.0\",\n-    \"sinon\": \"^1.17.2\",\n-    \"webpack\": \"^1.12.9\",\n-    \"webpack-dev-server\": \"^1.14.1\"\n+    \"codecov\": \"1.0.1\",\n+    \"eslint\": \"4.18.2\",\n+    \"mocha\": \"3.0.1\",\n+    \"multiline-slash\": \"2.0.0\",\n+    \"nyc\": \"11.6.0\"\n   },\n   \"dependencies\": {\n-    \"async\": \"^1.5.0\",\n-    \"json-stringify-safe\": \"^5.0.1\"\n-  }\n+    \"async\": \"1.5.0\",\n+    \"json-stringify-safe\": \"5.0.1\",\n+    \"loader-utils\": \"1.1.0\",\n+    \"serialize-error\": \"^2.1.0\"\n+  },\n+  \"nyc\": {\n+    \"include\": [\n+      \"lib/*.js\"\n+    ],\n+    \"exclude\": [\n+      \"lib/**/*.test.js\"\n+    ]\n+  },\n+  \"files\": [\n+    \"lib\",\n+    \"CHANGELOG.md\",\n+    \"LICENSE\",\n+    \"loader.js\",\n+    \"README.md\"\n+  ]\n }\n",
+					"match": false,
+					"packageHash": "d0d1fd39094dc31a5509c19e8605886c07f0d06c8089ce10ee014aca27605a2f",
+					"size": 1464,
+					"sourceHash": "5af966ea5536d6417411d8b186f35780fa20d7b57b842daf3b95f3fdca538bb3",
+					"status": "content"
+				},
+				"CHANGELOG.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"LICENSE": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/BufferedFd.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/ErrorSerializer.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/HappyForegroundThreadPool.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/SharedPtr.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/SharedPtrMap.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/SourceMapSerializer.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/UnbufferedFd.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/constants.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/pick.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/processSend.js": {
+					"match": false,
+					"status": "missing-in-package"
+				}
+			},
+			"summary": {
+				"differentFiles": 16,
+				"matchingFiles": 3,
+				"missingInPackage": 12,
+				"missingInSource": 9,
+				"score": 0.075,
+				"totalFiles": 40
+			}
+		},
+		"prodDependencies": []
+	}
+]
