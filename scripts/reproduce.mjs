@@ -293,7 +293,7 @@ function npmPack(dir, options = {}) {
  * @property {string} strategy
  * @property {boolean} reproduced
  * @property {boolean} attested
- * @property {{ spec: string, name: string, version: string, location: string, integrity: string, publishedAt: string | null, publishedWith: { node: string | null, npm: string | null } }} package
+ * @property {{ spec: string, name: string, version: string, location: string, integrity: string, publishedAt: string | null, publishedWith: { node: string | null, npm: string | null }, dependencies: Record<string, string> }} package
  * @property {{ integrity: string | null, location: string, spec: string }} source
  */
 
@@ -472,6 +472,7 @@ export default async function reproduce(spec, opts) {
 					node: /** @type {string | undefined} */ (mani._nodeVersion) || null,
 					npm: /** @type {string | undefined} */ (mani._npmVersion) || null,
 				},
+				dependencies: /** @type {Record<string, string>} */ (mani.dependencies || {}),
 			},
 			source: {
 				integrity: packed?.integrity ?? null,

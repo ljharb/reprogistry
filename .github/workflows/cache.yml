@@ -122,6 +122,15 @@ jobs:
           retention-days: 1
           if-no-files-found: ignore
 
+      - name: upload deps
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: deps-${{ steps.sanitize.outputs.safe_version }}
+          path: /tmp/deps/${{ steps.sanitize.outputs.safe_version }}.json
+          retention-days: 1
+          if-no-files-found: ignore
+
   commit:
     needs: [setup, process]
     if: ${{ always() && needs.setup.result == 'success' }}
@@ -207,3 +216,150 @@ jobs:
           git fetch origin queue
           git rebase origin/queue
           git push
+
+  queue-dependencies:
+    needs: [setup, process]
+    if: ${{ always() && needs.setup.result == 'success' }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    concurrency:
+      group: queue-dependencies
+      cancel-in-progress: false
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: deps-*
+          path: /tmp/deps
+          merge-multiple: true
+        continue-on-error: true
+
+      - name: Check for deps
+        id: check
+        run: |
+          if [ -d /tmp/deps ] && [ "$(ls -A /tmp/deps/*.json 2>/dev/null)" ]; then
+            echo "has_deps=true" >> $GITHUB_OUTPUT
+          else
+            echo "has_deps=false" >> $GITHUB_OUTPUT
+            echo "::notice::No dependency files found"
+          fi
+
+      - uses: actions/checkout@v6
+        if: steps.check.outputs.has_deps == 'true'
+        with:
+          ref: data
+          persist-credentials: true
+
+      - name: Process dependencies
+        if: steps.check.outputs.has_deps == 'true'
+        id: process-deps
+        run: |
+          # Merge all dep files and extract unique pkg@version pairs
+          node -e "
+            const fs = require('fs');
+            const path = require('path');
+
+            const depsDir = '/tmp/deps';
+            const allDeps = new Map(); // pkg -> Set of versions
+
+            // Read all dep files
+            for (const file of fs.readdirSync(depsDir)) {
+              if (!file.endsWith('.json')) continue;
+              try {
+                const deps = JSON.parse(fs.readFileSync(path.join(depsDir, file), 'utf8'));
+                for (const { name, version } of deps) {
+                  if (!allDeps.has(name)) allDeps.set(name, new Set());
+                  allDeps.get(name).add(version);
+                }
+              } catch (e) {
+                console.error('Failed to parse', file, e.message);
+              }
+            }
+
+            console.log('Found', allDeps.size, 'unique packages');
+
+            // Read current packages.txt
+            const packagesFile = 'packages.txt';
+            const existing = new Set(
+              fs.existsSync(packagesFile)
+                ? fs.readFileSync(packagesFile, 'utf8').split('\n').filter(Boolean)
+                : []
+            );
+
+            // Find new packages to add
+            const newPackages = [...allDeps.keys()].filter(p => !existing.has(p));
+            console.log('New packages:', newPackages.length);
+
+            // Write new packages list
+            if (newPackages.length > 0) {
+              const updated = [...existing, ...newPackages].sort();
+              fs.writeFileSync(packagesFile, updated.join('\n') + '\n');
+            }
+
+            // Write queue entries: pkg||v1||v2||v3
+            const queueEntries = [];
+            for (const [pkg, versions] of allDeps) {
+              queueEntries.push(pkg + '||' + [...versions].join('||'));
+            }
+            fs.writeFileSync('/tmp/queue-entries.txt', queueEntries.join('\n'));
+            console.log('Queue entries:', queueEntries.length);
+
+            // Output for GitHub
+            fs.appendFileSync(process.env.GITHUB_OUTPUT, 'new_packages=' + newPackages.length + '\n');
+            fs.appendFileSync(process.env.GITHUB_OUTPUT, 'queue_entries=' + queueEntries.length + '\n');
+          "
+
+      - name: Commit new packages
+        if: steps.check.outputs.has_deps == 'true' && steps.process-deps.outputs.new_packages != '0'
+        run: |
+          git config --global user.email "${GITHUB_ACTOR}@users.noreply.github.com"
+          git config --global user.name "${GITHUB_ACTOR}"
+          git add packages.txt
+          git commit -m '[deps] add ${{ steps.process-deps.outputs.new_packages }} dependency packages'
+          git fetch origin data
+          git rebase origin/data
+          git push
+
+      - uses: actions/checkout@v6
+        if: steps.check.outputs.has_deps == 'true' && steps.process-deps.outputs.queue_entries != '0'
+        with:
+          ref: queue
+          persist-credentials: true
+
+      - name: Queue dependency versions
+        if: steps.check.outputs.has_deps == 'true' && steps.process-deps.outputs.queue_entries != '0'
+        run: |
+          cat /tmp/queue-entries.txt >> cache-queue.txt
+          QUEUE_SIZE=$(wc -l < cache-queue.txt)
+          echo "::notice::Added ${{ steps.process-deps.outputs.queue_entries }} dep entries, queue now has ${QUEUE_SIZE} entries"
+
+          git config --global user.email "${GITHUB_ACTOR}@users.noreply.github.com"
+          git config --global user.name "${GITHUB_ACTOR}"
+          git add cache-queue.txt
+          git commit -m 'queue: add dependency versions from `${{ needs.setup.outputs.package }}`'
+
+          # Retry loop for push conflicts
+          for i in 1 2 3 4 5; do
+            git fetch origin queue
+            if git rebase origin/queue; then
+              if git push; then
+                echo "::notice::Successfully pushed on attempt $i"
+                exit 0
+              fi
+            else
+              git rebase --abort 2>/dev/null || true
+              git reset --hard HEAD~1
+              git pull --rebase origin queue
+              cat /tmp/queue-entries.txt >> cache-queue.txt
+              git add cache-queue.txt
+              git commit -m 'queue: add dependency versions from `${{ needs.setup.outputs.package }}`' || true
+              if git push; then
+                echo "::notice::Successfully pushed on attempt $i (via merge)"
+                exit 0
+              fi
+            fi
+            echo "::warning::Push attempt $i failed, retrying..."
+            sleep $((i * 2))
+          done
+          echo "::error::Failed to push after 5 attempts"
+          exit 1

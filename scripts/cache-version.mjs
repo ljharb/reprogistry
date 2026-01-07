@@ -1,5 +1,5 @@
 import { execSync } from 'node:child_process';
-import { createWriteStream } from 'node:fs';
+import { createWriteStream, existsSync } from 'node:fs';
 import { mkdir, readFile, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
@@ -95,9 +95,100 @@ async function installWithRetry(packageDir, maxRetries = 5) {
 		}
 	}
 }
+
 import normalizeGitUrl from './normalize-git-url.mjs';
 import COMPARISON_HASH from './comparison-hash.mjs';
 import reproduce from './reproduce.mjs';
+
+/**
+ * @typedef {{ name: string, version: string }} DepInfo
+ */
+
+/**
+ * Parse production deps from lockfile v2/v3 packages object.
+ *
+ * @param {Record<string, unknown>} packages - The packages object from lockfile
+ * @returns {DepInfo[]} Array of production dependencies
+ */
+function parseLockV2Deps(packages) {
+	/** @type {DepInfo[]} */
+	const deps = [];
+	for (const [pkgPath, pkgInfo] of Object.entries(packages)) {
+		if (!pkgPath) {
+			continue; // eslint-disable-line no-continue, no-restricted-syntax
+		}
+		if (/** @type {{ dev?: boolean }} */ (pkgInfo).dev) {
+			continue; // eslint-disable-line no-continue, no-restricted-syntax
+		}
+		const match = pkgPath.match(/node_modules\/(?<pkgName>(?:@[^/]+\/)?[^/]+)$/);
+		const { pkgName } = match?.groups || {};
+		const ver = /** @type {{ version?: string }} */ (pkgInfo).version;
+		if (pkgName && ver) {
+			deps.push({ name: pkgName, version: ver });
+		}
+	}
+	return deps;
+}
+
+/**
+ * Parse production deps from lockfile v1 dependencies object.
+ *
+ * @param {Record<string, { version?: string, dev?: boolean, dependencies?: Record<string, unknown> }>} deps
+ * @param {DepInfo[]} result - Accumulator array
+ */
+function parseLockV1Deps(deps, result) {
+	for (const [name, info] of Object.entries(deps)) {
+		if (!info.dev && info.version) {
+			result.push({ name, version: info.version });
+		}
+		if (info.dependencies) {
+			parseLockV1Deps(/** @type {Record<string, { version?: string, dev?: boolean, dependencies?: Record<string, unknown> }>} */ (info.dependencies), result);
+		}
+	}
+}
+
+/**
+ * Extract production dependencies from package-lock.json.
+ *
+ * @param {string} dir - Directory containing package-lock.json
+ * @returns {Promise<DepInfo[]>} Array of production dependencies
+ */
+async function getProdDeps(dir) {
+	const lockPath = path.join(dir, 'package-lock.json');
+	if (!existsSync(lockPath)) {
+		console.log('  -> No package-lock.json found, skipping dependency extraction');
+		return [];
+	}
+
+	try {
+		const lockfile = JSON.parse(await readFile(lockPath, 'utf8'));
+		/** @type {DepInfo[]} */
+		let prodDeps = [];
+
+		if (lockfile.packages && typeof lockfile.packages === 'object') {
+			prodDeps = parseLockV2Deps(lockfile.packages);
+		} else if (lockfile.dependencies && typeof lockfile.dependencies === 'object') {
+			parseLockV1Deps(lockfile.dependencies, prodDeps);
+		}
+
+		// Dedupe by name+version
+		const seen = new Set();
+		const uniqueDeps = prodDeps.filter((dep) => {
+			const key = `${dep.name}@${dep.version}`;
+			if (seen.has(key)) {
+				return false;
+			}
+			seen.add(key);
+			return true;
+		});
+
+		console.log(`  -> Extracted ${uniqueDeps.length} production dependencies`);
+		return uniqueDeps;
+	} catch (err) {
+		console.error(`  -> Failed to extract deps: ${/** @type {Error} */ (err).message}`);
+		return [];
+	}
+}
 
 const { PACKAGE: pkg, VERSION: version } = process.env;
 
@@ -109,13 +200,17 @@ if (!pkg || !version) {
 const pkgDir = path.join(process.cwd(), 'data', 'results', /** @type {string} */ (pkg));
 
 /** @typedef {`${number}.${number}.${number}${'' | '-${string}'}`} Version */
-/** @typedef {{ spec: string, name: string, version: string, location: string, integrity: string, publishedAt?: string | null, publishedWith?: { node?: string | null, npm?: string | null } }} PackageInfo */
+/** @typedef {{ spec: string, name: string, version: string, location: string, integrity: string, publishedAt?: string | null, publishedWith?: { node?: string | null, npm?: string | null }, dependencies?: Record<string, string> }} PackageInfo */
 /** @typedef {{ spec: string, location: string, integrity?: string | null }} SourceInfo */
 /** @typedef {{ reproduceVersion: string, timestamp: string, os: string, arch: string, strategy: string, reproduced: boolean, attested: boolean, package: PackageInfo, source: SourceInfo }} ReproduceResult */
 /** @typedef {import('./compare.mjs').ComparisonResult} ComparisonResult */
 
 /**
- * @typedef {ReproduceResult & { comparisonHash?: string, diff?: { files: Record<string, import('./compare.mjs').FileComparison>, summary: import('./compare.mjs').ComparisonSummary } }} EnhancedResult
+ * @typedef {ReproduceResult & { comparisonHash?: string, diff?: { files: Record<string, import('./compare.mjs').FileComparison>, summary: import('./compare.mjs').ComparisonSummary }, prodDependencies?: DepInfo[] }} EnhancedResult
+ */
+
+/**
+ * @typedef {{ comparison: ComparisonResult, prodDependencies: DepInfo[] }} ComparisonWithDeps
  */
 
 /**
@@ -183,9 +278,10 @@ function parseSourceLocation(location) {
 
 /**
  * Perform file-level comparison between published and rebuilt packages.
+ * Also extracts production dependencies from the generated lockfile.
  *
  * @param {ReproduceResult} result - Reproduce result
- * @returns {Promise<ComparisonResult>} Comparison result
+ * @returns {Promise<ComparisonWithDeps>} Comparison result with dependencies
  * @throws {Error} If comparison fails
  */
 async function performComparison(result) {
@@ -229,6 +325,10 @@ async function performComparison(result) {
 		 */
 		await rewriteWorkspaceDeps(packageDir);
 		await installWithRetry(packageDir);
+
+		// Extract production dependencies from the generated lockfile
+		const prodDependencies = await getProdDeps(packageDir);
+
 		const packOutput = execSync(
 			`cd "${packageDir}" && npm pack --pack-destination "${tempDir}"`,
 			{ env: { ...process.env, PATH: `${packageDir}/node_modules/.bin:${process.env.PATH}` }, stdio: 'pipe' },
@@ -247,7 +347,10 @@ async function performComparison(result) {
 		const comparison = await compareDirectories(publishedDir, rebuiltDir);
 
 		// Only store non-matching files to save space
-		return filterNonMatching(comparison);
+		return {
+			comparison: filterNonMatching(comparison),
+			prodDependencies,
+		};
 	} finally {
 		// Cleanup temp directory
 		await rm(tempDir, { force: true, recursive: true }).catch(() => {});
@@ -281,10 +384,14 @@ try {
 // Perform comparison
 console.log(`Comparing ${pkg}@${version}...`);
 const reproduceResult = /** @type {ReproduceResult} */ (result);
-let comparison;
+/** @type {ComparisonWithDeps | null} */
+let comparisonWithDeps = null;
 try {
-	comparison = await performComparison(reproduceResult);
-	console.log(`  -> Score: ${Math.round((comparison.summary?.score ?? 0) * 100)}%`);
+	comparisonWithDeps = await performComparison(reproduceResult);
+	console.log(`  -> Score: ${Math.round((comparisonWithDeps.comparison.summary?.score ?? 0) * 100)}%`);
+	if (comparisonWithDeps.prodDependencies.length > 0) {
+		console.log(`  -> Found ${comparisonWithDeps.prodDependencies.length} production dependencies`);
+	}
 } catch (err) {
 	console.error(`  -> Comparison failed: ${/** @type {Error} */ (err).message}`);
 	process.exit(1);
@@ -294,7 +401,8 @@ try {
 const enhancedResult = {
 	...reproduceResult,
 	comparisonHash: COMPARISON_HASH,
-	diff: comparison,
+	diff: comparisonWithDeps.comparison,
+	prodDependencies: comparisonWithDeps.prodDependencies,
 };
 
 existing.push(enhancedResult);
@@ -335,3 +443,13 @@ deduped.sort((a, b) => {
 
 await writeFile(dataPath, `${JSON.stringify(deduped, null, '\t')}\n`);
 console.log(`  -> Saved to ${dataPath}`);
+
+// Write dependency info for queueing (if any deps found)
+if (enhancedResult.prodDependencies && enhancedResult.prodDependencies.length > 0) {
+	const safeVersion = version.replace(/\+/g, '__');
+	const depsDir = '/tmp/deps';
+	await mkdir(depsDir, { recursive: true });
+	const depsPath = path.join(depsDir, `${safeVersion}.json`);
+	await writeFile(depsPath, JSON.stringify(enhancedResult.prodDependencies));
+	console.log(`  -> Wrote ${enhancedResult.prodDependencies.length} deps to ${depsPath}`);
+}
