@@ -1,0 +1,89 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-07T16:16:52.948Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:11.7.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "interpret@0.3.0",
+			"name": "interpret",
+			"version": "0.3.0",
+			"location": "https://registry.npmjs.org/interpret/-/interpret-0.3.0.tgz",
+			"integrity": "sha512-p55Fu9SeoNdoRMF/LrtvlACztgYCYr8AVOL/vKgWvAaVRx5Ma329okoQXMGZbvAILEc73WmVJYUjpqmEm8OLIA==",
+			"publishedAt": "2014-03-20T19:03:07.679Z",
+			"publishedWith": {
+				"node": null,
+				"npm": "1.4.3"
+			},
+			"dependencies": {}
+		},
+		"source": {
+			"integrity": null,
+			"location": "git://github.com/tkellen/node-interpret.git",
+			"spec": "github:tkellen/node-interpret#HEAD"
+		},
+		"comparisonHash": "9ef46a5bd31291e57cbab41e2f17c57bd6da0b5b",
+		"diff": {
+			"files": {
+				"CHANGELOG": {
+					"match": false,
+					"packageHash": "6e7017fb26a5daa91703d74c662899ef51df039980485deb889e6902740580b7",
+					"size": 248,
+					"status": "missing-in-source"
+				},
+				"LICENSE": {
+					"diff": "--- published/LICENSE\n+++ rebuilt/LICENSE\n@@ -1,22 +1,21 @@\n-Copyright (c) 2014 Tyler Kellen\n+The MIT License (MIT)\n \n-Permission is hereby granted, free of charge, to any person\n-obtaining a copy of this software and associated documentation\n-files (the \"Software\"), to deal in the Software without\n-restriction, including without limitation the rights to use,\n-copy, modify, merge, publish, distribute, sublicense, and/or sell\n-copies of the Software, and to permit persons to whom the\n-Software is furnished to do so, subject to the following\n-conditions:\n+Copyright (c) 2014-2018, 2022 Tyler Kellen <tyler@sleekcode.net>, Blaine Bublitz <blaine.bublitz@gmail.com>, and Eric Schoffstall <yo@contra.io>\n \n-The above copyright notice and this permission notice shall be\n-included in all copies or substantial portions of the Software.\n+Permission is hereby granted, free of charge, to any person obtaining a copy\n+of this software and associated documentation files (the \"Software\"), to deal\n+in the Software without restriction, including without limitation the rights\n+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell\n+copies of the Software, and to permit persons to whom the Software is\n+furnished to do so, subject to the following conditions:\n \n-THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND,\n-EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES\n-OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND\n-NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT\n-HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,\n-WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING\n-FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR\n-OTHER DEALINGS IN THE SOFTWARE.\n+The above copyright notice and this permission notice shall be included in all\n+copies or substantial portions of the Software.\n+\n+THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR\n+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,\n+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE\n+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER\n+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,\n+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE\n+SOFTWARE.\n",
+					"match": false,
+					"packageHash": "a645bf0c43893457d9b36dbfb702955b6c9c1f99ecf0d924a10f5095b8ab0002",
+					"size": 1056,
+					"sourceHash": "303d5272704a7b6eac411b3b723fb418c13257ca8d8af5aeb872dfa888dfcc1b",
+					"status": "content"
+				},
+				"README.md": {
+					"diff": "--- published/README.md\n+++ rebuilt/README.md\n@@ -1,41 +1,244 @@\n+<p align=\"center\">\n+  <a href=\"http://gulpjs.com\">\n+    <img height=\"257\" width=\"114\" src=\"https://raw.githubusercontent.com/gulpjs/artwork/master/gulp-2x.png\">\n+  </a>\n+</p>\n+\n # interpret\n-> A dictionary of file extensions and associated module loaders.\n \n-[![NPM](https://nodei.co/npm/interpret.png)](https://nodei.co/npm/interpret/)\n+[![NPM version][npm-image]][npm-url] [![Downloads][downloads-image]][npm-url] [![Build Status][ci-image]][ci-url] [![Coveralls Status][coveralls-image]][coveralls-url]\n+\n+A dictionary of file extensions and associated module loaders.\n \n ## What is it\n-This is used by [rechoir](http://github.com/tkellen/node-rechoir) for registering module loaders.\n+\n+This is used by [Liftoff] to automatically require dependencies for configuration files, and by [rechoir] for registering module loaders.\n+\n+## How to use it\n+\n+Consumers should use the exported `extensions` or `jsVariants` object to determine which module should be loaded for a given extension. If a matching extension is found, consumers should do the following:\n+\n+1.  If the value is null, do nothing.\n+2.  If the value is a string, try to require it.\n+3.  If the value is an object, try to require the `module` property. If successful, the `register` property (a function) should be called with the module passed as the first argument. **Advanced:** An optional second argument can be provided to replace the default configuration for a hook.\n+4.  If the value is an array, iterate over it, attempting step #2 or #3 until one of the attempts does not throw.\n \n ## API\n \n-### extensions\n-Map file types to modules which provide a [require.extensions] loader.\n+This module provides two top-level properties: `extensions` and `jsVariants`.\n+\n+**Note:** This module does not depend on any of the loaders it recommends; instead, end-users are expected to install the hooks they want to use for the file types they want to use. See supported extensions and their hooks in the sections below.\n+\n+### `extensions`\n+\n+A mapping of file extensions to modules which provide a [require.extensions] loader.\n+\n+File extension keys are all in the format of `'.foo'` or `'.foo.bar'` and module loader values are either `null` if the loader should fallthrough to node's loader,\n+or a string representing the module to be required, an object of `{ module: 'foobar', register: function }`, or an array containing those strings and/or objects.\n+\n+A sample of an entry containing multiple hooks would look like:\n+\n ```js\n {\n-  '.co': 'coco',\n-  '.coffee': 'coffee-script/require',\n-  '.csv': 'require-csv',\n-  '.iced': 'iced-coffee-script/require',\n-  '.ini': 'require-ini',\n-  '.js': null,\n-  '.json': null,\n-  '.litcoffee': 'coffee-script/require',\n-  '.ls': 'livescript',\n-  '.toml': 'toml-require',\n-  '.xml': 'require-xml',\n-  '.yaml': 'require-yaml',\n-  '.yml': 'require-yaml'\n+  '.ts': [\n+    'ts-node/register',\n+    'sucrase/register/ts',\n+    {\n+      module: '@babel/register',\n+      register: function(hook) {\n+        hook({\n+          extensions: '.ts',\n+          rootMode: 'upward-optional',\n+          ignore: [ignoreNonBabelAndNodeModules],\n+        });\n+      },\n+    },\n+  ],\n }\n ```\n \n-### register\n-Check here to see if setup is needed for the module register itself with [require.extensions].  If a method is returned, call it with the module.\n-```js\n-{\n-  'toml-require': function (module) {\n-    module.install();\n-  }\n-}\n+**Supported extensions and their hooks**\n+\n+```yaml file=scripts/extensions.yaml\n+.babel.js:\n+  - '@babel/register'\n+.babel.jsx:\n+  - '@babel/register'\n+.babel.ts:\n+  - '@babel/register'\n+.babel.tsx:\n+  - '@babel/register'\n+.cjs:\n",
+					"match": false,
+					"packageHash": "d2fa3d187cfa3b8453424a867ffc51c9919707bc0d92c6b1dc458fa271e8940c",
+					"size": 1047,
+					"sourceHash": "36e72c365349d4e5cb79ccc82eaab7989a2ca47dd498861200a8dd72e3dc6501",
+					"status": "content"
+				},
+				"index.js": {
+					"diff": "--- published/index.js\n+++ rebuilt/index.js\n@@ -1,21 +1,542 @@\n-exports.extensions = {\n-  '.co': 'coco',\n-  '.coffee': 'coffee-script/register',\n-  '.csv': 'require-csv',\n-  '.iced': 'iced-coffee-script/register',\n-  '.ini': 'require-ini',\n+var path = require('path');\n+\n+// We only register on the final extension (like `.js`) due to https://github.com/joyent/node/blob/v0.12.0/lib/module.js#L353\n+// However, we use these matchers to apply the transform only if the full extension matches\n+function endsInJsx(filename) {\n+  return filename.endsWith('.jsx');\n+}\n+function endsInTs(filename) {\n+  return filename.endsWith('.ts');\n+}\n+function endsInTsx(filename) {\n+  return filename.endsWith('.tsx');\n+}\n+function endsInBabelJs(filename) {\n+  return filename.endsWith('.babel.js');\n+}\n+function endsInBabelJsx(filename) {\n+  return filename.endsWith('.babel.jsx');\n+}\n+function endsInBabelTs(filename) {\n+  return filename.endsWith('.babel.ts');\n+}\n+function endsInBabelTsx(filename) {\n+  return filename.endsWith('.babel.tsx');\n+}\n+function endsInEsbuildJs(filename) {\n+  return filename.endsWith('.esbuild.js');\n+}\n+function endsInEsbuildJsx(filename) {\n+  return filename.endsWith('.esbuild.jsx');\n+}\n+function endsInEsbuildTs(filename) {\n+  return filename.endsWith('.esbuild.ts');\n+}\n+function endsInEsbuildTsx(filename) {\n+  return filename.endsWith('.esbuild.tsx');\n+}\n+function endsInSucraseJs(filename) {\n+  return filename.endsWith('.sucrase.js');\n+}\n+function endsInSucraseJsx(filename) {\n+  return filename.endsWith('.sucrase.jsx');\n+}\n+function endsInSucraseTs(filename) {\n+  return filename.endsWith('.sucrase.ts');\n+}\n+function endsInSucraseTsx(filename) {\n+  return filename.endsWith('.sucrase.tsx');\n+}\n+function endsInSwcJs(filename) {\n+  return filename.endsWith('.swc.js');\n+}\n+function endsInSwcJsx(filename) {\n+  return filename.endsWith('.swc.jsx');\n+}\n+function endsInSwcTs(filename) {\n+  return filename.endsWith('.swc.ts');\n+}\n+function endsInSwcTsx(filename) {\n+  return filename.endsWith('.swc.tsx');\n+}\n+\n+var cjsStub = path.join(__dirname, 'cjs-stub');\n+var mjsStub = path.join(__dirname, 'mjs-stub');\n+\n+function isNodeModules(file) {\n+  return path.relative(process.cwd(), file).includes('node_modules');\n+}\n+\n+var extensions = {\n+  '.babel.js': {\n+    module: '@babel/register',\n+    register: function (hook, config) {\n+      config = config || {\n+        rootMode: 'upward-optional',\n+        overrides: [{ only: [endsInBabelJs], presets: ['@babel/preset-env'] }],\n+      };\n+\n+      hook(Object.assign({}, config, { extensions: '.js' }));\n+    },\n+  },\n+  '.babel.jsx': {\n+    module: '@babel/register',\n+    register: function (hook, config) {\n+      config = config || {\n+        rootMode: 'upward-optional',\n+        overrides: [\n+          {\n+            only: [endsInBabelJsx],\n+            presets: ['@babel/preset-env', '@babel/preset-react'],\n+          },\n",
+					"match": false,
+					"packageHash": "f52dfb18f6a8c13324b7bf0a03106048376567331fe60aaed9106952e39a1f44",
+					"size": 464,
+					"sourceHash": "883ffb3fd5bd012511ead6820bece545cd339d5d57fe594752b444505dd41f0d",
+					"status": "content"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -1,34 +1,71 @@\n {\n   \"name\": \"interpret\",\n+  \"version\": \"3.1.1\",\n   \"description\": \"A dictionary of file extensions and associated module loaders.\",\n-  \"version\": \"0.3.0\",\n-  \"homepage\": \"https://github.com/tkellen/node-interpret\",\n-  \"author\": {\n-    \"name\": \"Tyler Kellen\",\n-    \"url\": \"http://goingslowly.com/\"\n+  \"author\": \"Gulp Team <team@gulpjs.com> (https://gulpjs.com/)\",\n+  \"contributors\": [\n+    \"Blaine Bublitz <blaine.bublitz@gmail.com>\",\n+    \"Tyler Kellen <tyler@sleekcode.net> (http://goingslowly.com/)\"\n+  ],\n+  \"repository\": \"gulpjs/interpret\",\n+  \"license\": \"MIT\",\n+  \"engines\": {\n+    \"node\": \">=10.13.0\"\n   },\n-  \"repository\": {\n-    \"type\": \"git\",\n-    \"url\": \"git://github.com/tkellen/node-interpret.git\"\n+  \"main\": \"index.js\",\n+  \"files\": [\n+    \"LICENSE\",\n+    \"index.js\",\n+    \"cjs-stub.js\",\n+    \"mjs-stub.js\"\n+  ],\n+  \"scripts\": {\n+    \"readme\": \"remark README.md --use ./scripts/plugin.mjs --output\",\n+    \"lint\": \"eslint .\",\n+    \"pretest\": \"npm run lint\",\n+    \"test\": \"nyc mocha --async-only\"\n   },\n-  \"bugs\": {\n-    \"url\": \"https://github.com/tkellen/node-interpret/issues\"\n+  \"devDependencies\": {\n+    \"eslint\": \"^7.0.0\",\n+    \"eslint-config-gulp\": \"^5.0.0\",\n+    \"eslint-plugin-node\": \"^11.1.0\",\n+    \"expect\": \"^27.0.0\",\n+    \"js-yaml\": \"^4.1.0\",\n+    \"mocha\": \"^8.0.0\",\n+    \"nyc\": \"^15.0.0\",\n+    \"parse-node-version\": \"^2.0.0\",\n+    \"rechoir\": \"^0.8.0\",\n+    \"remark-cli\": \"^10.0.1\",\n+    \"remark-code-import\": \"^1.1.0\",\n+    \"shelljs\": \"0.8.5\"\n+  },\n+  \"nyc\": {\n+    \"extension\": [\n+      \".js\"\n+    ],\n+    \"reporter\": [\n+      \"lcov\",\n+      \"text-summary\"\n+    ]\n+  },\n+  \"prettier\": {\n+    \"singleQuote\": true\n   },\n-  \"licenses\": [\n-    {\n-      \"type\": \"MIT\",\n-      \"url\": \"https://github.com/tkellen/node-interpret/blob/master/LICENSE\"\n-    }\n-  ],\n-  \"main\": \"index.js\",\n   \"keywords\": [\n-    \"coco\",\n-    \"coffee-script\",\n-    \"csv\",\n-    \"iced-coffee-script\",\n-    \"ini\",\n-    \"livescript\",\n+    \"coffee\",\n+    \"coffee.md\",\n+    \"coffeescript\",\n+    \"es\",\n+    \"es6\",\n+    \"js\",\n+    \"json\",\n+    \"json5\",\n+    \"jsx\",\n+    \"react\",\n+    \"litcoffee\",\n     \"toml\",\n+    \"ts\",\n+    \"typescript\",\n     \"xml\",\n     \"yaml\",\n     \"yml\"\n",
+					"match": false,
+					"packageHash": "d26dc3b6cd70d9c7c8748c8333dc022f0a128f5e3aa636b992d6f560c67187af",
+					"size": 770,
+					"sourceHash": "4ebc10f8d227e12b1458b8ece7b830794176dca1f3d92401366ddfe95ff314d8",
+					"status": "content"
+				},
+				"cjs-stub.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"mjs-stub.js": {
+					"match": false,
+					"status": "missing-in-package"
+				}
+			},
+			"summary": {
+				"differentFiles": 4,
+				"matchingFiles": 0,
+				"missingInPackage": 2,
+				"missingInSource": 1,
+				"score": 0,
+				"totalFiles": 7
+			}
+		},
+		"prodDependencies": []
+	}
+]
