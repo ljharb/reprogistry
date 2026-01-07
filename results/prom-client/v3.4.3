@@ -1,0 +1,313 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-07T18:55:34.393Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:11.7.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "prom-client@3.4.3",
+			"name": "prom-client",
+			"version": "3.4.3",
+			"location": "https://registry.npmjs.org/prom-client/-/prom-client-3.4.3.tgz",
+			"integrity": "sha512-bG77kiZ6bGiF/JttVUJvset53cCokH33z7rgqfvCz6u6lbjF6LumNuDfdX3i0BP2UbW0vHW2tGcEKWXw27Pqwg==",
+			"publishedAt": "2016-05-30T10:32:00.072Z",
+			"publishedWith": {
+				"node": "4.2.2",
+				"npm": "3.8.9"
+			},
+			"dependencies": {
+				"request": "^2.69.0",
+				"tdigest": "^0.1.1",
+				"util-extend": "^1.0.1"
+			}
+		},
+		"source": {
+			"integrity": null,
+			"location": "git+ssh://git@github.com/siimon/prom-client.git",
+			"spec": "github:siimon/prom-client#495b1181b6ec03aa25f601bf5202b2e48ea04b54"
+		},
+		"comparisonHash": "9ef46a5bd31291e57cbab41e2f17c57bd6da0b5b",
+		"diff": {
+			"files": {
+				".eslintrc": {
+					"match": false,
+					"packageHash": "8d499ec644c5f0d7b89122a951fa5b92ae8486a08419c107a311851387120dc4",
+					"size": 1152,
+					"status": "missing-in-source"
+				},
+				".npmignore": {
+					"match": false,
+					"packageHash": "9765abdd39df9d8b4aeaf84491d54924f2246dde4dc960f603ea174600e65259",
+					"size": 30,
+					"status": "missing-in-source"
+				},
+				".travis.yml": {
+					"match": false,
+					"packageHash": "3c542e3c7e6864accfccf83fb8ddb1a2277eca829acb35f6472a757340a62069",
+					"size": 18,
+					"status": "missing-in-source"
+				},
+				"README.md": {
+					"diff": "--- published/README.md\n+++ rebuilt/README.md\n@@ -1,80 +1,238 @@\n-# Prometheus client for node.js [![Build Status](https://travis-ci.org/siimon/prom-client.svg?branch=master)](https://travis-ci.org/siimon/prom-client)\n+# Prometheus client for node.js [![Actions Status](https://github.com/siimon/prom-client/workflows/Node.js%20CI/badge.svg?branch=master)](https://github.com/siimon/prom-client/actions)\n \n-A prometheus client for node.js that supports histogram, summaries, gauges and counters.\n+A prometheus client for Node.js that supports histogram, summaries, gauges and\n+counters.\n \n-### Usage\n+## Usage\n \n-See example folder for a sample usage. The library does not bundle any web framework, to expose the metrics just return the metrics() function in the registry.\n+See example folder for a sample usage. The library does not bundle any web\n+framework. To expose the metrics, respond to Prometheus's scrape requests with\n+the result of `await registry.metrics()`.\n \n-### API\n+### Usage with Node.js's `cluster` module\n \n-#### Configuration\n+Node.js's `cluster` module spawns multiple processes and hands off socket\n+connections to those workers. Returning metrics from a worker's local registry\n+will only reveal that individual worker's metrics, which is generally\n+undesirable. To solve this, you can aggregate all of the workers' metrics in the\n+master process. See `example/cluster.js` for an example.\n \n-All metric types has 2 mandatory parameters, name and help.\n+Default metrics use sensible aggregation methods. (Note, however, that the event\n+loop lag mean and percentiles are averaged, which is not perfectly accurate.)\n+Custom metrics are summed across workers by default. To use a different\n+aggregation method, set the `aggregator` property in the metric config to one of\n+'sum', 'first', 'min', 'max', 'average' or 'omit'. (See `lib/metrics/version.js`\n+for an example.)\n+\n+If you need to expose metrics about an individual worker, you can include a\n+value that is unique to the worker (such as the worker ID or process ID) in a\n+label. (See `example/server.js` for an example using\n+`worker_${cluster.worker.id}` as a label value.)\n+\n+Metrics are aggregated from the global registry by default. To use a different\n+registry, call\n+`client.AggregatorRegistry.setRegistries(registryOrArrayOfRegistries)` from the\n+worker processes.\n+\n+## API\n+\n+### Default metrics\n+\n+There are some default metrics recommended by Prometheus\n+[itself](https://prometheus.io/docs/instrumenting/writing_clientlibs/#standard-and-runtime-collectors).\n+To collect these, call `collectDefaultMetrics`. In addition, some\n+Node.js-specific metrics are included, such as event loop lag, active handles,\n+GC and Node.js version. See [lib/metrics](lib/metrics) for a list of all\n+metrics.\n+\n+NOTE: Some of the metrics, concerning File Descriptors and Memory, are only\n+available on Linux.\n+\n+`collectDefaultMetrics` optionally accepts a config object with following entries:\n+\n+- `prefix` an optional prefix for metric names. Default: no prefix.\n+- `register` to which registry the metrics should be registered. Default: the global default registry.\n+- `gcDurationBuckets` with custom buckets for GC duration histogram. Default buckets of GC duration histogram are `[0.001, 0.01, 0.1, 1, 2, 5]` (in seconds).\n+- `eventLoopMonitoringPrecision` with sampling rate in milliseconds. Must be greater than zero. Default: 10.\n+\n+To register metrics to another registry, pass it in as `register`:\n+\n+```js\n+const client = require('prom-client');\n+const collectDefaultMetrics = client.collectDefaultMetrics;\n+const Registry = client.Registry;\n+const register = new Registry();\n+collectDefaultMetrics({ register });\n+```\n+\n+To use custom buckets for GC duration histogram, pass it in as `gcDurationBuckets`:\n+\n+```js\n+const client = require('prom-client');\n+const collectDefaultMetrics = client.collectDefaultMetrics;\n+collectDefaultMetrics({ gcDurationBuckets: [0.1, 0.2, 0.3] });\n+```\n+\n+To prefix metric names with your own arbitrary string, pass in a `prefix`:\n+\n+```js\n+const client = require('prom-client');\n+const collectDefaultMetrics = client.collectDefaultMetrics;\n+const prefix = 'my_application_';\n+collectDefaultMetrics({ prefix });\n+```\n+\n+To apply generic labels to all default metrics, pass an object to the `labels` property (useful if you're working in a clustered environment):\n+\n+```js\n+const client = require('prom-client');\n+const collectDefaultMetrics = client.collectDefaultMetrics;\n+collectDefaultMetrics({\n",
+					"match": false,
+					"packageHash": "b3636d6287c1afcf37ad2f2822af54efc25978a2f0c7cbc2aea5e82d372b3dee",
+					"size": 4258,
+					"sourceHash": "d32f48a6e7f5c13dd4c81410bf116d493059a1b64ec512f5167b4cb22faddf8e",
+					"status": "content"
+				},
+				"example/server.js": {
+					"match": false,
+					"packageHash": "c25e54972e739058f5309675fb360976dc6089ccbc7d2d88da06193b8aa18527",
+					"size": 995,
+					"status": "missing-in-source"
+				},
+				"index.js": {
+					"diff": "--- published/index.js\n+++ rebuilt/index.js\n@@ -5,11 +5,21 @@\n \n 'use strict';\n \n-exports.counter = require('./lib/counter');\n-exports.gauge = require('./lib/gauge');\n-exports.register = require('./lib/register');\n-exports.histogram = require('./lib/histogram');\n-exports.summary = require('./lib/summary');\n+exports.register = require('./lib/registry').globalRegistry;\n+exports.Registry = require('./lib/registry');\n+Object.defineProperty(exports, 'contentType', {\n+\tconfigurable: false,\n+\tenumerable: true,\n+\tget() {\n+\t\treturn exports.register.contentType;\n+\t},\n+\tset(value) {\n+\t\texports.register.setContentType(value);\n+\t},\n+});\n+exports.prometheusContentType = exports.Registry.PROMETHEUS_CONTENT_TYPE;\n+exports.openMetricsContentType = exports.Registry.OPENMETRICS_CONTENT_TYPE;\n+exports.validateMetricName = require('./lib/validation').validateMetricName;\n \n exports.Counter = require('./lib/counter');\n exports.Gauge = require('./lib/gauge');\n@@ -18,4 +28,14 @@\n exports.Pushgateway = require('./lib/pushgateway');\n \n exports.linearBuckets = require('./lib/bucketGenerators').linearBuckets;\n-exports.exponentialBuckets = require('./lib/bucketGenerators').exponentialBuckets;\n+exports.exponentialBuckets =\n+\trequire('./lib/bucketGenerators').exponentialBuckets;\n+\n+exports.collectDefaultMetrics = require('./lib/defaultMetrics');\n+\n+exports.aggregators = require('./lib/metricAggregators').aggregators;\n+exports.ClusterRegistry = require('./lib/cluster');\n+exports.WorkerRegistry = require('./lib/worker');\n+/** @deprecated */\n+exports.AggregatorRegistry = exports.ClusterRegistry;\n+exports[Symbol('util')] = require('./lib/util');\n",
+					"match": false,
+					"packageHash": "bed881a4b1f98ed318e3d84bf2cd15004ccb48232f9dddc021540b673215c7ee",
+					"size": 682,
+					"sourceHash": "f629064d280177613b850b3e1a1b3fabbeab146b38022fdf7a6d585647fa1eb5",
+					"status": "content"
+				},
+				"lib/bucketGenerators.js": {
+					"diff": "--- published/lib/bucketGenerators.js\n+++ rebuilt/lib/bucketGenerators.js\n@@ -1,30 +1,29 @@\n 'use strict';\n \n-exports.linearBuckets = function(start, width, count) {\n-\tif(count < 1) {\n+exports.linearBuckets = (start, width, count) => {\n+\tif (count < 1) {\n \t\tthrow new Error('Linear buckets needs a positive count');\n \t}\n \n-\tvar buckets = new Array(count);\n-\tfor(var i = 0; i < count; i++) {\n-\t\tbuckets[i] = start;\n-\t\tstart += width;\n+\tconst buckets = new Array(count);\n+\tfor (let i = 0; i < count; i++) {\n+\t\tbuckets[i] = start + i * width;\n \t}\n \treturn buckets;\n };\n \n-exports.exponentialBuckets = function(start, factor, count) {\n-\tif(start <= 0) {\n+exports.exponentialBuckets = (start, factor, count) => {\n+\tif (start <= 0) {\n \t\tthrow new Error('Exponential buckets needs a positive start');\n \t}\n-\tif(count < 1) {\n+\tif (count < 1) {\n \t\tthrow new Error('Exponential buckets needs a positive count');\n \t}\n-\tif(factor <= 1) {\n+\tif (factor <= 1) {\n \t\tthrow new Error('Exponential buckets needs a factor greater than 1');\n \t}\n-\tvar buckets = new Array(count);\n-\tfor(var i = 0; i < count; i++) {\n+\tconst buckets = new Array(count);\n+\tfor (let i = 0; i < count; i++) {\n \t\tbuckets[i] = start;\n \t\tstart *= factor;\n \t}\n",
+					"match": false,
+					"packageHash": "d2ab20f93d9cc08fcadca0a1ca494549b8b5f57353ce85ecd1be54ca04b62a67",
+					"size": 741,
+					"sourceHash": "b201f57b42047be0a0b705b2d92dcb352783a1a23c60c6042d637518bbd18404",
+					"status": "content"
+				},
+				"lib/counter.js": {
+					"diff": "--- published/lib/counter.js\n+++ rebuilt/lib/counter.js\n@@ -2,94 +2,125 @@\n  * Counter metric\n  */\n 'use strict';\n-var register = require('./register');\n-var type = 'counter';\n-var isNumber = require('./util').isNumber;\n-var getProperties = require('./util').getPropertiesFromObj;\n-var createValue = require('./util').incValue;\n-var hashObject = require('./util').hashObject;\n-var validateLabels = require('./validation').validateLabel;\n-var validateMetricName = require('./validation').validateMetricName;\n-var validateLabelNames = require('./validation').validateLabelName;\n-\n-var getLabels = require('./util').getLabels;\n-\n-/**\n- * Counter\n- * @param {string} name - Name of the metric\n- * @param {string} help - Help description for the metric\n- * @param {array} labels - Labels\n- * @constructor\n- */\n-function Counter(name, help, labels) {\n-\tif(!help) {\n-\t\tthrow new Error('Missing mandatory help parameter');\n-\t}\n-\tif(!name) {\n-\t\tthrow new Error('Missing mandatory name parameter');\n+\n+const util = require('util');\n+const { isObject, getLabels, nowTimestamp, LabelMap } = require('./util');\n+const { Metric } = require('./metric');\n+const Exemplar = require('./exemplar');\n+\n+class Counter extends Metric {\n+\tconstructor(config) {\n+\t\tsuper(config);\n+\t\tthis.type = 'counter';\n+\t\tthis.defaultLabels = {};\n+\t\tthis.defaultValue = 1;\n+\t\tthis.defaultExemplarLabelSet = {};\n+\t\tif (config.enableExemplars) {\n+\t\t\tthis.enableExemplars = true;\n+\t\t\tthis.inc = this.incWithExemplar;\n+\t\t} else {\n+\t\t\tthis.inc = this.incWithoutExemplar;\n+\t\t}\n \t}\n-\tif(!validateMetricName(name)) {\n-\t\tthrow new Error('Invalid metric name');\n+\n+\t/**\n+\t * Increment counter.\n+\t * @param {object} labels - What label you want to be incremented\n+\t * @param {number} value - Value to increment, if omitted increment with 1\n+\t * @returns {void}\n+\t */\n+\tincWithoutExemplar(labels, value) {\n+\t\tif (!isObject(labels)) {\n+\t\t\tvalue = labels;\n+\t\t\tlabels = {};\n+\t\t}\n+\n+\t\tif (value && !Number.isFinite(value)) {\n+\t\t\tthrow new TypeError(`Value is not a valid number: ${util.format(value)}`);\n+\t\t}\n+\t\tif (value < 0) {\n+\t\t\tthrow new Error('It is not possible to decrease a counter');\n+\t\t}\n+\n+\t\tif (value === null || value === undefined) value = 1;\n+\n+\t\tthis.store.validate(labels);\n+\t\tthis.store.setDelta(labels, value);\n \t}\n \n-\tif(!validateLabelNames(labels)) {\n-\t\tthrow new Error('Invalid label name');\n+\t/**\n+\t * Increment counter with exemplar, same as inc but accepts labels for an\n+\t * exemplar.\n+\t * If no label is provided the current exemplar labels are kept unchanged\n+\t * (defaults to empty set).\n+\t *\n+\t * @param {object} incOpts - Object with options about what metric to increase\n+\t * @param {object} incOpts.labels - What label you want to be incremented,\n+\t *                                  defaults to null (metric with no labels)\n+\t * @param {number} incOpts.value - Value to increment, defaults to 1\n+\t * @param {object} incOpts.exemplarLabels - Key-value  labels for the\n+\t *                                          exemplar, defaults to empty set {}\n+\t * @returns {void}\n+\t */\n+\tincWithExemplar({\n+\t\tlabels = this.defaultLabels,\n+\t\tvalue = this.defaultValue,\n+\t\texemplarLabels = this.defaultExemplarLabelSet,\n+\t} = {}) {\n",
+					"match": false,
+					"packageHash": "0189b0910844a0b55716e2ea11cffdd6adbf2ef1ee3605f843b4a94fa64e3a44",
+					"size": 2269,
+					"sourceHash": "c13a732b73b6ec472721629a01111b29ce1d48eb4d85c03ff0b934c8c5575fea",
+					"status": "content"
+				},
+				"lib/gauge.js": {
+					"diff": "--- published/lib/gauge.js\n+++ rebuilt/lib/gauge.js\n@@ -3,189 +3,159 @@\n  */\n 'use strict';\n \n-var register = require('./register');\n-var type = 'gauge';\n+const util = require('util');\n \n-var isNumber = require('./util').isNumber;\n-var createValue = require('./util').setValue;\n-var getProperties = require('./util').getPropertiesFromObj;\n-var getLabels = require('./util').getLabels;\n-var hashObject = require('./util').hashObject;\n-var validateMetricName = require('./validation').validateMetricName;\n-var validateLabels = require('./validation').validateLabel;\n-var validateLabelNames = require('./validation').validateLabelName;\n-\n-/**\n- * Gauge constructor\n- * @param {string} name - Name of the metric\n- * @param {string} help - Help for the metric\n- * @param {array} labels - Array with strings, all label keywords supported\n- * @constructor\n- */\n-function Gauge(name, help, labels) {\n-\tif(!help) {\n-\t\tthrow new Error('Missing mandatory help parameter');\n-\t}\n-\tif(!name) {\n-\t\tthrow new Error('Missing mandatory name parameter');\n-\t}\n-\tif(!validateMetricName(name)) {\n-\t\tthrow new Error('Invalid metric name');\n-\t}\n-\tif(!validateLabelNames(labels)) {\n-\t\tthrow new Error('Invalid label name');\n-\t}\n+const { getLabels, isObject, LabelMap } = require('./util');\n+const { Metric } = require('./metric');\n \n-\tthis.name = name;\n-\tthis.labelNames = labels || [];\n-\tthis.hashMap = {};\n+class Gauge extends Metric {\n+\tconstructor(config) {\n+\t\tsuper(config);\n+\t\tthis.type = 'gauge';\n+\t}\n+\n+\t/**\n+\t * Set a gauge to a value.\n+\t * @param {object} labels - Object with labels and their values\n+\t * @param {number} value - Value to set the gauge to, must be positive\n+\t * @returns {void}\n+\t */\n+\tset(labels, value) {\n+\t\tvalue = getValueArg(labels, value);\n+\t\tlabels = getLabelArg(labels);\n+\t\tset(this, labels, value);\n+\t}\n+\n+\t/**\n+\t * Reset gauge.\n+\t * @returns {void}\n+\t */\n+\treset() {\n+\t\tthis.store = new LabelMap(this.labelNames);\n+\t\tif (this.labelNames.length === 0) {\n+\t\t\tthis.store.set({}, 0);\n+\t\t}\n+\t}\n \n-\tthis.help = help;\n-\tregister.registerMetric(this);\n-}\n+\t/**\n+\t * Increment a gauge value.\n+\t * @param {object} labels - Object with labels where key is the label key and value is label value. Can only be one level deep\n+\t * @param {number} value - Value to increment - if omitted, increment with 1\n+\t * @returns {void}\n+\t */\n+\tinc(labels, value) {\n+\t\tvalue = getValueArg(labels, value) ?? 1;\n+\t\tlabels = getLabelArg(labels);\n+\t\tsetDelta(this, labels, value);\n+\t}\n+\n+\t/**\n+\t * Decrement a gauge value.\n+\t * @param {object} labels - Object with labels where key is the label key and value is label value. Can only be one level deep\n+\t * @param {number} value - Value to decrement - if omitted, decrement with 1\n+\t * @returns {void}\n+\t */\n+\tdec(labels, value) {\n+\t\tvalue = getValueArg(labels, value) ?? 1;\n+\t\tlabels = getLabelArg(labels);\n+\t\tsetDelta(this, labels, -value);\n+\t}\n",
+					"match": false,
+					"packageHash": "a6d18280c7d7300cb159e376d652ce23b34aeff4c336bc847ba7817658d48568",
+					"size": 4851,
+					"sourceHash": "c1eee057a16e017f24e898d2d4fb9d1df97eb622a4a6bcfdac4455646c56b4d7",
+					"status": "content"
+				},
+				"lib/histogram.js": {
+					"diff": "--- published/lib/histogram.js\n+++ rebuilt/lib/histogram.js\n@@ -3,249 +3,339 @@\n  */\n 'use strict';\n \n-var register = require('./register');\n-var type = 'histogram';\n-var isNumber = require('./util').isNumber;\n-var extend = require('util-extend');\n-var getProperties = require('./util').getPropertiesFromObj;\n-var getLabels = require('./util').getLabels;\n-var hashObject = require('./util').hashObject;\n-var createValue = require('./util');\n-var validateLabels = require('./validation').validateLabel;\n-var validateMetricName = require('./validation').validateMetricName;\n-var validateLabelNames = require('./validation').validateLabelName;\n-\n-/**\n- * Histogram\n- * @param {string} name - Name of the metric\n- * @param {string} help - Help for the metric\n- * @param {object|array} labelsOrConf - Either array of label names or config object as a key-value object\n- * @param {object} conf - Configuration object\n- * @constructor\n- */\n-function Histogram(name, help, labelsOrConf, conf) {\n-\tvar obj;\n-\tvar labels = [];\n-\n-\tif(Array.isArray(labelsOrConf)) {\n-\t\tobj = conf || {};\n-\t\tlabels = labelsOrConf;\n-\t} else {\n-\t\tobj = labelsOrConf || {};\n-\t}\n+const util = require('util');\n+const {\n+\tgetLabels,\n+\tisObject,\n+\tisEmpty,\n+\tnowTimestamp,\n+\tLabelMap,\n+} = require('./util');\n+const { Metric } = require('./metric');\n+const Exemplar = require('./exemplar');\n+\n+class Histogram extends Metric {\n+\tconstructor(config) {\n+\t\tsuper(config, {\n+\t\t\tbuckets: [0.005, 0.01, 0.025, 0.05, 0.1, 0.25, 0.5, 1, 2.5, 5, 10],\n+\t\t});\n+\n+\t\tthis.type = 'histogram';\n+\t\tthis.defaultLabels = {};\n+\t\tthis.defaultExemplarLabelSet = {};\n+\t\tthis.enableExemplars = false;\n+\n+\t\tfor (const label of this.labelNames) {\n+\t\t\tif (label === 'le') {\n+\t\t\t\tthrow new Error('le is a reserved label keyword');\n+\t\t\t}\n+\t\t}\n \n-\tvalidateInput(name, help, labels);\n+\t\tthis.upperBounds = this.buckets;\n+\t\tthis.bucketValues = this.upperBounds.reduce((acc, upperBound) => {\n+\t\t\tacc[upperBound] = 0;\n+\t\t\treturn acc;\n+\t\t}, {});\n+\n+\t\tif (config.enableExemplars) {\n+\t\t\tthis.enableExemplars = true;\n+\t\t\tthis.bucketExemplars = this.upperBounds.reduce((acc, upperBound) => {\n+\t\t\t\tacc[upperBound] = null;\n+\t\t\t\treturn acc;\n+\t\t\t}, {});\n+\t\t\tObject.freeze(this.bucketExemplars);\n+\t\t\tthis.observe = this.observeWithExemplar;\n+\t\t} else {\n+\t\t\tthis.observe = this.observeWithoutExemplar;\n+\t\t}\n \n-\tthis.name = name;\n-\tthis.help = help;\n+\t\tObject.freeze(this.bucketValues);\n+\t\tObject.freeze(this.upperBounds);\n \n-\tthis.upperBounds = configureUpperbounds(obj.buckets);\n-\tthis.bucketValues = this.upperBounds.reduce(function(acc, upperBound) {\n-\t\tacc[upperBound] = 0;\n-\t\treturn acc;\n-\t}, {});\n+\t\tif (this.labelNames.length === 0) {\n+\t\t\tthis.store = new LabelMap(this.labelNames);\n+\t\t\tthis.store.merge(\n+\t\t\t\t{},\n+\t\t\t\tcreateBaseValues({}, this.bucketValues, this.bucketExemplars),\n+\t\t\t);\n+\t\t}\n",
+					"match": false,
+					"packageHash": "8bc8db3803958fe6ee3c1995563090c72f73fec0620318fde22f64c214c3706f",
+					"size": 6324,
+					"sourceHash": "71c4b231f8e46826f228339e15dda96f218d8642f9c4761e3ed3fc2b3c5c79e4",
+					"status": "content"
+				},
+				"lib/pushgateway.js": {
+					"diff": "--- published/lib/pushgateway.js\n+++ rebuilt/lib/pushgateway.js\n@@ -1,56 +1,136 @@\n 'use strict';\n \n-var request = require('request');\n-var register = require('./register');\n+const url = require('url');\n+const http = require('http');\n+const https = require('https');\n+const { gzipSync } = require('zlib');\n+const { globalRegistry } = require('./registry');\n+\n+class Pushgateway {\n+\tconstructor(gatewayUrl, options, registry) {\n+\t\tif (!registry) {\n+\t\t\tregistry = globalRegistry;\n+\t\t}\n+\t\tthis.registry = registry;\n+\t\tthis.gatewayUrl = gatewayUrl;\n+\t\tconst { requireJobName, ...requestOptions } = {\n+\t\t\trequireJobName: true,\n+\t\t\t...options,\n+\t\t};\n+\t\tthis.requireJobName = requireJobName;\n+\t\tthis.requestOptions = requestOptions;\n+\t}\n \n-function Pushgateway(url) {\n-\tthis.gatewayUrl = url;\n-}\n+\tpushAdd(params = {}) {\n+\t\tif (this.requireJobName && !params.jobName) {\n+\t\t\tthrow new Error('Missing jobName parameter');\n+\t\t}\n \n-Pushgateway.prototype.pushAdd = function(params, callback) {\n-\tif(!params || !params.jobName) {\n-\t\tthrow new Error('Missing jobName parameter');\n+\t\treturn useGateway.call(this, 'POST', params.jobName, params.groupings);\n \t}\n \n-\tuseGateway.call(this, 'POST', params.jobName, params.groupings, callback);\n-};\n-Pushgateway.prototype.push = function(params, callback) {\n-\tif(!params || !params.jobName) {\n-\t\tthrow new Error('Missing jobName parameter');\n-\t}\n+\tpush(params = {}) {\n+\t\tif (this.requireJobName && !params.jobName) {\n+\t\t\tthrow new Error('Missing jobName parameter');\n+\t\t}\n \n-\tuseGateway.call(this, 'PUT', params.jobName, params.groupings, callback);\n-};\n-Pushgateway.prototype.delete = function(params, callback) {\n-\tif(!params || !params.jobName) {\n-\t\tthrow new Error('Missing jobName parameter');\n+\t\treturn useGateway.call(this, 'PUT', params.jobName, params.groupings);\n \t}\n \n-\tuseGateway.call(this, 'DELETE', params.jobName, params.groupings, callback);\n-};\n-\n-function useGateway(method, job, groupings, callback) {\n-\tvar url = [this.gatewayUrl, '/metrics/job/', encodeURIComponent(job), generateGroupings(groupings)].join('');\n-\tvar options = {\n-\t\tbody: register.metrics(),\n-\t\turl: url,\n-\t\tmethod: method\n-\t};\n+\tdelete(params = {}) {\n+\t\tif (this.requireJobName && !params.jobName) {\n+\t\t\tthrow new Error('Missing jobName parameter');\n+\t\t}\n \n-\tif(method === 'DELETE') {\n-\t\toptions.body = '';\n+\t\treturn useGateway.call(this, 'DELETE', params.jobName, params.groupings);\n \t}\n-\n-\trequest(options, callback);\n+}\n+async function useGateway(method, job, groupings) {\n+\t// `URL` first added in v6.13.0\n+\t// eslint-disable-next-line n/no-deprecated-api\n+\tconst gatewayUrlParsed = url.parse(this.gatewayUrl);\n+\tconst gatewayUrlPath =\n+\t\tgatewayUrlParsed.pathname && gatewayUrlParsed.pathname !== '/'\n+\t\t\t? gatewayUrlParsed.pathname\n+\t\t\t: '';\n+\tconst jobPath = job\n+\t\t? `/job/${encodeURIComponent(job)}${generateGroupings(groupings)}`\n+\t\t: '';\n+\tconst path = `${gatewayUrlPath}/metrics${jobPath}`;\n+\n+\t// eslint-disable-next-line n/no-deprecated-api\n+\tconst target = url.resolve(this.gatewayUrl, path);\n+\t// eslint-disable-next-line n/no-deprecated-api\n+\tconst requestParams = url.parse(target);\n",
+					"match": false,
+					"packageHash": "8dcf7361e6c7e20304a56563793766ec673f38470b5d4e00e266130bb2633432",
+					"size": 1413,
+					"sourceHash": "a095acaabaf24ff92d90ec00740c3836ae97c6d903fa6b3814bbad89c8bcab89",
+					"status": "content"
+				},
+				"lib/register.js": {
+					"match": false,
+					"packageHash": "8f641c7d656fb4ff59b2440c6b8904c91419ef561bc636fb52d1b44f600c5bd2",
+					"size": 1167,
+					"status": "missing-in-source"
+				},
+				"lib/summary.js": {
+					"diff": "--- published/lib/summary.js\n+++ rebuilt/lib/summary.js\n@@ -3,238 +3,195 @@\n  */\n 'use strict';\n \n-var register = require('./register');\n-var type = 'summary';\n-var isNumber = require('./util').isNumber;\n-var extend = require('util-extend');\n-var getProperties = require('./util').getPropertiesFromObj;\n-var getLabels = require('./util').getLabels;\n-var hashObject = require('./util').hashObject;\n-var createValue = require('./util');\n-var validateLabels = require('./validation').validateLabel;\n-var validateMetricName = require('./validation').validateMetricName;\n-var validateLabelNames = require('./validation').validateLabelName;\n-var TDigest = require('tdigest').TDigest;\n-\n-/**\n- * Summary\n- * @param {string} name - Name of the metric\n- * @param {string} help - Help for the metric\n- * @param {object|array} labelsOrConf - Either array of label names or config object as a key-value object\n- * @param {object} conf - Configuration object\n- * @constructor\n- */\n-function Summary(name, help, labelsOrConf, conf) {\n-\tvar obj;\n-\tvar labels = [];\n+const util = require('util');\n+const { getLabels, LabelMap } = require('./util');\n+const { Metric } = require('./metric');\n+const timeWindowQuantiles = require('./timeWindowQuantiles');\n+\n+const DEFAULT_COMPRESS_COUNT = 1000; // every 1000 measurements\n+\n+class Summary extends Metric {\n+\tconstructor(config) {\n+\t\tsuper(config, {\n+\t\t\tpercentiles: [0.01, 0.05, 0.5, 0.9, 0.95, 0.99, 0.999],\n+\t\t\tcompressCount: DEFAULT_COMPRESS_COUNT,\n+\t\t\tstore: new LabelMap(),\n+\t\t});\n+\n+\t\tif (this.labelNames.includes('quantile'))\n+\t\t\tthrow new Error('quantile is a reserved label keyword');\n \n-\tif(Array.isArray(labelsOrConf)) {\n-\t\tobj = conf || {};\n-\t\tlabels = labelsOrConf;\n-\t} else {\n-\t\tobj = labelsOrConf || {};\n+\t\tthis.type = 'summary';\n+\t\tthis.store = new LabelMap(this.labelNames);\n+\n+\t\tif (this.labelNames.length === 0) {\n+\t\t\tthis.store.set(\n+\t\t\t\t{},\n+\t\t\t\t{\n+\t\t\t\t\ttd: new timeWindowQuantiles(this.maxAgeSeconds, this.ageBuckets),\n+\t\t\t\t\tcount: 0,\n+\t\t\t\t\tsum: 0,\n+\t\t\t\t},\n+\t\t\t);\n+\t\t}\n \t}\n \n-\tvalidateInput(name, help, labels);\n+\t/**\n+\t * Observe a value.\n+\t * @param {object} labels - Object with labels where key is the label key and value is label value. Can only be one level deep\n+\t * @param {number} value - Value to observe\n+\t * @returns {void}\n+\t */\n+\tobserve(labels, value) {\n+\t\tobserve.call(this, labels === 0 ? 0 : labels || {})(value);\n+\t}\n \n-\tthis.name = name;\n-\tthis.help = help;\n+\tasync get() {\n+\t\tif (this.collect) {\n+\t\t\tconst v = this.collect();\n+\t\t\tif (v instanceof Promise) await v;\n+\t\t}\n+\t\tconst values = [];\n \n-\tthis.percentiles = configurePercentiles(obj.percentiles);\n-\tthis.hashMap = {};\n-\tthis.labelNames = labels || [];\n-\tregister.registerMetric(this);\n-}\n+\t\tfor (const entry of this.store.values()) {\n+\t\t\tconst s = entry.value;\n+\t\t\tif (this.pruneAgedBuckets && s.td.size() === 0) {\n+\t\t\t\tthis.store.remove(entry.labels);\n+\t\t\t} else {\n+\t\t\t\tvalues.push(...extractSummariesForExport(s, this.percentiles));\n+\t\t\t\tvalues.push(getSumForExport(s, this));\n",
+					"match": false,
+					"packageHash": "6630a1700fd5ff7d6da76d1166df7862da421516fc1dceee4d1be1b9c66f21f6",
+					"size": 5785,
+					"sourceHash": "5a052e8672a40e977b13c43af220c2f457b9b9cf275184878ab03ade97e2cf0b",
+					"status": "content"
+				},
+				"lib/util.js": {
+					"diff": "--- published/lib/util.js\n+++ rebuilt/lib/util.js\n@@ -1,61 +1,382 @@\n 'use strict';\n \n-exports.isNumber = isNumber;\n+const util = require('util');\n \n-exports.getPropertiesFromObj = function(hashMap) {\n-\tvar obj = Object.keys(hashMap).map(function(x) {\n-\t\treturn hashMap[x];\n-\t});\n-\treturn obj;\n-};\n+exports.getValueAsString = function getValueString(value) {\n+\tif (Number.isFinite(value)) {\n+\t\treturn `${value}`;\n+\t}\n \n-exports.incValue = function createValue(hashMap, value, labels, hash) {\n-\tif(hashMap[hash]){\n-\t\thashMap[hash].value += value || 1;\n+\tif (Number.isNaN(value)) {\n+\t\treturn 'Nan';\n+\t} else if (value < 0) {\n+\t\treturn '-Inf';\n \t} else {\n-\t\thashMap[hash] = { value: value || 1, labels: labels || {} };\n+\t\treturn '+Inf';\n \t}\n-\treturn hashMap;\n };\n \n+/**\n+ * @function removeLabels\n+ * @param {Map} hashMap\n+ * @param {string[]} labels\n+ * @param {string[]} sortedLabelNames\n+ */\n+exports.removeLabels = function removeLabels(\n+\thashMap,\n+\tlabels,\n+\tsortedLabelNames,\n+) {\n+\thashMap.delete(hashObject(labels, sortedLabelNames));\n+};\n+\n+/**\n+ * @function setValue\n+ * @param {Map} hashMap\n+ * @param {*} value\n+ * @param {object} labels\n+ */\n exports.setValue = function setValue(hashMap, value, labels) {\n-\tvar hash = hashObject(labels);\n-\thashMap[hash] = { value: isNumber(value) ? value : 0, labels: labels || {} };\n+\tconst hash = hashObject(labels);\n+\thashMap.set(hash, {\n+\t\tvalue: typeof value === 'number' ? value : 0,\n+\t\tlabels: labels || {},\n+\t});\n \treturn hashMap;\n };\n \n-exports.getLabels = function(labelNames, args) {\n-\tif(labelNames.length !== args.length) {\n-\t\tthrow new Error('Invalid number of arguments');\n+/**\n+ * @function setValueDelta\n+ * @param {Map} hashMap\n+ * @param {*} deltaValue\n+ * @param {object} labels\n+ * @returns {Map}\n+ */\n+exports.setValueDelta = function setValueDelta(\n+\thashMap,\n+\tdeltaValue,\n+\tlabels,\n+\thash = '',\n+) {\n+\tconst value = typeof deltaValue === 'number' ? deltaValue : 0;\n+\tconst entry = hashMap.get(hash);\n+\n+\tif (entry !== undefined) {\n+\t\tentry.value += value;\n+\t} else {\n+\t\thashMap.set(hash, { value, labels });\n \t}\n+\treturn hashMap;\n+};\n \n-\tvar argsAsArray = Array.prototype.slice.call(args);\n-\treturn labelNames.reduce(function(acc, label, index){\n-\t\tacc[label] = argsAsArray[index];\n-\t\treturn acc;\n-\t}, {});\n+/**\n+ * @param {string[]} labelNames\n+ * @param {any[]} args\n+ * @returns {object}\n",
+					"match": false,
+					"packageHash": "be10270e74509e30967b02b0607a6e9086c27404dbe0140725f63aca5d88cd0e",
+					"size": 1527,
+					"sourceHash": "ae3a997027532ab27661115eed144a1bf76a77d9bc8bd98e7973960549bb8dd9",
+					"status": "content"
+				},
+				"lib/validation.js": {
+					"diff": "--- published/lib/validation.js\n+++ rebuilt/lib/validation.js\n@@ -1,25 +1,27 @@\n 'use strict';\n \n-exports.validateMetricName = function(name) {\n-\tvar regexp = new RegExp('^[a-zA-Z_:][a-zA-Z0-9_:]*$');\n-\treturn regexp.test(name);\n+const util = require('util');\n+\n+// These are from https://prometheus.io/docs/concepts/data_model/#metric-names-and-labels\n+const metricRegexp = /^[a-zA-Z_:][a-zA-Z0-9_:]*$/;\n+const labelRegexp = /^[a-zA-Z_][a-zA-Z0-9_]*$/;\n+\n+exports.validateMetricName = function (name) {\n+\treturn metricRegexp.test(name);\n };\n \n-exports.validateLabelName = function(names) {\n-\tvar valid = true;\n-\tvar regexp = new RegExp('^[a-zA-Z_][a-zA-Z0-9_]*$');\n-\t(names || []).forEach(function(name) {\n-\t\tif(!regexp.test(name)) {\n-\t\t\tvalid = false;\n-\t\t}\n-\t});\n-\treturn valid;\n+exports.validateLabelName = function (names = []) {\n+\treturn names.filter(name => !labelRegexp.test(name));\n };\n \n exports.validateLabel = function validateLabel(savedLabels, labels) {\n-\tObject.keys(labels).forEach(function(label) {\n-\t\tif(savedLabels.indexOf(label) === -1) {\n-\t\t\tthrow new Error('Added label is not included in initial labelset');\n+\tfor (const label in labels) {\n+\t\tif (!savedLabels.includes(label)) {\n+\t\t\tthrow new Error(\n+\t\t\t\t`Added label \"${label}\" is not included in initial labelset: ${util.inspect(\n+\t\t\t\t\tsavedLabels,\n+\t\t\t\t)}`,\n+\t\t\t);\n \t\t}\n-\t});\n+\t}\n };\n",
+					"match": false,
+					"packageHash": "b19a301a92d507e6fcf19587f906b81ef3072f5fe6224c81f9434ffca487b3b1",
+					"size": 622,
+					"sourceHash": "7d69819364113bcb4c2157f16363b0b88344b8766b6b2107aa18fd695d0b63e9",
+					"status": "content"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -1,38 +1,82 @@\n {\n-  \"name\": \"prom-client\",\n-  \"version\": \"3.4.3\",\n-  \"description\": \"Client for prometheus\",\n-  \"main\": \"index.js\",\n-  \"directories\": {\n-    \"test\": \"test\"\n-  },\n-  \"scripts\": {\n-    \"test\": \"eslint --ignore-pattern doc/ --ignore-path .gitignore . && mocha test/\"\n-  },\n-  \"repository\": {\n-    \"type\": \"git\",\n-    \"url\": \"git@github.com:siimon/prom-client.git\"\n-  },\n-  \"keywords\": [\n-    \"Prometheus\",\n-    \"Metrics\",\n-    \"Client\"\n-  ],\n-  \"author\": \"Simon Nyberg\",\n-  \"license\": \"Apache-2.0\",\n-  \"homepage\": \"https://github.com/siimon/prom-client\",\n-  \"devDependencies\": {\n-    \"chai\": \"^3.4.1\",\n-    \"eslint\": \"^1.10.1\",\n-    \"express\": \"^4.13.3\",\n-    \"minami\": \"^1.1.1\",\n-    \"mocha\": \"^2.3.4\",\n-    \"nock\": \"^7.2.2\",\n-    \"sinon\": \"^1.17.2\"\n-  },\n-  \"dependencies\": {\n-    \"request\": \"^2.69.0\",\n-    \"tdigest\": \"^0.1.1\",\n-    \"util-extend\": \"^1.0.1\"\n-  }\n+\t\"name\": \"prom-client\",\n+\t\"version\": \"15.1.3\",\n+\t\"description\": \"Client for prometheus\",\n+\t\"main\": \"index.js\",\n+\t\"files\": [\n+\t\t\"lib/\",\n+\t\t\"index.js\",\n+\t\t\"index.d.ts\"\n+\t],\n+\t\"engines\": {\n+\t\t\"node\": \"^20 || ^22 || >=24\"\n+\t},\n+\t\"scripts\": {\n+\t\t\"benchmarks\": \"node --max-heap-size=5000 --allow-natives-syntax ./benchmarks/index.js\",\n+\t\t\"test\": \"npm run lint && npm run check-prettier && npm run compile-typescript && npm run test-unit -- --coverage\",\n+\t\t\"lint\": \"eslint .\",\n+\t\t\"test-unit\": \"jest\",\n+\t\t\"run-prettier\": \"prettier .\",\n+\t\t\"check-prettier\": \"npm run run-prettier -- --check\",\n+\t\t\"compile-typescript\": \"tsc --project .\",\n+\t\t\"prepare\": \"husky\"\n+\t},\n+\t\"repository\": {\n+\t\t\"type\": \"git\",\n+\t\t\"url\": \"git@github.com:siimon/prom-client.git\"\n+\t},\n+\t\"keywords\": [\n+\t\t\"Prometheus\",\n+\t\t\"Metrics\",\n+\t\t\"Client\"\n+\t],\n+\t\"author\": \"Simon Nyberg\",\n+\t\"license\": \"Apache-2.0\",\n+\t\"homepage\": \"https://github.com/siimon/prom-client\",\n+\t\"devDependencies\": {\n+\t\t\"@eslint/js\": \"^9.29.0\",\n+\t\t\"debug\": \"^4.4.1\",\n+\t\t\"eslint\": \"^9.29.0\",\n+\t\t\"eslint-config-prettier\": \"^10.1.5\",\n+\t\t\"eslint-plugin-jsdoc\": \"^61.4.1\",\n+\t\t\"eslint-plugin-n\": \"^17.20.0\",\n+\t\t\"eslint-plugin-prettier\": \"^5.0.1\",\n+\t\t\"express\": \"^5.1.0\",\n+\t\t\"faceoff\": \"^1.1.0\",\n+\t\t\"globals\": \"^16.2.0\",\n+\t\t\"husky\": \"^9.0.0\",\n+\t\t\"jest\": \"^30.0.2\",\n+\t\t\"lint-staged\": \"^15.5.2\",\n+\t\t\"nock\": \"^13.0.5\",\n+\t\t\"prettier\": \"3.7.0\",\n+\t\t\"typescript\": \"^5.0.4\",\n+\t\t\"typescript-eslint\": \"^8.35.0\"\n+\t},\n+\t\"dependencies\": {\n+\t\t\"@opentelemetry/api\": \"^1.4.0\",\n+\t\t\"tdigest\": \"^0.1.1\"\n+\t},\n+\t\"types\": \"./index.d.ts\",\n+\t\"jest\": {\n+\t\t\"testRegex\": \".*Test\\\\.js$\"\n",
+					"match": false,
+					"packageHash": "43cffe7035d7552a7944067fbb9b71340750a7dc3cead91502adcced925aed4e",
+					"size": 829,
+					"sourceHash": "6aa1056dd938747874f29caa2aeed5152e3992e16b6a8276dc2adf50e2fd011f",
+					"status": "content"
+				},
+				"test/.eslintrc": {
+					"match": false,
+					"packageHash": "206fe6034eb3aa88db7a14300ad92bfc1803b57707347830cda5a7a02f988406",
+					"size": 320,
+					"status": "missing-in-source"
+				},
+				"test/bucketGeneratorsTest.js": {
+					"match": false,
+					"packageHash": "d0fd252d03eaf1fb3b58de126f2b673ce89858ac56af123604cd8e029c497461",
+					"size": 1814,
+					"status": "missing-in-source"
+				},
+				"test/counterTest.js": {
+					"match": false,
+					"packageHash": "d8290e8990732cc42a538cb993479d540b34f11d57cb515f81243636144498b5",
+					"size": 1383,
+					"status": "missing-in-source"
+				},
+				"test/gaugeTest.js": {
+					"match": false,
+					"packageHash": "417b5bc4dbe32acbee12b4cefb3d26265a152dbda122febcb3f74780bc37cf1d",
+					"size": 2315,
+					"status": "missing-in-source"
+				},
+				"test/histogramTest.js": {
+					"match": false,
+					"packageHash": "4cb8c16888be4db10520816bafde402b5c5251c04e62ccc2629d9d031e42559c",
+					"size": 5308,
+					"status": "missing-in-source"
+				},
+				"test/pushgatewayTest.js": {
+					"match": false,
+					"packageHash": "d41372c8375e8818ee369a41ee1c27b861e49ac83fda24a2af0b3c17e17d138a",
+					"size": 2230,
+					"status": "missing-in-source"
+				},
+				"test/registerTest.js": {
+					"match": false,
+					"packageHash": "576e49a79fd8f7af4e8009073f12074ff4185e2d8447fa6ca4c9a0a4369c48e8",
+					"size": 2165,
+					"status": "missing-in-source"
+				},
+				"test/summaryTest.js": {
+					"match": false,
+					"packageHash": "c4c284f6eba2946c5049aa952482aa520d2509c879db56138a0606308962663b",
+					"size": 5794,
+					"status": "missing-in-source"
+				},
+				"index.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/cluster.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/defaultMetrics.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/exemplar.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/metric.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/metricAggregators.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/metrics/eventLoopLag.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/metrics/gc.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/metrics/heapSizeAndUsed.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/metrics/heapSpacesSizeAndUsed.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/metrics/helpers/processMetricsHelpers.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/metrics/helpers/safeMemoryUsage.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/metrics/osMemoryHeap.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/metrics/osMemoryHeapLinux.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/metrics/processCpuTotal.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/metrics/processHandles.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/metrics/processMaxFileDescriptors.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/metrics/processOpenFileDescriptors.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/metrics/processRequests.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/metrics/processResources.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/metrics/processStartTime.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/metrics/version.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/registry.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/timeWindowQuantiles.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/worker.js": {
+					"match": false,
+					"status": "missing-in-package"
+				}
+			},
+			"summary": {
+				"differentFiles": 11,
+				"matchingFiles": 1,
+				"missingInPackage": 25,
+				"missingInSource": 13,
+				"score": 0.02,
+				"totalFiles": 50
+			}
+		},
+		"prodDependencies": []
+	}
+]
