@@ -1,0 +1,649 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-07T03:58:34.460Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:11.7.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "vitepress@0.2.0",
+			"name": "vitepress",
+			"version": "0.2.0",
+			"location": "https://registry.npmjs.org/vitepress/-/vitepress-0.2.0.tgz",
+			"integrity": "sha512-Wwa3sq95SmZMqxKQpAGnp6LHXllf0BRLJJ40v8ADSFXE6ibUv5Lku1uSgOu7OUMEdb8EjhMjOgKxidn2Klrubg==",
+			"publishedAt": "2020-05-22T21:49:23.037Z",
+			"publishedWith": {
+				"node": null,
+				"npm": null
+			}
+		},
+		"source": {
+			"integrity": null,
+			"location": "git+https://github.com/vuejs/vitepress.git",
+			"spec": "github:vuejs/vitepress#HEAD"
+		},
+		"comparisonHash": "9ef46a5bd31291e57cbab41e2f17c57bd6da0b5b",
+		"diff": {
+			"files": {
+				"CHANGELOG.md": {
+					"match": false,
+					"packageHash": "91b18088af1dd3d23e91a551bcbcaedfdc6f53af26b5b39b4f330b31426dc9db",
+					"size": 1811,
+					"status": "missing-in-source"
+				},
+				"README.md": {
+					"diff": "--- published/README.md\n+++ rebuilt/README.md\n@@ -1,93 +1,28 @@\n-# (WIP) VitePress 📝💨\n+# VitePress 📝💨\n \n-> [VuePress](http://vuepress.vuejs.org/)' little brother, built on top of [vite](https://github.com/vuejs/vite)\n+[![test](https://github.com/vuejs/vitepress/actions/workflows/test.yml/badge.svg?branch=main)](https://github.com/vuejs/vitepress/actions/workflows/test.yml)\n+[![npm](https://img.shields.io/npm/v/vitepress/next)](https://www.npmjs.com/package/vitepress/v/next)\n+[![nightly releases](https://img.shields.io/badge/nightly-releases-orange)](https://nightly.akryum.dev/vuejs/vitepress)\n+[![chat](https://img.shields.io/badge/chat-discord-blue?logo=discord)](https://chat.vuejs.org)\n \n-**Note this is early WIP! Currently the focus is on making Vite stable and feature complete first. It is not recommended to use this for anything serious yet.**\n+---\n \n-``` bash\n-npm install -D vitepress\n-echo '# Hello VitePress' > index.md\n+VitePress is a Vue-powered static site generator and a spiritual successor to [VuePress](https://vuepress.vuejs.org), built on top of [Vite](https://github.com/vitejs/vite).\n \n-# starts dev server\n-npx vitepress\n+## Documentation\n \n-# build > .vitepress/dist\n-npx vitepress build\n-```\n+To check out docs, visit [vitepress.dev](https://vitepress.dev).\n \n-## Customization\n+## Changelog\n \n-Configuration can be done via `.vitepress/config.js` (see `src/config.ts`)\n+Detailed changes for each release are documented in the [CHANGELOG](https://github.com/vuejs/vitepress/blob/main/CHANGELOG.md).\n \n-You can develop your custom theme by adding the following files:\n+## Contribution\n \n-`.vitepress/theme/Layout.vue`\n-\n-```vue\n-<template>\n-  <h1>Custom Layout!</h1>\n-  <Content/><!-- make sure to include markdown outlet -->\n-</template>\n-```\n-\n-`.vitepress/theme/index.js`\n-\n-```js\n-import Layout from './Layout.vue'\n-\n-export default {\n-  Layout,\n-  NotFound: () => 'custom 404', // <- this is a Vue 3 functional component\n-  enhanceApp({ app, router, siteData }) {\n-    // app is the Vue 3 app instance from createApp()\n-    // router is VitePress' custom router (see `lib/app/router.js`)\n-    // siteData is a ref of current site-level metadata.\n-  }\n-}\n-```\n-\n-Unlike VuePress, the only file with a fixed location in a theme is `index.js` - everything else is imported and exported there like in a normal application.\n-\n-## Motivation\n-\n-I love VuePress, but being built on top of webpack, the time it takes to spin up the dev server for a simple doc site with a few pages is just becoming unbearable. Even HMR updates can take up to seconds to reflect in the browser!\n-\n-As a reference, the [Composition API RFC repo](https://github.com/vuejs/composition-api-rfc) is just two pages, but it takes 4 seconds to spin up the server, and almost 2 seconds for any edit to reflect in the browser.\n-\n-Fundamentally, this is because VuePress is a webpack app under the hood. Even with just two pages, it's a full on webpack project (including all the theme source files) being compiled. It gets even worse when the project has many pages - every page must first be fully compiled before the server can even display anything!\n-\n-Incidentally, [vite](https://github.com/vuejs/vite) solves these problems really well: nearly instant server start, on-demand compilation that only compiles the page being served, and lightning fast HMR. Plus, there are a few additional design issues I have noted in VuePress over time, but never had the time to fix due to the amount of refactoring it would require.\n-\n-Now, with `vite` and Vue 3, it is time to rethink what a \"Vue-powered static site generator\" can really be.\n-\n-## Improvements over VuePress\n-\n-- Uses Vue 3.\n-  - Leverages Vue 3's improved template static analysis to stringify static content as much as possible. Static content is sent as string literals instead of JavaScript render function code - the JS payload is therefore *much* cheaper to parse, and hydration also becomes faster.\n-\n-    Note the optimization is applied while still allowing the user to freely mix Vue components inside markdown content - the compiler does the static/dynamic separation for you automatically and you never need to think about it.\n-\n-- Uses `vite` under the hood:\n-  - Faster dev server start\n-  - Faster hot updates\n-  - Faster build (uses Rollup internally)\n-\n-- Lighter page weight.\n-  - Vue 3 tree-shaking + Rollup code splitting\n-  - Does not ship metadata for every page on every request. This decouples page weight from total number of pages. Only the current page's metadata is sent. Client side navigation fetches the new page's component and metadata together.\n-  - Does not use `vue-router` because the need of VitePress is very simple and specific - a simple custom router (under 200 LOC) is used instead.\n-  - (WIP) i18n locale data should also be fetched on demand.\n-\n-## Other Differences\n-\n-- More opinionated and less configurable: VitePress aims to scale back the complexity in the current VuePress and restart from its minimalist roots.\n-\n-- Future oriented: VitePress only targets browsers that support native ES module imports. It encourages the use of native JavaScript without transpilation, and CSS variables for theming.\n",
+					"match": false,
+					"packageHash": "3bd19e8b2fc4dc7ca178612e2359b964fc286945ebd374c78c34b3ba46e2a6c5",
+					"size": 4683,
+					"sourceHash": "f4f7c2e930ec91163882784ccbbaa24220cfa22a51a10e8dcd965dec71710e6e",
+					"status": "content"
+				},
+				"bin/vitepress.js": {
+					"diff": "--- published/bin/vitepress.js\n+++ rebuilt/bin/vitepress.js\n@@ -1,34 +1,16 @@\n #!/usr/bin/env node\n-const chalk = require('chalk')\n-const argv = require('minimist')(process.argv.slice(2))\n+// @ts-check\n \n-console.log(chalk.cyan(`vitepress v${require('../package.json').version}`))\n-console.log(chalk.cyan(`vite v${require('vite/package.json').version}`))\n+import module from 'node:module'\n \n-const command = argv._[0]\n+// https://github.com/vitejs/vite/blob/6c8a5a27e645a182f5b03a4ed6aa726eab85993f/packages/vite/bin/vite.js#L48-L63\n+try {\n+  module.enableCompileCache?.()\n+  setTimeout(() => {\n+    try {\n+      module.flushCompileCache?.()\n+    } catch {}\n+  }, 10 * 1000).unref()\n+} catch {}\n \n-if (!command || command === 'dev') {\n-  const port = argv.port || 3000\n-  const root = command === 'dev' && argv._[1]\n-  if (root) {\n-    argv.root = root\n-  }\n-  require('../dist/node')\n-    .createServer(argv)\n-    .then((server) => {\n-      server.listen(port, () => {\n-        console.log(`listening at http://localhost:${port}`)\n-      })\n-    })\n-    .catch((err) => {\n-      console.error(chalk.red(`failed to start server. error:\\n`), err)\n-    })\n-} else if (command === 'build') {\n-  require('../dist/node')\n-    .build(argv)\n-    .catch((err) => {\n-      console.error(chalk.red(`build error:\\n`), err)\n-    })\n-} else {\n-  console.log(chalk.red(`unknown command \"${command}\".`))\n-}\n+import('../dist/node/cli.js')\n",
+					"match": false,
+					"packageHash": "3dc29c3e018b20d477a4b116286bc13f963eedc1756cac0ba0c3bf58196b05ca",
+					"size": 955,
+					"sourceHash": "5f0e1576433566ec20f9a635a6997d93f385db3ef54be01a1f0d401b1a0b0748",
+					"status": "content"
+				},
+				"dist/client/app/components/Content.d.ts": {
+					"match": false,
+					"packageHash": "9d7295f870c55cc076756ce703d4e975afad74d525f2ae8e6071961b633a70e3",
+					"size": 141,
+					"status": "missing-in-source"
+				},
+				"dist/client/app/components/Content.js": {
+					"match": false,
+					"packageHash": "002e2af19a05b36de4f343c7ed7fc98606fc36fb6c06c670c3046d6ffec8d490",
+					"size": 417,
+					"status": "missing-in-source"
+				},
+				"dist/client/app/composables/head.d.ts": {
+					"match": false,
+					"packageHash": "10916a1003c94fecc1e2d00abdcfb95bd33ebc3ef8fe0a9aa82ef5a317a5e788",
+					"size": 113,
+					"status": "missing-in-source"
+				},
+				"dist/client/app/composables/head.js": {
+					"match": false,
+					"packageHash": "4fa63324726b5a465649b80dc7b8d3a062b4b91a7066c308e87ffbb3be784c87",
+					"size": 1664,
+					"status": "missing-in-source"
+				},
+				"dist/client/app/composables/pageData.d.ts": {
+					"match": false,
+					"packageHash": "6a344f04d3852557a529810a28893b70b359061144d578aa681f71dbd8868fa8",
+					"size": 259,
+					"status": "missing-in-source"
+				},
+				"dist/client/app/composables/pageData.js": {
+					"match": false,
+					"packageHash": "d0e8b64792f00a5456033bdcd3fb548fc94ff182eef7783a3b7731a06e0af6ad",
+					"size": 255,
+					"status": "missing-in-source"
+				},
+				"dist/client/app/composables/preFetch.d.ts": {
+					"match": false,
+					"packageHash": "da3574934c5c76dd25fbc4525a9dea5efc6a5a89e926d96a7e18a3ba49f53a98",
+					"size": 45,
+					"status": "missing-in-source"
+				},
+				"dist/client/app/composables/preFetch.js": {
+					"match": false,
+					"packageHash": "1cbec187300986274d592b9f57897f512aa520f127f057c3a980d87c95782fdd",
+					"size": 3133,
+					"status": "missing-in-source"
+				},
+				"dist/client/app/composables/siteData.d.ts": {
+					"match": false,
+					"packageHash": "ade42ce55acf1618276ebb7729bc46a5ebcb5b4922bdcd2a6810ec9036c7841c",
+					"size": 188,
+					"status": "missing-in-source"
+				},
+				"dist/client/app/composables/siteData.js": {
+					"match": false,
+					"packageHash": "c75eb1a09dc8a8eb5e198659d4d6f6a5087d9de3c8784a97f7dc564e62ffedb4",
+					"size": 382,
+					"status": "missing-in-source"
+				},
+				"dist/client/app/exports.d.ts": {
+					"match": false,
+					"packageHash": "578adf0147bd85e5483d242ee47665c06f5ebd19d5f87c6da918130a21a6a828",
+					"size": 326,
+					"status": "missing-in-source"
+				},
+				"dist/client/app/exports.js": {
+					"match": false,
+					"packageHash": "475bda600fb2375792c32bf41722bf24b45ab4c73032d16155d930d421547606",
+					"size": 457,
+					"status": "missing-in-source"
+				},
+				"dist/client/app/index.d.ts": {
+					"match": false,
+					"packageHash": "0024c3661ce561407eabbc90e2618542c6a0f60735e68cc10fda5eab14ffa82c",
+					"size": 118,
+					"status": "missing-in-source"
+				},
+				"dist/client/app/index.js": {
+					"match": false,
+					"packageHash": "9825b875534fded73168265dac4443d060baadba7ae54cf70e36aa7596e499da",
+					"size": 3246,
+					"status": "missing-in-source"
+				},
+				"dist/client/app/router.d.ts": {
+					"match": false,
+					"packageHash": "ab2ba963f834bdc9523b9a84cdb11ee074abd40e3d3dd264f18e5ec76938b03c",
+					"size": 512,
+					"status": "missing-in-source"
+				},
+				"dist/client/app/router.js": {
+					"match": false,
+					"packageHash": "1de0a1bcd2bfcb8ae12a9e7d872b152bd2eaec1ebf59b14a69257ef7559e7e9d",
+					"size": 4093,
+					"status": "missing-in-source"
+				},
+				"dist/client/app/theme.d.ts": {
+					"match": false,
+					"packageHash": "b0119644f099bad2f28cd0641c028a106a4e44d062df4eb65a6ee6f551e7c9a5",
+					"size": 378,
+					"status": "missing-in-source"
+				},
+				"dist/client/app/theme.js": {
+					"match": false,
+					"packageHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+					"size": 0,
+					"status": "missing-in-source"
+				},
+				"dist/client/app/utils.d.ts": {
+					"match": false,
+					"packageHash": "83c5b6ea76f48ad0f3dcaf99e6c134159686040c06aa75d6fc78e0eb219d9b18",
+					"size": 170,
+					"status": "missing-in-source"
+				},
+				"dist/client/app/utils.js": {
+					"match": false,
+					"packageHash": "295a99cf833fedcffa64ce6446fb46658ba5ca525b6b0cf81e8dea2e171ab728",
+					"size": 1128,
+					"status": "missing-in-source"
+				},
+				"dist/client/theme-default/index.d.ts": {
+					"match": false,
+					"packageHash": "36973991e6dc5fd1609302bf131fec363a956752e79105ef1d6a380a74d7bddd",
+					"size": 88,
+					"status": "missing-in-source"
+				},
+				"dist/client/theme-default/index.js": {
+					"match": false,
+					"packageHash": "1fbb0e9624a5a821a3b7b37cc416130123a02d1f9ca0a29a049089e1a90fa8eb",
+					"size": 87,
+					"status": "missing-in-source"
+				},
+				"dist/node/build/build.d.ts": {
+					"match": false,
+					"packageHash": "26166510a4a982c6138b8c94b6d458f74e77e2140fdb38b8e9b2997365ede478",
+					"size": 272,
+					"status": "missing-in-source"
+				},
+				"dist/node/build/build.js": {
+					"match": false,
+					"packageHash": "6c5c43276a57e2b8fe0aff77649a42df08ec2676b608511f6dd1b700626956fe",
+					"size": 1607,
+					"status": "missing-in-source"
+				},
+				"dist/node/build/build.js.map": {
+					"match": false,
+					"packageHash": "a316f2dcef27223309890577a16b0b378d5d0605aaf4fb4620c20380963ae932",
+					"size": 1152,
+					"status": "missing-in-source"
+				},
+				"dist/node/build/bundle.d.ts": {
+					"match": false,
+					"packageHash": "d97a243a93d5c1d539a15e6c8bcd936029ec542a3540a5e183411f06d75f468f",
+					"size": 252,
+					"status": "missing-in-source"
+				},
+				"dist/node/build/bundle.js": {
+					"match": false,
+					"packageHash": "f85a6450ab3f04d1b5663c54585f6b5c7870f0b62e96060e67b400bec61437c0",
+					"size": 5789,
+					"status": "missing-in-source"
+				},
+				"dist/node/build/bundle.js.map": {
+					"match": false,
+					"packageHash": "fd757c1c2f753bd020a2d24f4fab3b09e5c132a0cb1856731bc2025f51486d54",
+					"size": 3884,
+					"status": "missing-in-source"
+				},
+				"dist/node/build/render.d.ts": {
+					"match": false,
+					"packageHash": "f0e97d60904bc5b582b6faf2b87dd43a6f069d11fb8b91e899a88ae239bea6f3",
+					"size": 351,
+					"status": "missing-in-source"
+				},
+				"dist/node/build/render.js": {
+					"match": false,
+					"packageHash": "eb0c8be18d739bfe79e009bee6ea2b6f065582e8b64d55a6cf1f66de45d5f837",
+					"size": 3847,
+					"status": "missing-in-source"
+				},
+				"dist/node/build/render.js.map": {
+					"match": false,
+					"packageHash": "99ecd6f5e0335b024f07d9f85c18d86b4da564c3d0af7ad2e9a3be58a7f9134f",
+					"size": 3201,
+					"status": "missing-in-source"
+				},
+				"dist/node/config.d.ts": {
+					"match": false,
+					"packageHash": "93e5c0da0a33da1cc0db0f75ee9ef7b07ec6125a45259fbdaa3265fdd54e67f0",
+					"size": 647,
+					"status": "missing-in-source"
+				},
+				"dist/node/config.js": {
+					"match": false,
+					"packageHash": "c1fcb095bcc7ff6b1526f595fc7585d8c376b38bf38d78d4b2b34cda4e26d14a",
+					"size": 2264,
+					"status": "missing-in-source"
+				},
+				"dist/node/config.js.map": {
+					"match": false,
+					"packageHash": "4f166e51f0a49a604f1c48fa6521cbb85a3bfec6cbfe33f7a05ead9e790ed1ca",
+					"size": 1850,
+					"status": "missing-in-source"
+				},
+				"dist/node/index.d.ts": {
+					"match": false,
+					"packageHash": "eb5540384285118d0b218a3fd0597eb5b4ee9810ffeb6b8796cf519812a078a5",
+					"size": 83,
+					"status": "missing-in-source"
+				},
+				"dist/node/index.js": {
+					"match": false,
+					"packageHash": "1fb57cd88ba7ab6dc2589d5bfe71161f20724cc817d0e7184d7ad7575b9667c9",
+					"size": 305,
+					"status": "missing-in-source"
+				},
+				"dist/node/index.js.map": {
+					"match": false,
+					"packageHash": "9799162993d273d2ac738dc6ef459eb9e61fcceb8f5af5dc06bc747e714c3b22",
+					"size": 152,
+					"status": "missing-in-source"
+				},
+				"dist/node/markdown/markdown.d.ts": {
+					"match": false,
+					"packageHash": "1e5bc827a00cba8a1d3fe43b1e5276d78703702d533c1ab45899937c1b4516cc",
+					"size": 763,
+					"status": "missing-in-source"
+				},
+				"dist/node/markdown/markdown.js": {
+					"match": false,
+					"packageHash": "0160b780908da4c2166447ea30d4b50707fe2786a9cacd46961f8f898c464026",
+					"size": 2641,
+					"status": "missing-in-source"
+				},
+				"dist/node/markdown/markdown.js.map": {
+					"match": false,
+					"packageHash": "2d1b1681b9b79c1ffbfbb6e66986b31d67fc444f74f6cce2f104b7265085ac9a",
+					"size": 1835,
+					"status": "missing-in-source"
+				},
+				"dist/node/markdown/plugins/component.d.ts": {
+					"match": false,
+					"packageHash": "69b47a3f461019a0b464a62558f7d7dd0e0a9785362f2e38f541315d92845912",
+					"size": 102,
+					"status": "missing-in-source"
+				},
+				"dist/node/markdown/plugins/component.js": {
+					"match": false,
+					"packageHash": "42ffa1c9f85d1f9d96b90a66db24781abf856507499dbe5f42f3338cdf29ca09",
+					"size": 2897,
+					"status": "missing-in-source"
+				},
+				"dist/node/markdown/plugins/component.js.map": {
+					"match": false,
+					"packageHash": "e0c80028026133585207f0807d542ebca5c9f4aeb7798b2a31885fba5631bea5",
+					"size": 2886,
+					"status": "missing-in-source"
+				},
+				"dist/node/markdown/plugins/containers.d.ts": {
+					"match": false,
+					"packageHash": "631774fdd767b679b44337340e3a94c62097dc9bb3daef55938ac9f52e521e86",
+					"size": 102,
+					"status": "missing-in-source"
+				},
+				"dist/node/markdown/plugins/containers.js": {
+					"match": false,
+					"packageHash": "8b6e2bda719c092338642ac867c8b736ee0146ad32251dc69a401ef1373009bf",
+					"size": 1089,
+					"status": "missing-in-source"
+				},
+				"dist/node/markdown/plugins/containers.js.map": {
+					"match": false,
+					"packageHash": "b31b12026fe7ae543b2016ab03b80741bf8e7e0ccf710e829a38f2b84d3fa0ef",
+					"size": 1049,
+					"status": "missing-in-source"
+				},
+				"dist/node/markdown/plugins/header.d.ts": {
+					"match": false,
+					"packageHash": "472dba160086163061a7781040b61d5d8ca7aaac0037ae040996b4d916b6c47b",
+					"size": 126,
+					"status": "missing-in-source"
+				},
+				"dist/node/markdown/plugins/header.js": {
+					"match": false,
+					"packageHash": "6180c6fe34a4d59139bfc2a1696bac2684495d15c2808757583ad901664ae580",
+					"size": 982,
+					"status": "missing-in-source"
+				},
+				"dist/node/markdown/plugins/header.js.map": {
+					"match": false,
+					"packageHash": "b6af0c6dd8e13951fa98af67cde05bde0fec9893cf622bc0ee67beceeccdcfa0",
+					"size": 1119,
+					"status": "missing-in-source"
+				},
+				"dist/node/markdown/plugins/highlight.d.ts": {
+					"match": false,
+					"packageHash": "ee32991f896c11b8edee5f98ce76799ead4d5558ac4d3788c404cd0ed80a466f",
+					"size": 71,
+					"status": "missing-in-source"
+				},
+				"dist/node/markdown/plugins/highlight.js": {
+					"match": false,
+					"packageHash": "dd86242238feb3516ec1ebb36730ad8273575080b739b88427d3ad7098581803",
+					"size": 1375,
+					"status": "missing-in-source"
+				},
+				"dist/node/markdown/plugins/highlight.js.map": {
+					"match": false,
+					"packageHash": "d89129c8ae592b4f990d4201eab750c5644611d7de0a34583b9462ce816bd6b7",
+					"size": 1511,
+					"status": "missing-in-source"
+				},
+				"dist/node/markdown/plugins/highlightLines.d.ts": {
+					"match": false,
+					"packageHash": "268ca8bc4f1c9409c9c2427676358678807cf3b42bd0a37159f2acf719d1b6f7",
+					"size": 106,
+					"status": "missing-in-source"
+				},
+				"dist/node/markdown/plugins/highlightLines.js": {
+					"match": false,
+					"packageHash": "5604a4b2c5f1f9c6ada611152bdbd86a26af4ad67e5db11c78af7420ef670a3c",
+					"size": 1701,
+					"status": "missing-in-source"
+				},
+				"dist/node/markdown/plugins/highlightLines.js.map": {
+					"match": false,
+					"packageHash": "5c13f8715e51026a88e59769c51845df5aea764a3b1bc7d44ad4bab26ae2edec",
+					"size": 1819,
+					"status": "missing-in-source"
+				},
+				"dist/node/markdown/plugins/hoist.d.ts": {
+					"match": false,
+					"packageHash": "64326046d2e7072ad056e370579e9db39a8d861788c31c8f922a9ffdc21c028e",
+					"size": 98,
+					"status": "missing-in-source"
+				},
+				"dist/node/markdown/plugins/hoist.js": {
+					"match": false,
+					"packageHash": "6d08acb9b3b2139be185ce79bb24f36606fda9b1c8b640085ab2cc7df4cab334",
+					"size": 681,
+					"status": "missing-in-source"
+				},
+				"dist/node/markdown/plugins/hoist.js.map": {
+					"match": false,
+					"packageHash": "0891b3b05a0d647d305f348be7557d073fa3bf6d582d6c688af00a367b0dd404",
+					"size": 676,
+					"status": "missing-in-source"
+				},
+				"dist/node/markdown/plugins/lineNumbers.d.ts": {
+					"match": false,
+					"packageHash": "9ffccb34e45b4481367064b92319eaddbc5696e0e27a0751894cc03cd3369d55",
+					"size": 103,
+					"status": "missing-in-source"
+				},
+				"dist/node/markdown/plugins/lineNumbers.js": {
+					"match": false,
+					"packageHash": "67a92afd38e691fd8dbf4d78cfdad3e0792668f3a7c76886f29f5ccd0b68dfa7",
+					"size": 985,
+					"status": "missing-in-source"
+				},
+				"dist/node/markdown/plugins/lineNumbers.js.map": {
+					"match": false,
+					"packageHash": "b4bcda3169d35aee6d1159954f8db5a31170463750ad18bdee5a9c9bf4ae4ab2",
+					"size": 978,
+					"status": "missing-in-source"
+				},
+				"dist/node/markdown/plugins/link.d.ts": {
+					"match": false,
+					"packageHash": "c187ec0ce6b02c1ff40c24cd4544681dbe1fccce767eec68bd93604ebad2015f",
+					"size": 136,
+					"status": "missing-in-source"
+				},
+				"dist/node/markdown/plugins/link.js": {
+					"match": false,
+					"packageHash": "50617432c6d8cbfb855c87038afd55ec0e0caf6e57c3d84ffd11fa0d06541de6",
+					"size": 2206,
+					"status": "missing-in-source"
+				},
+				"dist/node/markdown/plugins/link.js.map": {
+					"match": false,
+					"packageHash": "3ad341167a597d7f0c12d29cb0610b276db775c16bee8b2b1e35a45bd6e19b44",
+					"size": 2226,
+					"status": "missing-in-source"
+				},
+				"dist/node/markdown/plugins/preWrapper.d.ts": {
+					"match": false,
+					"packageHash": "0f4fbb38ad7d1e720c5ed434c90c09ad2e622ade85afae27e467fda7b73a0cd0",
+					"size": 103,
+					"status": "missing-in-source"
+				},
+				"dist/node/markdown/plugins/preWrapper.js": {
+					"match": false,
+					"packageHash": "aae92a351db4f07622d9d7693d59e932774d68f8c91d1b438d90f10c62cb5ad1",
+					"size": 857,
+					"status": "missing-in-source"
+				},
+				"dist/node/markdown/plugins/preWrapper.js.map": {
+					"match": false,
+					"packageHash": "449aee531aab902511c8f7d8c7127373c5e1ef5cb863e3b076eae263fd856115",
+					"size": 692,
+					"status": "missing-in-source"
+				},
+				"dist/node/markdown/plugins/slugify.d.ts": {
+					"match": false,
+					"packageHash": "52a777cb5cf23f36d452ba83b227bd578025ead1978c5f3859e44887263fddcf",
+					"size": 55,
+					"status": "missing-in-source"
+				},
+				"dist/node/markdown/plugins/slugify.js": {
+					"match": false,
+					"packageHash": "061f2acc7b5590bdbcb6f549dccc390448294af3ff737cc4c4721d11a2bdfc46",
+					"size": 901,
+					"status": "missing-in-source"
+				},
+				"dist/node/markdown/plugins/slugify.js.map": {
+					"match": false,
+					"packageHash": "0bf9d1991cc931ff556941692c12629ebf4ba02591cd493920a184ecc5aa018a",
+					"size": 676,
+					"status": "missing-in-source"
+				},
+				"dist/node/markdown/plugins/snippet.d.ts": {
+					"match": false,
+					"packageHash": "d2b181d02f983c5d61e85bd09b8341b0223c270ae0d4ef4dfe8fcfea0a3dbd01",
+					"size": 114,
+					"status": "missing-in-source"
+				},
+				"dist/node/markdown/plugins/snippet.js": {
+					"match": false,
+					"packageHash": "8e49b0b4384fd55fcb31b2a23b0c192c120d1a1c07a928e2638c32727c25ace8",
+					"size": 1732,
+					"status": "missing-in-source"
+				},
+				"dist/node/markdown/plugins/snippet.js.map": {
+					"match": false,
+					"packageHash": "5281ba96f7de680befb09c64b607b50b71683f1ebb3999ba91c19b37fb0f49e7",
+					"size": 1876,
+					"status": "missing-in-source"
+				},
+				"dist/node/markdownToVue.d.ts": {
+					"match": false,
+					"packageHash": "ddb8472b744711919767a2c12e9ea7897d3ef1a78d27515787b8e620dc2716e7",
+					"size": 384,
+					"status": "missing-in-source"
+				},
+				"dist/node/markdownToVue.js": {
+					"match": false,
+					"packageHash": "52a3e616e70da011d6f4470fddc658b5c9483cfbd15c55e48ce6ae7662e9328c",
+					"size": 2767,
+					"status": "missing-in-source"
+				},
+				"dist/node/markdownToVue.js.map": {
+					"match": false,
+					"packageHash": "d488f6e0161f579aa5e143ffdf6c8f776bb39d4d01418b3fc2285d59d058c72b",
+					"size": 2400,
+					"status": "missing-in-source"
+				},
+				"dist/node/resolver.d.ts": {
+					"match": false,
+					"packageHash": "f14d616da99434c74787ca93aa5e3ef591bc5edad6ef1e7ac435af26610a1946",
+					"size": 242,
+					"status": "missing-in-source"
+				},
+				"dist/node/resolver.js": {
+					"match": false,
+					"packageHash": "46764016c91c9201c57fe2592cb36d40e40a5fa5a19950a6ed658f4be0af4c04",
+					"size": 2268,
+					"status": "missing-in-source"
+				},
+				"dist/node/resolver.js.map": {
+					"match": false,
+					"packageHash": "3d040ca83db33b5271fcb752b5f8b42d8c42af4a9bbfa4dd4d0afa12cdd27d23",
+					"size": 1310,
+					"status": "missing-in-source"
+				},
+				"dist/node/server.d.ts": {
+					"match": false,
+					"packageHash": "850973990ee9c62378de65c21368ebd1ec868c43bf40c36cc85bc5de20ec68e5",
+					"size": 162,
+					"status": "missing-in-source"
+				},
+				"dist/node/server.js": {
+					"match": false,
+					"packageHash": "4b573d702c7eb0a732fb952e91ce46510a93b5fb09f458436f0e8307586fefc3",
+					"size": 5178,
+					"status": "missing-in-source"
+				},
+				"dist/node/server.js.map": {
+					"match": false,
+					"packageHash": "9ffa6fcf524b77c6af4b835387c138e4a49f4ad09e53f3b12328bb55308bd979",
+					"size": 3622,
+					"status": "missing-in-source"
+				},
+				"dist/node/utils/parseHeader.d.ts": {
+					"match": false,
+					"packageHash": "ec127fa809dc3a92f03a6c781e4f1883d453bde5bdd296023f004e991391b4c5",
+					"size": 196,
+					"status": "missing-in-source"
+				},
+				"dist/node/utils/parseHeader.js": {
+					"match": false,
+					"packageHash": "cc6ff8686ac4f3e176d8d3389dd502a76584bc9de360200f4994477315219a39",
+					"size": 2392,
+					"status": "missing-in-source"
+				},
+				"dist/node/utils/parseHeader.js.map": {
+					"match": false,
+					"packageHash": "0d0c85f31200f3de49f653052d900867b5f3bd7b8e96b04c5a161fb15b27790c",
+					"size": 1793,
+					"status": "missing-in-source"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -1,89 +1,212 @@\n {\n   \"name\": \"vitepress\",\n-  \"version\": \"0.2.0\",\n-  \"description\": \"\",\n+  \"version\": \"2.0.0-alpha.15\",\n+  \"description\": \"Vite & Vue powered static site generator\",\n+  \"keywords\": [\n+    \"vite\",\n+    \"vue\",\n+    \"vitepress\"\n+  ],\n+  \"homepage\": \"https://vitepress.dev/\",\n+  \"bugs\": {\n+    \"url\": \"https://github.com/vuejs/vitepress/issues\"\n+  },\n+  \"repository\": \"github:vuejs/vitepress\",\n+  \"license\": \"MIT\",\n+  \"author\": \"Evan You\",\n+  \"type\": \"module\",\n+  \"exports\": {\n+    \".\": {\n+      \"types\": \"./types/index.d.ts\",\n+      \"default\": \"./dist/node/index.js\"\n+    },\n+    \"./dist/*\": \"./dist/*\",\n+    \"./package.json\": \"./package.json\",\n+    \"./client\": {\n+      \"types\": \"./client.d.ts\",\n+      \"default\": \"./dist/client/index.js\"\n+    },\n+    \"./theme\": {\n+      \"types\": \"./theme.d.ts\",\n+      \"default\": \"./dist/client/theme-default/index.js\"\n+    },\n+    \"./theme-without-fonts\": {\n+      \"types\": \"./theme-without-fonts.d.ts\",\n+      \"default\": \"./dist/client/theme-default/without-fonts.js\"\n+    }\n+  },\n   \"main\": \"dist/node/index.js\",\n-  \"types\": \"index.d.ts\",\n+  \"types\": \"types/index.d.ts\",\n   \"bin\": {\n     \"vitepress\": \"bin/vitepress.js\"\n   },\n   \"files\": [\n     \"bin\",\n-    \"lib\",\n     \"dist\",\n-    \"types\"\n-  ],\n-  \"keywords\": [\n-    \"vite\",\n-    \"vue\",\n-    \"vuepress\"\n+    \"types\",\n+    \"template\",\n+    \"client.d.ts\",\n+    \"theme.d.ts\",\n+    \"theme-without-fonts.d.ts\",\n+    \"lib\"\n   ],\n-  \"repository\": {\n-    \"type\": \"git\",\n-    \"url\": \"git+https://github.com/vuejs/vitepress.git\"\n-  },\n-  \"bugs\": {\n-    \"url\": \"https://github.com/vuejs/vitepress/issues\"\n-  },\n-  \"homepage\": \"https://github.com/vuejs/vitepress/tree/master/#readme\",\n   \"scripts\": {\n-    \"dev\": \"run-p dev-client dev-client-copy dev-node\",\n-    \"dev-client\": \"tsc -w -p src/client\",\n-    \"dev-client-copy\": \"node scripts/copy\",\n-    \"dev-node\": \"tsc -w -p src/node\",\n-    \"build\": \"rm -rf dist && tsc -p src/client && tsc -p src/node\",\n+    \"dev\": \"rimraf dist && pnpm dev:shared && pnpm dev:start\",\n+    \"dev:start\": \"pnpm --stream '/^dev:(client|node|watch)$/'\",\n+    \"dev:client\": \"tsc --sourcemap -w --preserveWatchOutput -p src/client\",\n+    \"dev:node\": \"DEV=true pnpm build:node -w\",\n+    \"dev:shared\": \"node scripts/copyShared\",\n+    \"dev:watch\": \"node scripts/watchAndCopy\",\n+    \"build\": \"pnpm build:prepare && pnpm build:client && pnpm build:node\",\n+    \"build:prepare\": \"rimraf dist && node scripts/copyShared\",\n+    \"build:client\": \"vue-tsc --noEmit -p src/client && tsc -p src/client && node scripts/copyClient\",\n+    \"build:node\": \"tsc -p src/node --noEmit && rollup --config rollup.config.ts --configPlugin esbuild\",\n+    \"test\": \"pnpm --aggregate-output --reporter=append-only '/^test:(unit|e2e|init)$/'\",\n+    \"test:unit\": \"vitest run -r __tests__/unit\",\n+    \"test:unit:watch\": \"vitest -r __tests__/unit\",\n+    \"test:e2e\": \"pnpm test:e2e-dev && pnpm test:e2e-build\",\n+    \"test:e2e:site:dev\": \"pnpm -F=tests-e2e site:dev\",\n+    \"test:e2e:site:build\": \"pnpm -F=tests-e2e site:build\",\n+    \"test:e2e:site:preview\": \"pnpm -F=tests-e2e site:preview\",\n+    \"test:e2e-dev\": \"pnpm -F=tests-e2e test\",\n+    \"test:e2e-dev:watch\": \"pnpm -F=tests-e2e watch\",\n+    \"test:e2e-build\": \"VITE_TEST_BUILD=1 pnpm test:e2e-dev\",\n+    \"test:e2e-build:watch\": \"VITE_TEST_BUILD=1 pnpm test:e2e-dev:watch\",\n",
+					"match": false,
+					"packageHash": "a663b1a3660b52b4b83023d35b13770d9c2b5a878e82d1f40edecc4aa931dcce",
+					"size": 2285,
+					"sourceHash": "9e59ea9e95f3d11785aea38e8a591837bf6c4ee714f1ca0730b89b3fd25f08ad",
+					"status": "content"
+				},
+				"types/index.d.ts": {
+					"diff": "--- published/types/index.d.ts\n+++ rebuilt/types/index.d.ts\n@@ -1,3 +1,3 @@\n-export * from './shared'\n-export * from '../dist/client/app/exports'\n-export * from '../dist/node/index'\n+export * from '../dist/client/index.js'\n+export * from '../dist/node/index.js'\n+export * from './shared.js'\n",
+					"match": false,
+					"packageHash": "bf3f97dfdf1c7de3554f4019debb1b74c0d8f680c18d636a2de70a7f64956c12",
+					"size": 103,
+					"sourceHash": "f0d90ea8028a1e10a66c8146452f28c56778ff591f18fe186ada36b36aa5e2a6",
+					"status": "content"
+				},
+				"types/shared.d.ts": {
+					"diff": "--- published/types/shared.d.ts\n+++ rebuilt/types/shared.d.ts\n@@ -1,26 +1,234 @@\n-// types shared between server and client.\n+// types shared between server and client\n+import type { UseDarkOptions } from '@vueuse/core'\n+import type { SSRContext } from 'vue/server-renderer'\n+export type { DefaultTheme } from './default-theme.js'\n \n-export interface SiteData<ThemeConfig = any> {\n+export type Awaitable<T> = T | PromiseLike<T>\n+\n+type DeepPartial<T> =\n+  T extends Record<string, any>\n+    ? T extends\n+        | Date\n+        | RegExp\n+        | Function\n+        | ReadonlyMap<any, any>\n+        | ReadonlySet<any>\n+        | ReadonlyArray<any>\n+      ? T\n+      : { [P in keyof T]?: DeepPartial<T[P]> }\n+    : T\n+\n+export interface PageData {\n+  relativePath: string\n+  /**\n+   * differs from relativePath in case of path rewrites\n+   * empty string if the page is virtual (e.g. 404 page)\n+   */\n+  filePath: string\n   title: string\n+  titleTemplate?: string | boolean\n   description: string\n+  headers: Header[]\n+  frontmatter: Record<string, any>\n+  params?: Record<string, any>\n+  isNotFound?: boolean\n+  lastUpdated?: number\n+}\n+\n+/**\n+ * SFC block extracted from markdown\n+ */\n+export interface SfcBlock {\n+  /**\n+   * The type of the block\n+   */\n+  type: string\n+  /**\n+   * The content, including open-tag and close-tag\n+   */\n+  content: string\n+  /**\n+   * The content that stripped open-tag and close-tag off\n+   */\n+  contentStripped: string\n+  /**\n+   * The open-tag\n+   */\n+  tagOpen: string\n+  /**\n+   * The close-tag\n+   */\n+  tagClose: string\n+}\n+\n+export interface MarkdownSfcBlocks {\n+  /**\n+   * The `<template>` block\n+   */\n+  template: SfcBlock | null\n+  /**\n+   * The common `<script>` block\n+   */\n+  script: SfcBlock | null\n+  /**\n+   * The `<script setup>` block\n+   */\n+  scriptSetup: SfcBlock | null\n+  /**\n+   * All `<script>` blocks.\n+   *\n+   * By default, SFC only allows one `<script>` block and one `<script setup>` block.\n+   * However, some tools may support different types of `<script>`s, so we keep all of them here.\n+   */\n+  scripts: SfcBlock[]\n+  /**\n+   * All `<style>` blocks.\n+   */\n+  styles: SfcBlock[]\n+  /**\n+   * All custom blocks.\n+   */\n+  customBlocks: SfcBlock[]\n+}\n+\n+export interface Header {\n+  /**\n",
+					"match": false,
+					"packageHash": "a4920454a5a45369fc5b1a850d84497cdd8f7976c71af361f17f268e3458f96e",
+					"size": 502,
+					"sourceHash": "ef348e75c283f54299b54527131c9827c0560b366b882631e1547eb3ca64817b",
+					"status": "content"
+				},
+				"client.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"template/.vitepress/config.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"template/.vitepress/theme/Layout.vue": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"template/.vitepress/theme/index.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"template/.vitepress/theme/style.css": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"template/api-examples.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"template/index.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"template/markdown-examples.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"theme-without-fonts.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"theme.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"types/default-theme.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"types/docsearch.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"types/local-search.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				}
+			},
+			"summary": {
+				"differentFiles": 5,
+				"matchingFiles": 1,
+				"missingInPackage": 13,
+				"missingInSource": 86,
+				"score": 0.009523809523809525,
+				"totalFiles": 105
+			}
+		}
+	}
+]
