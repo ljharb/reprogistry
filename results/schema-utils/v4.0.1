@@ -1,0 +1,89 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-07T00:05:53.976Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:11.7.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "schema-utils@4.0.1",
+			"name": "schema-utils",
+			"version": "4.0.1",
+			"location": "https://registry.npmjs.org/schema-utils/-/schema-utils-4.0.1.tgz",
+			"integrity": "sha512-lELhBAAly9NowEsX0yZBlw9ahZG+sK/1RJ21EpzdYHKEs13Vku3LJ+MIPhh4sMs0oCCeufZQEQbMekiA4vuVIQ==",
+			"publishedAt": "2023-04-15T14:55:14.105Z",
+			"publishedWith": {
+				"node": "16.15.0",
+				"npm": "8.5.5"
+			}
+		},
+		"source": {
+			"integrity": null,
+			"location": "git+https://github.com/webpack/schema-utils.git",
+			"spec": "github:webpack/schema-utils#490d60a198ce595f7846fe87c3beec399d0aae5b"
+		},
+		"comparisonHash": "9ef46a5bd31291e57cbab41e2f17c57bd6da0b5b",
+		"diff": {
+			"files": {
+				"dist/ValidationError.js": {
+					"diff": "--- published/dist/ValidationError.js\n+++ rebuilt/dist/ValidationError.js\n@@ -4,20 +4,26 @@\n   value: true\n });\n exports.default = void 0;\n+\n const {\n   stringHints,\n   numberHints\n } = require(\"./util/hints\");\n-\n /** @typedef {import(\"json-schema\").JSONSchema6} JSONSchema6 */\n+\n /** @typedef {import(\"json-schema\").JSONSchema7} JSONSchema7 */\n \n /** @typedef {import(\"./validate\").Schema} Schema */\n+\n /** @typedef {import(\"./validate\").ValidationErrorConfiguration} ValidationErrorConfiguration */\n+\n /** @typedef {import(\"./validate\").PostFormatter} PostFormatter */\n+\n /** @typedef {import(\"./validate\").SchemaUtilErrorObject} SchemaUtilErrorObject */\n \n /** @enum {number} */\n+\n+\n const SPECIFICITY = {\n   type: 1,\n   not: 1,\n@@ -52,31 +58,33 @@\n   additionalProperties: 2,\n   absolutePath: 2\n };\n-\n /**\n  * @param {string} value\n  * @returns {value is number}\n  */\n+\n function isNumeric(value) {\n   return /^-?\\d+$/.test(value);\n }\n-\n /**\n  *\n  * @param {Array<SchemaUtilErrorObject>} array\n  * @param {(item: SchemaUtilErrorObject) => number} fn\n  * @returns {Array<SchemaUtilErrorObject>}\n  */\n+\n+\n function filterMax(array, fn) {\n   const evaluatedMax = array.reduce((max, item) => Math.max(max, fn(item)), 0);\n   return array.filter(item => fn(item) === evaluatedMax);\n }\n-\n /**\n  *\n  * @param {Array<SchemaUtilErrorObject>} children\n  * @returns {Array<SchemaUtilErrorObject>}\n  */\n+\n+\n function filterChildren(children) {\n   let newChildren = children;\n   newChildren = filterMax(newChildren,\n@@ -91,24 +99,29 @@\n    * @param {SchemaUtilErrorObject} error\n    * @returns {number}\n    */\n-  error => SPECIFICITY[/** @type {keyof typeof SPECIFICITY} */error.keyword] || 2);\n+  error => SPECIFICITY[\n+  /** @type {keyof typeof SPECIFICITY} */\n+  error.keyword] || 2);\n   return newChildren;\n }\n-\n /**\n  * Find all children errors\n  * @param {Array<SchemaUtilErrorObject>} children\n  * @param {Array<string>} schemaPaths\n  * @return {number} returns index of first child\n  */\n+\n+\n function findAllChildren(children, schemaPaths) {\n   let i = children.length - 1;\n+\n   const predicate =\n   /**\n    * @param {string} schemaPath\n    * @returns {boolean}\n    */\n   schemaPath => children[i].schemaPath.indexOf(schemaPath) !== 0;\n+\n   while (i > -1 && !schemaPaths.every(predicate)) {\n     if (children[i].keyword === \"anyOf\" || children[i].keyword === \"oneOf\") {\n       const refs = extractRefs(children[i]);\n@@ -118,39 +131,47 @@\n",
+					"match": false,
+					"packageHash": "a2fbe10ec30c3ca6c6966c9d6a6857ac72194ba08db825612eae4159b93384e1",
+					"size": 35827,
+					"sourceHash": "246b74a595536034bda46d785fb7e09ea8ea0d03a7ece5a500520b4134255120",
+					"status": "content"
+				},
+				"dist/index.js": {
+					"diff": "--- published/dist/index.js\n+++ rebuilt/dist/index.js\n@@ -4,6 +4,7 @@\n   validate,\n   ValidationError\n } = require(\"./validate\");\n+\n module.exports = {\n   validate,\n   ValidationError\n",
+					"match": false,
+					"packageHash": "274b6df132e136443556dbe53efebeadea5f6affcdb9ff9e61e55b13359f417b",
+					"size": 131,
+					"sourceHash": "9d4e4ccd136293c524e7b58e919c7acb8658cee5d1f187f91d86fe2beb30d6b7",
+					"status": "content"
+				},
+				"dist/keywords/absolutePath.js": {
+					"diff": "--- published/dist/keywords/absolutePath.js\n+++ rebuilt/dist/keywords/absolutePath.js\n@@ -4,9 +4,13 @@\n   value: true\n });\n exports.default = void 0;\n+\n /** @typedef {import(\"ajv\").default} Ajv */\n+\n /** @typedef {import(\"ajv\").SchemaValidateFunction} SchemaValidateFunction */\n+\n /** @typedef {import(\"ajv\").AnySchemaObject} AnySchemaObject */\n+\n /** @typedef {import(\"../validate\").SchemaUtilErrorObject} SchemaUtilErrorObject */\n \n /**\n@@ -31,28 +35,31 @@\n     parentSchema: schema\n   };\n }\n-\n /**\n  * @param {boolean} shouldBeAbsolute\n  * @param {object} schema\n  * @param {string} data\n  * @returns {SchemaUtilErrorObject}\n  */\n+\n+\n function getErrorFor(shouldBeAbsolute, schema, data) {\n   const message = shouldBeAbsolute ? `The provided value ${JSON.stringify(data)} is not an absolute path!` : `A relative path is expected. However, the provided value ${JSON.stringify(data)} is an absolute path!`;\n   return errorMessage(message, schema, data);\n }\n-\n /**\n  *\n  * @param {Ajv} ajv\n  * @returns {Ajv}\n  */\n+\n+\n function addAbsolutePathKeyword(ajv) {\n   ajv.addKeyword({\n     keyword: \"absolutePath\",\n     type: \"string\",\n     errors: true,\n+\n     /**\n      * @param {boolean} schema\n      * @param {AnySchemaObject} parentSchema\n@@ -63,26 +70,32 @@\n       const callback = data => {\n         let passes = true;\n         const isExclamationMarkPresent = data.includes(\"!\");\n+\n         if (isExclamationMarkPresent) {\n           callback.errors = [errorMessage(`The provided value ${JSON.stringify(data)} contains exclamation mark (!) which is not allowed because it's reserved for loader syntax.`, parentSchema, data)];\n           passes = false;\n-        }\n-\n-        // ?:[A-Za-z]:\\\\ - Windows absolute path\n+        } // ?:[A-Za-z]:\\\\ - Windows absolute path\n         // \\\\\\\\ - Windows network absolute path\n         // \\/ - Unix-like OS absolute path\n+\n+\n         const isCorrectAbsolutePath = schema === /^(?:[A-Za-z]:(\\\\|\\/)|\\\\\\\\|\\/)/.test(data);\n+\n         if (!isCorrectAbsolutePath) {\n           callback.errors = [getErrorFor(schema, parentSchema, data)];\n           passes = false;\n         }\n+\n         return passes;\n       };\n+\n       callback.errors = [];\n       return callback;\n     }\n+\n   });\n   return ajv;\n }\n+\n var _default = addAbsolutePathKeyword;\n exports.default = _default;\n\\ No newline at end of file\n",
+					"match": false,
+					"packageHash": "ae0def6b730cef5c11749d55a1ecebc2bb34aa2f64c10edd3ff65f7504220469",
+					"size": 2646,
+					"sourceHash": "ac0d715dc1f009bdda8a6db8bdabec43019933100411fb1ce1790fd3a52eb240",
+					"status": "content"
+				},
+				"dist/util/Range.js": {
+					"diff": "--- published/dist/util/Range.js\n+++ rebuilt/dist/util/Range.js\n@@ -9,7 +9,6 @@\n  * @param {RangeValue} rangeValue\n  * @returns {boolean}\n  */\n-\n class Range {\n   /**\n    * @param {\"left\" | \"right\"} side\n@@ -20,35 +19,39 @@\n     if (side === \"left\") {\n       return exclusive ? \">\" : \">=\";\n     }\n+\n     return exclusive ? \"<\" : \"<=\";\n   }\n-\n   /**\n    * @param {number} value\n    * @param {boolean} logic is not logic applied\n    * @param {boolean} exclusive is range exclusive\n    * @returns {string}\n    */\n+\n+\n   static formatRight(value, logic, exclusive) {\n     if (logic === false) {\n       return Range.formatLeft(value, !logic, !exclusive);\n     }\n+\n     return `should be ${Range.getOperator(\"right\", exclusive)} ${value}`;\n   }\n-\n   /**\n    * @param {number} value\n    * @param {boolean} logic is not logic applied\n    * @param {boolean} exclusive is range exclusive\n    * @returns {string}\n    */\n+\n+\n   static formatLeft(value, logic, exclusive) {\n     if (logic === false) {\n       return Range.formatRight(value, !logic, !exclusive);\n     }\n+\n     return `should be ${Range.getOperator(\"left\", exclusive)} ${value}`;\n   }\n-\n   /**\n    * @param {number} start left side value\n    * @param {number} end right side value\n@@ -57,6 +60,8 @@\n    * @param {boolean} logic is not logic applied\n    * @returns {string}\n    */\n+\n+\n   static formatRange(start, end, startExclusive, endExclusive, logic) {\n     let result = \"should be\";\n     result += ` ${Range.getOperator(logic ? \"left\" : \"right\", logic ? startExclusive : !startExclusive)} ${start} `;\n@@ -64,80 +69,95 @@\n     result += ` ${Range.getOperator(logic ? \"right\" : \"left\", logic ? endExclusive : !endExclusive)} ${end}`;\n     return result;\n   }\n-\n   /**\n    * @param {Array<RangeValue>} values\n    * @param {boolean} logic is not logic applied\n    * @return {RangeValue} computed value and it's exclusive flag\n    */\n+\n+\n   static getRangeValue(values, logic) {\n     let minMax = logic ? Infinity : -Infinity;\n     let j = -1;\n-    const predicate = logic ? /** @type {RangeValueCallback} */\n-    ([value]) => value <= minMax : /** @type {RangeValueCallback} */\n+    const predicate = logic ?\n+    /** @type {RangeValueCallback} */\n+    ([value]) => value <= minMax :\n+    /** @type {RangeValueCallback} */\n     ([value]) => value >= minMax;\n+\n     for (let i = 0; i < values.length; i++) {\n       if (predicate(values[i])) {\n         [minMax] = values[i];\n         j = i;\n       }\n     }\n+\n     if (j > -1) {\n       return values[j];\n     }\n+\n     return [Infinity, true];\n   }\n+\n   constructor() {\n",
+					"match": false,
+					"packageHash": "b5c4803b923bb8d9ba98181c45f62fc83b1f21a3a4839401889012a876da4779",
+					"size": 4052,
+					"sourceHash": "5cc52d013bcd4300dae6456308b1e40af4e97bc6f272f45a0e1684094ebcb93f",
+					"status": "content"
+				},
+				"dist/util/hints.js": {
+					"diff": "--- published/dist/util/hints.js\n+++ rebuilt/dist/util/hints.js\n@@ -1,7 +1,6 @@\n \"use strict\";\n \n const Range = require(\"./Range\");\n-\n /** @typedef {import(\"../validate\").Schema} Schema */\n \n /**\n@@ -9,12 +8,14 @@\n  * @param {boolean} logic\n  * @return {string[]}\n  */\n+\n+\n module.exports.stringHints = function stringHints(schema, logic) {\n   const hints = [];\n   let type = \"string\";\n-  const currentSchema = {\n-    ...schema\n+  const currentSchema = { ...schema\n   };\n+\n   if (!logic) {\n     const tmpLength = currentSchema.minLength;\n     const tmpFormat = currentSchema.formatMinimum;\n@@ -23,6 +24,7 @@\n     currentSchema.formatMinimum = currentSchema.formatMaximum;\n     currentSchema.formatMaximum = tmpFormat;\n   }\n+\n   if (typeof currentSchema.minLength === \"number\") {\n     if (currentSchema.minLength === 1) {\n       type = \"non-empty string\";\n@@ -31,6 +33,7 @@\n       hints.push(`should be longer than ${length} character${length > 1 ? \"s\" : \"\"}`);\n     }\n   }\n+\n   if (typeof currentSchema.maxLength === \"number\") {\n     if (currentSchema.maxLength === 0) {\n       type = \"empty string\";\n@@ -39,47 +42,61 @@\n       hints.push(`should be shorter than ${length} character${length > 1 ? \"s\" : \"\"}`);\n     }\n   }\n+\n   if (currentSchema.pattern) {\n     hints.push(`should${logic ? \"\" : \" not\"} match pattern ${JSON.stringify(currentSchema.pattern)}`);\n   }\n+\n   if (currentSchema.format) {\n     hints.push(`should${logic ? \"\" : \" not\"} match format ${JSON.stringify(currentSchema.format)}`);\n   }\n+\n   if (currentSchema.formatMinimum) {\n     hints.push(`should be ${currentSchema.formatExclusiveMinimum ? \">\" : \">=\"} ${JSON.stringify(currentSchema.formatMinimum)}`);\n   }\n+\n   if (currentSchema.formatMaximum) {\n     hints.push(`should be ${currentSchema.formatExclusiveMaximum ? \"<\" : \"<=\"} ${JSON.stringify(currentSchema.formatMaximum)}`);\n   }\n+\n   return [type].concat(hints);\n };\n-\n /**\n  * @param {Schema} schema\n  * @param {boolean} logic\n  * @return {string[]}\n  */\n+\n+\n module.exports.numberHints = function numberHints(schema, logic) {\n   const hints = [schema.type === \"integer\" ? \"integer\" : \"number\"];\n   const range = new Range();\n+\n   if (typeof schema.minimum === \"number\") {\n     range.left(schema.minimum);\n   }\n+\n   if (typeof schema.exclusiveMinimum === \"number\") {\n     range.left(schema.exclusiveMinimum, true);\n   }\n+\n   if (typeof schema.maximum === \"number\") {\n     range.right(schema.maximum);\n   }\n+\n   if (typeof schema.exclusiveMaximum === \"number\") {\n     range.right(schema.exclusiveMaximum, true);\n   }\n+\n   const rangeFormat = range.format(logic);\n+\n   if (rangeFormat) {\n     hints.push(rangeFormat);\n   }\n+\n",
+					"match": false,
+					"packageHash": "2a43cce008f1537f76a84377369a4aded9167b5a36ced816ab511b6d89fa8fc5",
+					"size": 2762,
+					"sourceHash": "f26757452d33a95e28efa6cbca9c5edf0ab9817e8fe468f06be26218052d9f20",
+					"status": "content"
+				},
+				"dist/validate.js": {
+					"diff": "--- published/dist/validate.js\n+++ rebuilt/dist/validate.js\n@@ -10,9 +10,13 @@\n   }\n });\n exports.validate = validate;\n+\n var _absolutePath = _interopRequireDefault(require(\"./keywords/absolutePath\"));\n+\n var _ValidationError = _interopRequireDefault(require(\"./ValidationError\"));\n+\n function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }\n+\n /**\n  * @template T\n  * @param fn {(function(): any) | undefined}\n@@ -21,32 +25,40 @@\n const memoize = fn => {\n   let cache = false;\n   /** @type {T} */\n+\n   let result;\n   return () => {\n     if (cache) {\n       return result;\n     }\n-    result = /** @type {function(): any} */fn();\n-    cache = true;\n-    // Allow to clean up memory for fn\n+\n+    result =\n+    /** @type {function(): any} */\n+    fn();\n+    cache = true; // Allow to clean up memory for fn\n     // and all dependent resources\n     // eslint-disable-next-line no-undefined, no-param-reassign\n+\n     fn = undefined;\n     return result;\n   };\n };\n+\n const getAjv = memoize(() => {\n   // Use CommonJS require for ajv libs so TypeScript consumers aren't locked into esModuleInterop (see #110).\n   // eslint-disable-next-line global-require\n-  const Ajv = require(\"ajv\").default;\n-  // eslint-disable-next-line global-require\n-  const ajvKeywords = require(\"ajv-keywords\").default;\n-  // eslint-disable-next-line global-require\n-  const addFormats = require(\"ajv-formats\").default;\n+  const Ajv = require(\"ajv\").default; // eslint-disable-next-line global-require\n \n+\n+  const ajvKeywords = require(\"ajv-keywords\").default; // eslint-disable-next-line global-require\n+\n+\n+  const addFormats = require(\"ajv-formats\").default;\n   /**\n    * @type {Ajv}\n    */\n+\n+\n   const ajv = new Ajv({\n     strict: false,\n     allErrors: true,\n@@ -56,15 +68,17 @@\n   ajvKeywords(ajv, [\"instanceof\", \"patternRequired\"]);\n   addFormats(ajv, {\n     keywords: true\n-  });\n-  // Custom keywords\n+  }); // Custom keywords\n+\n   (0, _absolutePath.default)(ajv);\n   return ajv;\n });\n-\n /** @typedef {import(\"json-schema\").JSONSchema4} JSONSchema4 */\n+\n /** @typedef {import(\"json-schema\").JSONSchema6} JSONSchema6 */\n+\n /** @typedef {import(\"json-schema\").JSONSchema7} JSONSchema7 */\n+\n /** @typedef {import(\"ajv\").ErrorObject} ErrorObject */\n \n /**\n@@ -100,8 +114,10 @@\n  * @param {ValidationErrorConfiguration=} configuration\n  * @returns {void}\n  */\n+\n function validate(schema, options, configuration) {\n   let errors = [];\n+\n   if (Array.isArray(options)) {\n     errors = Array.from(options, nestedOptions => validateObject(schema, nestedOptions));\n     errors.forEach((list, idx) => {\n@@ -112,10 +128,12 @@\n       error => {\n         // eslint-disable-next-line no-param-reassign\n",
+					"match": false,
+					"packageHash": "50747c0668711ca1d47ecd0bb1205e9db05324a1ac5fea663fc8a0abda86adc7",
+					"size": 4940,
+					"sourceHash": "3064efd0049e5872ac621e09305c909ca983d8917e5de4e47ae04c5ab1689b3a",
+					"status": "content"
+				}
+			},
+			"summary": {
+				"differentFiles": 6,
+				"matchingFiles": 9,
+				"missingInPackage": 0,
+				"missingInSource": 0,
+				"score": 0.6,
+				"totalFiles": 15
+			}
+		}
+	}
+]
