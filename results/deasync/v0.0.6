@@ -1,0 +1,178 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-07T13:29:28.659Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:11.7.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "deasync@0.0.6",
+			"name": "deasync",
+			"version": "0.0.6",
+			"location": "https://registry.npmjs.org/deasync/-/deasync-0.0.6.tgz",
+			"integrity": "sha512-2Br2ogAAM2nU1bP4awugj0+S0+W9cPyeMFsw/KCkAuxsZJ/5Xiwzw4/nCMK8hBeXlX2r1Fp7LVLTZj0RZZ2S+Q==",
+			"publishedAt": "2014-03-30T22:01:40.220Z",
+			"publishedWith": {
+				"node": null,
+				"npm": "1.4.3"
+			},
+			"dependencies": {
+				"bindings": "~1.1.1"
+			}
+		},
+		"source": {
+			"integrity": "sha512-i0kBhHbpMxKRXS0YCz2VglP7kPS9ttw8t1xqFow2qdvKqO6HhAjBbmPhxyjboAsNpubrPnIlFjqlBIRDgJ2nZA==",
+			"location": "https://github.com/abbr/deasync.git",
+			"spec": "github:abbr/deasync#HEAD"
+		},
+		"comparisonHash": "9ef46a5bd31291e57cbab41e2f17c57bd6da0b5b",
+		"diff": {
+			"files": {
+				".npmignore": {
+					"match": false,
+					"packageHash": "fc79aad623dd85852bbd201d5e72416565a62b16a14013e4bd44232201bdf642",
+					"size": 16,
+					"status": "missing-in-source"
+				},
+				"README.md": {
+					"diff": "--- published/README.md\n+++ rebuilt/README.md\n@@ -1,49 +1,61 @@\n-deasync\n+DeAsync.js\n =======\n-deasync turns async function into sync, implemented with a blocking mechanism by way of calling Node.js event loop at JavaScript layer. The core of deasync is writen in C++.\n+[![NPM version](http://img.shields.io/npm/v/deasync.svg)](https://www.npmjs.org/package/deasync)\n+\n+DeAsync turns async function into sync, implemented with a blocking mechanism by calling Node.js event loop at JavaScript layer. The core of deasync is written in C++.\n+\n \n ## Motivation\n+\n Suppose you maintain a library that exposes a function <code>getData</code>. Your users call it to get actual data:   \n-<code>var output = getData();</code>  \n-Under the hood data is saved in a file so you implemented <code>getData</code> using Node.js built-in <code>fs.readFileSync</code>. It's obvious both <code>getData</code> and <code>fs.readFileSync</code> are sync functions. One day you were told to switch the underlying data source to a repo such as MongoDB which can only be accessed asynchronously. You were also told to avoid pissing off your users, <code>getData</code> API cannot be changed to return merely a promise or demand a callback parameter. How do you meet both requirements?\n+<code>var myData = getData();</code>  \n+Under the hood data is saved in a file so you implemented <code>getData</code> using Node.js built-in <code>fs.readFileSync</code>. It's obvious both <code>getData</code> and <code>fs.readFileSync</code> are sync functions. One day you were told to switch the underlying data source to a repo such as MongoDB which can only be accessed asynchronously. You were also told for backward compatibility, <code>getData</code> API cannot be changed to return merely a promise or demand a callback parameter. How do you meet both requirements?\n+\n+You may tempted to use [node-fibers](https://github.com/laverdet/node-fibers) or a module derived from it, but node fibers can only wrap async function call into a sync function inside a fiber. In the case above you cannot assume all  callers are inside fibers. On the other hand, if you start a fiber in `getData` then `getData` itself will still return immediately without waiting for the async call result. For similar reason ES6 generators introduced in Node v0.11 won't work either. \n+\n+What really needed is a way to block subsequent JavaScript from running without blocking entire thread by yielding to allow other events in the event loop to be handled. Ideally the blockage is removed as soon as the result of async function is available. A less ideal but often acceptable alternative is a `sleep` function which you can use to implement the blockage like ```while(!done) sleep(100);```. It is less ideal because sleep duration has to be guessed. It is important the `sleep` function not only shouldn't block entire thread, but also shouldn't incur busy wait that pegs the CPU to 100%. \n+</small>\n \n-You may tempted to use [node-fibers](https://github.com/laverdet/node-fibers) or a module derived from it, but node fibers can only wrap async function call into a sync function inside a fiber. In the case above you cannot assume all  callers are inside fibers. For similar reason ES6 generators won't work either. \n+DeAsync supports both alternatives.\n \n-What really needed is a way to block subsequent JavaScript from running without blocking entire thread by yielding to allow other events in the event loop to be handled. Ideally the blockage is removed as soon as the result of async function is available. A less ideal but acceptable alternative is a `sleep` function which you can use to implement the blockage like ```while(!done) sleep(100);```. It is less ideal because sleep duration has to be guessed. It is important the `sleep` function not only shouldn't block entire thread, but also shouldn't incur busy wait that pegs the CPU to 100%. \n \n-deasync supports both alternatives.\n \n ## Usages\n-* Generic wrapper of async function with standard API signature `function(p1,...pn,function cb(err,res){})`\n \n-```\n+\n+* Generic wrapper of async function with conventional API signature `function(p1,...pn,function cb(error,result){})`. Returns `result` and throws `error` as exception if not null:\n+\n+```javascript\n var deasync = require('deasync');\n var cp = require('child_process');\n var exec = deasync(cp.exec);\n // output result of ls -la\n-console.log(exec('ls -la'));\n+try{\n+    console.log(exec('ls -la'));\n+}\n+catch(err){\n+    console.log(err);\n+}\n // done is printed last, as supposed, with cp.exec wrapped in deasync; first without.\n console.log('done');\n ```\n \n-* For async function with non-standard API, for instance `function asyncFunction(p1,function cb(res){})`, use `runLoopOnce`\n+* For async function with unconventional API, for instance `function asyncFunction(p1,function cb(res){})`, use `loopWhile(predicateFunc)` where `predicateFunc` is a function that returns boolean loop condition\n \n-```\n+```javascript\n var done = false;\n var data;\n asyncFunction(p1,function cb(res){\n-  data = res;\n-  done = true;\n+    data = res;\n+    done = true;\n });\n-while(!done) {\n-  require('deasync').runLoopOnce();\n-}\n+require('deasync').loopWhile(function(){return !done;});\n // data is now populated\n ```\n \n * Sleep (a wrapper of setTimeout)\n \n-```\n+```javascript\n function SyncFunction(){\n   var ret;\n   setTimeout(function(){\n@@ -57,10 +69,44 @@\n }\n ```\n \n-\n ## Installation\n-Prerequisites: Except on a few platforms where binary distribution is included, deasync uses node-gyp to compile C++ source code so you may need the compilers listed in [node-gyp](https://github.com/TooTallNate/node-gyp). \n+Except on a few [ platforms + Node version combinations](https://github.com/abbr/deasync-bin) where binary distribution is included, DeAsync uses node-gyp to compile C++ source code so you may need the compilers listed in [node-gyp](https://github.com/TooTallNate/node-gyp). You may also need to [update npm's bundled node-gyp](https://github.com/TooTallNate/node-gyp/wiki/Updating-npm's-bundled-node-gyp).\n+\n+To install, run\n \n-To install, run \n ```npm install deasync```\n \n+\n+## Recommendation\n+Unlike other (a)sync js packages that mostly have only syntactic impact, DeAsync also changes code execution sequence. As such, it is intended to solve niche cases like the above one. If all you are facing is syntactic problem such as callback hell, using a less drastic package implemented in pure js is recommended.\n+\n",
+					"match": false,
+					"packageHash": "65aeac846a255807ca316cc001a048df4d043166239ab01da87abcfe1e824aca",
+					"size": 3114,
+					"sourceHash": "f669ad6856d55b11c7f24aac66e39fa2bfbad50c33a8b1aaa0f94551266c01c8",
+					"status": "content"
+				},
+				"bin/linux-x64/deasync.node": {
+					"match": false,
+					"packageHash": "834598193babc22bee11867dd49fb5422b2c252682816fa33e25eb6b37fcb71a",
+					"size": 9580,
+					"status": "missing-in-source"
+				},
+				"bin/win32-ia32/deasync.node": {
+					"match": false,
+					"packageHash": "0ed66837988905dcc10a3e834cf1d906a18db32069a9744f409be1ab7511ccb7",
+					"size": 33792,
+					"status": "missing-in-source"
+				},
+				"binding.gyp": {
+					"diff": "--- published/binding.gyp\n+++ rebuilt/binding.gyp\n@@ -2,8 +2,37 @@\n   \"targets\": [\n     {\n       \"target_name\": \"deasync\",\n+      \"cflags!\": [\n+        \"-fno-exceptions\"\n+      ],\n+      \"cflags_cc!\": [\n+        \"-fno-exceptions\"\n+      ],\n+      \"xcode_settings\": {\n+        \"GCC_ENABLE_CPP_EXCEPTIONS\": \"YES\",\n+        \"CLANG_CXX_LIBRARY\": \"libc++\",\n+        \"MACOSX_DEPLOYMENT_TARGET\": \"10.7\"\n+      },\n+      \"msvs_settings\": {\n+        \"VCCLCompilerTool\": {\n+          \"ExceptionHandling\": 1\n+        }\n+      },\n       \"sources\": [\n         \"src/deasync.cc\"\n+      ],\n+      \"include_dirs\": [\n+        \"<!@(node -p \\\"require('node-addon-api').include.replace(/\\\\\\s/g, \\\\\\\"\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\ \\\\\\\")\\\")\"\n+      ],\n+      \"conditions\": [\n+        [\n+          \"OS=='linux'\",\n+          {\n+            \"ldflags\": [\n+#              \"-static-libstdc++\",\n+            ]\n+          }\n+        ]\n       ]\n     }\n   ]\n",
+					"match": false,
+					"packageHash": "13c68f4bbba131d64f16299427ba474f285913bc6299694e6f792228a48c5193",
+					"size": 119,
+					"sourceHash": "c25ffc463c19d028bce6b50fceb50b9c28a9119238dc0f12f5247fcde23d317a",
+					"status": "content"
+				},
+				"build.js": {
+					"diff": "--- published/build.js\n+++ rebuilt/build.js\n@@ -1,91 +1,125 @@\n #!/usr/bin/env node\n+\n var cp = require('child_process'),\n-\tfs = require('fs'),\n-\tpath = require('path');\n+  fs = require('fs'),\n+  path = require('path');\n \n // Parse args\n-var force = false, debug = false;\n-var\n-\tarch = process.arch,\n-\tplatform = process.platform;\n-var args = process.argv.slice(2).filter(function(arg) {\n-\tif (arg === '-f') {\n-\t\tforce = true;\n-\t\treturn false;\n-\t} else if (arg.substring(0, 13) === '--target_arch') {\n-\t\tarch = arg.substring(14);\n-\t} else if (arg === '--debug') {\n-\t\tdebug = true;\n-\t}\n-\treturn true;\n+var force = false,\n+  debug = false;\n+var arch = process.arch,\n+  platform = process.platform,\n+  nodeV = /[0-9]+\\.[0-9]+/.exec(process.versions.node)[0],\n+  nodeVM = /[0-9]+/.exec(process.versions.node)[0];\n+var args = process.argv.slice(2).filter(function (arg) {\n+  if (arg === '-f') {\n+    force = true;\n+    return false;\n+  } else if (arg.substring(0, 13) === '--target_arch') {\n+    arch = arg.substring(14);\n+  } else if (arg === '--debug') {\n+    debug = true;\n+  }\n+  return true;\n });\n-if (!{ia32: true, x64: true, arm: true}.hasOwnProperty(arch)) {\n-\tconsole.error('Unsupported (?) architecture: `'+ arch+ '`');\n-\tprocess.exit(1);\n+if (\n+  !{\n+    ia32: true,\n+    x64: true,\n+    arm: true,\n+    arm64: true,\n+    ppc64: true,\n+    ppc: true,\n+    s390x: true,\n+    mips64el: true,\n+    loong64: true,\n+  }.hasOwnProperty(arch)\n+) {\n+  console.error('Unsupported (?) architecture: `' + arch + '`');\n+  process.exit(1);\n }\n \n // Test for pre-built library\n-var modPath = platform+ '-'+ arch;\n+var modPath = platform + '-' + arch + '-node-' + nodeV;\n if (!force) {\n-\ttry {\n-\t\tfs.statSync(path.join(__dirname, 'bin', modPath, 'deasync.node'));\n-\t\tconsole.log('`'+ modPath+ '` exists; testing');\n-\t\tcp.execFile(process.execPath, ['quick-test'], function(err, stdout, stderr) {\n-\t\t\tif (err || stdout !== 'pass' || stderr) {\n-\t\t\t\tconsole.log('Problem with the binary; manual build incoming');\n-\t\t\t\tbuild();\n-\t\t\t} else {\n-\t\t\t\tconsole.log('Binary is fine; exiting');\n-\t\t\t}\n-\t\t});\n-\t} catch (ex) {\n-\t\t// Stat failed\n-\t\tbuild();\n-\t}\n+  try {\n+    try {\n+      fs.statSync(path.join(__dirname, 'bin', modPath, 'deasync.node'));\n+    } catch (ex) {\n+      modPath = platform + '-' + arch + '-node-' + nodeVM;\n+      fs.statSync(path.join(__dirname, 'bin', modPath, 'deasync.node'));\n+    }\n+    console.log('`' + modPath + '` exists; testing');\n+    cp.execFile(\n+      process.execPath,\n+      ['quick-test.js'],\n+      function (err, stdout, stderr) {\n+        if (err || stderr) {\n+          console.log('Problem with the binary; manual build incoming');\n+          console.log('stdout=' + stdout);\n+          console.log('err=' + err);\n+          build();\n+        } else {\n",
+					"match": false,
+					"packageHash": "610c6597b89a0901c7dba80cc2e2203778045876e7e08b15c6612e4d99821359",
+					"size": 2241,
+					"sourceHash": "fd897956e9f00f57050dc67333faf824a24bb9a2c56370297341b85a91f2262c",
+					"status": "content"
+				},
+				"index.js": {
+					"diff": "--- published/index.js\n+++ rebuilt/index.js\n@@ -1,49 +1,73 @@\n-var fs = require('fs'), path = require('path');\n-var binding;\n+/*!\n+ * deasync\n+ * https://github.com/abbr/deasync\n+ *\n+ * Copyright 2014-present Abbr\n+ * Released under the MIT license\n+ */\n+\n+var fs = require('fs'),\n+\tpath = require('path'),\n+\tbinding\n+\n+// Seed random numbers [gh-82] if on Windows. See https://github.com/laverdet/node-fibers/issues/82\n+if (process.platform === 'win32') Math.random()\n \n-// Seed random numbers [gh-82]\n-Math.random();\n \n // Look for binary for this platform\n-var modPath = path.join(__dirname, 'bin', process.platform+ '-'+ process.arch, 'deasync');\n+var nodeV = 'node-' + /[0-9]+\\.[0-9]+/.exec(process.versions.node)[0]\n+var nodeVM = 'node-' + /[0-9]+/.exec(process.versions.node)[0]\n+var modPath = path.join(__dirname, 'bin', process.platform + '-' + process.arch + '-' + nodeV, 'deasync')\n try {\n-\tfs.statSync(modPath+ '.node');\n-\tbinding = require(modPath);\n+\ttry {\n+\t\tfs.statSync(modPath + '.node')\n+\t} catch (ex) {\n+\t\tmodPath = path.join(__dirname, 'bin', process.platform + '-' + process.arch + '-' + nodeVM, 'deasync')\n+\t\tfs.statSync(modPath + '.node')\n+\t}\n+\tbinding = require(modPath)\n } catch (ex) {\n-\tbinding = require('bindings')('deasync');\n+\tbinding = require('bindings')('deasync')\n }\n \n-\n-\n function deasync(fn) {\n-\treturn function() {\n-\t\tvar done = false;\n-\t\tvar args = Array.prototype.slice.apply(arguments).concat(cb);\n-\t\tvar err;\n-\t\tvar res;\n-\n-\t\tfn.apply(this, args);\n-\n-\t\twhile (!done) {\n-\t\t\tbinding.run();\n-\t\t}\n+\treturn function () {\n+\t\tvar done = false\n+\t\tvar args = Array.prototype.slice.apply(arguments).concat(cb)\n+\t\tvar err\n+\t\tvar res\n+\n+\t\tfn.apply(this, args)\n+\t\tmodule.exports.loopWhile(function () {\n+\t\t\treturn !done\n+\t\t})\n \t\tif (err)\n-\t\t\tthrow err;\n+\t\t\tthrow err\n \n-\t\treturn res;\n+\t\treturn res\n \n \t\tfunction cb(e, r) {\n-\t\t\terr = e;\n-\t\t\tres = r;\n-\t\t\tdone = true;\n+\t\t\terr = e\n+\t\t\tres = r\n+\t\t\tdone = true\n \t\t}\n \t}\n }\n \n-module.exports = deasync;\n+module.exports = deasync\n \n-module.exports.sleep = deasync(function(timeout, done) {\n-\tsetTimeout(done, timeout);\n-});\n+module.exports.sleep = deasync(function (timeout, done) {\n+\tsetTimeout(done, timeout)\n+})\n+\n+module.exports.runLoopOnce = function () {\n+\tprocess._tickCallback()\n+\tbinding.run()\n+}\n \n",
+					"match": false,
+					"packageHash": "dce9cd941637ff8231b60551b0d96d7caad4e75bec2d4fabe835ddae430544ed",
+					"size": 855,
+					"sourceHash": "a99e03c3a94298a4a417b534447d1133dbc305d3cef1a7f05f98b5a3449453ee",
+					"status": "content"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -1,21 +1,36 @@\n {\n   \"name\": \"deasync\",\n-  \"version\": \"0.0.6\",\n+  \"version\": \"0.1.31\",\n   \"description\": \"Turns async function into sync via JavaScript wrapper of Node event loop\",\n   \"main\": \"index.js\",\n   \"author\": \"Vladimir Kurchatkin <vladimir.kurchatkin@gmail.com>\",\n-  \"contributors\": [\"Fred Wen <wenfred@gmail.com> (https://github.com/abbr)\"],\n+  \"contributors\": [\n+    \"Fred Wen <wenfred@gmail.com> (https://github.com/abbr)\"\n+  ],\n   \"license\": \"MIT\",\n-\t\"scripts\": {\n-\t\t\"install\": \"node ./build.js\"\n-\t},\n+  \"scripts\": {\n+    \"install\": \"node ./build.js\",\n+    \"test\": \"node spec\"\n+  },\n   \"dependencies\": {\n-    \"bindings\": \"~1.1.1\"\n+    \"bindings\": \"^1.5.0\",\n+    \"node-addon-api\": \"^1.7.1\"\n+  },\n+  \"repository\": {\n+    \"type\": \"git\",\n+    \"url\": \"https://github.com/abbr/deasync.git\"\n+  },\n+  \"homepage\": \"https://github.com/abbr/deasync\",\n+  \"keywords\": [\n+    \"async\",\n+    \"sync\",\n+    \"sleep\",\n+    \"async wrapper\"\n+  ],\n+  \"engines\": {\n+    \"node\": \">=0.11.0\"\n   },\n-\t\"repository\": {\n-\t\t\"type\": \"git\",\n-\t\t\"url\": \"https://github.com/abbr/deasync.git\"\n-\t},\n-\t\"homepage\": \"https://github.com/abbr/deasync\",\n-\t\"keywords\": [\"async\", \"sync\", \"sleep\", \"async wrapper\"]\n+  \"devDependencies\": {\n+    \"require-directory\": \"^2.1.1\"\n+  }\n }\n",
+					"match": false,
+					"packageHash": "fe46d3dcd1c22d5ca612c425a3231b804c5d17a0025744f15dce9bf87f26539b",
+					"size": 616,
+					"sourceHash": "020ac93854818645dbdb14e569875dca99ec6cbefad5d26c3a7fcee3001472fe",
+					"status": "content"
+				},
+				"quick-test.js": {
+					"diff": "--- published/quick-test.js\n+++ rebuilt/quick-test.js\n@@ -1,7 +1,9 @@\n-var ret, deasync = require('./index.js');\n-setTimeout(function () {\n-  ret = 'pass';\n-}, 100);\n+const assert = require('assert')\n+var ret,\n+  deasync = require('./index.js')\n+setTimeout(function() {\n+  ret = 'pass'\n+}, 100)\n \n-while(ret === undefined) deasync.sleep(10);\n-process.stdout.write(ret);\n+while (ret === undefined) deasync.sleep(10)\n+assert.strictEqual(ret, 'pass')\n",
+					"match": false,
+					"packageHash": "7c0b4351c41495c1e9a12339d39888ef5528a4cd985d9132cdee71be3d5362e2",
+					"size": 164,
+					"sourceHash": "e91917e391edc55d861a2d759bd2cf70f21fb2a0c5f5fb48188cb8eec652a454",
+					"status": "content"
+				},
+				"src/deasync.cc": {
+					"diff": "--- published/src/deasync.cc\n+++ rebuilt/src/deasync.cc\n@@ -1,23 +1,19 @@\n-#include <node.h>\n+#include <uv.h>\n #include <v8.h>\n+#include <napi.h>\n+#include <uv.h>\n+#include <node.h>\n \n-using namespace v8;\n-uv_idle_t idler;\n-\n-static void crunch_away(uv_idle_t* handle, int status) {\n-    uv_idle_stop(handle);\n-}\n-\n-static Handle<Value> Run(const Arguments& args) {\n-  HandleScope scope;\n-  uv_idle_start(&idler, crunch_away);\n-  uv_run(uv_default_loop(), UV_RUN_ONCE);\n-  return scope.Close(Undefined());\n+Napi::Value Run(const Napi::CallbackInfo& info) {\n+  Napi::Env env = info.Env();\n+  Napi::HandleScope scope(env);\n+  uv_run(node::GetCurrentEventLoop(v8::Isolate::GetCurrent()), UV_RUN_ONCE);\n+  return env.Undefined();\n }\n \n-static void Init(Handle<Object> target) {\n-  node::SetMethod(target, \"run\", Run);\n-  uv_idle_init(uv_default_loop(), &idler);\n+static Napi::Object init(Napi::Env env, Napi::Object exports) {\n+  exports.Set(Napi::String::New(env, \"run\"), Napi::Function::New(env, Run));\n+  return exports;\n }\n \n-NODE_MODULE(deasync, Init)\n+NODE_API_MODULE(deasync, init)\n",
+					"match": false,
+					"packageHash": "8eb027df55e03be65892f40ff7b27396e51bad7c6ee7c57085ad4d6eb7d4c192",
+					"size": 502,
+					"sourceHash": "7d18810fe396cb8a070c2ba46f3d9c7c452b288dc873f7ffdd57bee8d3dd73d8",
+					"status": "content"
+				},
+				"test.js": {
+					"match": false,
+					"packageHash": "20162a2bfd1de02f3d146ad9232952f0d1eafe19090ff7631964181941a4aa2c",
+					"size": 657,
+					"status": "missing-in-source"
+				},
+				".github/FUNDING.yml": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				".github/workflows/npm_test.yml": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				".travis.yml": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"LICENSE": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"app.code-workspace": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"spec/app/exec.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"spec/app/request.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"spec/app/sleep.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"spec/app/worker-threads.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"spec/index.js": {
+					"match": false,
+					"status": "missing-in-package"
+				}
+			},
+			"summary": {
+				"differentFiles": 7,
+				"matchingFiles": 0,
+				"missingInPackage": 10,
+				"missingInSource": 4,
+				"score": 0,
+				"totalFiles": 21
+			}
+		},
+		"prodDependencies": [
+			{
+				"name": "bindings",
+				"version": "1.5.0"
+			},
+			{
+				"name": "file-uri-to-path",
+				"version": "1.0.0"
+			},
+			{
+				"name": "node-addon-api",
+				"version": "1.7.1"
+			}
+		]
+	}
+]
