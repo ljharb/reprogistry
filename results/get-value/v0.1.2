@@ -1,0 +1,117 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-07T15:22:37.352Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:11.7.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "get-value@0.1.2",
+			"name": "get-value",
+			"version": "0.1.2",
+			"location": "https://registry.npmjs.org/get-value/-/get-value-0.1.2.tgz",
+			"integrity": "sha512-Wenfkl8gvVnNWcRSCgen8QZoauN4WenMzYEIyhGHZzTeTLog2B3TyODl0Ed8D6ncLBvMCYsYs5JQ83raYWbDRQ==",
+			"publishedAt": "2014-10-07T20:50:53.592Z",
+			"publishedWith": {
+				"node": null,
+				"npm": "1.4.9"
+			},
+			"dependencies": {
+				"isobject": "^0.2.0"
+			}
+		},
+		"source": {
+			"integrity": null,
+			"location": "git://github.com/jonschlinkert/get-value.git",
+			"spec": "github:jonschlinkert/get-value#HEAD"
+		},
+		"comparisonHash": "9ef46a5bd31291e57cbab41e2f17c57bd6da0b5b",
+		"diff": {
+			"files": {
+				".gitattributes": {
+					"match": false,
+					"packageHash": "c697329350b4e95aab826aafb5cf438e2e0b60506912f740918a9e9b82dae864",
+					"size": 237,
+					"status": "missing-in-source"
+				},
+				".jshintrc": {
+					"match": false,
+					"packageHash": "f8a6ac3c3eca9fb7d2ef224f95ddc9976f91ce01cadc7809fa151ddd97524f5d",
+					"size": 342,
+					"status": "missing-in-source"
+				},
+				".npmignore": {
+					"match": false,
+					"packageHash": "de7fa51b20e07f4c3a92dd315095ab16ccbbc6ea100e325649b9394429ae56f7",
+					"size": 507,
+					"status": "missing-in-source"
+				},
+				".travis.yml": {
+					"match": false,
+					"packageHash": "4a2b861f1ccaf3e56388b7af075088fc8d6d0a60d1622470eb851dae5363074f",
+					"size": 37,
+					"status": "missing-in-source"
+				},
+				".verbrc.md": {
+					"match": false,
+					"packageHash": "0ddd1e32541b2ed9cb55e2d373fbb4ec4a7226be1fff286d43432ea14d97a11f",
+					"size": 520,
+					"status": "missing-in-source"
+				},
+				"LICENSE-MIT": {
+					"match": false,
+					"packageHash": "5bf88c23e05c40530f2015cf49e9331f9f54010ce552a5a3b50684b71158c4ac",
+					"size": 1073,
+					"status": "missing-in-source"
+				},
+				"README.md": {
+					"diff": "--- published/README.md\n+++ rebuilt/README.md\n@@ -1,48 +1,372 @@\n-# get-value [![NPM version](https://badge.fury.io/js/get-value.svg)](http://badge.fury.io/js/get-value)\n+# get-value [![NPM version](https://img.shields.io/npm/v/get-value.svg?style=flat)](https://www.npmjs.com/package/get-value) [![NPM monthly downloads](https://img.shields.io/npm/dm/get-value.svg?style=flat)](https://npmjs.org/package/get-value) [![NPM total downloads](https://img.shields.io/npm/dt/get-value.svg?style=flat)](https://npmjs.org/package/get-value)\n \n+> Use property paths like 'a.b.c' to get a nested value from an object. Even works when keys have dots in them (no other dot-prop library we tested does this, or does it correctly).\n \n-> Use property paths (`a.b.c`) get a nested value from an object.\n+Please consider following this project's author, [Jon Schlinkert](https://github.com/jonschlinkert), and consider starring the project to show your :heart: and support.\n+\n+## Table of Contents\n+\n+<details>\n+<summary><strong>Details</strong></summary>\n+\n+- [Install](#install)\n+- [Usage](#usage)\n+  * [Supports keys with dots](#supports-keys-with-dots)\n+  * [Supports arrays](#supports-arrays)\n+  * [Supports functions](#supports-functions)\n+  * [Supports passing object path as an array](#supports-passing-object-path-as-an-array)\n+- [Options](#options)\n+  * [options.default](#optionsdefault)\n+  * [options.isValid](#optionsisvalid)\n+  * [options.split](#optionssplit)\n+  * [options.separator](#optionsseparator)\n+  * [options.join](#optionsjoin)\n+  * [options.joinChar](#optionsjoinchar)\n+- [Benchmarks](#benchmarks)\n+  * [Running the benchmarks](#running-the-benchmarks)\n+- [Release history](#release-history)\n+  * [v4.0.0](#v400)\n+  * [v3.0.0](#v300)\n+- [About](#about)\n+\n+</details>\n \n ## Install\n-#### Install with [npm](npmjs.org)\n \n-```bash\n-npm i get-value --save\n+Install with [npm](https://www.npmjs.com/):\n+\n+```sh\n+$ npm install --save get-value\n ```\n \n-## Run tests\n+## Usage\n+\n+See the [unit tests](test/test.js) for many more examples.\n+\n+```js\n+const get = require('get-value');\n+const obj = { a: { b: { c: { d: 'foo' } } } };\n \n-```bash\n-npm test\n+console.log(get(obj));            //=> { a: { b: { c: { d: 'foo' } } } };\n+console.log(get(obj, 'a'));       //=> { b: { c: { d: 'foo' } } }\n+console.log(get(obj, 'a.b'));     //=> { c: { d: 'foo' } }\n+console.log(get(obj, 'a.b.c'));   //=> { d: 'foo' }\n+console.log(get(obj, 'a.b.c.d')); //=> 'foo'\n ```\n \n-## Usage\n+### Supports keys with dots\n+\n+Unlike other dot-prop libraries, get-value works when keys have dots in them:\n+\n+```js\n+console.log(get({ 'a.b': { c: 'd' } }, 'a.b.c'));\n+//=> 'd'\n+\n+console.log(get({ 'a.b': { c: { 'd.e': 'f' } } }, 'a.b.c.d.e'));\n+//=> 'f'\n+```\n+\n+### Supports arrays\n+\n+```js\n+console.log(get({ a: { b: { c: { d: 'foo' } } }, e: [{ f: 'g' }, { f: 'h' }] }, 'e.1.f'));\n+//=> 'h'\n+\n+console.log(get({ a: { b: [{ c: 'd' }] } }, 'a.b.0.c'));\n+//=> 'd'\n+\n+console.log(get({ a: { b: [{ c: 'd' }, { e: 'f' }] } }, 'a.b.1.e'));\n+//=> 'f'\n+```\n+\n+### Supports functions\n+\n+```js\n+function foo() {}\n+foo.bar = { baz: 'qux' };\n+\n+console.log(get(foo));\n",
+					"match": false,
+					"packageHash": "eee53b1f4b3f4004de41e2e78cf3473bbd862ae00bc310f59ec2666b2ce79a07",
+					"size": 897,
+					"sourceHash": "4ea55a11f8e41e8e8e5060db7303e79ec7d21235453dbf9376b0075db667b30c",
+					"status": "content"
+				},
+				"index.js": {
+					"match": false,
+					"packageHash": "210f73db14c7a81b278a1ac6b9ee35e896908df79ad35c7672302ba8652cef19",
+					"size": 573,
+					"status": "missing-in-source"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -1,39 +1,60 @@\n {\n   \"name\": \"get-value\",\n-  \"description\": \"Use property paths (`a.b.c`) get a nested value from an object.\",\n-  \"version\": \"0.1.2\",\n+  \"description\": \"Use property paths like 'a.b.c' to get a nested value from an object. Even works when keys have dots in them (no other dot-prop library we tested does this, or does it correctly).\",\n+  \"version\": \"4.0.1\",\n   \"homepage\": \"https://github.com/jonschlinkert/get-value\",\n-  \"author\": {\n-    \"name\": \"Jon Schlinkert\",\n-    \"url\": \"https://github.com/jonschlinkert\"\n-  },\n-  \"repository\": {\n-    \"type\": \"git\",\n-    \"url\": \"git://github.com/jonschlinkert/get-value.git\"\n-  },\n+  \"author\": \"Jon Schlinkert (https://github.com/jonschlinkert)\",\n+  \"repository\": \"jonschlinkert/get-value\",\n   \"bugs\": {\n     \"url\": \"https://github.com/jonschlinkert/get-value/issues\"\n   },\n-  \"licenses\": [\n-    {\n-      \"type\": \"MIT\",\n-      \"url\": \"https://github.com/jonschlinkert/get-value/blob/master/LICENSE-MIT\"\n-    }\n-  ],\n-  \"main\": \"index.js\",\n-  \"engines\": {\n-    \"node\": \">=0.10.0\"\n-  },\n+  \"license\": \"MIT\",\n   \"scripts\": {\n-    \"test\": \"mocha -R spec\"\n+    \"bench\": \"node benchmark\",\n+    \"eslint\": \"npx eslint --ext .ts .\",\n+    \"coverage\": \"nyc --reporter=text --reporter=html\",\n+    \"test\": \"ts-mocha -r esbuild-register 'test/**/*.ts'\",\n+    \"tsup\": \"npx tsup\"\n+  },\n+  \"files\": [\n+    \"dist/index.js\",\n+    \"dist/index.mjs\",\n+    \"index.d.ts\"\n+  ],\n+  \"main\": \"dist/index.js\",\n+  \"module\": \"dist/index.mjs\",\n+  \"types\": \"index.d.ts\",\n+  \"exports\": {\n+    \".\": {\n+      \"types\": \"./index.d.ts\",\n+      \"import\": \"./dist/index.mjs\",\n+      \"require\": \"./dist/index.js\"\n+    }\n   },\n   \"devDependencies\": {\n-    \"mocha\": \"*\",\n-    \"should\": \"^4.0.4\",\n-    \"verb\": \">= 0.2.6\",\n-    \"verb-tag-jscomments\": \">= 0.2.0\"\n+    \"@types/node\": \"^22.10.7\",\n+    \"@typescript-eslint/eslint-plugin\": \"^6.2.0\",\n+    \"@typescript-eslint/parser\": \"^6.2.0\",\n+    \"arr-reduce\": \"^1.0.1\",\n+    \"dot-prop\": \"^9.0.0\",\n+    \"dotty\": \"^0.1.2\",\n+    \"esbuild-register\": \"^3.5.0\",\n+    \"eslint\": \"^8.57.0\",\n+    \"getobject\": \"^1.1.1\",\n+    \"gulp-format-md\": \"^2.0.0\",\n+    \"micromatch\": \"^4.0.5\",\n+    \"minimist\": \"^1.2.8\",\n+    \"nyc\": \"^17.1.0\",\n+    \"object-path\": \"^0.11.8\",\n+    \"prettier\": \"^3.4.2\",\n+    \"ts-mocha\": \"^10.0.0\",\n+    \"ts-node\": \"^10.9.2\",\n+    \"tsconfig-paths\": \"^4.2.0\",\n+    \"tsup\": \"^8.3.5\",\n+    \"typescript\": \"^5.4.5\"\n   },\n   \"keywords\": [\n+    \"get\",\n     \"key\",\n     \"nested\",\n     \"object\",\n@@ -43,14 +64,31 @@\n     \"properties\",\n     \"property\",\n     \"props\",\n-    \"util\",\n-    \"utilities\",\n-    \"utility\",\n-    \"utils\",\n+    \"segment\",\n     \"value\",\n     \"values\"\n   ],\n",
+					"match": false,
+					"packageHash": "95744ffdb843ba4871ae445c73609784e40a7f2f9eff0308a19b0cc13c2e4f00",
+					"size": 1125,
+					"sourceHash": "e6f307e773cbad035054f251505b6359f147660a82cb4b0ea78dcc821daac46f",
+					"status": "content"
+				},
+				"test.js": {
+					"match": false,
+					"packageHash": "d6ba7c528115c5797023101473830716099082680570f697d41c890bc8e88b52",
+					"size": 890,
+					"status": "missing-in-source"
+				},
+				"LICENSE": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"index.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				}
+			},
+			"summary": {
+				"differentFiles": 2,
+				"matchingFiles": 0,
+				"missingInPackage": 2,
+				"missingInSource": 8,
+				"score": 0,
+				"totalFiles": 12
+			}
+		},
+		"prodDependencies": []
+	}
+]

@@ -1,0 +1,261 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-07T15:22:28.847Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:11.7.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "get-value@0.3.2",
+			"name": "get-value",
+			"version": "0.3.2",
+			"location": "https://registry.npmjs.org/get-value/-/get-value-0.3.2.tgz",
+			"integrity": "sha512-G2RtIaOepMVLobMvKHqpzPeBwmoigH1qML6wvQzhqonryemA5rpOHWr41/9GjqP7FNV88YqyFzjwRTu2zNDSGA==",
+			"publishedAt": "2014-11-02T01:54:55.176Z",
+			"publishedWith": {
+				"node": null,
+				"npm": "1.4.9"
+			},
+			"dependencies": {
+				"isobject": "^0.2.0"
+			}
+		},
+		"source": {
+			"integrity": null,
+			"location": "git://github.com/jonschlinkert/get-value.git",
+			"spec": "github:jonschlinkert/get-value#HEAD"
+		},
+		"comparisonHash": "9ef46a5bd31291e57cbab41e2f17c57bd6da0b5b",
+		"diff": {
+			"files": {
+				".gitattributes": {
+					"match": false,
+					"packageHash": "c697329350b4e95aab826aafb5cf438e2e0b60506912f740918a9e9b82dae864",
+					"size": 237,
+					"status": "missing-in-source"
+				},
+				".jshintrc": {
+					"match": false,
+					"packageHash": "f8a6ac3c3eca9fb7d2ef224f95ddc9976f91ce01cadc7809fa151ddd97524f5d",
+					"size": 342,
+					"status": "missing-in-source"
+				},
+				".npmignore": {
+					"match": false,
+					"packageHash": "de7fa51b20e07f4c3a92dd315095ab16ccbbc6ea100e325649b9394429ae56f7",
+					"size": 507,
+					"status": "missing-in-source"
+				},
+				".travis.yml": {
+					"match": false,
+					"packageHash": "4a2b861f1ccaf3e56388b7af075088fc8d6d0a60d1622470eb851dae5363074f",
+					"size": 37,
+					"status": "missing-in-source"
+				},
+				".verbrc.md": {
+					"match": false,
+					"packageHash": "eaf684bdcd9402d3dff413900241b0996cb948930b012691bb42d95a95237836",
+					"size": 783,
+					"status": "missing-in-source"
+				},
+				"LICENSE-MIT": {
+					"match": false,
+					"packageHash": "5bf88c23e05c40530f2015cf49e9331f9f54010ce552a5a3b50684b71158c4ac",
+					"size": 1073,
+					"status": "missing-in-source"
+				},
+				"README.md": {
+					"diff": "--- published/README.md\n+++ rebuilt/README.md\n@@ -1,70 +1,372 @@\n-# get-value [![NPM version](https://badge.fury.io/js/get-value.svg)](http://badge.fury.io/js/get-value)\n+# get-value [![NPM version](https://img.shields.io/npm/v/get-value.svg?style=flat)](https://www.npmjs.com/package/get-value) [![NPM monthly downloads](https://img.shields.io/npm/dm/get-value.svg?style=flat)](https://npmjs.org/package/get-value) [![NPM total downloads](https://img.shields.io/npm/dt/get-value.svg?style=flat)](https://npmjs.org/package/get-value)\n \n-> Use property paths (`a.b.c`) get a nested value from an object.\n+> Use property paths like 'a.b.c' to get a nested value from an object. Even works when keys have dots in them (no other dot-prop library we tested does this, or does it correctly).\n \n-## Related project\n+Please consider following this project's author, [Jon Schlinkert](https://github.com/jonschlinkert), and consider starring the project to show your :heart: and support.\n \n-  - [get-property](https://github.com/jonschlinkert/get-property)\n-  - [get-object](https://github.com/jonschlinkert/get-object)\n+## Table of Contents\n \n+<details>\n+<summary><strong>Details</strong></summary>\n+\n+- [Install](#install)\n+- [Usage](#usage)\n+  * [Supports keys with dots](#supports-keys-with-dots)\n+  * [Supports arrays](#supports-arrays)\n+  * [Supports functions](#supports-functions)\n+  * [Supports passing object path as an array](#supports-passing-object-path-as-an-array)\n+- [Options](#options)\n+  * [options.default](#optionsdefault)\n+  * [options.isValid](#optionsisvalid)\n+  * [options.split](#optionssplit)\n+  * [options.separator](#optionsseparator)\n+  * [options.join](#optionsjoin)\n+  * [options.joinChar](#optionsjoinchar)\n+- [Benchmarks](#benchmarks)\n+  * [Running the benchmarks](#running-the-benchmarks)\n+- [Release history](#release-history)\n+  * [v4.0.0](#v400)\n+  * [v3.0.0](#v300)\n+- [About](#about)\n \n-## Benchmarks\n+</details>\n+\n+## Install\n+\n+Install with [npm](https://www.npmjs.com/):\n \n-```bash\n-node benchmark\n+```sh\n+$ npm install --save get-value\n ```\n \n ## Usage\n \n+See the [unit tests](test/test.js) for many more examples.\n+\n+```js\n+const get = require('get-value');\n+const obj = { a: { b: { c: { d: 'foo' } } } };\n+\n+console.log(get(obj));            //=> { a: { b: { c: { d: 'foo' } } } };\n+console.log(get(obj, 'a'));       //=> { b: { c: { d: 'foo' } } }\n+console.log(get(obj, 'a.b'));     //=> { c: { d: 'foo' } }\n+console.log(get(obj, 'a.b.c'));   //=> { d: 'foo' }\n+console.log(get(obj, 'a.b.c.d')); //=> 'foo'\n+```\n+\n+### Supports keys with dots\n+\n+Unlike other dot-prop libraries, get-value works when keys have dots in them:\n+\n+```js\n+console.log(get({ 'a.b': { c: 'd' } }, 'a.b.c'));\n+//=> 'd'\n+\n+console.log(get({ 'a.b': { c: { 'd.e': 'f' } } }, 'a.b.c.d.e'));\n+//=> 'f'\n+```\n+\n+### Supports arrays\n+\n+```js\n+console.log(get({ a: { b: { c: { d: 'foo' } } }, e: [{ f: 'g' }, { f: 'h' }] }, 'e.1.f'));\n+//=> 'h'\n+\n+console.log(get({ a: { b: [{ c: 'd' }] } }, 'a.b.0.c'));\n+//=> 'd'\n+\n+console.log(get({ a: { b: [{ c: 'd' }, { e: 'f' }] } }, 'a.b.1.e'));\n+//=> 'f'\n+```\n+\n+### Supports functions\n+\n+```js\n+function foo() {}\n+foo.bar = { baz: 'qux' };\n+\n+console.log(get(foo));\n+//=> { [Function: foo] bar: { baz: 'qux' } }\n",
+					"match": false,
+					"packageHash": "5d161e7b62f1b38e7e05ec073e5e12da556b6401cd757c0c9e572ccf87141f1f",
+					"size": 1217,
+					"sourceHash": "4ea55a11f8e41e8e8e5060db7303e79ec7d21235453dbf9376b0075db667b30c",
+					"status": "content"
+				},
+				"benchmark/code/for-path-escape-check.js": {
+					"match": false,
+					"packageHash": "524ce79d02ca18eb14809ac52096821c77d21d7e1159123d2cc4e264a3b14c5b",
+					"size": 1006,
+					"status": "missing-in-source"
+				},
+				"benchmark/code/for-path-escape-flag.js": {
+					"match": false,
+					"packageHash": "6eb385b10497307d9fb6bc1994e13f2579be9b63036ad5d335dbfc570dfcf9dc",
+					"size": 1001,
+					"status": "missing-in-source"
+				},
+				"benchmark/code/for-path-escape.js": {
+					"match": false,
+					"packageHash": "b5ff4ab59fc969c1fcdbd222a6766f4aeb3e8e59e429ea1af2a81bb38db317f2",
+					"size": 908,
+					"status": "missing-in-source"
+				},
+				"benchmark/code/for.js": {
+					"match": false,
+					"packageHash": "88518addf8edda1669f270827189f8382ff6983547f3771d1d2c86f4ab5250c7",
+					"size": 466,
+					"status": "missing-in-source"
+				},
+				"benchmark/code/getobject.js": {
+					"match": false,
+					"packageHash": "c424f243b36e8a38bc1d5f762df4e53a3c3f3104d0514ab220f0f6b2824fdaa8",
+					"size": 210,
+					"status": "missing-in-source"
+				},
+				"benchmark/code/reduce-custom.js": {
+					"match": false,
+					"packageHash": "7b1cd2ea93430561003b150d40b45ba1f5cb0f5ae61ad5e1d02e1c1cf3c5b8f2",
+					"size": 435,
+					"status": "missing-in-source"
+				},
+				"benchmark/code/reduce.js": {
+					"match": false,
+					"packageHash": "c86636ba791c25c0a0d481fa1b62309a0a4e58baafc1628b5b95c98b0d98b44a",
+					"size": 271,
+					"status": "missing-in-source"
+				},
+				"benchmark/code/while-fn-both.js": {
+					"match": false,
+					"packageHash": "b7b5e69a9beadbc40b8439db47669e179e2925cb529a18d369cb095b0ea1f634",
+					"size": 1081,
+					"status": "missing-in-source"
+				},
+				"benchmark/code/while-fn-optional.js": {
+					"match": false,
+					"packageHash": "c87cafdae66cb4cbcbb33dd371afab598cc91a14782caea53d9f22ec6eb70d70",
+					"size": 627,
+					"status": "missing-in-source"
+				},
+				"benchmark/code/while-has-own.js": {
+					"match": false,
+					"packageHash": "c9919fd4a8b73cd2df76b5dea375c86c2f5b4e43b9da65b86651edabca51eb01",
+					"size": 536,
+					"status": "missing-in-source"
+				},
+				"benchmark/code/while-in.js": {
+					"match": false,
+					"packageHash": "03208b72af5101424b87ba664c6ec1c7ce2adc9d6814715b9eca3cdfccf2285a",
+					"size": 523,
+					"status": "missing-in-source"
+				},
+				"benchmark/code/while-path-escape-check.js": {
+					"match": false,
+					"packageHash": "f2e667aefc46bdcf5755c3da851c7c6ff41d828381448d1967ed8e9a82ebf005",
+					"size": 742,
+					"status": "missing-in-source"
+				},
+				"benchmark/code/while-path-escape-flag-no-regex.js": {
+					"match": false,
+					"packageHash": "5bab3f771ef11c642fc8559ba2912cfa32bda03e24459c44448464c3a1272005",
+					"size": 1074,
+					"status": "missing-in-source"
+				},
+				"benchmark/code/while-path-escape-flag.js": {
+					"match": false,
+					"packageHash": "9e2400fda052cb4424f8a3c17e6b55a7fecf08ec9b2069642f6b040c7bcfd6c6",
+					"size": 748,
+					"status": "missing-in-source"
+				},
+				"benchmark/code/while-path-escape-no-regex.js": {
+					"match": false,
+					"packageHash": "92d63d246a5ee92e59a3de955fae757093accea330d6f509cb3aab4e08135410",
+					"size": 983,
+					"status": "missing-in-source"
+				},
+				"benchmark/code/while-path-escape.js": {
+					"match": false,
+					"packageHash": "4d7d440ba2af57835f56bb25d0b6ea0487a7c0dbb2782ff9b5a83c2a975d1673",
+					"size": 656,
+					"status": "missing-in-source"
+				},
+				"benchmark/code/while-path-fn.js": {
+					"match": false,
+					"packageHash": "c1f483ebdf0b04795a1c07ab62b2fd211f38ae98c6878f477f64392f560fabf0",
+					"size": 626,
+					"status": "missing-in-source"
+				},
+				"benchmark/code/while.js": {
+					"match": false,
+					"packageHash": "209c10981406027030713a97c6058e2944e6b60013a4f08d0a7f0d0e147edad3",
+					"size": 534,
+					"status": "missing-in-source"
+				},
+				"benchmark/fixtures/deep.js": {
+					"match": false,
+					"packageHash": "878d62345465fb52cc3ebaa895f53eb5b61127136576dc34106943062b4e9e4a",
+					"size": 175,
+					"status": "missing-in-source"
+				},
+				"benchmark/fixtures/escaped-flag.js": {
+					"match": false,
+					"packageHash": "c1ff20fdb4a4cb30dbbe8104e090339aa667592031aa70a3526e435b5129597e",
+					"size": 222,
+					"status": "missing-in-source"
+				},
+				"benchmark/fixtures/escaped-fn.js": {
+					"match": false,
+					"packageHash": "cbce3d4a3ddedb9b644abb5094f614c5d25edcae72cddf0172af27519d4ac722",
+					"size": 714,
+					"status": "missing-in-source"
+				},
+				"benchmark/fixtures/shallow-long.js": {
+					"match": false,
+					"packageHash": "28c36b79a3f6b049f492b7bce9f6ccb6ad8ad64aa4263120a002e3eaae81ceb9",
+					"size": 170,
+					"status": "missing-in-source"
+				},
+				"benchmark/fixtures/shallow.js": {
+					"match": false,
+					"packageHash": "16d6a234e3f85424407f9d2ad9112b7bd2f219c8747dc551c8d133df6a9d600c",
+					"size": 84,
+					"status": "missing-in-source"
+				},
+				"benchmark/index.js": {
+					"match": false,
+					"packageHash": "9403edd586f90d900539214913d07602d7904ea6d7aa783cf8533deedec3e226",
+					"size": 445,
+					"status": "missing-in-source"
+				},
+				"index.js": {
+					"match": false,
+					"packageHash": "3b99cdbc8b4e0ade37b52d928c89cdd42874eb5c06b6bddc7f1a2461b018bfaa",
+					"size": 1248,
+					"status": "missing-in-source"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -1,39 +1,57 @@\n {\n   \"name\": \"get-value\",\n-  \"description\": \"Use property paths (`a.b.c`) get a nested value from an object.\",\n-  \"version\": \"0.3.2\",\n+  \"description\": \"Use property paths like 'a.b.c' to get a nested value from an object. Even works when keys have dots in them (no other dot-prop library we tested does this, or does it correctly).\",\n+  \"version\": \"4.0.1\",\n   \"homepage\": \"https://github.com/jonschlinkert/get-value\",\n-  \"author\": {\n-    \"name\": \"Jon Schlinkert\",\n-    \"url\": \"https://github.com/jonschlinkert\"\n-  },\n-  \"repository\": {\n-    \"type\": \"git\",\n-    \"url\": \"git://github.com/jonschlinkert/get-value.git\"\n-  },\n+  \"author\": \"Jon Schlinkert (https://github.com/jonschlinkert)\",\n+  \"repository\": \"jonschlinkert/get-value\",\n   \"bugs\": {\n     \"url\": \"https://github.com/jonschlinkert/get-value/issues\"\n   },\n-  \"licenses\": [\n-    {\n-      \"type\": \"MIT\",\n-      \"url\": \"https://github.com/jonschlinkert/get-value/blob/master/LICENSE-MIT\"\n-    }\n-  ],\n-  \"main\": \"index.js\",\n-  \"engines\": {\n-    \"node\": \">=0.10.0\"\n-  },\n+  \"license\": \"MIT\",\n   \"scripts\": {\n-    \"test\": \"mocha -R spec\"\n+    \"bench\": \"node benchmark\",\n+    \"eslint\": \"npx eslint --ext .ts .\",\n+    \"coverage\": \"nyc --reporter=text --reporter=html\",\n+    \"test\": \"ts-mocha -r esbuild-register 'test/**/*.ts'\",\n+    \"tsup\": \"npx tsup\"\n+  },\n+  \"files\": [\n+    \"dist/index.js\",\n+    \"dist/index.mjs\",\n+    \"index.d.ts\"\n+  ],\n+  \"main\": \"dist/index.js\",\n+  \"module\": \"dist/index.mjs\",\n+  \"types\": \"index.d.ts\",\n+  \"exports\": {\n+    \".\": {\n+      \"types\": \"./index.d.ts\",\n+      \"import\": \"./dist/index.mjs\",\n+      \"require\": \"./dist/index.js\"\n+    }\n   },\n   \"devDependencies\": {\n-    \"benchmarked\": \"^0.1.1\",\n-    \"getobject\": \"^0.1.0\",\n-    \"mocha\": \"*\",\n-    \"should\": \"^4.0.4\",\n-    \"verb\": \">= 0.2.6\",\n-    \"verb-tag-jscomments\": \">= 0.2.0\"\n+    \"@types/node\": \"^22.10.7\",\n+    \"@typescript-eslint/eslint-plugin\": \"^6.2.0\",\n+    \"@typescript-eslint/parser\": \"^6.2.0\",\n+    \"arr-reduce\": \"^1.0.1\",\n+    \"dot-prop\": \"^9.0.0\",\n+    \"dotty\": \"^0.1.2\",\n+    \"esbuild-register\": \"^3.5.0\",\n+    \"eslint\": \"^8.57.0\",\n+    \"getobject\": \"^1.1.1\",\n+    \"gulp-format-md\": \"^2.0.0\",\n+    \"micromatch\": \"^4.0.5\",\n+    \"minimist\": \"^1.2.8\",\n+    \"nyc\": \"^17.1.0\",\n+    \"object-path\": \"^0.11.8\",\n+    \"prettier\": \"^3.4.2\",\n+    \"ts-mocha\": \"^10.0.0\",\n+    \"ts-node\": \"^10.9.2\",\n+    \"tsconfig-paths\": \"^4.2.0\",\n+    \"tsup\": \"^8.3.5\",\n+    \"typescript\": \"^5.4.5\"\n   },\n   \"keywords\": [\n     \"get\",\n@@ -47,14 +65,30 @@\n     \"property\",\n     \"props\",\n     \"segment\",\n-    \"util\",\n-    \"utilities\",\n-    \"utility\",\n-    \"utils\",\n     \"value\",\n     \"values\"\n   ],\n-  \"dependencies\": {\n-    \"isobject\": \"^0.2.0\"\n",
+					"match": false,
+					"packageHash": "60c0ed0ebfbae88e9aa87b0c39bbb57a01fb93f4c04b71437859a9afcd8cc1b7",
+					"size": 1207,
+					"sourceHash": "e6f307e773cbad035054f251505b6359f147660a82cb4b0ea78dcc821daac46f",
+					"status": "content"
+				},
+				"test.js": {
+					"match": false,
+					"packageHash": "57f1aa0ec03738c1a7acd70e286e31eae323b145aab6bf3616d0beed64ee60ac",
+					"size": 1820,
+					"status": "missing-in-source"
+				},
+				"LICENSE": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"index.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				}
+			},
+			"summary": {
+				"differentFiles": 2,
+				"matchingFiles": 0,
+				"missingInPackage": 2,
+				"missingInSource": 32,
+				"score": 0,
+				"totalFiles": 36
+			}
+		},
+		"prodDependencies": []
+	}
+]
