@@ -1,0 +1,177 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-07T06:57:55.597Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:11.7.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "react-app-rewired@0.5.0",
+			"name": "react-app-rewired",
+			"version": "0.5.0",
+			"location": "https://registry.npmjs.org/react-app-rewired/-/react-app-rewired-0.5.0.tgz",
+			"integrity": "sha512-vL6fvtfLyiTGg8W8b/WFpG+y4eQtIdqqHtyZ50KSmWvRosaHqUIN14165UsKJtJcbdj48zJnPfksqeNYeKnYpA==",
+			"publishedAt": "2017-01-05T14:20:42.852Z",
+			"publishedWith": {
+				"node": "7.2.1",
+				"npm": "3.10.10"
+			}
+		},
+		"source": {
+			"integrity": null,
+			"location": "git+https://github.com/timarney/react-app-rewired.git",
+			"spec": "github:timarney/react-app-rewired#HEAD"
+		},
+		"comparisonHash": "9ef46a5bd31291e57cbab41e2f17c57bd6da0b5b",
+		"diff": {
+			"files": {
+				"bin/index.js": {
+					"diff": "--- published/bin/index.js\n+++ rebuilt/bin/index.js\n@@ -1,19 +1,50 @@\n #!/usr/bin/env node\n-const spawn = require('cross-spawn');\n-const script = process.argv[2];\n-const args = process.argv.slice(3);\n+const { dependRequire } = require('../scripts/utils/dependRequire');\n+var spawn = dependRequire('react-dev-utils/crossSpawn');\n+const args = process.argv.slice(2);\n+\n+const scriptIndex = args.findIndex(\n+  x => x === 'build' || x === 'eject' || x === 'start' || x === 'test'\n+);\n+const script = scriptIndex === -1 ? args[0] : args[scriptIndex];\n+const nodeArgs = scriptIndex > 0 ? args.slice(0, scriptIndex) : [];\n \n switch (script) {\n-case 'build':\n-case 'start':\n-  const result = spawn.sync(\n-    'node',\n-    [require.resolve('../scripts/' + script)].concat(args),\n-    { stdio: 'inherit' }\n-  );\n-  process.exit(result.status);\n-  break;\n-default:\n-  console.log('Unknown script \"' + script + '\".');\n-  break;\n+  case 'build':\n+  case 'eject':\n+  case 'start':\n+  case 'test': {\n+    const result = spawn.sync(\n+      'node',\n+      nodeArgs\n+        .concat(require.resolve('../scripts/' + script))\n+        .concat(args.slice(scriptIndex + 1)),\n+      { stdio: 'inherit' }\n+    );\n+    if (result.signal) {\n+      if (result.signal === 'SIGKILL') {\n+        console.log(\n+          'The build failed because the process exited too early. ' +\n+            'This probably means the system ran out of memory or someone called ' +\n+            '`kill -9` on the process.'\n+        );\n+      } else if (result.signal === 'SIGTERM') {\n+        console.log(\n+          'The build failed because the process exited too early. ' +\n+            'Someone might have called `kill` or `killall`, or the system could ' +\n+            'be shutting down.'\n+        );\n+      }\n+      process.exit(1);\n+    }\n+    process.exit(result.status);\n+    break;\n+  }\n+  default:\n+    console.log('Unknown script \"' + script + '\".');\n+    console.log('Perhaps you need to update react-scripts?');\n+    console.log(\n+      'See: https://github.com/facebookincubator/create-react-app/blob/master/packages/react-scripts/template/README.md#updating-to-new-releases'\n+    );\n+    break;\n }\n",
+					"match": false,
+					"packageHash": "21572819cd4a12805066ea24ae543efec09abe2e34ae099909dfe3f839396442",
+					"size": 415,
+					"sourceHash": "f27b5c059049fdab003b164fbe67e7753b45fffc2e44d32cb43f2f550917e7b2",
+					"status": "content"
+				},
+				"config/paths.js": {
+					"diff": "--- published/config/paths.js\n+++ rebuilt/config/paths.js\n@@ -1,11 +1 @@\n-const path = require('path');\n-const fs = require('fs');\n-const scriptVersion = process.argv[2] || 'react-scripts';\n-const projectDir = path.resolve(fs.realpathSync(process.cwd()));\n-const scriptVersionDir = path.join(projectDir, 'node_modules', scriptVersion);\n-\n-module.exports = {\n-    scriptVersion,\n-    projectDir,\n-    scriptVersionDir,\n-};\n\\ No newline at end of file\n+module.exports = require('../overrides/paths');\n",
+					"match": false,
+					"packageHash": "95824a23b4c704bd1336753b74c8977bd6cf18e86daee44844b8625d97e0276b",
+					"size": 337,
+					"sourceHash": "a9facfa957053e007c58e5d92a467aa0c5ed3a1b7c7cc119a1f25cb576c3a0bf",
+					"status": "content"
+				},
+				"config-overrides.js": {
+					"diff": "--- published/config-overrides.js\n+++ rebuilt/config-overrides.js\n@@ -1,5 +1,33 @@\n-/* DEFAULT */\n-module.exports = function override(config, env) {\n-  /* Modify the config as needed*/\n-  return config;\n+const {paths} = require('./');\n+// load environment variables from .env files\n+// before overrides scripts are read\n+require(paths.scriptVersion + '/config/env');\n+const override = require(paths.configOverrides);\n+\n+const webpack = typeof override === 'function'\n+  ? override\n+  : override.webpack || ((config, env) => config);\n+\n+if (override.devserver) {\n+  console.log(\n+    'Warning: `devserver` has been deprecated. Please use `devServer` instead as ' +\n+    '`devserver` will not be used in the next major release.'\n+  )\n+}\n+\n+const devServer = override.devServer || override.devserver\n+  || ((configFunction) =>\n+    (proxy, allowedHost) =>\n+      configFunction(proxy, allowedHost));\n+\n+const jest = override.jest || ((config) => config);\n+\n+const pathsOverride = override.paths || ((paths, env) => paths);\n+\n+// normalized overrides functions\n+module.exports = {\n+  webpack,\n+  devServer,\n+  jest,\n+  paths: pathsOverride\n };\n",
+					"match": false,
+					"packageHash": "b1f4576341e116ace13981e5e66b6b31b04d6c93974b476690471c87bf2c87bf",
+					"size": 119,
+					"sourceHash": "6d1e19195c4797baf2287a510d8f478e16ce977c461b2eccf92b3173f8ea2e3b",
+					"status": "content"
+				},
+				"examples/css-modules.md": {
+					"match": false,
+					"packageHash": "d2a11d6cb21fabde0e51496de80ffe9b7503f724c0d5ba6d2fae61da687d844a",
+					"size": 1278,
+					"status": "missing-in-source"
+				},
+				"examples/inferno.md": {
+					"match": false,
+					"packageHash": "261f348b312ea1ebb0c5a5697a6b542defc6850fd75b720f46f55c0a231705da",
+					"size": 509,
+					"status": "missing-in-source"
+				},
+				"examples/mobx.md": {
+					"match": false,
+					"packageHash": "4903cb568fb672db6038719b46aa6279892f1d4ee3fbf05c0f37bad697f3d5ed",
+					"size": 1201,
+					"status": "missing-in-source"
+				},
+				"examples/preact.md": {
+					"match": false,
+					"packageHash": "68bd97b56a76a77e5b582350335251628ec7cb6f3895624a704493150354e5fe",
+					"size": 453,
+					"status": "missing-in-source"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -1,20 +1,41 @@\n {\n   \"name\": \"react-app-rewired\",\n-  \"version\": \"0.5.0\",\n-  \"description\": \"Configure the unconfigurable, override create-react-app webpack configs\",\n+  \"version\": \"2.2.1\",\n+  \"description\": \"Tweak the create-react-app webpack config(s) without using 'eject' and without creating a fork of the react-scripts\",\n   \"private\": false,\n   \"bin\": {\n     \"react-app-rewired\": \"./bin/index.js\"\n   },\n+  \"scripts\": {\n+    \"build\": \"yarn --cwd 'test/react-app' build\",\n+    \"clean\": \"rm -rf node_modules\",\n+    \"setup\": \"yarn deps && yarn link && yarn --cwd 'test/react-app' link 'react-app-rewired'\",\n+    \"start\": \"yarn --cwd 'test/react-app' start\",\n+    \"teardown\": \"yarn unlink && yarn clean && yarn --cwd 'test/react-app' clean\",\n+    \"test\": \"yarn --cwd 'test/react-app' test\",\n+    \"deps\": \"yarn && yarn --cwd 'test/react-app'\"\n+  },\n   \"peerDependencies\": {\n-    \"react-scripts\": \"^0.8.3\"\n+    \"react-scripts\": \">=2.1.3\"\n   },\n   \"dependencies\": {\n-    \"cross-spawn\": \"5.0.1\"\n+    \"semver\": \"^5.6.0\"\n+  },\n+  \"devDependencies\": {\n+    \"react-scripts\": \"^2.1.3\"\n   },\n   \"repository\": {\n     \"type\": \"git\",\n     \"url\": \"git+https://github.com/timarney/react-app-rewired\"\n   },\n-  \"license\": \"MIT\"\n+  \"license\": \"MIT\",\n+  \"files\": [\n+    \"/index.js\",\n+    \"/config-overrides.js\",\n+    \"/assets\",\n+    \"/bin\",\n+    \"/config\",\n+    \"/overrides\",\n+    \"/scripts\"\n+  ]\n }\n",
+					"match": false,
+					"packageHash": "37756a05394696001390624ed088fc3e83a90df5aa93fdee0dd43b7cdd80bc2d",
+					"size": 462,
+					"sourceHash": "e5b8a53a08a63f3d0c73029032849f04d46e30b810796d00303b23b516af85e1",
+					"status": "content"
+				},
+				"scripts/build.js": {
+					"diff": "--- published/scripts/build.js\n+++ rebuilt/scripts/build.js\n@@ -1,14 +1,12 @@\n-/* build.js */\n process.env.NODE_ENV = 'production';\n \n-const fs = require('fs');\n-const path = require('path');\n-const paths = require('../config/paths');\n-const webpackConfig = paths.scriptVersionDir + '/config/webpack.config.prod';\n-const config = require(webpackConfig);\n-const override = require(paths.projectDir + '/config-overrides');\n+const { scriptVersion } = require('./utils/paths');\n \n-require.cache[require.resolve(webpackConfig)].exports =\n-  override(config, process.env.NODE_ENV);\n+// override paths in memory\n+require('../overrides/paths');\n \n-require(paths.scriptVersionDir + '/scripts/build');\n+// override config in memory\n+require('../overrides/webpack');\n+\n+// run original script\n+require(`${scriptVersion}/scripts/build`);\n",
+					"match": false,
+					"packageHash": "6b7db03b13d0819552d316d86a2eedd58db8d89814c546e7951d4b75a4ed9572",
+					"size": 486,
+					"sourceHash": "ced7a5949fca4eb27a7a889e9c2470d3778d3c62f3aba0b3f743245343a9d5c2",
+					"status": "content"
+				},
+				"scripts/start.js": {
+					"diff": "--- published/scripts/start.js\n+++ rebuilt/scripts/start.js\n@@ -1,12 +1,13 @@\n-/* start.js */\n-const fs = require('fs');\n-const path = require('path');\n-const paths = require('../config/paths');\n-const webpackConfig = paths.scriptVersionDir + '/config/webpack.config.dev';\n-const config = require(webpackConfig);\n-const override = require(paths.projectDir + '/config-overrides');\n+process.env.NODE_ENV = process.env.NODE_ENV || 'development';\n \n-require.cache[require.resolve(webpackConfig)].exports =\n-  override(config, process.env.NODE_ENV || 'development');\n+const { scriptVersion } = require('./utils/paths');\n \n-require(paths.scriptVersionDir + '/scripts/start');\n+// override paths in memory\n+require('../overrides/paths');\n+\n+// override config in memory\n+require('../overrides/webpack');\n+require('../overrides/devServer');\n+\n+// run original script\n+require(`${scriptVersion}/scripts/start`);\n",
+					"match": false,
+					"packageHash": "dfa7e76148d19c27c47dae52c4422d34ff941c98369396e1516204298fbe31a1",
+					"size": 464,
+					"sourceHash": "b7913a43ab91b8f9c8b6c3abb333fdac7279fc99e59e88029ee9ed3cb035ab56",
+					"status": "content"
+				},
+				"LICENSE": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"README.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"assets/react-app-rewired.png": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"bin/jest.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"config/webpack.config.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"config/webpackDevServer.config.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"index.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"overrides/devServer.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"overrides/jest.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"overrides/paths.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"overrides/webpack.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"scripts/test.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"scripts/utils/babelTransform.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"scripts/utils/dependRequire.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"scripts/utils/paths.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"scripts/utils/rewireJestConfig.js": {
+					"match": false,
+					"status": "missing-in-package"
+				}
+			},
+			"summary": {
+				"differentFiles": 6,
+				"matchingFiles": 0,
+				"missingInPackage": 16,
+				"missingInSource": 4,
+				"score": 0,
+				"totalFiles": 26
+			}
+		}
+	}
+]
