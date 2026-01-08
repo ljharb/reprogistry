@@ -1,0 +1,101 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-08T20:10:37.243Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:11.7.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "is-url@1.2.1",
+			"name": "is-url",
+			"version": "1.2.1",
+			"location": "https://registry.npmjs.org/is-url/-/is-url-1.2.1.tgz",
+			"integrity": "sha512-TFcQF1FpmQuAOpKygbkePpSdwVmVsmhd2amTEvf5KidujFnh08NofG18tLiZcBti08BHMKReM0aBg+usS2eCPw==",
+			"publishedAt": "2015-05-24T06:56:45.063Z",
+			"publishedWith": {
+				"node": null,
+				"npm": "1.4.28"
+			},
+			"dependencies": {}
+		},
+		"source": {
+			"integrity": "sha512-2ed+DGvJRy2JmhvtA2DDz9nfV6ANut6BYsQqQoCe6sLz9kEfMKcko9cXdSJhplWahD+un9gWmKTHxLH85I3Eug==",
+			"location": "https://github.com/segmentio/is-url",
+			"spec": "github:segmentio/is-url#1e2d17ee7d15e0c1bb8deaa4439b5b807d7b6688"
+		},
+		"comparisonHash": "9ef46a5bd31291e57cbab41e2f17c57bd6da0b5b",
+		"diff": {
+			"files": {
+				".npmignore": {
+					"match": false,
+					"packageHash": "65f1eb434dcbc4af0493b9c66326940ef406222f0d434a4e13c32bee46d323a0",
+					"size": 29,
+					"status": "missing-in-source"
+				},
+				"Makefile": {
+					"match": false,
+					"packageHash": "04954a0c5eea2243746f2ea1eaa8a38120383ab5d6fbea6294aa6b8e1eb59fd7",
+					"size": 310,
+					"status": "missing-in-source"
+				},
+				"Readme.md": {
+					"diff": "--- published/Readme.md\n+++ rebuilt/Readme.md\n@@ -1,22 +1,22 @@\n # is-url\n \n-  Check whether a string is a URL.\n+> **Note**  \n+> Segment has paused maintenance on this project, but may return it to an active status in the future. Issues and pull requests from external contributors are not being considered, although internal contributions may appear from time to time. The project remains available under its open source license for anyone to use.\n+\n+Check whether a string is a URL.\n \n ## Installation\n \n-```\n-$ component install segmentio/is-url\n-```\n-```\n-$ npm install is-url\n+```sh\n+npm install is-url\n ```\n \n ## API\n \n-### isUrl(string)\n+### `isUrl(string)`\n \n-  Checks whether `string` is a URL.\n+Returns a Boolean indicating whether `string` is a URL.\n \n ## License\n \n-  MIT\n+MIT\n",
+					"match": false,
+					"packageHash": "8c81b107772718bd3f3ee7b1c539263309fc08c809b7b12fa51c6f7d10dcf93b",
+					"size": 220,
+					"sourceHash": "32e86423a0192b744828c6541e83c704c8dcb9ff72654e34b90d53adc5cffcb6",
+					"status": "content"
+				},
+				"component.json": {
+					"match": false,
+					"packageHash": "69683516a6296b7e08a767d07713ed9b34edc1ae0c04ec6293474549a2f1602a",
+					"size": 308,
+					"status": "missing-in-source"
+				},
+				"index.js": {
+					"diff": "--- published/index.js\n+++ rebuilt/index.js\n@@ -6,10 +6,15 @@\n module.exports = isUrl;\n \n /**\n- * Matcher.\n+ * RegExps.\n+ * A URL must match #1 and then at least one of #2/#3.\n+ * Use two levels of REs to avoid REDOS.\n  */\n \n-var matcher = /^(?:\\w+:)?\\/\\/([^\\s\\.]+\\.\\S{2}|localhost[\\:?\\d]*)\\S*$/;\n+var protocolAndDomainRE = /^(?:\\w+:)?\\/\\/(\\S+)$/;\n+\n+var localhostDomainRE = /^localhost[\\:?\\d]*(?:[^\\:?\\d]\\S*)?$/\n+var nonLocalhostDomainRE = /^[^\\s\\.]+\\.\\S{2,}$/;\n \n /**\n  * Loosely validate a URL `string`.\n@@ -19,5 +24,24 @@\n  */\n \n function isUrl(string){\n-  return matcher.test(string);\n+  if (typeof string !== 'string') {\n+    return false;\n+  }\n+\n+  var match = string.match(protocolAndDomainRE);\n+  if (!match) {\n+    return false;\n+  }\n+\n+  var everythingAfterProtocol = match[1];\n+  if (!everythingAfterProtocol) {\n+    return false;\n+  }\n+\n+  if (localhostDomainRE.test(everythingAfterProtocol) ||\n+      nonLocalhostDomainRE.test(everythingAfterProtocol)) {\n+    return true;\n+  }\n+\n+  return false;\n }\n",
+					"match": false,
+					"packageHash": "126c808ffe7da1363c0fe169812af90e2c8e4e7b82a265e607ee5a06bb870037",
+					"size": 299,
+					"sourceHash": "c7cb9f56300321d104c9772c054144d75e3bf280d184d547fab525f9fbf16e5c",
+					"status": "content"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -1,9 +1,10 @@\n {\n   \"name\": \"is-url\",\n+  \"description\": \"Check whether a string is a URL.\",\n   \"repository\": \"https://github.com/segmentio/is-url\",\n-  \"version\": \"1.2.1\",\n+  \"version\": \"1.2.4\",\n   \"scripts\": {\n-    \"test\": \"make test\"\n+    \"test\": \"mocha --reporter spec\"\n   },\n   \"license\": \"MIT\",\n   \"devDependencies\": {\n",
+					"match": false,
+					"packageHash": "af8164a1ba4a4c6f9485d6d63755372fa647df2440ea6accf2dd236de2f6c473",
+					"size": 209,
+					"sourceHash": "215ed6a491b1ac845b556de17f46075897e084c7c9f6018bde7150017da34817",
+					"status": "content"
+				},
+				"test/index.js": {
+					"diff": "--- published/test/index.js\n+++ rebuilt/test/index.js\n@@ -118,5 +118,32 @@\n     it('google.com', function () {\n       assert(!url('google.com'));\n     });\n+\n+    it('empty', function () {\n+      assert(!url(''));\n+    });\n+\n+    it('undef', function () {\n+      assert(!url(undefined));\n+    });\n+\n+    it('object', function () {\n+      assert(!url({}));\n+    });\n+\n+    it('re', function () {\n+      assert(!url(/abc/));\n+    });\n+  });\n+\n+  describe('redos', function () {\n+    it('redos exploit', function () {\n+      // Invalid. This should be discovered in under 1 second.\n+      var attackString = 'a://localhost' + '9'.repeat(100000) + '\\t';\n+      var before = process.hrtime();\n+      assert(!url(attackString), 'attackString was valid');\n+      var elapsed = process.hrtime(before);\n+      assert(elapsed[0] < 1, 'attackString took ' + elapsed[0] + ' > 1 seconds');\n+    });\n   });\n });\n",
+					"match": false,
+					"packageHash": "eacf2dd2aa140d76b3668da89c655159f0d72aea2aff15c4bcd10890b87b616e",
+					"size": 2985,
+					"sourceHash": "ac53796f4aaf8474830eec375f929b0269c2811eb2e7abf9cfdd87b793ee7f5b",
+					"status": "content"
+				},
+				".travis.yml": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"LICENSE-MIT": {
+					"match": false,
+					"status": "missing-in-package"
+				}
+			},
+			"summary": {
+				"differentFiles": 4,
+				"matchingFiles": 1,
+				"missingInPackage": 2,
+				"missingInSource": 3,
+				"score": 0.1,
+				"totalFiles": 10
+			}
+		},
+		"prodDependencies": []
+	}
+]
