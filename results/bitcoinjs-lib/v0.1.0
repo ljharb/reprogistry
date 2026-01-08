@@ -1,0 +1,668 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-08T02:49:06.871Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:11.7.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "bitcoinjs-lib@0.1.0",
+			"name": "bitcoinjs-lib",
+			"version": "0.1.0",
+			"location": "https://registry.npmjs.org/bitcoinjs-lib/-/bitcoinjs-lib-0.1.0.tgz",
+			"integrity": "sha512-S/8NUJxUNmgGQ4FSU5Et1NXC80vY1d8JJqdx3zAhdm/fkvN1XcYb1ShWr1MsmpWTLWYnyEE8xWt5AYo10AAwWQ==",
+			"publishedAt": "2011-09-27T12:52:08.282Z",
+			"publishedWith": {
+				"node": "v0.4.10",
+				"npm": "1.0.23"
+			},
+			"dependencies": {}
+		},
+		"source": {
+			"integrity": "sha512-vwEmpL5Tpj0I0RBdNkcDMXePoaYSTeKY6mL6/l5esbnTs+jGdPDuLp4NY1hSh6Zk5wSgePygZ4Wx5JJao30Pww==",
+			"location": "git://github.com/bitcoinjs/bitcoinjs-lib.git",
+			"spec": "github:bitcoinjs/bitcoinjs-lib#HEAD"
+		},
+		"comparisonHash": "9ef46a5bd31291e57cbab41e2f17c57bd6da0b5b",
+		"diff": {
+			"files": {
+				".gitignore": {
+					"match": false,
+					"packageHash": "16d30e4462189fb14dd611bdb708c510630c576a1f35b9383e89a4352da36c97",
+					"size": 13,
+					"status": "missing-in-source"
+				},
+				"Jakefile.js": {
+					"match": false,
+					"packageHash": "3faa54200eaa3544520a87a4ed490803f76d27452bafedf85f636810612d8ba8",
+					"size": 1145,
+					"status": "missing-in-source"
+				},
+				"README.md": {
+					"diff": "--- published/README.md\n+++ rebuilt/README.md\n@@ -1,12 +1,205 @@\n # bitcoinjs-lib\n \n-A library containing Bitcoin client-side functionality in JavaScript,\n-most notably ECDSA signing and verification.\n+[![Github CI](https://github.com/bitcoinjs/bitcoinjs-lib/actions/workflows/main_ci.yml/badge.svg)](https://github.com/bitcoinjs/bitcoinjs-lib/actions/workflows/main_ci.yml) [![NPM](https://img.shields.io/npm/v/bitcoinjs-lib.svg)](https://www.npmjs.org/package/bitcoinjs-lib) [![code style: prettier](https://img.shields.io/badge/code_style-prettier-ff69b4.svg?style=flat-square)](https://github.com/prettier/prettier)\n \n-# Status\n+A javascript Bitcoin library for node.js and browsers. Written in TypeScript, but committing the JS files to verify.\n \n-This is currently pretty raw code. We're planning to clean it up,\n-convert everything into CommonJS modules and put a flexible build\n-system in place.\n+Released under the terms of the [MIT LICENSE](LICENSE).\n \n-Prototype software, use at your own peril.\n+## Should I use this in production?\n+If you are thinking of using the *master* branch of this library in production, **stop**.\n+Master is not stable; it is our development branch, and [only tagged releases may be classified as stable](https://github.com/bitcoinjs/bitcoinjs-lib/tags).\n+\n+## Can I trust this code?\n+> Don't trust. Verify.\n+\n+We recommend every user of this library and the [bitcoinjs](https://github.com/bitcoinjs) ecosystem audit and verify any underlying code for its validity and suitability,  including reviewing any and all of your project's dependencies.\n+\n+Mistakes and bugs happen, but with your help in resolving and reporting [issues](https://github.com/bitcoinjs/bitcoinjs-lib/issues), together we can produce open source software that is:\n+\n+- Easy to audit and verify,\n+- Tested, with test coverage >95%,\n+- Advanced and feature rich,\n+- Standardized, using [prettier](https://github.com/prettier/prettier) and Node `Buffer`'s throughout, and\n+- Friendly, with a strong and helpful community, ready to answer questions.\n+\n+## Documentation\n+Visit our [documentation](https://bitcoinjs.github.io/bitcoinjs-lib/) to explore the available resources. We're continually enhancing our documentation with additional features for an enriched experience. If you need further guidance beyond what our [examples](#examples) offer, don't hesitate to  [ask for help](https://github.com/bitcoinjs/bitcoinjs-lib/issues/new). We're here to assist you.\n+\n+You can find a [Web UI](https://bitcoincore.tech/apps/bitcoinjs-ui/index.html) that covers most of the `psbt.ts`, `transaction.ts` and `p2*.ts` APIs [here](https://bitcoincore.tech/apps/bitcoinjs-ui/index.html).\n+\n+## How can I contact the developers outside of Github?\n+**Most of the time, this is not appropriate. Creating issues and pull requests in the open will help others with similar issues, so please try to use public issues and pull requests for communication.**\n+\n+That said, sometimes developers might be open to taking things off the record (ie. You want to share code that you don't want public to get help with it). In that case, please negotiate on the public issues as to where you will contact.\n+\n+We have created public rooms on IRC (`#bitcoinjs` on `libera.chat`) and Matrix (`#bitcoinjs-dev:matrix.org`). These two channels have been joined together in a Matrix \"Space\" which has the Matrix room AND an IRC bridge room that can converse with the IRC room. The \"Space\" is `#bitcoinjs-space:matrix.org`.\n+\n+Matrix and IRC both have functions for direct messaging, but IRC is not end to end encrypted, so Matrix is recommended for most communication. The official Matrix client maintained by the Matrix core team is called \"Element\" and can be downloaded here: https://element.io/download (Account creation is free on the matrix.org server, which is the default setting for Element.)\n+\n+We used to have a Slack. It is dead. If you find it, no one will answer you most likely.\n+\n+No we will not make a Discord.\n+\n+## Installation\n+``` bash\n+npm install bitcoinjs-lib\n+# optionally, install a key derivation library as well\n+npm install ecpair bip32\n+# ecpair is the ECPair class for single keys\n+# bip32 is for generating HD keys\n+```\n+\n+Previous versions of the library included classes for key management (ECPair, HDNode(->\"bip32\")) but now these have been separated into different libraries. This lowers the bundle size significantly if you don't need to perform any crypto functions (converting private to public keys and deriving HD keys).\n+\n+Typically we support the [Node Maintenance LTS version](https://github.com/nodejs/Release). TypeScript target will be set\n+to the ECMAScript version in which all features are fully supported by current Active Node LTS.\n+However, depending on adoption among other environments (browsers etc.) we may keep the target back a year or two.\n+If in doubt, see the [main_ci.yml](.github/workflows/main_ci.yml) for what versions are used by our continuous integration tests.\n+\n+**WARNING**: We presently don't provide any tooling to verify that the release on `npm` matches GitHub.  As such, you should verify anything downloaded by `npm` against your own verified copy.\n+\n+\n+## Usage\n+Crypto is hard.\n+\n+When working with private keys, the random number generator is fundamentally one of the most important parts of any software you write.\n+For random number generation, we *default* to the [`randombytes`](https://github.com/crypto-browserify/randombytes) module, which uses [`window.crypto.getRandomValues`](https://developer.mozilla.org/en-US/docs/Web/API/window.crypto.getRandomValues) in the browser, or Node js' [`crypto.randomBytes`](https://nodejs.org/api/crypto.html#crypto_crypto_randombytes_size_callback), depending on your build system.\n+Although this default is ~OK, there is no simple way to detect if the underlying RNG provided is good enough, or if it is **catastrophically bad**.\n+You should always verify this yourself to your own standards.\n+\n+This library uses [tiny-secp256k1](https://github.com/bitcoinjs/tiny-secp256k1), which uses [RFC6979](https://tools.ietf.org/html/rfc6979) to help prevent `k` re-use and exploitation.\n+Unfortunately, this isn't a silver bullet.\n+Often, Javascript itself is working against us by bypassing these counter-measures.\n+\n+Problems in [`Buffer (UInt8Array)`](https://github.com/feross/buffer), for example, can trivially result in **catastrophic fund loss** without any warning.\n+It can do this through undermining your random number generation, accidentally producing a [duplicate `k` value](https://web.archive.org/web/20160308014317/http://www.nilsschneider.net/2013/01/28/recovering-bitcoin-private-keys.html), sending Bitcoin to a malformed output script, or any of a million different ways.\n+Running tests in your target environment is important and a recommended step to verify continuously.\n+\n+Finally, **adhere to best practice**.\n+We are not an authoritative source of best practice, but, at the very least:\n+\n+* [Don't reuse addresses](https://en.bitcoin.it/wiki/Address_reuse).\n+* Don't share BIP32 extended public keys ('xpubs'). [They are a liability](https://bitcoin.stackexchange.com/questions/56916/derivation-of-parent-private-key-from-non-hardened-child), and it only takes 1 misplaced private key (or a buggy implementation!) and you are vulnerable to **catastrophic fund loss**.\n+* [Don't use `Math.random`](https://security.stackexchange.com/questions/181580/why-is-math-random-not-designed-to-be-cryptographically-secure) - in any way - don't.\n+* Enforce that users always verify (manually) a freshly-decoded human-readable version of their intended transaction before broadcast.\n+* [Don't *ask* users to generate mnemonics](https://en.bitcoin.it/wiki/Brainwallet#cite_note-1), or 'brain wallets',  humans are terrible random number generators.\n+* Lastly, if you can, use [Typescript](https://www.typescriptlang.org/) or similar.\n+\n+\n+### Browser\n",
+					"match": false,
+					"packageHash": "8b18ac0b2f23bdc678eb93f7cdeb8091f2932221580e2a9f3885ec6103b4d02a",
+					"size": 336,
+					"sourceHash": "a7a1050cb170ec0e5311e0edea4b6f6b8fc25b615d492301a152c29b3acc9baf",
+					"status": "content"
+				},
+				"demo/demo.css": {
+					"match": false,
+					"packageHash": "d1f95111064da550c187112ccf6a9dbb7fc51d6c245ae59c62fc4ce6ee6cb901",
+					"size": 760,
+					"status": "missing-in-source"
+				},
+				"demo/split-key.html": {
+					"match": false,
+					"packageHash": "705befd10f9cbb0387625f3affd34187bf24d1061efdd56ac69c012a6057bd75",
+					"size": 7233,
+					"status": "missing-in-source"
+				},
+				"demo/split-key.js": {
+					"match": false,
+					"packageHash": "34cf3e4632aaba36464f04b93c3a5b15b76dac99773dd5bf413019e476862d14",
+					"size": 8029,
+					"status": "missing-in-source"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -1,24 +1,113 @@\n {\n   \"name\": \"bitcoinjs-lib\",\n-  \"version\": \"0.1.0\",\n+  \"version\": \"7.0.1\",\n   \"description\": \"Client-side Bitcoin JavaScript library\",\n-\n+  \"type\": \"module\",\n+  \"main\": \"./src/cjs/index.cjs\",\n+  \"module\": \"./src/esm/index.js\",\n+  \"types\": \"./src/cjs/index.d.ts\",\n+  \"exports\": {\n+    \".\": {\n+      \"require\": \"./src/cjs/index.cjs\",\n+      \"import\": \"./src/esm/index.js\",\n+      \"types\": \"./src/cjs/index.d.ts\"\n+    },\n+    \"./src/*\": {\n+      \"require\": \"./src/cjs/*.cjs\",\n+      \"types\": \"./src/cjs/*.d.ts\",\n+      \"import\": \"./src/esm/*.js\"\n+    }\n+  },\n+  \"engines\": {\n+    \"node\": \">=18.0.0\"\n+  },\n   \"keywords\": [\n+    \"bitcoinjs\",\n     \"bitcoin\",\n-    \"browser\",\n-    \"client\",\n-    \"library\"\n+    \"browserify\",\n+    \"javascript\",\n+    \"bitcoinjs\"\n   ],\n-\n-  \"author\": \"Stefan Thomas <justmoon@members.fsf.org> (http://www.justmoon.net)\",\n-\n-  \"repository\" : {\n-    \"type\" : \"git\",\n-    \"url\" : \"https://github.com/bitcoinjs/bitcoinjs-lib.git\"\n-  },\n-\n-  \"devDependencies\" : {\n-    \"pkginfo\" : \">=0.2.1\",\n-    \"jake-uglify\" : \">=1.0.0\"\n-  }\n+  \"scripts\": {\n+    \"audit\": \"better-npm-audit audit -l high\",\n+    \"build\": \"npm run clean && tsc -p ./tsconfig.json && tsc -p ./tsconfig.cjs.json && npm run formatjs\",\n+    \"postbuild\": \"find src/cjs -type f -name \\\"*.js\\\" -exec bash -c 'mv \\\"$0\\\" \\\"${0%.js}.cjs\\\"' {} \\\\; && chmod +x ./fixup.cjs && node fixup.cjs\",\n+    \"clean\": \"rimraf src\",\n+    \"coverage-report\": \"npm run build && npm run nobuild:coverage-report\",\n+    \"coverage-html\": \"npm run build && npm run nobuild:coverage-html\",\n+    \"coverage\": \"npm run build && npm run nobuild:coverage\",\n+    \"doc\": \"typedoc\",\n+    \"format\": \"npm run prettier -- --write\",\n+    \"formatjs\": \"npm run prettierjs -- --write\",\n+    \"format:ci\": \"npm run prettier -- --check && npm run prettierjs -- --check\",\n+    \"gitdiff:ci\": \"npm run build && git diff --exit-code\",\n+    \"integration\": \"npm run build && npm run nobuild:integration\",\n+    \"lint\": \"eslint ts_src/** src/**/*.js\",\n+    \"lint:tests\": \"eslint test/**/*.spec.ts\",\n+    \"mocha:ts\": \"mocha --recursive\",\n+    \"nobuild:coverage-report\": \"c8 report --reporter=lcov\",\n+    \"nobuild:coverage-html\": \"c8 report --reporter=html\",\n+    \"nobuild:coverage\": \"c8 --check-coverage --branches 85 --functions 90 --lines 90 npm run nobuild:unit\",\n+    \"nobuild:integration\": \"npm run mocha:ts -- --timeout 50000 'test/integration/*.ts'\",\n+    \"nobuild:unit\": \"npm run mocha:ts -- 'test/*.ts'\",\n+    \"prettier\": \"prettier \\\"ts_src/**/*.ts\\\" \\\"test/**/*.ts\\\" --ignore-path ./.prettierignore\",\n+    \"prettierjs\": \"prettier \\\"src/**/*.js\\\" --ignore-path ./.prettierignore\",\n+    \"test\": \"npm run build && npm run format:ci && npm run lint && npm run nobuild:coverage\",\n+    \"unit\": \"npm run build && npm run nobuild:unit\"\n+  },\n+  \"repository\": {\n+    \"type\": \"git\",\n+    \"url\": \"https://github.com/bitcoinjs/bitcoinjs-lib.git\"\n+  },\n+  \"files\": [\n+    \"src\"\n+  ],\n+  \"dependencies\": {\n+    \"@noble/hashes\": \"^1.2.0\",\n+    \"bech32\": \"^2.0.0\",\n+    \"bip174\": \"^3.0.0\",\n+    \"bs58check\": \"^4.0.0\",\n+    \"uint8array-tools\": \"^0.0.9\",\n+    \"valibot\": \"^1.2.0\",\n+    \"varuint-bitcoin\": \"^2.0.0\"\n+  },\n+  \"devDependencies\": {\n+    \"bitcoinjs-lib\": \".\",\n+    \"@eslint/eslintrc\": \"^3.1.0\",\n+    \"@eslint/js\": \"^9.9.1\",\n+    \"@types/bs58\": \"^4.0.0\",\n+    \"@types/bs58check\": \"^2.1.0\",\n+    \"@types/mocha\": \"^5.2.7\",\n",
+					"match": false,
+					"packageHash": "439c9aa852a0932800f4845e6a1af145db327b99f951ed73aed50fc4430b3684",
+					"size": 467,
+					"sourceHash": "9e6869d6f20f86d73190cda6a0d996ee3125a4ae0bf1a92ce46ad2a38d6c2f86",
+					"status": "content"
+				},
+				"src/address.js": {
+					"match": false,
+					"packageHash": "5640b10439fcb3ede5d42b2a7f39940fce44f2d5335696028d6283efd8d098c8",
+					"size": 1103,
+					"status": "missing-in-source"
+				},
+				"src/base58.js": {
+					"match": false,
+					"packageHash": "83de0ad411220a17ec12031706a66b02fd743d067ac22f507cbaf1a865ee389a",
+					"size": 1723,
+					"status": "missing-in-source"
+				},
+				"src/bitcoin.js": {
+					"match": false,
+					"packageHash": "b74d112571c5947a2229f7ad76b2738153a44c090dfb092778dff20110c0bf9a",
+					"size": 6869,
+					"status": "missing-in-source"
+				},
+				"src/crypto-js/crypto-min.js": {
+					"match": false,
+					"packageHash": "59d3ade2024ae9b8ba263f306a7d29b0fa044bd9f5151b6fb7e1f4071653c0cd",
+					"size": 2084,
+					"status": "missing-in-source"
+				},
+				"src/crypto-js/crypto.js": {
+					"match": false,
+					"packageHash": "b1bff90ce017ebbefe9f1ee1d90531b912131a1244d412aba1286023fa70fe82",
+					"size": 4194,
+					"status": "missing-in-source"
+				},
+				"src/crypto-js/ripemd160.js": {
+					"match": false,
+					"packageHash": "76e9bb251eb8087d454b907f7938db4a5427934258aa94769de0eef840444c6e",
+					"size": 5563,
+					"status": "missing-in-source"
+				},
+				"src/crypto-js/sha256-min.js": {
+					"match": false,
+					"packageHash": "ee579d82617aa5a4111ebfc148bfdcc548ae777dcf1093a87584b6bd2b1fda73",
+					"size": 1944,
+					"status": "missing-in-source"
+				},
+				"src/crypto-js/sha256.js": {
+					"match": false,
+					"packageHash": "0644ec4cfc0be84e2cf265988825e821804ebbfda7f92a195d2ae1ea939bf4fa",
+					"size": 3563,
+					"status": "missing-in-source"
+				},
+				"src/ecdsa.js": {
+					"match": false,
+					"packageHash": "bd9dd72cb8581d0c0d432f5952c3e3c994319ad72404a20f27ae6c2b47a98a0c",
+					"size": 7515,
+					"status": "missing-in-source"
+				},
+				"src/eckey.js": {
+					"match": false,
+					"packageHash": "c526fb61a980fa49db4bc6d3ef2ced3f12a039934dcab278ed1f748aedfaac40",
+					"size": 1728,
+					"status": "missing-in-source"
+				},
+				"src/events/eventemitter.js": {
+					"match": false,
+					"packageHash": "0f66838bee66ef7294a0f7a85b8f6e5406102fd8835c0ca16ab0887bfb3ef592",
+					"size": 3542,
+					"status": "missing-in-source"
+				},
+				"src/exit/client.js": {
+					"match": false,
+					"packageHash": "5d094960d4c0113d486aa0ab2139d6fa39b8c9618dc5c9eb056f3bfbf2767472",
+					"size": 3721,
+					"status": "missing-in-source"
+				},
+				"src/jsbn/ec.js": {
+					"match": false,
+					"packageHash": "1d048db0a3703aa05ccd4c10c4f06adc85d0402544dd1d31bda324015d571fe8",
+					"size": 9440,
+					"status": "missing-in-source"
+				},
+				"src/jsbn/jsbn.js": {
+					"match": false,
+					"packageHash": "61de67d61cf9977a30ebbd11f82570d4472620e3e15af06e4c6564d96faa091a",
+					"size": 15161,
+					"status": "missing-in-source"
+				},
+				"src/jsbn/jsbn2.js": {
+					"match": false,
+					"packageHash": "b0a29d8f0677eca6f8fc03ee1286d53e804ec1cc19593beed60530a7b348af67",
+					"size": 18583,
+					"status": "missing-in-source"
+				},
+				"src/jsbn/prng4.js": {
+					"match": false,
+					"packageHash": "9f27554859db05d776233142664db7d65867d6b52e9ada830c7e2fe50df91718",
+					"size": 1009,
+					"status": "missing-in-source"
+				},
+				"src/jsbn/rng.js": {
+					"match": false,
+					"packageHash": "13a4bbc07313a1f6cd9adf38adbb512c63369e7e99ffc9477de764dd3e88f174",
+					"size": 1883,
+					"status": "missing-in-source"
+				},
+				"src/jsbn/sec.js": {
+					"match": false,
+					"packageHash": "b6d2bc48558bed0349c479754a5e789eae58096a7a93a9d63ecae44e0045d78e",
+					"size": 6524,
+					"status": "missing-in-source"
+				},
+				"src/opcode.js": {
+					"match": false,
+					"packageHash": "ef1428597a07ab1f894c42071a922abeb6a76ad7d365e4b0afcef904376c8b5c",
+					"size": 3311,
+					"status": "missing-in-source"
+				},
+				"src/paillier.js": {
+					"match": false,
+					"packageHash": "b28063a9dd11e572f3d503236578260c09c2e1782ffff22fdeb646e48d3c151f",
+					"size": 3233,
+					"status": "missing-in-source"
+				},
+				"src/script.js": {
+					"match": false,
+					"packageHash": "0d48376a731c7aa97bcc4a2f1ece2719964b49f63d29083a3a6637d07c88a0e9",
+					"size": 4440,
+					"status": "missing-in-source"
+				},
+				"src/transaction.js": {
+					"match": false,
+					"packageHash": "c5b99943ff0857890a60643d6fc26f83781193fd4e80efe5c91eb7fdbac91d3f",
+					"size": 9699,
+					"status": "missing-in-source"
+				},
+				"src/txdb.js": {
+					"match": false,
+					"packageHash": "fe1b6feadeafbacc0317ec0f0d73b2f61685eb8e5607a25d4b462033a277ade2",
+					"size": 1420,
+					"status": "missing-in-source"
+				},
+				"src/util.js": {
+					"match": false,
+					"packageHash": "d1c8999a1693bae415d5bb6d3866467b517a36d112d9b528a8ac93b5bcb6a87a",
+					"size": 3162,
+					"status": "missing-in-source"
+				},
+				"src/wallet.js": {
+					"match": false,
+					"packageHash": "a810fda115fdeb1123dc33372d2a9c8384c7ca652da4b3299291b08e881bc085",
+					"size": 6595,
+					"status": "missing-in-source"
+				},
+				"test/index.html": {
+					"match": false,
+					"packageHash": "20618f867a8443f337d21478eb335d982fdb8176ed5855c42e53098e54c783e1",
+					"size": 1757,
+					"status": "missing-in-source"
+				},
+				"test/test.js": {
+					"match": false,
+					"packageHash": "4b0cb5e7927c714358e93f654369124c5de0ea56b24ea083e650bc273b6b32d2",
+					"size": 3462,
+					"status": "missing-in-source"
+				},
+				"vendor/qunit/qunit.css": {
+					"match": false,
+					"packageHash": "d4cec6ed05b91128796f8525ae3dfcc852356744e5dcf67791aed9a05240790f",
+					"size": 4510,
+					"status": "missing-in-source"
+				},
+				"vendor/qunit/qunit.js": {
+					"match": false,
+					"packageHash": "f0687e90991a3053650d995ee54892b788f4e6ff27cd5694abe22c9d561d8aea",
+					"size": 38071,
+					"status": "missing-in-source"
+				},
+				"LICENSE": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/cjs/address.cjs": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/cjs/address.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/cjs/bip66.cjs": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/cjs/bip66.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/cjs/block.cjs": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/cjs/block.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/cjs/bufferutils.cjs": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/cjs/bufferutils.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/cjs/crypto.cjs": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/cjs/crypto.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/cjs/ecc_lib.cjs": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/cjs/ecc_lib.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/cjs/index.cjs": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/cjs/index.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/cjs/merkle.cjs": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/cjs/merkle.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/cjs/networks.cjs": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/cjs/networks.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/cjs/ops.cjs": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/cjs/ops.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/cjs/payments/bip341.cjs": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/cjs/payments/bip341.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/cjs/payments/embed.cjs": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/cjs/payments/embed.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/cjs/payments/index.cjs": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/cjs/payments/index.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/cjs/payments/lazy.cjs": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/cjs/payments/lazy.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/cjs/payments/p2ms.cjs": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/cjs/payments/p2ms.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/cjs/payments/p2pk.cjs": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/cjs/payments/p2pk.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/cjs/payments/p2pkh.cjs": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/cjs/payments/p2pkh.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/cjs/payments/p2sh.cjs": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/cjs/payments/p2sh.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/cjs/payments/p2tr.cjs": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/cjs/payments/p2tr.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/cjs/payments/p2wpkh.cjs": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/cjs/payments/p2wpkh.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/cjs/payments/p2wsh.cjs": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/cjs/payments/p2wsh.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/cjs/psbt/bip371.cjs": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/cjs/psbt/bip371.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/cjs/psbt/psbtutils.cjs": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/cjs/psbt/psbtutils.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/cjs/psbt.cjs": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/cjs/psbt.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/cjs/push_data.cjs": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/cjs/push_data.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/cjs/script.cjs": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/cjs/script.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/cjs/script_number.cjs": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/cjs/script_number.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/cjs/script_signature.cjs": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/cjs/script_signature.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/cjs/transaction.cjs": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/cjs/transaction.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/cjs/types.cjs": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/cjs/types.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/esm/address.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/esm/bip66.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/esm/block.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/esm/bufferutils.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/esm/crypto.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/esm/ecc_lib.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/esm/index.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/esm/merkle.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/esm/networks.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/esm/ops.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/esm/payments/bip341.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/esm/payments/embed.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/esm/payments/index.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/esm/payments/lazy.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/esm/payments/p2ms.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/esm/payments/p2pk.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/esm/payments/p2pkh.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/esm/payments/p2sh.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/esm/payments/p2tr.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/esm/payments/p2wpkh.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/esm/payments/p2wsh.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/esm/psbt/bip371.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/esm/psbt/psbtutils.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/esm/psbt.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/esm/push_data.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/esm/script.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/esm/script_number.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/esm/script_signature.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/esm/transaction.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/esm/types.js": {
+					"match": false,
+					"status": "missing-in-package"
+				}
+			},
+			"summary": {
+				"differentFiles": 2,
+				"matchingFiles": 0,
+				"missingInPackage": 91,
+				"missingInSource": 34,
+				"score": 0,
+				"totalFiles": 127
+			}
+		},
+		"prodDependencies": [
+			{
+				"name": "@noble/hashes",
+				"version": "1.5.0"
+			},
+			{
+				"name": "bech32",
+				"version": "2.0.0"
+			},
+			{
+				"name": "bip174",
+				"version": "3.0.0"
+			},
+			{
+				"name": "bs58",
+				"version": "6.0.0"
+			},
+			{
+				"name": "base-x",
+				"version": "5.0.0"
+			},
+			{
+				"name": "bs58check",
+				"version": "4.0.0"
+			},
+			{
+				"name": "uint8array-tools",
+				"version": "0.0.9"
+			},
+			{
+				"name": "valibot",
+				"version": "1.2.0"
+			},
+			{
+				"name": "varuint-bitcoin",
+				"version": "2.0.0"
+			},
+			{
+				"name": "uint8array-tools",
+				"version": "0.0.8"
+			}
+		]
+	}
+]
