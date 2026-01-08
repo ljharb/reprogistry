@@ -1,0 +1,240 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-08T08:31:07.818Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:11.7.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "istanbul-lib-instrument@1.0.0-alpha.0",
+			"name": "istanbul-lib-instrument",
+			"version": "1.0.0-alpha.0",
+			"location": "https://registry.npmjs.org/istanbul-lib-instrument/-/istanbul-lib-instrument-1.0.0-alpha.0.tgz",
+			"integrity": "sha512-KJ6RgXjK7/gv/qclDCeX9IhnMniRYewzqjjdz5JA1x/FLbWmfrDvtOGaCuZe+0hF5Jf/5VAzHQgK8E2tPwau4Q==",
+			"publishedAt": "2015-11-21T22:37:22.940Z",
+			"publishedWith": {
+				"node": "0.10.26",
+				"npm": "2.12.0"
+			},
+			"dependencies": {
+				"esprima": "^2.5.1",
+				"escodegen": "^1.7.0",
+				"istanbul-lib-coverage": "^1.0.0-alpha"
+			}
+		},
+		"source": {
+			"integrity": null,
+			"location": "git+ssh://git@github.com/istanbuljs/istanbul-lib-instrument.git",
+			"spec": "github:istanbuljs/istanbul-lib-instrument#4f2da45d77e120900d366a12ecaa17d720cabac6"
+		},
+		"comparisonHash": "9ef46a5bd31291e57cbab41e2f17c57bd6da0b5b",
+		"diff": {
+			"files": {
+				"README.md": {
+					"diff": "--- published/README.md\n+++ rebuilt/README.md\n@@ -3,18 +3,22 @@\n \n [![Build Status](https://travis-ci.org/istanbuljs/istanbul-lib-instrument.svg?branch=master)](https://travis-ci.org/istanbuljs/istanbul-lib-instrument)\n \n-Istanbul instrumenter and source maps processing library.\n+Istanbul instrumenter library.\n \n-Backwards incompatibilities\n-----------------------------\n+Version 1.1.x now implements instrumentation using `Babel`. The implementation is inspired\n+by prior art by @dtinth as demonstrated in the `__coverage__` babel plugin.\n \n-* Function declarations and no-init variable declarations\n-* Ignores do not inject code\n-* No support for embedding code into coverage objects\n+It provides 2 \"modes\" of instrumentation.\n \n-TODO\n-----\n+* The old API that is mostly unchanged (except for incompatibilities noted) and\n+  performs the instrumentation using babel as a library.\n+\n+* A `programVisitor` function for the Babel AST that can be used by a Babel plugin\n+  to emit instrumentation for ES6 code directly without any source map\n+  processing. This is the preferred path for babel users. The Babel plugin is\n+  called `babel-plugin-istanbul`.\n+\n+Incompatibilities and changes to instrumentation behavior can be found in\n+[v0-changes.md](v0-changes.md).\n \n-* Change the interface signature to always return an object?\n-* Figure out skip counting and implement\n \n",
+					"match": false,
+					"packageHash": "c82a79597180c1c07ca59125e146d6e6532ad589f7daafd5165f7b337b3c2fb2",
+					"size": 575,
+					"sourceHash": "0ba4a7389558088f6665be422b119adcea058a8833fda95c431bb2cf12b8ff12",
+					"status": "content"
+				},
+				"index.js": {
+					"match": false,
+					"packageHash": "3d1c15ce484e6b5d99857a5da0e5d1b8d7e5d88e3779c7af38c63485b3c84d47",
+					"size": 550,
+					"status": "missing-in-source"
+				},
+				"lib/instrumenter-core.js": {
+					"match": false,
+					"packageHash": "2ffa0f920ce8c82adb4fd7912f18890ba60c99413878bfa4986c6ba1170a5076",
+					"size": 39145,
+					"status": "missing-in-source"
+				},
+				"lib/instrumenter.js": {
+					"match": false,
+					"packageHash": "20acc8f330c492e90169b1032f38ee7e010981d67226417817b51d2010a559b9",
+					"size": 377,
+					"status": "missing-in-source"
+				},
+				"lib/source-coverage.js": {
+					"match": false,
+					"packageHash": "aab71e83647eecf89ffd6baac9f6efd8d76fde2bdf5d7ecb083d0bc0a8221b81",
+					"size": 3579,
+					"status": "missing-in-source"
+				},
+				"lib/vargen-browser.js": {
+					"match": false,
+					"packageHash": "cdedbf0f1fa8b12c1cf1b9030a0605e9d84c3b1e727a51842dc9d16e5f198533",
+					"size": 391,
+					"status": "missing-in-source"
+				},
+				"lib/vargen.js": {
+					"match": false,
+					"packageHash": "9f59644937b23cb198e225ce0f5f2e41f2ebd19773ad43204d65175d9f0be832",
+					"size": 600,
+					"status": "missing-in-source"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -1,44 +1,52 @@\n {\n   \"name\": \"istanbul-lib-instrument\",\n-  \"version\": \"1.0.0-alpha.0\",\n+  \"version\": \"1.4.2\",\n   \"description\": \"Core istanbul API for JS code coverage\",\n   \"author\": \"Krishnan Anantheswaran <kananthmail-github@yahoo.com>\",\n-  \"main\": \"index.js\",\n+  \"main\": \"dist/index.js\",\n   \"scripts\": {\n-    \"fast\": \"mocha --harmony -r ./support/yaml-loader --recursive test/\",\n-    \"pretest\": \"jshint index.js lib/ test/\",\n-    \"test\": \"node --harmony ./node_modules/istanbul/lib/cli.js cover --include-all-sources --print=both -x karma.conf.js -x 'support/**/*js' -x 'lib/vargen-browser.js' _mocha -- -r ./support/yaml-loader --recursive test/\",\n-    \"xposttest\": \"node ./node_modules/istanbul/lib/cli.js check-coverage --statements 95 --branches 80\"\n+    \"release\": \"babel src --out-dir dist && documentation build -f md -o api.md src\",\n+    \"test\": \"cross-env NODE_ENV=test nyc --check-coverage --statements 90 --branches 80 mocha --recursive test/\",\n+    \"pretest\": \"jshint src/ test/\",\n+    \"prepublish\": \"npm test && npm run release\",\n+    \"version\": \"standard-version\",\n+    \"coverage\": \"nyc report --reporter=text-lcov | coveralls\"\n   },\n   \"dependencies\": {\n-    \"escodegen\": \"^1.7.0\",\n-    \"esprima\": \"^2.5.1\",\n-    \"istanbul-lib-coverage\": \"^1.0.0-alpha\"\n+    \"babel-generator\": \"^6.18.0\",\n+    \"babel-template\": \"^6.16.0\",\n+    \"babel-traverse\": \"^6.18.0\",\n+    \"babel-types\": \"^6.18.0\",\n+    \"babylon\": \"^6.13.0\",\n+    \"istanbul-lib-coverage\": \"^1.0.0\",\n+    \"semver\": \"^5.3.0\"\n   },\n   \"devDependencies\": {\n+    \"babel-cli\": \"^6.3.17\",\n+    \"babel-plugin-istanbul\": \"^2.0.3\",\n+    \"babel-preset-es2015\": \"^6.3.13\",\n+    \"babel-register\": \"^6.16.3\",\n     \"chai\": \"^3.0.0\",\n-    \"clone\": \"^1.0.2\",\n+    \"clone\": \"^2.0.0\",\n     \"coveralls\": \"^2.11.4\",\n-    \"istanbul\": \"^0.3.17\",\n+    \"cross-env\": \"^2.0.1\",\n+    \"documentation\": \"^4.0.0-beta9\",\n     \"js-yaml\": \"^3.3.1\",\n     \"jshint\": \"^2.8.0\",\n-    \"mocha\": \"^2.2.5\"\n+    \"mocha\": \"^3.1.2\",\n+    \"nopt\": \"^3.0.6\",\n+    \"nyc\": \"^8.3.1\",\n+    \"standard-version\": \"^3.0.0\"\n   },\n-  \"karmaDeps\": {\n-    \"aliasify\": \"^1.7.2\",\n-    \"browserify-istanbul\": \"^0.2.1\",\n-    \"karma\": \"^0.13.10\",\n-    \"karma-browserify\": \"^4.2.1\",\n-    \"karma-chrome-launcher\": \"^0.2.0\",\n-    \"karma-coverage\": \"^0.4.2\",\n-    \"karma-mocha\": \"^0.2.0\",\n-    \"karma-phantomjs-launcher\": \"^0.2.0\",\n-    \"phantomjs\": \"^1.9.17\"\n-  },\n-  \"aliasify\": {\n-    \"aliases\": {\n-      \"./vargen\": \"./lib/vargen-browser.js\"\n-    }\n+  \"nyc\": {\n+    \"include\": [\n+      \"src/**/*.js\"\n+    ],\n+    \"require\": [\n+      \"babel-register\"\n+    ],\n+    \"sourceMap\": false,\n+    \"instrument\": false\n   },\n   \"license\": \"BSD-3-Clause\",\n   \"bugs\": {\n",
+					"match": false,
+					"packageHash": "fa94d077fd39eceb7533898aec1604b096136ec1c9ee1633655c837b9027fda5",
+					"size": 1792,
+					"sourceHash": "11207c12802a29537a36ea72edf9cbd5ddc0114056444bff1adf4cf458c8e136",
+					"status": "content"
+				},
+				"CHANGELOG.md": {
+					"match": false,
+					"status": "missing-in-package"
+				}
+			},
+			"summary": {
+				"differentFiles": 2,
+				"matchingFiles": 1,
+				"missingInPackage": 1,
+				"missingInSource": 6,
+				"score": 0.1,
+				"totalFiles": 10
+			}
+		},
+		"prodDependencies": [
+			{
+				"name": "ansi-regex",
+				"version": "2.1.1"
+			},
+			{
+				"name": "ansi-styles",
+				"version": "2.2.1"
+			},
+			{
+				"name": "babel-code-frame",
+				"version": "6.26.0"
+			},
+			{
+				"name": "babel-generator",
+				"version": "6.26.1"
+			},
+			{
+				"name": "babel-messages",
+				"version": "6.23.0"
+			},
+			{
+				"name": "babel-runtime",
+				"version": "6.26.0"
+			},
+			{
+				"name": "regenerator-runtime",
+				"version": "0.11.1"
+			},
+			{
+				"name": "babel-template",
+				"version": "6.26.0"
+			},
+			{
+				"name": "babel-traverse",
+				"version": "6.26.0"
+			},
+			{
+				"name": "babel-types",
+				"version": "6.26.0"
+			},
+			{
+				"name": "babylon",
+				"version": "6.18.0"
+			},
+			{
+				"name": "chalk",
+				"version": "1.1.3"
+			},
+			{
+				"name": "core-js",
+				"version": "2.6.12"
+			},
+			{
+				"name": "debug",
+				"version": "2.6.9"
+			},
+			{
+				"name": "detect-indent",
+				"version": "4.0.0"
+			},
+			{
+				"name": "escape-string-regexp",
+				"version": "1.0.5"
+			},
+			{
+				"name": "esutils",
+				"version": "2.0.3"
+			},
+			{
+				"name": "globals",
+				"version": "9.18.0"
+			},
+			{
+				"name": "has-ansi",
+				"version": "2.0.0"
+			},
+			{
+				"name": "invariant",
+				"version": "2.2.4"
+			},
+			{
+				"name": "is-finite",
+				"version": "1.1.0"
+			},
+			{
+				"name": "istanbul-lib-coverage",
+				"version": "1.2.1"
+			},
+			{
+				"name": "js-tokens",
+				"version": "3.0.2"
+			},
+			{
+				"name": "jsesc",
+				"version": "1.3.0"
+			},
+			{
+				"name": "lodash",
+				"version": "4.17.21"
+			},
+			{
+				"name": "loose-envify",
+				"version": "1.4.0"
+			},
+			{
+				"name": "ms",
+				"version": "2.0.0"
+			},
+			{
+				"name": "repeating",
+				"version": "2.0.1"
+			},
+			{
+				"name": "semver",
+				"version": "5.7.2"
+			},
+			{
+				"name": "source-map",
+				"version": "0.5.7"
+			},
+			{
+				"name": "strip-ansi",
+				"version": "3.0.1"
+			},
+			{
+				"name": "supports-color",
+				"version": "2.0.0"
+			},
+			{
+				"name": "to-fast-properties",
+				"version": "1.0.3"
+			},
+			{
+				"name": "trim-right",
+				"version": "1.0.1"
+			}
+		]
+	}
+]
