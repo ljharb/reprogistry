@@ -1,0 +1,346 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-08T08:15:02.787Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:11.7.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "inquirer-autocomplete-prompt@3.0.1",
+			"name": "inquirer-autocomplete-prompt",
+			"version": "3.0.1",
+			"location": "https://registry.npmjs.org/inquirer-autocomplete-prompt/-/inquirer-autocomplete-prompt-3.0.1.tgz",
+			"integrity": "sha512-DQBXwX2fVQPVUzu4v4lGgtNgyjcX2+rTyphb2MeSOQh3xUayKAfHAF4y0KgsMi06m6ZiR3xIOdzMZMfQgX2m9w==",
+			"publishedAt": "2023-09-25T12:44:42.831Z",
+			"publishedWith": {
+				"node": "18.18.0",
+				"npm": "9.8.1"
+			},
+			"dependencies": {
+				"ansi-escapes": "^6.0.0",
+				"figures": "^5.0.0",
+				"picocolors": "^1.0.0",
+				"run-async": "^2.4.1",
+				"rxjs": "^7.5.6"
+			}
+		},
+		"source": {
+			"integrity": "sha512-Td9XAHTR61JrOKncT1qM2wQ7UsVsqSMK1Q0Ooor78agwV93h9NO27057ImV9d72BgsH2VmoOwdRhNnUzL2OcWw==",
+			"location": "git+ssh://git@github.com/mokkabonna/inquirer-autocomplete-prompt.git",
+			"spec": "github:mokkabonna/inquirer-autocomplete-prompt#81d0cd3690e91f9e14167af057fbbba4f514131f"
+		},
+		"comparisonHash": "9ef46a5bd31291e57cbab41e2f17c57bd6da0b5b",
+		"diff": {
+			"files": {
+				"LICENSE": {
+					"match": false,
+					"packageHash": "cda8589ade74ea3eb876e57662af432fe021c3c36336d42a455fa9af1019eb2b",
+					"size": 757,
+					"status": "missing-in-source"
+				},
+				"README.md": {
+					"diff": "--- published/README.md\n+++ rebuilt/README.md\n@@ -1,84 +1,125 @@\n-# inquirer-autocomplete-prompt\n+# inquirer-autocomplete-standalone\n \n-Autocomplete prompt for [inquirer](https://github.com/SBoudrias/Inquirer.js)\n+Standalone autocomplete prompt for the CLI based on [inquirer](https://github.com/SBoudrias/Inquirer.js) core.\n \n-[![build status](https://github.com/mokkabonna/inquirer-autocomplete-prompt/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/mokkabonna/inquirer-autocomplete-prompt/actions/workflows/ci.yml)\n+Allows you do do show dynamic choices in a list based on user input, both synchronous or asynchronous allowing you to connect to an external service.\n \n ## Installation\n \n-```sh\n-npm install inquirer-autocomplete-prompt\n-```\n-\n-inquirer v9 and inquirer-autocomplete-prompt v3 and higher are native esm modules, this mean you cannot use the commonjs syntax `require('inquirer-autocomplete-prompt')` anymore. If you want to learn more about using native esm in Node, I'd recommend reading [the following guide](https://gist.github.com/sindresorhus/a39789f98801d908bbc7ff3ecc99d99c). Alternatively, you can rely on an older version until you're ready to upgrade your environment:\n-\n ```\n-npm install inquirer-autocomplete-prompt@^2.0.0\n+npm install inquirer-autocomplete-standalone\n ```\n \n-## Usage\n-\n-This prompt is anonymous, meaning you can register this prompt with the type name you please:\n+If you want the legacy version used with inquirer version 9 and below then that is located [here](https://www.npmjs.com/package/inquirer-autocomplete-prompt) and can be installed with:\n \n ```js\n-import inquirer from 'inquirer';\n-import inquirerPrompt from 'inquirer-autocomplete-prompt';\n-\n-inquirer.registerPrompt('autocomplete', inquirerPrompt);\n-inquirer.prompt({\n-  type: 'autocomplete',\n-  ...\n-})\n+npm install inquirer-autocomplete-prompt\n ```\n \n-Change `autocomplete` to whatever you might prefer.\n-\n-### Options\n-\n-> **Note:** _allowed options written inside square brackets (`[]`) are optional. Others are required._\n+That version will still be maintained for bugs and other issues, but is not the recommended way to use this prompt. This is following the change that Inquirer itself chose. Now the preferred way is to have standalone prompts that you can pick and choose from.\n \n-`type`, `name`, `message`, `source`, [`default`, `validate`, `filter`, `when`, `pageSize`, `prefix`, `suffix`, `askAnswered`, `loop`, `suggestOnly`, `searchText`, `emptyText`]\n+## Demo\n \n-See [inquirer](https://github.com/SBoudrias/Inquirer.js) readme for meaning of all except **source**, **suggestOnly**, **searchText** and **emptyText**.\n+Run a quick demo locally with\n \n-**source** will be called with previous answers object and the current user input each time the user types, it **must** return a promise (which resolves to an array of options).\n+```js\n+npx inquirer-autocomplete-demo\n+```\n \n-**source** will be called once at at first before the user types anything with **undefined** as the value. If a new search is triggered by user input it maintains the correct order, meaning that if the first call completes after the second starts, the results of the first call are never displayed.\n+## Usage\n \n-**suggestOnly** is default **false**. Setting it to true turns the input into a normal text input. Meaning that pressing enter selects whatever value you currently have. And pressing tab autocompletes the currently selected value in the list. This way you can accept manual input instead of forcing a selection from the list.\n+```ts\n+import autocomplete from 'inquirer-autocomplete-standalone';\n+import { searchCountries } = './some-external-api';\n+\n+const answer = await autocomplete({\n+  message: 'Travel from what country?',\n+  source: async (input) => {\n+    const filteredCountries = await searchCountries(input)\n+    return filteredCountries.map(country => {\n+      return {\n+        value: country,\n+        description: `${country} is a great place to visit`\n+      }\n+    })\n+  }\n+})\n \n-**validate** is called with the entered text when **suggestOnly** is set to **true**. When **suggestOnly** is false, validate is called with the choice object. In addition it is called with the answers object so far.\n+// user searches and selects a country from the returned list\n+console.log(answer) // Norway\n+```\n \n-**searchText** Is the text shown when searching. Defaults: `Searching...`\n+![Example render](https://raw.githubusercontent.com/mokkabonna/inquirer-autocomplete-prompt/master/packages/inquirer-autocomplete-standalone/assets/example.png)\n \n-**emptyText** Is the text shown if the search returns no results. Defaults: `No results...`\n+## Options\n \n-#### Example\n+The generic type `Value` is whatever type the value of your choices are.\n \n-```js\n-import inquirer from 'inquirer';\n-import inquirerPrompt from 'inquirer-autocomplete-prompt';\n-\n-inquirer.registerPrompt('autocomplete', inquirerPrompt);\n",
+					"match": false,
+					"packageHash": "a13172425a574994009a9d3c43d4964f363aed128f0838f075262f5901ad9b5c",
+					"size": 3730,
+					"sourceHash": "c75777af369330b73cf822051036a6fc7aea3d04ea75e828b2c9f9f3b0540f5b",
+					"status": "content"
+				},
+				"index.js": {
+					"match": false,
+					"packageHash": "fc9c3cfa1e90bcf0c17ce25ce35d0599578f3cbb05adf862a26ced998312be43",
+					"size": 9912,
+					"status": "missing-in-source"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -1,90 +1,36 @@\n {\n-  \"name\": \"inquirer-autocomplete-prompt\",\n-  \"description\": \"Autocomplete prompt for inquirer\",\n-  \"version\": \"3.0.1\",\n-  \"main\": \"index.js\",\n-  \"files\": [\n-    \"index.js\"\n-  ],\n-  \"keywords\": [\n-    \"answer\",\n-    \"answers\",\n-    \"ask\",\n-    \"base\",\n-    \"cli\",\n-    \"command\",\n-    \"command-line\",\n-    \"enquirer\",\n-    \"input\",\n-    \"inquire\",\n-    \"inquirer\",\n-    \"interface\",\n-    \"iterm\",\n-    \"javascript\",\n-    \"menu\",\n-    \"node\",\n-    \"nodejs\",\n-    \"prompt\",\n-    \"promptly\",\n-    \"prompts\",\n-    \"question\",\n-    \"readline\",\n-    \"stdin\",\n-    \"stdout\",\n-    \"terminal\",\n-    \"tty\",\n-    \"ui\",\n-    \"yeoman\",\n-    \"yo\",\n-    \"zsh\"\n-  ],\n-  \"repository\": {\n-    \"type\": \"git\",\n-    \"url\": \"git@github.com:mokkabonna/inquirer-autocomplete-prompt.git\"\n-  },\n-  \"bugs\": {\n-    \"url\": \"https://github.com/mokkabonna/inquirer-autocomplete-prompt/issues\"\n-  },\n-  \"homepage\": \"https://github.com/mokkabonna/inquirer-autocomplete-prompt/blob/main/packages/inquirer-autocomplete-prompt/README.md\",\n-  \"publishConfig\": {\n-    \"registry\": \"https://registry.npmjs.org\",\n-    \"access\": \"public\"\n-  },\n+  \"name\": \"inquirer-prompts\",\n   \"author\": \"Martin Hansen <martin@martinhansen.no>\",\n-  \"contributors\": [\n-    \"Karl Horky <karl.horky@gmail.com> (https://github.com/karlhorky)\"\n-  ],\n-  \"engines\": {\n-    \"node\": \">=16\"\n-  },\n-  \"license\": \"ISC\",\n-  \"dependencies\": {\n-    \"ansi-escapes\": \"^6.0.0\",\n-    \"figures\": \"^5.0.0\",\n-    \"picocolors\": \"^1.0.0\",\n-    \"run-async\": \"^2.4.1\",\n-    \"rxjs\": \"^7.5.6\"\n+  \"version\": \"0.0.0\",\n+  \"license\": \"MIT\",\n+  \"scripts\": {\n+    \"lint\": \"nx run-many -t lint\",\n+    \"test\": \"nx run-many -t test\",\n+    \"build\": \"nx run-many -t build\"\n   },\n+  \"private\": true,\n   \"devDependencies\": {\n-    \"flow-bin\": \"^0.187.1\",\n-    \"fuzzy\": \"^0.1.3\",\n-    \"inquirer\": \"^9.1.2\"\n-  },\n-  \"peerDependencies\": {\n-    \"inquirer\": \"^9.1.0\"\n+    \"@nx/node\": \"^16.7.4\",\n+    \"@sindresorhus/tsconfig\": \"^4.0.0\",\n+    \"@typescript-eslint/parser\": \"^6.5.0\",\n+    \"@vitest/coverage-v8\": \"^0.34.3\",\n+    \"@vitest/ui\": \"^0.34.3\",\n+    \"c8\": \"^7.12.0\",\n+    \"eslint\": \"^8.23.1\",\n+    \"eslint-plugin-import\": \"^2.26.0\",\n+    \"inquirer\": \"^9.1.2\",\n+    \"nx\": \"16.7.4\",\n+    \"nx-cloud\": \"latest\",\n+    \"prettier\": \"^2.7.1\",\n+    \"sinon\": \"^15.2.0\",\n+    \"ts-node\": \"^10.9.1\",\n+    \"typescript\": \"^5.2.2\",\n",
+					"match": false,
+					"packageHash": "804951c1efc877441ab18bb3a96fccb9ab721aa33e79cf277609557a5de6b73a",
+					"size": 2234,
+					"sourceHash": "758e6ea249170a3c6c71fe0124f9b633c9e36c1b2bf94805c77a2218e01cde68",
+					"status": "content"
+				},
+				".c8rc.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				".editorconfig": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				".eslintrc.yml": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				".gitattributes": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				".github/workflows/ci.yml": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				".prettierignore": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				".prettierrc": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"nx.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/.gitkeep": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/inquirer-autocomplete-demo/README.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/inquirer-autocomplete-demo/package.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/inquirer-autocomplete-demo/src/index.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/inquirer-autocomplete-prompt/.flowconfig": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/inquirer-autocomplete-prompt/LICENSE": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/inquirer-autocomplete-prompt/README.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/inquirer-autocomplete-prompt/example.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/inquirer-autocomplete-prompt/index.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/inquirer-autocomplete-prompt/inquirer.gif": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/inquirer-autocomplete-prompt/package.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/inquirer-autocomplete-prompt/test/helpers/readline.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/inquirer-autocomplete-prompt/test/spec/indexSpec.spec.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/inquirer-autocomplete-standalone/README.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/inquirer-autocomplete-standalone/assets/example.png": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/inquirer-autocomplete-standalone/assets/example.xcf": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/inquirer-autocomplete-standalone/demo/example.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/inquirer-autocomplete-standalone/package.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/inquirer-autocomplete-standalone/scripts/build-module-fixup.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/inquirer-autocomplete-standalone/src/index.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/inquirer-autocomplete-standalone/test/index.spec.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/inquirer-autocomplete-standalone/tsconfig.cjs.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/inquirer-autocomplete-standalone/tsconfig.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"tsconfig.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"vite.config.js": {
+					"match": false,
+					"status": "missing-in-package"
+				}
+			},
+			"summary": {
+				"differentFiles": 2,
+				"matchingFiles": 0,
+				"missingInPackage": 33,
+				"missingInSource": 2,
+				"score": 0,
+				"totalFiles": 37
+			}
+		},
+		"prodDependencies": [
+			{
+				"name": "@inquirer/core",
+				"version": "3.1.2"
+			},
+			{
+				"name": "escape-string-regexp",
+				"version": "1.0.5"
+			},
+			{
+				"name": "figures",
+				"version": "3.2.0"
+			},
+			{
+				"name": "@inquirer/type",
+				"version": "1.1.4"
+			},
+			{
+				"name": "@types/mute-stream",
+				"version": "0.0.1"
+			},
+			{
+				"name": "@types/node",
+				"version": "20.6.2"
+			},
+			{
+				"name": "@types/wrap-ansi",
+				"version": "3.0.0"
+			},
+			{
+				"name": "ansi-escapes",
+				"version": "4.3.2"
+			},
+			{
+				"name": "ansi-regex",
+				"version": "5.0.1"
+			},
+			{
+				"name": "ansi-styles",
+				"version": "4.3.0"
+			},
+			{
+				"name": "chalk",
+				"version": "4.1.2"
+			},
+			{
+				"name": "cli-spinners",
+				"version": "2.9.1"
+			},
+			{
+				"name": "cli-width",
+				"version": "4.1.0"
+			},
+			{
+				"name": "color-convert",
+				"version": "2.0.1"
+			},
+			{
+				"name": "color-name",
+				"version": "1.1.4"
+			},
+			{
+				"name": "emoji-regex",
+				"version": "8.0.0"
+			},
+			{
+				"name": "figures",
+				"version": "5.0.0"
+			},
+			{
+				"name": "escape-string-regexp",
+				"version": "5.0.0"
+			},
+			{
+				"name": "has-flag",
+				"version": "4.0.0"
+			},
+			{
+				"name": "is-fullwidth-code-point",
+				"version": "3.0.0"
+			},
+			{
+				"name": "is-unicode-supported",
+				"version": "1.3.0"
+			},
+			{
+				"name": "mute-stream",
+				"version": "1.0.0"
+			},
+			{
+				"name": "picocolors",
+				"version": "1.0.0"
+			},
+			{
+				"name": "run-async",
+				"version": "3.0.0"
+			},
+			{
+				"name": "rxjs",
+				"version": "7.8.1"
+			},
+			{
+				"name": "string-width",
+				"version": "4.2.3"
+			},
+			{
+				"name": "strip-ansi",
+				"version": "6.0.1"
+			},
+			{
+				"name": "supports-color",
+				"version": "7.2.0"
+			},
+			{
+				"name": "tslib",
+				"version": "2.6.2"
+			},
+			{
+				"name": "type-fest",
+				"version": "0.21.3"
+			},
+			{
+				"name": "wrap-ansi",
+				"version": "6.2.0"
+			},
+			{
+				"name": "ansi-escapes",
+				"version": "6.2.0"
+			},
+			{
+				"name": "run-async",
+				"version": "2.4.1"
+			},
+			{
+				"name": "type-fest",
+				"version": "3.13.1"
+			}
+		]
+	}
+]
