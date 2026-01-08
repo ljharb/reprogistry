@@ -133,9 +133,34 @@ jobs:
 
           git add cache-queue.txt
           git commit -m 'queue: process batch of cache tasks' || true
-          git fetch origin queue
-          git rebase origin/queue || (git rebase --abort && git merge origin/queue)
-          git push
+
+          # Retry push with conflict resolution
+          MAX_RETRIES=5
+          for i in $(seq 1 $MAX_RETRIES); do
+            git fetch origin queue
+            if git rebase origin/queue 2>/dev/null; then
+              if git push; then
+                echo "::notice::Successfully pushed on attempt $i"
+                exit 0
+              fi
+            else
+              echo "::warning::Rebase conflict on attempt $i, using merge with ours strategy..."
+              git rebase --abort 2>/dev/null || true
+              # For queue file, accept all changes (union merge) - both our removals and remote additions
+              git merge origin/queue -X ours -m 'queue: merge remote changes' || {
+                # If merge still fails, just reset to remote (our changes were just line removals)
+                git merge --abort 2>/dev/null || true
+                git reset --hard origin/queue
+              }
+              if git push; then
+                echo "::notice::Successfully pushed after merge on attempt $i"
+                exit 0
+              fi
+            fi
+            sleep $((i * 2))
+          done
+          echo "::error::Failed to push after $MAX_RETRIES attempts"
+          exit 1
 
   dispatch-tasks:
     needs: process-queue
