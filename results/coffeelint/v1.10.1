@@ -1,0 +1,1247 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-08T04:20:00.572Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:11.7.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "coffeelint@1.10.1",
+			"name": "coffeelint",
+			"version": "1.10.1",
+			"location": "https://registry.npmjs.org/coffeelint/-/coffeelint-1.10.1.tgz",
+			"integrity": "sha512-R6prnyIAlOU2ax96+KwU7Ls/TvMglZjgTxvn0As8pUWZq71IBspG6MzEa/dMnuymB0N8ebmbhMu+6Zolabu+vg==",
+			"publishedAt": "2015-06-02T18:55:48.246Z",
+			"publishedWith": {
+				"node": "0.10.38",
+				"npm": "2.10.0"
+			},
+			"dependencies": {
+				"coffee-script": "^1.9.1",
+				"glob": "^4.0.0",
+				"ignore": "^2.2.15",
+				"optimist": "^0.6.1",
+				"resolve": "^0.6.3",
+				"strip-json-comments": "^1.0.2"
+			}
+		},
+		"source": {
+			"integrity": null,
+			"location": "git://github.com/clutchski/coffeelint.git",
+			"spec": "github:clutchski/coffeelint#5d26365e01463dc9d40d0b9582ce786b5a7552e2"
+		},
+		"comparisonHash": "9ef46a5bd31291e57cbab41e2f17c57bd6da0b5b",
+		"diff": {
+			"files": {
+				".dir-locals.el": {
+					"match": false,
+					"packageHash": "a7869f2dfcffc04d3280c8c5e1c31b378d7bb9d072ae7c310a148fc11cd83894",
+					"size": 160,
+					"status": "missing-in-source"
+				},
+				".npmignore": {
+					"match": false,
+					"packageHash": "01275fdce1977002a2af3bdbf8fbb5893012b0fbae6bb52720606cd68bc70096",
+					"size": 19,
+					"status": "missing-in-source"
+				},
+				".package.json": {
+					"match": false,
+					"packageHash": "073e6b724bf7127ef36094123861533781a931e35d9bf65f16a17eff4cc1c607",
+					"size": 1284,
+					"status": "missing-in-source"
+				},
+				".travis.yml": {
+					"match": false,
+					"packageHash": "77240d35f7bf347b181398d3b164837c7db5a9012cbafaf0410318777d765668",
+					"size": 388,
+					"status": "missing-in-source"
+				},
+				"Cakefile": {
+					"diff": "--- published/Cakefile\n+++ rebuilt/Cakefile\n@@ -2,8 +2,8 @@\n glob = require 'glob'\n path = require 'path'\n browserify = require 'browserify'\n-CoffeeScript = require 'coffee-script'\n-\n+CoffeeScript = require 'coffeescript'\n+{ exec } = require 'child_process'\n \n copySync = (src, dest) ->\n     fs.writeFileSync dest, fs.readFileSync(src)\n@@ -12,7 +12,6 @@\n     coffee = fs.readFileSync(input).toString()\n     fs.writeFileSync output, CoffeeScript.compile(coffee)\n \n-\n task 'compile', 'Compile Coffeelint', ->\n     console.log 'Compiling Coffeelint...'\n     fs.mkdirSync 'lib' unless fs.existsSync 'lib'\n@@ -54,11 +53,15 @@\n \n     invoke 'compile'\n \n+task 'postpublish', 'Postpublish', ->\n+    # Revert the package.json back to it's original state\n+    exec 'git checkout ./package.json', (err) ->\n+      if err\n+        console.error('Error reverting package.json: ' + err)\n+\n task 'publish', 'publish', ->\n     copySync '.package.json', 'package.json'\n \n task 'install', 'Install', ->\n     unless require(\"fs\").existsSync(\"lib/commandline.js\")\n         invoke 'compile'\n-\n-\n",
+					"match": false,
+					"packageHash": "e50f69b8a3549e093480f20345c01aed2537b8dc65b9e4367285ea3a5f57bfcb",
+					"size": 2094,
+					"sourceHash": "8b1d24b2a0180c64a6f26a3a797c50199b053956a9c13bcd38fc6174278ee3fd",
+					"status": "content"
+				},
+				"README.md": {
+					"diff": "--- published/README.md\n+++ rebuilt/README.md\n@@ -1,95 +1,8 @@\n CoffeeLint\n ==========\n \n-CoffeeLint is a style checker that helps keep CoffeeScript code\n+CoffeeLint ~~is~~ was a style checker that ~~helps~~ helped keep CoffeeScript code\n clean and consistent.\n \n-For guides on installing, using and configuring CoffeeLint, head over\n-[here](http://www.coffeelint.org).\n-\n-To suggest a feature, report a bug, or general discussion, head over\n-[here](http://github.com/clutchski/coffeelint/issues/).\n-\n-## Team\n-\n-Current:\n-\n-- [Asa Ayers](https://github.com/AsaAyers)\n-\n-Past:\n-\n-- [Matt Perpick](https://github.com/clutchski)\n-\n-## Contributing\n-\n-* New rules should be set to a `warn` level. Developers will expect new changes to NOT break their existing workflow, so unless your change is extremely usefull, default to `warn`. Expect discussion if you choose to use `error`.\n-\n-* Look at existing rules and test structures when deciding how to name your rule. `no_foo.coffee` is used for many tests designed to catch specific errors, whereas `foo.coffee` is used for tests that are designed to enforce formatting and syntax.\n-\n-### Steps\n-\n-1. Fork the repo locally.\n-2. Run `npm install` to get dependencies.\n-3. Create your rule in a single file as `src/rules/your_rule_here.coffee`, using the existing\n-   rules as a guide.\n-   You may examine the AST and tokens using\n-   [http://asaayers.github.io/clfiddle/](http://asaayers.github.io/clfiddle/).\n-4. Add your test file `my_test.coffee` to the `test` directory.\n-5. Register your rule in `src/coffeelint.coffee`.\n-6. Run your test using `npm run testrule test/your_test_here.coffee`.\n-7. Run the whole tests suite using `npm test`.\n-8. Check that your rule's documentation is generated properly (see _Updating documentation when\n-adding a new rule_ below).\n-9. Squash all commits into a single commit when done.\n-10. Submit a pull request.\n-\n-[![Build Status](https://secure.travis-ci.org/clutchski/coffeelint.svg)](http://travis-ci.org/clutchski/coffeelint)\n-\n-### Updating documentation when adding a new rule\n-\n-When adding a new rule, its documentation is specified by setting a\n-`description` property within its `rule` property:\n-```\n-module.exports = class NoComment\n-\n-    rule:\n-        name: 'no_comment'\n-        level: 'ignore'\n-        message: 'No comment'\n-        description: \"\"\"\n-            Disallows any comment in the code\n-            \"\"\"\n-\n-    tokens: ['#', '###']\n-\n-    lintToken : (token, tokenApi) ->\n-\t\treturn {context: \"Found '#{token[0]}'\"}\n-```\n-\n-The description property is a string that can embed HTML code:\n-```\n-description: \"\"\"\n-\tDisallows any comment in the code. This code would not pass:\n-\t<pre>\n-\t<code>### Some code with comments\n-\tfoo = ->\n-\t\t# some other comments\n-\t\tbar()\n-\t</code>\n-\t</pre>\n-\t\"\"\"\n-```\n-[Coffeelint's website](http://www.coffeelint.org/) generates each\n-rule's documentation based on this `description` property.\n-\n-When adding a new rule, it is suggested that you check that the documentation\n-for your new rule is generated correctly. In order to do that, you should\n-follow these steps:\n-* Checkout the branch that contains the changes adding the new rule.\n-* Run `npm run compile`.\n-* Checkout the `gh-pages` branch: `git checkout origin/gh-pages`.\n-* Run `cp lib/coffeelint.js js/coffeelint.js`.\n-* Regenerate the HTML documentation: `rake updatehtml`. Note that you will\n-probably need to install rake.\n-* Open the `index.html` file with your favorite browser and make sure that your\n-rule's documentation is generated properly.\n+This project is no longer maintained but the code remains freely available for your\n",
+					"match": false,
+					"packageHash": "6d89fd6675e94613bb5a4c8650d3f60c8f5e1587a584d03db2e78446645a4c5a",
+					"size": 3313,
+					"sourceHash": "75b16e7ca15cc78df1da2d3138cd736061f5c2d4372dbc3974878e58c21c521b",
+					"status": "content"
+				},
+				"coffeelint.json": {
+					"match": false,
+					"packageHash": "3a01ef594baeb7f5fc4f3afb3c6f8ee0ad8baf2822dfc9384e7c8052618da4d9",
+					"size": 377,
+					"status": "missing-in-source"
+				},
+				"doc/writing_rules.md": {
+					"match": false,
+					"packageHash": "eec5a8525c362d5881f9cc10288226e596bfcd6f4645a8a61aa4c03327e245a6",
+					"size": 219,
+					"status": "missing-in-source"
+				},
+				"generated_coffeelint.json": {
+					"diff": "--- published/generated_coffeelint.json\n+++ rebuilt/generated_coffeelint.json\n@@ -1,109 +1,135 @@\n {\n-    \"arrow_spacing\": {\n-        \"level\": \"ignore\"\n-    },\n-    \"camel_case_classes\": {\n-        \"level\": \"error\"\n-    },\n-    \"coffeescript_error\": {\n-        \"level\": \"error\"\n-    },\n-    \"colon_assignment_spacing\": {\n-        \"level\": \"ignore\",\n-        \"spacing\": {\n-            \"left\": 0,\n-            \"right\": 0\n-        }\n-    },\n-    \"cyclomatic_complexity\": {\n-        \"value\": 10,\n-        \"level\": \"ignore\"\n-    },\n-    \"duplicate_key\": {\n-        \"level\": \"error\"\n-    },\n-    \"empty_constructor_needs_parens\": {\n-        \"level\": \"ignore\"\n-    },\n-    \"indentation\": {\n-        \"value\": 2,\n-        \"level\": \"error\"\n-    },\n-    \"line_endings\": {\n-        \"level\": \"ignore\",\n-        \"value\": \"unix\"\n-    },\n-    \"max_line_length\": {\n-        \"value\": 80,\n-        \"level\": \"error\",\n-        \"limitComments\": true\n-    },\n-    \"missing_fat_arrows\": {\n-        \"level\": \"ignore\"\n-    },\n-    \"newlines_after_classes\": {\n-        \"value\": 3,\n-        \"level\": \"ignore\"\n-    },\n-    \"no_backticks\": {\n-        \"level\": \"error\"\n-    },\n-    \"no_debugger\": {\n-        \"level\": \"warn\"\n-    },\n-    \"no_empty_functions\": {\n-        \"level\": \"ignore\"\n-    },\n-    \"no_empty_param_list\": {\n-        \"level\": \"ignore\"\n-    },\n-    \"no_implicit_braces\": {\n-        \"level\": \"ignore\",\n-        \"strict\": true\n-    },\n-    \"no_implicit_parens\": {\n-        \"strict\": true,\n-        \"level\": \"ignore\"\n-    },\n-    \"no_interpolation_in_single_quotes\": {\n-        \"level\": \"ignore\"\n-    },\n-    \"no_plusplus\": {\n-        \"level\": \"ignore\"\n-    },\n-    \"spacing_after_comma\": {\n-        \"level\": \"ignore\"\n-    },\n-    \"no_stand_alone_at\": {\n-        \"level\": \"ignore\"\n-    },\n-    \"no_tabs\": {\n-        \"level\": \"error\"\n-    },\n-    \"no_throwing_strings\": {\n-        \"level\": \"error\"\n-    },\n-    \"no_trailing_semicolons\": {\n-        \"level\": \"error\"\n-    },\n-    \"no_trailing_whitespace\": {\n-        \"level\": \"error\",\n-        \"allowed_in_comments\": false,\n-        \"allowed_in_empty_lines\": true\n-    },\n-    \"no_unnecessary_double_quotes\": {\n-        \"level\": \"ignore\"\n-    },\n-    \"no_unnecessary_fat_arrows\": {\n",
+					"match": false,
+					"packageHash": "bed43076f06b4c7f0d7b675df85044aedce8c46aad6a9ef066aef3935514449b",
+					"size": 2250,
+					"sourceHash": "38f0a479c67773fda4a3094234bfdbb0d5a3be5f7c8e898813e9ce2ce5998358",
+					"status": "content"
+				},
+				"lib/cache.js": {
+					"match": false,
+					"packageHash": "926d80d216997b617f98ecf7f9b73b82cf754e3b8fa00812308c309dbbd125dd",
+					"size": 1350,
+					"status": "missing-in-source"
+				},
+				"lib/coffeelint.js": {
+					"match": false,
+					"packageHash": "11fb3ef979fb8b9ef721e7aae610f4affb6873c2d07811f494a3da7e82433bd2",
+					"size": 93604,
+					"status": "missing-in-source"
+				},
+				"lib/commandline.js": {
+					"match": false,
+					"packageHash": "d158f49d53762ac39e325324d9487ac840990e41808ac97b6d3ab936fc16a6b4",
+					"size": 8814,
+					"status": "missing-in-source"
+				},
+				"lib/configfinder.js": {
+					"match": false,
+					"packageHash": "c18a5662a8493680446922521fb5d164f95cbd2c50bcf6445c4fbcd680316c77",
+					"size": 3213,
+					"status": "missing-in-source"
+				},
+				"lib/reporters/checkstyle.js": {
+					"match": false,
+					"packageHash": "c176be5c73dfea90b06da4eb007596bcaa7bb97694a9ac7266e506ea2882056f",
+					"size": 1542,
+					"status": "missing-in-source"
+				},
+				"lib/reporters/csv.js": {
+					"match": false,
+					"packageHash": "2d0e1438bded5d6016be16981a8690de2bfd2c08c4746558fb378fde0880136b",
+					"size": 1250,
+					"status": "missing-in-source"
+				},
+				"lib/reporters/default.js": {
+					"match": false,
+					"packageHash": "a2b77cc50f3729c14a51258e7b545c0300650df16946d449050abc3458840df2",
+					"size": 3474,
+					"status": "missing-in-source"
+				},
+				"lib/reporters/jslint.js": {
+					"match": false,
+					"packageHash": "8311dde4a717ab935272df13e7d168bb647b67d3e6ff921d98776f3e1975d43c",
+					"size": 1650,
+					"status": "missing-in-source"
+				},
+				"lib/reporters/raw.js": {
+					"match": false,
+					"packageHash": "3ef508196f2ada85848c41b67ad8e5ca1b12b4634c43fc2c26009b155734b039",
+					"size": 513,
+					"status": "missing-in-source"
+				},
+				"lib/ruleLoader.js": {
+					"match": false,
+					"packageHash": "7f3aa3a81777ce1e09eb5941dc655cf6eef5b21fd3bb7087e245bd4ccd9b745c",
+					"size": 1645,
+					"status": "missing-in-source"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -1,7 +1,7 @@\n {\n   \"name\": \"coffeelint\",\n   \"description\": \"Lint your CoffeeScript\",\n-  \"version\": \"1.10.1\",\n+  \"version\": \"2.1.0\",\n   \"homepage\": \"http://www.coffeelint.org\",\n   \"keywords\": [\n     \"lint\",\n@@ -12,7 +12,7 @@\n   \"main\": \"./lib/coffeelint.js\",\n   \"engines\": {\n     \"npm\": \">=1.3.7\",\n-    \"node\": \">=0.8.0\"\n+    \"node\": \">=6.9.1\"\n   },\n   \"repository\": {\n     \"type\": \"git\",\n@@ -22,15 +22,17 @@\n     \"coffeelint\": \"./bin/coffeelint\"\n   },\n   \"dependencies\": {\n-    \"coffee-script\": \"^1.9.1\",\n-    \"glob\": \"^4.0.0\",\n-    \"ignore\": \"^2.2.15\",\n+    \"browserify\": \"^13.1.0\",\n+    \"coffeeify\": \"~1.0.0\",\n+    \"coffeescript\": \"^2.1.0\",\n+    \"glob\": \"^7.0.6\",\n+    \"ignore\": \"^3.0.9\",\n     \"optimist\": \"^0.6.1\",\n     \"resolve\": \"^0.6.3\",\n     \"strip-json-comments\": \"^1.0.2\"\n   },\n   \"devDependencies\": {\n-    \"vows\": \">=0.6.0\",\n+    \"vows\": \">=0.8.1\",\n     \"underscore\": \">=1.4.4\"\n   },\n   \"license\": \"MIT\",\n@@ -40,10 +42,12 @@\n     \"testrule\": \"npm run compile && ./vowsrunner.js --spec\",\n     \"posttest\": \"npm run lint\",\n     \"prepublish\": \"cake prepublish\",\n+    \"postpublish\": \"cake postpublish\",\n     \"publish\": \"cake publish\",\n+    \"install\": \"cake install\",\n     \"lint\": \"cake compile && ./bin/coffeelint .\",\n     \"lint-csv\": \"cake compile && ./bin/coffeelint --csv .\",\n     \"lint-jslint\": \"cake compile && ./bin/coffeelint --jslint .\",\n     \"compile\": \"cake compile\"\n   }\n-}\n\\ No newline at end of file\n+}\n",
+					"match": false,
+					"packageHash": "073e6b724bf7127ef36094123861533781a931e35d9bf65f16a17eff4cc1c607",
+					"size": 1284,
+					"sourceHash": "95296cb300b9bb13700e081cc61d347877132619001b992d84ebe29e68555222",
+					"status": "content"
+				},
+				"src/ast_linter.coffee": {
+					"match": false,
+					"packageHash": "2ddd94f6ac3119b02716b91123ba2989f4c56b973c5de8c505a08b7eede4bb3e",
+					"size": 2823,
+					"status": "missing-in-source"
+				},
+				"src/base_linter.coffee": {
+					"match": false,
+					"packageHash": "c4571eaab6822061d18d63b67d1ca916b33596e4eb7766d4f0c7b4bde50c123a",
+					"size": 1784,
+					"status": "missing-in-source"
+				},
+				"src/cache.coffee": {
+					"match": false,
+					"packageHash": "af13bd3b8c402abb36d58612790eddab86a1221c07c77c758c1399734b647c6a",
+					"size": 911,
+					"status": "missing-in-source"
+				},
+				"src/coffeelint.coffee": {
+					"match": false,
+					"packageHash": "3c49140dc9ea9a6c78e2ca710cc84dbe03e5e12b5e49c6bfe8a8a1a136f7c81e",
+					"size": 13533,
+					"status": "missing-in-source"
+				},
+				"src/commandline.coffee": {
+					"match": false,
+					"packageHash": "237209e3a7cc4979e8e0bc2457700bf1faafbea361c8efb703f057fe1107c505",
+					"size": 8697,
+					"status": "missing-in-source"
+				},
+				"src/configfinder.coffee": {
+					"match": false,
+					"packageHash": "42dd2f1227850d00ca9eb6dde7171ecd4c384c5097cec9a17f2d2f273aadb7cc",
+					"size": 3103,
+					"status": "missing-in-source"
+				},
+				"src/error_report.coffee": {
+					"match": false,
+					"packageHash": "7e2b726116b3ff57eafcade8dd7d923ccbfb036ee9af021c51707dda4c79e0d9",
+					"size": 1164,
+					"status": "missing-in-source"
+				},
+				"src/htmldoc.coffee": {
+					"match": false,
+					"packageHash": "d4a44421911f8eaf9f75feda902eb62d5bfb425f61a9b7baba5ea52d0561b8f9",
+					"size": 630,
+					"status": "missing-in-source"
+				},
+				"src/lexical_linter.coffee": {
+					"match": false,
+					"packageHash": "164bf170b18d2b912224b19998d1719af5a28ed9488089ded06313a7f25b18f3",
+					"size": 2508,
+					"status": "missing-in-source"
+				},
+				"src/line_linter.coffee": {
+					"match": false,
+					"packageHash": "31c384c66c777b99d50bfeaeb9bf943742b3f262fe71930be32d652d589af9e7",
+					"size": 4482,
+					"status": "missing-in-source"
+				},
+				"src/reporters/checkstyle.coffee": {
+					"match": false,
+					"packageHash": "6435af69b328c9f6da9504b8b86ada50c4ce9606d12e30e5750af197b36b6a26",
+					"size": 1197,
+					"status": "missing-in-source"
+				},
+				"src/reporters/csv.coffee": {
+					"match": false,
+					"packageHash": "c36f811a103a947158562cd650e669a979793103b7cfd0a0c0e4d55277036402",
+					"size": 878,
+					"status": "missing-in-source"
+				},
+				"src/reporters/default.coffee": {
+					"match": false,
+					"packageHash": "06a897fe0565ea5e4e86b4cc7086ade1ff48fed620dbf3afc5526dcf255dc258",
+					"size": 2619,
+					"status": "missing-in-source"
+				},
+				"src/reporters/jslint.coffee": {
+					"match": false,
+					"packageHash": "3a2027282164eedcefc8d0b9da4038ade90e1592836b317755715923b849ca48",
+					"size": 1373,
+					"status": "missing-in-source"
+				},
+				"src/reporters/raw.coffee": {
+					"match": false,
+					"packageHash": "a886d647dd89b758f8288b366426a7e2a706e2e750a75c8ba67ca5677b9cbedf",
+					"size": 308,
+					"status": "missing-in-source"
+				},
+				"src/ruleLoader.coffee": {
+					"match": false,
+					"packageHash": "e9413777811677d0d7548ab63ada8b30466886d1f8b9b9446b0163ea3d08449f",
+					"size": 1940,
+					"status": "missing-in-source"
+				},
+				"src/rules/arrow_spacing.coffee": {
+					"match": false,
+					"packageHash": "ebbdf462f25277be7450e5850ce456d2986ffe46cb8edd6bc9cd44022e0a6a11",
+					"size": 2419,
+					"status": "missing-in-source"
+				},
+				"src/rules/braces_spacing.coffee": {
+					"match": false,
+					"packageHash": "473166b20e082d3d61f57ffb87bb94196782cebb9849aa478f60dac7afb688d9",
+					"size": 2682,
+					"status": "missing-in-source"
+				},
+				"src/rules/camel_case_classes.coffee": {
+					"match": false,
+					"packageHash": "ef59ef547dcf271b268b6bfa51208001201f89032729ae57be7bc4fa4993a4cf",
+					"size": 1709,
+					"status": "missing-in-source"
+				},
+				"src/rules/colon_assignment_spacing.coffee": {
+					"match": false,
+					"packageHash": "a2a08965a7f2a9cb5dfcb976b1c0f1054dbe22544f7115311989ca88fecf2a31",
+					"size": 2234,
+					"status": "missing-in-source"
+				},
+				"src/rules/cyclomatic_complexity.coffee": {
+					"match": false,
+					"packageHash": "2611634f6cef6495aedcf34efe357ffca51e033d58bcbf90b2e0d302e44a43ca",
+					"size": 1717,
+					"status": "missing-in-source"
+				},
+				"src/rules/duplicate_key.coffee": {
+					"match": false,
+					"packageHash": "e96f6e66995ea276201e6d52761af41da950af594fdb095ef298efbeb05d98f9",
+					"size": 1849,
+					"status": "missing-in-source"
+				},
+				"src/rules/empty_constructor_needs_parens.coffee": {
+					"match": false,
+					"packageHash": "752846766d16eb35c6f98d8ccc5c50d929f911408c05533d1c23cd6d95f92ba7",
+					"size": 1769,
+					"status": "missing-in-source"
+				},
+				"src/rules/ensure_comprehensions.coffee": {
+					"match": false,
+					"packageHash": "81b384277b1dcf39d5aee19259b1327b7e3cf3fecfc11d519c0425c813495e06",
+					"size": 1709,
+					"status": "missing-in-source"
+				},
+				"src/rules/eol_last.coffee": {
+					"match": false,
+					"packageHash": "c8a0783d811e0d8cf2a3e3642cb746e46788af195ba2335ca1ac5a1df219fe6e",
+					"size": 342,
+					"status": "missing-in-source"
+				},
+				"src/rules/indentation.coffee": {
+					"match": false,
+					"packageHash": "13eec1dce764b6107270d71864b4f9da3bbb95e658907f5fcff048bd975e247d",
+					"size": 6303,
+					"status": "missing-in-source"
+				},
+				"src/rules/line_endings.coffee": {
+					"match": false,
+					"packageHash": "c1756e1c22f565b9e4cb03e222c70efc97cd479655939b0fa434329baf172cc7",
+					"size": 901,
+					"status": "missing-in-source"
+				},
+				"src/rules/max_line_length.coffee": {
+					"match": false,
+					"packageHash": "6a377b8790fd8dec6ab8afc387c0fbcea1cf9f15e71bd5ba3a97d0101e9aa75b",
+					"size": 1476,
+					"status": "missing-in-source"
+				},
+				"src/rules/missing_fat_arrows.coffee": {
+					"match": false,
+					"packageHash": "80f31f0bcaafc6e0b75b29e2b0cf6ae327815d7e6cabe0d2b74fcf0d97cd117c",
+					"size": 3169,
+					"status": "missing-in-source"
+				},
+				"src/rules/newlines_after_classes.coffee": {
+					"match": false,
+					"packageHash": "f47265d72a6ad05f8db44a87b1687f4020fb8e5c0945a8c31eb1516ff12b474d",
+					"size": 1004,
+					"status": "missing-in-source"
+				},
+				"src/rules/no_backticks.coffee": {
+					"match": false,
+					"packageHash": "81cb28f42cc27b2e14b936e5cf9bf71f2e2dc331638e7f21edf0e9341f7b8e88",
+					"size": 638,
+					"status": "missing-in-source"
+				},
+				"src/rules/no_debugger.coffee": {
+					"match": false,
+					"packageHash": "31c7175e46316172e596470508fc73f665710efe2cb13f1ae9d30482b273f90d",
+					"size": 711,
+					"status": "missing-in-source"
+				},
+				"src/rules/no_empty_functions.coffee": {
+					"match": false,
+					"packageHash": "2276044e2dfa9fe09901ef4575cdf94fb46764552e7642e846398dd07fdcc8ec",
+					"size": 1548,
+					"status": "missing-in-source"
+				},
+				"src/rules/no_empty_param_list.coffee": {
+					"match": false,
+					"packageHash": "f9ee3c87f5faae8d1922bf25b03bdbff7682d44bdcc44379b1a40ac5a2409a49",
+					"size": 730,
+					"status": "missing-in-source"
+				},
+				"src/rules/no_implicit_braces.coffee": {
+					"match": false,
+					"packageHash": "0e49121faa581a295f90bc1b79690ca9888126a22ed9e5577509aabd6117e58d",
+					"size": 2079,
+					"status": "missing-in-source"
+				},
+				"src/rules/no_implicit_parens.coffee": {
+					"match": false,
+					"packageHash": "61bdae4c0f91620cce19dad100f5341fa592e8414344ecd2bce34d10be28fb11",
+					"size": 1508,
+					"status": "missing-in-source"
+				},
+				"src/rules/no_interpolation_in_single_quotes.coffee": {
+					"match": false,
+					"packageHash": "dfe957df9a417880148e93575ec9e7ad43886d4a5ab3c357c241e0ffbc6661fa",
+					"size": 851,
+					"status": "missing-in-source"
+				},
+				"src/rules/no_plusplus.coffee": {
+					"match": false,
+					"packageHash": "287e9e110aa95d5de9d1358c130fbb1272b9116f5c95d0407640b439c753f07a",
+					"size": 629,
+					"status": "missing-in-source"
+				},
+				"src/rules/no_stand_alone_at.coffee": {
+					"match": false,
+					"packageHash": "51e7ebf048240556fd683af3909f240dba8b4ac40ff8b49a1bee821f19b8a52e",
+					"size": 1262,
+					"status": "missing-in-source"
+				},
+				"src/rules/no_tabs.coffee": {
+					"match": false,
+					"packageHash": "9d8fb923cd872304983cd8485d486d4ed02e2d4c5ce26c1115609984c3883a00",
+					"size": 756,
+					"status": "missing-in-source"
+				},
+				"src/rules/no_this.coffee": {
+					"match": false,
+					"packageHash": "6943518e5a9cfa7a68cc14a1616e70af9d75ac89870712045e96ba098e3b7ca8",
+					"size": 311,
+					"status": "missing-in-source"
+				},
+				"src/rules/no_throwing_strings.coffee": {
+					"match": false,
+					"packageHash": "0341048a8b54e219103742a7385d7b6fb7eeffc0591c3ab9c241bfe7e9e0e736",
+					"size": 1380,
+					"status": "missing-in-source"
+				},
+				"src/rules/no_trailing_semicolons.coffee": {
+					"match": false,
+					"packageHash": "235f01235d9f6d6ca5dcb8d1f4f6699c91f5b1b0790cb3652f95e409d59e465e",
+					"size": 2292,
+					"status": "missing-in-source"
+				},
+				"src/rules/no_trailing_whitespace.coffee": {
+					"match": false,
+					"packageHash": "caf6a104a67a1c741fcb02652c878c39cc69d778d415e0d226d2170a934dcdc7",
+					"size": 1603,
+					"status": "missing-in-source"
+				},
+				"src/rules/no_unnecessary_double_quotes.coffee": {
+					"match": false,
+					"packageHash": "f0c9b18952cac10819539cf7515bd04064c75a981a830990541df1f80b33cb10",
+					"size": 1840,
+					"status": "missing-in-source"
+				},
+				"src/rules/no_unnecessary_fat_arrows.coffee": {
+					"match": false,
+					"packageHash": "e90e457ca676e714d9ef3262f907d7f842642d8c65f2d781df3758717c4674a9",
+					"size": 1407,
+					"status": "missing-in-source"
+				},
+				"src/rules/non_empty_constructor_needs_parens.coffee": {
+					"match": false,
+					"packageHash": "84802fb70d2d1334956251127cd9f40f19a80e5c681f8cde29cad09f2fa99fbf",
+					"size": 554,
+					"status": "missing-in-source"
+				},
+				"src/rules/prefer_english_operator.coffee": {
+					"match": false,
+					"packageHash": "2114637686f389c26469c9ddf1bd2775e9febc8b82025d4d87f2c69a32fc2370",
+					"size": 1668,
+					"status": "missing-in-source"
+				},
+				"src/rules/space_operators.coffee": {
+					"match": false,
+					"packageHash": "eca323115770103196212eaaffbd01d1b4f1d3d1f1d297ec855b4d6b19f5750b",
+					"size": 2855,
+					"status": "missing-in-source"
+				},
+				"src/rules/spacing_after_comma.coffee": {
+					"match": false,
+					"packageHash": "a16151918013b3f3f7d54dd5b6918a4b4da66f2f445b8d90e243576f06a18b67",
+					"size": 1075,
+					"status": "missing-in-source"
+				},
+				"src/rules/transform_messes_up_line_numbers.coffee": {
+					"match": false,
+					"packageHash": "4f6fc96b92e90d606fcb06cfeb68b7779ba39b69b579bc9356a04c98f3d0ddbc",
+					"size": 508,
+					"status": "missing-in-source"
+				},
+				"src/rules.coffee": {
+					"match": false,
+					"packageHash": "1139eee539409db6b3cfeee8f955226d3dd9fd486b71808bd69b6307031554b3",
+					"size": 254,
+					"status": "missing-in-source"
+				},
+				"vowsrunner.js": {
+					"diff": "--- published/vowsrunner.js\n+++ rebuilt/vowsrunner.js\n@@ -1,4 +1,4 @@\n #!/usr/bin/env node\n-require('coffee-script/register')\n+require('coffeescript/register')\n require('./node_modules/vows/bin/vows')\n \n",
+					"match": false,
+					"packageHash": "8de355f152f05edc2aea5964df4e914fd8196faf6df46a80edbc227523a740ed",
+					"size": 95,
+					"sourceHash": "624a2851b1fa8644bb24ddf85691518b80707b70adda831fcc74527a4845f759",
+					"status": "content"
+				},
+				"OLD_README.md": {
+					"match": false,
+					"status": "missing-in-package"
+				}
+			},
+			"summary": {
+				"differentFiles": 5,
+				"matchingFiles": 7,
+				"missingInPackage": 1,
+				"missingInSource": 68,
+				"score": 0.08641975308641975,
+				"totalFiles": 81
+			}
+		},
+		"prodDependencies": [
+			{
+				"name": "acorn",
+				"version": "7.4.1"
+			},
+			{
+				"name": "acorn-node",
+				"version": "1.8.2"
+			},
+			{
+				"name": "acorn-walk",
+				"version": "7.2.0"
+			},
+			{
+				"name": "asn1.js",
+				"version": "4.10.1"
+			},
+			{
+				"name": "bn.js",
+				"version": "4.12.2"
+			},
+			{
+				"name": "assert",
+				"version": "1.5.1"
+			},
+			{
+				"name": "available-typed-arrays",
+				"version": "1.0.7"
+			},
+			{
+				"name": "balanced-match",
+				"version": "1.0.2"
+			},
+			{
+				"name": "base64-js",
+				"version": "1.5.1"
+			},
+			{
+				"name": "bn.js",
+				"version": "5.2.2"
+			},
+			{
+				"name": "brace-expansion",
+				"version": "1.1.12"
+			},
+			{
+				"name": "brorand",
+				"version": "1.1.0"
+			},
+			{
+				"name": "browser-pack",
+				"version": "6.1.0"
+			},
+			{
+				"name": "browser-resolve",
+				"version": "1.11.3"
+			},
+			{
+				"name": "resolve",
+				"version": "1.1.7"
+			},
+			{
+				"name": "browserify",
+				"version": "13.3.0"
+			},
+			{
+				"name": "browserify-aes",
+				"version": "1.2.0"
+			},
+			{
+				"name": "browserify-cipher",
+				"version": "1.0.1"
+			},
+			{
+				"name": "browserify-des",
+				"version": "1.0.2"
+			},
+			{
+				"name": "browserify-rsa",
+				"version": "4.1.1"
+			},
+			{
+				"name": "browserify-sign",
+				"version": "4.2.5"
+			},
+			{
+				"name": "browserify-zlib",
+				"version": "0.1.4"
+			},
+			{
+				"name": "resolve",
+				"version": "1.22.11"
+			},
+			{
+				"name": "buffer",
+				"version": "4.9.2"
+			},
+			{
+				"name": "buffer-from",
+				"version": "1.1.2"
+			},
+			{
+				"name": "buffer-xor",
+				"version": "1.0.3"
+			},
+			{
+				"name": "builtin-status-codes",
+				"version": "3.0.0"
+			},
+			{
+				"name": "cached-path-relative",
+				"version": "1.1.0"
+			},
+			{
+				"name": "call-bind",
+				"version": "1.0.8"
+			},
+			{
+				"name": "call-bind-apply-helpers",
+				"version": "1.0.2"
+			},
+			{
+				"name": "call-bound",
+				"version": "1.0.4"
+			},
+			{
+				"name": "cipher-base",
+				"version": "1.0.7"
+			},
+			{
+				"name": "coffee-script",
+				"version": "1.12.7"
+			},
+			{
+				"name": "coffeeify",
+				"version": "1.0.0"
+			},
+			{
+				"name": "coffeescript",
+				"version": "2.7.0"
+			},
+			{
+				"name": "combine-source-map",
+				"version": "0.8.0"
+			},
+			{
+				"name": "convert-source-map",
+				"version": "1.1.3"
+			},
+			{
+				"name": "concat-map",
+				"version": "0.0.1"
+			},
+			{
+				"name": "concat-stream",
+				"version": "1.5.2"
+			},
+			{
+				"name": "process-nextick-args",
+				"version": "1.0.7"
+			},
+			{
+				"name": "readable-stream",
+				"version": "2.0.6"
+			},
+			{
+				"name": "console-browserify",
+				"version": "1.2.0"
+			},
+			{
+				"name": "constants-browserify",
+				"version": "1.0.0"
+			},
+			{
+				"name": "convert-source-map",
+				"version": "0.4.1"
+			},
+			{
+				"name": "core-util-is",
+				"version": "1.0.3"
+			},
+			{
+				"name": "create-ecdh",
+				"version": "4.0.4"
+			},
+			{
+				"name": "create-hash",
+				"version": "1.2.0"
+			},
+			{
+				"name": "create-hmac",
+				"version": "1.1.7"
+			},
+			{
+				"name": "crypto-browserify",
+				"version": "3.12.1"
+			},
+			{
+				"name": "dash-ast",
+				"version": "1.0.0"
+			},
+			{
+				"name": "define-data-property",
+				"version": "1.1.4"
+			},
+			{
+				"name": "define-properties",
+				"version": "1.2.1"
+			},
+			{
+				"name": "defined",
+				"version": "1.0.1"
+			},
+			{
+				"name": "deps-sort",
+				"version": "2.0.1"
+			},
+			{
+				"name": "des.js",
+				"version": "1.1.0"
+			},
+			{
+				"name": "detective",
+				"version": "4.7.1"
+			},
+			{
+				"name": "acorn",
+				"version": "5.7.4"
+			},
+			{
+				"name": "diffie-hellman",
+				"version": "5.0.3"
+			},
+			{
+				"name": "domain-browser",
+				"version": "1.1.7"
+			},
+			{
+				"name": "dunder-proto",
+				"version": "1.0.1"
+			},
+			{
+				"name": "duplexer2",
+				"version": "0.1.4"
+			},
+			{
+				"name": "elliptic",
+				"version": "6.6.1"
+			},
+			{
+				"name": "es-define-property",
+				"version": "1.0.1"
+			},
+			{
+				"name": "es-errors",
+				"version": "1.3.0"
+			},
+			{
+				"name": "es-object-atoms",
+				"version": "1.1.1"
+			},
+			{
+				"name": "events",
+				"version": "1.1.1"
+			},
+			{
+				"name": "evp_bytestokey",
+				"version": "1.0.3"
+			},
+			{
+				"name": "fast-safe-stringify",
+				"version": "2.1.1"
+			},
+			{
+				"name": "for-each",
+				"version": "0.3.5"
+			},
+			{
+				"name": "fs.realpath",
+				"version": "1.0.0"
+			},
+			{
+				"name": "function-bind",
+				"version": "1.1.2"
+			},
+			{
+				"name": "get-assigned-identifiers",
+				"version": "1.2.0"
+			},
+			{
+				"name": "get-intrinsic",
+				"version": "1.3.0"
+			},
+			{
+				"name": "get-proto",
+				"version": "1.0.1"
+			},
+			{
+				"name": "glob",
+				"version": "7.2.3"
+			},
+			{
+				"name": "gopd",
+				"version": "1.2.0"
+			},
+			{
+				"name": "has",
+				"version": "1.0.4"
+			},
+			{
+				"name": "has-property-descriptors",
+				"version": "1.0.2"
+			},
+			{
+				"name": "has-symbols",
+				"version": "1.1.0"
+			},
+			{
+				"name": "has-tostringtag",
+				"version": "1.0.2"
+			},
+			{
+				"name": "hash-base",
+				"version": "3.0.5"
+			},
+			{
+				"name": "hash.js",
+				"version": "1.1.7"
+			},
+			{
+				"name": "hasown",
+				"version": "2.0.2"
+			},
+			{
+				"name": "hmac-drbg",
+				"version": "1.0.1"
+			},
+			{
+				"name": "htmlescape",
+				"version": "1.1.1"
+			},
+			{
+				"name": "https-browserify",
+				"version": "0.0.1"
+			},
+			{
+				"name": "ieee754",
+				"version": "1.2.1"
+			},
+			{
+				"name": "ignore",
+				"version": "3.3.10"
+			},
+			{
+				"name": "indexof",
+				"version": "0.0.1"
+			},
+			{
+				"name": "inflight",
+				"version": "1.0.6"
+			},
+			{
+				"name": "inherits",
+				"version": "2.0.4"
+			},
+			{
+				"name": "inline-source-map",
+				"version": "0.6.3"
+			},
+			{
+				"name": "insert-module-globals",
+				"version": "7.2.1"
+			},
+			{
+				"name": "concat-stream",
+				"version": "1.6.2"
+			},
+			{
+				"name": "typedarray",
+				"version": "0.0.6"
+			},
+			{
+				"name": "is-buffer",
+				"version": "1.1.6"
+			},
+			{
+				"name": "is-callable",
+				"version": "1.2.7"
+			},
+			{
+				"name": "is-core-module",
+				"version": "2.16.1"
+			},
+			{
+				"name": "is-typed-array",
+				"version": "1.1.15"
+			},
+			{
+				"name": "isarray",
+				"version": "1.0.0"
+			},
+			{
+				"name": "json-stable-stringify",
+				"version": "0.0.1"
+			},
+			{
+				"name": "jsonify",
+				"version": "0.0.1"
+			},
+			{
+				"name": "jsonparse",
+				"version": "1.3.1"
+			},
+			{
+				"name": "JSONStream",
+				"version": "1.3.5"
+			},
+			{
+				"name": "labeled-stream-splicer",
+				"version": "2.0.2"
+			},
+			{
+				"name": "lodash.memoize",
+				"version": "3.0.4"
+			},
+			{
+				"name": "math-intrinsics",
+				"version": "1.1.0"
+			},
+			{
+				"name": "md5.js",
+				"version": "1.3.5"
+			},
+			{
+				"name": "miller-rabin",
+				"version": "4.0.1"
+			},
+			{
+				"name": "minimalistic-assert",
+				"version": "1.0.1"
+			},
+			{
+				"name": "minimalistic-crypto-utils",
+				"version": "1.0.1"
+			},
+			{
+				"name": "minimatch",
+				"version": "3.1.2"
+			},
+			{
+				"name": "minimist",
+				"version": "0.0.10"
+			},
+			{
+				"name": "module-deps",
+				"version": "4.1.1"
+			},
+			{
+				"name": "object-inspect",
+				"version": "1.13.4"
+			},
+			{
+				"name": "object-keys",
+				"version": "1.1.1"
+			},
+			{
+				"name": "object.assign",
+				"version": "4.1.7"
+			},
+			{
+				"name": "once",
+				"version": "1.4.0"
+			},
+			{
+				"name": "optimist",
+				"version": "0.6.1"
+			},
+			{
+				"name": "os-browserify",
+				"version": "0.1.2"
+			},
+			{
+				"name": "pako",
+				"version": "0.2.9"
+			},
+			{
+				"name": "parents",
+				"version": "1.0.1"
+			},
+			{
+				"name": "parse-asn1",
+				"version": "5.1.9"
+			},
+			{
+				"name": "path-browserify",
+				"version": "0.0.1"
+			},
+			{
+				"name": "path-is-absolute",
+				"version": "1.0.1"
+			},
+			{
+				"name": "path-parse",
+				"version": "1.0.7"
+			},
+			{
+				"name": "path-platform",
+				"version": "0.11.15"
+			},
+			{
+				"name": "pbkdf2",
+				"version": "3.1.5"
+			},
+			{
+				"name": "possible-typed-array-names",
+				"version": "1.1.0"
+			},
+			{
+				"name": "process",
+				"version": "0.11.10"
+			},
+			{
+				"name": "process-nextick-args",
+				"version": "2.0.1"
+			},
+			{
+				"name": "public-encrypt",
+				"version": "4.0.3"
+			},
+			{
+				"name": "punycode",
+				"version": "1.4.1"
+			},
+			{
+				"name": "qs",
+				"version": "6.14.1"
+			},
+			{
+				"name": "querystring-es3",
+				"version": "0.2.1"
+			},
+			{
+				"name": "randombytes",
+				"version": "2.1.0"
+			},
+			{
+				"name": "randomfill",
+				"version": "1.0.4"
+			},
+			{
+				"name": "read-only-stream",
+				"version": "2.0.0"
+			},
+			{
+				"name": "readable-stream",
+				"version": "2.3.8"
+			},
+			{
+				"name": "safe-buffer",
+				"version": "5.1.2"
+			},
+			{
+				"name": "string_decoder",
+				"version": "1.1.1"
+			},
+			{
+				"name": "resolve",
+				"version": "0.6.3"
+			},
+			{
+				"name": "ripemd160",
+				"version": "2.0.3"
+			},
+			{
+				"name": "hash-base",
+				"version": "3.1.2"
+			},
+			{
+				"name": "safe-buffer",
+				"version": "5.2.1"
+			},
+			{
+				"name": "set-function-length",
+				"version": "1.2.2"
+			},
+			{
+				"name": "sha.js",
+				"version": "2.4.12"
+			},
+			{
+				"name": "shasum",
+				"version": "1.0.2"
+			},
+			{
+				"name": "shasum-object",
+				"version": "1.0.1"
+			},
+			{
+				"name": "shell-quote",
+				"version": "1.8.3"
+			},
+			{
+				"name": "side-channel",
+				"version": "1.1.0"
+			},
+			{
+				"name": "side-channel-list",
+				"version": "1.0.0"
+			},
+			{
+				"name": "side-channel-map",
+				"version": "1.0.1"
+			},
+			{
+				"name": "side-channel-weakmap",
+				"version": "1.0.2"
+			},
+			{
+				"name": "simple-concat",
+				"version": "1.0.1"
+			},
+			{
+				"name": "source-map",
+				"version": "0.5.7"
+			},
+			{
+				"name": "stream-browserify",
+				"version": "2.0.2"
+			},
+			{
+				"name": "stream-combiner2",
+				"version": "1.1.1"
+			},
+			{
+				"name": "stream-http",
+				"version": "2.8.3"
+			},
+			{
+				"name": "stream-splicer",
+				"version": "2.0.1"
+			},
+			{
+				"name": "string_decoder",
+				"version": "0.10.31"
+			},
+			{
+				"name": "strip-json-comments",
+				"version": "1.0.4"
+			},
+			{
+				"name": "subarg",
+				"version": "1.0.0"
+			},
+			{
+				"name": "minimist",
+				"version": "1.2.8"
+			},
+			{
+				"name": "supports-preserve-symlinks-flag",
+				"version": "1.0.0"
+			},
+			{
+				"name": "syntax-error",
+				"version": "1.4.0"
+			},
+			{
+				"name": "through",
+				"version": "2.3.8"
+			},
+			{
+				"name": "through2",
+				"version": "2.0.5"
+			},
+			{
+				"name": "timers-browserify",
+				"version": "1.4.2"
+			},
+			{
+				"name": "to-arraybuffer",
+				"version": "1.0.1"
+			},
+			{
+				"name": "to-buffer",
+				"version": "1.2.2"
+			},
+			{
+				"name": "isarray",
+				"version": "2.0.5"
+			},
+			{
+				"name": "tty-browserify",
+				"version": "0.0.1"
+			},
+			{
+				"name": "typed-array-buffer",
+				"version": "1.0.3"
+			},
+			{
+				"name": "typedarray",
+				"version": "0.0.7"
+			},
+			{
+				"name": "umd",
+				"version": "3.0.3"
+			},
+			{
+				"name": "undeclared-identifiers",
+				"version": "1.1.3"
+			},
+			{
+				"name": "url",
+				"version": "0.11.4"
+			},
+			{
+				"name": "util",
+				"version": "0.10.4"
+			},
+			{
+				"name": "util-deprecate",
+				"version": "1.0.2"
+			},
+			{
+				"name": "inherits",
+				"version": "2.0.3"
+			},
+			{
+				"name": "vm-browserify",
+				"version": "0.0.4"
+			},
+			{
+				"name": "which-typed-array",
+				"version": "1.1.19"
+			},
+			{
+				"name": "wordwrap",
+				"version": "0.0.3"
+			},
+			{
+				"name": "wrappy",
+				"version": "1.0.2"
+			},
+			{
+				"name": "xtend",
+				"version": "4.0.2"
+			}
+		]
+	}
+]

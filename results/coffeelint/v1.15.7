@@ -1,0 +1,909 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-08T04:22:47.217Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:11.7.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "coffeelint@1.15.7",
+			"name": "coffeelint",
+			"version": "1.15.7",
+			"location": "https://registry.npmjs.org/coffeelint/-/coffeelint-1.15.7.tgz",
+			"integrity": "sha512-Rq65Z8dKbTMgUiDM4SsM8m3C0tkejhfFDNhleY1mLscyh7c3Nk7bwiigaaAaT83VCi/Lls7b4W6ow15PMNOoiQ==",
+			"publishedAt": "2016-04-22T01:49:55.323Z",
+			"publishedWith": {
+				"node": "5.10.1",
+				"npm": "3.8.3"
+			},
+			"dependencies": {
+				"coffee-script": "~1.10.0",
+				"glob": "^4.0.0",
+				"ignore": "^3.0.9",
+				"optimist": "^0.6.1",
+				"resolve": "^0.6.3",
+				"strip-json-comments": "^1.0.2"
+			}
+		},
+		"source": {
+			"integrity": null,
+			"location": "git://github.com/clutchski/coffeelint.git",
+			"spec": "github:clutchski/coffeelint#69b9725ce8802ebd6d4d7b654283ce512a2c6ce7"
+		},
+		"comparisonHash": "9ef46a5bd31291e57cbab41e2f17c57bd6da0b5b",
+		"diff": {
+			"files": {
+				".npmignore": {
+					"match": false,
+					"packageHash": "279bad8bdd5d4681f1b96bec4bcafbd0f67426c1dce265ceb13c2c4a63aa65a5",
+					"size": 53,
+					"status": "missing-in-source"
+				},
+				"Cakefile": {
+					"diff": "--- published/Cakefile\n+++ rebuilt/Cakefile\n@@ -2,7 +2,7 @@\n glob = require 'glob'\n path = require 'path'\n browserify = require 'browserify'\n-CoffeeScript = require 'coffee-script'\n+CoffeeScript = require 'coffeescript'\n { exec } = require 'child_process'\n \n copySync = (src, dest) ->\n",
+					"match": false,
+					"packageHash": "d72b653da35bde050c6fb3238371fe0350d3e26366ec3f98512a70155627caa8",
+					"size": 2346,
+					"sourceHash": "8b1d24b2a0180c64a6f26a3a797c50199b053956a9c13bcd38fc6174278ee3fd",
+					"status": "content"
+				},
+				"README.md": {
+					"diff": "--- published/README.md\n+++ rebuilt/README.md\n@@ -1,96 +1,8 @@\n CoffeeLint\n ==========\n \n-CoffeeLint is a style checker that helps keep CoffeeScript code\n+CoffeeLint ~~is~~ was a style checker that ~~helps~~ helped keep CoffeeScript code\n clean and consistent.\n \n-For guides on installing, using and configuring CoffeeLint, head over\n-[here](http://www.coffeelint.org).\n-\n-To suggest a feature, report a bug, or general discussion, head over\n-[here](http://github.com/clutchski/coffeelint/issues/).\n-\n-## Team\n-\n-Current:\n-\n-- [Shuan Wang](https://github.com/swang)\n-\n-Past:\n-\n-- [Asa Ayers](https://github.com/AsaAyers)\n-- [Matt Perpick](https://github.com/clutchski)\n-\n-## Contributing\n-\n-* New rules should be set to a `warn` level. Developers will expect new changes to NOT break their existing workflow, so unless your change is extremely usefull, default to `warn`. Expect discussion if you choose to use `error`.\n-\n-* Look at existing rules and test structures when deciding how to name your rule. `no_foo.coffee` is used for many tests designed to catch specific errors, whereas `foo.coffee` is used for tests that are designed to enforce formatting and syntax.\n-\n-### Steps\n-\n-1. Fork the repo locally.\n-2. Run `npm install` to get dependencies.\n-3. Create your rule in a single file as `src/rules/your_rule_here.coffee`, using the existing\n-   rules as a guide.\n-   You may examine the AST and tokens using\n-   [http://asaayers.github.io/clfiddle/](http://asaayers.github.io/clfiddle/).\n-4. Add your test file `my_test.coffee` to the `test` directory.\n-5. Register your rule in `src/coffeelint.coffee`.\n-6. Run your test using `npm run testrule test/your_test_here.coffee`.\n-7. Run the whole tests suite using `npm test`.\n-8. Check that your rule's documentation is generated properly (see _Updating documentation when\n-adding a new rule_ below).\n-9. Squash all commits into a single commit when done.\n-10. Submit a pull request.\n-\n-[![Build Status](https://secure.travis-ci.org/clutchski/coffeelint.svg)](http://travis-ci.org/clutchski/coffeelint)\n-\n-### Updating documentation when adding a new rule\n-\n-When adding a new rule, its documentation is specified by setting a\n-`description` property within its `rule` property:\n-```coffeescript\n-module.exports = class NoComment\n-\n-    rule:\n-        name: 'no_comment'\n-        level: 'ignore'\n-        message: 'No comment'\n-        description: '''\n-            Disallows any comment in the code\n-            '''\n-\n-    tokens: ['#', '###']\n-\n-    lintToken : (token, tokenApi) ->\n-\t\treturn {context: \"Found '#{token[0]}'\"}\n-```\n-\n-The description property is a string that can embed HTML code:\n-```html\n-description: '''\n-\tDisallows any comment in the code. This code would not pass:\n-\t<pre>\n-\t<code>### Some code with comments\n-\tfoo = ->\n-\t\t# some other comments\n-\t\tbar()\n-\t</code>\n-\t</pre>\n-\t'''\n-```\n-[Coffeelint's website](http://www.coffeelint.org/) generates each\n-rule's documentation based on this `description` property.\n-\n-When adding a new rule, it is suggested that you check that the documentation\n-for your new rule is generated correctly. In order to do that, you should\n-follow these steps:\n-* Checkout the branch that contains the changes adding the new rule.\n-* Run `npm run compile`.\n-* Checkout the `gh-pages` branch: `git checkout origin/gh-pages`.\n-* Run `cp lib/coffeelint.js js/coffeelint.js`.\n-* Regenerate the HTML documentation: `rake updatehtml`. Note that you will\n-probably need to install rake.\n-* Open the `index.html` file with your favorite browser and make sure that your\n-rule's documentation is generated properly.\n",
+					"match": false,
+					"packageHash": "060e6f8cedb320f85decbfa90ed94822e205cf306039d7aff0b7c261edbd5105",
+					"size": 3370,
+					"sourceHash": "75b16e7ca15cc78df1da2d3138cd736061f5c2d4372dbc3974878e58c21c521b",
+					"status": "content"
+				},
+				"bin/.npmignore": {
+					"match": false,
+					"packageHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+					"size": 0,
+					"status": "missing-in-source"
+				},
+				"lib/.npmignore": {
+					"match": false,
+					"packageHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+					"size": 0,
+					"status": "missing-in-source"
+				},
+				"lib/cache.js": {
+					"match": false,
+					"packageHash": "1d242d32cfdab219d0579d06010c1610d1b6e16099e38db1999c94f180c53312",
+					"size": 1350,
+					"status": "missing-in-source"
+				},
+				"lib/coffeelint.js": {
+					"match": false,
+					"packageHash": "d133ba050cec80adbc87c3a50868443539b7faa32afcdf5654ae72b0b1be79c0",
+					"size": 106818,
+					"status": "missing-in-source"
+				},
+				"lib/commandline.js": {
+					"match": false,
+					"packageHash": "7958a4a3054cfa6fd6871f0d30d9b34e44a924d0b30c910d7b3e3ae832054016",
+					"size": 9239,
+					"status": "missing-in-source"
+				},
+				"lib/configfinder.js": {
+					"match": false,
+					"packageHash": "e25af5e0339566b47765e1220c0ed9e411e461e6655848addd18af8d9d97cab1",
+					"size": 3916,
+					"status": "missing-in-source"
+				},
+				"lib/reporters/checkstyle.js": {
+					"match": false,
+					"packageHash": "e2ddde90200fea7fd38e72386589ad9d0cf6e5fd880dd2af9c4001e02c95917c",
+					"size": 1665,
+					"status": "missing-in-source"
+				},
+				"lib/reporters/csv.js": {
+					"match": false,
+					"packageHash": "06d535ead8725083c00028e842bddbea32839cfdfef9f5fa2b0a121cb02913b6",
+					"size": 1379,
+					"status": "missing-in-source"
+				},
+				"lib/reporters/default.js": {
+					"match": false,
+					"packageHash": "87c64f7105555e370e80b1f47ecbb55e2a1a6e4f15d8f701c805b5a5ee1d8e2f",
+					"size": 3478,
+					"status": "missing-in-source"
+				},
+				"lib/reporters/jslint.js": {
+					"match": false,
+					"packageHash": "fbaa42c90265cef7567376f3f7c5b4211b12468b43a020b6d2f0584de659debb",
+					"size": 1750,
+					"status": "missing-in-source"
+				},
+				"lib/reporters/raw.js": {
+					"match": false,
+					"packageHash": "fdf393529a27ebfb515a4d5b3c855534d4907c568bbca1e7ad74034b4d548bd0",
+					"size": 1010,
+					"status": "missing-in-source"
+				},
+				"lib/ruleLoader.js": {
+					"match": false,
+					"packageHash": "0a78e7bb431c83c0d867b15d660e984586050d2cbb09bda62fc380b51055e7e0",
+					"size": 1659,
+					"status": "missing-in-source"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -1,7 +1,7 @@\n {\n   \"name\": \"coffeelint\",\n   \"description\": \"Lint your CoffeeScript\",\n-  \"version\": \"1.15.7\",\n+  \"version\": \"2.1.0\",\n   \"homepage\": \"http://www.coffeelint.org\",\n   \"keywords\": [\n     \"lint\",\n@@ -12,7 +12,7 @@\n   \"main\": \"./lib/coffeelint.js\",\n   \"engines\": {\n     \"npm\": \">=1.3.7\",\n-    \"node\": \">=0.8.0\"\n+    \"node\": \">=6.9.1\"\n   },\n   \"repository\": {\n     \"type\": \"git\",\n@@ -22,15 +22,17 @@\n     \"coffeelint\": \"./bin/coffeelint\"\n   },\n   \"dependencies\": {\n-    \"coffee-script\": \"~1.10.0\",\n-    \"glob\": \"^4.0.0\",\n+    \"browserify\": \"^13.1.0\",\n+    \"coffeeify\": \"~1.0.0\",\n+    \"coffeescript\": \"^2.1.0\",\n+    \"glob\": \"^7.0.6\",\n     \"ignore\": \"^3.0.9\",\n     \"optimist\": \"^0.6.1\",\n     \"resolve\": \"^0.6.3\",\n     \"strip-json-comments\": \"^1.0.2\"\n   },\n   \"devDependencies\": {\n-    \"vows\": \">=0.6.0\",\n+    \"vows\": \">=0.8.1\",\n     \"underscore\": \">=1.4.4\"\n   },\n   \"license\": \"MIT\",\n@@ -42,9 +44,10 @@\n     \"prepublish\": \"cake prepublish\",\n     \"postpublish\": \"cake postpublish\",\n     \"publish\": \"cake publish\",\n+    \"install\": \"cake install\",\n     \"lint\": \"cake compile && ./bin/coffeelint .\",\n     \"lint-csv\": \"cake compile && ./bin/coffeelint --csv .\",\n     \"lint-jslint\": \"cake compile && ./bin/coffeelint --jslint .\",\n     \"compile\": \"cake compile\"\n   }\n-}\n\\ No newline at end of file\n+}\n",
+					"match": false,
+					"packageHash": "69ea1493926d5019e4b0ef1bb68c006e45690eba5f1309968a6e6b51fb68c566",
+					"size": 1323,
+					"sourceHash": "95296cb300b9bb13700e081cc61d347877132619001b992d84ebe29e68555222",
+					"status": "content"
+				},
+				"vowsrunner.js": {
+					"diff": "--- published/vowsrunner.js\n+++ rebuilt/vowsrunner.js\n@@ -1,4 +1,4 @@\n #!/usr/bin/env node\n-require('coffee-script/register')\n+require('coffeescript/register')\n require('./node_modules/vows/bin/vows')\n \n",
+					"match": false,
+					"packageHash": "8de355f152f05edc2aea5964df4e914fd8196faf6df46a80edbc227523a740ed",
+					"size": 95,
+					"sourceHash": "624a2851b1fa8644bb24ddf85691518b80707b70adda831fcc74527a4845f759",
+					"status": "content"
+				},
+				"OLD_README.md": {
+					"match": false,
+					"status": "missing-in-package"
+				}
+			},
+			"summary": {
+				"differentFiles": 4,
+				"matchingFiles": 8,
+				"missingInPackage": 1,
+				"missingInSource": 13,
+				"score": 0.3076923076923077,
+				"totalFiles": 26
+			}
+		},
+		"prodDependencies": [
+			{
+				"name": "acorn",
+				"version": "7.4.1"
+			},
+			{
+				"name": "acorn-node",
+				"version": "1.8.2"
+			},
+			{
+				"name": "acorn-walk",
+				"version": "7.2.0"
+			},
+			{
+				"name": "asn1.js",
+				"version": "4.10.1"
+			},
+			{
+				"name": "bn.js",
+				"version": "4.12.2"
+			},
+			{
+				"name": "assert",
+				"version": "1.5.1"
+			},
+			{
+				"name": "available-typed-arrays",
+				"version": "1.0.7"
+			},
+			{
+				"name": "balanced-match",
+				"version": "1.0.2"
+			},
+			{
+				"name": "base64-js",
+				"version": "1.5.1"
+			},
+			{
+				"name": "bn.js",
+				"version": "5.2.2"
+			},
+			{
+				"name": "brace-expansion",
+				"version": "1.1.12"
+			},
+			{
+				"name": "brorand",
+				"version": "1.1.0"
+			},
+			{
+				"name": "browser-pack",
+				"version": "6.1.0"
+			},
+			{
+				"name": "browser-resolve",
+				"version": "1.11.3"
+			},
+			{
+				"name": "resolve",
+				"version": "1.1.7"
+			},
+			{
+				"name": "browserify",
+				"version": "13.3.0"
+			},
+			{
+				"name": "browserify-aes",
+				"version": "1.2.0"
+			},
+			{
+				"name": "browserify-cipher",
+				"version": "1.0.1"
+			},
+			{
+				"name": "browserify-des",
+				"version": "1.0.2"
+			},
+			{
+				"name": "browserify-rsa",
+				"version": "4.1.1"
+			},
+			{
+				"name": "browserify-sign",
+				"version": "4.2.5"
+			},
+			{
+				"name": "browserify-zlib",
+				"version": "0.1.4"
+			},
+			{
+				"name": "resolve",
+				"version": "1.22.11"
+			},
+			{
+				"name": "buffer",
+				"version": "4.9.2"
+			},
+			{
+				"name": "buffer-from",
+				"version": "1.1.2"
+			},
+			{
+				"name": "buffer-xor",
+				"version": "1.0.3"
+			},
+			{
+				"name": "builtin-status-codes",
+				"version": "3.0.0"
+			},
+			{
+				"name": "cached-path-relative",
+				"version": "1.1.0"
+			},
+			{
+				"name": "call-bind",
+				"version": "1.0.8"
+			},
+			{
+				"name": "call-bind-apply-helpers",
+				"version": "1.0.2"
+			},
+			{
+				"name": "call-bound",
+				"version": "1.0.4"
+			},
+			{
+				"name": "cipher-base",
+				"version": "1.0.7"
+			},
+			{
+				"name": "coffee-script",
+				"version": "1.12.7"
+			},
+			{
+				"name": "coffeeify",
+				"version": "1.0.0"
+			},
+			{
+				"name": "coffeescript",
+				"version": "2.7.0"
+			},
+			{
+				"name": "combine-source-map",
+				"version": "0.8.0"
+			},
+			{
+				"name": "convert-source-map",
+				"version": "1.1.3"
+			},
+			{
+				"name": "concat-map",
+				"version": "0.0.1"
+			},
+			{
+				"name": "concat-stream",
+				"version": "1.5.2"
+			},
+			{
+				"name": "process-nextick-args",
+				"version": "1.0.7"
+			},
+			{
+				"name": "readable-stream",
+				"version": "2.0.6"
+			},
+			{
+				"name": "console-browserify",
+				"version": "1.2.0"
+			},
+			{
+				"name": "constants-browserify",
+				"version": "1.0.0"
+			},
+			{
+				"name": "convert-source-map",
+				"version": "0.4.1"
+			},
+			{
+				"name": "core-util-is",
+				"version": "1.0.3"
+			},
+			{
+				"name": "create-ecdh",
+				"version": "4.0.4"
+			},
+			{
+				"name": "create-hash",
+				"version": "1.2.0"
+			},
+			{
+				"name": "create-hmac",
+				"version": "1.1.7"
+			},
+			{
+				"name": "crypto-browserify",
+				"version": "3.12.1"
+			},
+			{
+				"name": "dash-ast",
+				"version": "1.0.0"
+			},
+			{
+				"name": "define-data-property",
+				"version": "1.1.4"
+			},
+			{
+				"name": "define-properties",
+				"version": "1.2.1"
+			},
+			{
+				"name": "defined",
+				"version": "1.0.1"
+			},
+			{
+				"name": "deps-sort",
+				"version": "2.0.1"
+			},
+			{
+				"name": "des.js",
+				"version": "1.1.0"
+			},
+			{
+				"name": "detective",
+				"version": "4.7.1"
+			},
+			{
+				"name": "acorn",
+				"version": "5.7.4"
+			},
+			{
+				"name": "diffie-hellman",
+				"version": "5.0.3"
+			},
+			{
+				"name": "domain-browser",
+				"version": "1.1.7"
+			},
+			{
+				"name": "dunder-proto",
+				"version": "1.0.1"
+			},
+			{
+				"name": "duplexer2",
+				"version": "0.1.4"
+			},
+			{
+				"name": "elliptic",
+				"version": "6.6.1"
+			},
+			{
+				"name": "es-define-property",
+				"version": "1.0.1"
+			},
+			{
+				"name": "es-errors",
+				"version": "1.3.0"
+			},
+			{
+				"name": "es-object-atoms",
+				"version": "1.1.1"
+			},
+			{
+				"name": "events",
+				"version": "1.1.1"
+			},
+			{
+				"name": "evp_bytestokey",
+				"version": "1.0.3"
+			},
+			{
+				"name": "fast-safe-stringify",
+				"version": "2.1.1"
+			},
+			{
+				"name": "for-each",
+				"version": "0.3.5"
+			},
+			{
+				"name": "fs.realpath",
+				"version": "1.0.0"
+			},
+			{
+				"name": "function-bind",
+				"version": "1.1.2"
+			},
+			{
+				"name": "get-assigned-identifiers",
+				"version": "1.2.0"
+			},
+			{
+				"name": "get-intrinsic",
+				"version": "1.3.0"
+			},
+			{
+				"name": "get-proto",
+				"version": "1.0.1"
+			},
+			{
+				"name": "glob",
+				"version": "7.2.3"
+			},
+			{
+				"name": "gopd",
+				"version": "1.2.0"
+			},
+			{
+				"name": "has",
+				"version": "1.0.4"
+			},
+			{
+				"name": "has-property-descriptors",
+				"version": "1.0.2"
+			},
+			{
+				"name": "has-symbols",
+				"version": "1.1.0"
+			},
+			{
+				"name": "has-tostringtag",
+				"version": "1.0.2"
+			},
+			{
+				"name": "hash-base",
+				"version": "3.0.5"
+			},
+			{
+				"name": "hash.js",
+				"version": "1.1.7"
+			},
+			{
+				"name": "hasown",
+				"version": "2.0.2"
+			},
+			{
+				"name": "hmac-drbg",
+				"version": "1.0.1"
+			},
+			{
+				"name": "htmlescape",
+				"version": "1.1.1"
+			},
+			{
+				"name": "https-browserify",
+				"version": "0.0.1"
+			},
+			{
+				"name": "ieee754",
+				"version": "1.2.1"
+			},
+			{
+				"name": "ignore",
+				"version": "3.3.10"
+			},
+			{
+				"name": "indexof",
+				"version": "0.0.1"
+			},
+			{
+				"name": "inflight",
+				"version": "1.0.6"
+			},
+			{
+				"name": "inherits",
+				"version": "2.0.4"
+			},
+			{
+				"name": "inline-source-map",
+				"version": "0.6.3"
+			},
+			{
+				"name": "insert-module-globals",
+				"version": "7.2.1"
+			},
+			{
+				"name": "concat-stream",
+				"version": "1.6.2"
+			},
+			{
+				"name": "typedarray",
+				"version": "0.0.6"
+			},
+			{
+				"name": "is-buffer",
+				"version": "1.1.6"
+			},
+			{
+				"name": "is-callable",
+				"version": "1.2.7"
+			},
+			{
+				"name": "is-core-module",
+				"version": "2.16.1"
+			},
+			{
+				"name": "is-typed-array",
+				"version": "1.1.15"
+			},
+			{
+				"name": "isarray",
+				"version": "1.0.0"
+			},
+			{
+				"name": "json-stable-stringify",
+				"version": "0.0.1"
+			},
+			{
+				"name": "jsonify",
+				"version": "0.0.1"
+			},
+			{
+				"name": "jsonparse",
+				"version": "1.3.1"
+			},
+			{
+				"name": "JSONStream",
+				"version": "1.3.5"
+			},
+			{
+				"name": "labeled-stream-splicer",
+				"version": "2.0.2"
+			},
+			{
+				"name": "lodash.memoize",
+				"version": "3.0.4"
+			},
+			{
+				"name": "math-intrinsics",
+				"version": "1.1.0"
+			},
+			{
+				"name": "md5.js",
+				"version": "1.3.5"
+			},
+			{
+				"name": "miller-rabin",
+				"version": "4.0.1"
+			},
+			{
+				"name": "minimalistic-assert",
+				"version": "1.0.1"
+			},
+			{
+				"name": "minimalistic-crypto-utils",
+				"version": "1.0.1"
+			},
+			{
+				"name": "minimatch",
+				"version": "3.1.2"
+			},
+			{
+				"name": "minimist",
+				"version": "0.0.10"
+			},
+			{
+				"name": "module-deps",
+				"version": "4.1.1"
+			},
+			{
+				"name": "object-inspect",
+				"version": "1.13.4"
+			},
+			{
+				"name": "object-keys",
+				"version": "1.1.1"
+			},
+			{
+				"name": "object.assign",
+				"version": "4.1.7"
+			},
+			{
+				"name": "once",
+				"version": "1.4.0"
+			},
+			{
+				"name": "optimist",
+				"version": "0.6.1"
+			},
+			{
+				"name": "os-browserify",
+				"version": "0.1.2"
+			},
+			{
+				"name": "pako",
+				"version": "0.2.9"
+			},
+			{
+				"name": "parents",
+				"version": "1.0.1"
+			},
+			{
+				"name": "parse-asn1",
+				"version": "5.1.9"
+			},
+			{
+				"name": "path-browserify",
+				"version": "0.0.1"
+			},
+			{
+				"name": "path-is-absolute",
+				"version": "1.0.1"
+			},
+			{
+				"name": "path-parse",
+				"version": "1.0.7"
+			},
+			{
+				"name": "path-platform",
+				"version": "0.11.15"
+			},
+			{
+				"name": "pbkdf2",
+				"version": "3.1.5"
+			},
+			{
+				"name": "possible-typed-array-names",
+				"version": "1.1.0"
+			},
+			{
+				"name": "process",
+				"version": "0.11.10"
+			},
+			{
+				"name": "process-nextick-args",
+				"version": "2.0.1"
+			},
+			{
+				"name": "public-encrypt",
+				"version": "4.0.3"
+			},
+			{
+				"name": "punycode",
+				"version": "1.4.1"
+			},
+			{
+				"name": "qs",
+				"version": "6.14.1"
+			},
+			{
+				"name": "querystring-es3",
+				"version": "0.2.1"
+			},
+			{
+				"name": "randombytes",
+				"version": "2.1.0"
+			},
+			{
+				"name": "randomfill",
+				"version": "1.0.4"
+			},
+			{
+				"name": "read-only-stream",
+				"version": "2.0.0"
+			},
+			{
+				"name": "readable-stream",
+				"version": "2.3.8"
+			},
+			{
+				"name": "safe-buffer",
+				"version": "5.1.2"
+			},
+			{
+				"name": "string_decoder",
+				"version": "1.1.1"
+			},
+			{
+				"name": "resolve",
+				"version": "0.6.3"
+			},
+			{
+				"name": "ripemd160",
+				"version": "2.0.3"
+			},
+			{
+				"name": "hash-base",
+				"version": "3.1.2"
+			},
+			{
+				"name": "safe-buffer",
+				"version": "5.2.1"
+			},
+			{
+				"name": "set-function-length",
+				"version": "1.2.2"
+			},
+			{
+				"name": "sha.js",
+				"version": "2.4.12"
+			},
+			{
+				"name": "shasum",
+				"version": "1.0.2"
+			},
+			{
+				"name": "shasum-object",
+				"version": "1.0.1"
+			},
+			{
+				"name": "shell-quote",
+				"version": "1.8.3"
+			},
+			{
+				"name": "side-channel",
+				"version": "1.1.0"
+			},
+			{
+				"name": "side-channel-list",
+				"version": "1.0.0"
+			},
+			{
+				"name": "side-channel-map",
+				"version": "1.0.1"
+			},
+			{
+				"name": "side-channel-weakmap",
+				"version": "1.0.2"
+			},
+			{
+				"name": "simple-concat",
+				"version": "1.0.1"
+			},
+			{
+				"name": "source-map",
+				"version": "0.5.7"
+			},
+			{
+				"name": "stream-browserify",
+				"version": "2.0.2"
+			},
+			{
+				"name": "stream-combiner2",
+				"version": "1.1.1"
+			},
+			{
+				"name": "stream-http",
+				"version": "2.8.3"
+			},
+			{
+				"name": "stream-splicer",
+				"version": "2.0.1"
+			},
+			{
+				"name": "string_decoder",
+				"version": "0.10.31"
+			},
+			{
+				"name": "strip-json-comments",
+				"version": "1.0.4"
+			},
+			{
+				"name": "subarg",
+				"version": "1.0.0"
+			},
+			{
+				"name": "minimist",
+				"version": "1.2.8"
+			},
+			{
+				"name": "supports-preserve-symlinks-flag",
+				"version": "1.0.0"
+			},
+			{
+				"name": "syntax-error",
+				"version": "1.4.0"
+			},
+			{
+				"name": "through",
+				"version": "2.3.8"
+			},
+			{
+				"name": "through2",
+				"version": "2.0.5"
+			},
+			{
+				"name": "timers-browserify",
+				"version": "1.4.2"
+			},
+			{
+				"name": "to-arraybuffer",
+				"version": "1.0.1"
+			},
+			{
+				"name": "to-buffer",
+				"version": "1.2.2"
+			},
+			{
+				"name": "isarray",
+				"version": "2.0.5"
+			},
+			{
+				"name": "tty-browserify",
+				"version": "0.0.1"
+			},
+			{
+				"name": "typed-array-buffer",
+				"version": "1.0.3"
+			},
+			{
+				"name": "typedarray",
+				"version": "0.0.7"
+			},
+			{
+				"name": "umd",
+				"version": "3.0.3"
+			},
+			{
+				"name": "undeclared-identifiers",
+				"version": "1.1.3"
+			},
+			{
+				"name": "url",
+				"version": "0.11.4"
+			},
+			{
+				"name": "util",
+				"version": "0.10.4"
+			},
+			{
+				"name": "util-deprecate",
+				"version": "1.0.2"
+			},
+			{
+				"name": "inherits",
+				"version": "2.0.3"
+			},
+			{
+				"name": "vm-browserify",
+				"version": "0.0.4"
+			},
+			{
+				"name": "which-typed-array",
+				"version": "1.1.19"
+			},
+			{
+				"name": "wordwrap",
+				"version": "0.0.3"
+			},
+			{
+				"name": "wrappy",
+				"version": "1.0.2"
+			},
+			{
+				"name": "xtend",
+				"version": "4.0.2"
+			}
+		]
+	}
+]
