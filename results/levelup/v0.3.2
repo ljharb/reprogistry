@@ -1,0 +1,365 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-08T09:37:53.202Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:11.7.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "levelup@0.3.2",
+			"name": "levelup",
+			"version": "0.3.2",
+			"location": "https://registry.npmjs.org/levelup/-/levelup-0.3.2.tgz",
+			"integrity": "sha512-qjVPhbzoCcaGJp0UARWmH36QsJaY6itrrZLNTfYZ2Ci/4S7SEcLaouaMWwXE0E5Si+aT5IGSdPdCE3rkzxqUCg==",
+			"publishedAt": "2012-11-24T08:35:51.917Z",
+			"publishedWith": {
+				"node": null,
+				"npm": "1.1.65"
+			},
+			"dependencies": {
+				"errno": "~0.0.3",
+				"bindings": "~1.0.0",
+				"bufferstream": "~0.5.1",
+				"concat-stream": "~0.0.9"
+			}
+		},
+		"source": {
+			"integrity": null,
+			"location": "https://github.com/rvagg/node-levelup.git",
+			"spec": "github:rvagg/node-levelup#0.3.2"
+		},
+		"comparisonHash": "9ef46a5bd31291e57cbab41e2f17c57bd6da0b5b",
+		"diff": {
+			"files": {
+				".npmignore": {
+					"match": false,
+					"packageHash": "7dd1b75f4a7ea06afe7b8899d1feaab08c9835948b1966e49957d1a8366d54ea",
+					"size": 46,
+					"status": "missing-in-source"
+				},
+				"deps/leveldb/leveldb-1.5.0/.npmignore": {
+					"match": false,
+					"packageHash": "0df94efb0b39aa8d4a7aaaf240e558c9b78436b266c7dac108035d73c3722f42",
+					"size": 61,
+					"status": "missing-in-source"
+				},
+				"deps/leveldb/leveldb-1.5.0/build/config.gypi": {
+					"match": false,
+					"packageHash": "bc4b0c42fa720814c9ba7fa67a8709638924793896f0d21a5963551efbee50cb",
+					"size": 705,
+					"status": "missing-in-source"
+				},
+				"npm-shrinkwrap.json": {
+					"match": false,
+					"packageHash": "95ecbf35a04a2307df30570c06a1ff3a5fbc489ed99bb9c99614f8aeb704875b",
+					"size": 373,
+					"status": "missing-in-source"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -31,7 +31,7 @@\n     \"tar\": \"*\",\n     \"mkfiletree\": \"*\",\n     \"readfiletree\": \"*\",\n-    \"slow-stream\": \"*\",\n+    \"slow-stream\": \"~0.0.3\",\n     \"delayed\": \"*\",\n     \"boganipsum\": \"*\"\n   },\n@@ -44,7 +44,9 @@\n     \"install\": \"node-gyp rebuild\",\n     \"functionaltests\": \"node ./test/functional/fstream-test.js && node ./test/functional/binary-data-test.js && node ./test/functional/compat-test.js\",\n     \"alltests\": \"npm test && npm run-script functionaltests\",\n-    \"publish\": \"rm -rf ./node_modules/ npm-shrinkwrap.json && npm install --production && npm shrinkwrap && npm publish && rm npm-shrinkwrap.json && npm install\"\n+    \"publish\": \"rm -rf ./node_modules/ npm-shrinkwrap.json && npm install --production && npm shrinkwrap && npm publish && rm npm-shrinkwrap.json && npm install\",\n+    \"sr\": \"npm shrinkwrap\",\n+    \"l\": \"npm ls\"\n   },\n   \"license\": \"MIT\",\n   \"gypfile\": true\n",
+					"match": false,
+					"packageHash": "91c87aefe0733ffa349bfa0ddbedf2d5d950f0025f54e97776a4c470199b9ec2",
+					"size": 1362,
+					"sourceHash": "91f76d9c960e18b52bc68205c704e99e7dc378720d6f281404264dbfb030c65a",
+					"status": "content"
+				},
+				"src/database.cc": {
+					"diff": "--- published/src/database.cc\n+++ rebuilt/src/database.cc\n@@ -65,6 +65,14 @@\n   return db->NewIterator(*options);\n }\n \n+const leveldb::Snapshot* Database::NewSnapshot () {\n+  return db->GetSnapshot();\n+}\n+\n+void Database::ReleaseSnapshot (const leveldb::Snapshot* snapshot) {\n+  return db->ReleaseSnapshot(snapshot);\n+}\n+\n void Database::CloseDatabase () {\n   delete db;\n   db = NULL;\n",
+					"match": false,
+					"packageHash": "0889f7204b962bb43a6abb6496383249f1264f95bbc44ae06332246c9caa4c23",
+					"size": 9948,
+					"sourceHash": "763f341d1928e4946636f2120090c2e4a62916cd0fa36edce4b272319fb5e848",
+					"status": "content"
+				},
+				"src/database.h": {
+					"diff": "--- published/src/database.h\n+++ rebuilt/src/database.h\n@@ -23,13 +23,15 @@\n   static void Init ();\n   static v8::Handle<v8::Value> NewInstance (const v8::Arguments& args);\n \n-  Status OpenDatabase           (Options* options, string location);\n-  Status PutToDatabase          (WriteOptions* options, Slice key, Slice value);\n-  Status GetFromDatabase        (ReadOptions* options, Slice key, string& value);\n-  Status DeleteFromDatabase     (WriteOptions* options, Slice key);\n-  Status WriteBatchToDatabase   (WriteOptions* options, WriteBatch* batch);\n+  Status OpenDatabase            (Options* options, string location);\n+  Status PutToDatabase           (WriteOptions* options, Slice key, Slice value);\n+  Status GetFromDatabase         (ReadOptions* options, Slice key, string& value);\n+  Status DeleteFromDatabase      (WriteOptions* options, Slice key);\n+  Status WriteBatchToDatabase    (WriteOptions* options, WriteBatch* batch);\n   leveldb::Iterator* NewIterator (ReadOptions* options);\n-  void   CloseDatabase          ();\n+  const leveldb::Snapshot* NewSnapshot ();\n+  void ReleaseSnapshot           (const leveldb::Snapshot* snapshot);\n+  void CloseDatabase             ();\n \n private:\n   Database ();\n",
+					"match": false,
+					"packageHash": "6a414dd9bc337dec95b31ea509d3d1757c526e8c58308e4d40007c583c27b348",
+					"size": 1271,
+					"sourceHash": "232c6a810fbc15edaed19daf44ec648f28b16204a24ce199d738462b1d79bc9e",
+					"status": "content"
+				},
+				"test/benchmarks/node_modules/async/.gitmodules": {
+					"match": false,
+					"packageHash": "2377d568401e60e782c9d3ebd47d92e65c72b8de5eed3349d52e64ad9f59e7b5",
+					"size": 283,
+					"status": "missing-in-source"
+				},
+				"test/benchmarks/node_modules/async/.npmignore": {
+					"match": false,
+					"packageHash": "dc3e8417b58c445856d2156ab06b07b3d3295ad4ee822a1eab7e9883e2711d7d",
+					"size": 27,
+					"status": "missing-in-source"
+				},
+				"test/benchmarks/node_modules/async/LICENSE": {
+					"match": false,
+					"packageHash": "b04b9e208e566fa898c7429e4dd5b45ba3ba2f7391e5c009cf63c53d580fa9b4",
+					"size": 1058,
+					"status": "missing-in-source"
+				},
+				"test/benchmarks/node_modules/async/Makefile": {
+					"match": false,
+					"packageHash": "77d71e50f78d9289b59f265d2337591d549217f997a3618fcc6c1e411b45745f",
+					"size": 542,
+					"status": "missing-in-source"
+				},
+				"test/benchmarks/node_modules/async/README.md": {
+					"match": false,
+					"packageHash": "3604f9774207d30568e682f6cef2f7fc2783bf69979367c4cc16b64ec55ae808",
+					"size": 32218,
+					"status": "missing-in-source"
+				},
+				"test/benchmarks/node_modules/async/index.js": {
+					"match": false,
+					"packageHash": "c0d6dd119ae1c052b791312c7c3704a022a4918a602724a57cc7c7e53c592646",
+					"size": 163,
+					"status": "missing-in-source"
+				},
+				"test/benchmarks/node_modules/async/lib/async.js": {
+					"match": false,
+					"packageHash": "8a3b6a57100cdbfc07a9fc67a3bdd2bbf96c4f3efba963867a381177736f79d1",
+					"size": 21183,
+					"status": "missing-in-source"
+				},
+				"test/benchmarks/node_modules/async/package.json": {
+					"match": false,
+					"packageHash": "05b2ee271cff017ef7641fb3a1dd9a666686a393c701ce4558557d7e2eb7f9c2",
+					"size": 33994,
+					"status": "missing-in-source"
+				},
+				"test/benchmarks/node_modules/benchmark/LICENSE.txt": {
+					"match": false,
+					"packageHash": "461f637de80855725eba2c1143f6a3706bba775a1219899bf225d59dbade8f73",
+					"size": 1212,
+					"status": "missing-in-source"
+				},
+				"test/benchmarks/node_modules/benchmark/README.md": {
+					"match": false,
+					"packageHash": "343473d93ee93f1321d172e379887cd4e568285d1625b0a164a8d778102f8865",
+					"size": 3701,
+					"status": "missing-in-source"
+				},
+				"test/benchmarks/node_modules/benchmark/benchmark.js": {
+					"match": false,
+					"packageHash": "6acd55d59df06199253d9998dc5c0765005badaa017724f475a3e674bee4d962",
+					"size": 113855,
+					"status": "missing-in-source"
+				},
+				"test/benchmarks/node_modules/benchmark/doc/README.md": {
+					"match": false,
+					"packageHash": "bd6fd3651486b8134a4e837b38dbd1387b06d068cf0b4d0502ea1ca477328746",
+					"size": 70714,
+					"status": "missing-in-source"
+				},
+				"test/benchmarks/node_modules/benchmark/package.json": {
+					"match": false,
+					"packageHash": "5f63c3dbb780acc7e5461320724a8230b86484c7213e8b8f8e57b6bc1650bfea",
+					"size": 5175,
+					"status": "missing-in-source"
+				},
+				"test/benchmarks/node_modules/benchmark/test/run-test.sh": {
+					"match": false,
+					"packageHash": "800158a51ea9d24304212addaaff4c064c197b11fcf341edfb4952f5544183fc",
+					"size": 171,
+					"status": "missing-in-source"
+				},
+				"test/benchmarks/node_modules/benchmark/test/test.js": {
+					"match": false,
+					"packageHash": "7ab4a1e289f57a8e31a26b344be35bfceb86a0a79cd75712d7ad7d6daae6de2a",
+					"size": 60136,
+					"status": "missing-in-source"
+				},
+				"test/benchmarks/node_modules/colors/MIT-LICENSE.txt": {
+					"match": false,
+					"packageHash": "bf31c5eec1df64ee686f74f571f869debdb1fa4a00ef9c6cf8c4620d478d741f",
+					"size": 1085,
+					"status": "missing-in-source"
+				},
+				"test/benchmarks/node_modules/colors/ReadMe.md": {
+					"match": false,
+					"packageHash": "f61832a2618a93d39be36011937a28562167138a2927f9b98ff944fee5feae7d",
+					"size": 1290,
+					"status": "missing-in-source"
+				},
+				"test/benchmarks/node_modules/colors/colors.js": {
+					"match": false,
+					"packageHash": "06f100839ee81f3b8d89273ea2983c2b4126d4b9397977c743058ab8c801787b",
+					"size": 7705,
+					"status": "missing-in-source"
+				},
+				"test/benchmarks/node_modules/colors/example.html": {
+					"match": false,
+					"packageHash": "bf17e1739b215ceabed77419a9458b3e2f91cd6b1f71f5119a5e3f9c670fd665",
+					"size": 2486,
+					"status": "missing-in-source"
+				},
+				"test/benchmarks/node_modules/colors/example.js": {
+					"match": false,
+					"packageHash": "79bad056f48b90e223682c770702c84b8765a9503a5f44c8f9b2bf086190ea97",
+					"size": 2039,
+					"status": "missing-in-source"
+				},
+				"test/benchmarks/node_modules/colors/package.json": {
+					"match": false,
+					"packageHash": "3119e0b80b2162749de4fe3922499b637f1eea11a326c8f7b7e21713a7d2f06a",
+					"size": 1796,
+					"status": "missing-in-source"
+				},
+				"test/benchmarks/node_modules/colors/test.js": {
+					"match": false,
+					"packageHash": "b0fac58c8567021e4b097096ceedd8cc300d55665ed4fdf52b70d15d3e0b6257",
+					"size": 1958,
+					"status": "missing-in-source"
+				},
+				"test/benchmarks/node_modules/rimraf/AUTHORS": {
+					"match": false,
+					"packageHash": "15fedcbc6f19b958d27f73b626f6ac5330f28aaa97f3e350edbd64121238d50c",
+					"size": 235,
+					"status": "missing-in-source"
+				},
+				"test/benchmarks/node_modules/rimraf/LICENSE": {
+					"match": false,
+					"packageHash": "ab95d69fc43021e0451b5021ff09fbc89ee6f9199354397f18fe7ce3f4b50554",
+					"size": 1092,
+					"status": "missing-in-source"
+				},
+				"test/benchmarks/node_modules/rimraf/README.md": {
+					"match": false,
+					"packageHash": "35b0bfde36439cbfc813766d5df8258d04ae92bd59c9d731a37399c533654346",
+					"size": 540,
+					"status": "missing-in-source"
+				},
+				"test/benchmarks/node_modules/rimraf/node_modules/graceful-fs/.npmignore": {
+					"match": false,
+					"packageHash": "4d56952b0fb13bf8f9b6c13a6d4c34a075bac3af447636a1df4335d7576e2f97",
+					"size": 14,
+					"status": "missing-in-source"
+				},
+				"test/benchmarks/node_modules/rimraf/node_modules/graceful-fs/LICENSE": {
+					"match": false,
+					"packageHash": "ab95d69fc43021e0451b5021ff09fbc89ee6f9199354397f18fe7ce3f4b50554",
+					"size": 1092,
+					"status": "missing-in-source"
+				},
+				"test/benchmarks/node_modules/rimraf/node_modules/graceful-fs/README.md": {
+					"match": false,
+					"packageHash": "da243fbf3af6236f9bb2089e2f53e9510809f1c7a1676b8df42dae7ac66d9f74",
+					"size": 184,
+					"status": "missing-in-source"
+				},
+				"test/benchmarks/node_modules/rimraf/node_modules/graceful-fs/graceful-fs.js": {
+					"match": false,
+					"packageHash": "f3d1d71192aeee989fea3d60573dae6c7598ef3ce0e0f5246048e4f051c21274",
+					"size": 7834,
+					"status": "missing-in-source"
+				},
+				"test/benchmarks/node_modules/rimraf/node_modules/graceful-fs/package.json": {
+					"match": false,
+					"packageHash": "5eaf800263ebc11762ad77ab4f59a1cd2601c8f117a25a9fa5ba160141366eb0",
+					"size": 908,
+					"status": "missing-in-source"
+				},
+				"test/benchmarks/node_modules/rimraf/node_modules/graceful-fs/test/open.js": {
+					"match": false,
+					"packageHash": "68794b35b4425fb9ed590d14709056bf1f79b0f26dd818a4a89f414af4498903",
+					"size": 1019,
+					"status": "missing-in-source"
+				},
+				"test/benchmarks/node_modules/rimraf/package.json": {
+					"match": false,
+					"packageHash": "94ca93d9b1975b67de1c44b13e9dd9936956b4fe2034106eaa4bebd7e471a43d",
+					"size": 1720,
+					"status": "missing-in-source"
+				},
+				"test/benchmarks/node_modules/rimraf/rimraf.js": {
+					"match": false,
+					"packageHash": "a8056181bf7dd197d00b4a882262c614b7a740bd354704fda76689f433fa7ef2",
+					"size": 3512,
+					"status": "missing-in-source"
+				},
+				"test/benchmarks/node_modules/rimraf/test/run.sh": {
+					"match": false,
+					"packageHash": "26d5e50b0b2940ab1870e962040b523c88bbcb63389bc94402dee41cd3e2c235",
+					"size": 136,
+					"status": "missing-in-source"
+				},
+				"test/benchmarks/node_modules/rimraf/test/setup.sh": {
+					"match": false,
+					"packageHash": "38ae341efe8670bb5aa72be3f00a362530000ba36c0851be791b1d2850263643",
+					"size": 602,
+					"status": "missing-in-source"
+				},
+				"test/benchmarks/node_modules/rimraf/test/test-async.js": {
+					"match": false,
+					"packageHash": "688449876a8446241c0e181ffe6c5a10ae0ce96b60d2e8b58a22bdb31079bc80",
+					"size": 138,
+					"status": "missing-in-source"
+				},
+				"test/benchmarks/node_modules/rimraf/test/test-fiber.js": {
+					"match": false,
+					"packageHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+					"size": 0,
+					"status": "missing-in-source"
+				},
+				"test/benchmarks/node_modules/rimraf/test/test-sync.js": {
+					"match": false,
+					"packageHash": "2ad1b6b6c64944b00fdcb88443d10f026a7ccd660aa611497d60c0a5643c478c",
+					"size": 105,
+					"status": "missing-in-source"
+				},
+				"test/common.js": {
+					"diff": "--- published/test/common.js\n+++ rebuilt/test/common.js\n@@ -92,4 +92,43 @@\n   this.closeableDatabases = []\n   this.openTestDatabase = module.exports.openTestDatabase.bind(this)\n   this.timeout = 10000\n-}\n\\ No newline at end of file\n+}\n+\n+module.exports.readStreamSetUp = function () {\n+  module.exports.commonSetUp.call(this)\n+\n+  this.readySpy   = this.spy()\n+  this.dataSpy    = this.spy()\n+  this.endSpy     = this.spy()\n+  this.sourceData = []\n+\n+  for (var i = 0; i < 100; i++) {\n+    var k = (i < 10 ? '0' : '') + i\n+    this.sourceData.push({\n+        type  : 'put'\n+      , key   : k\n+      , value : Math.random()\n+    })\n+  }\n+\n+  this.verify = function (rs, done, data) {\n+    if (!data) data = this.sourceData // can pass alternative data array for verification\n+    assert.isFalse(rs.writable)\n+    assert.isFalse(rs.readable)\n+    assert.equals(this.readySpy.callCount, 1, 'ReadStream emitted single \"ready\" event')\n+    assert.equals(this.endSpy.callCount, 1, 'ReadStream emitted single \"end\" event')\n+    assert.equals(this.dataSpy.callCount, data.length, 'ReadStream emitted correct number of \"data\" events')\n+    data.forEach(function (d, i) {\n+      var call = this.dataSpy.getCall(i)\n+      if (call) {\n+        //console.log('call', i, ':', call.args[0].key, '=', call.args[0].value, '(expected', d.key, '=', d.value, ')')\n+        assert.equals(call.args.length, 1, 'ReadStream \"data\" event #' + i + ' fired with 1 argument')\n+        refute.isNull(call.args[0].key, 'ReadStream \"data\" event #' + i + ' argument has \"key\" property')\n+        refute.isNull(call.args[0].value, 'ReadStream \"data\" event #' + i + ' argument has \"value\" property')\n+        assert.equals(call.args[0].key, d.key, 'ReadStream \"data\" event #' + i + ' argument has correct \"key\"')\n+        assert.equals(call.args[0].value, d.value, 'ReadStream \"data\" event #' + i + ' argument has correct \"value\"')\n+      }\n+    }.bind(this))\n+    done()\n+  }.bind(this)\n+}\n",
+					"match": false,
+					"packageHash": "28a2aba6384da214cd5f6443754af11b899f38a0b07ff52addc38b894100b71a",
+					"size": 2871,
+					"sourceHash": "a7a4e8c350875c24c5840e431f2b5ee365c4bb1dcdead5f13d695baed5cf3f73",
+					"status": "content"
+				},
+				"test/read-stream-test.js": {
+					"diff": "--- published/test/read-stream-test.js\n+++ rebuilt/test/read-stream-test.js\n@@ -10,44 +10,7 @@\n   , async      = require('async')\n \n buster.testCase('ReadStream', {\n-    'setUp': function () {\n-      common.commonSetUp.call(this)\n-\n-      this.readySpy   = this.spy()\n-      this.dataSpy    = this.spy()\n-      this.endSpy     = this.spy()\n-      this.sourceData = []\n-\n-      for (var i = 0; i < 100; i++) {\n-        var k = (i < 10 ? '0' : '') + i\n-        this.sourceData.push({\n-            type  : 'put'\n-          , key   : k\n-          , value : Math.random()\n-        })\n-      }\n-\n-      this.verify = function (rs, done, data) {\n-        if (!data) data = this.sourceData // can pass alternative data array for verification\n-        assert.isFalse(rs.writable)\n-        assert.isFalse(rs.readable)\n-        assert.equals(this.readySpy.callCount, 1, 'ReadStream emitted single \"ready\" event')\n-        assert.equals(this.endSpy.callCount, 1, 'ReadStream emitted single \"end\" event')\n-        assert.equals(this.dataSpy.callCount, data.length, 'ReadStream emitted correct number of \"data\" events')\n-        data.forEach(function (d, i) {\n-          var call = this.dataSpy.getCall(i)\n-          if (call) {\n-            //console.log('call', i, ':', call.args[0].key, '=', call.args[0].value, '(expected', d.key, '=', d.value, ')')\n-            assert.equals(call.args.length, 1, 'ReadStream \"data\" event #' + i + ' fired with 1 argument')\n-            refute.isNull(call.args[0].key, 'ReadStream \"data\" event #' + i + ' argument has \"key\" property')\n-            refute.isNull(call.args[0].value, 'ReadStream \"data\" event #' + i + ' argument has \"value\" property')\n-            assert.equals(call.args[0].key, d.key, 'ReadStream \"data\" event #' + i + ' argument has correct \"key\"')\n-            assert.equals(call.args[0].value, d.value, 'ReadStream \"data\" event #' + i + ' argument has correct \"value\"')\n-          }\n-        }.bind(this))\n-        done()\n-      }.bind(this)\n-    }\n+    'setUp': common.readStreamSetUp\n \n   , 'tearDown': common.commonTearDown\n \n",
+					"match": false,
+					"packageHash": "da5d872853a84366d572d7f9bfe5dbb030881d8a43c68593e19caac1b1365b7d",
+					"size": 25915,
+					"sourceHash": "c82531ec5af83695f66be2c2c4308017576bc0007108741b179ae987f82b0c26",
+					"status": "content"
+				},
+				"test/snapshot-test.js": {
+					"match": false,
+					"status": "missing-in-package"
+				}
+			},
+			"summary": {
+				"differentFiles": 5,
+				"matchingFiles": 226,
+				"missingInPackage": 1,
+				"missingInSource": 42,
+				"score": 0.8248175182481752,
+				"totalFiles": 274
+			}
+		},
+		"prodDependencies": [
+			{
+				"name": "bindings",
+				"version": "1.0.0"
+			},
+			{
+				"name": "bufferstream",
+				"version": "0.5.2"
+			},
+			{
+				"name": "buffertools",
+				"version": "2.1.6"
+			},
+			{
+				"name": "concat-stream",
+				"version": "0.0.9"
+			},
+			{
+				"name": "errno",
+				"version": "0.0.5"
+			}
+		]
+	}
+]

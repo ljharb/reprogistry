@@ -1,0 +1,97 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-08T09:45:20.351Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:11.7.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "levelup@0.5.2",
+			"name": "levelup",
+			"version": "0.5.2",
+			"location": "https://registry.npmjs.org/levelup/-/levelup-0.5.2.tgz",
+			"integrity": "sha512-CjlVbg4BA9+GOeB53s2xl9Vjxpd4HsCqoddkJoYH8ienZEebORtDKExyrIyDSjBeH/5V/nTI+i5kz1ox8npjnQ==",
+			"publishedAt": "2013-01-23T22:32:11.441Z",
+			"publishedWith": {
+				"node": null,
+				"npm": "1.2.2"
+			},
+			"dependencies": {
+				"errno": "~0.0.3",
+				"bindings": "~1.0.0",
+				"bufferstream": "~0.5.1",
+				"concat-stream": "~0.0.9"
+			}
+		},
+		"source": {
+			"integrity": null,
+			"location": "https://github.com/rvagg/node-levelup.git",
+			"spec": "github:rvagg/node-levelup#0.5.2"
+		},
+		"comparisonHash": "9ef46a5bd31291e57cbab41e2f17c57bd6da0b5b",
+		"diff": {
+			"files": {
+				".jshintrc": {
+					"diff": "--- published/.jshintrc\n+++ rebuilt/.jshintrc\n@@ -27,4 +27,5 @@\n   , \"es5\": true\n   , \"esnext\": true\n   , \"strict\": false\n+  , \"onevar\": true\n }\n\\ No newline at end of file\n",
+					"match": false,
+					"packageHash": "3ff7bca532791ad55c7f81881d6ac6af2bc00cf68a3978196041f18f45fbe7ad",
+					"size": 555,
+					"sourceHash": "d41e08d2af41ca13ddf47de0f5e4cf205052447d67c1240b0f3299fb16776a07",
+					"status": "content"
+				},
+				".npmignore": {
+					"match": false,
+					"packageHash": "953ad4f02f997fa1fcefc8e9e799183efaec853b43e78ad8517a048741a621f4",
+					"size": 63,
+					"status": "missing-in-source"
+				},
+				"lib/levelup.js": {
+					"diff": "--- published/lib/levelup.js\n+++ rebuilt/lib/levelup.js\n@@ -52,15 +52,14 @@\n   EventEmitter.call(this)\n   this.setMaxListeners(Infinity)\n   \n-  this._options = extend(extend({}, defaultOptions), options)\n+  this._options  = extend(extend({}, defaultOptions), options)\n   this._location = location\n-  this._status = 'new'\n+  this._status   = 'new'\n }\n \n inherits(LevelUP, EventEmitter)\n \n LevelUP.prototype.open = function (callback) {\n-\n   if (this.isOpen()) {\n     if (callback)\n       process.nextTick(callback.bind(null, null, this))\n@@ -71,8 +70,10 @@\n     return callback && this.once('open', callback.bind(null, null, this))\n \n   this._status = 'opening'\n+\n   var execute = function () {\n     var db = bridge.createDatabase()\n+\n     db.open(this._location, this._options, function (err) {\n       if (err) {\n         err = new errors.OpenError(err)\n@@ -80,7 +81,7 @@\n           return callback(err)\n         this.emit('error', err)\n       } else {\n-        this._db = db\n+        this._db     = db\n         this._status = 'open'\n         if (callback)\n           callback(null, this)\n@@ -96,6 +97,8 @@\n \n //TODO: we can crash Node by submitting an operation between close() and the actual closing of the database\n LevelUP.prototype.close = function (callback) {\n+  var err\n+\n   if (this.isOpen()) {\n     this._status = 'closing'\n     this._db.close(function () {\n@@ -117,7 +120,7 @@\n       this.close(callback)\n     })\n   } else {\n-    var err = new errors.CloseError('Cannot close unopened database')\n+    err = new errors.CloseError('Cannot close unopened database')\n     if (callback)\n       return callback(err)\n     this.emit('error', err)\n@@ -137,7 +140,12 @@\n \n LevelUP.prototype.get = function (key_, options_, callback_) {\n   var open = this.isOpen()\n-  , callback, options, key, keyEnc, valueEnc, err\n+    , callback\n+    , options\n+    , key\n+    , keyEnc\n+    , valueEnc\n+    , err\n   \n   if (!open && !this.isClosed()) {\n     // limbo, defer the operation\n@@ -175,7 +183,11 @@\n \n LevelUP.prototype.put = function (key_, value_, options_, callback_) {\n   var open = this.isOpen()\n-  , callback, options, err, key, value\n+    , callback\n+    , options\n+    , err\n+    , key\n+    , value\n   \n   if (!open && !this.isClosed()) {\n     // limbo, defer the operation\n@@ -187,9 +199,9 @@\n   callback = getCallback(options_, callback_)\n   \n   if (open) {\n-    options  = getOptions(options_, this._options)\n-    key      = toSlice[options.keyEncoding   || options.encoding](key_)\n-    value    = toSlice[options.valueEncoding || options.encoding](value_)\n+    options = getOptions(options_, this._options)\n+    key     = toSlice[options.keyEncoding   || options.encoding](key_)\n+    value   = toSlice[options.valueEncoding || options.encoding](value_)\n \n     this._db.put(key, value, options, function (err) {\n       if (err) {\n@@ -212,9 +224,13 @@\n }\n",
+					"match": false,
+					"packageHash": "bc68700a7cdc47a1d591beba4bc612d174898852ffb051e24940b86f830a1988",
+					"size": 10697,
+					"sourceHash": "3ac12df3e0969804cb7c291d753170a5db13c7963e047a9d6813d919885544af",
+					"status": "content"
+				},
+				"npm-shrinkwrap.json": {
+					"match": false,
+					"packageHash": "757ada0d86a94d8e436cec4527f839e7992fe486fea639461591b9ceb8b9ff27",
+					"size": 553,
+					"status": "missing-in-source"
+				}
+			},
+			"summary": {
+				"differentFiles": 2,
+				"matchingFiles": 229,
+				"missingInPackage": 0,
+				"missingInSource": 2,
+				"score": 0.9828326180257511,
+				"totalFiles": 233
+			}
+		},
+		"prodDependencies": [
+			{
+				"name": "bindings",
+				"version": "1.0.0"
+			},
+			{
+				"name": "bufferstream",
+				"version": "0.5.2"
+			},
+			{
+				"name": "buffertools",
+				"version": "2.1.6"
+			},
+			{
+				"name": "concat-stream",
+				"version": "0.0.9"
+			},
+			{
+				"name": "errno",
+				"version": "0.0.5"
+			}
+		]
+	}
+]

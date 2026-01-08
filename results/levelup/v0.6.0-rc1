@@ -1,0 +1,107 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-08T09:46:25.551Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:11.7.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "levelup@0.6.0-rc1",
+			"name": "levelup",
+			"version": "0.6.0-rc1",
+			"location": "https://registry.npmjs.org/levelup/-/levelup-0.6.0-rc1.tgz",
+			"integrity": "sha512-WO4uKrv8qvNAlIOxpT+NNsk33SCIVdk0Ea9+GPoK9UE+EsDSg632z0pSrOsPVedIs7ZSKlMBBmBSCcMstpefvw==",
+			"publishedAt": "2013-02-24T08:57:07.433Z",
+			"publishedWith": {
+				"node": null,
+				"npm": "1.2.11"
+			},
+			"dependencies": {
+				"errno": "~0.0.3",
+				"leveldown": "~0.1.0",
+				"concat-stream": "~0.1.1",
+				"simple-bufferstream": "~0.0.2"
+			}
+		},
+		"source": {
+			"integrity": null,
+			"location": "https://github.com/rvagg/node-levelup.git",
+			"spec": "github:rvagg/node-levelup#0.6.0-rc1"
+		},
+		"comparisonHash": "9ef46a5bd31291e57cbab41e2f17c57bd6da0b5b",
+		"diff": {
+			"files": {
+				".npmignore": {
+					"match": false,
+					"packageHash": "953ad4f02f997fa1fcefc8e9e799183efaec853b43e78ad8517a048741a621f4",
+					"size": 63,
+					"status": "missing-in-source"
+				},
+				"README.md": {
+					"diff": "--- published/README.md\n+++ rebuilt/README.md\n@@ -10,7 +10,7 @@\n \n **LevelUP** aims to expose the features of LevelDB in a Node.js-friendly way. Both keys and values are treated as `Buffer` objects and are automatically converted using a specified `'encoding'`. LevelDB's iterators are exposed as a Node.js style object-`ReadStream` and writing can be peformed via an object-`WriteStream`.\n \n-An important feature of LevelDB is that it stores entries sorted by keys. This makes LevelUP's <a href=\"#createReadStream\"><code>ReadStream</code></a> interface is a very powerful way to look up items, particularly when combined with the `start` option.\n+An important feature of LevelDB is that it stores entries sorted by keys. This makes LevelUP's <a href=\"#readStream\"><code>ReadStream</code></a> interface is a very powerful way to look up items, particularly when combined with the `start` option.\n \n **LevelUP** is an **OPEN Open Source Project**, see the <a href=\"#contributing\">Contributing</a> section to find out what this means.\n \n@@ -75,10 +75,10 @@\n   * <a href=\"#approximateSize\"><code>db.<b>approximateSize()</b></code></a>\n   * <a href=\"#isOpen\"><code>db.<b>isOpen()</b></code></a>\n   * <a href=\"#isClosed\"><code>db.<b>isClosed()</b></code></a>\n-  * <a href=\"#createReadStream\"><code>db.<b>createReadStream()</b></code></a>\n-  * <a href=\"#createKeyStream\"><code>db.<b>createKeyStream()</b></code></a>\n-  * <a href=\"#createValueStream\"><code>db.<b>createValueStream()</b></code></a>\n-  * <a href=\"#createWriteStream\"><code>db.<b>createWriteStream()</b></code></a>\n+  * <a href=\"#readStream\"><code>db.<b>readStream()</b></code></a>\n+  * <a href=\"#keyStream\"><code>db.<b>keyStream()</b></code></a>\n+  * <a href=\"#valueStream\"><code>db.<b>valueStream()</b></code></a>\n+  * <a href=\"#writeStream\"><code>db.<b>writeStream()</b></code></a>\n \n \n --------------------------------------------------------\n@@ -240,13 +240,13 @@\n `isClosed()` will return `true` only when the state is \"closing\" *or* \"closed\", it can be useful for determining if read and write operations are permissible.\n \n --------------------------------------------------------\n-<a name=\"createReadStream\"></a>\n-### db.createReadStream([options])\n+<a name=\"readStream\"></a>\n+### db.readStream([options])\n \n-You can obtain a **ReadStream** of the full database by calling the `createReadStream()` method. The resulting stream is a complete Node.js-style [Readable Stream](http://nodejs.org/docs/latest/api/stream.html#stream_readable_stream) where `'data'` events emit objects with `'key'` and `'value'` pairs.\n+You can obtain a **ReadStream** of the full database by calling the `readStream()` method. The resulting stream is a complete Node.js-style [Readable Stream](http://nodejs.org/docs/latest/api/stream.html#stream_readable_stream) where `'data'` events emit objects with `'key'` and `'value'` pairs.\n \n ```js\n-db.createReadStream()\n+db.readStream()\n   .on('data', function (data) {\n     console.log(data.key, '=', data.value)\n   })\n@@ -263,7 +263,7 @@\n \n The standard `pause()`, `resume()` and `destroy()` methods are implemented on the ReadStream, as is `pipe()` (see below). `'data'`, '`error'`, `'end'` and `'close'` events are emitted.\n \n-Additionally, you can supply an options object as the first parameter to `createReadStream()` with the following options:\n+Additionally, you can supply an options object as the first parameter to `readStream()` with the following options:\n \n * `'start'`: the key you wish to start the read at. By default it will start at the beginning of the store. Note that the *start* doesn't have to be an actual key that exists, LevelDB will simply find the *next* key, greater than the key you provide.\n \n@@ -271,64 +271,64 @@\n \n * `'reverse'` *(boolean, default: `false`)*: a boolean, set to true if you want the stream to go in reverse order. Beware that due to the way LevelDB works, a reverse seek will be slower than a forward seek.\n \n-* `'keys'` *(boolean, default: `true`)*: whether the `'data'` event should contain keys. If set to `true` and `'values'` set to `false` then `'data'` events will simply be keys, rather than objects with a `'key'` property. Used internally by the `createKeyStream()` method.\n+* `'keys'` *(boolean, default: `true`)*: whether the `'data'` event should contain keys. If set to `true` and `'values'` set to `false` then `'data'` events will simply be keys, rather than objects with a `'key'` property. Used internally by the `keyStream()` method.\n \n-* `'values'` *(boolean, default: `true`)*: whether the `'data'` event should contain values. If set to `true` and `'keys'` set to `false` then `'data'` events will simply be values, rather than objects with a `'value'` property. Used internally by the `createValueStream()` method.\n+* `'values'` *(boolean, default: `true`)*: whether the `'data'` event should contain values. If set to `true` and `'keys'` set to `false` then `'data'` events will simply be values, rather than objects with a `'value'` property. Used internally by the `valueStream()` method.\n \n * `'limit'` *(number, default: `-1`)*: limit the number of results collected by this stream. This number represents a *maximum* number of results and may not be reached if you get to the end of the store or your `'end'` value first. A value of `-1` means there is no limit.\n \n * `'fillCache'` *(boolean, default: `false`)*: wheather LevelDB's LRU-cache should be filled with data read.\n \n --------------------------------------------------------\n-<a name=\"createKeyStream\"></a>\n-### db.createKeyStream([options])\n+<a name=\"keyStream\"></a>\n+### db.keyStream([options])\n \n A **KeyStream** is a **ReadStream** where the `'data'` events are simply the keys from the database so it can be used like a traditional stream rather than an object stream.\n \n-You can obtain a KeyStream either by calling the `createKeyStream()` method on a LevelUP object or by passing passing an options object to `createReadStream()` with `keys` set to `true` and `values` set to `false`.\n+You can obtain a KeyStream either by calling the `keyStream()` method on a LevelUP object or by passing passing an options object to `readStream()` with `keys` set to `true` and `values` set to `false`.\n \n ```js\n-db.createKeyStream()\n+db.keyStream()\n   .on('data', function (data) {\n     console.log('key=', data)\n   })\n \n // same as:\n-db.createReadStream({ keys: true, values: false })\n+db.readStream({ keys: true, values: false })\n   .on('data', function (data) {\n     console.log('key=', data)\n   })\n ```\n \n --------------------------------------------------------\n-<a name=\"createValueStream\"></a>\n-### db.createValueStream([options])\n+<a name=\"valueStream\"></a>\n+### db.valueStream([options])\n \n A **ValueStream** is a **ReadStream** where the `'data'` events are simply the values from the database so it can be used like a traditional stream rather than an object stream.\n",
+					"match": false,
+					"packageHash": "66be7c0f9b7a5f891ebc142f983b7e34e52c9465e8ceec1f7acac22e2753759d",
+					"size": 24278,
+					"sourceHash": "b2b17f94b2c866e2e53dcfdc15558f278f56a2a2291384796e46ffd36afc814b",
+					"status": "content"
+				},
+				"lib/levelup.js": {
+					"diff": "--- published/lib/levelup.js\n+++ rebuilt/lib/levelup.js\n@@ -335,8 +335,7 @@\n         }.bind(this))\n       }\n \n-      LevelUP.prototype.readStream =\n-      LevelUP.prototype.createReadStream = function (options) {\n+      LevelUP.prototype.readStream = function (options) {\n         options = extend(\n             extend({}, this._options)\n           , typeof options == 'object' ? options : {}\n@@ -351,8 +350,7 @@\n         )\n       }\n \n-      LevelUP.prototype.keyStream =\n-      LevelUP.prototype.createKeyStream = function (options) {\n+      LevelUP.prototype.keyStream = function (options) {\n         return this.readStream(\n             extend(\n                 options ? extend({}, options) : {}\n@@ -361,8 +359,7 @@\n         )\n       }\n \n-      LevelUP.prototype.valueStream =\n-      LevelUP.prototype.createValueStream = function (options) {\n+      LevelUP.prototype.valueStream = function (options) {\n         return this.readStream(\n             extend(\n                 options ? extend({}, options) : {}\n@@ -371,8 +368,7 @@\n         )\n       }\n \n-      LevelUP.prototype.writeStream =\n-      LevelUP.prototype.createWriteStream = function (options) {\n+      LevelUP.prototype.writeStream = function (options) {\n         return writeStream.create(\n             options || {}\n           , this\n",
+					"match": false,
+					"packageHash": "c978c104a79b0d8be8110a38224b63afe96ee1394a22dadc5eb574a99a2b7ec0",
+					"size": 11704,
+					"sourceHash": "e11dd7fba82f1d60c54a01241df0d91b483105d07c41c9f843da8edb28864508",
+					"status": "content"
+				},
+				"test/read-stream-test.js": {
+					"diff": "--- published/test/read-stream-test.js\n+++ rebuilt/test/read-stream-test.js\n@@ -27,7 +27,7 @@\n         db.batch(this.sourceData.slice(), function (err) {\n           refute(err)\n \n-          var rs = db.createReadStream()\n+          var rs = db.readStream()\n           assert.isFalse(rs.writable)\n           assert.isTrue(rs.readable)\n           rs.on('ready', this.readySpy)\n@@ -66,7 +66,7 @@\n         db.batch(this.sourceData.slice(), function (err) {\n           refute(err)\n \n-          rs = db.createReadStream()\n+          rs = db.readStream()\n           assert.isFalse(rs.writable)\n           assert.isTrue(rs.readable)\n           rs.on('ready', this.readySpy)\n@@ -83,7 +83,7 @@\n         db.batch(this.sourceData.slice(), function (err) {\n           refute(err)\n \n-          var rs = db.createReadStream()\n+          var rs = db.readStream()\n           assert.isFalse(rs.writable)\n           assert.isTrue(rs.readable)\n           rs.on('ready', this.readySpy)\n@@ -107,7 +107,7 @@\n         db.batch(this.sourceData.slice(), function (err) {\n           refute(err)\n \n-          var rs = db.createReadStream()\n+          var rs = db.readStream()\n             , endSpy = this.spy()\n             , calls = 0\n           this.dataSpy = this.spy(function () {\n@@ -148,7 +148,7 @@\n         db.batch(this.sourceData.slice(), function (err) {\n           refute(err)\n \n-          var rs = db.createReadStream({ reverse: true })\n+          var rs = db.readStream({ reverse: true })\n           assert.isFalse(rs.writable)\n           assert.isTrue(rs.readable)\n           rs.on('ready', this.readySpy)\n@@ -166,7 +166,7 @@\n         db.batch(this.sourceData.slice(), function (err) {\n           refute(err)\n \n-          var rs = db.createReadStream({ start: '50' })\n+          var rs = db.readStream({ start: '50' })\n           assert.isFalse(rs.writable)\n           assert.isTrue(rs.readable)\n           rs.on('ready', this.readySpy)\n@@ -185,7 +185,7 @@\n         db.batch(this.sourceData.slice(), function (err) {\n           refute(err)\n \n-          var rs = db.createReadStream({ start: '50', reverse: true })\n+          var rs = db.readStream({ start: '50', reverse: true })\n           assert.isFalse(rs.writable)\n           assert.isTrue(rs.readable)\n           rs.on('ready', this.readySpy)\n@@ -206,7 +206,7 @@\n           refute(err)\n \n           // '49.5' doesn't actually exist but we expect it to start at '50' because '49' < '49.5' < '50' (in string terms as well as numeric)\n-          var rs = db.createReadStream({ start: '49.5' })\n+          var rs = db.readStream({ start: '49.5' })\n           assert.isFalse(rs.writable)\n           assert.isTrue(rs.readable)\n           rs.on('ready', this.readySpy)\n@@ -228,7 +228,7 @@\n           //NOTE: this is similar to the above case but we're going backwards, the important caveat with\n           // reversable streams is that the start will always be the NEXT key if the actual key you specify\n           // doesn't exist, not the PREVIOUS (i.e. it skips ahead to find a start key)\n-          var rs = db.createReadStream({ start: '49.5', reverse: true })\n+          var rs = db.readStream({ start: '49.5', reverse: true })\n           assert.isFalse(rs.writable)\n           assert.isTrue(rs.readable)\n           rs.on('ready', this.readySpy)\n@@ -250,7 +250,7 @@\n \n           // '499999' doesn't actually exist but we expect it to start at '50' because '49' < '499999' < '50' (in string terms)\n           // the same as the previous test but we're relying solely on string ordering\n-          var rs = db.createReadStream({ start: '499999' })\n+          var rs = db.readStream({ start: '499999' })\n           assert.isFalse(rs.writable)\n           assert.isTrue(rs.readable)\n           rs.on('ready', this.readySpy)\n@@ -269,7 +269,7 @@\n         db.batch(this.sourceData.slice(), function (err) {\n           refute(err)\n \n-          var rs = db.createReadStream({ end: '50' })\n+          var rs = db.readStream({ end: '50' })\n           assert.isFalse(rs.writable)\n           assert.isTrue(rs.readable)\n",
+					"match": false,
+					"packageHash": "f143731adccd9c12fa83162a49512667f30bdca9fae3e5f17782af5bf05f5168",
+					"size": 25321,
+					"sourceHash": "d8661283e75649dcddeefc07ea41960c70be0ea20f3f52e24963e8ecffcfaa5e",
+					"status": "content"
+				},
+				"test/write-stream-test.js": {
+					"diff": "--- published/test/write-stream-test.js\n+++ rebuilt/test/write-stream-test.js\n@@ -48,7 +48,7 @@\n \n   , 'test simple WriteStream': function (done) {\n       this.openTestDatabase(function (db) {\n-        var ws = db.createWriteStream()\n+        var ws = db.writeStream()\n         ws.on('error', function (err) {\n           refute(err)\n         })\n@@ -62,7 +62,7 @@\n \n   , 'test WriteStream with async writes': function (done) {\n       this.openTestDatabase(function (db) {\n-        var ws = db.createWriteStream()\n+        var ws = db.writeStream()\n \n         ws.on('error', function (err) {\n           refute(err)\n@@ -99,7 +99,7 @@\n           })\n         }\n \n-        var ws = db.createWriteStream({ useBatch: false })\n+        var ws = db.writeStream({ useBatch: false })\n \n         ws.on('error', function (err) {\n           refute(err)\n@@ -129,7 +129,7 @@\n     // at the moment, destroySoon() is basically just end()\n   , 'test destroySoon()': function (done) {\n       this.openTestDatabase(function (db) {\n-        var ws = db.createWriteStream()\n+        var ws = db.writeStream()\n         ws.on('error', function (err) {\n           refute(err)\n         })\n@@ -159,7 +159,7 @@\n       }\n \n       this.openTestDatabase(function (db) {\n-        var ws = db.createWriteStream()\n+        var ws = db.writeStream()\n         ws.on('error', function (err) {\n           refute(err)\n         })\n@@ -192,7 +192,7 @@\n           ]\n \n       this.openTestDatabase(options, function (db) {\n-        var ws = db.createWriteStream()\n+        var ws = db.writeStream()\n         ws.on('error', function (err) {\n           refute(err)\n         })\n",
+					"match": false,
+					"packageHash": "cd5d3aaed835f9df1e9bebb8fea191fc1d128c884712a7d1d418c86b4927519a",
+					"size": 6567,
+					"sourceHash": "1850072c885192fad3a1a662884dc7506a55f848f79c57d7c7c3011d6441b339",
+					"status": "content"
+				}
+			},
+			"summary": {
+				"differentFiles": 4,
+				"matchingFiles": 27,
+				"missingInPackage": 0,
+				"missingInSource": 1,
+				"score": 0.84375,
+				"totalFiles": 32
+			}
+		},
+		"prodDependencies": [
+			{
+				"name": "concat-stream",
+				"version": "0.1.1"
+			},
+			{
+				"name": "errno",
+				"version": "0.0.5"
+			},
+			{
+				"name": "leveldown",
+				"version": "0.1.4"
+			},
+			{
+				"name": "bindings",
+				"version": "1.0.0"
+			},
+			{
+				"name": "simple-bufferstream",
+				"version": "0.0.4"
+			}
+		]
+	}
+]

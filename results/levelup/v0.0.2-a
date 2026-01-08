@@ -1,0 +1,1479 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-08T09:58:29.167Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:11.7.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "levelup@0.0.2-a",
+			"name": "levelup",
+			"version": "0.0.2-a",
+			"location": "https://registry.npmjs.org/levelup/-/levelup-0.0.2a.tgz",
+			"integrity": "sha512-GVYv/oTYXMvaP84aUUghtqTuT66zP0B2BwbJUmUzfa52a26vIyrgKqJpRgSJMVrzGQtyKOP/KhhuarA9GVWHLA==",
+			"publishedAt": "2013-08-26T00:26:27.148Z",
+			"publishedWith": {
+				"node": null,
+				"npm": "1.1.59"
+			},
+			"dependencies": {
+				"errno": "~0.0.2",
+				"bindings": "~1.0.0",
+				"bufferstream": "~0.5.1",
+				"concat-stream": "~0.0.8"
+			}
+		},
+		"source": {
+			"integrity": null,
+			"location": "https://github.com/rvagg/node-levelup.git",
+			"spec": "github:rvagg/node-levelup#HEAD"
+		},
+		"comparisonHash": "9ef46a5bd31291e57cbab41e2f17c57bd6da0b5b",
+		"diff": {
+			"files": {
+				".jshintrc": {
+					"match": false,
+					"packageHash": "0e9620a1c8a7e5989e18139c5def391222728a69cef30d94b4fac5f77ab33e73",
+					"size": 553,
+					"status": "missing-in-source"
+				},
+				".npmignore": {
+					"match": false,
+					"packageHash": "e66500f822a9b25fe2c0edaa11fea5dd7fa45546d9e03d5da017a7a153701e32",
+					"size": 15,
+					"status": "missing-in-source"
+				},
+				"LICENSE": {
+					"diff": "--- published/LICENSE\n+++ rebuilt/LICENSE\n@@ -1,39 +1,21 @@\n-Copyright 2012, Rod Vagg (the \"Original Author\")\n-All rights reserved.\n+The MIT License (MIT)\n \n-MIT +no-false-attribs License\n+Copyright © 2012 The contributors to levelup.\n \n-Permission is hereby granted, free of charge, to any person\n-obtaining a copy of this software and associated documentation\n-files (the \"Software\"), to deal in the Software without\n-restriction, including without limitation the rights to use,\n-copy, modify, merge, publish, distribute, sublicense, and/or sell\n-copies of the Software, and to permit persons to whom the\n-Software is furnished to do so, subject to the following\n-conditions:\n-\n-The above copyright notice and this permission notice shall be\n-included in all copies or substantial portions of the Software.\n-\n-Distributions of all or part of the Software intended to be used\n-by the recipients as they would use the unmodified Software,\n-containing modifications that substantially alter, remove, or\n-disable functionality of the Software, outside of the documented\n-configuration mechanisms provided by the Software, shall be\n-modified such that the Original Author's bug reporting email\n-addresses and urls are either replaced with the contact information\n-of the parties responsible for the changes, or removed entirely.\n-\n-THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND,\n-EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES\n-OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND\n-NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT\n-HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,\n-WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING\n-FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR\n-OTHER DEALINGS IN THE SOFTWARE.\n-\n-\n-Except where noted, this license applies to any and all software\n-programs and associated documentation files created by the\n-Original Author, when distributed with the Software.\n\\ No newline at end of file\n+Permission is hereby granted, free of charge, to any person obtaining a copy\n+of this software and associated documentation files (the \"Software\"), to deal\n+in the Software without restriction, including without limitation the rights\n+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell\n+copies of the Software, and to permit persons to whom the Software is\n+furnished to do so, subject to the following conditions:\n+\n+The above copyright notice and this permission notice shall be included in all\n+copies or substantial portions of the Software.\n+\n+THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR\n+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,\n+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE\n+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER\n+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,\n+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE\n+SOFTWARE.\n",
+					"match": false,
+					"packageHash": "c24b881149e922dbd813a9e3f72477bacb4518ab2cdbfe893c9a03615fee05eb",
+					"size": 1811,
+					"sourceHash": "c9f82cad9835c7aa67ff602136e6c9eebf8dc43deea1eef1c55bf988c810b3c2",
+					"status": "content"
+				},
+				"README.md": {
+					"diff": "--- published/README.md\n+++ rebuilt/README.md\n@@ -1,71 +1,223 @@\n-LevelUP\n-=======\n+# levelup\n \n-Fast & simple storage - a Node.js-style LevelDB wrapper\n--------------------------------------------------------\n+**Superseded by [`abstract-level`](https://github.com/Level/abstract-level). Please see [Frequently Asked Questions](https://github.com/Level/community#faq).**\n \n-**[LevelDB](http://code.google.com/p/leveldb/)** is a simple key/value data store built by Google, inspired by BigTable. It's used in Google Chrome and many other products. LevelDB supports arbitrary byte arrays as both keys and values, singular *get*, *put* and *delete* operations, *batched put and delete*, forward and reverse iteration and simple compression using the [Snappy](http://code.google.com/p/snappy/) algorithm which is optimised for speed over compression.\n+## Table of Contents\n \n+<details><summary>Click to expand</summary>\n \n-**LevelUP** aims to expose the features of LevelDB in a Node.js-friendly way. Both keys and values are treated as `Buffer` objects and are automatically converted using a specified `'encoding'`. LevelDB's iterators are exposed as a Node.js style object-`ReadStream` and writing can be peformed via an object-`WriteStream`.\n+- [Introduction](#introduction)\n+- [Supported Platforms](#supported-platforms)\n+- [Usage](#usage)\n+- [API](#api)\n+  - [`levelup(db[, options[, callback]])`](#levelupdb-options-callback)\n+  - [`db.supports`](#dbsupports)\n+  - [`db.open([options][, callback])`](#dbopenoptions-callback)\n+  - [`db.close([callback])`](#dbclosecallback)\n+  - [`db.put(key, value[, options][, callback])`](#dbputkey-value-options-callback)\n+  - [`db.get(key[, options][, callback])`](#dbgetkey-options-callback)\n+  - [`db.getMany(keys[, options][, callback])`](#dbgetmanykeys-options-callback)\n+  - [`db.del(key[, options][, callback])`](#dbdelkey-options-callback)\n+  - [`db.batch(array[, options][, callback])` _(array form)_](#dbbatcharray-options-callback-array-form)\n+  - [`db.batch()` _(chained form)_](#dbbatch-chained-form)\n+  - [`db.status`](#dbstatus)\n+  - [`db.isOperational()`](#dbisoperational)\n+  - [`db.createReadStream([options])`](#dbcreatereadstreamoptions)\n+  - [`db.createKeyStream([options])`](#dbcreatekeystreamoptions)\n+  - [`db.createValueStream([options])`](#dbcreatevaluestreamoptions)\n+  - [`db.iterator([options])`](#dbiteratoroptions)\n+  - [`db.clear([options][, callback])`](#dbclearoptions-callback)\n+- [What happened to `db.createWriteStream`?](#what-happened-to-dbcreatewritestream)\n+- [Promise Support](#promise-support)\n+- [Events](#events)\n+- [Multi-process Access](#multi-process-access)\n+- [Contributing](#contributing)\n+- [Big Thanks](#big-thanks)\n+- [Donate](#donate)\n+- [License](#license)\n \n-Basic usage\n------------\n+</details>\n \n-All operations are asynchronous although they don't necessarily require a callback if you don't need to know when the operation was performed.\n+## Introduction\n+\n+**Fast and simple storage. A Node.js wrapper for `abstract-leveldown` compliant stores, which follow the characteristics of [LevelDB](https://github.com/google/leveldb).**\n+\n+LevelDB is a simple key-value store built by Google. It's used in Google Chrome and many other products. LevelDB supports arbitrary byte arrays as both keys and values, singular _get_, _put_ and _delete_ operations, _batched put and delete_, bi-directional iterators and simple compression using the very fast [Snappy](http://google.github.io/snappy/) algorithm.\n+\n+LevelDB stores entries sorted lexicographically by keys. This makes the streaming interface of `levelup` - which exposes LevelDB iterators as [Readable Streams](https://nodejs.org/docs/latest/api/stream.html#stream_readable_streams) - a very powerful query mechanism.\n+\n+The most common store is [`leveldown`](https://github.com/Level/leveldown/) which provides a pure C++ binding to LevelDB. [Many alternative stores are available](https://github.com/Level/awesome/#stores) such as [`level.js`](https://github.com/Level/level.js) in the browser or [`memdown`](https://github.com/Level/memdown) for an in-memory store. They typically support strings and Buffers for both keys and values. For a richer set of data types you can wrap the store with [`encoding-down`](https://github.com/Level/encoding-down).\n+\n+**The [`level`](https://github.com/Level/level) package is the recommended way to get started.** It conveniently bundles `levelup`, [`leveldown`](https://github.com/Level/leveldown/) and [`encoding-down`](https://github.com/Level/encoding-down). Its main export is `levelup` - i.e. you can do `var db = require('level')`.\n+\n+## Supported Platforms\n+\n+We aim to support Active LTS and Current Node.js releases as well as browsers. For support of the underlying store, please see the respective documentation.\n+\n+## Usage\n+\n+_If you are upgrading: please see [`UPGRADING.md`](UPGRADING.md)._\n+\n+First you need to install `levelup`! No stores are included so you must also install `leveldown` (for example).\n+\n+```sh\n+$ npm install levelup leveldown\n+```\n+\n+All operations are asynchronous. If you do not provide a callback, [a Promise is returned](#promise-support).\n \n ```js\n var levelup = require('levelup')\n+var leveldown = require('leveldown')\n \n-// 1) Create our database, supply location and options.\n-//    This will create or open the underlying LevelDB store.\n-var options = { createIfMissing: true, errorIfExists: false }\n-levelup('./mydb', options, function (err, db) {\n-  if (err) return console.log('Ooops!', err)\n+// 1) Create our store\n+var db = levelup(leveldown('./mydb'))\n \n-  // 2) put a key & value\n-  db.put('name', 'LevelUP', function (err) {\n-    if (err) return console.log('Ooops!', err) // some kind of I/O error\n+// 2) Put a key & value\n+db.put('name', 'levelup', function (err) {\n+  if (err) return console.log('Ooops!', err) // some kind of I/O error\n \n-    // 3) fetch by key\n",
+					"match": false,
+					"packageHash": "a7eef15e85805b9149557b40719b5f4338642d0308e198d66e39a6c4448c5de2",
+					"size": 8766,
+					"sourceHash": "d4554afc7ebdb4ed7aea364a7d78b69c5ad567f266b2d1f62e6c7b879dc20f40",
+					"status": "content"
+				},
+				"binding.gyp": {
+					"match": false,
+					"packageHash": "e1b47bde98f31502f011448e1ef796cf52ace0b2c68b7074416f8f9c6ed463df",
+					"size": 409,
+					"status": "missing-in-source"
+				},
+				"buster.js": {
+					"match": false,
+					"packageHash": "dfcdde4bda221855b62bac79d41cb1e15256ebb4644997fa188cafce47426dd2",
+					"size": 136,
+					"status": "missing-in-source"
+				},
+				"deps/leveldb/leveldb-1.5.0/.npmignore": {
+					"match": false,
+					"packageHash": "0df94efb0b39aa8d4a7aaaf240e558c9b78436b266c7dac108035d73c3722f42",
+					"size": 61,
+					"status": "missing-in-source"
+				},
+				"deps/leveldb/leveldb-1.5.0/AUTHORS": {
+					"match": false,
+					"packageHash": "4e4a9fb4c4ac90318710f99e009f022c8d2863fdae029e24418c0f579538c676",
+					"size": 193,
+					"status": "missing-in-source"
+				},
+				"deps/leveldb/leveldb-1.5.0/LICENSE": {
+					"match": false,
+					"packageHash": "ccc19f1da0798ed666609b65a5b44dd8b3abe6fc08b9c0592eb76e82e174db19",
+					"size": 1484,
+					"status": "missing-in-source"
+				},
+				"deps/leveldb/leveldb-1.5.0/Makefile": {
+					"match": false,
+					"packageHash": "2e3869438364f5545e1245400883bed7c35ed96b48f3d9ab2d9e433a0ee8cc6b",
+					"size": 7194,
+					"status": "missing-in-source"
+				},
+				"deps/leveldb/leveldb-1.5.0/NEWS": {
+					"match": false,
+					"packageHash": "cb679e01637f28359f7e269b4b9243a7cbae2e3b54c4b1dd2dc7a3dcc710d017",
+					"size": 509,
+					"status": "missing-in-source"
+				},
+				"deps/leveldb/leveldb-1.5.0/README": {
+					"match": false,
+					"packageHash": "bcdef4580f9303105cb1c3a7e4ad504dc42b7b965435d9f3960956e58ec5afda",
+					"size": 1713,
+					"status": "missing-in-source"
+				},
+				"deps/leveldb/leveldb-1.5.0/TODO": {
+					"match": false,
+					"packageHash": "404d4805a47ba3033d7a2d6d422e58e617c6f5d7df3ebea23f3da91c79cb4d39",
+					"size": 494,
+					"status": "missing-in-source"
+				},
+				"deps/leveldb/leveldb-1.5.0/build/config.gypi": {
+					"match": false,
+					"packageHash": "bc4b0c42fa720814c9ba7fa67a8709638924793896f0d21a5963551efbee50cb",
+					"size": 705,
+					"status": "missing-in-source"
+				},
+				"deps/leveldb/leveldb-1.5.0/build_detect_platform": {
+					"match": false,
+					"packageHash": "f46321a452935f21e959d11561cf1962680b59da2cd52cd7087babe5ec517895",
+					"size": 5961,
+					"status": "missing-in-source"
+				},
+				"deps/leveldb/leveldb-1.5.0/db/builder.cc": {
+					"match": false,
+					"packageHash": "d4662a07824c6dd4185255a1939f3a93020574964a71fb1f1c6fdaf6c6085aa0",
+					"size": 2163,
+					"status": "missing-in-source"
+				},
+				"deps/leveldb/leveldb-1.5.0/db/builder.h": {
+					"match": false,
+					"packageHash": "047a1b100a83850d314fa110a65f198f1b8593e52572374dd0b8d9ec37fd6805",
+					"size": 1102,
+					"status": "missing-in-source"
+				},
+				"deps/leveldb/leveldb-1.5.0/db/c.cc": {
+					"match": false,
+					"packageHash": "fcfba49b24070dfb3825c689ffe477553a49f777d3f5e16d976666b1adcd2ac0",
+					"size": 15786,
+					"status": "missing-in-source"
+				},
+				"deps/leveldb/leveldb-1.5.0/db/c_test.c": {
+					"match": false,
+					"packageHash": "799067b90e086f3b720345b0ed61b81fadb78549960055424a3e133a8b7f294e",
+					"size": 11396,
+					"status": "missing-in-source"
+				},
+				"deps/leveldb/leveldb-1.5.0/db/corruption_test.cc": {
+					"match": false,
+					"packageHash": "6151ec4f133d17f4be6aea4ae88005c7d8ab4fe77c4428090b514f918b6fee4e",
+					"size": 9777,
+					"status": "missing-in-source"
+				},
+				"deps/leveldb/leveldb-1.5.0/db/db_bench.cc": {
+					"match": false,
+					"packageHash": "ccd1ace6a3e9654adeeda63d2c7e6782897299b05056f5d3d3a26e1b3aee1c5b",
+					"size": 28991,
+					"status": "missing-in-source"
+				},
+				"deps/leveldb/leveldb-1.5.0/db/db_impl.cc": {
+					"match": false,
+					"packageHash": "b34eb1be254ad4eb558a3d9e6c6f06a81e5be80bc8c244af4dabc8f36c524f28",
+					"size": 44174,
+					"status": "missing-in-source"
+				},
+				"deps/leveldb/leveldb-1.5.0/db/db_impl.h": {
+					"match": false,
+					"packageHash": "f68d57c424c6676237cf2c4b368b3027e18aba72e5d55053de81319ad0f13a0b",
+					"size": 6517,
+					"status": "missing-in-source"
+				},
+				"deps/leveldb/leveldb-1.5.0/db/db_iter.cc": {
+					"match": false,
+					"packageHash": "53b204686f994692505aea9958094fc4399ce27d1076623881dcd05502c14baf",
+					"size": 8091,
+					"status": "missing-in-source"
+				},
+				"deps/leveldb/leveldb-1.5.0/db/db_iter.h": {
+					"match": false,
+					"packageHash": "7cd7a904c5d2242bb732036a458d11d4b43cdbe0a9ea70d596e2dbc4a65c1a9d",
+					"size": 805,
+					"status": "missing-in-source"
+				},
+				"deps/leveldb/leveldb-1.5.0/db/db_test.cc": {
+					"match": false,
+					"packageHash": "870dad9d255572847c0bc9ebec45eb32c6931f4f4b0c4fc91b79b43951f82b60",
+					"size": 56804,
+					"status": "missing-in-source"
+				},
+				"deps/leveldb/leveldb-1.5.0/db/dbformat.cc": {
+					"match": false,
+					"packageHash": "ddeee8906d00203d284bc3505a2b26401b33d4303316116179b2fd482295f25b",
+					"size": 4523,
+					"status": "missing-in-source"
+				},
+				"deps/leveldb/leveldb-1.5.0/db/dbformat.h": {
+					"match": false,
+					"packageHash": "041ae177223eadfc2f35a12e73b65ecf6d047b4df15a1237719a56fa175ab330",
+					"size": 7791,
+					"status": "missing-in-source"
+				},
+				"deps/leveldb/leveldb-1.5.0/db/dbformat_test.cc": {
+					"match": false,
+					"packageHash": "19666fcd61713adb8da156620e3ff5819409eee5adcbdfc0fba76e7320796352",
+					"size": 3803,
+					"status": "missing-in-source"
+				},
+				"deps/leveldb/leveldb-1.5.0/db/filename.cc": {
+					"match": false,
+					"packageHash": "02b1aa84cc092b610f0fe4e9f86f9b579e29d082890fc9328e5ba37f66ffd423",
+					"size": 3920,
+					"status": "missing-in-source"
+				},
+				"deps/leveldb/leveldb-1.5.0/db/filename.h": {
+					"match": false,
+					"packageHash": "4ee6d94cec09cdb8a38876b8db4a27b91bbbbaf162c6730895caca1ddcf89bb0",
+					"size": 2816,
+					"status": "missing-in-source"
+				},
+				"deps/leveldb/leveldb-1.5.0/db/filename_test.cc": {
+					"match": false,
+					"packageHash": "2e0f017d7c3250513d661bd426b66a269060eb2356be793b7d1a456fb504ded9",
+					"size": 3375,
+					"status": "missing-in-source"
+				},
+				"deps/leveldb/leveldb-1.5.0/db/log_format.h": {
+					"match": false,
+					"packageHash": "b60a0165d0030edd773e46bc1d2214f9e888e38ca019356473f4339f1346b72c",
+					"size": 897,
+					"status": "missing-in-source"
+				},
+				"deps/leveldb/leveldb-1.5.0/db/log_reader.cc": {
+					"match": false,
+					"packageHash": "a3feac9015a70ec0d6221f7892593ffd2357c0fe01533e604200c69b8195abef",
+					"size": 7981,
+					"status": "missing-in-source"
+				},
+				"deps/leveldb/leveldb-1.5.0/db/log_reader.h": {
+					"match": false,
+					"packageHash": "9d712ea0954a60f359007c435c65dcdb72ae986ac80bd0a3799eb107e5488040",
+					"size": 3572,
+					"status": "missing-in-source"
+				},
+				"deps/leveldb/leveldb-1.5.0/db/log_test.cc": {
+					"match": false,
+					"packageHash": "aa99a6cbcc2f10869e0bbd7ce1becd7bfdd9482c95938657bb8998dc0692c12d",
+					"size": 13078,
+					"status": "missing-in-source"
+				},
+				"deps/leveldb/leveldb-1.5.0/db/log_writer.cc": {
+					"match": false,
+					"packageHash": "701d17124b06b8d659994ef4d7a3f4f73b4094050d8e9bf2c43a95680a5c6cbe",
+					"size": 2844,
+					"status": "missing-in-source"
+				},
+				"deps/leveldb/leveldb-1.5.0/db/log_writer.h": {
+					"match": false,
+					"packageHash": "af0778ff3ddda35b0a45cbca113e3c0d37f223fdd8bb250f5fbc3bef0cd885e4",
+					"size": 1287,
+					"status": "missing-in-source"
+				},
+				"deps/leveldb/leveldb-1.5.0/db/memtable.cc": {
+					"match": false,
+					"packageHash": "fe8979036b8ecb002f5cefc5b25e227051ec67ef82e8b5fc1d8d490cf83f81a3",
+					"size": 4783,
+					"status": "missing-in-source"
+				},
+				"deps/leveldb/leveldb-1.5.0/db/memtable.h": {
+					"match": false,
+					"packageHash": "2e16f184b3c57e5ea599dd823b482c1bc6c35c143509589a2d8a3210b79ea127",
+					"size": 2737,
+					"status": "missing-in-source"
+				},
+				"deps/leveldb/leveldb-1.5.0/db/repair.cc": {
+					"match": false,
+					"packageHash": "747aa29421d67fafdee2dfc0145056869b78a406d779975b43878e154ff27eea",
+					"size": 11873,
+					"status": "missing-in-source"
+				},
+				"deps/leveldb/leveldb-1.5.0/db/skiplist.h": {
+					"match": false,
+					"packageHash": "b0881002bcee7676432437377489c5f12b2ec7ef6a9b85c717f667c0731c6921",
+					"size": 11177,
+					"status": "missing-in-source"
+				},
+				"deps/leveldb/leveldb-1.5.0/db/skiplist_test.cc": {
+					"match": false,
+					"packageHash": "978949d3f9950bcca7edfa8459a29aa9672c14ed21ef4e206c064b0867b16c03",
+					"size": 9788,
+					"status": "missing-in-source"
+				},
+				"deps/leveldb/leveldb-1.5.0/db/snapshot.h": {
+					"match": false,
+					"packageHash": "61ffdb69f8919b75ecbf941ef4fb577bba1a60659546cd45fe69fac1452731f1",
+					"size": 1666,
+					"status": "missing-in-source"
+				},
+				"deps/leveldb/leveldb-1.5.0/db/table_cache.cc": {
+					"match": false,
+					"packageHash": "567ef485a2fedd3add19769fa6eb8a9d8ed0bfeb203fa5644e2d3f7696a59a0d",
+					"size": 3462,
+					"status": "missing-in-source"
+				},
+				"deps/leveldb/leveldb-1.5.0/db/table_cache.h": {
+					"match": false,
+					"packageHash": "4f0c02f1df80c72cc6a7d036ce60f97ed5feee0126751856e867d30fe8e9b257",
+					"size": 2017,
+					"status": "missing-in-source"
+				},
+				"deps/leveldb/leveldb-1.5.0/db/version_edit.cc": {
+					"match": false,
+					"packageHash": "5d98c0d90d551385fb8afdc294bd030a2e80f528c88bb719ba9628af6054829e",
+					"size": 6946,
+					"status": "missing-in-source"
+				},
+				"deps/leveldb/leveldb-1.5.0/db/version_edit.h": {
+					"match": false,
+					"packageHash": "81c9a7f890631deb28992248371da3f1e4e8618e518f3ec6a0a42a95da752816",
+					"size": 2990,
+					"status": "missing-in-source"
+				},
+				"deps/leveldb/leveldb-1.5.0/db/version_edit_test.cc": {
+					"match": false,
+					"packageHash": "06f529d9e6b1cd71da7e1e096f1c20b752a2d834ae2347c924fa77537128e828",
+					"size": 1343,
+					"status": "missing-in-source"
+				},
+				"deps/leveldb/leveldb-1.5.0/db/version_set.cc": {
+					"match": false,
+					"packageHash": "fd2c445e1de5cd27593cd4fc9cc1c9b07de3b57ed438133cd93bc91f01f59d7f",
+					"size": 44559,
+					"status": "missing-in-source"
+				},
+				"deps/leveldb/leveldb-1.5.0/db/version_set.h": {
+					"match": false,
+					"packageHash": "2a9e4dedb1870aa65fb430b11b26a5a231e69e5742f23218bc41b9c4707e0410",
+					"size": 13221,
+					"status": "missing-in-source"
+				},
+				"deps/leveldb/leveldb-1.5.0/db/version_set_test.cc": {
+					"match": false,
+					"packageHash": "c22b55f30dab0ac2c510ae5ee65b0922d661262b7653da86eefa9c63b70b9856",
+					"size": 5353,
+					"status": "missing-in-source"
+				},
+				"deps/leveldb/leveldb-1.5.0/db/write_batch.cc": {
+					"match": false,
+					"packageHash": "31583202d236f4194adb871cd6fc410599ad1b6fc4cf6a713f55570562c86a9f",
+					"size": 4022,
+					"status": "missing-in-source"
+				},
+				"deps/leveldb/leveldb-1.5.0/db/write_batch_internal.h": {
+					"match": false,
+					"packageHash": "f704b5075fadd4377bf2dc20c106f8059f2259d3dbb97e15cabc5f391cf0301e",
+					"size": 1508,
+					"status": "missing-in-source"
+				},
+				"deps/leveldb/leveldb-1.5.0/db/write_batch_test.cc": {
+					"match": false,
+					"packageHash": "18c9109e62354b194f76c8f03901c9a527bfe2462b96988d5bd40f4164e00840",
+					"size": 3446,
+					"status": "missing-in-source"
+				},
+				"deps/leveldb/leveldb-1.5.0/doc/bench/db_bench_sqlite3.cc": {
+					"match": false,
+					"packageHash": "c9822539f7476ba2d4ece9bf135603766fac147e2ec6fddcc9304abf8e0073de",
+					"size": 22584,
+					"status": "missing-in-source"
+				},
+				"deps/leveldb/leveldb-1.5.0/doc/bench/db_bench_tree_db.cc": {
+					"match": false,
+					"packageHash": "d7eac03e6f62d2aa2ca821b4073574f88b362009025c2bbfd8390af806f24d2d",
+					"size": 15945,
+					"status": "missing-in-source"
+				},
+				"deps/leveldb/leveldb-1.5.0/doc/benchmark.html": {
+					"match": false,
+					"packageHash": "acf224ad6e29aaa21325e91604660aab902b22d3134ab389d2bb1a4ee3f3f348",
+					"size": 20970,
+					"status": "missing-in-source"
+				},
+				"deps/leveldb/leveldb-1.5.0/doc/doc.css": {
+					"match": false,
+					"packageHash": "8abbf692e3a6495ae43fff03d3533c72f6a56fcf4817595152336d12f37ebbaa",
+					"size": 1127,
+					"status": "missing-in-source"
+				},
+				"deps/leveldb/leveldb-1.5.0/doc/impl.html": {
+					"match": false,
+					"packageHash": "a6aecb8f032a1d52b7153a2cc10612a296bbd8fdfec73367fa19cc352f93bb4e",
+					"size": 8279,
+					"status": "missing-in-source"
+				},
+				"deps/leveldb/leveldb-1.5.0/doc/index.html": {
+					"match": false,
+					"packageHash": "621c6adabf8ac4eda08e17a1ba146f596388339521d47ab76c81dba9120fccfc",
+					"size": 21342,
+					"status": "missing-in-source"
+				},
+				"deps/leveldb/leveldb-1.5.0/doc/log_format.txt": {
+					"match": false,
+					"packageHash": "daf4859d3842f97dae45b3ca12475707a2755c7399b5dc9d9ad943676e47b00e",
+					"size": 2771,
+					"status": "missing-in-source"
+				},
+				"deps/leveldb/leveldb-1.5.0/doc/table_format.txt": {
+					"match": false,
+					"packageHash": "b6e20b7801ac0f340e14c6a7c890e49d8ce43485de11cb21836679b1dfb8b2d5",
+					"size": 3606,
+					"status": "missing-in-source"
+				},
+				"deps/leveldb/leveldb-1.5.0/helpers/memenv/memenv.cc": {
+					"match": false,
+					"packageHash": "95a35a6f35de7d8b748cc3fccb113436b917d281794a92fc48ee56e2ed5625ac",
+					"size": 9158,
+					"status": "missing-in-source"
+				},
+				"deps/leveldb/leveldb-1.5.0/helpers/memenv/memenv.h": {
+					"match": false,
+					"packageHash": "888a3e910f412ccebd53a6b8ee324bac3086f485fe5e5b43aa85cd630b732970",
+					"size": 699,
+					"status": "missing-in-source"
+				},
+				"deps/leveldb/leveldb-1.5.0/helpers/memenv/memenv_test.cc": {
+					"match": false,
+					"packageHash": "a069e253d6eefc55913895ff28e3e2ba50d427bd6051224fe7435061837512a4",
+					"size": 6868,
+					"status": "missing-in-source"
+				},
+				"deps/leveldb/leveldb-1.5.0/include/leveldb/c.h": {
+					"match": false,
+					"packageHash": "d3ea52a126d6260f3eea2ec44b5e60308188f0b663cc1735507d4e953b6b3187",
+					"size": 9316,
+					"status": "missing-in-source"
+				},
+				"deps/leveldb/leveldb-1.5.0/include/leveldb/cache.h": {
+					"match": false,
+					"packageHash": "27d7926f5ee7f09cc9f0a21543110dd8998e9d6252bfe8a233574d8979b117f1",
+					"size": 3534,
+					"status": "missing-in-source"
+				},
+				"deps/leveldb/leveldb-1.5.0/include/leveldb/comparator.h": {
+					"match": false,
+					"packageHash": "3c9c9b78f45c3521790bcc0b6e02a25832760da50ae0503e08e0af18253ae214",
+					"size": 2349,
+					"status": "missing-in-source"
+				},
+				"deps/leveldb/leveldb-1.5.0/include/leveldb/db.h": {
+					"match": false,
+					"packageHash": "5015dbbcdd0ce97a436875dbd08d5a4b5493585095ddda53f6cf7de2628c78c1",
+					"size": 6404,
+					"status": "missing-in-source"
+				},
+				"deps/leveldb/leveldb-1.5.0/include/leveldb/env.h": {
+					"match": false,
+					"packageHash": "bfaafaa1c86d4ec5e943704f403bc8fee8675bcf0431cca9fb13e3fb510930e9",
+					"size": 11716,
+					"status": "missing-in-source"
+				},
+				"deps/leveldb/leveldb-1.5.0/include/leveldb/filter_policy.h": {
+					"match": false,
+					"packageHash": "e366b5cb1ddc82155ec692e60cbc22c84f03e3da1d610cdfbfc01055e018218b",
+					"size": 2925,
+					"status": "missing-in-source"
+				},
+				"deps/leveldb/leveldb-1.5.0/include/leveldb/iterator.h": {
+					"match": false,
+					"packageHash": "924fe90313f3abd911ce5fc451f1277ee19e06943469f97468d4b83877356ac1",
+					"size": 3502,
+					"status": "missing-in-source"
+				},
+				"deps/leveldb/leveldb-1.5.0/include/leveldb/options.h": {
+					"match": false,
+					"packageHash": "e0e77681ae13810d9e7a0dc73d3307b4619fcbee21e48011acef88c5e6af4f96",
+					"size": 6815,
+					"status": "missing-in-source"
+				},
+				"deps/leveldb/leveldb-1.5.0/include/leveldb/slice.h": {
+					"match": false,
+					"packageHash": "fcd5357cc7270a30bcf2ee15b9f725317a46e163b986c5858a25f712d9380a40",
+					"size": 3128,
+					"status": "missing-in-source"
+				},
+				"deps/leveldb/leveldb-1.5.0/include/leveldb/status.h": {
+					"match": false,
+					"packageHash": "6db59f24a58f814ff2040ec8d0d81676d137760b00754cc46a96f76e6d3be5d7",
+					"size": 3350,
+					"status": "missing-in-source"
+				},
+				"deps/leveldb/leveldb-1.5.0/include/leveldb/table.h": {
+					"match": false,
+					"packageHash": "2ebcb1f777df88a36d1cdad0c43b59b9ad81ea63ec2c2010f0efb5697e4d9036",
+					"size": 2963,
+					"status": "missing-in-source"
+				},
+				"deps/leveldb/leveldb-1.5.0/include/leveldb/table_builder.h": {
+					"match": false,
+					"packageHash": "74bfb6191f1b9ffc15891d6b57142367cf8fc8b8e0730e56696eb99117accb41",
+					"size": 3395,
+					"status": "missing-in-source"
+				},
+				"deps/leveldb/leveldb-1.5.0/include/leveldb/write_batch.h": {
+					"match": false,
+					"packageHash": "f0007c3a7e8841b5bd87d7d5f29098a6df752d39f048241f24fb4ea304969b97",
+					"size": 1848,
+					"status": "missing-in-source"
+				},
+				"deps/leveldb/leveldb-1.5.0/port/README": {
+					"match": false,
+					"packageHash": "778c1b13885c1cdfeb25ff3d5e525379c723cdb60c62f63bce6d67b5fae1a045",
+					"size": 405,
+					"status": "missing-in-source"
+				},
+				"deps/leveldb/leveldb-1.5.0/port/atomic_pointer.h": {
+					"match": false,
+					"packageHash": "bafc1b199a26080aaa0545b3acba5df415ed7d8fe5c263e77c858a8ef8212a5b",
+					"size": 4780,
+					"status": "missing-in-source"
+				},
+				"deps/leveldb/leveldb-1.5.0/port/port.h": {
+					"match": false,
+					"packageHash": "15264023f8dcae352834f102dd9130133c7fe360ff4d173dbeb1d44a53c90cae",
+					"size": 697,
+					"status": "missing-in-source"
+				},
+				"deps/leveldb/leveldb-1.5.0/port/port_example.h": {
+					"match": false,
+					"packageHash": "fc34db2a72d67c8b105e1d0c4596180edb540932c80fdeb1ff39b2130f32c034",
+					"size": 4667,
+					"status": "missing-in-source"
+				},
+				"deps/leveldb/leveldb-1.5.0/port/port_posix.cc": {
+					"match": false,
+					"packageHash": "e58a6209df7b1c7dd94277b1ebeedbb7d111e91bf0501209849a1dfe2753caf7",
+					"size": 1440,
+					"status": "missing-in-source"
+				},
+				"deps/leveldb/leveldb-1.5.0/port/port_posix.h": {
+					"match": false,
+					"packageHash": "362824e5a43afe6b39b06bfc4d464cb6f3a39c1eeb1072d7cd7afaea959d6dcc",
+					"size": 3666,
+					"status": "missing-in-source"
+				},
+				"deps/leveldb/leveldb-1.5.0/port/win/stdint.h": {
+					"match": false,
+					"packageHash": "dba79bf9c2f653478601076eb2dab29fd3ddf054f799d4b6eed439e9e3570184",
+					"size": 855,
+					"status": "missing-in-source"
+				},
+				"deps/leveldb/leveldb-1.5.0/table/block.cc": {
+					"match": false,
+					"packageHash": "4b72d6a65bd5280fb620dc6718e54275f2be31112aad5338d0e4a8497264fd93",
+					"size": 8052,
+					"status": "missing-in-source"
+				},
+				"deps/leveldb/leveldb-1.5.0/table/block.h": {
+					"match": false,
+					"packageHash": "0f14ed6a71e702042ba513fc1f68bf5bce40e8f15134fb6b3c65ca5e82ee3478",
+					"size": 1034,
+					"status": "missing-in-source"
+				},
+				"deps/leveldb/leveldb-1.5.0/table/block_builder.cc": {
+					"match": false,
+					"packageHash": "9353b3034dbf264488a4e37e089f5a7510f047b1670677060bca88e4ea0472c3",
+					"size": 3656,
+					"status": "missing-in-source"
+				},
+				"deps/leveldb/leveldb-1.5.0/table/block_builder.h": {
+					"match": false,
+					"packageHash": "84fd216e60ea8c8c6675716105c2f0e668140bc1f6c162cad3b933ed8b5d752f",
+					"size": 1767,
+					"status": "missing-in-source"
+				},
+				"deps/leveldb/leveldb-1.5.0/table/filter_block.cc": {
+					"match": false,
+					"packageHash": "b3e2676db083cce546f5e7921aecf52dffb3dfc5e96857263d7aca00cbc91529",
+					"size": 3381,
+					"status": "missing-in-source"
+				},
+				"deps/leveldb/leveldb-1.5.0/table/filter_block.h": {
+					"match": false,
+					"packageHash": "12c5ec86fa2ba9f57f52089f014f54db335eb309c70a5482161de14a7010bdeb",
+					"size": 2248,
+					"status": "missing-in-source"
+				},
+				"deps/leveldb/leveldb-1.5.0/table/filter_block_test.cc": {
+					"match": false,
+					"packageHash": "fb432af53cabecc48572415d17ccb2f92eae739b2c8e1df025ffae295bca0c63",
+					"size": 3688,
+					"status": "missing-in-source"
+				},
+				"deps/leveldb/leveldb-1.5.0/table/format.cc": {
+					"match": false,
+					"packageHash": "06d966804aaef21a858dce0f525697c6cbdb6cac798ef2be0dbd2cdc180d00bb",
+					"size": 4587,
+					"status": "missing-in-source"
+				},
+				"deps/leveldb/leveldb-1.5.0/table/format.h": {
+					"match": false,
+					"packageHash": "a798b939c0e9a2745609c1645dc41b9d1e3630e606d2116d175332f3240b285b",
+					"size": 3142,
+					"status": "missing-in-source"
+				},
+				"deps/leveldb/leveldb-1.5.0/table/iterator.cc": {
+					"match": false,
+					"packageHash": "dd55b12379ac34ed09afe701c8a40a8a0e086468e58364ac230a499267a2b807",
+					"size": 1702,
+					"status": "missing-in-source"
+				},
+				"deps/leveldb/leveldb-1.5.0/table/iterator_wrapper.h": {
+					"match": false,
+					"packageHash": "3a0ae72e0a6c9edaffdb813b5e8f1ca310dcc1f6687272bed9fb4cb5020630ab",
+					"size": 2031,
+					"status": "missing-in-source"
+				},
+				"deps/leveldb/leveldb-1.5.0/table/merger.cc": {
+					"match": false,
+					"packageHash": "f6ce32006b8a85de328c1e44c32ac9c8a549bd796287c8f74b7baef6125d06cc",
+					"size": 4911,
+					"status": "missing-in-source"
+				},
+				"deps/leveldb/leveldb-1.5.0/table/merger.h": {
+					"match": false,
+					"packageHash": "3248e58ed794854a0ac289ee1dfae684f31ed3dd7e0f72e6ecc56d752cb5eafd",
+					"size": 867,
+					"status": "missing-in-source"
+				},
+				"deps/leveldb/leveldb-1.5.0/table/table.cc": {
+					"match": false,
+					"packageHash": "f88b55a092070e7080cb1a13a9220e944a1e0a2ee8981a9675aa130d3d324f51",
+					"size": 8224,
+					"status": "missing-in-source"
+				},
+				"deps/leveldb/leveldb-1.5.0/table/table_builder.cc": {
+					"match": false,
+					"packageHash": "b1f2f4c278e3ec82661dd63653bf8302ac5d9ecb42606c52558bc17c044b395a",
+					"size": 8100,
+					"status": "missing-in-source"
+				},
+				"deps/leveldb/leveldb-1.5.0/table/table_test.cc": {
+					"match": false,
+					"packageHash": "92ad3a2a3595b188f965a4a7b3ea45bb8cb2bd7de93fe654c7c00c45d6f0cf8e",
+					"size": 23297,
+					"status": "missing-in-source"
+				},
+				"deps/leveldb/leveldb-1.5.0/table/two_level_iterator.cc": {
+					"match": false,
+					"packageHash": "067cf6d91720ef0415cafabca9ce7dc272f8ac363382e0c0f518ccd10cc15618",
+					"size": 4702,
+					"status": "missing-in-source"
+				},
+				"deps/leveldb/leveldb-1.5.0/table/two_level_iterator.h": {
+					"match": false,
+					"packageHash": "de2c10c8d5a02d3163a5c5d916c26fddec0b42fcf3278316cb4bc89a2f91e01d",
+					"size": 1223,
+					"status": "missing-in-source"
+				},
+				"deps/leveldb/leveldb-1.5.0/util/arena.cc": {
+					"match": false,
+					"packageHash": "377bf81b33549a5baa50f2729ac4f2e8dfa0e2383862b3fa3897d9702d5ff41e",
+					"size": 1993,
+					"status": "missing-in-source"
+				},
+				"deps/leveldb/leveldb-1.5.0/util/arena.h": {
+					"match": false,
+					"packageHash": "1ddacdf361a817a7a9f23ed299ce0ee30c743febde817d2fc94f78151055e3b5",
+					"size": 1817,
+					"status": "missing-in-source"
+				},
+				"deps/leveldb/leveldb-1.5.0/util/arena_test.cc": {
+					"match": false,
+					"packageHash": "efce0bcfdf4b45213fcffccb7a42d8a9c4b389afc7eb79da9b616af9c1a5c0ce",
+					"size": 1670,
+					"status": "missing-in-source"
+				},
+				"deps/leveldb/leveldb-1.5.0/util/bloom.cc": {
+					"match": false,
+					"packageHash": "f0b8557f727a5a52fc0d59decd8387de59227521e596fe78e143fe902f7e0eb8",
+					"size": 2918,
+					"status": "missing-in-source"
+				},
+				"deps/leveldb/leveldb-1.5.0/util/bloom_test.cc": {
+					"match": false,
+					"packageHash": "c23f2e302adad14e7a70fee63597f9de9e7b6e4ea2d06111dec88166527592f8",
+					"size": 3732,
+					"status": "missing-in-source"
+				},
+				"deps/leveldb/leveldb-1.5.0/util/cache.cc": {
+					"match": false,
+					"packageHash": "fc1a777c6d194889a7f35c25afd5500c9c910e1ee4edaed457c5677b61ea5bfb",
+					"size": 8734,
+					"status": "missing-in-source"
+				},
+				"deps/leveldb/leveldb-1.5.0/util/cache_test.cc": {
+					"match": false,
+					"packageHash": "4fac1c2c86826518860902705e3fb57c9ef6f3e9d4b9a5c9b207751ddec9c677",
+					"size": 4687,
+					"status": "missing-in-source"
+				},
+				"deps/leveldb/leveldb-1.5.0/util/coding.cc": {
+					"match": false,
+					"packageHash": "948052234f8adcb8c5b79b5f773ca784a3ce4aac3b5092f1a4973a5c3a040b1e",
+					"size": 4909,
+					"status": "missing-in-source"
+				},
+				"deps/leveldb/leveldb-1.5.0/util/coding.h": {
+					"match": false,
+					"packageHash": "05e662ddc46e658ae865f92363ce703b827200a6827663d1cb4dbd4618862958",
+					"size": 4050,
+					"status": "missing-in-source"
+				},
+				"deps/leveldb/leveldb-1.5.0/util/coding_test.cc": {
+					"match": false,
+					"packageHash": "d8698af2cec53ec7a39a5888009122196e2867c4b68a1105c4b9b1421858bd66",
+					"size": 5516,
+					"status": "missing-in-source"
+				},
+				"deps/leveldb/leveldb-1.5.0/util/comparator.cc": {
+					"match": false,
+					"packageHash": "cea203b6a01c36bb8ac2db51f48b151e141a8f95a101a1cf92d3def16e494255",
+					"size": 2184,
+					"status": "missing-in-source"
+				},
+				"deps/leveldb/leveldb-1.5.0/util/crc32c.cc": {
+					"match": false,
+					"packageHash": "a1487fd9c2b20b240c773f9352138452ff2369b7a0ebda92e503dbfd06f61f89",
+					"size": 14977,
+					"status": "missing-in-source"
+				},
+				"deps/leveldb/leveldb-1.5.0/util/crc32c.h": {
+					"match": false,
+					"packageHash": "4a75367fedd11a25d500229c8f50b2d40e4ef3b1350b0b020cfa36c9814b4ace",
+					"size": 1457,
+					"status": "missing-in-source"
+				},
+				"deps/leveldb/leveldb-1.5.0/util/crc32c_test.cc": {
+					"match": false,
+					"packageHash": "4a5f29fca975dda34f760a9ecce6b84d460d473c150d27fd8b741f283d2daef8",
+					"size": 1748,
+					"status": "missing-in-source"
+				},
+				"deps/leveldb/leveldb-1.5.0/util/env.cc": {
+					"match": false,
+					"packageHash": "3fc6bb0075076c19179430ce1a28859ad95174e90400709a8fe148564d2ac98b",
+					"size": 2114,
+					"status": "missing-in-source"
+				},
+				"deps/leveldb/leveldb-1.5.0/util/env_posix.cc": {
+					"match": false,
+					"packageHash": "9354f8531120dd6616bdcf8fb7a519a97e4c3544fea881189d77edfc0d22b4bf",
+					"size": 15794,
+					"status": "missing-in-source"
+				},
+				"deps/leveldb/leveldb-1.5.0/util/env_test.cc": {
+					"match": false,
+					"packageHash": "06d70afa831277b580c427090950295132a8217ed99dd002babc193982ebf4d4",
+					"size": 2524,
+					"status": "missing-in-source"
+				},
+				"deps/leveldb/leveldb-1.5.0/util/filter_policy.cc": {
+					"match": false,
+					"packageHash": "744628bcf55e7644502b9586473ab0577bf8663fbd3ea99355dbdc7d03f6374e",
+					"size": 333,
+					"status": "missing-in-source"
+				},
+				"deps/leveldb/leveldb-1.5.0/util/hash.cc": {
+					"match": false,
+					"packageHash": "db0ce857935b427c685e7a465ff7a076582286d7ab33229a030d4159cda83b96",
+					"size": 980,
+					"status": "missing-in-source"
+				},
+				"deps/leveldb/leveldb-1.5.0/util/hash.h": {
+					"match": false,
+					"packageHash": "7c4cc85552ce7717fa97b6657e811e15aafc783d8f2636a773564250d6310f59",
+					"size": 524,
+					"status": "missing-in-source"
+				},
+				"deps/leveldb/leveldb-1.5.0/util/histogram.cc": {
+					"match": false,
+					"packageHash": "2cd1ae69da4c4ef564a6202d0eae9531cde29fc9fbd45d5af09eecc3a17b5c41",
+					"size": 4729,
+					"status": "missing-in-source"
+				},
+				"deps/leveldb/leveldb-1.5.0/util/histogram.h": {
+					"match": false,
+					"packageHash": "b1d6a19c2b5eb0c150cb35704086428bd7ffcf63292c1edd7e4861de5556844b",
+					"size": 925,
+					"status": "missing-in-source"
+				},
+				"deps/leveldb/leveldb-1.5.0/util/logging.cc": {
+					"match": false,
+					"packageHash": "4867f85cf9b1510c1926abf795a2e147bf8bd6934fa8e53c04ebc20abfd238ef",
+					"size": 1869,
+					"status": "missing-in-source"
+				},
+				"deps/leveldb/leveldb-1.5.0/util/logging.h": {
+					"match": false,
+					"packageHash": "bbdddacf3566e3dbc8615f16a8b4cb87609d04cf2a0de379b546745e7ea7c4cb",
+					"size": 1594,
+					"status": "missing-in-source"
+				},
+				"deps/leveldb/leveldb-1.5.0/util/mutexlock.h": {
+					"match": false,
+					"packageHash": "ffe66a46e3cf402164e90762407a41b892e637a86e5affe2ff5ac93186442c25",
+					"size": 1023,
+					"status": "missing-in-source"
+				},
+				"deps/leveldb/leveldb-1.5.0/util/options.cc": {
+					"match": false,
+					"packageHash": "5f39960f883f87ce1748d930fbc095684d4f2b6a4b24f1a64374503a2981fc9f",
+					"size": 764,
+					"status": "missing-in-source"
+				},
+				"deps/leveldb/leveldb-1.5.0/util/posix_logger.h": {
+					"match": false,
+					"packageHash": "1f9f02c1ea1762e3573e81fe4213dcfa60d3937441332dc517aed286b08531b1",
+					"size": 2745,
+					"status": "missing-in-source"
+				},
+				"deps/leveldb/leveldb-1.5.0/util/random.h": {
+					"match": false,
+					"packageHash": "a0d85e3168ff7d6ee4f4508a38083c2535938ee9de19b6e9837e23e3464aa7c1",
+					"size": 2079,
+					"status": "missing-in-source"
+				},
+				"deps/leveldb/leveldb-1.5.0/util/status.cc": {
+					"match": false,
+					"packageHash": "5f1bc586c32187352b950c3d6efcf922b85e9c034a774335bc3ebedef02558c2",
+					"size": 1931,
+					"status": "missing-in-source"
+				},
+				"deps/leveldb/leveldb-1.5.0/util/testharness.cc": {
+					"match": false,
+					"packageHash": "8626019ea6e8f595d8db58a8830d9c9a79ddf83d21a8fc6df93294379d9b4e9e",
+					"size": 1665,
+					"status": "missing-in-source"
+				},
+				"deps/leveldb/leveldb-1.5.0/util/testharness.h": {
+					"match": false,
+					"packageHash": "72915a6e491679ae2023f2e0dd6311737eae2b74630640dfbc5e2c8572dd2b52",
+					"size": 4707,
+					"status": "missing-in-source"
+				},
+				"deps/leveldb/leveldb-1.5.0/util/testutil.cc": {
+					"match": false,
+					"packageHash": "6c4ab7132cb174e1d4099e93e9b656c89ff0716b76af1f66c47f01bad19de87b",
+					"size": 1454,
+					"status": "missing-in-source"
+				},
+				"deps/leveldb/leveldb-1.5.0/util/testutil.h": {
+					"match": false,
+					"packageHash": "0a73c868bd45d0f671a30a9c5a4770b781b87339336b191bddb91ab12a8696d1",
+					"size": 1755,
+					"status": "missing-in-source"
+				},
+				"deps/leveldb/leveldb.gyp": {
+					"match": false,
+					"packageHash": "5a25574f2cbddd46e03f929408880138f771b366d27e8db41684c5619098127e",
+					"size": 5068,
+					"status": "missing-in-source"
+				},
+				"deps/snappy/linux/config.h": {
+					"match": false,
+					"packageHash": "0998ffe401a36f7e4883b46d63b27d78996b15c03fba7cebab4bb413c2aa23bb",
+					"size": 3068,
+					"status": "missing-in-source"
+				},
+				"deps/snappy/linux/snappy-stubs-public.h": {
+					"match": false,
+					"packageHash": "0ee027e09c510d9b3549159460fb5a88ae99e9a92f2cf54d895fc2b6acbafe94",
+					"size": 2913,
+					"status": "missing-in-source"
+				},
+				"deps/snappy/mac/config.h": {
+					"match": false,
+					"packageHash": "0998ffe401a36f7e4883b46d63b27d78996b15c03fba7cebab4bb413c2aa23bb",
+					"size": 3068,
+					"status": "missing-in-source"
+				},
+				"deps/snappy/mac/snappy-stubs-public.h": {
+					"match": false,
+					"packageHash": "0ee027e09c510d9b3549159460fb5a88ae99e9a92f2cf54d895fc2b6acbafe94",
+					"size": 2913,
+					"status": "missing-in-source"
+				},
+				"deps/snappy/snappy-1.0.5/.deps/snappy-c.Plo": {
+					"match": false,
+					"packageHash": "ddb1c8705176da86c285112f625f6a732bf7353b0a17835e8bcbc27c0e4243d9",
+					"size": 8,
+					"status": "missing-in-source"
+				},
+				"deps/snappy/snappy-1.0.5/.deps/snappy-sinksource.Plo": {
+					"match": false,
+					"packageHash": "ddb1c8705176da86c285112f625f6a732bf7353b0a17835e8bcbc27c0e4243d9",
+					"size": 8,
+					"status": "missing-in-source"
+				},
+				"deps/snappy/snappy-1.0.5/.deps/snappy-stubs-internal.Plo": {
+					"match": false,
+					"packageHash": "ddb1c8705176da86c285112f625f6a732bf7353b0a17835e8bcbc27c0e4243d9",
+					"size": 8,
+					"status": "missing-in-source"
+				},
+				"deps/snappy/snappy-1.0.5/.deps/snappy.Plo": {
+					"match": false,
+					"packageHash": "ddb1c8705176da86c285112f625f6a732bf7353b0a17835e8bcbc27c0e4243d9",
+					"size": 8,
+					"status": "missing-in-source"
+				},
+				"deps/snappy/snappy-1.0.5/.deps/snappy_unittest-snappy-test.Po": {
+					"match": false,
+					"packageHash": "ddb1c8705176da86c285112f625f6a732bf7353b0a17835e8bcbc27c0e4243d9",
+					"size": 8,
+					"status": "missing-in-source"
+				},
+				"deps/snappy/snappy-1.0.5/.deps/snappy_unittest-snappy_unittest.Po": {
+					"match": false,
+					"packageHash": "ddb1c8705176da86c285112f625f6a732bf7353b0a17835e8bcbc27c0e4243d9",
+					"size": 8,
+					"status": "missing-in-source"
+				},
+				"deps/snappy/snappy-1.0.5/AUTHORS": {
+					"match": false,
+					"packageHash": "710c0a3a4681c8c40f5a59eb794f61093fa142935c647c92f46ea595f0591833",
+					"size": 22,
+					"status": "missing-in-source"
+				},
+				"deps/snappy/snappy-1.0.5/COPYING": {
+					"match": false,
+					"packageHash": "5221a36a801b981fbdfda7b87db64cff231a3b88223a066c325411b539df796f",
+					"size": 1475,
+					"status": "missing-in-source"
+				},
+				"deps/snappy/snappy-1.0.5/ChangeLog": {
+					"match": false,
+					"packageHash": "5cefe4c3adb024f92b6bb0f26526db2aec885b5e2d4b7de74bdc518cebf85902",
+					"size": 56154,
+					"status": "missing-in-source"
+				},
+				"deps/snappy/snappy-1.0.5/INSTALL": {
+					"match": false,
+					"packageHash": "91826b889739b720e0da7055b74a5a579dd31ad2f3b683b15302039df676e34f",
+					"size": 15578,
+					"status": "missing-in-source"
+				},
+				"deps/snappy/snappy-1.0.5/Makefile": {
+					"match": false,
+					"packageHash": "f61bed205af4584449b0e3366ade19486b96e1be09479c00180d9d4f174d53b0",
+					"size": 33503,
+					"status": "missing-in-source"
+				},
+				"deps/snappy/snappy-1.0.5/Makefile.am": {
+					"match": false,
+					"packageHash": "68097702e67bcf33f6158cf6ed70c8945e4d226edea0b83b6f040c40335213ef",
+					"size": 1304,
+					"status": "missing-in-source"
+				},
+				"deps/snappy/snappy-1.0.5/Makefile.in": {
+					"match": false,
+					"packageHash": "795f5d7d5dfeaf397c53146f7f27d6c31c8a7e68b24d77f9e65a27dafb4714fc",
+					"size": 34691,
+					"status": "missing-in-source"
+				},
+				"deps/snappy/snappy-1.0.5/NEWS": {
+					"match": false,
+					"packageHash": "459e39fe2d4b91213908ea94de5378237fc452e686e03adbec36c16a4611b185",
+					"size": 2843,
+					"status": "missing-in-source"
+				},
+				"deps/snappy/snappy-1.0.5/README": {
+					"match": false,
+					"packageHash": "463f981fa564e35545ef999d3eb13fbf6dbce848b03be3e8d076a7d9b428d1bf",
+					"size": 5727,
+					"status": "missing-in-source"
+				},
+				"deps/snappy/snappy-1.0.5/aclocal.m4": {
+					"match": false,
+					"packageHash": "9254262716a2085c31805491b4631f16781c037f4165a80abd3f7a1c4f74b81f",
+					"size": 322184,
+					"status": "missing-in-source"
+				},
+				"deps/snappy/snappy-1.0.5/autogen.sh": {
+					"match": false,
+					"packageHash": "b0215abb7e1828512ea6b210086ca5cc2be7228d32e1774ecae73262369d8c73",
+					"size": 118,
+					"status": "missing-in-source"
+				},
+				"deps/snappy/snappy-1.0.5/config.guess": {
+					"match": false,
+					"packageHash": "6279087d5345d601cf579a6c8ebf09c57ddc7eae9b61762b5273749d189154f7",
+					"size": 45612,
+					"status": "missing-in-source"
+				},
+				"deps/snappy/snappy-1.0.5/config.h": {
+					"match": false,
+					"packageHash": "f1823229df93c0a307d54da2abd566e8a97454f1a775e6984633129e30d73bd5",
+					"size": 3617,
+					"status": "missing-in-source"
+				},
+				"deps/snappy/snappy-1.0.5/config.h.in": {
+					"match": false,
+					"packageHash": "769d0edf5765df2e8bcc600d7994a0893aedd4a59ebe3c63c1e8fc91a064bc20",
+					"size": 3356,
+					"status": "missing-in-source"
+				},
+				"deps/snappy/snappy-1.0.5/config.log": {
+					"match": false,
+					"packageHash": "411991ee4e4d10ddb9253c1fb6732bd47766303f03ceed918371b0957e3fa97f",
+					"size": 47884,
+					"status": "missing-in-source"
+				},
+				"deps/snappy/snappy-1.0.5/config.status": {
+					"match": false,
+					"packageHash": "498909c71f44ad805402dbd516cc4264f1d2b531b1d7b6b6e567e58405607aac",
+					"size": 68936,
+					"status": "missing-in-source"
+				},
+				"deps/snappy/snappy-1.0.5/config.sub": {
+					"match": false,
+					"packageHash": "f8f313b5ec9b998cc9b93a4bfa4f435cb86b72812162554bbfdb0f214a8e4d19",
+					"size": 34069,
+					"status": "missing-in-source"
+				},
+				"deps/snappy/snappy-1.0.5/configure": {
+					"match": false,
+					"packageHash": "b857292447db82b7b2ca44d08917182bca010090745c3cd81300a621d6096aec",
+					"size": 549785,
+					"status": "missing-in-source"
+				},
+				"deps/snappy/snappy-1.0.5/configure.ac": {
+					"match": false,
+					"packageHash": "c0b1b3f58574edb451118718625853a0bdb0efb7706854409b60ef457ae68dd5",
+					"size": 3779,
+					"status": "missing-in-source"
+				},
+				"deps/snappy/snappy-1.0.5/depcomp": {
+					"match": false,
+					"packageHash": "20efdbd4f295e6b759a024fe045671de5db6066e2a210be3296eeb9c38a1b238",
+					"size": 18615,
+					"status": "missing-in-source"
+				},
+				"deps/snappy/snappy-1.0.5/format_description.txt": {
+					"match": false,
+					"packageHash": "66e33c4190e7be39477864d58ad7b581ca0e65e9aca4e97e91db45256ee9a203",
+					"size": 4388,
+					"status": "missing-in-source"
+				},
+				"deps/snappy/snappy-1.0.5/framing_format.txt": {
+					"match": false,
+					"packageHash": "9169eb76a311dc855125b8e49954e2c4d1551214eeda96d75c857cae69e4deed",
+					"size": 4634,
+					"status": "missing-in-source"
+				},
+				"deps/snappy/snappy-1.0.5/install-sh": {
+					"match": false,
+					"packageHash": "a42cce53f5b376a4b1251e8d06e96dead9e858396d07333ed0cc83aa4b510023",
+					"size": 13663,
+					"status": "missing-in-source"
+				},
+				"deps/snappy/snappy-1.0.5/libtool": {
+					"match": false,
+					"packageHash": "57aa21ce8db49edfff2ad55fbf8f62a562fc6bd0cb7f79c8dd239735cc27758b",
+					"size": 264179,
+					"status": "missing-in-source"
+				},
+				"deps/snappy/snappy-1.0.5/ltmain.sh": {
+					"match": false,
+					"packageHash": "f7052e821939841d77966ce993b8f0969abb1c37f3c4ead2667c3ff89b577699",
+					"size": 243469,
+					"status": "missing-in-source"
+				},
+				"deps/snappy/snappy-1.0.5/m4/gtest.m4": {
+					"match": false,
+					"packageHash": "aa02b526fd3f8f7e426cd7bcd4735b8c64b0376f3216fba32c427ec46bd032eb",
+					"size": 3216,
+					"status": "missing-in-source"
+				},
+				"deps/snappy/snappy-1.0.5/missing": {
+					"match": false,
+					"packageHash": "fd08cdce99a06aeb2308dd3b78499edc15c29ebc2da23b059a931b38cc5b90f3",
+					"size": 11419,
+					"status": "missing-in-source"
+				},
+				"deps/snappy/snappy-1.0.5/snappy-c.cc": {
+					"match": false,
+					"packageHash": "bd06ca0e8243940aaee6c42cf13aa212870b9b1b7d036727fc636f02c37e797d",
+					"size": 3637,
+					"status": "missing-in-source"
+				},
+				"deps/snappy/snappy-1.0.5/snappy-c.h": {
+					"match": false,
+					"packageHash": "6127b67027aacf7e3ca2b8ba86249bd2eab420fc789fad5e2fb5e80f51ab49ae",
+					"size": 5394,
+					"status": "missing-in-source"
+				},
+				"deps/snappy/snappy-1.0.5/snappy-internal.h": {
+					"match": false,
+					"packageHash": "092a9e891aeb2a27f8c568877c7c5957fb8c4b05dc74f0d3ef8ef644763960c8",
+					"size": 5462,
+					"status": "missing-in-source"
+				},
+				"deps/snappy/snappy-1.0.5/snappy-sinksource.cc": {
+					"match": false,
+					"packageHash": "631298b48da6edd301c67e7e6dca23899907fe448ce97d197bb90690acffb29d",
+					"size": 2367,
+					"status": "missing-in-source"
+				},
+				"deps/snappy/snappy-1.0.5/snappy-sinksource.h": {
+					"match": false,
+					"packageHash": "42521c62e97e5a5edf45f15032f24e959c2da08ad781b42147a55b4610622f1a",
+					"size": 4931,
+					"status": "missing-in-source"
+				},
+				"deps/snappy/snappy-1.0.5/snappy-stubs-internal.cc": {
+					"match": false,
+					"packageHash": "7330bb32cf0f2d16d14637bd0f203a68372f222d99665635efad0f81e64b691e",
+					"size": 1827,
+					"status": "missing-in-source"
+				},
+				"deps/snappy/snappy-1.0.5/snappy-stubs-internal.h": {
+					"match": false,
+					"packageHash": "a973aecee7b91abe618828e4e0a00533290ce57139336ac0a2bd62071ca11af6",
+					"size": 17328,
+					"status": "missing-in-source"
+				},
+				"deps/snappy/snappy-1.0.5/snappy-stubs-public.h": {
+					"match": false,
+					"packageHash": "0ee027e09c510d9b3549159460fb5a88ae99e9a92f2cf54d895fc2b6acbafe94",
+					"size": 2913,
+					"status": "missing-in-source"
+				},
+				"deps/snappy/snappy-1.0.5/snappy-stubs-public.h.in": {
+					"match": false,
+					"packageHash": "afa5be4cb78924af3b6776bb89f731f6382960e96609fbb8f9d9143e85d244a1",
+					"size": 3017,
+					"status": "missing-in-source"
+				},
+				"deps/snappy/snappy-1.0.5/snappy-test.cc": {
+					"match": false,
+					"packageHash": "da2a8a6a55e09f8d78cb9b23fc46f6305ddd01ebadf5aee04ab058cc4ad56355",
+					"size": 19837,
+					"status": "missing-in-source"
+				},
+				"deps/snappy/snappy-1.0.5/snappy-test.h": {
+					"match": false,
+					"packageHash": "887382871614cb5099c640ac6d3f36f142199a6c8aaa358b3de0530fc26ebf6f",
+					"size": 15213,
+					"status": "missing-in-source"
+				},
+				"deps/snappy/snappy-1.0.5/snappy.cc": {
+					"match": false,
+					"packageHash": "36ba0d9ea07686c0d27461a82e7857f6964b9be58955f1ee9d801af5a4312280",
+					"size": 39456,
+					"status": "missing-in-source"
+				},
+				"deps/snappy/snappy-1.0.5/snappy.h": {
+					"match": false,
+					"packageHash": "5e9d8ff5382bbf366be72ca83a481f92828ec3d115ea03ce3926eee1b09f46db",
+					"size": 6901,
+					"status": "missing-in-source"
+				},
+				"deps/snappy/snappy-1.0.5/snappy_unittest.cc": {
+					"match": false,
+					"packageHash": "5de6d62f465a5f7e1d63e9453c0b9a8f2958f2c9732ab49499bb10f7bf8b7fac",
+					"size": 38214,
+					"status": "missing-in-source"
+				},
+				"deps/snappy/snappy-1.0.5/stamp-h1": {
+					"match": false,
+					"packageHash": "24fdde0aee1f49666fc7a5bd7f422dc0118e4db128bc1f606f7f047c9b245bb4",
+					"size": 23,
+					"status": "missing-in-source"
+				},
+				"deps/snappy/snappy.gyp": {
+					"match": false,
+					"packageHash": "ad53196fd866ee7e487f0c456a06a0f3afdb5bf3b2ebce8720dd66fab76e5d16",
+					"size": 1528,
+					"status": "missing-in-source"
+				},
+				"deps/snappy/win32/snappy-stubs-public.h": {
+					"match": false,
+					"packageHash": "47db2acecb055457a4bc300f85f9ca9ef3e9fa8c7773987a3063698fd298f1fe",
+					"size": 2913,
+					"status": "missing-in-source"
+				},
+				"lib/errors.js": {
+					"match": false,
+					"packageHash": "a04476253e8e09e1a85f8b4dcb0283d1d903f3f7ec988411dcf87f0ca9ecdf25",
+					"size": 599,
+					"status": "missing-in-source"
+				},
+				"lib/levelup.js": {
+					"diff": "--- published/lib/levelup.js\n+++ rebuilt/lib/levelup.js\n@@ -1,246 +1,333 @@\n-/* Copyright (c) 2012 Rod Vagg <@rvagg> */\n+'use strict'\n \n-var bridge       = require('bindings')('levelup.node')\n+const EventEmitter = require('events').EventEmitter\n+const inherits = require('util').inherits\n+const DeferredLevelDOWN = require('deferred-leveldown')\n+const IteratorStream = require('level-iterator-stream')\n+const Batch = require('./batch')\n+const errors = require('level-errors')\n+const supports = require('level-supports')\n+const catering = require('catering')\n+const getCallback = require('./common').getCallback\n+const getOptions = require('./common').getOptions\n+\n+// TODO: after we drop node 10, also use queueMicrotask() in node\n+const nextTick = require('./next-tick')\n+\n+const WriteError = errors.WriteError\n+const ReadError = errors.ReadError\n+const NotFoundError = errors.NotFoundError\n+const OpenError = errors.OpenError\n+const InitializationError = errors.InitializationError\n+\n+function LevelUP (db, options, callback) {\n+  if (!(this instanceof LevelUP)) {\n+    return new LevelUP(db, options, callback)\n+  }\n \n-  , errors       = require('./errors')\n-  , readStream   = require('./read-stream')\n-  , writeStream  = require('./write-stream')\n-  , toEncoding   = require('./util').toEncoding\n-  , toBuffer     = require('./util').toBuffer\n-  , extend       = require('./util').extend\n-  , EventEmitter = require('events').EventEmitter\n-\n-  , defaultOptions = {\n-        createIfMissing : false\n-      , errorIfExists   : false\n-      , encoding        : 'utf8'\n-      , keyEncoding     : null\n-      , valueEncoding   : null\n-    }\n-\n-  , encodingOpts = (function (enc) {\n-      var eo = {}\n-      enc.forEach(function (e) { eo[e] = { encoding: e } })\n-      return eo\n-    }('hex utf8 utf-8 ascii binary base64 ucs2 ucs-2 utf16le utf-16le'.split(' ')))\n-\n-  , getOptions = function (options, globalOptions) {\n-      if (typeof options == 'string') // just an encoding\n-        options = extend({}, encodingOpts[options] || encodingOpts[defaultOptions.encoding])\n-      return extend(extend({}, globalOptions), options)\n-    }\n-\n-  , getCallback = function (options_, callback_) {\n-      if (typeof options_ == 'function')\n-        return options_\n-      return callback_\n-    }\n+  let error\n \n-function LevelUP (location, options) {\n-  this.__proto__.__proto__ = EventEmitter.prototype\n   EventEmitter.call(this)\n-  this._options = extend(extend({}, defaultOptions), options)\n-  this._location = location\n-}\n+  this.setMaxListeners(Infinity)\n \n-LevelUP.prototype = {\n-    open: function (callback) {\n-      var execute = function () {\n-            var db = bridge.createDatabase()\n-            db.open(this._location, this._options, function (err) {\n-              if (err) {\n-                err = new errors.OpenError(err)\n-                if (callback)\n-                  return callback(err)\n-                this.emit('error', err)\n-              } else {\n-                this._db = db\n-                callback(null, this)\n-                this.emit('ready')\n-              }\n-            }.bind(this))\n-          }.bind(this)\n-\n-      if (this.isOpen())\n-        this.close(execute)\n-      else\n-        execute()\n-    }\n-\n-    //TODO: we can crash Node by submitting an operation between close() and the actual closing of the database\n",
+					"match": false,
+					"packageHash": "f216401f6a1b222051723c7fb2ed2b05b735c7cb506cabec0a7bb6176fb51800",
+					"size": 7311,
+					"sourceHash": "ce63e180b8383fb7ed1ab34392c77d3fcc6412e4eea95a7999c78cac32ea55e6",
+					"status": "content"
+				},
+				"lib/read-stream.js": {
+					"match": false,
+					"packageHash": "3c02b4f0ef54965fbbb7d1d87872d55bb0c78c4a5138124639ed98c7c623720c",
+					"size": 3494,
+					"status": "missing-in-source"
+				},
+				"lib/util.js": {
+					"match": false,
+					"packageHash": "8caf5bfe7f38347019316663db9800c90dc5287a8b9ad2b775b6537472e5241b",
+					"size": 881,
+					"status": "missing-in-source"
+				},
+				"lib/write-stream.js": {
+					"match": false,
+					"packageHash": "39f3fdfb4c1562e01c4dbd559e92e327ea77bdf7b77b94037afcbf95afdfc314",
+					"size": 3769,
+					"status": "missing-in-source"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -1,34 +1,75 @@\n {\n-    \"name\"            : \"levelup\"\n-  , \"authors\": [\n-       \"Rod Vagg @rvagg <rod@vagg.org> (https://github.com/rvagg)\"\n-    ]\n-  , \"keywords\"        : [ \"leveldb\", \"levelup\", \"stream\", \"database\", \"db\", \"store\", \"storage\", \"json\" ]\n-  , \"version\"         : \"0.0.2a\"\n-  , \"main\"            : \"lib/levelup.js\"\n-  , \"dependencies\"    : {\n-        \"errno\"         : \"~0.0.2\"\n-      , \"bindings\"      : \"~1.0.0\"\n-      , \"concat-stream\" : \"~0.0.8\"\n-      , \"bufferstream\"  : \"~0.5.1\"\n-    }\n-  , \"devDependencies\" : {\n-        \"buster\"        : \"*\"\n-      , \"rimraf\"        : \"*\"\n-      , \"async\"         : \"*\"\n-      , \"fstream\"       : \"*\"\n-      , \"tar\"           : \"*\"\n-      , \"mkfiletree\"    : \"*\"\n-      , \"readfiletree\"  : \"*\"\n-    }\n-  , \"repository\": {\n-        \"type\": \"git\"\n-      , \"url\": \"https://github.com/rvagg/node-levelup.git\"\n-    }\n-  , \"scripts\"         : {\n-      \"test\"            : \"./node_modules/.bin/buster-test\"\n-    , \"install\"         : \"node-gyp rebuild\"\n+  \"name\": \"levelup\",\n+  \"version\": \"5.1.1\",\n+  \"description\": \"Fast & simple storage - a Node.js-style LevelDB wrapper\",\n+  \"license\": \"MIT\",\n+  \"main\": \"lib/levelup.js\",\n+  \"browser\": {\n+    \"./lib/next-tick.js\": \"./lib/next-tick-browser.js\"\n+  },\n+  \"scripts\": {\n+    \"test\": \"standard && hallmark && (nyc -s node test/self.js | faucet) && nyc report\",\n+    \"coverage\": \"nyc report -r lcovonly\",\n+    \"test-browsers\": \"airtap --coverage --verbose test/self.js\",\n+    \"test-browsers-local\": \"airtap -p local test/self.js\",\n+    \"hallmark\": \"hallmark --fix\",\n+    \"dependency-check\": \"dependency-check --no-dev -i queue-microtask .\",\n+    \"prepublishOnly\": \"npm run dependency-check\"\n+  },\n+  \"files\": [\n+    \"lib\",\n+    \"CHANGELOG.md\",\n+    \"UPGRADING.md\",\n+    \"sauce-labs.svg\"\n+  ],\n+  \"dependencies\": {\n+    \"catering\": \"^2.0.0\",\n+    \"deferred-leveldown\": \"^7.0.0\",\n+    \"level-errors\": \"^3.0.1\",\n+    \"level-iterator-stream\": \"^5.0.0\",\n+    \"level-supports\": \"^2.0.1\",\n+    \"queue-microtask\": \"^1.2.3\"\n+  },\n+  \"devDependencies\": {\n+    \"after\": \"^0.8.2\",\n+    \"airtap\": \"^4.0.1\",\n+    \"airtap-playwright\": \"^1.0.1\",\n+    \"airtap-sauce\": \"^1.1.0\",\n+    \"async-each\": \"^1.0.3\",\n+    \"browserify\": \"^17.0.0\",\n+    \"concat-stream\": \"^2.0.0\",\n+    \"delayed\": \"^2.0.0\",\n+    \"dependency-check\": \"^4.1.0\",\n+    \"encoding-down\": \"^7.1.0\",\n+    \"faucet\": \"^0.0.3\",\n+    \"hallmark\": \"^4.0.0\",\n+    \"level-concat-iterator\": \"^3.0.0\",\n+    \"memdown\": \"^6.1.0\",\n+    \"nyc\": \"^15.1.0\",\n+    \"run-parallel\": \"^1.2.0\",\n+    \"run-series\": \"^1.1.8\",\n+    \"simple-concat\": \"^1.0.0\",\n+    \"sinon\": \"^13.0.1\",\n+    \"standard\": \"^17.0.0\",\n+    \"tape\": \"^5.2.2\",\n+    \"trickle\": \"0.0.2\"\n+  },\n+  \"repository\": {\n+    \"type\": \"git\",\n+    \"url\": \"https://github.com/Level/levelup.git\"\n+  },\n+  \"homepage\": \"https://github.com/Level/levelup\",\n+  \"keywords\": [\n+    \"level\",\n+    \"leveldb\",\n+    \"stream\",\n+    \"database\",\n+    \"db\",\n+    \"store\",\n",
+					"match": false,
+					"packageHash": "3fd5f31109ae05eb96122ce3840ba21bbabed3e9a0c19eb52430777cfc39cf1b",
+					"size": 1022,
+					"sourceHash": "6eed0ed2518f5c05c1abdc3753948923cfba29631684c02586d200626d33f8b8",
+					"status": "content"
+				},
+				"src/async.cc": {
+					"match": false,
+					"packageHash": "625aa84b45fb1a37d8205da0d49051447c61f86ca20f45a4248a0e575c12911c",
+					"size": 1398,
+					"status": "missing-in-source"
+				},
+				"src/async.h": {
+					"match": false,
+					"packageHash": "6a638d0a67444183dba4417c2df5072a2d71ecb9eaf5f0738e1abbc8a027f460",
+					"size": 947,
+					"status": "missing-in-source"
+				},
+				"src/batch.cc": {
+					"match": false,
+					"packageHash": "2a545b38d28da2996ea22f868458a4c00b77360d714967c6703ab240d7937db1",
+					"size": 436,
+					"status": "missing-in-source"
+				},
+				"src/batch.h": {
+					"match": false,
+					"packageHash": "6a402e45e93316312cedce2d9aea299a202efee7c1afcb500521a55ba1a866d3",
+					"size": 895,
+					"status": "missing-in-source"
+				},
+				"src/database.cc": {
+					"match": false,
+					"packageHash": "6c097c5b07b9e79107f6addbc97f4de895dfa88f2f372840d4df46317f511626",
+					"size": 8826,
+					"status": "missing-in-source"
+				},
+				"src/database.h": {
+					"match": false,
+					"packageHash": "6a414dd9bc337dec95b31ea509d3d1757c526e8c58308e4d40007c583c27b348",
+					"size": 1271,
+					"status": "missing-in-source"
+				},
+				"src/database_async.cc": {
+					"match": false,
+					"packageHash": "c33735329501f8ee055d707c10f1cc05eeb318855ac9d7b3e6448255b929156c",
+					"size": 3554,
+					"status": "missing-in-source"
+				},
+				"src/database_async.h": {
+					"match": false,
+					"packageHash": "181554cbf583f7b31e6747239881f3a2b5e98e2debcf48cb34736b4f5345f964",
+					"size": 3308,
+					"status": "missing-in-source"
+				},
+				"src/iterator.cc": {
+					"match": false,
+					"packageHash": "b54447ec8adb75fd8c57e306716d694828fe8fce9d6e231df5c458d169d3b87b",
+					"size": 3928,
+					"status": "missing-in-source"
+				},
+				"src/iterator.h": {
+					"match": false,
+					"packageHash": "9cf7f7f8fd4fa26471eccad7769ab9456bb32ff21df91a85a2f8f6e6e13d17cb",
+					"size": 1268,
+					"status": "missing-in-source"
+				},
+				"src/iterator_async.cc": {
+					"match": false,
+					"packageHash": "c4ab8874c064f49de4b5854a38431fcd3a2cf5f1c211422b2d315e6608cc79c7",
+					"size": 895,
+					"status": "missing-in-source"
+				},
+				"src/iterator_async.h": {
+					"match": false,
+					"packageHash": "ce2e43c8a8e3f5469541e9fc85e4ac0525be8803d53a82d74e8014a58d1c5d91",
+					"size": 1149,
+					"status": "missing-in-source"
+				},
+				"src/levelup.cc": {
+					"match": false,
+					"packageHash": "33340154cce0987de7027d1e437355fe34ceb190d2cddff4318d14c0a28c615e",
+					"size": 796,
+					"status": "missing-in-source"
+				},
+				"src/levelup.h": {
+					"match": false,
+					"packageHash": "f6169c504fd8401916c6cb75c7e67298754d13ec5a83433a4d227db94f978033",
+					"size": 533,
+					"status": "missing-in-source"
+				},
+				"test/binary-test.js": {
+					"match": false,
+					"packageHash": "698d00796aa306a989c365599c30dcd9dbce4ed2a1462bcdda2fdab6cc272343",
+					"size": 5853,
+					"status": "missing-in-source"
+				},
+				"test/common.js": {
+					"match": false,
+					"packageHash": "ff311d01a8231f98ea456e08428fc977f585fd43d187a2dabe334bda3936ded5",
+					"size": 2869,
+					"status": "missing-in-source"
+				},
+				"test/copy-test.js": {
+					"match": false,
+					"packageHash": "1a7973a7377d36928b66fd43dd472437c20475c5ec9786a82ff909f92b757fe0",
+					"size": 1699,
+					"status": "missing-in-source"
+				},
+				"test/data/testdata.bin": {
+					"match": false,
+					"packageHash": "0be3a04156e62982dab9ef4aface6085bff3c699c4c5c29fbe2145c869ca45c4",
+					"size": 4688,
+					"status": "missing-in-source"
+				},
+				"test/functional/fstream-test.js": {
+					"match": false,
+					"packageHash": "2abb754900f9e17f9a272ba511937336a858551f728f7a55c87dddbff0be8a1b",
+					"size": 7994,
+					"status": "missing-in-source"
+				},
+				"test/json-test.js": {
+					"match": false,
+					"packageHash": "201988434456406f09ac6fca2da4e9a95bb46c28562558a81b96e84d29220ae8",
+					"size": 2507,
+					"status": "missing-in-source"
+				},
+				"test/read-stream-test.js": {
+					"match": false,
+					"packageHash": "48a411225ea7e97958b55c3f3f6b677c0bd758a85406cdbe4ee736c87994b2cd",
+					"size": 10208,
+					"status": "missing-in-source"
+				},
+				"test/simple-test.js": {
+					"match": false,
+					"packageHash": "b522e13e01d102850efb78dbd29a3e79e12127e5f6ee878d7ffea7bf5aca0cc9",
+					"size": 16228,
+					"status": "missing-in-source"
+				},
+				"test/write-stream-test.js": {
+					"match": false,
+					"packageHash": "4c590ccb290cf302722de2473f7067a75bf7087a4710b68353bc41d43207efb3",
+					"size": 3842,
+					"status": "missing-in-source"
+				},
+				"CHANGELOG.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"UPGRADING.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/batch.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/common.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/next-tick-browser.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/next-tick.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"sauce-labs.svg": {
+					"match": false,
+					"status": "missing-in-package"
+				}
+			},
+			"summary": {
+				"differentFiles": 4,
+				"matchingFiles": 0,
+				"missingInPackage": 7,
+				"missingInSource": 217,
+				"score": 0,
+				"totalFiles": 228
+			}
+		},
+		"prodDependencies": [
+			{
+				"name": "abstract-leveldown",
+				"version": "7.2.0"
+			},
+			{
+				"name": "buffer",
+				"version": "6.0.3"
+			},
+			{
+				"name": "base64-js",
+				"version": "1.5.1"
+			},
+			{
+				"name": "catering",
+				"version": "2.1.1"
+			},
+			{
+				"name": "deferred-leveldown",
+				"version": "7.0.0"
+			},
+			{
+				"name": "ieee754",
+				"version": "1.2.1"
+			},
+			{
+				"name": "inherits",
+				"version": "2.0.4"
+			},
+			{
+				"name": "is-buffer",
+				"version": "2.0.5"
+			},
+			{
+				"name": "level-concat-iterator",
+				"version": "3.1.0"
+			},
+			{
+				"name": "level-errors",
+				"version": "3.0.1"
+			},
+			{
+				"name": "level-iterator-stream",
+				"version": "5.0.0"
+			},
+			{
+				"name": "level-supports",
+				"version": "2.1.0"
+			},
+			{
+				"name": "queue-microtask",
+				"version": "1.2.3"
+			},
+			{
+				"name": "readable-stream",
+				"version": "3.6.2"
+			},
+			{
+				"name": "safe-buffer",
+				"version": "5.2.1"
+			},
+			{
+				"name": "string_decoder",
+				"version": "1.3.0"
+			},
+			{
+				"name": "util-deprecate",
+				"version": "1.0.2"
+			}
+		]
+	}
+]
