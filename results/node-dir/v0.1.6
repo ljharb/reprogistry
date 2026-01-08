@@ -1,0 +1,110 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-08T10:35:46.813Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:11.7.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "node-dir@0.1.6",
+			"name": "node-dir",
+			"version": "0.1.6",
+			"location": "https://registry.npmjs.org/node-dir/-/node-dir-0.1.6.tgz",
+			"integrity": "sha512-EzmTGfHfDiX0l7GkQSFZvEqUrgw6qJ/Bt0jPTypjMLoLJxCTxzvuqEdlDrDOz3dMEcdrX7m4xVytJDBKE/nJhw==",
+			"publishedAt": "2014-08-09T22:11:12.533Z",
+			"publishedWith": {
+				"node": null,
+				"npm": "1.2.18"
+			},
+			"dependencies": {}
+		},
+		"source": {
+			"integrity": null,
+			"location": "https://github.com/fshost/node-dir",
+			"spec": "github:fshost/node-dir#HEAD"
+		},
+		"comparisonHash": "9ef46a5bd31291e57cbab41e2f17c57bd6da0b5b",
+		"diff": {
+			"files": {
+				".npmignore": {
+					"match": false,
+					"packageHash": "99a274c5216c231aa79d4fd0c04103402bd12579db47a44c1cd94c1f6311cf42",
+					"size": 22,
+					"status": "missing-in-source"
+				},
+				"README.md": {
+					"diff": "--- published/README.md\n+++ rebuilt/README.md\n@@ -1,12 +1,31 @@\n-[![Build Status](https://secure.travis-ci.org/fshost/node-dir.png)](http://travis-ci.org/fshost/node-dir)\r\n+[![Build Status](https://secure.travis-ci.org/fshost/node-dir.svg)](http://travis-ci.org/fshost/node-dir)\r\n \r\n # node-dir\r\n A lightweight Node.js module with methods for some common directory and file operations, including asynchronous, non-blocking methods for recursively getting an array of files, subdirectories, or both, and methods for recursively, sequentially reading and processing the contents of files in a directory and its subdirectories, with several options available for added flexibility if needed.\r\n \r\n+### Table of Contents\r\n+\r\n+- [installation](#installation)\r\n+- [usage](#usage)\r\n+        - [methods](#methods)\r\n+        - [readFiles( dir, options, fileCallback, finishedCallback)](#readfiles-dir-options-filecallback-finishedcallback)\r\n+        - [readFilesStream( dir, options, streamCallback, finishedCallback)](#readfilesstream-dir-options-streamcallback-finishedcallback)\r\n+                - [readFilesStream examples](#readfilesstream-examples)\r\n+        - [files( dir, callback )](#files-dir-callback)\r\n+        - [files( dir, {sync:true} )](#files-dir-synctrue)\r\n+        - [promiseFiles( dir, callback )](#promisefiles-dir-callback)\r\n+        - [subdirs( dir, callback )](#subdirs-dir-callback)\r\n+        - [paths(dir, [combine], callback )](#pathsdir-combine-callback)\r\n+- [API Docs](#api-docs)\r\n+        - [files(dir, type, callback, options)](#filesdir-type-callback-options)\r\n+- [License](#license)\r\n+\r\n #### installation\r\n \r\n     npm install node-dir\r\n \r\n+### usage\r\n+\r\n #### methods\r\n For the sake of brevity, assume that the following line of code precedes all of the examples.\r\n \r\n@@ -15,6 +34,7 @@\n ```\r\n \r\n #### readFiles( dir, [options], fileCallback, [finishedCallback] )\r\n+#### readFilesStream( dir, [options], streamCallback, [finishedCallback] )\r\n Sequentially read the content of each file in a directory, passing the contents to a callback, optionally calling a finished callback when complete.  The options and finishedCallback arguments are not required.\r\n \r\n Valid options are:\r\n@@ -27,10 +47,11 @@\n - reverse: sort files in each directory in descending order\r\n - shortName: whether to aggregate only the base filename rather than the full filepath\r\n - sort: sort files in each directory in ascending order (defaults to true)\r\n+- doneOnErr: control if done function called on error (defaults to true)\r\n \r\n A reverse sort can also be achieved by setting the sort option to 'reverse', 'desc', or 'descending' string value.\r\n \r\n-examples\r\n+#### readFilesStream examples\r\n \r\n ```javascript\r\n // display contents of files in this script's directory\r\n@@ -45,6 +66,24 @@\n         console.log('finished reading files:', files);\r\n     });\r\n \r\n+// display contents of huge files in this script's directory\r\n+dir.readFilesStream(__dirname,\r\n+    function(err, stream, next) {\r\n+        if (err) throw err;\r\n+        var content = '';\r\n+        stream.on('data',function(buffer) {\r\n+            content += buffer.toString();\r\n+        });\r\n+        stream.on('end',function() {\r\n+            console.log('content:', content);\r\n+            next();\r\n+        });\r\n+    },\r\n+    function(err, files){\r\n+        if (err) throw err;\r\n+        console.log('finished reading files:', files);\r\n+    });\r\n+\r\n // match only filenames with a .txt extension and that don't start with a `.´\r\n dir.readFiles(__dirname, {\r\n     match: /.txt$/,\r\n@@ -91,7 +130,47 @@\n     console.log(files);\r\n });\r\n ```\r\n+        \r\n+#### files( dir, {sync:true} )\r\n+Synchronously iterate the files of a directory and its subdirectories and pass an array of file paths to a callback.\r\n+    \r\n+```javascript\r\n+var files = dir.files(__dirname, {sync:true});\r\n+console.log(files);\r\n+```\r\n \r\n+#### promiseFiles( dir, callback )\r\n+Asynchronously iterate the files of a directory and its subdirectories and pass an array of file paths to a callback.\r\n+    \r\n+```javascript\r\n+dir.promiseFiles(__dirname)\r\n+.then((files)=>{\r\n",
+					"match": false,
+					"packageHash": "98c84721efa39bb1c7b17f3645cc789826b411ee8c852a7d41e67e0bbf6ab0da",
+					"size": 4547,
+					"sourceHash": "f9bfc17bc936f111ff9e8ab26b3e18488274f23be887f2b00be26c9efbd230ef",
+					"status": "content"
+				},
+				"index.js": {
+					"diff": "--- published/index.js\n+++ rebuilt/index.js\n@@ -1,9 +1,5 @@\n-var key,\r\n-    path = require('path'),\r\n-    dirpaths = require(__dirname + '/lib/paths');\r\n+var dirpaths = require('./lib/paths');\r\n \r\n-for (key in dirpaths) {\r\n-\tif (dirpaths.hasOwnProperty(key)) exports[key] = dirpaths[key];\r\n-}\r\n-\r\n-exports.readFiles = require(path.join(__dirname, 'lib', 'readfiles'));\n\\ No newline at end of file\n+Object.assign(exports, dirpaths)\r\n+exports.readFiles = require('./lib/readfiles');\r\n+exports.readFilesStream = require('./lib/readfilesstream');\r\n",
+					"match": false,
+					"packageHash": "f05e06a2e426803c3800e7bf1d9c44c0a65f0639fc7afe9742f642cf5edb27db",
+					"size": 258,
+					"sourceHash": "e4c42710a9f4f4762dea9b328a51ca338bcffbc27ab6a077370bd12446dbadda",
+					"status": "content"
+				},
+				"lib/paths.js": {
+					"diff": "--- published/lib/paths.js\n+++ rebuilt/lib/paths.js\n@@ -1,6 +1,19 @@\n ﻿var fs = require('fs'),\n     path = require('path');\n \n+exports.promiseFiles = function promiseFiles(dir, type, options){\n+  type = type || 'file'\n+\n+  var processor = function(res,rej){\n+    var cb = function(err,data){\n+      if(err)return rej(err)\n+      res(data)\n+    }\n+    exports.files(dir,type,cb,options)\n+  }\n+  return new Promise(processor)\n+}\n+\n /**\n  * find all files or subdirs (recursive) and pass to callback fn\n  *\n@@ -13,69 +26,143 @@\n  *      console.log('files:', files);\n  *  });\n  */\n-exports.files = function files(dir, type, callback, /* used internally */ ignoreType) {\n+exports.files = function files(dir, type, callback, options) {\n+  var ofType = typeof type\n+  if(ofType == 'object'){\n+    options = options || type\n+    type = 'file'\n+    callback = function(){}\n+  }else if (ofType !== 'string') {\n+    //ignoreType = callback;\n+    callback = type;\n+    type = 'file';\n+  }\n+  \n+  options = options || {}\n+\n+  var pending,\n+      results = {\n+          files: [],\n+          dirs: []\n+      };\n+\n+  var done = function() {\n+    if(type==='combine'){\n+      results = results.files.concat(results.dirs)\n+    } else if (!type || options.ignoreType || ['all','combine'].indexOf(type)>=0) {\n+        results = results\n+    } else {\n+      results = results[type + 's']\n+    }\n \n-    var pending,\n-        results = {\n-            files: [],\n-            dirs: []\n-        };\n-    var done = function() {\n-        if (ignoreType || type === 'all') {\n-            callback(null, results);\n-        } else {\n-            callback(null, results[type + 's']);\n+    if(options.sync)return;\n+\n+\n+    callback(null, results);\n+  };\n+\n+  var getStatHandler = function(statPath, name, lstatCalled) {\n+    return function(err, stat) {\n+      if (err) {\n+        if (!lstatCalled) {\n+          return fs.lstat(statPath, getStatHandler(statPath, name, true));\n+        }\n+        return callback(err);\n+      }\n+\n+      var pushVal = options.shortName ? name : statPath\n+\n+      if (stat && stat.isDirectory() && stat.mode !== 17115) {\n+        if (type !== 'file') {\n+          results.dirs.push(pushVal);\n         }\n-    };\n \n-    var getStatHandler = function(statPath) {\n-        return function(err, stat) {\n-            if (err) return callback(err);\n-            if (stat && stat.isDirectory() && stat.mode !== 17115) {\n-                if (type !== 'file') {\n-                    results.dirs.push(statPath);\n-                }\n-                files(statPath, type, function(err, res) {\n-                    if (err) return callback(err);\n-                    if (type === 'all') {\n-                        results.files = results.files.concat(res.files);\n",
+					"match": false,
+					"packageHash": "a63728d0f6125ca1c85ea425cfb62a7ad8a4cb50935c52f4317fbf2c5fd71404",
+					"size": 4426,
+					"sourceHash": "12b3153974c179a67257d5184c812e839d5267927af5c6141d97d4ad370f5a3c",
+					"status": "content"
+				},
+				"lib/readfiles.js": {
+					"diff": "--- published/lib/readfiles.js\n+++ rebuilt/lib/readfiles.js\n@@ -1,4 +1,4 @@\n-﻿var fs = require('fs'),\n+var fs = require('fs'),\n     path = require('path');\n \n /**\n@@ -49,7 +49,8 @@\n     };\n     options = extend({\n         recursive: true,\n-        encoding: 'utf8'\n+        encoding: 'utf8',\n+        doneOnErr: true\n     }, options);\n     var files = [];\n \n@@ -61,7 +62,12 @@\n     };\n \n     fs.readdir(dir, function(err, list) {\n-        if (err) return done(err);\n+        if (err)  {\n+            if (options.doneOnErr === true) {\n+              if (err.code === 'EACCES') return done();\n+              return done(err);\n+            }\n+        }\n         var i = 0;\n \n         if (options.reverse === true ||\n@@ -75,34 +81,42 @@\n             if (!filename) return done(null, files);\n             var file = path.join(dir, filename);\n             fs.stat(file, function(err, stat) {\n-                if (err) return done(err);\n+                if (err && options.doneOnErr === true) return done(err);\n                 if (stat && stat.isDirectory()) {\n                     if (options.recursive) {\n                         if (options.matchDir && !matches(filename, options.matchDir)) return next();\n                         if (options.excludeDir && matches(filename, options.excludeDir)) return next();\n                         readFiles(file, options, callback, function(err, sfiles) {\n-                            if (err) return done(err);\n+                            if (err && options.doneOnErr === true) return done(err);\n                             files = files.concat(sfiles);\n                             next();\n                         });\n                     } else next();\n-                } else {\n+                } else if (stat && stat.isFile()) {\n                     if (options.match && !matches(filename, options.match)) return next();\n                     if (options.exclude && matches(filename, options.exclude)) return next();\n                     if (options.filter && !options.filter(filename)) return next();\n                     if (options.shortName) files.push(filename);\n                     else files.push(file);\n                     fs.readFile(file, options.encoding, function(err, data) {\n-                        if (err) return done(err);\n+                        if (err) {\n+                            if (err.code === 'EACCES') return next();\n+                            if (options.doneOnErr === true) {\n+                                return done(err);\n+                            }\n+                        }\n                         if (callback.length > 3)\n                             if (options.shortName) callback(null, data, filename, next);\n                             else callback(null, data, file, next);\n                             else callback(null, data, next);\n                     });\n                 }\n+                else {\n+                    next();\n+                }\n             });\n         })();\n \n     });\n }\n-module.exports = readFiles;\n\\ No newline at end of file\n+module.exports = readFiles;\n",
+					"match": false,
+					"packageHash": "c527bdb52d5fc8189ab84518b707b75f70509829f6d70f255036dac1714d730a",
+					"size": 4083,
+					"sourceHash": "ccc068f80734a46b468b8cd93ff5887ac684fac337bd9402fb3ae458781e06b4",
+					"status": "content"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -1,6 +1,6 @@\n {\n   \"name\": \"node-dir\",\n-  \"version\": \"0.1.6\",\n+  \"version\": \"0.1.17\",\n   \"description\": \"asynchronous file and directory operations for Node.js\",\n   \"main\": \"index\",\n   \"homepage\": \"https://github.com/fshost\",\n@@ -19,9 +19,7 @@\n   \"engines\": {\n     \"node\": \">= 0.10.5\"\n   },\n-  \"licenses\": [\n-    \"MIT\"\n-  ],\n+  \"license\": \"MIT\",\n   \"keywords\": [\n     \"node-dir\",\n     \"directory\",\n@@ -32,6 +30,9 @@\n     \"Node.js\",\n     \"fs\"\n   ],\n+  \"dependencies\": {\n+    \"minimatch\": \"^3.0.2\"\n+  },\n   \"devDependencies\": {\n     \"mocha\": \"~1.13.0\",\n     \"should\": \"~2.0.2\"\n",
+					"match": false,
+					"packageHash": "e266eebe17893d23e1cfa5da4df8d417024d690c36779d113266b730225c3dee",
+					"size": 764,
+					"sourceHash": "10d5602b2ba38363d8e94049166cb3c1ce48e1442f024256a753ef4e2338e191",
+					"status": "content"
+				},
+				"lib/readfilesstream.js": {
+					"match": false,
+					"status": "missing-in-package"
+				}
+			},
+			"summary": {
+				"differentFiles": 5,
+				"matchingFiles": 1,
+				"missingInPackage": 1,
+				"missingInSource": 1,
+				"score": 0.125,
+				"totalFiles": 8
+			}
+		},
+		"prodDependencies": [
+			{
+				"name": "balanced-match",
+				"version": "1.0.2"
+			},
+			{
+				"name": "brace-expansion",
+				"version": "1.1.12"
+			},
+			{
+				"name": "concat-map",
+				"version": "0.0.1"
+			},
+			{
+				"name": "minimatch",
+				"version": "3.1.2"
+			}
+		]
+	}
+]
