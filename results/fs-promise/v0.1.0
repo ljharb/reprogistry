@@ -1,0 +1,150 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-08T06:26:12.542Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:11.7.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "fs-promise@0.1.0",
+			"name": "fs-promise",
+			"version": "0.1.0",
+			"location": "https://registry.npmjs.org/fs-promise/-/fs-promise-0.1.0.tgz",
+			"integrity": "sha512-hFob7JsJfm2DgdSXHA41C0PUplxG5n6SzNjFGKWOk5jl15JdiMd6Cs1Eu29Z2fe6utJqn8nQuFj1uKfD5VcbxQ==",
+			"publishedAt": "2014-03-31T22:47:51.677Z",
+			"publishedWith": {
+				"node": null,
+				"npm": "1.3.25"
+			},
+			"dependencies": {
+				"promise": "~4.0.0"
+			}
+		},
+		"source": {
+			"integrity": null,
+			"location": "https://github.com/kevinbeaty/fs-promise.git",
+			"spec": "github:kevinbeaty/fs-promise#HEAD"
+		},
+		"comparisonHash": "9ef46a5bd31291e57cbab41e2f17c57bd6da0b5b",
+		"diff": {
+			"files": {
+				".npmignore": {
+					"match": false,
+					"packageHash": "133fa155ad757ba6d51fa952d82ae1ef048384ebdf7bc1d791320cd5f38eb2e7",
+					"size": 19,
+					"status": "missing-in-source"
+				},
+				".travis.yml": {
+					"diff": "--- published/.travis.yml\n+++ rebuilt/.travis.yml\n@@ -1,4 +1,14 @@\n language: node_js\n+sudo: false\n node_js:\n-  - 0.8\n-  - 0.10\n+  - \"4\"\n+  - \"5\"\n+  - \"6\"\n+  - \"7\"\n+env:\n+  - ANY_PROMISE=\n+  - ANY_PROMISE=es6-promise\n+  - ANY_PROMISE=bluebird\n+  - ANY_PROMISE=rsvp\n+  - ANY_PROMISE=when\n+  - ANY_PROMISE=q\n",
+					"match": false,
+					"packageHash": "2303095d00b06eae42c100a926e77a42c4c3664dfbc22160a4c2fd559636cf8c",
+					"size": 44,
+					"sourceHash": "a8f45fea735721ec9755edd8c909ddc6c89055fc3821d821d4ea87687fe2d74e",
+					"status": "content"
+				},
+				"README.md": {
+					"diff": "--- published/README.md\n+++ rebuilt/README.md\n@@ -1,8 +1,6 @@\n # fs-promise\n \n-[![Build Status](https://secure.travis-ci.org/kevinbeaty/fs-promise.png)](http://travis-ci.org/kevinbeaty/fs-promise)\n+`fs-promise` is now *deprecated*. Use [`mz/fs`][1] [`fs-extra^3.0`][2].\n \n-Proxies all async `fs` methods exposing them as Promises/A+ compatible promises (when, Q, etc).\n-Passes all sync methods through as values.\n-\n-Also exposes to `graceful-fs` and/or `fs-extra` methods if they are installed.\n+[1]: https://github.com/normalize/mz\n+[2]: https://www.npmjs.org/package/fs-extra\n",
+					"match": false,
+					"packageHash": "fd25ee600779c10e6ff1ae7f05da890df9f884187e8382163b3d64d19964443c",
+					"size": 352,
+					"sourceHash": "227864c035a53e075af5e578bee7a3301547f99c00c70b489b8ed590e212674b",
+					"status": "content"
+				},
+				"index.js": {
+					"diff": "--- published/index.js\n+++ rebuilt/index.js\n@@ -1,52 +1,76 @@\n-'use strict';\n+'use strict'\n \n-var fs,\n-    Promise = require('promise'),\n-    slice = Array.prototype.slice,\n-    noError = /exists/,\n-    returnValue = /Sync$|watch|(Read|Write)Stream$|^Stats$/;\n+var mzfs = require('mz/fs')\n+var fsExtra = require('fs-extra')\n+var Promise = require('any-promise')\n+var thenifyAll = require('thenify-all')\n+var slice = Array.prototype.slice\n \n-try {\n-  fs = require('fs-extra');\n-} catch(e) {\n-  try {\n-    fs = require('graceful-fs');\n-  } catch(e2){\n-    fs = require('fs');\n-  }\n-}\n+// thenify-all for all fs-extra that make sense to be promises\n+var fsExtraKeys = [\n+  'copy',\n+  'emptyDir',\n+  'ensureFile',\n+  'ensureDir',\n+  'ensureLink',\n+  'ensureSymlink',\n+  'mkdirs',\n+  'move',\n+  'outputFile',\n+  'outputJson',\n+  'readJson',\n+  'remove',\n+  'writeJson',\n+  // aliases\n+  'createFile',\n+  'createLink',\n+  'createSymlink',\n+  'emptydir',\n+  'mkdirp',\n+  'readJSON',\n+  'outputJSON',\n+  'writeJSON'\n+]\n+thenifyAll.withCallback(fsExtra, exports, fsExtraKeys)\n \n-Object.keys(fs).forEach(function(key) {\n-  var func = fs[key];\n-  if (typeof func == 'function')\n-    if(returnValue.test(key)){\n-      exports[key] = fs[key];\n-    } else if(noError.test(key)){\n-      exports[key] = promiseWithoutError(func);\n-    } else {\n-      exports[key] = promise(func);\n-    }\n-});\n+// Delegate all normal fs to mz/fs\n+// (this overwrites anything proxies directly above)\n+var mzKeys = [\n+  'rename',\n+  'ftruncate',\n+  'chown',\n+  'fchown',\n+  'lchown',\n+  'chmod',\n+  'fchmod',\n+  'stat',\n+  'lstat',\n+  'fstat',\n+  'link',\n+  'symlink',\n+  'readlink',\n+  'realpath',\n+  'unlink',\n+  'rmdir',\n+  'mkdir',\n+  'mkdtemp',\n+  'readdir',\n+  'close',\n+  'open',\n+  'utimes',\n+  'futimes',\n+  'fsync',\n+  'fdatasync',\n+  'write',\n+  'read',\n+  'readFile',\n+  'writeFile',\n+  'appendFile',\n+  'access',\n+  'truncate',\n+  'exists'\n",
+					"match": false,
+					"packageHash": "6f6b2b0b0fe921324e0703890151f9c66ac838a007d94a1e3883055e52bbbfe4",
+					"size": 1095,
+					"sourceHash": "6f954580136e210794ab61a0574d255d7cd653441b0b86e9ac3460a190e260e0",
+					"status": "content"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -1,7 +1,7 @@\n {\n   \"name\": \"fs-promise\",\n-  \"version\": \"0.1.0\",\n-  \"description\": \"Filesystem methods as promises, with optional fs-extra and fs-graceful dependencies\",\n+  \"version\": \"2.0.3\",\n+  \"description\": \"[DEPRECATED] Use mz or fs-extra^3.0 with Promise Support\",\n   \"main\": \"index.js\",\n   \"scripts\": {\n     \"test\": \"mocha\"\n@@ -19,11 +19,19 @@\n   \"author\": \"Kevin Beaty\",\n   \"license\": \"MIT\",\n   \"dependencies\": {\n-    \"promise\": \"~4.0.0\"\n+    \"any-promise\": \"^1.3.0\",\n+    \"fs-extra\": \"^2.0.0\",\n+    \"mz\": \"^2.6.0\",\n+    \"thenify-all\": \"^1.6.0\"\n   },\n   \"devDependencies\": {\n-    \"mocha\": \"~1.9.0\",\n-    \"mocha-as-promised\": \"~1.3.0\",\n-    \"fs-extra\": \"~0.6.1\"\n+    \"@types/fs-extra\": \"0.0.37\",\n+    \"@types/mz\": \"0.0.30\",\n+    \"mocha\": \"^3.0.0\",\n+    \"es6-promise\": \"^4.0.0\",\n+    \"rsvp\": \"^3.0.0\",\n+    \"bluebird\": \"^3.0.0\",\n+    \"when\": \"^3.0.0\",\n+    \"q\": \"^1.0.0\"\n   }\n }\n",
+					"match": false,
+					"packageHash": "265dbc1673e03782f30b2529030f51d0a3eff645af58f5056fb1172b577943d9",
+					"size": 598,
+					"sourceHash": "6224610be3456c41316ddf9b3224915d59074575150f94c03da1402fadca3043",
+					"status": "content"
+				},
+				"test/basic.js": {
+					"diff": "--- published/test/basic.js\n+++ rebuilt/test/basic.js\n@@ -1,11 +1,12 @@\n 'use strict';\n /*globals describe, it, beforeEach, afterEach */\n-\n var fsp = require('..'),\n     path = require('path'),\n     assert = require('assert'),\n-    Promise = require('promise'),\n-    testdir = path.join(__dirname, 'tmp');\n+    Prom = require('any-promise'),\n+    testdir = path.join(__dirname, 'tmp'),\n+    testdir2 = path.join(__dirname, 'tmp2')\n+\n \n describe('basic', function(){\n   beforeEach(function(){\n@@ -17,19 +18,40 @@\n   });\n \n   it('should create files and readdir', function(){\n-    return fsp.createFile(file('hello')).then(readtmp).then(function(files){\n+    return fsp.ensureFile(file('hello')).then(readtmp).then(function(files){\n       assert.deepEqual(files.sort(), ['hello']);\n-      return fsp.createFile(file('world'));\n+      return fsp.ensureFile(file('world'));\n     }).then(readtmp).then(function(files){\n       assert.deepEqual(files.sort(), ['hello', 'world']);\n-    });\n+      return fsp.exists(testdir2)\n+    }).then(function(exists){\n+      assert.equal(exists, false);\n+      return fsp.move(testdir, testdir2)\n+    }).then(function(){\n+      return Prom.all([fsp.exists(testdir), fsp.exists(testdir2)])\n+    }).then(function(exists){\n+      return assert.deepEqual(exists, [false, true])\n+    }).then(function(){\n+      return fsp.copy(testdir2, testdir)\n+    }).then(function(){\n+      return Prom.all([fsp.exists(testdir), fsp.exists(testdir2)])\n+    }).then(function(exists){\n+      return assert.deepEqual(exists, [true, true])\n+    }).then(readtmps).then(function(files){\n+      assert.deepEqual(files[0].sort(), files[1].sort());\n+      return fsp.emptyDir(testdir2);\n+    }).then(readtmp2).then(function(files){\n+      assert.deepEqual(files, []);\n+    }).then(function(){\n+      fsp.remove(testdir2);\n+    })\n   });\n \n   it('should pass through Sync as value', function(){\n-    return fsp.createFile(file('hello')).then(function(files){\n+    return fsp.ensureFile(file('hello')).then(function(files){\n       assert(fsp.existsSync(file('hello')));\n       assert(!fsp.existsSync(file('world')));\n-      return fsp.createFile(file('world'));\n+      return fsp.ensureFile(file('world'));\n     }).then(readtmp).then(function(files){\n       assert(fsp.existsSync(file('hello')));\n       assert(fsp.existsSync(file('world')));\n@@ -43,7 +65,7 @@\n       assert.equal(contents, 'hello world');\n       var read = fsp.createReadStream(file('hello1')),\n           write = fsp.createWriteStream(file('hello2')),\n-          promise = new Promise(function(resolve, reject){\n+          promise = new Prom(function(resolve, reject){\n             read.on('end', resolve);\n             write.on('error', reject);\n             read.on('error', reject);\n@@ -56,6 +78,18 @@\n       assert.equal(contents, 'hello world');\n     });\n   });\n+\n+  it('should pass third argument from write #7', function testWriteFsp() {\n+    return fsp.open(file('some.txt'), 'w+').then(function (fd){\n+      return fsp.write(fd, \"hello fs-promise\").then(function(result) {\n+        var written = result[0];\n+        var text = result[1];\n+        assert.equal(text.substring(0, written), \"hello fs-promise\".substring(0, written))\n+        return fsp.close(fd);\n+      })\n+    })\n+  });\n+\n });\n \n function file(){\n@@ -75,3 +109,11 @@\n function readtmp(){\n   return fsp.readdir(testdir);\n }\n+\n+function readtmp2(){\n+  return fsp.readdir(testdir2);\n+}\n",
+					"match": false,
+					"packageHash": "1eff17cddb0c90b4c5d5b9432b4b84cb6f992f5bfcbb821cb320a16d75f3516e",
+					"size": 2309,
+					"sourceHash": "7f27088ec17fa5c6846652333205c61b71941ddc2b51b1ec142d1a402f98ba86",
+					"status": "content"
+				},
+				"test/common.js": {
+					"match": false,
+					"packageHash": "077cb15975a6e1a435205aa3891b245f672869c24bc7368bc2bfcd2eed94ca07",
+					"size": 47,
+					"status": "missing-in-source"
+				},
+				"test/mocha.opts": {
+					"diff": "--- published/test/mocha.opts\n+++ rebuilt/test/mocha.opts\n@@ -1,5 +1,6 @@\n---require test/common.js\n --no-colors\n --ui bdd\n --reporter spec\n+--require test/register\n test/basic.js\n+test/mz.js\n",
+					"match": false,
+					"packageHash": "780cd7143c4e71fad21fe7cbe2f9e3dff85e6e7b88e0ed0471a9711777c700f1",
+					"size": 76,
+					"sourceHash": "b559862f317ef55e77b8e67803cc6e2ed924cf05a3766ec50f0fced74d7cd8e3",
+					"status": "content"
+				},
+				"index.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/mz.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/register.js": {
+					"match": false,
+					"status": "missing-in-package"
+				}
+			},
+			"summary": {
+				"differentFiles": 6,
+				"matchingFiles": 2,
+				"missingInPackage": 3,
+				"missingInSource": 2,
+				"score": 0.15384615384615385,
+				"totalFiles": 13
+			}
+		},
+		"prodDependencies": [
+			{
+				"name": "any-promise",
+				"version": "1.3.0"
+			},
+			{
+				"name": "fs-extra",
+				"version": "2.1.2"
+			},
+			{
+				"name": "graceful-fs",
+				"version": "4.2.11"
+			},
+			{
+				"name": "jsonfile",
+				"version": "2.4.0"
+			},
+			{
+				"name": "mz",
+				"version": "2.7.0"
+			},
+			{
+				"name": "object-assign",
+				"version": "4.1.1"
+			},
+			{
+				"name": "thenify",
+				"version": "3.3.1"
+			},
+			{
+				"name": "thenify-all",
+				"version": "1.6.0"
+			}
+		]
+	}
+]
