@@ -1,0 +1,94 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-08T13:50:13.930Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:11.7.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "regjsparser@0.1.0",
+			"name": "regjsparser",
+			"version": "0.1.0",
+			"location": "https://registry.npmjs.org/regjsparser/-/regjsparser-0.1.0.tgz",
+			"integrity": "sha512-BiMAyvXoMxWnk4i8VLXuirlCEZXuLBMNbegJwnQBZn8HJXDR01jf283P4DCaIEwIDfZbvVFou8lvFQjBB1bqlA==",
+			"publishedAt": "2014-06-29T16:16:45.871Z",
+			"publishedWith": {
+				"node": null,
+				"npm": "1.3.11"
+			},
+			"dependencies": {
+				"jsesc": "~0.4.3"
+			}
+		},
+		"source": {
+			"integrity": "sha512-xTt1+BZKfH3d7xbpUSL9rLQDp5wHmZdlixyDSOZ5R9gWruDtYBPnvQNfSbjoXT+SXU5H65OKP5XFvwpkZjZ3Bw==",
+			"location": "git@github.com:jviereck/regjsparser.git",
+			"spec": "github:jviereck/regjsparser#HEAD"
+		},
+		"comparisonHash": "9ef46a5bd31291e57cbab41e2f17c57bd6da0b5b",
+		"diff": {
+			"files": {
+				"LICENSE.BSD": {
+					"diff": "--- published/LICENSE.BSD\n+++ rebuilt/LICENSE.BSD\n@@ -1,3 +1,5 @@\n+Copyright (c) Julian Viereck and Contributors, All Rights Reserved.\n+\n Redistribution and use in source and binary forms, with or without\n modification, are permitted provided that the following conditions are met:\n \n",
+					"match": false,
+					"packageHash": "0e74697a68cebdcd61502c30fe80ab7f9e341d995dcd452023654d57133534b1",
+					"size": 1231,
+					"sourceHash": "2d65cdba6e67bd7fa9c59070eb3ef5b65490cf1644560eb30c931a1d364009c2",
+					"status": "content"
+				},
+				"README.md": {
+					"diff": "--- published/README.md\n+++ rebuilt/README.md\n@@ -15,6 +15,19 @@\n \n var parseTree = parse('^a'); // /^a/\n console.log(parseTree);\n+\n+// Toggle on/off additional features:\n+var parseTree = parse('^a', '', {\n+  // SEE: https://github.com/jviereck/regjsparser/pull/78\n+  unicodePropertyEscape: true,\n+\n+  // SEE: https://github.com/jviereck/regjsparser/pull/83\n+  namedGroups: true,\n+\n+  // SEE: https://github.com/jviereck/regjsparser/pull/89\n+  lookbehind: true\n+});\n+console.log(parseTree);\n ```\n \n ## Testing\n",
+					"match": false,
+					"packageHash": "279ca05b1e04e820c898ba717405402c57654cc2264ebb4f31b638d41d712d0d",
+					"size": 440,
+					"sourceHash": "06e79f6d631f5089ffed6882024cc6d0af64bb9e4adbb680514adb0bdade3894",
+					"status": "content"
+				},
+				"bin/parser": {
+					"diff": "--- published/bin/parser\n+++ rebuilt/bin/parser\n@@ -2,17 +2,21 @@\n (function() {\n \n   var fs = require('fs');\n+  var path = require('path');\n   var parse = require('../parser').parse;\n   var jsesc = require('jsesc');\n   var regexes = process.argv.splice(2);\n   var first = regexes[0];\n   var data;\n   var log = console.log;\n+  var flags = '';\n   var main = function() {\n     if (/^(?:-h|--help|undefined)$/.test(first)) {\n       log([\n         '\\nUsage:\\n',\n         '\\tregjsparser [regex ...]',\n+        '\\tregjsparser [-f | --flags] u [regex ...]',\n+        '\\tregjsparser [-v | --version]',\n         '\\tregjsparser [-h | --help]',\n         '\\nExamples:\\n',\n         '\\tregjsparser \\'^foo.bar$\\'',\n@@ -21,10 +25,19 @@\n       return process.exit(1);\n     }\n \n+    if (/^(?:-v|--version)$/.test(first)) {\n+      log('v%s', require(path.resolve(__dirname, '../package.json')).version);\n+      return process.exit(1);\n+    }\n+\n+    if (/^(?:-f|--flags)$/.test(first)) {\n+      flags = regexes[1];\n+      regexes = regexes.slice(2);\n+    }\n+\n     regexes.forEach(function(snippet) {\n-      var result;\n       try {\n-        result = parse(snippet);\n+        result = parse(snippet, flags);\n         log(jsesc(result, {\n           'json': true,\n           'compact': false,\n",
+					"match": false,
+					"packageHash": "b0fbddbe66a809370c419b4af3a11963df513a8394ad2147d063b1ffb24485b1",
+					"size": 1377,
+					"sourceHash": "cabce294cc6eb7bb1da3ad88c69e563171ad1fa99902f7a1985bcfa7fc712713",
+					"status": "content"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -1,25 +1,46 @@\n {\n   \"name\": \"regjsparser\",\n-  \"version\": \"0.1.0\",\n+  \"version\": \"0.13.0\",\n   \"author\": \"'Julian Viereck' <julian.viereck@gmail.com>\",\n-  \"license\": \"BSD\",\n+  \"license\": \"BSD-2-Clause\",\n   \"main\": \"./parser\",\n-  \"bin\": \"bin/parser\",\n+  \"types\": \"./parser.d.ts\",\n+  \"bin\": {\n+    \"regjsparser\": \"bin/parser\"\n+  },\n   \"homepage\": \"https://github.com/jviereck/regjsparser\",\n   \"repository\": {\n     \"type\": \"git\",\n-    \"url\": \"git@github.com:jviereck/regjsparser.git\"\n-  },\n-  \"dependencies\": {\n-    \"jsesc\": \"~0.4.3\"\n+    \"url\": \"git+ssh://git@github.com/jviereck/regjsparser.git\"\n   },\n   \"scripts\": {\n-    \"test\": \"node test/index.js\"\n+    \"lint\": \"eslint --max-warnings 0 .\",\n+    \"test\": \"run-p test:* lint\",\n+    \"test:src\": \"node test/index.js\",\n+    \"test:types\": \"tsc test/types.ts --noEmit\",\n+    \"bench:baseline\": \"node ./tools/bench/index.mjs baseline\",\n+    \"bench:current\": \"node ./tools/bench/index.mjs current\",\n+    \"bench\": \"run-s bench:*\"\n   },\n   \"files\": [\n     \"bin/\",\n     \"LICENSE.BSD\",\n     \"parser.js\",\n+    \"parser.d.ts\",\n     \"README.md\"\n-  ]\n+  ],\n+  \"dependencies\": {\n+    \"jsesc\": \"~3.1.0\"\n+  },\n+  \"devDependencies\": {\n+    \"@unicode/unicode-17.0.0\": \"^1.6.12\",\n+    \"eslint\": \"^9.35.0\",\n+    \"eslint-plugin-regexp\": \"^2.10.0\",\n+    \"globals\": \"^16.4.0\",\n+    \"npm-run-all\": \"^4.1.5\",\n+    \"regenerate\": \"^1.4.2\",\n+    \"regjsparser\": \"^0.11.2\",\n+    \"tinybench\": \"^5.0.1\",\n+    \"typescript\": \"~5.9.2\"\n+  }\n }\n",
+					"match": false,
+					"packageHash": "d88005d8654ba1f89713defd252e6ae63dbaa97f3cdf01fa1fd208178f9e4df7",
+					"size": 508,
+					"sourceHash": "060d4bee1a24357f49d8ec703d518366e8101519064291a0f0809b1dd33331b9",
+					"status": "content"
+				},
+				"parser.js": {
+					"diff": "--- published/parser.js\n+++ rebuilt/parser.js\n@@ -20,6 +20,7 @@\n //\n // Term ::\n //      Anchor\n+//      Anchor Quantifier (see https://github.com/jviereck/regjsparser/issues/130)\n //      Atom\n //      Atom Quantifier\n //\n@@ -30,6 +31,8 @@\n //      \\ B\n //      ( ? = Disjunction )\n //      ( ? ! Disjunction )\n+//      ( ? < = Disjunction )\n+//      ( ? < ! Disjunction )\n //\n // Quantifier ::\n //      QuantifierPrefix\n@@ -48,7 +51,7 @@\n //      .\n //      \\ AtomEscape\n //      CharacterClass\n-//      ( Disjunction )\n+//      ( GroupSpecifier Disjunction )\n //      ( ? : Disjunction )\n //\n // PatternCharacter ::\n@@ -56,8 +59,9 @@\n //\n // AtomEscape ::\n //      DecimalEscape\n-//      CharacterEscape\n //      CharacterClassEscape\n+//      CharacterEscape\n+//      k GroupName\n //\n // CharacterEscape[U] ::\n //      ControlEscape\n@@ -74,9 +78,7 @@\n //          A B C D E F G H I J K L M N O P Q R S T U V W X Y Z\n //\n // IdentityEscape ::\n-//      SourceCharacter but not IdentifierPart\n-//      <ZWJ>\n-//      <ZWNJ>\n+//      SourceCharacter but not c\n //\n // DecimalEscape ::\n //      DecimalIntegerLiteral [lookahead ∉ DecimalDigit]\n@@ -85,22 +87,23 @@\n //      one of d D s S w W\n //\n // CharacterClass ::\n-//      [ [lookahead ∉ {^}] ClassRanges ]\n-//      [ ^ ClassRanges ]\n+//      [ [lookahead ∉ {^}] ClassContents ]\n+//      [ ^ ClassContents ]\n //\n-// ClassRanges ::\n+// ClassContents ::\n //      [empty]\n-//      NonemptyClassRanges\n+//      [~V] NonemptyClassRanges\n+//      [+V] ClassSetExpression\n //\n // NonemptyClassRanges ::\n //      ClassAtom\n //      ClassAtom NonemptyClassRangesNoDash\n-//      ClassAtom - ClassAtom ClassRanges\n+//      ClassAtom - ClassAtom ClassContents\n //\n // NonemptyClassRangesNoDash ::\n //      ClassAtom\n //      ClassAtomNoDash NonemptyClassRangesNoDash\n-//      ClassAtomNoDash - ClassAtom ClassRanges\n+//      ClassAtomNoDash - ClassAtom ClassContents\n //\n // ClassAtom ::\n //      -\n@@ -115,38 +118,194 @@\n //      b\n //      CharacterEscape\n //      CharacterClassEscape\n+//\n+// GroupSpecifier ::\n+//      [empty]\n+//      ? GroupName\n+//\n+// GroupName ::\n+//      < RegExpIdentifierName >\n+//\n+// RegExpIdentifierName ::\n+//      RegExpIdentifierStart\n+//      RegExpIdentifierName RegExpIdentifierContinue\n+//\n+// RegExpIdentifierStart ::\n+//      UnicodeIDStart\n+//      $\n+//      _\n",
+					"match": false,
+					"packageHash": "4068853e7d3721644c69bfdf89bc589c8158761018ca6333b29705fc4c32b604",
+					"size": 28421,
+					"sourceHash": "ad31708952b615ad22d644bd608ee0c5a356dc901ae380f849c0c58585ae06cd",
+					"status": "content"
+				},
+				"parser.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				}
+			},
+			"summary": {
+				"differentFiles": 5,
+				"matchingFiles": 0,
+				"missingInPackage": 1,
+				"missingInSource": 0,
+				"score": 0,
+				"totalFiles": 6
+			}
+		},
+		"prodDependencies": [
+			{
+				"name": "jsesc",
+				"version": "3.1.0"
+			}
+		]
+	}
+]
