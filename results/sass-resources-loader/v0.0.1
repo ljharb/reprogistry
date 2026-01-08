@@ -1,0 +1,150 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-08T14:45:30.834Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:11.7.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "sass-resources-loader@0.0.1",
+			"name": "sass-resources-loader",
+			"version": "0.0.1",
+			"location": "https://registry.npmjs.org/sass-resources-loader/-/sass-resources-loader-0.0.1.tgz",
+			"integrity": "sha512-PJzh6W4ulD7KZYT0B51d2v6Z5/CjLMWbd21vaF59xbBShaGGwXnFuLIRvVJWUqa818bJD/jZY3QJKfEzMi0KIg==",
+			"publishedAt": "2015-11-26T07:09:25.837Z",
+			"publishedWith": {
+				"node": "4.2.1",
+				"npm": "2.14.7"
+			},
+			"dependencies": {
+				"chalk": "^1.1.1"
+			}
+		},
+		"source": {
+			"integrity": null,
+			"location": "git+https://github.com/shakacode/sass-resources-loader.git",
+			"spec": "github:shakacode/sass-resources-loader#e3bb404708ca1d165728a3b859594ae16c18fbf8"
+		},
+		"comparisonHash": "9ef46a5bd31291e57cbab41e2f17c57bd6da0b5b",
+		"diff": {
+			"files": {
+				"README.md": {
+					"diff": "--- published/README.md\n+++ rebuilt/README.md\n@@ -1,6 +1,42 @@\n # sass-resources-loader\n+![GitHub Workflow Status](https://img.shields.io/github/workflow/status/shakacode/sass-resources-loader/Node.js%20CI)\n+[![npm version](https://img.shields.io/npm/v/sass-resources-loader.svg?style=flat-square)](https://www.npmjs.com/package/sass-resources-loader)\n+[![license](https://img.shields.io/npm/l/sass-resources-loader.svg?style=flat-square)](https://www.npmjs.com/package/sass-resources-loader)\n \n-This loader will `@import` your SASS resources into every `require`d SASS module. So you can use your shared variables & mixins across all SASS styles without manually importing them in each file. Made to work with CSS Modules!\n+This loader will load your Sass resources into every `required` Sass module. So you can use your shared variables, mixins and functions across all Sass styles without manually loading them in each file.\n+\n+This project is sponsored by the software consulting firm [ShakaCode](https://www.shakacode.com), creator of the [React on Rails Gem](https://github.com/shakacode/react_on_rails). \n+\n+### ShakaCode Support\n+\n+[ShakaCode](https://www.shakacode.com) focuses on helping Ruby on Rails teams use React and Webpack better. We can upgrade your project and improve your development and customer experiences, allowing you to focus on building new features or fixing bugs instead. \n+\n+For an overview of working with us, see our [Client Engagement Model](https://www.shakacode.com/blog/client-engagement-model/) article and [how we bill for time](https://www.shakacode.com/blog/shortcut-jira-trello-github-toggl-time-and-task-tracking/).\n+\n+We also specialize in helping development teams lower infrastructure and CI costs. Check out our project [Control Plane Flow](https://github.com/shakacode/control-plane-flow/), which can allow you to get the ease of Heroku with the power of Kubernetes and big cost savings.\n+\n+If you think ShakaCode can help your project, [click here](https://meetings.hubspot.com/justingordon/30-minute-consultation) to book a call with [Justin Gordon](mailto:justin@shakacode.com), the creator of React on Rails and Shakapacker.\n+\n+Here's a testimonial of how ShakaCode can help from [Florian Gößler](https://github.com/FGoessler) of [Blinkist](https://www.blinkist.com/), January 2, 2023:\n+> Hey Justin 👋\n+>\n+> I just wanted to let you know that we today shipped the webpacker to shakapacker upgrades and it all seems to be running smoothly! Thanks again for all your support and your teams work! 😍\n+>\n+> On top of your work, it was now also very easy for me to upgrade Tailwind and include our external node_module based web component library which we were using for our other (more modern) apps already. That work is going to be shipped later this week though as we are polishing the last bits of it. 😉\n+>\n+> Have a great 2023 and maybe we get to work together again later in the year! 🙌\n+\n+Read the [full review here](https://clutch.co/profile/shakacode#reviews?sort_by=date_DESC#review-2118154).\n+\n+---\n+\n+# Features\n+* Made to work with CSS Modules!\n+* This loader is not limited to Sass resources. It supposedly works with less, post-css, etc. per [issue 31](https://github.com/shakacode/sass-resources-loader/issues/31).\n+* Supports **Webpack 5**\n+* Supports Sass `@use` syntax. You must use Dart Sass (`sass`, not `node-sass` npm package). See the `hoistUseStatements` option.\n+\n+---------------\n \n ## Installation\n \n@@ -12,25 +48,145 @@\n \n ## Usage\n \n-Create your file (or files) with resources:\n+Create your file (or files) with resources, which are snippets of Sass that you want available to places like CSS modules Sass:\n \n ```scss\n /* resources.scss */\n \n $section-width: 700px;\n \n-@mixin section {\n+@mixin section-mixin {\n   margin: 0 auto;\n   width: $section-width;\n }\n ```\n \n-**NB!** Do not include anything that will be actually rendered in CSS, because it will be added to every imported SASS file.\n+## Options\n+\n+| Name                 | Type                 | Default     | Description                                                                                                                  |\n+|----------------------|----------------------|-------------|------------------------------------------------------------------------------------------------------------------------------|\n+| `resources`          | `{String\\|String[]}` | `undefined` | Resources to include in files                                                                                                |\n+| `hoistUseStatements` | `{Boolean}`          | `false`     | If `true`, entry file `@use` imports will be hoisted. This means that `@use` statements will go above the inclusion of resources. |\n+\n+### Option Examples\n+\n+#### `resources`\n+Specify resources, contents of which will be prepended to each file.\n+\n+For example, if variable `$my-variable: #fff` is in file `example/a.scss`, specify this file as a resource in your `webpack.config.js`\n+```js\n+{\n+    loader: 'sass-resources-loader',\n+    options: {\n+        resources: 'example/a.scss'\n+    }\n+}\n+````\n+\n+to prepend this variable\n+```scss\n+// Entry file\n+\n+$my-variable: #fff;\n+\n+// Entry file's content go here\n+```\n+\n+#### `hoistUseStatements`\n+Tells the compiler if an existing `@use` statement is found in entry file, it should be hoisted to the top.\n+The reason is that `@use` must go before most other declarations, except variable declarations, per the [docs](https://sass-lang.com/documentation/at-rules/use).\n",
+					"match": false,
+					"packageHash": "3eb5f0ac47a787f1325f28e2379260b338d7de3af3ffb0dea65e0f4eec09b1cc",
+					"size": 1348,
+					"sourceHash": "fe5cee15136338dd15742a7abd9a210a54a77222a2cee086623d6fc0d50c4671",
+					"status": "content"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -1,15 +1,21 @@\n {\n   \"name\": \"sass-resources-loader\",\n-  \"version\": \"0.0.1\",\n+  \"version\": \"2.2.5\",\n   \"description\": \"SASS resources loader for Webpack\",\n   \"main\": \"lib/loader.js\",\n+  \"files\": [\n+    \"lib\"\n+  ],\n   \"scripts\": {\n-    \"start\": \"npm run lint && npm run clean && npm run dev\",\n+    \"start\": \"yarn run lint && yarn run clean && yarn run dev\",\n     \"dev\": \"scripts/dev\",\n     \"build\": \"scripts/build\",\n     \"lint\": \"scripts/lint\",\n+    \"test\": \"jest\",\n     \"clean\": \"scripts/clean\",\n-    \"prerelease\": \"npm run lint && npm run clean && npm run build\",\n+    \"prerelease\": \"yarn run clean && yarn run build && yarn run test && yarn run lint\",\n+    \"preversion\": \"yarn run prerelease\",\n+    \"prepublish\": \"yarn run prerelease\",\n     \"release:patch\": \"scripts/release patch\",\n     \"release:minor\": \"scripts/release minor\",\n     \"release:major\": \"scripts/release major\"\n@@ -32,13 +38,26 @@\n     \"webpack\"\n   ],\n   \"dependencies\": {\n-    \"chalk\": \"^1.1.1\"\n+    \"async\": \"^3.2.5\",\n+    \"chalk\": \"^4.1.2\",\n+    \"glob\": \"^8.1.0\",\n+    \"loader-utils\": \"^2.0.4\"\n   },\n   \"devDependencies\": {\n-    \"babel\": \"^6.1.18\",\n-    \"babel-cli\": \"^6.2.0\",\n-    \"babel-preset-es2015\": \"^6.1.18\",\n-    \"eslint\": \"^1.10.1\",\n-    \"eslint-config-airbnb\": \"^1.0.0\"\n+    \"@babel/cli\": \"^7.19.3\",\n+    \"@babel/core\": \"^7.19.3\",\n+    \"@babel/preset-env\": \"^7.19.3\",\n+    \"babel-eslint\": \"^10.1.0\",\n+    \"eslint\": \"^7.6.0\",\n+    \"eslint-config-airbnb\": \"^19.0.4\",\n+    \"eslint-config-shakacode\": \"^17.0.0\",\n+    \"eslint-plugin-import\": \"^2.26.0\",\n+    \"eslint-plugin-jsx-a11y\": \"^6.6.1\",\n+    \"eslint-plugin-react\": \"^7.31.8\",\n+    \"eslint-plugin-react-hooks\": \"^4.6.0\",\n+    \"jest\": \"^26.2.2\",\n+    \"raw-loader\": \"^4.0.2\",\n+    \"webpack\": \"^5.61.0\",\n+    \"webpack-merge\": \"^5.8.0\"\n   }\n }\n",
+					"match": false,
+					"packageHash": "2ea68bcf2483423e9d45ffbbd3ba024b79f0e73caa292786d52ef92cd2beb9b6",
+					"size": 1221,
+					"sourceHash": "570da2e326bfff43b81699dc4b9a30018a002eac04b8869dae72d9ab2c752e5f",
+					"status": "content"
+				},
+				"LICENSE": {
+					"match": false,
+					"status": "missing-in-package"
+				}
+			},
+			"summary": {
+				"differentFiles": 2,
+				"matchingFiles": 0,
+				"missingInPackage": 1,
+				"missingInSource": 0,
+				"score": 0,
+				"totalFiles": 3
+			}
+		},
+		"prodDependencies": [
+			{
+				"name": "@types/color-name",
+				"version": "1.1.1"
+			},
+			{
+				"name": "ansi-styles",
+				"version": "4.2.1"
+			},
+			{
+				"name": "async",
+				"version": "3.2.5"
+			},
+			{
+				"name": "balanced-match",
+				"version": "1.0.0"
+			},
+			{
+				"name": "big.js",
+				"version": "5.2.2"
+			},
+			{
+				"name": "chalk",
+				"version": "4.1.2"
+			},
+			{
+				"name": "color-convert",
+				"version": "2.0.1"
+			},
+			{
+				"name": "color-name",
+				"version": "1.1.4"
+			},
+			{
+				"name": "emojis-list",
+				"version": "3.0.0"
+			},
+			{
+				"name": "fs.realpath",
+				"version": "1.0.0"
+			},
+			{
+				"name": "glob",
+				"version": "8.1.0"
+			},
+			{
+				"name": "brace-expansion",
+				"version": "2.0.1"
+			},
+			{
+				"name": "minimatch",
+				"version": "5.1.0"
+			},
+			{
+				"name": "has-flag",
+				"version": "4.0.0"
+			},
+			{
+				"name": "inflight",
+				"version": "1.0.6"
+			},
+			{
+				"name": "inherits",
+				"version": "2.0.4"
+			},
+			{
+				"name": "json5",
+				"version": "2.2.1"
+			},
+			{
+				"name": "loader-utils",
+				"version": "2.0.4"
+			},
+			{
+				"name": "once",
+				"version": "1.4.0"
+			},
+			{
+				"name": "supports-color",
+				"version": "7.1.0"
+			},
+			{
+				"name": "wrappy",
+				"version": "1.0.2"
+			}
+		]
+	}
+]
