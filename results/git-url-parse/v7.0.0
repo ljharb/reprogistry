@@ -1,0 +1,106 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-08T07:05:22.548Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:11.7.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "git-url-parse@7.0.0",
+			"name": "git-url-parse",
+			"version": "7.0.0",
+			"location": "https://registry.npmjs.org/git-url-parse/-/git-url-parse-7.0.0.tgz",
+			"integrity": "sha512-qI8kgm+s5696R4Rm1yjYgfopMMz3pd8VWFBI3z7m0UbM09JxHC/LS0ZijI+wSfL3BceJzH2ZUQYctF3DVcOzrA==",
+			"publishedAt": "2017-06-14T14:00:07.139Z",
+			"publishedWith": {
+				"node": "7.0.0",
+				"npm": "3.10.8"
+			},
+			"dependencies": {
+				"git-up": "^2.0.0"
+			}
+		},
+		"source": {
+			"integrity": "sha512-7gUKJEW8y/rElfGSUxw/DyxM3JlluBHLJV9dk0sHu/iFbHX6T44eZkpF4meDlMGcf0vLR3b9xS4aiWf07OewhQ==",
+			"location": "git+ssh://git@github.com/IonicaBizau/git-url-parse.git",
+			"spec": "github:IonicaBizau/git-url-parse#ca29c35c7dd8f5f78ee85f852c5f9d16b091c886"
+		},
+		"comparisonHash": "9ef46a5bd31291e57cbab41e2f17c57bd6da0b5b",
+		"diff": {
+			"files": {
+				"lib/index.js": {
+					"diff": "--- published/lib/index.js\n+++ rebuilt/lib/index.js\n@@ -1,6 +1,6 @@\n \"use strict\";\n \n-var gitUp = require(\"git-up\");\n+const gitUp = require(\"git-up\");\n \n /**\n  * gitUrlParse\n@@ -35,15 +35,19 @@\n         throw new Error(\"The url must be a string.\");\n     }\n \n-    var urlInfo = gitUp(url),\n-        sourceParts = urlInfo.resource.split(\".\"),\n-        splits = null;\n+    let urlInfo = gitUp(url)\n+      , sourceParts = urlInfo.resource.split(\".\")\n+      , splits = null\n+      ;\n \n     urlInfo.toString = function (type) {\n         return gitUrlParse.stringify(this, type);\n     };\n \n-    urlInfo.source = sourceParts.length > 2 ? sourceParts.slice(-2).join(\".\") : urlInfo.source = urlInfo.resource;\n+    urlInfo.source = sourceParts.length > 2\n+                   ? sourceParts.slice(-2).join(\".\")\n+                   : urlInfo.source = urlInfo.resource\n+                   ;\n \n     urlInfo.name = urlInfo.pathname.substring(1).replace(/\\.git$/, \"\");\n     urlInfo.owner = urlInfo.user;\n@@ -83,24 +87,27 @@\n  * @return {String} The stringified url.\n  */\n gitUrlParse.stringify = function (obj, type) {\n-    type = type || (obj.protocols && obj.protocols.length ? obj.protocols.join('+') : obj.protocol);\n-    var port = obj.port ? \":\" + obj.port : '';\n-    var user = obj.user || 'git';\n+    type = type || ((obj.protocols && obj.protocols.length) ? obj.protocols.join('+') : obj.protocol);\n+    const port = obj.port ? `:${obj.port}` : '';\n+    const user = obj.user || 'git';\n     switch (type) {\n         case \"ssh\":\n-            if (port) return \"ssh://\" + user + \"@\" + obj.resource + port + \"/\" + obj.full_name + \".git\";else return user + \"@\" + obj.resource + \":\" + obj.full_name + \".git\";\n+            if (port)\n+                return `ssh://${user}@${obj.resource}${port}/${obj.full_name}.git`;\n+            else\n+                return `${user}@${obj.resource}:${obj.full_name}.git`;\n         case \"git+ssh\":\n         case \"ssh+git\":\n         case \"ftp\":\n         case \"ftps\":\n-            return type + \"://\" + user + \"@\" + obj.resource + port + \"/\" + obj.full_name + \".git\";\n+            return `${type}://${user}@${obj.resource}${port}/${obj.full_name}.git`;\n         case \"http\":\n         case \"https\":\n-            var token = \"\";\n+            let token = \"\";\n             if (obj.token) {\n-                token = buildToken(obj);\n+              token = buildToken(obj);\n             }\n-            return type + \"://\" + token + obj.resource + port + \"/\" + obj.full_name + \".git\";\n+            return `${type}://${token}${obj.resource}${port}/${obj.full_name}.git`;\n         default:\n             return obj.href;\n     }\n@@ -117,11 +124,11 @@\n  */\n function buildToken(obj) {\n     switch (obj.source) {\n-        case \"bitbucket.org\":\n-            return \"x-token-auth:\" + obj.token + \"@\";\n-        default:\n-            return obj.token + \"@\";\n+      case \"bitbucket.org\":\n+        return `x-token-auth:${obj.token}@`;\n+      default:\n+        return `${obj.token}@`\n     }\n }\n \n-module.exports = gitUrlParse;\n\\ No newline at end of file\n+module.exports = gitUrlParse;\n",
+					"match": false,
+					"packageHash": "82d2f89f308dfab8d447fb8080b127345296509656feee2cdcb9135f494a6b8f",
+					"size": 4026,
+					"sourceHash": "c231fb6932194183640eb3242a0e0cff9567b35f383fee642cc02b3acfb5f771",
+					"status": "content"
+				}
+			},
+			"summary": {
+				"differentFiles": 1,
+				"matchingFiles": 3,
+				"missingInPackage": 0,
+				"missingInSource": 0,
+				"score": 0.75,
+				"totalFiles": 4
+			}
+		},
+		"prodDependencies": [
+			{
+				"name": "git-up",
+				"version": "2.1.0"
+			},
+			{
+				"name": "is-plain-obj",
+				"version": "1.1.0"
+			},
+			{
+				"name": "is-ssh",
+				"version": "1.4.1"
+			},
+			{
+				"name": "normalize-url",
+				"version": "1.9.1"
+			},
+			{
+				"name": "object-assign",
+				"version": "4.1.1"
+			},
+			{
+				"name": "parse-path",
+				"version": "3.0.4"
+			},
+			{
+				"name": "protocols",
+				"version": "1.4.8"
+			},
+			{
+				"name": "parse-url",
+				"version": "3.0.2"
+			},
+			{
+				"name": "prepend-http",
+				"version": "1.0.4"
+			},
+			{
+				"name": "protocols",
+				"version": "2.0.2"
+			},
+			{
+				"name": "query-string",
+				"version": "4.3.4"
+			},
+			{
+				"name": "sort-keys",
+				"version": "1.1.2"
+			},
+			{
+				"name": "strict-uri-encode",
+				"version": "1.1.0"
+			}
+		]
+	}
+]
