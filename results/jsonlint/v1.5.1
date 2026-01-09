@@ -1,0 +1,133 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-09T05:03:40.007Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:11.7.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "jsonlint@1.5.1",
+			"name": "jsonlint",
+			"version": "1.5.1",
+			"location": "https://registry.npmjs.org/jsonlint/-/jsonlint-1.5.1.tgz",
+			"integrity": "sha512-ae4ZTc2qwcJQ0qRWoof6F2NtrOph8FpXTJUsPTbWCcN2P6VSb4Ud89MI9drWEeQ3TcDDpxLAw75z18PUNB6F7w==",
+			"publishedAt": "2012-08-22T17:37:57.472Z",
+			"publishedWith": {
+				"node": null,
+				"npm": null
+			},
+			"dependencies": {
+				"nomnom": ">= 1.5.x",
+				"JSV": ">= 4.0.x"
+			}
+		},
+		"source": {
+			"integrity": null,
+			"location": "git://github.com/zaach/jsonlint.git",
+			"spec": "github:zaach/jsonlint#HEAD"
+		},
+		"comparisonHash": "9ef46a5bd31291e57cbab41e2f17c57bd6da0b5b",
+		"diff": {
+			"files": {
+				".npmignore": {
+					"match": false,
+					"packageHash": "16d30e4462189fb14dd611bdb708c510630c576a1f35b9383e89a4352da36c97",
+					"size": 13,
+					"status": "missing-in-source"
+				},
+				"Makefile": {
+					"diff": "--- published/Makefile\n+++ rebuilt/Makefile\n@@ -2,9 +2,9 @@\n all: build test site\n \n build:\n-\tjison src/jsonlint.y src/jsonlint.l\n+\t./node_modules/jison/lib/cli.js src/jsonlint.y src/jsonlint.l\n \tmv jsonlint.js lib/jsonlint.js\n-\tnode scripts/bundle.js | uglifyjs > web/jsonlint.js\n+\tnode scripts/bundle.js | ./node_modules/uglify-js/bin/uglifyjs > web/jsonlint.js\n \n site:\n \tcp web/jsonlint.js ../jsonlint-pages/jsonlint.js\n",
+					"match": false,
+					"packageHash": "eb6a92355021134e1acb090bc0d17eb52ce3c39415f4bb59fff703f7db8351b1",
+					"size": 381,
+					"sourceHash": "0f1ae6523deee2c9ab8aff094f8cc18c65fcf69db82d37770d0dc0855d41b8f6",
+					"status": "content"
+				},
+				"README.md": {
+					"diff": "--- published/README.md\n+++ rebuilt/README.md\n@@ -22,18 +22,20 @@\n \n     $ jsonlint -h\n \n-    usage: jsonlint <file> [options]\n+    Usage: jsonlint [file] [options]\n \n     file     file to parse; otherwise uses stdin\n \n-    options:\n+    Options:\n        -v, --version            print version and exit\n        -s, --sort-keys          sort object keys\n        -i, --in-place           overwrite the file\n-       -t CHAR, --indent CHAR   character(s) to use for indentation\n+       -t CHAR, --indent CHAR   character(s) to use for indentation  [  ]\n        -c, --compact            compact error display\n        -V, --validate           a JSON schema to use for validation\n-       -e, --environment        which specification of JSON Schema the validation file uses\n+       -e, --environment        which specification of JSON Schema the validation file uses  [json-schema-draft-03]\n+       -q, --quiet              do not print the parsed json to STDOUT  [false]\n+       -p, --pretty-print       force pretty printing even if invalid\n \n \n ## Module interface\n@@ -49,7 +51,8 @@\n ## Vim Plugins\n \n * [Syntastic](http://www.vim.org/scripts/script.php?script_id=2736)\n-* [sourcebeautify](http://www.vim.org/scripts/script.php?script_id=4079) \n+* [sourcebeautify](http://www.vim.org/scripts/script.php?script_id=4079)\n+* [ALE](https://github.com/w0rp/ale)\n \n ## MIT License\n \n@@ -59,4 +62,4 @@\n \n The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.\n \n-THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.\n\\ No newline at end of file\n+THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.\n",
+					"match": false,
+					"packageHash": "e8c8deb152cc68a25157db9bdced6fd380ad07cdc3e90733727e5ead3187154b",
+					"size": 2550,
+					"sourceHash": "bfa3f4d86658f2c9fb739a67aa675774e78d28706a1ff7f04f3fb1cdb48c098b",
+					"status": "content"
+				},
+				"lib/cli.js": {
+					"diff": "--- published/lib/cli.js\n+++ rebuilt/lib/cli.js\n@@ -4,8 +4,9 @@\n var path = require(\"path\");\n var parser = require(\"./jsonlint\").parser;\n var JSV = require(\"JSV\").JSV;\n+var formatter = require(\"./formatter.js\").formatter;\n \n-var options = require(\"nomnom\")\n+var options = require(\"@gerhobbelt/nomnom\")\n   .script(\"jsonlint\")\n   .options({\n     file: {\n@@ -50,10 +51,16 @@\n         help: 'which specification of JSON Schema the validation file uses'\n     },\n     quiet: {\n-        flag:  true,key: \"value\",\n+        flag:  true,\n+        key: \"value\",\n         string: '-q, --quiet',\n         \"default\": false,\n-        help : 'do not print the parsed json to STDOUT'\n+        help: 'do not print the parsed json to STDOUT'\n+    },\n+    forcePrettyPrint: {\n+        flag:  true,\n+        string: '-p, --pretty-print',\n+        help: 'force pretty printing even if invalid'\n     }\n   }).parse();\n \n@@ -66,10 +73,13 @@\n }\n \n function parse (source) {\n+  var parsed,\n+      formatted;\n+\n   try {\n-    var parsed = options.sort ?\n-                  sortObject(parser.parse(source)) :\n-                  parser.parse(source);\n+    parsed = options.sort ?\n+      sortObject(parser.parse(source)) :\n+      parser.parse(source);\n \n     if (options.validate) {\n       var env = JSV.createEnvironment(options.env);\n@@ -80,10 +90,30 @@\n       }\n     }\n \n-    return JSON.stringify(parsed,null,options.indent);\n+    return JSON.stringify(parsed, null, options.indent);\n   } catch (e) {\n-    if (! options.compact) {\n+    if (options.forcePrettyPrint) {\n+      /* From https://github.com/umbrae/jsonlintdotcom:\n+       * If we failed to validate, run our manual formatter and then re-validate so that we\n+       * can get a better line number. On a successful validate, we don't want to run our\n+       * manual formatter because the automatic one is faster and probably more reliable.\n+       */\n+\n+      try {\n+        formatted = formatter.formatJson(source, options.indent);\n+        // Re-parse so exception output gets better line numbers\n+        parsed = parser.parse(formatted);\n+      } catch (e) {\n+        if (! options.compact) {\n+          console.error(e);\n+        }\n+        // force the pretty print before exiting\n+        console.log(formatted);\n+      }\n+    } else {\n+      if (! options.compact) {\n         console.error(e);\n+      }\n     }\n     process.exit(1);\n   }\n@@ -104,7 +134,7 @@\n     var json = path.normalize(options.file);\n     source = parse(fs.readFileSync(json, \"utf8\"));\n     if (options.inplace) {\n-      fs.writeSync(fs.openSync(path,'w+'), source, 0, \"utf8\");\n+      fs.writeSync(fs.openSync(json,'w+'), source, 0, \"utf8\");\n     } else {\n       if (! options.quiet) { console.log(source)};\n     }\n@@ -123,7 +153,9 @@\n \n // from http://stackoverflow.com/questions/1359761/sorting-a-json-object-in-javascript\n function sortObject(o) {\n-  if (Object.prototype.toString.call(o) !== '[object Object]') {\n+  if (Array.isArray(o)) {\n+    return o.map(sortObject);\n+  } else if (Object.prototype.toString.call(o) !== '[object Object]') {\n     return o;\n",
+					"match": false,
+					"packageHash": "3f0682d2c3ec8f175507e5efd25503edbea3f3b98353b9da1cdc14f86fc88301",
+					"size": 3750,
+					"sourceHash": "3ab00932848328d202ec6506a690d9f2371ac258347e99ba05e07467cfbd5fb6",
+					"status": "content"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -8,7 +8,8 @@\n     \"lint\",\n     \"jsonlint\"\n   ],\n-  \"version\": \"1.5.1\",\n+  \"version\": \"1.6.3\",\n+  \"license\": \"MIT\",\n   \"preferGlobal\": true,\n   \"repository\": {\n     \"type\": \"git\",\n@@ -25,8 +26,8 @@\n     \"node\": \">= 0.6\"\n   },\n   \"dependencies\": {\n-    \"nomnom\": \">= 1.5.x\",\n-    \"JSV\": \">= 4.0.x\"\n+    \"@gerhobbelt/nomnom\": \"^1.8.4-27\",\n+    \"JSV\": \"^4.0.x\"\n   },\n   \"devDependencies\": {\n     \"test\": \"*\",\n",
+					"match": false,
+					"packageHash": "410bd62ea527a0d65ff5df7620c92bf4aa49c1dfeaf541da02ce0ded8b8e3317",
+					"size": 816,
+					"sourceHash": "3096a81fae4dea6fcdc164a2fc51661bfe6c8a91d4554d06c1b3c62d910bbfdd",
+					"status": "content"
+				},
+				"bower.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/formatter.js": {
+					"match": false,
+					"status": "missing-in-package"
+				}
+			},
+			"summary": {
+				"differentFiles": 4,
+				"matchingFiles": 43,
+				"missingInPackage": 2,
+				"missingInSource": 1,
+				"score": 0.86,
+				"totalFiles": 50
+			}
+		},
+		"prodDependencies": [
+			{
+				"name": "@gerhobbelt/linewrap",
+				"version": "0.2.2-3"
+			},
+			{
+				"name": "@gerhobbelt/nomnom",
+				"version": "1.8.4-31"
+			},
+			{
+				"name": "ansi-styles",
+				"version": "4.3.0"
+			},
+			{
+				"name": "chalk",
+				"version": "4.1.0"
+			},
+			{
+				"name": "color-convert",
+				"version": "2.0.1"
+			},
+			{
+				"name": "color-name",
+				"version": "1.1.4"
+			},
+			{
+				"name": "exit",
+				"version": "0.1.2"
+			},
+			{
+				"name": "has-flag",
+				"version": "4.0.0"
+			},
+			{
+				"name": "JSV",
+				"version": "4.0.2"
+			},
+			{
+				"name": "supports-color",
+				"version": "7.2.0"
+			}
+		]
+	}
+]
