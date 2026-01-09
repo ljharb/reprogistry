@@ -1,0 +1,284 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-09T00:09:55.215Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:11.7.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "browserify-istanbul@0.1.0",
+			"name": "browserify-istanbul",
+			"version": "0.1.0",
+			"location": "https://registry.npmjs.org/browserify-istanbul/-/browserify-istanbul-0.1.0.tgz",
+			"integrity": "sha512-ac2A/bvF9Z/NXBYGzwL9wnifnHPILnQSMaio7yHkqjt8fwsQw9gIiIH6hk/MEjHo6vVOqOaebFZtukQ26Dr2fw==",
+			"publishedAt": "2014-05-03T04:22:29.263Z",
+			"publishedWith": {
+				"node": null,
+				"npm": "1.4.4"
+			},
+			"dependencies": {
+				"through": "^2.3.4",
+				"minimatch": "^0.2.14",
+				"istanbul": "^0.2.8"
+			}
+		},
+		"source": {
+			"integrity": null,
+			"location": "git://github.com/devongovett/browserify-istanbul.git",
+			"spec": "github:devongovett/browserify-istanbul#HEAD"
+		},
+		"comparisonHash": "9ef46a5bd31291e57cbab41e2f17c57bd6da0b5b",
+		"diff": {
+			"files": {
+				".npmignore": {
+					"match": false,
+					"packageHash": "f1a9a09b226cf8e98a4286200c5d9ebd5c28924707ac3317947f8ecf06ab167b",
+					"size": 13,
+					"status": "missing-in-source"
+				},
+				"README.md": {
+					"diff": "--- published/README.md\n+++ rebuilt/README.md\n@@ -4,8 +4,8 @@\n \n ## Installing\n \n-    npm install browserify-istanbul\n-    \n+    npm install --save-dev browserify-istanbul\n+\n ## Usage\n \n There are several ways to register browserify transforms: on the command line, in your `package.json`, or using the browserify API.\n@@ -22,15 +22,40 @@\n // or with some options...\n browserifyBundle.transform(istanbul({\n   // ignore these glob paths (the ones shown are the defaults)\n-  ignore: ['**/node_modules/**', '**/test/**', '**/tests/**'],\n-  \n-  // by default, any paths you include in the ignore option are ignored \n-  // in addition to the defaults. set the defaultIgnore option to false \n+  ignore: ['**/node_modules/**', '**/bower_components/**', '**/test/**', '**/tests/**', '**/*.json'],\n+\n+  // by default, any paths you include in the ignore option are ignored\n+  // in addition to the defaults. set the defaultIgnore option to false\n   // to only ignore the paths you specify.\n   defaultIgnore: true\n }));\n ```\n \n+### Command line\n+\n+- without options:\n+\n+```\n+./node_modules/.bin/browserify -t browserify-istanbul test/test-*.js -o bundle.js\n+```\n+\n+- with options\n+\n+```\n+./node_modules/.bin/browserify -t [ browserify-istanbul --ignore \"**/bower_components/**\" ] test/test-*.js -o bundle.js\n+```\n+\n+### Interacting With Coverage Reports\n+\n+To load and manipulate coverage reports, the command line tool [nyc](https://www.npmjs.com/package/nyc) can be used:\n+\n+1. output the the `__coverage__` object to `./.nyc_output/coverage.json`.\n+  * this can be facilitated using a library like [mocha-phantomjs-istanbul](https://www.npmjs.com/package/mocha-phantomjs-istanbul).\n+2. execute nyc with a list of [reporters](https://github.com/istanbuljs/istanbul-reports/tree/master/lib).\n+  * `nyc report --reporter=lcov --reporter=text-summary`.\n+\n+See [istanbul.js.org](https://istanbul.js.org/) for more examples and documentation.\n+\n ## License\n \n MIT\n",
+					"match": false,
+					"packageHash": "bfa9bbb723ea0d556473326e313035d18e1393d1f3775ab2c5fc218dbc5d5482",
+					"size": 1207,
+					"sourceHash": "ae139b0cd883bb666680fb6b02f630d28cd28a0d7007a19007ef6e9bd8cda793",
+					"status": "content"
+				},
+				"index.js": {
+					"diff": "--- published/index.js\n+++ rebuilt/index.js\n@@ -1,38 +1,58 @@\n-var istanbul = require('istanbul');\n var through = require('through');\n var minimatch = require('minimatch');\n-var path = require('path');\n+var objectAssign = require('object-assign');\n \n-var instrumenter = new istanbul.Instrumenter();\n-var defaultIgnore = ['**/node_modules/**', '**/test/**', '**/tests/**'];\n+var defaultIgnore = ['**/node_modules/**', '**/bower_components/**', '**/test/**', '**/tests/**', '**/*.json'];\n \n-module.exports = function(options) {\n+function shouldIgnoreFile(file, options) {\n+  var ignore = options.defaultIgnore === false ? [] : defaultIgnore;\n+  ignore = ignore.concat(options.ignore || []);\n+\n+  return ignore.some(function(pattern) {\n+    return minimatch(file, pattern, options.minimatchOptions);\n+  });\n+}\n+\n+module.exports = function(options, extraOptions) {\n+  var file;\n   options = options || {};\n-  \n-  function transform(file) {\n-    var ignore = options.defaultIgnore === false ? [] : defaultIgnore;\n-    ignore = ignore.concat(options.ignore || []);\n-    \n-    if (ignore.some(minimatch.bind(null, file)))\n-      return through();\n-    \n-    var data = '';\n-    return through(function(buf) {\n-      data += buf;\n-    }, function() {\n-      var self = this;\n-      instrumenter.instrument(data, file, function(err, code) {\n-        self.queue(code);\n-        self.queue(null);\n-      });\n-    });\n-  }\n-      \n+\n   if (typeof options === 'string') {\n-    var file = options;\n-    options = {};\n-    return transform(file);\n+    file = options;\n+    options = extraOptions || {};\n+    return transform(options, file);\n   }\n-  \n-  return transform;\n+\n+  return transform.bind(null, options);\n };\n+\n+function transform(options, file) {\n+  if (shouldIgnoreFile(file, options))\n+    return through();\n+\n+  var instrumenterConfig = objectAssign({}, {\n+    autoWrap: true,\n+    coverageVariable: '__coverage__',\n+    embedSource: true,\n+    noCompact: false,\n+    preserveComments: true,\n+    produceSourceMap: true\n+  }, options.instrumenterConfig);\n+\n+  var instrumenter = (options.instrumenter || require('istanbul-lib-instrument')).createInstrumenter(instrumenterConfig);\n+\n+  var data = '';\n+  return through(function(buf) {\n+    data += buf;\n+  }, function() {\n+    var self = this;\n+    instrumenter.instrument(data, file, function(err, code) {\n+      if (!err) {\n+        self.queue(code);\n+      } else {\n+        self.emit('error', err);\n+      }\n+      self.queue(null);\n+    });\n+  });\n+}\n",
+					"match": false,
+					"packageHash": "b3f47c6ffe5001fe9f87833231d8bda5e2029eaf249723b6211b0b189f1d894a",
+					"size": 957,
+					"sourceHash": "6e90d80f3bd3849c1a382f86b1a08f499bab3c6207b554313039e99398f6f0e9",
+					"status": "content"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -1,14 +1,20 @@\n {\n   \"name\": \"browserify-istanbul\",\n-  \"version\": \"0.1.0\",\n+  \"version\": \"3.0.1\",\n   \"description\": \"A browserify transform for the istanbul code coverage tool\",\n   \"main\": \"index.js\",\n   \"directories\": {\n     \"test\": \"test\"\n   },\n   \"scripts\": {\n-    \"test\": \"mocha\"\n+    \"lint\": \"eslint index.js test/*.js\",\n+    \"pretest\": \"npm run lint\",\n+    \"test\": \"nyc --reporter=text --reporter=lcov mocha\"\n   },\n+  \"pre-commit\": [\n+    \"lint\",\n+    \"test\"\n+  ],\n   \"repository\": {\n     \"type\": \"git\",\n     \"url\": \"git://github.com/devongovett/browserify-istanbul.git\"\n@@ -25,12 +31,18 @@\n   },\n   \"homepage\": \"https://github.com/devongovett/browserify-istanbul\",\n   \"dependencies\": {\n-    \"through\": \"^2.3.4\",\n-    \"minimatch\": \"^0.2.14\",\n-    \"istanbul\": \"^0.2.8\"\n+    \"istanbul-lib-instrument\": \"^1.8.0\",\n+    \"minimatch\": \"^3.0.4\",\n+    \"object-assign\": \"^4.1.1\",\n+    \"through\": \"^2.3.8\"\n   },\n   \"devDependencies\": {\n-    \"browserify\": \"^3.46.0\",\n-    \"mocha\": \"^1.18.2\"\n+    \"browserify\": \"^14.4.0\",\n+    \"coveralls\": \"^3.0.0\",\n+    \"eslint\": \"^4.8.0\",\n+    \"eslint-plugin-mocha\": \"^4.11.0\",\n+    \"mocha\": \"^4.0.1\",\n+    \"nyc\": \"^11.2.1\",\n+    \"pre-commit\": \"^1.2.2\"\n   }\n }\n",
+					"match": false,
+					"packageHash": "09f693f4da89099fffbbd23a4f76cd5091e5a7e62961717f84a63a866c13eab0",
+					"size": 831,
+					"sourceHash": "bb07a6c561e7a62bd3359f96be305829504132bed5250e65314d3786f0c4a388",
+					"status": "content"
+				},
+				"test/index.js": {
+					"match": false,
+					"packageHash": "27e611f62826ad2ae609e99da74c71c8a7bba743f8183268b3f3dea77ad2f446",
+					"size": 2538,
+					"status": "missing-in-source"
+				},
+				"test/mocha.opts": {
+					"match": false,
+					"packageHash": "a8efe1dfc3f1e6f0beed86ab3c092020887e83a533e365e7a3585fe918e106cc",
+					"size": 15,
+					"status": "missing-in-source"
+				},
+				"testdata/src/file.js": {
+					"match": false,
+					"packageHash": "d592a204c3f741e0d83deb09cdfaf95f60a18c8a4ece52b7389cbdf19a782f55",
+					"size": 117,
+					"status": "missing-in-source"
+				},
+				"testdata/src/ignored.js": {
+					"match": false,
+					"packageHash": "8a3b5119569532b6261bec31afca14187a6643c9e086038f823661cb77f2e8cb",
+					"size": 56,
+					"status": "missing-in-source"
+				},
+				"testdata/tests/file.js": {
+					"match": false,
+					"packageHash": "4e83a9f7f1d586086f94e449313a20549e06b493bacc0e1ebb4d6106f359179f",
+					"size": 42,
+					"status": "missing-in-source"
+				},
+				".editorconfig": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				".eslintrc": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				".travis.yml": {
+					"match": false,
+					"status": "missing-in-package"
+				}
+			},
+			"summary": {
+				"differentFiles": 3,
+				"matchingFiles": 0,
+				"missingInPackage": 3,
+				"missingInSource": 6,
+				"score": 0,
+				"totalFiles": 12
+			}
+		},
+		"prodDependencies": [
+			{
+				"name": "babel-code-frame",
+				"version": "6.26.0"
+			},
+			{
+				"name": "ansi-regex",
+				"version": "2.1.1"
+			},
+			{
+				"name": "ansi-styles",
+				"version": "2.2.1"
+			},
+			{
+				"name": "chalk",
+				"version": "1.1.3"
+			},
+			{
+				"name": "strip-ansi",
+				"version": "3.0.1"
+			},
+			{
+				"name": "supports-color",
+				"version": "2.0.0"
+			},
+			{
+				"name": "babel-generator",
+				"version": "6.26.1"
+			},
+			{
+				"name": "babel-messages",
+				"version": "6.23.0"
+			},
+			{
+				"name": "babel-runtime",
+				"version": "6.26.0"
+			},
+			{
+				"name": "babel-template",
+				"version": "6.26.0"
+			},
+			{
+				"name": "babel-traverse",
+				"version": "6.26.0"
+			},
+			{
+				"name": "debug",
+				"version": "2.6.9"
+			},
+			{
+				"name": "globals",
+				"version": "9.18.0"
+			},
+			{
+				"name": "ms",
+				"version": "2.0.0"
+			},
+			{
+				"name": "babel-types",
+				"version": "6.26.0"
+			},
+			{
+				"name": "babylon",
+				"version": "6.18.0"
+			},
+			{
+				"name": "balanced-match",
+				"version": "1.0.2"
+			},
+			{
+				"name": "brace-expansion",
+				"version": "1.1.12"
+			},
+			{
+				"name": "concat-map",
+				"version": "0.0.1"
+			},
+			{
+				"name": "core-js",
+				"version": "2.6.12"
+			},
+			{
+				"name": "detect-indent",
+				"version": "4.0.0"
+			},
+			{
+				"name": "escape-string-regexp",
+				"version": "1.0.5"
+			},
+			{
+				"name": "esutils",
+				"version": "2.0.3"
+			},
+			{
+				"name": "has-ansi",
+				"version": "2.0.0"
+			},
+			{
+				"name": "invariant",
+				"version": "2.2.4"
+			},
+			{
+				"name": "is-finite",
+				"version": "1.1.0"
+			},
+			{
+				"name": "istanbul-lib-coverage",
+				"version": "1.2.1"
+			},
+			{
+				"name": "istanbul-lib-instrument",
+				"version": "1.10.2"
+			},
+			{
+				"name": "js-tokens",
+				"version": "3.0.2"
+			},
+			{
+				"name": "jsesc",
+				"version": "1.3.0"
+			},
+			{
+				"name": "lodash",
+				"version": "4.17.21"
+			},
+			{
+				"name": "loose-envify",
+				"version": "1.4.0"
+			},
+			{
+				"name": "minimatch",
+				"version": "3.1.2"
+			},
+			{
+				"name": "object-assign",
+				"version": "4.1.1"
+			},
+			{
+				"name": "regenerator-runtime",
+				"version": "0.11.1"
+			},
+			{
+				"name": "repeating",
+				"version": "2.0.1"
+			},
+			{
+				"name": "semver",
+				"version": "5.7.2"
+			},
+			{
+				"name": "source-map",
+				"version": "0.5.7"
+			},
+			{
+				"name": "through",
+				"version": "2.3.8"
+			},
+			{
+				"name": "to-fast-properties",
+				"version": "1.0.3"
+			},
+			{
+				"name": "trim-right",
+				"version": "1.0.1"
+			}
+		]
+	}
+]
