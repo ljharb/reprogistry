@@ -1,0 +1,104 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-09T14:19:15.229Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:11.7.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "pg-hstore@2.2.0",
+			"name": "pg-hstore",
+			"version": "2.2.0",
+			"location": "https://registry.npmjs.org/pg-hstore/-/pg-hstore-2.2.0.tgz",
+			"integrity": "sha512-f2Z4c8ZWy3ov3IowxzMiNOEsAhz5GpaYaQYp9DmDe61KPn1b+0O2xhLiGFo+YyGTz7BXSkIaPBqS71kkCsybSw==",
+			"publishedAt": "2014-10-20T14:29:13.142Z",
+			"publishedWith": {
+				"node": null,
+				"npm": "1.3.14"
+			},
+			"dependencies": {
+				"underscore": "*"
+			}
+		},
+		"source": {
+			"integrity": null,
+			"location": "git@github.com:scarney81/pg-hstore.git",
+			"spec": "github:scarney81/pg-hstore#HEAD"
+		},
+		"comparisonHash": "9ef46a5bd31291e57cbab41e2f17c57bd6da0b5b",
+		"diff": {
+			"files": {
+				".npmignore": {
+					"match": false,
+					"packageHash": "4833f565a9feb6858c9b32fd1a5ad72e30537bb4ed965599af162390febfe234",
+					"size": 26,
+					"status": "missing-in-source"
+				},
+				".travis.yml": {
+					"diff": "--- published/.travis.yml\n+++ rebuilt/.travis.yml\n@@ -1,4 +1,3 @@\n language: node_js\n node_js:\n   - \"0.10\"\n-  - \"0.8\"\n",
+					"match": false,
+					"packageHash": "e6c07cdc24c5a030d24e746f55cd513691c63b6a70a7f2e6f04f1e81c0a800ff",
+					"size": 48,
+					"sourceHash": "e36b9b52fccb8114b8b8b13bdfbaa87342b07bda069b517ca34db9f85adaa3e3",
+					"status": "content"
+				},
+				"LICENSE": {
+					"diff": "--- published/LICENSE\n+++ rebuilt/LICENSE\n@@ -1,9 +1,7 @@\n The MIT License (MIT)\n \n-Copyright (C) 2012 Eloqua\n-\n Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the \"Software\"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:\n \n The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.\n \n-THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.\n\\ No newline at end of file\n+THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.\n",
+					"match": false,
+					"packageHash": "3d9ab5afdbc644278dfeedd7657d4209f894966cadcbfaa36f0156f86357ba0f",
+					"size": 1072,
+					"sourceHash": "6e19a315e03f36020f37dedcb1dd93b4eba6ebfd94ccdd13ec55b940776fb55e",
+					"status": "content"
+				},
+				"lib/index.js": {
+					"diff": "--- published/lib/index.js\n+++ rebuilt/lib/index.js\n@@ -16,6 +16,7 @@\n     switch(typeof input) {\r\n       case 'boolean':\r\n       case 'number':\r\n+      case 'object':\r\n         return String(input);\r\n       case 'string':\r\n         return sanitize ? sanitize_input(input) : input;\r\n@@ -44,7 +45,7 @@\n       parse: function(string, callback) {\r\n         var result = {},\r\n         //using [\\s\\S] to match any character, including line feed and carriage return,\r\n-            r = /([\"])(?:\\\\\\1|[\\s\\S])*?\\1|NULL/g,\r\n+            r = /([\"])(?:\\\\\\1|\\\\\\\\|[\\s\\S])*?\\1|NULL/g,\r\n             matches = string.match(r),\r\n             i,\r\n             l,\r\n@@ -63,9 +64,11 @@\n \r\n         if(matches) {\r\n           for (i = 0, l = matches.length; i < l; i+= 2) {\r\n-            var key = clean(matches[i]);\r\n-            var value = matches[i + 1];\r\n-            result[key] = value==\"NULL\"?null:clean(value);\r\n+            if (matches[i] && matches[i + 1]) {\r\n+              var key = clean(matches[i]);\r\n+              var value = matches[i + 1];\r\n+              result[key] = value==\"NULL\"?null:clean(value);\r\n+            }\r\n           }\r\n         }\r\n         if (!callback || callback === null) return result;\r\n",
+					"match": false,
+					"packageHash": "f7dfeca8b593d75c0f441b534df2e479fa670b9bf288b16ea88997acff7d3554",
+					"size": 2560,
+					"sourceHash": "e5e4e7886d113d467742cb800aee1cdf455512b5f840e4a28e5d8611e478af0b",
+					"status": "content"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -1,10 +1,15 @@\n {\n   \"author\": \"Seth Carney <scarney81@gmail.com> (https://github.com/scarney81)\",\n   \"name\": \"pg-hstore\",\n-  \"description\": \"An module for serializing and deserializing JSON data in to hstore format\",\n+  \"description\": \"A module for serializing and deserializing JSON data into hstore format\",\n   \"private\": false,\n-  \"keywords\": [\"pg\", \"postgres\", \"hstore\"],\n-  \"version\": \"2.2.0\",\n+  \"keywords\": [\n+    \"pg\",\n+    \"postgres\",\n+    \"hstore\"\n+  ],\n+  \"license\": \"MIT\",\n+  \"version\": \"2.3.4\",\n   \"main\": \"lib/index.js\",\n   \"homepage\": \"https://github.com/scarney81/pg-hstore\",\n   \"bugs\": {\n@@ -15,11 +20,11 @@\n     \"url\": \"git@github.com:scarney81/pg-hstore.git\"\n   },\n   \"dependencies\": {\n-    \"underscore\": \"*\"\n+    \"underscore\": \"^1.13.1\"\n   },\n   \"devDependencies\": {\n-    \"mocha\": \"1.2.x\",\n-    \"should\": \"0.6.x\"\n+    \"mocha\": \"^2.1.0\",\n+    \"should\": \"^4.4.2\"\n   },\n   \"engines\": {\n     \"node\": \">= 0.8.x\"\n",
+					"match": false,
+					"packageHash": "7ff3a7bcdcb3c6809cfc51d600e7248f233a38762d9bedc0aac7e2b6388897eb",
+					"size": 828,
+					"sourceHash": "c82ed3bd1faa388a2cde19a0504f25859ae5f4c791fc9a1b287ddbb6d783e2ed",
+					"status": "content"
+				},
+				"test/parse.js": {
+					"diff": "--- published/test/parse.js\n+++ rebuilt/test/parse.js\n@@ -107,5 +107,15 @@\n         done();\n       });\n     });\n+\n+    it('should hstore parse a string ending with \\\\', function (done) {\n+      var source = '\"url\"=>\"http://google.com\\\\\\\\\",\"foo\"=>\"bar\"';\n+      hstore.parse(source, function (target) {\n+        should.exist(target);\n+        target.url.should.equal('http://google.com\\\\');\n+        target.foo.should.equal('bar');\n+        done();\n+      });\n+    });\n   });\n })();\n",
+					"match": false,
+					"packageHash": "68392a4f8d1bd8717ff5bfe3234a79acf01a6eafb8ccc6ac636af99ad2f18000",
+					"size": 3379,
+					"sourceHash": "1dae3dac98132a66823f6039792e4698f7f77d7b887ca4625964684eac29d90a",
+					"status": "content"
+				},
+				"test/stringify.js": {
+					"diff": "--- published/test/stringify.js\n+++ rebuilt/test/stringify.js\n@@ -39,6 +39,15 @@\n         });\n       });\n \n+      it('should hstore encode an object', function (done) {\n+        var source = { foo: { bar: 1000 } };\n+        hstore.stringify(source, function (target) {\n+          should.exist(target);\n+          target.should.equal('\"foo\"=>\"[object Object]\"');\n+          done();\n+        });\n+      });\n+\n       it('should hstore encode a null value', function (done) {\n         var source = { foo: null };\n         hstore.stringify(source, function (target) {\n",
+					"match": false,
+					"packageHash": "2f3f22d7dbb43bbdd6f6aa92af0b4e0f32307fea3f15ce752f4a7e54a8aeabd5",
+					"size": 6026,
+					"sourceHash": "2b54a6805e8c594d2088df17069815b11cd12da7111e194ece429ca16c3b999c",
+					"status": "content"
+				}
+			},
+			"summary": {
+				"differentFiles": 6,
+				"matchingFiles": 4,
+				"missingInPackage": 0,
+				"missingInSource": 1,
+				"score": 0.36363636363636365,
+				"totalFiles": 11
+			}
+		},
+		"prodDependencies": [
+			{
+				"name": "underscore",
+				"version": "1.13.7"
+			}
+		]
+	}
+]

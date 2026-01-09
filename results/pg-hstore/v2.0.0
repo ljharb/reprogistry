@@ -1,0 +1,116 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-09T14:20:34.691Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:11.7.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "pg-hstore@2.0.0",
+			"name": "pg-hstore",
+			"version": "2.0.0",
+			"location": "https://registry.npmjs.org/pg-hstore/-/pg-hstore-2.0.0.tgz",
+			"integrity": "sha512-tDlyZaOs0GoCkFpDOeV9PDM8oTGWSu3YeEtLhmd10ng4H5fnC0nNHaYXMsPGaS9BptDEGkZ1WP/1UiyA8pbY3Q==",
+			"publishedAt": "2014-03-10T16:27:04.996Z",
+			"publishedWith": {
+				"node": null,
+				"npm": "1.3.14"
+			},
+			"dependencies": {
+				"underscore": "*"
+			}
+		},
+		"source": {
+			"integrity": null,
+			"location": "git@github.com:scarney81/pg-hstore.git",
+			"spec": "github:scarney81/pg-hstore#HEAD"
+		},
+		"comparisonHash": "9ef46a5bd31291e57cbab41e2f17c57bd6da0b5b",
+		"diff": {
+			"files": {
+				".npmignore": {
+					"match": false,
+					"packageHash": "4833f565a9feb6858c9b32fd1a5ad72e30537bb4ed965599af162390febfe234",
+					"size": 26,
+					"status": "missing-in-source"
+				},
+				".travis.yml": {
+					"diff": "--- published/.travis.yml\n+++ rebuilt/.travis.yml\n@@ -1,4 +1,3 @@\n language: node_js\n node_js:\n   - \"0.10\"\n-  - \"0.8\"\n",
+					"match": false,
+					"packageHash": "e6c07cdc24c5a030d24e746f55cd513691c63b6a70a7f2e6f04f1e81c0a800ff",
+					"size": 48,
+					"sourceHash": "e36b9b52fccb8114b8b8b13bdfbaa87342b07bda069b517ca34db9f85adaa3e3",
+					"status": "content"
+				},
+				"LICENSE": {
+					"diff": "--- published/LICENSE\n+++ rebuilt/LICENSE\n@@ -1,9 +1,7 @@\n The MIT License (MIT)\n \n-Copyright (C) 2012 Eloqua\n-\n Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the \"Software\"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:\n \n The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.\n \n-THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.\n\\ No newline at end of file\n+THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.\n",
+					"match": false,
+					"packageHash": "3d9ab5afdbc644278dfeedd7657d4209f894966cadcbfaa36f0156f86357ba0f",
+					"size": 1072,
+					"sourceHash": "6e19a315e03f36020f37dedcb1dd93b4eba6ebfd94ccdd13ec55b940776fb55e",
+					"status": "content"
+				},
+				"README.md": {
+					"diff": "--- published/README.md\n+++ rebuilt/README.md\n@@ -15,7 +15,7 @@\n ### stringify\n \n ```javascript\n-var hstore = require('pg-hstore');\n+var hstore = require('pg-hstore')();\n var source = { foo: \"oof\", bar: \"rab\", baz: \"zab\" };\n hstore.stringify(source, function(result) {\n   ...\n@@ -27,7 +27,7 @@\n ### parse\n \n ```javascript\n-var hstore = require('pg-hstore');\n+var hstore = require('pg-hstore')();\n var source = '\"foo\"=>\"oof\", \"bar\"=>\"rab\", \"baz\"=>\"zab\"';\n hstore.parse(source, function(result) {\n   ...\n",
+					"match": false,
+					"packageHash": "215151690940c68e0a902cc76793326ee7c310125d86940e5792a20420b3081c",
+					"size": 770,
+					"sourceHash": "b380e2e701fad986a2834ad875644dd4fb7dc4ffba639f9a2eefb6af5d907f86",
+					"status": "content"
+				},
+				"lib/index.js": {
+					"diff": "--- published/lib/index.js\n+++ rebuilt/lib/index.js\n@@ -9,8 +9,6 @@\n     input = input.replace(/\\\\/g, '\\\\\\\\');\r\n     // double quotes (\") must be replaced with escaped quotes (\\\\\")\r\n     input = input.replace(/\"/g, '\\\\\"');\r\n-    // colons (:) must be replaced with escaped colons (\\\\:)\r\n-    input = input.replace(/:/g, '\\\\:');\r\n     return input;\r\n   }\r\n \r\n@@ -18,6 +16,7 @@\n     switch(typeof input) {\r\n       case 'boolean':\r\n       case 'number':\r\n+      case 'object':\r\n         return String(input);\r\n       case 'string':\r\n         return sanitize ? sanitize_input(input) : input;\r\n@@ -27,7 +26,7 @@\n   }\r\n \r\n   module.exports = function (options) {\r\n-    options = _.defaults({ sanitize: false }, options);\r\n+    options = _.defaults({}, options, { sanitize: false });\r\n \r\n     return {\r\n       stringify: function (data, callback) {\r\n@@ -43,21 +42,34 @@\n         callback(joined);\r\n       },\r\n \r\n-      parse: function(value, callback) {\r\n+      parse: function(string, callback) {\r\n         var result = {},\r\n-            r = /([\"])(?:\\\\\\1|.)*?\\1/g,\r\n-            matches = value.match(r),\r\n+        //using [\\s\\S] to match any character, including line feed and carriage return,\r\n+            r = /([\"])(?:\\\\\\1|\\\\\\\\|[\\s\\S])*?\\1|NULL/g,\r\n+            matches = string.match(r),\r\n             i,\r\n             l,\r\n             clean = function (value) {\r\n                 // Remove leading double quotes\r\n                 value = value.replace(/^\\\"|\\\"$/g, \"\");\r\n                 // Unescape quotes\r\n-                return value.replace(/\\\\\"/g, \"\\\"\");\r\n+                value = value.replace(/\\\\\"/g, \"\\\"\");\r\n+                //Unescape backslashes\r\n+                value = value.replace(/\\\\\\\\/g,\"\\\\\");\r\n+                //Unescape single quotes\r\n+                value = value.replace(/''/g,\"'\");\r\n+\r\n+                return value;\r\n             };\r\n \r\n-        for (i = 0, l = matches.length; i < l; i+= 2) {\r\n-            result[clean(matches[i])] = clean(matches[i + 1]);\r\n+        if(matches) {\r\n+          for (i = 0, l = matches.length; i < l; i+= 2) {\r\n+            if (matches[i] && matches[i + 1]) {\r\n+              var key = clean(matches[i]);\r\n+              var value = matches[i + 1];\r\n+              result[key] = value==\"NULL\"?null:clean(value);\r\n+            }\r\n+          }\r\n         }\r\n         if (!callback || callback === null) return result;\r\n         callback(result);\r\n",
+					"match": false,
+					"packageHash": "9f7cd3b9395f7faa0b6c8ba2be4746b57a8f03ab8bc52b82c4742e694450acd7",
+					"size": 2220,
+					"sourceHash": "e5e4e7886d113d467742cb800aee1cdf455512b5f840e4a28e5d8611e478af0b",
+					"status": "content"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -1,10 +1,15 @@\n {\n   \"author\": \"Seth Carney <scarney81@gmail.com> (https://github.com/scarney81)\",\n   \"name\": \"pg-hstore\",\n-  \"description\": \"An module for serializing and deserializing JSON data in to hstore format\",\n+  \"description\": \"A module for serializing and deserializing JSON data into hstore format\",\n   \"private\": false,\n-  \"keywords\": [\"pg\", \"postgres\", \"hstore\"],\n-  \"version\": \"2.0.0\",\n+  \"keywords\": [\n+    \"pg\",\n+    \"postgres\",\n+    \"hstore\"\n+  ],\n+  \"license\": \"MIT\",\n+  \"version\": \"2.3.4\",\n   \"main\": \"lib/index.js\",\n   \"homepage\": \"https://github.com/scarney81/pg-hstore\",\n   \"bugs\": {\n@@ -15,11 +20,11 @@\n     \"url\": \"git@github.com:scarney81/pg-hstore.git\"\n   },\n   \"dependencies\": {\n-    \"underscore\": \"*\"\n+    \"underscore\": \"^1.13.1\"\n   },\n   \"devDependencies\": {\n-    \"mocha\": \"1.2.x\",\n-    \"should\": \"0.6.x\"\n+    \"mocha\": \"^2.1.0\",\n+    \"should\": \"^4.4.2\"\n   },\n   \"engines\": {\n     \"node\": \">= 0.8.x\"\n",
+					"match": false,
+					"packageHash": "a89a388d42b64c1e4805123829bbf6e986b29cff917f5d1b7fdc0e3b4bf9693f",
+					"size": 828,
+					"sourceHash": "c82ed3bd1faa388a2cde19a0504f25859ae5f4c791fc9a1b287ddbb6d783e2ed",
+					"status": "content"
+				},
+				"test/parse.js": {
+					"diff": "--- published/test/parse.js\n+++ rebuilt/test/parse.js\n@@ -3,6 +3,7 @@\n   'use strict';\n \n   var should = require('should'),\n+      assert= require('assert'),\n       HStore = require('../lib/index.js'),\n       hstore;\n \n@@ -20,6 +21,15 @@\n       });\n     });\n \n+    it('should hstore parse an empty hstore string', function (done) {\n+      var source = '';\n+      hstore.parse(source, function (target) {\n+        should.exist(target);\n+        target.should.eql({});\n+        done();\n+      });\n+    });\n+\n     it('should hstore parse an hstore string with multiple values', function (done) {\n       var source = '\"foo\"=>\"oof\",\"bar\"=>\"rab\",\"baz\"=>\"zab\"';\n       hstore.parse(source, function (target) {\n@@ -40,6 +50,24 @@\n       });\n     });\n \n+    it('should hstore parse an escaped quoted string with single quotes', function (done) {\n+      var source = '\"foo\"=>\"\\'\\'bar\\'\\'\"';\n+      hstore.parse(source, function (target) {\n+        should.exist(target);\n+        target.foo.should.equal('\\'bar\\'');\n+        done();\n+      });\n+    });\n+\n+    it('should hstore parse a string with escaped backslashes', function (done) {\n+      var source = '\"foo\"=>\"\\\\\\\\f0123\"';\n+      hstore.parse(source, function (target) {\n+        should.exist(target);\n+        target.foo.should.equal('\\\\f0123');\n+        done();\n+      });\n+    });\n+\n     it('should hstore parse a string with commas', function (done) {\n       var source = '\"foo\"=>\"bar,foo,bar\"';\n       hstore.parse(source, function (target) {\n@@ -57,5 +85,37 @@\n         done();\n       });\n     });\n+\n+    it('should hstore parse a string with NULL values', function (done) {\n+      var source = '\"foo\"=>\"oof\",\"bar\"=>NULL,\"baz\"=>\"zab\"';\n+      hstore.parse(source, function (target) {\n+        should.exist(target);\n+        target.foo.should.equal('oof');\n+        assert.equal(target.bar, null);\n+        target.baz.should.equal('zab');\n+        done();\n+      });\n+    });\n+\n+    it('should hstore parse a string with \\n values', function (done) {\n+      var source = '\"foo\"=>\"o\\rof\",\"bar\"=>NULL,\"baz\"=>\"z\\nab\"';\n+      hstore.parse(source, function (target) {\n+        should.exist(target);\n+        target.foo.should.equal('o\\rof');\n+        assert.equal(target.bar, null);\n+        target.baz.should.equal('z\\nab');\n+        done();\n+      });\n+    });\n+\n+    it('should hstore parse a string ending with \\\\', function (done) {\n+      var source = '\"url\"=>\"http://google.com\\\\\\\\\",\"foo\"=>\"bar\"';\n+      hstore.parse(source, function (target) {\n+        should.exist(target);\n+        target.url.should.equal('http://google.com\\\\');\n+        target.foo.should.equal('bar');\n+        done();\n+      });\n+    });\n   });\n })();\n",
+					"match": false,
+					"packageHash": "3851ad1149d0ad8601aaf79438398ae19c5d717d4c84421497b926bf10f09119",
+					"size": 1801,
+					"sourceHash": "1dae3dac98132a66823f6039792e4698f7f77d7b887ca4625964684eac29d90a",
+					"status": "content"
+				},
+				"test/stringify.js": {
+					"diff": "--- published/test/stringify.js\n+++ rebuilt/test/stringify.js\n@@ -7,98 +7,196 @@\n       hstore;\n \n   describe('pg-hstore.stringify', function () {\n-    beforeEach(function () {\n-      hstore = new HStore();\n-    });\n-\n-    it('should hstore encode a string', function (done) {\n-      var source = { foo: 'bar' };\n-      hstore.stringify(source, function (target) {\n-        should.exist(target);\n-        target.should.equal('\"foo\"=>\"bar\"');\n-        done();\n-      });\n-    });\n-\n-    it('should hstore encode a number', function (done) {\n-      var source = { foo: 1000 };\n-      hstore.stringify(source, function (target) {\n-        should.exist(target);\n-        target.should.equal('\"foo\"=>\"1000\"');\n-        done();\n-      });\n-    });\n-\n-    it('should hstore encode a boolean', function (done) {\n-      var source = { foo: true };\n-      hstore.stringify(source, function (target) {\n-        should.exist(target);\n-        target.should.equal('\"foo\"=>\"true\"');\n-        done();\n-      });\n-    });\n-\n-    it('should hstore encode a null value', function (done) {\n-      var source = { foo: null };\n-      hstore.stringify(source, function (target) {\n-        should.exist(target);\n-        target.should.equal('\"foo\"=>NULL');\n-        done();\n-      });\n-    });\n-\n-    it('should hstore encode a null string value', function (done) {\n-      var source = { foo: 'null' };\n-      hstore.stringify(source, function (target) {\n-        should.exist(target);\n-        target.should.equal('\"foo\"=>\"null\"');\n-        done();\n+    describe('without sanitization', function(){\n+      beforeEach(function () {\n+        hstore = new HStore();\n+      });\n+\n+      it('should hstore encode a string', function (done) {\n+        var source = { foo: 'bar' };\n+        hstore.stringify(source, function (target) {\n+          should.exist(target);\n+          target.should.equal('\"foo\"=>\"bar\"');\n+          done();\n+        });\n+      });\n+\n+      it('should hstore encode a number', function (done) {\n+        var source = { foo: 1000 };\n+        hstore.stringify(source, function (target) {\n+          should.exist(target);\n+          target.should.equal('\"foo\"=>\"1000\"');\n+          done();\n+        });\n+      });\n+\n+      it('should hstore encode a boolean', function (done) {\n+        var source = { foo: true };\n+        hstore.stringify(source, function (target) {\n+          should.exist(target);\n+          target.should.equal('\"foo\"=>\"true\"');\n+          done();\n+        });\n+      });\n+\n+      it('should hstore encode an object', function (done) {\n+        var source = { foo: { bar: 1000 } };\n+        hstore.stringify(source, function (target) {\n+          should.exist(target);\n+          target.should.equal('\"foo\"=>\"[object Object]\"');\n+          done();\n+        });\n+      });\n+\n+      it('should hstore encode a null value', function (done) {\n+        var source = { foo: null };\n+        hstore.stringify(source, function (target) {\n+          should.exist(target);\n+          target.should.equal('\"foo\"=>NULL');\n+          done();\n+        });\n",
+					"match": false,
+					"packageHash": "2cf53b09f9d56713b867b6fbb90bd041b2531ee4a10794e77f4fc8ee904c4467",
+					"size": 3045,
+					"sourceHash": "2b54a6805e8c594d2088df17069815b11cd12da7111e194ece429ca16c3b999c",
+					"status": "content"
+				},
+				"test/index.js": {
+					"match": false,
+					"status": "missing-in-package"
+				}
+			},
+			"summary": {
+				"differentFiles": 7,
+				"matchingFiles": 2,
+				"missingInPackage": 1,
+				"missingInSource": 1,
+				"score": 0.18181818181818182,
+				"totalFiles": 11
+			}
+		},
+		"prodDependencies": [
+			{
+				"name": "underscore",
+				"version": "1.13.7"
+			}
+		]
+	}
+]

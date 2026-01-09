@@ -1,0 +1,110 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-09T14:20:55.061Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:11.7.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "pg-hstore@1.0.2",
+			"name": "pg-hstore",
+			"version": "1.0.2",
+			"location": "https://registry.npmjs.org/pg-hstore/-/pg-hstore-1.0.2.tgz",
+			"integrity": "sha512-qqOteMNpeaX1BzZLbtscdwx0FLCVeG/oKxf95rR+rRfmgrQ/HYIdLjqA5jRjEG1nyMblZqhhWse5h3cXc/iVaA==",
+			"publishedAt": "2012-12-05T15:14:04.137Z",
+			"publishedWith": {
+				"node": null,
+				"npm": "1.1.63"
+			},
+			"dependencies": {}
+		},
+		"source": {
+			"integrity": null,
+			"location": "git@github.com:scarney81/pg-hstore.git",
+			"spec": "github:scarney81/pg-hstore#HEAD"
+		},
+		"comparisonHash": "9ef46a5bd31291e57cbab41e2f17c57bd6da0b5b",
+		"diff": {
+			"files": {
+				".npmignore": {
+					"match": false,
+					"packageHash": "4833f565a9feb6858c9b32fd1a5ad72e30537bb4ed965599af162390febfe234",
+					"size": 26,
+					"status": "missing-in-source"
+				},
+				"README.md": {
+					"diff": "--- published/README.md\n+++ rebuilt/README.md\n@@ -1,3 +1,5 @@\n+[![Build Status](https://travis-ci.org/scarney81/pg-hstore.png)](https://travis-ci.org/[YOUR_GITHUB_USERNAME]/[YOUR_PROJECT_NAME])\n+\n pg-hstore\n ===========\n \n@@ -13,7 +15,7 @@\n ### stringify\n \n ```javascript\n-var hstore = require('pg-hstore');\n+var hstore = require('pg-hstore')();\n var source = { foo: \"oof\", bar: \"rab\", baz: \"zab\" };\n hstore.stringify(source, function(result) {\n   ...\n@@ -25,11 +27,11 @@\n ### parse\n \n ```javascript\n-var hstore = require('pg-hstore');\n+var hstore = require('pg-hstore')();\n var source = '\"foo\"=>\"oof\", \"bar\"=>\"rab\", \"baz\"=>\"zab\"';\n hstore.parse(source, function(result) {\n   ...\n   // result = { foo: \"oof\", bar: \"rab\", baz: \"zab\" } \n   ...\n });\n-```\n\\ No newline at end of file\n+```\n",
+					"match": false,
+					"packageHash": "93fb19e1baecb8734a24e026013502acee1ea4248d4c8ed91ffe62082959f620",
+					"size": 637,
+					"sourceHash": "b380e2e701fad986a2834ad875644dd4fb7dc4ffba639f9a2eefb6af5d907f86",
+					"status": "content"
+				},
+				"lib/index.js": {
+					"diff": "--- published/lib/index.js\n+++ rebuilt/lib/index.js\n@@ -1,63 +1,79 @@\n-var sanitize_input = function(input) {\r\n-  // http://www.postgresql.org/docs/9.0/static/sql-syntax-lexical.html [4.1.2.1-4.1.2.2]\r\n-  // single quotes (') must be replaced with double single quotes ('')\r\n-  input = input.replace(/'/, '\\'\\'');\r\n-  // backslashes (\\) must be replaced with double backslashes (\\\\)\r\n-  input = input.replace(/\\\\/, '\\\\\\\\');\r\n-  return input;\r\n-};\r\n-\r\n-var to_string = function(input) {\r\n-  switch(typeof input) {\r\n-    case 'boolean':\r\n-    case 'number':\r\n-      return String(input);\r\n-    case 'string':\r\n-      return sanitize_input(input);\r\n-    default:\r\n-      return '';\r\n+(function () {\r\n+  var _ = require('underscore');\r\n+\r\n+  function sanitize_input(input) {\r\n+    // http://www.postgresql.org/docs/9.0/static/sql-syntax-lexical.html [4.1.2.1-4.1.2.2]\r\n+    // single quotes (') must be replaced with double single quotes ('')\r\n+    input = input.replace(/'/g, '\\'\\'');\r\n+    // backslashes (\\) must be replaced with double backslashes (\\\\)\r\n+    input = input.replace(/\\\\/g, '\\\\\\\\');\r\n+    // double quotes (\") must be replaced with escaped quotes (\\\\\")\r\n+    input = input.replace(/\"/g, '\\\\\"');\r\n+    return input;\r\n   }\r\n-};\r\n \r\n-module.exports = {\r\n-  stringify: function (data, callback) {\r\n-    var hstore = Object.keys(data).map(function (key) {\r\n-      return '\"'+key+'\"=>\"'+to_string(data[key])+'\"';\r\n-    });\r\n-    var joined = hstore.join();\r\n-    if (!callback || callback === null) return joined;\r\n-    callback(joined);\r\n-  },\r\n-\r\n-  parse: function(value, callback) {\r\n-    var result = {};\r\n-    var ke = value.length,\r\n-      vs = value.length,\r\n-      ve = value.length,\r\n-      key, val;\r\n-    var buf = '';\r\n-    var i = value.length;\r\n-    //work backwards through string\r\n-    while (i > -1) {\r\n-      buf = value.slice(i - 2, i);\r\n-      if (buf == '=>' || i === 0) {\r\n-        vs = i;\r\n-        ve = (value.lastIndexOf(',') == -1) ? value.length : value.lastIndexOf(',');\r\n-        if (i === 0) {\r\n-          ke = value.indexOf('=>');\r\n-          ve = -1;\r\n-        }\r\n-        if (val) {\r\n-          key = value.slice(ve + 1, ke).trim().slice(1, - 1);\r\n-          value = value.slice(0, ve);\r\n-          result[key] = val;\r\n-        }\r\n-        val = value.slice(vs, value.length).trim().slice(1, - 1);\r\n-        ke = i - 2;\r\n-      }\r\n-      i--;\r\n+  function to_string(input, sanitize) {\r\n+    switch(typeof input) {\r\n+      case 'boolean':\r\n+      case 'number':\r\n+      case 'object':\r\n+        return String(input);\r\n+      case 'string':\r\n+        return sanitize ? sanitize_input(input) : input;\r\n+      default:\r\n+        return '';\r\n     }\r\n-    if (!callback || callback === null) return result;\r\n-    callback(result);\r\n   }\r\n-};\n\\ No newline at end of file\n+\r\n+  module.exports = function (options) {\r\n+    options = _.defaults({}, options, { sanitize: false });\r\n+\r\n+    return {\r\n+      stringify: function (data, callback) {\r\n+        var hstore = Object.keys(data).map(function (key) {\r\n+          if (data[key] === null) {\r\n+            return '\"'+to_string(key, options.sanitize)+'\"=>NULL';\r\n+          } else {\r\n+            return '\"'+to_string(key, options.sanitize)+'\"=>\"'+to_string(data[key], options.sanitize)+'\"';\r\n",
+					"match": false,
+					"packageHash": "487b7fe654dd90c37c6fa32002acc1208a54c53ab09fa851d1db42bc1663b4a9",
+					"size": 1801,
+					"sourceHash": "e5e4e7886d113d467742cb800aee1cdf455512b5f840e4a28e5d8611e478af0b",
+					"status": "content"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -1,10 +1,15 @@\n {\n   \"author\": \"Seth Carney <scarney81@gmail.com> (https://github.com/scarney81)\",\n   \"name\": \"pg-hstore\",\n-  \"description\": \"An module for serializing and deserializing JSON data in to hstore format\",\n+  \"description\": \"A module for serializing and deserializing JSON data into hstore format\",\n   \"private\": false,\n-  \"keywords\": [\"pg\", \"postgres\", \"hstore\"],\n-  \"version\": \"1.0.2\",\n+  \"keywords\": [\n+    \"pg\",\n+    \"postgres\",\n+    \"hstore\"\n+  ],\n+  \"license\": \"MIT\",\n+  \"version\": \"2.3.4\",\n   \"main\": \"lib/index.js\",\n   \"homepage\": \"https://github.com/scarney81/pg-hstore\",\n   \"bugs\": {\n@@ -14,11 +19,17 @@\n     \"type\": \"git\",\n     \"url\": \"git@github.com:scarney81/pg-hstore.git\"\n   },\n+  \"dependencies\": {\n+    \"underscore\": \"^1.13.1\"\n+  },\n   \"devDependencies\": {\n-    \"mocha\": \"1.2.x\",\n-    \"should\": \"0.6.x\"\n+    \"mocha\": \"^2.1.0\",\n+    \"should\": \"^4.4.2\"\n   },\n   \"engines\": {\n-    \"node\": \">= 0.6.11\"\n+    \"node\": \">= 0.8.x\"\n+  },\n+  \"scripts\": {\n+    \"test\": \"./node_modules/.bin/mocha --reporter spec -u bdd --require should --recursive --timeout 10000\"\n   }\n }\n",
+					"match": false,
+					"packageHash": "68fce752027f566604b593ecce82060c5284721d0d0911b2d1810377359e3e35",
+					"size": 654,
+					"sourceHash": "c82ed3bd1faa388a2cde19a0504f25859ae5f4c791fc9a1b287ddbb6d783e2ed",
+					"status": "content"
+				},
+				"test/parse.js": {
+					"diff": "--- published/test/parse.js\n+++ rebuilt/test/parse.js\n@@ -1,53 +1,121 @@\n-/*globals it, describe */\n-var mocha  = require('mocha'),\n-    should = require('should'),\n-    hstore = require('../lib/index.js');\n-\n-describe('pg-hstore.parse', function() {\n-  it('should hstore parse an hstore string', function(done) {\n-    var source = '\"foo\"=>\"bar\"';\n-    hstore.parse(source, function(target) {\n-      should.exist(target);\n-      target.foo.should.equal('bar');\n-      done();\n+/*globals it, describe, beforeEach */\n+(function () {\n+  'use strict';\n+\n+  var should = require('should'),\n+      assert= require('assert'),\n+      HStore = require('../lib/index.js'),\n+      hstore;\n+\n+  describe('pg-hstore.parse', function () {\n+    beforeEach(function () {\n+      hstore = new HStore();\n     });\n-  });\n \n-  it('should hstore parse an hstore string with multiple values', function(done) {\n-    var source = '\"foo\"=>\"oof\",\"bar\"=>\"rab\",\"baz\"=>\"zab\"';\n-    hstore.parse(source, function(target) {\n-      should.exist(target);\n-      target.foo.should.equal('oof');\n-      target.bar.should.equal('rab');\n-      target.baz.should.equal('zab');\n-      done();\n+    it('should hstore parse an hstore string', function (done) {\n+      var source = '\"foo\"=>\"bar\"';\n+      hstore.parse(source, function (target) {\n+        should.exist(target);\n+        target.foo.should.equal('bar');\n+        done();\n+      });\n     });\n-  });\n-  \n-  it('should hstore parse an escaped quoted string with quotes', function(done) {\n-    var source = '\"foo\"=>\"\\\"bar\\\"\"';\n-    hstore.parse(source, function(target) {\n-      should.exist(target);\n-      target.foo.should.equal('\"bar\"');\n-      done();\n+\n+    it('should hstore parse an empty hstore string', function (done) {\n+      var source = '';\n+      hstore.parse(source, function (target) {\n+        should.exist(target);\n+        target.should.eql({});\n+        done();\n+      });\n     });\n-  });\n-  \n-  it('should hstore parse a string with commas', function(done) {\n-    var source = '\"foo\"=>\"bar,foo,bar\"';\n-    hstore.parse(source, function(target) {\n-      should.exist(target);\n-      target.foo.should.equal('bar,foo,bar');\n-      done();\n+\n+    it('should hstore parse an hstore string with multiple values', function (done) {\n+      var source = '\"foo\"=>\"oof\",\"bar\"=>\"rab\",\"baz\"=>\"zab\"';\n+      hstore.parse(source, function (target) {\n+        should.exist(target);\n+        target.foo.should.equal('oof');\n+        target.bar.should.equal('rab');\n+        target.baz.should.equal('zab');\n+        done();\n+      });\n     });\n-  });\n-  \n-  it('should hstore parse a string with advanced types', function(done) {\n-    var source = '\"foo\"=>\"{\"key\":\"value\",\"key2\":\"value\"}\"';\n-    hstore.parse(source, function(target) {\n-      should.exist(target);\n-      target.foo.should.equal('{\"key\":\"value\",\"key2\":\"value\"}');\n-      done();\n+\n+    it('should hstore parse an escaped quoted string with quotes', function (done) {\n+      var source = '\"foo\"=>\"\\\\\"bar\\\\\"\"';\n+      hstore.parse(source, function (target) {\n+        should.exist(target);\n+        target.foo.should.equal('\"bar\"');\n+        done();\n+      });\n+    });\n+\n",
+					"match": false,
+					"packageHash": "7fdb9d179d11475a7d478db95fd6116f676f6afc841b31ef346d2993de6f9e5b",
+					"size": 1585,
+					"sourceHash": "1dae3dac98132a66823f6039792e4698f7f77d7b887ca4625964684eac29d90a",
+					"status": "content"
+				},
+				"test/stringify.js": {
+					"diff": "--- published/test/stringify.js\n+++ rebuilt/test/stringify.js\n@@ -1,43 +1,202 @@\n-/*globals it, describe */\n-var mocha  = require('mocha'),\n-    should = require('should'),\n-    hstore = require('../lib/index.js');\n-\n-describe('pg-hstore.stringify', function() {\n-  it('should hstore encode a string', function(done) {\n-    var source = { foo: \"bar\" };\n-    hstore.stringify(source, function(target) {\n-      should.exist(target);\n-      target.should.equal('\"foo\"=>\"bar\"');\n-      console.log(target);\n-      done();\n-    });\n-  });\n+/*globals it, describe, beforeEach */\n+(function () {\n+  'use strict';\n \n-  it('should hstore encode a number', function(done) {\n-    var source = { foo: 1000 };\n-    hstore.stringify(source, function(target) {\n-      should.exist(target);\n-      target.should.equal('\"foo\"=>\"1000\"');\n-      done();\n-    });\n-  });\n+  var should = require('should'),\n+      HStore = require('../lib/index.js'),\n+      hstore;\n+\n+  describe('pg-hstore.stringify', function () {\n+    describe('without sanitization', function(){\n+      beforeEach(function () {\n+        hstore = new HStore();\n+      });\n+\n+      it('should hstore encode a string', function (done) {\n+        var source = { foo: 'bar' };\n+        hstore.stringify(source, function (target) {\n+          should.exist(target);\n+          target.should.equal('\"foo\"=>\"bar\"');\n+          done();\n+        });\n+      });\n+\n+      it('should hstore encode a number', function (done) {\n+        var source = { foo: 1000 };\n+        hstore.stringify(source, function (target) {\n+          should.exist(target);\n+          target.should.equal('\"foo\"=>\"1000\"');\n+          done();\n+        });\n+      });\n+\n+      it('should hstore encode a boolean', function (done) {\n+        var source = { foo: true };\n+        hstore.stringify(source, function (target) {\n+          should.exist(target);\n+          target.should.equal('\"foo\"=>\"true\"');\n+          done();\n+        });\n+      });\n+\n+      it('should hstore encode an object', function (done) {\n+        var source = { foo: { bar: 1000 } };\n+        hstore.stringify(source, function (target) {\n+          should.exist(target);\n+          target.should.equal('\"foo\"=>\"[object Object]\"');\n+          done();\n+        });\n+      });\n+\n+      it('should hstore encode a null value', function (done) {\n+        var source = { foo: null };\n+        hstore.stringify(source, function (target) {\n+          should.exist(target);\n+          target.should.equal('\"foo\"=>NULL');\n+          done();\n+        });\n+      });\n+\n+      it('should hstore encode a null string value', function (done) {\n+        var source = { foo: 'null' };\n+        hstore.stringify(source, function (target) {\n+          should.exist(target);\n+          target.should.equal('\"foo\"=>\"null\"');\n+          done();\n+        });\n+      });\n+\n+      it('should hstore encode single quotes correctly', function (done) {\n+        var source = { 'foo \\'quotes\\'': 'with \\'quotes\\'' };\n+        hstore.stringify(source, function (target) {\n+          should.exist(target);\n+          target.should.equal('\"foo \\'quotes\\'\"=>\"with \\'quotes\\'\"');\n+          done();\n",
+					"match": false,
+					"packageHash": "32a01bf12f579916f8f4dab0a4ffa4fd54fc3f3cfae3a58cb6d4a1ab2c5cac09",
+					"size": 1150,
+					"sourceHash": "2b54a6805e8c594d2088df17069815b11cd12da7111e194ece429ca16c3b999c",
+					"status": "content"
+				},
+				".jshintrc": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				".travis.yml": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"LICENSE": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/index.js": {
+					"match": false,
+					"status": "missing-in-package"
+				}
+			},
+			"summary": {
+				"differentFiles": 5,
+				"matchingFiles": 1,
+				"missingInPackage": 4,
+				"missingInSource": 1,
+				"score": 0.09090909090909091,
+				"totalFiles": 11
+			}
+		},
+		"prodDependencies": [
+			{
+				"name": "underscore",
+				"version": "1.13.7"
+			}
+		]
+	}
+]
