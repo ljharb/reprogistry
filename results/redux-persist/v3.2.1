@@ -1,0 +1,596 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-09T00:58:40.441Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:11.7.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "redux-persist@3.2.1",
+			"name": "redux-persist",
+			"version": "3.2.1",
+			"location": "https://registry.npmjs.org/redux-persist/-/redux-persist-3.2.1.tgz",
+			"integrity": "sha512-PuqPeiAbO3IEcJXFToqa1lNxVvRXmuZWpwunClkYq7ymo1jZUuT6wghWYyVzSFefXxdcnyUKmwtjRPgolWc5zw==",
+			"publishedAt": "2016-05-28T00:02:56.086Z",
+			"publishedWith": {
+				"node": "6.2.0",
+				"npm": "3.8.9"
+			},
+			"dependencies": {
+				"lodash": "^4.11.1",
+				"json-stringify-safe": "^5.0.1"
+			}
+		},
+		"source": {
+			"integrity": "sha512-Hfj6RKCz/RP3pWf5zqq5Ds/DtuQwkQKVyIUhK8Lsit9Sd0034BqraWcGHnHLXk3eirgJiTTA8iTPoDOgoAgZ0g==",
+			"location": "git+https://github.com/rt2zz/redux-persist.git",
+			"spec": "github:rt2zz/redux-persist#94c3348d27acd3ae14357ae6d8e85b14a7a8c366"
+		},
+		"comparisonHash": "9ef46a5bd31291e57cbab41e2f17c57bd6da0b5b",
+		"diff": {
+			"files": {
+				"LICENSE.md": {
+					"match": false,
+					"packageHash": "ade78f109d64f8b2b97812eef67e6d54b597d6769056550797519e2aa0096a4e",
+					"size": 1085,
+					"status": "missing-in-source"
+				},
+				"constants.js": {
+					"match": false,
+					"packageHash": "c2c8fc9ec76230573365544f75d4ab5403974dd27ce9001e3b8aa0dd657263ce",
+					"size": 45,
+					"status": "missing-in-source"
+				},
+				"lib/autoRehydrate.js": {
+					"match": false,
+					"packageHash": "0fb889f1d8ea54a2d01742f086c13dab1eacf3f5983a2d038a50368ec5dafa97",
+					"size": 3417,
+					"status": "missing-in-source"
+				},
+				"lib/constants.js": {
+					"diff": "--- published/lib/constants.js\n+++ rebuilt/lib/constants.js\n@@ -1,8 +1,11 @@\n-'use strict';\n-\n-Object.defineProperty(exports, \"__esModule\", {\n-  value: true\n-});\n-var keyPrefix = exports.keyPrefix = 'reduxPersist:';\n-var REHYDRATE = exports.REHYDRATE = 'persist/REHYDRATE';\n-var REHYDRATE_ERROR = exports.REHYDRATE_ERROR = 'persist/REHYDRATE_ERROR';\n\\ No newline at end of file\n+\"use strict\";\n+Object.defineProperty(exports, \"__esModule\", { value: true });\n+exports.DEFAULT_VERSION = exports.REGISTER = exports.PURGE = exports.PERSIST = exports.PAUSE = exports.REHYDRATE = exports.FLUSH = exports.KEY_PREFIX = void 0;\n+exports.KEY_PREFIX = 'persist:';\n+exports.FLUSH = 'persist/FLUSH';\n+exports.REHYDRATE = 'persist/REHYDRATE';\n+exports.PAUSE = 'persist/PAUSE';\n+exports.PERSIST = 'persist/PERSIST';\n+exports.PURGE = 'persist/PURGE';\n+exports.REGISTER = 'persist/REGISTER';\n+exports.DEFAULT_VERSION = -1;\n",
+					"match": false,
+					"packageHash": "62a4a90fb2038aeb9ca264a28c411150239abcb378f78ac6f8196162bc08767c",
+					"size": 264,
+					"sourceHash": "db15c6f4322498ce9991d61baffce5837524cfb78862e27b64250aaa9f42731a",
+					"status": "content"
+				},
+				"lib/createPersistor.js": {
+					"match": false,
+					"packageHash": "14bd914d618444d9085faa606263d2194cf6bacef749e4d3720068d528165e16",
+					"size": 6394,
+					"status": "missing-in-source"
+				},
+				"lib/createTransform.js": {
+					"diff": "--- published/lib/createTransform.js\n+++ rebuilt/lib/createTransform.js\n@@ -1,28 +1,28 @@\n \"use strict\";\n-\n-Object.defineProperty(exports, \"__esModule\", {\n-  value: true\n-});\n-function createTransform(inbound, outbound) {\n-  var config = arguments.length <= 2 || arguments[2] === undefined ? {} : arguments[2];\n-\n-  var whitelist = config.whitelist || null;\n-  var blacklist = config.blacklist || null;\n-\n-  function whitelistBlacklistCheck(key) {\n-    if (whitelist && whitelist.indexOf(key) === -1) return true;\n-    if (blacklist && blacklist.indexOf(key) !== -1) return true;\n-    return false;\n-  }\n-\n-  return {\n-    in: function _in(state, key) {\n-      return !whitelistBlacklistCheck(key) ? inbound(state, key) : state;\n-    },\n-    out: function out(state, key) {\n-      return !whitelistBlacklistCheck(key) ? outbound(state, key) : state;\n+Object.defineProperty(exports, \"__esModule\", { value: true });\n+function createTransform(\n+// @NOTE inbound: transform state coming from redux on its way to being serialized and stored\n+// eslint-disable-next-line @typescript-eslint/ban-types\n+inbound, \n+// @NOTE outbound: transform state coming from storage, on its way to be rehydrated into redux\n+// eslint-disable-next-line @typescript-eslint/ban-types\n+outbound, config = {}) {\n+    const whitelist = config.whitelist || null;\n+    const blacklist = config.blacklist || null;\n+    function whitelistBlacklistCheck(key) {\n+        if (whitelist && whitelist.indexOf(key) === -1)\n+            return true;\n+        if (blacklist && blacklist.indexOf(key) !== -1)\n+            return true;\n+        return false;\n     }\n-  };\n+    return {\n+        in: (state, key, fullState) => !whitelistBlacklistCheck(key) && inbound\n+            ? inbound(state, key, fullState)\n+            : state,\n+        out: (state, key, fullState) => !whitelistBlacklistCheck(key) && outbound\n+            ? outbound(state, key, fullState)\n+            : state,\n+    };\n }\n-\n-exports.default = createTransform;\n\\ No newline at end of file\n+exports.default = createTransform;\n",
+					"match": false,
+					"packageHash": "41508229c7509f33e028a34a75a4c69536794006a585f62460ac59bd55e645ee",
+					"size": 785,
+					"sourceHash": "1e5ab9416701b2a4b6dc4488615cbab7ef581b437845a1966cdd8fcb169715f6",
+					"status": "content"
+				},
+				"lib/defaults/asyncLocalStorage.js": {
+					"match": false,
+					"packageHash": "2dd4d1f22f85e56a2de58521212e83ebf97acead5bbc4a1f681c08ed6181e177",
+					"size": 2762,
+					"status": "missing-in-source"
+				},
+				"lib/getStoredState.js": {
+					"diff": "--- published/lib/getStoredState.js\n+++ rebuilt/lib/getStoredState.js\n@@ -1,106 +1,44 @@\n-'use strict';\n-\n-Object.defineProperty(exports, \"__esModule\", {\n-  value: true\n-});\n-\n-var _forEach2 = require('lodash/forEach');\n-\n-var _forEach3 = _interopRequireDefault(_forEach2);\n-\n-var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };\n-\n-exports.default = getStoredState;\n-\n-var _constants = require('./constants');\n-\n-var constants = _interopRequireWildcard(_constants);\n-\n-var _asyncLocalStorage = require('./defaults/asyncLocalStorage');\n-\n-var _asyncLocalStorage2 = _interopRequireDefault(_asyncLocalStorage);\n-\n-function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }\n-\n-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }\n-\n-function getStoredState(config, onComplete) {\n-  var storage = config.storage || (0, _asyncLocalStorage2.default)('local');\n-  var deserialize = config.deserialize || defaultDeserialize;\n-  var blacklist = config.blacklist || [];\n-  var whitelist = config.whitelist || false;\n-  var transforms = config.transforms || [];\n-  var purgeMode = config.purgeMode || false;\n-\n-  // fallback getAllKeys to `keys` if present (LocalForage compatability)\n-  if (storage.keys && !storage.getAllKeys) storage = _extends({}, storage, { getAllKeys: storage.keys });\n-\n-  var restoredState = {};\n-  var completionCount = 0;\n-\n-  storage.getAllKeys(function (err, allKeys) {\n-    if (err && process.env.NODE_ENV !== 'production') {\n-      console.warn('Error in storage.getAllKeys');\n+\"use strict\";\n+Object.defineProperty(exports, \"__esModule\", { value: true });\n+const constants_1 = require(\"./constants\");\n+function getStoredState(config) {\n+    const transforms = config.transforms || [];\n+    const storageKey = `${config.keyPrefix !== undefined ? config.keyPrefix : constants_1.KEY_PREFIX}${config.key}`;\n+    const storage = config.storage;\n+    const debug = config.debug;\n+    let deserialize;\n+    if (config.deserialize === false) {\n+        deserialize = (x) => x;\n     }\n-    var persistKeys = allKeys.filter(function (key) {\n-      return key.indexOf(constants.keyPrefix) === 0;\n-    }).map(function (key) {\n-      return key.slice(constants.keyPrefix.length);\n-    });\n-    var filteredPersistKeys = persistKeys.filter(passWhitelistBlacklist);\n-    var keysToRestore = Array.isArray(purgeMode) ? filteredPersistKeys.filter(function (key) {\n-      return purgeMode.indexOf(key) === -1;\n-    }) : purgeMode === '*' ? [] : filteredPersistKeys;\n-\n-    var restoreCount = keysToRestore.length;\n-    if (restoreCount === 0) complete(null, restoredState);\n-    (0, _forEach3.default)(keysToRestore, function (key) {\n-      storage.getItem(createStorageKey(key), function (err, serialized) {\n-        if (err && process.env.NODE_ENV !== 'production') console.warn('Error restoring data for key:', key, err);else restoredState[key] = rehydrate(key, serialized);\n-        completionCount += 1;\n-        if (completionCount === restoreCount) complete(null, restoredState);\n-      });\n-    });\n-  });\n-\n-  function rehydrate(key, serialized) {\n-    var state = null;\n-\n-    try {\n-      var data = deserialize(serialized);\n-      state = transforms.reduceRight(function (subState, transformer) {\n-        return transformer.out(subState, key);\n-      }, data);\n-    } catch (err) {\n-      if (process.env.NODE_ENV !== 'production') console.warn('Error restoring data for key:', key, err);\n+    else if (typeof config.deserialize === 'function') {\n+        deserialize = config.deserialize;\n     }\n-\n-    return state;\n-  }\n-\n-  function complete(err, restoredState) {\n-    onComplete(err, restoredState);\n-  }\n-\n",
+					"match": false,
+					"packageHash": "3705331ddcf72b6b872adf7b172bfac23a90478c84c09cd16d4a2b2cd538ccec",
+					"size": 3892,
+					"sourceHash": "f45c65167fc5ba40efd6e82c11b7287c2c907f6a9492379f6c6e361d557ad9f3",
+					"status": "content"
+				},
+				"lib/index.js": {
+					"diff": "--- published/lib/index.js\n+++ rebuilt/lib/index.js\n@@ -1,44 +1,33 @@\n-'use strict';\n-\n-Object.defineProperty(exports, \"__esModule\", {\n-  value: true\n-});\n-exports.storages = exports.persistStore = exports.getStoredState = exports.createTransform = exports.createPersistor = exports.autoRehydrate = undefined;\n-\n-var _autoRehydrate = require('./autoRehydrate');\n-\n-var _autoRehydrate2 = _interopRequireDefault(_autoRehydrate);\n-\n-var _createPersistor = require('./createPersistor');\n-\n-var _createPersistor2 = _interopRequireDefault(_createPersistor);\n-\n-var _createTransform = require('./createTransform');\n-\n-var _createTransform2 = _interopRequireDefault(_createTransform);\n-\n-var _getStoredState = require('./getStoredState');\n-\n-var _getStoredState2 = _interopRequireDefault(_getStoredState);\n-\n-var _persistStore = require('./persistStore');\n-\n-var _persistStore2 = _interopRequireDefault(_persistStore);\n-\n-var _asyncLocalStorage = require('./defaults/asyncLocalStorage');\n-\n-var _asyncLocalStorage2 = _interopRequireDefault(_asyncLocalStorage);\n-\n-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }\n-\n-var storages = {\n-  asyncLocalStorage: (0, _asyncLocalStorage2.default)('local'),\n-  asyncSessionStorage: (0, _asyncLocalStorage2.default)('session')\n+\"use strict\";\n+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {\n+    if (k2 === undefined) k2 = k;\n+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });\n+}) : (function(o, m, k, k2) {\n+    if (k2 === undefined) k2 = k;\n+    o[k2] = m[k];\n+}));\n+var __exportStar = (this && this.__exportStar) || function(m, exports) {\n+    for (var p in m) if (p !== \"default\" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);\n };\n-\n-exports.autoRehydrate = _autoRehydrate2.default;\n-exports.createPersistor = _createPersistor2.default;\n-exports.createTransform = _createTransform2.default;\n-exports.getStoredState = _getStoredState2.default;\n-exports.persistStore = _persistStore2.default;\n-exports.storages = storages;\n\\ No newline at end of file\n+var __importDefault = (this && this.__importDefault) || function (mod) {\n+    return (mod && mod.__esModule) ? mod : { \"default\": mod };\n+};\n+Object.defineProperty(exports, \"__esModule\", { value: true });\n+exports.purgeStoredState = exports.createPersistoid = exports.getStoredState = exports.createTransform = exports.createMigrate = exports.persistStore = exports.persistCombineReducers = exports.persistReducer = void 0;\n+var persistReducer_1 = require(\"./persistReducer\");\n+Object.defineProperty(exports, \"persistReducer\", { enumerable: true, get: function () { return __importDefault(persistReducer_1).default; } });\n+var persistCombineReducers_1 = require(\"./persistCombineReducers\");\n+Object.defineProperty(exports, \"persistCombineReducers\", { enumerable: true, get: function () { return __importDefault(persistCombineReducers_1).default; } });\n+var persistStore_1 = require(\"./persistStore\");\n+Object.defineProperty(exports, \"persistStore\", { enumerable: true, get: function () { return __importDefault(persistStore_1).default; } });\n+var createMigrate_1 = require(\"./createMigrate\");\n+Object.defineProperty(exports, \"createMigrate\", { enumerable: true, get: function () { return __importDefault(createMigrate_1).default; } });\n+var createTransform_1 = require(\"./createTransform\");\n+Object.defineProperty(exports, \"createTransform\", { enumerable: true, get: function () { return __importDefault(createTransform_1).default; } });\n+var getStoredState_1 = require(\"./getStoredState\");\n+Object.defineProperty(exports, \"getStoredState\", { enumerable: true, get: function () { return __importDefault(getStoredState_1).default; } });\n+var createPersistoid_1 = require(\"./createPersistoid\");\n+Object.defineProperty(exports, \"createPersistoid\", { enumerable: true, get: function () { return __importDefault(createPersistoid_1).default; } });\n+var purgeStoredState_1 = require(\"./purgeStoredState\");\n+Object.defineProperty(exports, \"purgeStoredState\", { enumerable: true, get: function () { return __importDefault(purgeStoredState_1).default; } });\n+__exportStar(require(\"./constants\"), exports);\n",
+					"match": false,
+					"packageHash": "4f82bb55688b5a5493613a4a1b96faecc938f74d0a9c8363a10fdb57ef6c3d7c",
+					"size": 1484,
+					"sourceHash": "84af1bc3e5b6652907860dfa484b4ee2f1e5fa05cf2ec4a52679270398381420",
+					"status": "content"
+				},
+				"lib/persistStore.js": {
+					"diff": "--- published/lib/persistStore.js\n+++ rebuilt/lib/persistStore.js\n@@ -1,72 +1,92 @@\n-'use strict';\n-\n-Object.defineProperty(exports, \"__esModule\", {\n-  value: true\n-});\n-\n-var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };\n-\n-exports.default = persistStore;\n-\n-var _constants = require('./constants');\n-\n-var constants = _interopRequireWildcard(_constants);\n-\n-var _getStoredState = require('./getStoredState');\n-\n-var _getStoredState2 = _interopRequireDefault(_getStoredState);\n-\n-var _createPersistor = require('./createPersistor');\n-\n-var _createPersistor2 = _interopRequireDefault(_createPersistor);\n-\n-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }\n-\n-function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }\n-\n-var genericSetImmediate = typeof setImmediate === 'undefined' ? global.setImmediate : setImmediate;\n-\n-function persistStore(store) {\n-  var config = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];\n-  var onComplete = arguments[2];\n-\n-  // defaults\n-  var shouldRestore = !config.skipRestore;\n-  if (process.env.NODE_ENV !== 'production' && config.skipRestore) console.warn('redux-persist: config.skipRestore has been deprecated. If you want to skip restoration use `createPersistor` instead');\n-\n-  // create and pause persistor\n-  var persistor = (0, _createPersistor2.default)(store, config);\n-  persistor.pause();\n-\n-  // restore\n-  if (shouldRestore) {\n-    genericSetImmediate(function () {\n-      (0, _getStoredState2.default)(_extends({}, config, { purgeMode: persistor._getPurgeMode() }), function (err, restoredState) {\n-        if (restoredState) store.dispatch(rehydrateAction(restoredState));\n-        if (err) store.dispatch(rehydrateErrorAction(err));\n-        complete(err, restoredState);\n-      });\n-    });\n-  } else genericSetImmediate(complete);\n-\n-  function complete(err, restoredState) {\n-    persistor.resume();\n-    onComplete && onComplete(err, restoredState);\n-  }\n-\n-  return persistor;\n-}\n-\n-function rehydrateAction(data) {\n-  return {\n-    type: constants.REHYDRATE,\n-    payload: data\n-  };\n+\"use strict\";\n+Object.defineProperty(exports, \"__esModule\", { value: true });\n+const redux_1 = require(\"redux\");\n+const constants_1 = require(\"./constants\");\n+const initialState = {\n+    registry: [],\n+    bootstrapped: false,\n+};\n+const persistorReducer = (state = initialState, action) => {\n+    const firstIndex = state.registry.indexOf(action.key);\n+    const registry = [...state.registry];\n+    switch (action.type) {\n+        case constants_1.REGISTER:\n+            return Object.assign(Object.assign({}, state), { registry: [...state.registry, action.key] });\n+        case constants_1.REHYDRATE:\n+            registry.splice(firstIndex, 1);\n+            return Object.assign(Object.assign({}, state), { registry, bootstrapped: registry.length === 0 });\n+        default:\n+            return state;\n+    }\n+};\n+function persistStore(store, options, cb) {\n+    // help catch incorrect usage of passing PersistConfig in as PersistorOptions\n+    if (process.env.NODE_ENV !== 'production') {\n+        const optionsToTest = options || {};\n+        const bannedKeys = [\n+            'blacklist',\n+            'whitelist',\n+            'transforms',\n+            'storage',\n+            'keyPrefix',\n+            'migrate',\n+        ];\n",
+					"match": false,
+					"packageHash": "05a758d59734d67a67e403f4269afbc15ef21870c1c26126e2a4c7344a4a3705",
+					"size": 2498,
+					"sourceHash": "94465175c0f6766ae6bd97327b8c2bdfc2d1c98ca708e090b9f23579e9b14db6",
+					"status": "content"
+				},
+				"lib/utils/isStatePlainEnough.js": {
+					"match": false,
+					"packageHash": "707f587fa5b54468534635e2800fabee3abb2c8e95ae6c3f94dfc4bb3c930122",
+					"size": 895,
+					"status": "missing-in-source"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -1,60 +1,80 @@\n {\n   \"name\": \"redux-persist\",\n-  \"version\": \"3.2.1\",\n+  \"version\": \"6.1.0\",\n   \"description\": \"persist and rehydrate redux stores\",\n   \"main\": \"lib/index.js\",\n+  \"module\": \"es/index.js\",\n+  \"types\": \"lib/index.d.ts\",\n+  \"repository\": \"rt2zz/redux-persist\",\n+  \"files\": [\n+    \"src\",\n+    \"es\",\n+    \"lib\",\n+    \"dist\",\n+    \"integration\",\n+    \"README.md\"\n+  ],\n   \"scripts\": {\n-    \"test\": \"standard && ava\",\n-    \"test:watch\": \"npm test -- --watch\",\n-    \"clean\": \"rimraf lib dist\",\n-    \"build\": \"babel src --out-dir lib\",\n-    \"build:watch\": \"npm run build ./src -- -watch\",\n-    \"prepublish\": \"npm run clean && npm run build\"\n+    \"ava\": \"ava\",\n+    \"build\": \"npm run build:commonjs && npm run build:es && npm run build:umd\",\n+    \"build:commonjs\": \"tsc --module commonjs --outDir lib\",\n+    \"build:es\": \"tsc --module es2015 --outDir es\",\n+    \"build:umd\": \"rollup -c\",\n+    \"clean\": \"rimraf dist && rimraf es && rimraf lib\",\n+    \"prepare\": \"npm run build\",\n+    \"precommit\": \"lint-staged\",\n+    \"stats:size\": \"node ./scripts/size-estimator.js\",\n+    \"test\": \"ava\",\n+    \"version\": \"npm run clean && npm run build && npm run stats:size | tail -1 >> LIBSIZE.md && git add LIBSIZE.md\"\n   },\n-  \"ava\": {\n-    \"require\": [\n-      \"babel-register\"\n-    ],\n-    \"babel\": \"inherit\"\n+  \"lint-staged\": {\n+    \"src/**/*.ts\": [\n+      \"prettier --write\",\n+      \"git add\"\n+    ]\n   },\n-  \"repository\": {\n-    \"type\": \"git\",\n-    \"url\": \"https://github.com/rt2zz/redux-persist.git\"\n-  },\n-  \"homepage\": \"https://github.com/rt2zz/redux-persist\",\n-  \"keywords\": [\n-    \"redux\",\n-    \"redux-middleware\",\n-    \"localstorage\",\n-    \"redux-persist\",\n-    \"redux-storage\",\n-    \"redux-rehydrate\"\n-  ],\n-  \"author\": \"rt2zz <zack@root-two.com>\",\n+  \"author\": \"\",\n   \"license\": \"MIT\",\n-  \"dependencies\": {\n-    \"json-stringify-safe\": \"^5.0.1\",\n-    \"lodash\": \"^4.11.1\"\n+  \"homepage\": \"https://github.com/rt2zz/redux-persist#readme\",\n+  \"ava\": {\n+    \"files\": [\n+      \"tests/**/*.spec.ts\"\n+    ],\n+    \"extensions\": [\n+      \"ts\"\n+    ],\n+    \"require\": [\n+      \"ts-node/register\"\n+    ]\n   },\n   \"devDependencies\": {\n-    \"ava\": \"^0.14.0\",\n-    \"babel-cli\": \"^6.6.5\",\n-    \"babel-eslint\": \"^6.0.0\",\n-    \"babel-plugin-lodash\": \"^2.3.0\",\n-    \"babel-preset-es2015\": \"^6.6.0\",\n-    \"babel-preset-stage-2\": \"^6.5.0\",\n-    \"babel-register\": \"^6.7.2\",\n-    \"immutable\": \"^3.7.6\",\n-    \"redux\": \"~3.3.1\",\n-    \"rimraf\": \"~2.5.2\",\n-    \"standard\": \"^6.0.8\"\n+    \"@babel/core\": \"^7.15.0\",\n+    \"@babel/preset-env\": \"^7.15.0\",\n+    \"@rollup/plugin-babel\": \"^5.3.0\",\n+    \"@rollup/plugin-commonjs\": \"^20.0.0\",\n+    \"@rollup/plugin-node-resolve\": \"^13.0.4\",\n+    \"@rollup/plugin-typescript\": \"^8.2.5\",\n+    \"@types/react\": \"^17.0.16\",\n",
+					"match": false,
+					"packageHash": "28ae9f6a5ce8ba5bc307ed716fd0f3c97845c47cd5141b511c75b4b3dc83424a",
+					"size": 1388,
+					"sourceHash": "efcf7883bceb3a6feb60b9075c8552d9e65a498e623756af25f3c4d88b538633",
+					"status": "content"
+				},
+				"src/autoRehydrate.js": {
+					"match": false,
+					"packageHash": "280e91f39dc9a95b1cd5557c4b71f151d57b92c7f24b364d0c22ca9691912d0b",
+					"size": 2219,
+					"status": "missing-in-source"
+				},
+				"src/constants.js": {
+					"match": false,
+					"packageHash": "4f2be3cd9f5859b7eb4e89c88a546cac519c28d257eeab360ae6c1f65d8401a1",
+					"size": 143,
+					"status": "missing-in-source"
+				},
+				"src/createPersistor.js": {
+					"match": false,
+					"packageHash": "c95cc1486f8eee11f5221170f514fa61c5d40e456ec5cad49cbf645c1c1ca791",
+					"size": 4788,
+					"status": "missing-in-source"
+				},
+				"src/createTransform.js": {
+					"match": false,
+					"packageHash": "3bfcbe48f51774f876ee82640802e5e7b56bfed937cd2b689a6fb50425704fae",
+					"size": 560,
+					"status": "missing-in-source"
+				},
+				"src/defaults/asyncLocalStorage.js": {
+					"match": false,
+					"packageHash": "b8fe7d9379217ffdad7145399574023f3b819e6afe95afa11a15900f877a1e34",
+					"size": 2263,
+					"status": "missing-in-source"
+				},
+				"src/getStoredState.js": {
+					"match": false,
+					"packageHash": "5e10847a69f2549201109903a4bc56fb0fd0011a26c180914264fdb97a7dc0b5",
+					"size": 2808,
+					"status": "missing-in-source"
+				},
+				"src/index.js": {
+					"match": false,
+					"packageHash": "1b508430869a296a916c80bbe4e3d93716e687031e4988da2145e44d1a3a3a7b",
+					"size": 530,
+					"status": "missing-in-source"
+				},
+				"src/persistStore.js": {
+					"match": false,
+					"packageHash": "60a40621c9614d932bb4c7139e78bb4c27acb90667f95d9c6b1c5d4e13479519",
+					"size": 1417,
+					"status": "missing-in-source"
+				},
+				"src/utils/isStatePlainEnough.js": {
+					"match": false,
+					"packageHash": "3b39755e63d5dd5821da2ab088f31ac9652a2cf9c862367cb37a34ca04ee3b1f",
+					"size": 307,
+					"status": "missing-in-source"
+				},
+				"LICENSE": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"README.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"dist/redux-persist.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"dist/redux-persist.js.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"dist/redux-persist.min.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"dist/redux-persist.min.js.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"es/constants.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"es/constants.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"es/createMigrate.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"es/createMigrate.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"es/createPersistoid.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"es/createPersistoid.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"es/createTransform.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"es/createTransform.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"es/getStoredState.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"es/getStoredState.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"es/index.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"es/index.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"es/integration/getStoredStateMigrateV4.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"es/integration/getStoredStateMigrateV4.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"es/integration/react.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"es/integration/react.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"es/persistCombineReducers.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"es/persistCombineReducers.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"es/persistReducer.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"es/persistReducer.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"es/persistStore.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"es/persistStore.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"es/purgeStoredState.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"es/purgeStoredState.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"es/stateReconciler/autoMergeLevel1.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"es/stateReconciler/autoMergeLevel1.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"es/stateReconciler/autoMergeLevel2.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"es/stateReconciler/autoMergeLevel2.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"es/stateReconciler/hardSet.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"es/stateReconciler/hardSet.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"es/storage/createWebStorage.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"es/storage/createWebStorage.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"es/storage/getStorage.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"es/storage/getStorage.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"es/storage/index.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"es/storage/index.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"es/storage/session.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"es/storage/session.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"es/types.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"es/types.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"integration/README.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"integration/react/package.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/constants.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/createMigrate.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/createMigrate.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/createPersistoid.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/createPersistoid.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/createTransform.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/getStoredState.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/index.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/integration/getStoredStateMigrateV4.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/integration/getStoredStateMigrateV4.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/integration/react.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/integration/react.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/persistCombineReducers.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/persistCombineReducers.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/persistReducer.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/persistReducer.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/persistStore.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/purgeStoredState.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/purgeStoredState.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/stateReconciler/autoMergeLevel1.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/stateReconciler/autoMergeLevel1.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/stateReconciler/autoMergeLevel2.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/stateReconciler/autoMergeLevel2.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/stateReconciler/hardSet.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/stateReconciler/hardSet.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/storage/createWebStorage.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/storage/createWebStorage.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/storage/getStorage.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/storage/getStorage.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/storage/index.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/storage/index.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/storage/session.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/storage/session.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/types.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/types.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/constants.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/createMigrate.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/createPersistoid.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/createTransform.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/getStoredState.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/index.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/integration/getStoredStateMigrateV4.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/integration/react.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/persistCombineReducers.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/persistReducer.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/persistStore.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/purgeStoredState.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/stateReconciler/autoMergeLevel1.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/stateReconciler/autoMergeLevel2.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/stateReconciler/hardSet.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/storage/createWebStorage.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/storage/getStorage.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/storage/index.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/storage/session.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/types.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				}
+			},
+			"summary": {
+				"differentFiles": 6,
+				"matchingFiles": 0,
+				"missingInPackage": 103,
+				"missingInSource": 15,
+				"score": 0,
+				"totalFiles": 124
+			}
+		},
+		"prodDependencies": []
+	}
+]
