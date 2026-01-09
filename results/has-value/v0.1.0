@@ -1,0 +1,130 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-09T18:05:49.730Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:11.7.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "has-value@0.1.0",
+			"name": "has-value",
+			"version": "0.1.0",
+			"location": "https://registry.npmjs.org/has-value/-/has-value-0.1.0.tgz",
+			"integrity": "sha512-zQT9e9YEGWeb5SE0gi46ZjR/j8LQ+ZnYH1Fd9GFF0rwaN7xTmqExrQj82/W0tlJJWPca0G7IyPheDSqjOUnxWg==",
+			"publishedAt": "2014-09-22T01:44:49.852Z",
+			"publishedWith": {
+				"node": null,
+				"npm": "1.4.9"
+			},
+			"dependencies": {}
+		},
+		"source": {
+			"integrity": null,
+			"location": "git://github.com/jonschlinkert/has-value.git",
+			"spec": "github:jonschlinkert/has-value#HEAD"
+		},
+		"comparisonHash": "9ef46a5bd31291e57cbab41e2f17c57bd6da0b5b",
+		"diff": {
+			"files": {
+				".gitattributes": {
+					"match": false,
+					"packageHash": "c697329350b4e95aab826aafb5cf438e2e0b60506912f740918a9e9b82dae864",
+					"size": 237,
+					"status": "missing-in-source"
+				},
+				".jshintrc": {
+					"match": false,
+					"packageHash": "f8a6ac3c3eca9fb7d2ef224f95ddc9976f91ce01cadc7809fa151ddd97524f5d",
+					"size": 342,
+					"status": "missing-in-source"
+				},
+				".npmignore": {
+					"match": false,
+					"packageHash": "de7fa51b20e07f4c3a92dd315095ab16ccbbc6ea100e325649b9394429ae56f7",
+					"size": 507,
+					"status": "missing-in-source"
+				},
+				".travis.yml": {
+					"match": false,
+					"packageHash": "4a2b861f1ccaf3e56388b7af075088fc8d6d0a60d1622470eb851dae5363074f",
+					"size": 37,
+					"status": "missing-in-source"
+				},
+				".verbrc.md": {
+					"match": false,
+					"packageHash": "b96aed092150732300c6f1cd34b6c5331d0b5eb5d879548e9e5602ec2c64e050",
+					"size": 836,
+					"status": "missing-in-source"
+				},
+				"LICENSE-MIT": {
+					"match": false,
+					"packageHash": "5bf88c23e05c40530f2015cf49e9331f9f54010ce552a5a3b50684b71158c4ac",
+					"size": 1073,
+					"status": "missing-in-source"
+				},
+				"README.md": {
+					"diff": "--- published/README.md\n+++ rebuilt/README.md\n@@ -1,75 +1,237 @@\n-# has-value [![NPM version](https://badge.fury.io/js/has-value.svg)](http://badge.fury.io/js/has-value)\n+# has-value [![NPM version](https://img.shields.io/npm/v/has-value.svg?style=flat)](https://www.npmjs.com/package/has-value) [![NPM monthly downloads](https://img.shields.io/npm/dm/has-value.svg?style=flat)](https://npmjs.org/package/has-value) [![NPM total downloads](https://img.shields.io/npm/dt/has-value.svg?style=flat)](https://npmjs.org/package/has-value) [![Linux Build Status](https://img.shields.io/travis/jonschlinkert/has-value.svg?style=flat&label=Travis)](https://travis-ci.org/jonschlinkert/has-value)\n \n+> Returns true if a value exists, false if empty. Works with deeply nested values using object paths.\n \n-> Returns true if a value exists, false if empty. Works for booleans, functions, numbers, strings, nulls, objects and arrays. Other libs do this, but I needed one that would optionally _not_ treat zero as empty.\n+Please consider following this project's author, [Jon Schlinkert](https://github.com/jonschlinkert), and consider starring the project to show your :heart: and support.\n \n ## Install\n-#### Install with [npm](npmjs.org):\n \n-```bash\n-npm i has-value --save-dev\n+Install with [npm](https://www.npmjs.com/):\n+\n+```sh\n+$ npm install --save has-value\n ```\n \n-## Run tests\n+## Heads up!\n \n-```bash\n-npm test\n-```\n+Breaking changes in v2.0! See the [release history](#release-history) for details.\n \n ## Usage\n \n ```js\n-var hasValue = require('has-value');\n+const has = require('has-value');\n+\n+console.log(has()) //=> true\n+console.log(has('foo')) //=> true\n+```\n+\n+**Works for:**\n+\n+* booleans\n+* functions\n+* numbers\n+* strings\n+* nulls\n+* object\n+* arrays\n+\n+**isEmpty**\n+\n+To do the opposite and test for empty values, do:\n+\n+```js\n+const isEmpty = (...args) => !has(...args);\n+```\n+\n+## Supported types\n+\n+### Arrays\n+\n+```js\n+console.log(has({ foo: { bar: ['a'] } }, 'foo.bar'));    //=> true\n+console.log(has({ foo: { bar: [0] } }, 'foo.bar'));      //=> true\n+console.log(has({ foo: { bar: [[[]]] } }, 'foo.bar'));   //=> false\n+console.log(has({ foo: { bar: [[], []] } }, 'foo.bar')); //=> false\n+console.log(has({ foo: { bar: [] } }, 'foo.bar'));       //=> false\n+```\n+\n+### Booleans\n+\n+```js\n+console.log(has({ foo: { bar: true } }, 'foo.bar'));  //=> true\n+console.log(has({ foo: { bar: false } }, 'foo.bar')); //=> true\n+```\n+\n+### Buffers\n+\n+```js\n+console.log(has({ foo: { bar: new Buffer() } }, 'foo.bar'));      //=> false\n+console.log(has({ foo: { bar: new Buffer('foo') } }, 'foo.bar')); //=> true\n+```\n+\n+### Dates\n+\n+Dates are always true.\n+\n+```js\n+console.log(has({ foo: { bar: new Date() } }, 'foo.bar')); //=> true\n+```\n+\n+### Errors\n+\n+Returns `false` if `err.message` is an empty string.\n+\n+```js\n+console.log(has({ foo: { bar: new Error() } }, 'foo.bar'));      //=> false\n+console.log(has({ foo: { bar: new Error('foo') } }, 'foo.bar')); //=> true\n+```\n",
+					"match": false,
+					"packageHash": "0032e1f100745214581b78c691754d93fe8e0fdb9a5dd62ee8d323084e297081",
+					"size": 1267,
+					"sourceHash": "f2ac61498aee7eac432593e85f0849770cee2d599220adeb94ce5858f094013b",
+					"status": "content"
+				},
+				"index.js": {
+					"diff": "--- published/index.js\n+++ rebuilt/index.js\n@@ -1,36 +1,22 @@\n /*!\n  * has-value <https://github.com/jonschlinkert/has-value>\n  *\n- * Copyright (c) 2014 Jon Schlinkert, contributors.\n- * Licensed under the MIT License\n+ * Copyright (c) 2014-2018, Jon Schlinkert.\n+ * Released under the MIT License.\n  */\n \n 'use strict';\n \n-module.exports = function hasValue(o, noZero) {\n-  if (o === null || o === undefined) {\n-    return false;\n-  }\n-\n-  if (typeof o === 'boolean') {\n-    return true;\n-  }\n-\n-  if (typeof o === 'number') {\n-    if (o === 0 && noZero === true) {\n-      return false;\n-    }\n-    return true;\n-  }\n-\n-  if (o.length !== undefined) {\n-    return o.length !== 0;\n-  }\n+const get = require('get-value');\n+const has = require('has-values');\n \n-  for (var key in o) {\n-    if (o.hasOwnProperty(key)) {\n-      return true;\n-    }\n+module.exports = function(obj, path, options) {\n+  if (isObject(obj) && (typeof path === 'string' || Array.isArray(path))) {\n+    return has(get(obj, path, options));\n   }\n   return false;\n };\n+\n+function isObject(val) {\n+  return val != null && (typeof val === 'object' || typeof val === 'function' || Array.isArray(val));\n+}\n",
+					"match": false,
+					"packageHash": "8381a14960e7f31ecef207233010c195e953590097b7357e3458fe646c2ea7d5",
+					"size": 620,
+					"sourceHash": "cb051d947a135acc52da6e8fff58d9b16e639eca73fb9d91830e7a62ac42ceca",
+					"status": "content"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -1,60 +1,78 @@\n {\n   \"name\": \"has-value\",\n-  \"description\": \"Returns true if a value exists, false if empty. Works for booleans, functions, numbers, strings, nulls, objects and arrays. Other libs do this, but I needed one that would optionally _not_ treat zero as empty. Also, this works with booleans and other values that other libs fail to test properly.\",\n-  \"version\": \"0.1.0\",\n+  \"description\": \"Returns true if a value exists, false if empty. Works with deeply nested values using object paths.\",\n+  \"version\": \"2.0.2\",\n   \"homepage\": \"https://github.com/jonschlinkert/has-value\",\n-  \"author\": {\n-    \"name\": \"Jon Schlinkert\",\n-    \"url\": \"https://github.com/jonschlinkert\"\n-  },\n-  \"repository\": {\n-    \"type\": \"git\",\n-    \"url\": \"git://github.com/jonschlinkert/has-value.git\"\n-  },\n+  \"author\": \"Jon Schlinkert (https://github.com/jonschlinkert)\",\n+  \"contributors\": [\n+    \"Jon Schlinkert (http://twitter.com/jonschlinkert)\",\n+    \"Ryan M Harrison (https://linkedin.com/in/harrisonrm)\",\n+    \"(https://github.com/wtgtybhertgeghgtwtg)\"\n+  ],\n+  \"repository\": \"jonschlinkert/has-value\",\n   \"bugs\": {\n     \"url\": \"https://github.com/jonschlinkert/has-value/issues\"\n   },\n-  \"licenses\": [\n-    {\n-      \"type\": \"MIT\",\n-      \"url\": \"https://github.com/jonschlinkert/has-value/blob/master/LICENSE-MIT\"\n-    }\n+  \"license\": \"MIT\",\n+  \"files\": [\n+    \"index.js\"\n   ],\n   \"main\": \"index.js\",\n   \"engines\": {\n-    \"node\": \">=0.10.0\"\n+    \"node\": \">=6\"\n   },\n   \"scripts\": {\n-    \"test\": \"mocha -R spec\"\n+    \"test\": \"mocha\"\n+  },\n+  \"dependencies\": {\n+    \"get-value\": \"^3.0.0\",\n+    \"has-values\": \"^2.0.1\"\n   },\n   \"devDependencies\": {\n-    \"mocha\": \"*\",\n-    \"should\": \"^4.0.4\",\n-    \"verb\": \">= 0.2.6\"\n+    \"gulp-format-md\": \"^1.0.0\",\n+    \"mocha\": \"^3.5.3\"\n   },\n   \"keywords\": [\n     \"array\",\n     \"boolean\",\n+    \"check\",\n+    \"deep\",\n     \"empty\",\n-    \"find\",\n     \"function\",\n     \"has\",\n     \"hasOwn\",\n-    \"javascript\",\n-    \"js\",\n-    \"key\",\n-    \"keys\",\n-    \"node.js\",\n+    \"is-empty\",\n+    \"nested\",\n     \"null\",\n     \"number\",\n     \"object\",\n+    \"object path\",\n     \"properties\",\n     \"property\",\n     \"string\",\n     \"type\",\n-    \"util\",\n-    \"utilities\",\n-    \"utility\",\n     \"value\"\n-  ]\n-}\n\\ No newline at end of file\n+  ],\n+  \"verb\": {\n+    \"run\": true,\n+    \"toc\": false,\n+    \"layout\": \"default\",\n+    \"tasks\": [\n+      \"readme\"\n+    ],\n+    \"plugins\": [\n+      \"gulp-format-md\"\n+    ],\n",
+					"match": false,
+					"packageHash": "77a5254ecb9da4be291ee92b2fdc0ba9ae88ea9159c725c3dec9aba330f9fa2c",
+					"size": 1378,
+					"sourceHash": "c367ff28ccada9ef3fbc82f1c2ce95e6f35cf6976613bb222689bc9cc9559946",
+					"status": "content"
+				},
+				"test.js": {
+					"match": false,
+					"packageHash": "bbcf08747706e1d7e78f899b24e22e9f01022ea215328b068f33ea28e2d4d35e",
+					"size": 2380,
+					"status": "missing-in-source"
+				},
+				"LICENSE": {
+					"match": false,
+					"status": "missing-in-package"
+				}
+			},
+			"summary": {
+				"differentFiles": 3,
+				"matchingFiles": 0,
+				"missingInPackage": 1,
+				"missingInSource": 7,
+				"score": 0,
+				"totalFiles": 11
+			}
+		},
+		"prodDependencies": [
+			{
+				"name": "get-value",
+				"version": "3.0.1"
+			},
+			{
+				"name": "has-values",
+				"version": "2.0.1"
+			},
+			{
+				"name": "isobject",
+				"version": "3.0.1"
+			},
+			{
+				"name": "kind-of",
+				"version": "6.0.3"
+			}
+		]
+	}
+]
