@@ -122,6 +122,30 @@ function execWithNodeVersion(nodeVersion, command, options) {
 }
 
 /**
+ * Extract just the version number from nvm output.
+ * nvm exec outputs things like "Running node v0.12.18 (npm v2.15.11)\nv0.12.18"
+ *
+ * @param {string} output
+ * @returns {string}
+ */
+function extractNodeVersion(output) {
+	// Look for a line that is just a version number (vX.Y.Z or X.Y.Z)
+	const lines = output.split('\n').map((l) => l.trim());
+	for (const line of lines) {
+		// Match version patterns like "v0.12.18" or "0.12.18"
+		if ((/^v?\d+\.\d+\.\d+/).test(line)) {
+			return line.replace(/^v/, '');
+		}
+	}
+	// Fallback: try to extract from "Running node vX.Y.Z" pattern
+	const match = output.match(/node v?(?<ver>\d+\.\d+\.\d+)/i);
+	if (match?.groups) {
+		return match.groups.ver;
+	}
+	return output.trim().replace(/^v/, '');
+}
+
+/**
  * @param {string} version
  * @returns {string | null}
  */
@@ -134,12 +158,13 @@ function tryInstallNode(version) {
 			{ ...EXEC_OPTIONS, shell: '/bin/bash' },
 		);
 
-		// Verify it's actually usable
-		const installedVersion = execSync(
+		// Verify it's actually usable - nvm exec outputs extra info, so extract just the version
+		const rawOutput = execSync(
 			`source "${NVM_SCRIPT}" && nvm exec ${version} node --version 2>/dev/null`,
 			{ ...EXEC_OPTIONS, shell: '/bin/bash' },
-		).toString().trim().replace(/^v/, '');
+		).toString();
 
+		const installedVersion = extractNodeVersion(rawOutput);
 		return installedVersion;
 	} catch (err) {
 		console.error(`  -> Failed to install node ${version}: ${/** @type {Error} */ (err).message}`);
@@ -352,8 +377,27 @@ export default async function reproduce(spec, opts) {
 			return false;
 		}
 
-		const location = parsed.pathname.replace('.git', '').replace(/^\//, '');
-		const repoPath = repo.directory ? `::path:${repo.directory}` : '';
+		// Extract repo path and handle /tree/ and /blob/ URLs (monorepos)
+		let pathname = parsed.pathname.replace('.git', '').replace(/^\//, '');
+		let extractedSubdir = null;
+
+		// Handle GitHub /tree/branch/path and /blob/branch/path URLs
+		const treeMatch = pathname.match(/^(?<repo>[^/]+\/[^/]+)\/(?:tree|blob)\/[^/]+\/(?<subdir>.+)$/);
+		if (treeMatch?.groups) {
+			pathname = treeMatch.groups.repo;
+			extractedSubdir = treeMatch.groups.subdir;
+		} else {
+			// Also strip just /tree/branch or /blob/branch without subdir
+			const branchMatch = pathname.match(/^(?<repo>[^/]+\/[^/]+)\/(?:tree|blob)\/[^/]+$/);
+			if (branchMatch?.groups) {
+				pathname = branchMatch.groups.repo;
+			}
+		}
+
+		const location = pathname;
+		// Use repo.directory if provided, otherwise use extracted subdir from URL
+		const effectiveDirectory = repo.directory || extractedSubdir;
+		const repoPath = effectiveDirectory ? `::path:${effectiveDirectory}` : '';
 
 		// Determine git ref: prefer gitHead, then try version tags, finally fallback to HEAD
 		let ref = mani.gitHead;
@@ -435,7 +479,7 @@ export default async function reproduce(spec, opts) {
 			exec(`cd "${repoCacheDir}" && git fetch --depth 1 origin "${ref}" 2>/dev/null || git fetch origin 2>/dev/null || true`);
 			exec(`cd "${repoCacheDir}" && git checkout "${ref}" 2>/dev/null || git checkout FETCH_HEAD 2>/dev/null`);
 
-			const packageDir = repo.directory ? pathJoin(repoCacheDir, repo.directory) : repoCacheDir;
+			const packageDir = effectiveDirectory ? pathJoin(repoCacheDir, effectiveDirectory) : repoCacheDir;
 
 			await rewriteWorkspaceDeps(packageDir);
 			npmInstall(packageDir, {

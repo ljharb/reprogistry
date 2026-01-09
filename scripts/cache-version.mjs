@@ -231,13 +231,14 @@ async function downloadFile(url, destPath) {
 
 /**
  * Extract a tarball to a directory.
+ * Uses --no-same-permissions to avoid EACCES errors on old packages with restrictive permissions.
  *
  * @param {string} tarballPath - Path to tarball
  * @param {string} destDir - Destination directory
  */
 async function extractTarball(tarballPath, destDir) {
 	await mkdir(destDir, { recursive: true });
-	execSync(`tar -xzf "${tarballPath}" -C "${destDir}" --strip-components=1`, { stdio: 'pipe' });
+	execSync(`tar -xzf "${tarballPath}" -C "${destDir}" --strip-components=1 --no-same-permissions`, { stdio: 'pipe' });
 }
 
 /**
