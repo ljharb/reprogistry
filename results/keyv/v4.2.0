@@ -1,0 +1,1074 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-09T05:15:43.161Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:11.7.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "keyv@4.2.0",
+			"name": "keyv",
+			"version": "4.2.0",
+			"location": "https://registry.npmjs.org/keyv/-/keyv-4.2.0.tgz",
+			"integrity": "sha512-mcRm0yqY2Z2FdE3Tkb7hNEUN7J7VdedNZ8F6vS5jX04gNo2pyOWqfyW+chW9amiS3gbULPucyRzVq0gjPUmhTA==",
+			"publishedAt": "2022-04-02T21:35:55.729Z",
+			"publishedWith": {
+				"node": null,
+				"npm": null
+			},
+			"dependencies": {
+				"json-buffer": "3.0.1",
+				"compress-brotli": "^1.3.6"
+			}
+		},
+		"source": {
+			"integrity": null,
+			"location": "git+https://github.com/jaredwray/keyv.git",
+			"spec": "github:jaredwray/keyv#HEAD"
+		},
+		"comparisonHash": "9ef46a5bd31291e57cbab41e2f17c57bd6da0b5b",
+		"diff": {
+			"files": {
+				"README.md": {
+					"diff": "--- published/README.md\n+++ rebuilt/README.md\n@@ -1,372 +1,94 @@\n-<h1 align=\"center\">\n-\t<img width=\"250\" src=\"https://jaredwray.com/images/keyv.svg\" alt=\"keyv\">\n-\t<br>\n-\t<br>\n-</h1>\n+<h1 align=\"center\"><img width=\"250\" src=\"https://jaredwray.com/images/keyv.svg\" alt=\"keyv\"></h1>\n \n > Simple key-value storage with support for multiple backends\n \n [![build](https://github.com/jaredwray/keyv/actions/workflows/tests.yaml/badge.svg)](https://github.com/jaredwray/keyv/actions/workflows/tests.yaml)\n-[![codecov](https://codecov.io/gh/jaredwray/keyv/branch/master/graph/badge.svg?token=bRzR3RyOXZ)](https://codecov.io/gh/jaredwray/keyv)\n+[![bun](https://github.com/jaredwray/keyv/actions/workflows/bun-test.yaml/badge.svg)](https://github.com/jaredwray/keyv/actions/workflows/bun-test.yaml)\n+[![codecov](https://codecov.io/gh/jaredwray/keyv/graph/badge.svg?token=bRzR3RyOXZ)](https://codecov.io/gh/jaredwray/keyv)\n [![npm](https://img.shields.io/npm/dm/keyv.svg)](https://www.npmjs.com/package/keyv)\n [![npm](https://img.shields.io/npm/v/keyv.svg)](https://www.npmjs.com/package/keyv)\n \n-Keyv provides a consistent interface for key-value storage across multiple backends via storage adapters. It supports TTL based expiry, making it suitable as a cache or a persistent key-value store.\n+# How to Use the Keyv Mono Repo\n \n-## Features\n+Keyv and its storage adapters are in this mono repo and there are details below on how to use this repository. In addtion we have a couple of other documents for review:\n \n-There are a few existing modules similar to Keyv, however Keyv is different because it:\n+* [CODE_OF_CONDUCT](CODE_OF_CONDUCT.md) - Our code of conduct\n+* [CONTRIBUTING](CONTRIBUTING.md) - How to contribute to this project\n+* [SECURITY](SECURITY.md) - Security guidelines and supported versions\n \n-- Isn't bloated\n-- Has a simple Promise based API\n-- Suitable as a TTL based cache or persistent key-value store\n-- [Easily embeddable](#add-cache-support-to-your-module) inside another module\n-- Works with any storage that implements the [`Map`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Map) API\n-- Handles all JSON types plus `Buffer`\n-- Supports namespaces\n-- Wide range of [**efficient, well tested**](#official-storage-adapters) storage adapters\n-- Connection errors are passed through (db failures won't kill your app)\n-- Supports the current active LTS version of Node.js or higher\n+## Getting Started\n \n-## Usage\n+Keyv is a simple key-value storage system that supports multiple backends. It's designed to be a simple and consistent way to work with key-value stores.\n \n-Install Keyv.\n+To learn how to use Keyv, check out the [keyv](https://github.com/jaredwray/keyv/blob/main/packages/keyv/README.md) README. To learn how to use a specific storage adapter, check out the README for that adapter under [Storage Adapters](#storage-adapters).\n \n-```\n-npm install --save keyv\n-```\n+## Open a Pull Request\n \n-By default everything is stored in memory, you can optionally also install a storage adapter.\n+You can contribute changes to this repo by opening a pull request:\n \n-```\n-npm install --save @keyv/redis\n-npm install --save @keyv/mongo\n-npm install --save @keyv/sqlite\n-npm install --save @keyv/postgres\n-npm install --save @keyv/mysql\n-npm install --save @keyv/etcd\n-```\n-\n-Create a new Keyv instance, passing your connection string if applicable. Keyv will automatically load the correct storage adapter.\n-\n-```js\n-const Keyv = require('keyv');\n-\n-// One of the following\n-const keyv = new Keyv();\n-const keyv = new Keyv('redis://user:pass@localhost:6379');\n-const keyv = new Keyv('mongodb://user:pass@localhost:27017/dbname');\n-const keyv = new Keyv('sqlite://path/to/database.sqlite');\n-const keyv = new Keyv('postgresql://user:pass@localhost:5432/dbname');\n-const keyv = new Keyv('mysql://user:pass@localhost:3306/dbname');\n-const keyv = new Keyv('etcd://localhost:2379');\n-\n-// Handle DB connection errors\n-keyv.on('error', err => console.log('Connection Error', err));\n-\n-await keyv.set('foo', 'expires in 1 second', 1000); // true\n-await keyv.set('foo', 'never expires'); // true\n-await keyv.get('foo'); // 'never expires'\n-await keyv.delete('foo'); // true\n-await keyv.clear(); // undefined\n-```\n-\n-### Namespaces\n-\n-You can namespace your Keyv instance to avoid key collisions and allow you to clear only a certain namespace while using the same database.\n-\n-```js\n-const users = new Keyv('redis://user:pass@localhost:6379', { namespace: 'users' });\n-const cache = new Keyv('redis://user:pass@localhost:6379', { namespace: 'cache' });\n-\n-await users.set('foo', 'users'); // true\n-await cache.set('foo', 'cache'); // true\n-await users.get('foo'); // 'users'\n",
+					"match": false,
+					"packageHash": "c9773b971a95f967239027ab41279054eec1c8fd6bfcd454ad696a3dbde68f45",
+					"size": 13904,
+					"sourceHash": "0c220d3de251468cd94a29f026bcae7f6eff381d3ba31f45bb58e7b23c0a30fe",
+					"status": "content"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -1,58 +1,39 @@\n {\n-\t\"name\": \"keyv\",\n-\t\"version\": \"4.2.0\",\n-\t\"description\": \"Simple key-value storage with support for multiple backends\",\n-\t\"main\": \"src/index.js\",\n-\t\"scripts\": {\n-\t\t\"test\": \"xo && nyc ava --serial\",\n-\t\t\"coverage\": \"nyc report --reporter=text-lcov > coverage.lcov\",\n-\t\t\"clean\": \"rm -rf node_modules && rm -rf .nyc_output && rm -rf coverage.lcov && rm -rf ./test/testdb.sqlite\"\n-\t},\n-\t\"xo\": {\n-\t\t\"extends\": \"xo-lukechilds\",\n-\t\t\"rules\": {\n-\t\t\t\"unicorn/prefer-module\": 0\n-\t\t}\n-\t},\n-\t\"repository\": {\n-\t\t\"type\": \"git\",\n-\t\t\"url\": \"git+https://github.com/jaredwray/keyv.git\"\n-\t},\n-\t\"keywords\": [\n-\t\t\"key\",\n-\t\t\"value\",\n-\t\t\"store\",\n-\t\t\"cache\",\n-\t\t\"ttl\"\n-\t],\n-\t\"author\": \"Jared Wray <me@jaredwray.com> (http://jaredwray.com)\",\n-\t\"license\": \"MIT\",\n-\t\"bugs\": {\n-\t\t\"url\": \"https://github.com/jaredwray/keyv/issues\"\n-\t},\n-\t\"homepage\": \"https://github.com/jaredwray/keyv\",\n-\t\"dependencies\": {\n-\t\t\"compress-brotli\": \"^1.3.6\",\n-\t\t\"json-buffer\": \"3.0.1\"\n-\t},\n-\t\"devDependencies\": {\n-\t\t\"@keyv/test-suite\": \"*\",\n-\t\t\"ava\": \"^4.1.0\",\n-\t\t\"eslint-config-xo-lukechilds\": \"^1.0.1\",\n-\t\t\"eslint-plugin-promise\": \"^6.0.0\",\n-\t\t\"nyc\": \"^15.1.0\",\n-\t\t\"pify\": \"5.0.0\",\n-\t\t\"this\": \"^1.1.0\",\n-\t\t\"timekeeper\": \"^2.2.0\",\n-\t\t\"tsd\": \"^0.20.0\",\n-\t\t\"typescript\": \"^4.6.3\",\n-\t\t\"xo\": \"^0.48.0\"\n-    },\n-    \"tsd\" : {\n-      \"directory\" : \"test\"\n-    },\n-    \"types\": \"./src/index.d.ts\",\n-    \"files\": [\n-      \"src\"\n+  \"name\": \"@keyv/mono-repo\",\n+  \"version\": \"1.0.0\",\n+  \"type\": \"module\",\n+  \"description\": \"Keyv Mono Repo\",\n+  \"repository\": \"https://github.com/jaredwray/keyv.git\",\n+  \"author\": \"Jared Wray <me@jaredwray.com>\",\n+  \"license\": \"MIT\",\n+  \"private\": true,\n+  \"scripts\": {\n+    \"build:keyv:serialize\": \"pnpm recursive --filter=@keyv/serialize run build\",\n+    \"build:keyv\": \"pnpm recursive --filter=keyv run build\",\n+    \"build\": \"pnpm build:keyv:serialize && pnpm build:keyv && pnpm recursive --filter '!keyv' --filter '!@keyv/serialize' run build\",\n+    \"test\": \"pnpm -r --workspace-concurrency 1 test:ci\",\n+    \"test:services:start\": \"chmod +x ./scripts/test-services-start.sh && ./scripts/test-services-start.sh\",\n+    \"test:services:stop\": \"chmod +x ./scripts/test-services-stop.sh && ./scripts/test-services-stop.sh\",\n+    \"website:build\": \"pnpm recursive --filter @keyv/website run website:build\",\n+    \"website:serve\": \"pnpm recursive --filter @keyv/website run website:serve\",\n+    \"clean\": \"rimraf node_modules pnpm-lock.yaml && pnpm recursive run clean\"\n+  },\n+  \"devDependencies\": {\n+    \"@biomejs/biome\": \"^2.3.8\",\n+    \"@types/node\": \"^24.10.1\",\n+    \"@vitest/coverage-v8\": \"^4.0.14\",\n+    \"rimraf\": \"^6.1.2\",\n+    \"tsup\": \"^8.5.1\",\n+    \"typescript\": \"^5.9.3\",\n+    \"vitest\": \"^4.0.14\"\n+  },\n+  \"pnpm\": {\n+    \"onlyBuiltDependencies\": [\n+      \"esbuild\",\n+      \"protobufjs\",\n+      \"sqlite3\",\n+      \"sqlite325h\",\n+      \"unrs-resolver\"\n     ]\n+  }\n }\n",
+					"match": false,
+					"packageHash": "7217500638e3c755e52c9599a446d88b7dbeda572dabcf72a9106409ee1a34e3",
+					"size": 1325,
+					"sourceHash": "616a7c9a75fc981ab12a3b08985f44a58b6ed3f3b18baf30829a375b5f14dbaf",
+					"status": "content"
+				},
+				"src/index.d.ts": {
+					"match": false,
+					"packageHash": "fe35397467ccd44655f0246bbb2f1633a36785e8f080618ee7ae56710e95ea70",
+					"size": 592,
+					"status": "missing-in-source"
+				},
+				"src/index.js": {
+					"match": false,
+					"packageHash": "2f7cdc77cff56775fb1ea7479b945c7b4d3119f00ae8ad15769f88d5a56bf7a6",
+					"size": 6791,
+					"status": "missing-in-source"
+				},
+				".github/ISSUE_TEMPLATE/bug_report.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				".github/ISSUE_TEMPLATE/feature_request.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				".github/PULL_REQUEST_TEMPLATE.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				".github/workflows/bun-test.yaml": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				".github/workflows/codecov.yaml": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				".github/workflows/codeql-analysis.yml": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				".github/workflows/deploy-website.yml": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				".github/workflows/nodejs-20-test.yaml": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				".github/workflows/nodejs-22-test.yaml": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				".github/workflows/tests.yaml": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				".nvmrc": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"CODE_OF_CONDUCT.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"CONTRIBUTING.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"LICENSE": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"SECURITY.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"biome.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"media/github-social-logo.png": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"media/keyv-guidelines-1.0.pdf": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"media/keyv-logos/black-white/png/keyv-logo-horizontal-black.png": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"media/keyv-logos/black-white/png/keyv-logo-horizontal-white.png": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"media/keyv-logos/black-white/png/keyv-logo-vertical-black.png": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"media/keyv-logos/black-white/png/keyv-logo-vertical-white.png": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"media/keyv-logos/black-white/png/keyv-symbol-black.png": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"media/keyv-logos/black-white/png/keyv-symbol-white.png": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"media/keyv-logos/black-white/svg/keyv-logo-horizontal-black.svg": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"media/keyv-logos/black-white/svg/keyv-logo-horizontal-white.svg": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"media/keyv-logos/black-white/svg/keyv-logo-vertical-black.svg": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"media/keyv-logos/black-white/svg/keyv-logo-vertical-white.svg": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"media/keyv-logos/black-white/svg/keyv-symbol-black.svg": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"media/keyv-logos/black-white/svg/keyv-symbol-white.svg": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"media/keyv-logos/color-rgb/png/keyv-logo-horizontal-black.png": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"media/keyv-logos/color-rgb/png/keyv-logo-horizontal-white.png": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"media/keyv-logos/color-rgb/png/keyv-logo-vertical-black.png": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"media/keyv-logos/color-rgb/png/keyv-logo-vertical-white.png": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"media/keyv-logos/color-rgb/png/keyv-symbol.png": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"media/keyv-logos/color-rgb/svg/keyv-logo-horizontal-black.svg": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"media/keyv-logos/color-rgb/svg/keyv-logo-horizontal-white.svg": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"media/keyv-logos/color-rgb/svg/keyv-logo-vertical-black.svg": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"media/keyv-logos/color-rgb/svg/keyv-logo-vertical-white.svg": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"media/keyv-logos/color-rgb/svg/keyv-symbol.svg": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"media/legacy_logo.svg": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"media/logo.svg": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/bigmap/LICENSE": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/bigmap/README.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/bigmap/package.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/bigmap/src/index.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/bigmap/test/index.test.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/bigmap/tsconfig.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/bigmap/vitest.config.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/compress-brotli/LICENSE": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/compress-brotli/README.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/compress-brotli/package.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/compress-brotli/src/index.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/compress-brotli/src/types.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/compress-brotli/test/test.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/compress-brotli/test/types.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/compress-brotli/tsconfig.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/compress-brotli/vitest.config.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/compress-gzip/LICENSE": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/compress-gzip/README.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/compress-gzip/package.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/compress-gzip/src/index.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/compress-gzip/src/types.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/compress-gzip/test/test.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/compress-gzip/tsconfig.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/compress-gzip/vitest.config.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/compress-lz4/LICENSE": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/compress-lz4/README.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/compress-lz4/package.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/compress-lz4/src/index.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/compress-lz4/src/types.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/compress-lz4/test/test.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/compress-lz4/tsconfig.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/compress-lz4/vitest.config.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/dynamo/LICENSE": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/dynamo/README.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/dynamo/package.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/dynamo/src/index.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/dynamo/test/test.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/dynamo/tsconfig.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/dynamo/vitest.config.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/etcd/LICENSE": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/etcd/README.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/etcd/package.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/etcd/src/index.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/etcd/src/types.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/etcd/test/test.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/etcd/tsconfig.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/etcd/vitest.config.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/keyv/LICENSE": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/keyv/README.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/keyv/package.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/keyv/src/capabilities.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/keyv/src/event-manager.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/keyv/src/generic-store.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/keyv/src/hooks-manager.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/keyv/src/index.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/keyv/src/stats-manager.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/keyv/src/types.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/keyv/test/capabilities.test.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/keyv/test/event-manager.test.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/keyv/test/generic-store-integration.test.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/keyv/test/generic-store.test.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/keyv/test/get-raw.test.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/keyv/test/hooks-manager.test.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/keyv/test/keyv-hooks.test.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/keyv/test/keyv-test.test.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/keyv/test/stats-manager.test.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/keyv/test/suite.test.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/keyv/test/test.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/keyv/tsconfig.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/keyv/vitest.config.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/memcache/LICENSE": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/memcache/README.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/memcache/package.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/memcache/src/index.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/memcache/test/test.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/memcache/tsconfig.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/memcache/vitest.config.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/mongo/LICENSE": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/mongo/README.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/mongo/package.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/mongo/src/index.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/mongo/src/types.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/mongo/test/test.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/mongo/tsconfig.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/mongo/vitest.config.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/mysql/LICENSE": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/mysql/README.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/mysql/package.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/mysql/src/index.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/mysql/src/pool.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/mysql/src/types.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/mysql/test/certs/ca.pem": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/mysql/test/certs/client-cert.pem": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/mysql/test/certs/client-key.pem": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/mysql/test/certs/server-cert.pem": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/mysql/test/certs/server-key.pem": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/mysql/test/ssl.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/mysql/test/test.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/mysql/tsconfig.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/mysql/vitest.config.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/postgres/Dockerfile.ssl": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/postgres/LICENSE": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/postgres/README.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/postgres/config/pg_hba.conf": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/postgres/package.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/postgres/src/index.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/postgres/src/pool.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/postgres/src/types.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/postgres/test/test-ssl.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/postgres/test/test.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/postgres/tls/server.crt": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/postgres/tls/server.key": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/postgres/tsconfig.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/postgres/vitest.config.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/redis/LICENSE": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/redis/README.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/redis/package.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/redis/src/create.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/redis/src/index.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/redis/src/types.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/redis/test/cluster.test.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/redis/test/create-keyv.test.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/redis/test/delete.test.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/redis/test/get-client.test.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/redis/test/get.test.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/redis/test/has.test.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/redis/test/iterator.test.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/redis/test/main.test.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/redis/test/namespace.test.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/redis/test/sentinel.test.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/redis/test/set.test.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/redis/test/suite.test.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/redis/test/types.test.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/redis/tls/ca.crt": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/redis/tls/ca.key": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/redis/tls/ca.txt": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/redis/tls/client.crt": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/redis/tls/client.key": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/redis/tls/openssl.cnf": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/redis/tls/redis.crt": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/redis/tls/redis.dh": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/redis/tls/redis.key": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/redis/tls/server.crt": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/redis/tls/server.key": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/redis/tsconfig.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/redis/vitest.config.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/serialize/LICENSE": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/serialize/README.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/serialize/package.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/serialize/src/index.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/serialize/test/test.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/serialize/tsconfig.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/serialize/vitest.config.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/sqlite/LICENSE": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/sqlite/README.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/sqlite/package.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/sqlite/src/index.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/sqlite/src/types.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/sqlite/test/iterator.test.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/sqlite/test/test.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/sqlite/tsconfig.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/sqlite/vitest.config.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/test-suite/LICENSE": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/test-suite/README.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/test-suite/package.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/test-suite/src/api.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/test-suite/src/compression-adapter.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/test-suite/src/compression.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/test-suite/src/helper.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/test-suite/src/index.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/test-suite/src/iterator.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/test-suite/src/namespace.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/test-suite/src/types.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/test-suite/src/values.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/test-suite/test/unit.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/test-suite/tsconfig.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/test-suite/vitest.config.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/valkey/LICENSE": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/valkey/README.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/valkey/package.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/valkey/src/index.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/valkey/src/types.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/valkey/test/test.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/valkey/tsconfig.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/valkey/vitest.config.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/website/package.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/website/site/docs/caching/caching-express.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/website/site/docs/caching/caching-fastify.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/website/site/docs/caching/caching-javascript.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/website/site/docs/caching/caching-koa.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/website/site/docs/caching/caching-nestjs.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/website/site/docs/caching/caching-node.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/website/site/docs/index.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/website/site/docs/third-party-storage-adapters.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/website/site/docs/v4-to-v5.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/website/site/docula.config.mjs": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/website/site/favicon.ico": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/website/site/logo.svg": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/website/site/variables.css": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/website/src/docs.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"pnpm-workspace.yaml": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"scripts/docker-compose-arm64.yaml": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"scripts/docker-compose-redis-cluster.yaml": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"scripts/docker-compose-redis-sentinel.yaml": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"scripts/docker-compose.yaml": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"scripts/test-services-start.sh": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"scripts/test-services-stop.sh": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"tsconfig.json": {
+					"match": false,
+					"status": "missing-in-package"
+				}
+			},
+			"summary": {
+				"differentFiles": 2,
+				"matchingFiles": 0,
+				"missingInPackage": 250,
+				"missingInSource": 2,
+				"score": 0,
+				"totalFiles": 254
+			}
+		},
+		"prodDependencies": []
+	}
+]
