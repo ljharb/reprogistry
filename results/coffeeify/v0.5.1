@@ -1,0 +1,164 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-09T04:46:40.184Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:11.7.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "coffeeify@0.5.1",
+			"name": "coffeeify",
+			"version": "0.5.1",
+			"location": "https://registry.npmjs.org/coffeeify/-/coffeeify-0.5.1.tgz",
+			"integrity": "sha512-Owfc5R25JZ80KsN78G3zmwGpf6Icv0QQ5CxQiECayiWh7vA0hQK8Bgv/rhmXU7MW7GrUX04thhm4Z1i2hOGGlA==",
+			"publishedAt": "2013-06-02T12:36:13.334Z",
+			"publishedWith": {
+				"node": null,
+				"npm": "1.2.23"
+			},
+			"dependencies": {
+				"coffee-script": "~1.6.2",
+				"through": "~2.2.0",
+				"convert-source-map": "~0.2.3"
+			}
+		},
+		"source": {
+			"integrity": "sha512-Q0OwgU3a0NVjSYWo588hCo4xTzqGfatq1ypvqV0Dz515vXXcalDQc7i+pjsGyDcxo+K3dNle2DbwXP0B8FAzbw==",
+			"location": "git://github.com/jnordberg/coffeeify.git",
+			"spec": "github:jnordberg/coffeeify#HEAD"
+		},
+		"comparisonHash": "9ef46a5bd31291e57cbab41e2f17c57bd6da0b5b",
+		"diff": {
+			"files": {
+				".npmignore": {
+					"match": false,
+					"packageHash": "4d56952b0fb13bf8f9b6c13a6d4c34a075bac3af447636a1df4335d7576e2f97",
+					"size": 14,
+					"status": "missing-in-source"
+				},
+				".travis.yml": {
+					"diff": "--- published/.travis.yml\n+++ rebuilt/.travis.yml\n@@ -1,4 +1,4 @@\n language: node_js\n node_js:\n-  - 0.8\n-  - 0.10\n+  - 6\n+  - 8\n",
+					"match": false,
+					"packageHash": "2303095d00b06eae42c100a926e77a42c4c3664dfbc22160a4c2fd559636cf8c",
+					"size": 44,
+					"sourceHash": "6a62161d90262e1bd648244a56f7d9fc3bba5a7723cd685e596d373ffce4c065",
+					"status": "content"
+				},
+				"index.js": {
+					"diff": "--- published/index.js\n+++ rebuilt/index.js\n@@ -1,9 +1,12 @@\n-var coffee = require('coffee-script');\n-var through = require('through');\n+﻿var coffee = require('coffeescript');\n var convert = require('convert-source-map');\n+var path = require('path');\n+var through = require('through2');\n+\n+var filePattern = /\\.((lit)?coffee|coffee\\.md)$/;\n \n function isCoffee (file) {\n-    return (/\\.((lit)?coffee|coffee\\.md)$/).test(file);\n+    return filePattern.test(file);\n }\n \n function isLiterate (file) {\n@@ -20,7 +23,10 @@\n     this.line = error.location.first_line + 1; // cs linenums are 0-indexed\n     this.column = error.location.first_column + 1; // same with columns\n \n-    var markerLen = 2 + error.location.last_column - error.location.first_column;\n+    var markerLen = 2;\n+    if(error.location.first_line === error.location.last_line) {\n+        markerLen += error.location.last_column - error.location.first_column;\n+    }\n     this.annotated = [\n         file + ':' + this.line,\n         src.split('\\n')[this.line - 1],\n@@ -39,49 +45,72 @@\n     return this.annotated;\n };\n \n-function compile(file, data, callback) {\n+function compile(filename, source, options, callback) {\n     var compiled;\n     try {\n-        compiled = coffee.compile(data, {\n-            sourceMap: true,\n-            generatedFile: file,\n-            inline: true,\n-            bare: true,\n-            literate: isLiterate(file)\n-        });\n+        compiled = coffee.compile(source, Object.assign({\n+          inline: true,\n+          literate: isLiterate(filename)\n+        }, options));\n     } catch (e) {\n         var error = e;\n         if (e.location) {\n-            error = new ParseError(e, data, file);\n+            error = new ParseError(e, source, filename);\n         }\n         callback(error);\n         return;\n     }\n \n-    var map = convert.fromJSON(compiled.v3SourceMap);\n-    map.setProperty('sources', [file]);\n+    if (options.sourceMap) {\n+        var map = convert.fromJSON(compiled.v3SourceMap);\n+        var basename = path.basename(filename);\n+        map.setProperty('file', basename.replace(filePattern, '.js'));\n+        map.setProperty('sources', [basename]);\n+        map.setProperty('sourcesContent', [source]);\n+        callback(null, compiled.js + '\\n' + map.toComment() + '\\n');\n+    } else {\n+        callback(null, compiled + '\\n');\n+    }\n \n-    callback(null, compiled.js + '\\n' + map.toComment());\n }\n \n-function coffeeify(file) {\n-    if (!isCoffee(file)) return through();\n+function coffeeify(filename, options) {\n+    if (!isCoffee(filename)) return through();\n \n-    var data = '', stream = through(write, end);\n+    if (typeof options === 'undefined' || options === null) options = {};\n \n-    return stream;\n+    var compileOptions = {\n+        sourceMap: (options._flags && options._flags.debug),\n+        bare: true,\n+        header: false\n+    };\n+\n+    for (var i = 0, keys = Object.keys(options); i < keys.length; i++) {\n+        var key = keys[i], option = options[key];\n+        if (typeof option !== 'undefined' && option !== null) {\n+            if (option === 'false' || option === 'no' || option === '0') {\n+                option = false;\n+            }\n+            compileOptions[key] = option;\n+        }\n+    }\n \n",
+					"match": false,
+					"packageHash": "a1afa6dafec50d7f96b574f15ba4cbbd97ebba583553a9a1829fe6de46c67753",
+					"size": 2315,
+					"sourceHash": "62cfa8064e54a31e4f78b03c8eb2b1d1f9c3e0136cde06e15dbc36f54c9a335e",
+					"status": "content"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -1,44 +1,51 @@\n {\n-    \"name\": \"coffeeify\",\n-    \"version\": \"0.5.1\",\n-    \"description\": \"browserify v2 plugin for coffee-script with support for mixed .js and .coffee files\",\n-    \"main\": \"index.js\",\n-    \"dependencies\": {\n-        \"coffee-script\": \"~1.6.2\",\n-        \"through\": \"~2.2.0\",\n-        \"convert-source-map\": \"~0.2.3\"\n+  \"name\": \"coffeeify\",\n+  \"version\": \"3.0.1\",\n+  \"description\": \"browserify plugin for coffeescript with support for mixed .js and .coffee files\",\n+  \"main\": \"index.js\",\n+  \"dependencies\": {\n+    \"convert-source-map\": \"^1.3.0\",\n+    \"through2\": \"^2.0.0\"\n+  },\n+  \"peerDependencies\": {\n+    \"coffeescript\": \">1.9.2 <3\"\n+  },\n+  \"devDependencies\": {\n+    \"browserify\": \"^14.4.0\",\n+    \"proxyquire\": \"^1.8.0\",\n+    \"sinon\": \"^4.0.2\",\n+    \"tap\": \"^10.7.2\",\n+    \"test-all-versions\": \"^3.1.1\",\n+    \"through\": \"^2.3.8\"\n+  },\n+  \"scripts\": {\n+    \"test\": \"tav coffeescript '>1.9.2 <99' tap test/*.js\"\n+  },\n+  \"repository\": {\n+    \"type\": \"git\",\n+    \"url\": \"git://github.com/jnordberg/coffeeify.git\"\n+  },\n+  \"homepage\": \"https://github.com/jnordberg/coffeeify\",\n+  \"keywords\": [\n+    \"coffeescript\",\n+    \"coffee-script\",\n+    \"browserify\",\n+    \"v2\",\n+    \"js\",\n+    \"plugin\",\n+    \"transform\"\n+  ],\n+  \"contributors\": [\n+    {\n+      \"name\": \"James Halliday\",\n+      \"email\": \"mail@substack.net\",\n+      \"url\": \"http://substack.net\"\n     },\n-    \"devDependencies\": {\n-        \"tap\": \"~0.4.0\",\n-        \"browserify\": \"2.x\"\n-    },\n-    \"scripts\": {\n-        \"test\": \"tap test/*.js\"\n-    },\n-    \"repository\": {\n-        \"type\": \"git\",\n-        \"url\": \"git://github.com/jnordberg/coffeeify.git\"\n-    },\n-    \"homepage\": \"https://github.com/jnordberg/coffeeify\",\n-    \"keywords\": [\n-        \"coffee-script\",\n-        \"browserify\",\n-        \"v2\",\n-        \"js\",\n-        \"plugin\",\n-        \"transform\"\n-    ],\n-    \"contributors\": [\n-        {\n-            \"name\": \"James Halliday\",\n-            \"email\": \"mail@substack.net\",\n-            \"url\": \"http://substack.net\"\n-        },\n-        {\n-            \"name\": \"Johan Nordberg\",\n-            \"email\": \"code@johan-nordberg.com\",\n-            \"url\": \"http://johan-nordberg.com\"\n-        }\n-    ],\n-    \"license\": \"MIT\"\n+    {\n+      \"name\": \"Johan Nordberg\",\n+      \"email\": \"code@johan-nordberg.com\",\n+      \"url\": \"http://johan-nordberg.com\"\n+    }\n+  ],\n+  \"license\": \"MIT\"\n }\n",
+					"match": false,
+					"packageHash": "47e6f1a60b9729153ea342ae09b0ac68a2a75a55db59135c1a4641a2a1746651",
+					"size": 1105,
+					"sourceHash": "be290b6c04a49acac3785fca023773e4c8d50bb67a8f30dd955ed8144026a82b",
+					"status": "content"
+				},
+				"readme.markdown": {
+					"match": false,
+					"packageHash": "743442651d308e62899b67ad91a4e53511c69a2c74e51108c366d5871d681db4",
+					"size": 1124,
+					"status": "missing-in-source"
+				},
+				"test/bundle.js": {
+					"diff": "--- published/test/bundle.js\n+++ rebuilt/test/bundle.js\n@@ -1,26 +1,57 @@\n var test = require('tap').test;\n var browserify = require('browserify');\n var vm = require('vm');\n+var convert = require('convert-source-map');\n+var path = require('path');\n+var fs = require('fs');\n \n function bundle (file) {\n     test('bundle transform', function (t) {\n-        t.plan(1);\n+        t.plan(2);\n \n-        var b = browserify();\n-        b.add(__dirname + file);\n-        b.transform(__dirname + '/..');\n-        b.bundle(function (err, src) {\n-            if (err) t.fail(err);\n-            vm.runInNewContext(src, {\n-                console: { log: log }\n-            });\n+        var bundle = browserify();\n+        var sourcepath = path.join(__dirname, file);\n+\n+        bundle.add(sourcepath);\n+        bundle.transform(path.join(__dirname, '..'));\n+        bundle.bundle(function (error, src) {\n+            if (error) t.fail(error);\n+            vm.runInNewContext(src, {console: {log: log}});\n+            var map = convert.fromSource(String(src));\n+            t.ok(map == null, 'should not have a map when debug is off');\n+        });\n+\n+        function log (msg) {\n+            t.equal(msg, 555);\n+        }\n+    });\n+\n+    test('bundle transform includes sourcemaps with debug on', function (t) {\n+        t.plan(3);\n+\n+        var bundle = browserify({debug: true});\n+        var sourcepath = path.join(__dirname, file);\n+\n+        bundle.add(sourcepath);\n+        bundle.transform(path.join(__dirname, '..'));\n+        bundle.bundle(function (error, src) {\n+            if (error) t.fail(error);\n+            vm.runInNewContext(src, {console: {log: log}});\n+            var map = convert.fromSource(String(src));\n+            var relpath = path.relative(process.cwd(), sourcepath);\n+            var sourceIdx = map.sourcemap.sources.indexOf(relpath);\n+            t.ok(sourceIdx !== -1, 'should have source filename in map')\n+            var filesrc = fs.readFileSync(sourcepath).toString()\n+            t.equal(filesrc, map.sourcemap.sourcesContent[sourceIdx], 'should have source content in map')\n         });\n \n         function log (msg) {\n             t.equal(msg, 555);\n         }\n     });\n+\n+\n }\n \n-bundle('/../example/foo.coffee');\n-bundle('/../example/foo.litcoffee');\n+bundle('../example/foo.coffee');\n+bundle('../example/foo.litcoffee');\n",
+					"match": false,
+					"packageHash": "f49c5baddd3518948c92624105902435bd6918ed2a43f3a55b7e5d0868d64f18",
+					"size": 619,
+					"sourceHash": "c31a513822dc70ddc92e6972d0ef89574737772606a8c9a8b4bebf83622db9ef",
+					"status": "content"
+				},
+				"test/error.js": {
+					"diff": "--- published/test/error.js\n+++ rebuilt/test/error.js\n@@ -4,6 +4,7 @@\n var fs = require('fs');\n \n var file = path.resolve(__dirname, '../example/error.coffee');\n+var multilineFile = path.resolve(__dirname, '../example/multiline_error.coffee');\n var transform = path.join(__dirname, '..');\n \n test('transform error', function (t) {\n@@ -20,3 +21,13 @@\n         t.equal(error.column, 15, \"error should be on column 15\");\n     });\n });\n+\n+test('multiline transform error', function (t) {\n+    t.plan(1);\n+\n+    var b = browserify([multilineFile]);\n+    b.transform(transform);\n+    b.bundle(function (error) {\n+        t.ok(error !== undefined, \"bundle should callback with an error\");\n+    });\n+});\n",
+					"match": false,
+					"packageHash": "78884ca9c237bcf6ee717860e48af18fd1005df94e29736bc5a93f5865905dde",
+					"size": 744,
+					"sourceHash": "dfedda83a2200affd633a3b64deb377c58f51bc62db0284a8a5fafc50be9f32e",
+					"status": "content"
+				},
+				"test/transform.js": {
+					"diff": "--- published/test/transform.js\n+++ rebuilt/test/transform.js\n@@ -5,13 +5,13 @@\n var convert   =  require('convert-source-map');\n var transform =  require('..');\n \n-test('transform adds sourcemap comment', function (t) {\n+test('transform adds sourcemap comment when sourceMap option is true', function (t) {\n     t.plan(1);\n     var data = '';\n \n-    var file = path.join(__dirname, '../example/foo.coffee')\n+    var file = path.join(__dirname, '../example/foo.coffee');\n     fs.createReadStream(file)\n-        .pipe(transform(file))\n+        .pipe(transform(file, {sourceMap: true}))\n         .pipe(through(write, end));\n \n     function write (buf) { data += buf }\n@@ -21,13 +21,31 @@\n         t.deepEqual(\n             sourceMap,\n             { version: 3,\n-              file: file,\n+              file: 'foo.js',\n               sourceRoot: '',\n-              sources: [ file ],\n+              sources: [ 'foo.coffee' ],\n               names: [],\n-              mappings: 'AAAA,CAAQ,EAAR,IAAO,GAAK',\n+              mappings: 'AAAA,OAAO,CAAC,GAAR,CAAY,OAAA,CAAQ,UAAR,CAAZ',\n               sourcesContent: [ 'console.log(require \\'./bar.js\\')\\n' ] },\n             'adds sourcemap comment including original source'\n       );\n     }\n });\n+\n+test('transform does not add sourcemap when sourceMap option is false', function (t) {\n+\n+  t.plan(1);\n+  var data = '';\n+\n+  var file = path.join(__dirname, '../example/foo.coffee');\n+  fs.createReadStream(file)\n+    .pipe(transform(file, {sourceMap: false}))\n+    .pipe(through(write, end));\n+\n+  function write (buf) { data += buf }\n+  function end () {\n+    var sourceMap = convert.fromSource(data);\n+    t.equal(sourceMap, null);\n+  }\n+\n+});\n",
+					"match": false,
+					"packageHash": "ec07b55b918d9c7b0bbbc91630c46549f6d33365d73493cf9001b858b664ceb6",
+					"size": 990,
+					"sourceHash": "896f8f6906df103962e2ca5807e11a3ec3cc8a8b0019b5b43baee795e0c3cec6",
+					"status": "content"
+				},
+				"README.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"example/multiline_error.coffee": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/options.js": {
+					"match": false,
+					"status": "missing-in-package"
+				}
+			},
+			"summary": {
+				"differentFiles": 6,
+				"matchingFiles": 8,
+				"missingInPackage": 3,
+				"missingInSource": 2,
+				"score": 0.42105263157894735,
+				"totalFiles": 19
+			}
+		},
+		"prodDependencies": [
+			{
+				"name": "convert-source-map",
+				"version": "1.5.0"
+			},
+			{
+				"name": "core-util-is",
+				"version": "1.0.2"
+			},
+			{
+				"name": "inherits",
+				"version": "2.0.3"
+			},
+			{
+				"name": "isarray",
+				"version": "1.0.0"
+			},
+			{
+				"name": "process-nextick-args",
+				"version": "1.0.7"
+			},
+			{
+				"name": "readable-stream",
+				"version": "2.3.3"
+			},
+			{
+				"name": "safe-buffer",
+				"version": "5.1.1"
+			},
+			{
+				"name": "string_decoder",
+				"version": "1.0.3"
+			},
+			{
+				"name": "through2",
+				"version": "2.0.3"
+			},
+			{
+				"name": "util-deprecate",
+				"version": "1.0.2"
+			},
+			{
+				"name": "xtend",
+				"version": "4.0.1"
+			}
+		]
+	}
+]
