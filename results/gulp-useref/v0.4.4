@@ -1,0 +1,557 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-09T15:29:55.493Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:11.7.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "gulp-useref@0.4.4",
+			"name": "gulp-useref",
+			"version": "0.4.4",
+			"location": "https://registry.npmjs.org/gulp-useref/-/gulp-useref-0.4.4.tgz",
+			"integrity": "sha512-MNPVJ5cvWu3ovAtQJ/acmo9EZIjGZCWQb/TR795Pzb7T6H6S+ZOgbSjOSrstAUx0uo0GCR6ynvURNR4taZIxOw==",
+			"publishedAt": "2014-06-05T03:38:56.724Z",
+			"publishedWith": {
+				"node": null,
+				"npm": "1.4.3"
+			},
+			"dependencies": {
+				"glob": "^4.0.2",
+				"through2": "^0.5.1",
+				"gulp-util": "^2.2.14",
+				"node-useref": "^0.2.7"
+			}
+		},
+		"source": {
+			"integrity": "sha512-K05QdTpZenFWZlTjPahF79jO3U/RNZk8hhFru2XgCSyctkOxoFUie992fqVTMUIRpuiPEP2Mb/4RF8iXC0JVbw==",
+			"location": "git://github.com/jonkemp/gulp-useref.git",
+			"spec": "github:jonkemp/gulp-useref#HEAD"
+		},
+		"comparisonHash": "9ef46a5bd31291e57cbab41e2f17c57bd6da0b5b",
+		"diff": {
+			"files": {
+				".npmignore": {
+					"match": false,
+					"packageHash": "1037e443d5a0fce69d6f292ab0cd0335820bce92e2bed3d84a2262d5b52855e6",
+					"size": 84,
+					"status": "missing-in-source"
+				},
+				"CONTRIBUTING.md": {
+					"match": false,
+					"packageHash": "e4770fdb2953d32161546151229dcc90927878d415c76a859972a598eddc43e1",
+					"size": 5937,
+					"status": "missing-in-source"
+				},
+				"README.md": {
+					"diff": "--- published/README.md\n+++ rebuilt/README.md\n@@ -1,9 +1,25 @@\n-# [gulp](https://github.com/wearefractal/gulp)-useref [![Build Status](https://travis-ci.org/jonkemp/gulp-useref.png?branch=master)](https://travis-ci.org/jonkemp/gulp-useref)\n+# [gulp](https://github.com/gulpjs/gulp)-useref ![Build Status](https://github.com/jonkemp/gulp-useref/actions/workflows/main.yml/badge.svg?branch=master) [![Coverage Status](https://coveralls.io/repos/jonkemp/gulp-useref/badge.svg?branch=master&service=github)](https://coveralls.io/github/jonkemp/gulp-useref?branch=master)\n \n-> Parse build blocks in HTML files to replace references to non-optimized scripts or stylesheets with [useref](https://github.com/digisfera/useref)\n+[![NPM](https://nodei.co/npm/gulp-useref.png?downloads=true)](https://nodei.co/npm/gulp-useref/)\n \n-Inspired by the grunt plugin [grunt-useref](https://github.com/pajtai/grunt-useref). It can handle file concatenation but not minification. Files are then passed down the stream. For minification of assets or other modifications, use [gulp-filter](https://github.com/sindresorhus/gulp-filter) to filter specific types of assets.\n+> Parse build blocks in HTML files to replace references to non-optimized scripts or stylesheets with [useref](https://github.com/jonkemp/useref)\n \n+Inspired by the grunt plugin [grunt-useref](https://github.com/pajtai/grunt-useref). It can handle file concatenation but not minification. Files are then passed down the stream. For minification of assets or other modifications, use [gulp-if](https://github.com/robrich/gulp-if) to conditionally handle specific types of assets.\n+\n+\n+## What's new in 3.0?\n+\n+Changes under the hood have made the code more efficient and simplified the API. Since the API has changed, please observe the usage examples below.\n+\n+If you get errors like\n+\n+    TypeError: useref.assets is not a function\n+\n+or\n+\n+    TypeError: $.useref.assets is not a function\n+\n+please read the Migration Notes below.\n \n ## Install\n \n@@ -23,88 +39,118 @@\n     useref = require('gulp-useref');\n \n gulp.task('default', function () {\n-\treturn gulp.src('app/*.html')\n-        .pipe(useref.assets())\n-        .pipe(useref.restore())\n+    return gulp.src('app/*.html')\n         .pipe(useref())\n         .pipe(gulp.dest('dist'));\n });\n ```\n \n-If you want to minify your assets or perform some other modification, you can use [gulp-filter](https://github.com/sindresorhus/gulp-filter) to handle specific types of assets. When you want all the original files back, just call the restore method.\n+With options:\n+\n+```js\n+var gulp = require('gulp'),\n+    useref = require('gulp-useref');\n+\n+gulp.task('default', function () {\n+    return gulp.src('app/*.html')\n+        .pipe(useref({ searchPath: '.tmp' }))\n+        .pipe(gulp.dest('dist'));\n+});\n+```\n+\n+If you want to minify your assets or perform some other modification, you can use [gulp-if](https://github.com/robrich/gulp-if) to conditionally handle specific types of assets.\n \n ```js\n var gulp = require('gulp'),\n     useref = require('gulp-useref'),\n-    filter = require('gulp-filter'),\n+    gulpif = require('gulp-if'),\n     uglify = require('gulp-uglify'),\n-    minifyCss = require('gulp-minify-css');\n+    minifyCss = require('gulp-clean-css');\n \n gulp.task('html', function () {\n-    var jsFilter = filter('**/*.js');\n-    var cssFilter = filter('**/*.css');\n-\n     return gulp.src('app/*.html')\n-        .pipe(useref.assets())\n-        .pipe(jsFilter)\n-        .pipe(uglify())\n-        .pipe(jsFilter.restore())\n-        .pipe(cssFilter)\n-        .pipe(minifyCss())\n-        .pipe(cssFilter.restore())\n-        .pipe(useref.restore())\n         .pipe(useref())\n+        .pipe(gulpif('*.js', uglify()))\n+        .pipe(gulpif('*.css', minifyCss()))\n         .pipe(gulp.dest('dist'));\n });\n ```\n \n-\n Blocks are expressed as:\n \n ```html\n-<!-- build:<type>(alternate search path) <path> -->\n+<!-- build:<type>(alternate search path) <path> <parameters> -->\n ... HTML Markup, list of script / link tags.\n <!-- endbuild -->\n ```\n \n - **type**: either `js`, `css` or `remove`; `remove` will remove the build block entirely without generating a file\n",
+					"match": false,
+					"packageHash": "146443d90e8151e929239338d0e61c0784b4de035a152da27915c7206254179e",
+					"size": 4501,
+					"sourceHash": "7fb194c243f4b7c3f8f3392a5f108c2880a6ac6416e83c510a47dd361cdf56bc",
+					"status": "content"
+				},
+				"index.js": {
+					"diff": "--- published/index.js\n+++ rebuilt/index.js\n@@ -1,102 +1,197 @@\n-'use strict';\n-var gutil = require('gulp-util');\n-var through = require('through2');\n-var useref = require('node-useref');\n-var path = require('path');\n-var fs = require('fs');\n-var glob = require('glob');\n-\n-var restoreStream = through.obj();\n+const path = require('path');\n+const PluginError = require('plugin-error');\n+const es = require('event-stream');\n+const through = require('through2');\n+const useref = require('useref');\n+const getGlobs = require('./lib/getGlobs');\n+const addFilesFromExtStreams = require('./lib/addFilesFromExtStreams');\n+const addHtmlToStream = require('./lib/addHtmlToStream');\n+const unprocessedCounter = require('./lib/unprocessedCounter')();\n+const end = require('./lib/end')();\n+const additionalFiles = [];\n+let transforms;\n+let pluginOptions;\n+\n+function handleAdditionalStreams(additionalStreams) {\n+    let _additionalStreams = additionalStreams;\n+\n+    if (!Array.isArray(additionalStreams)) {\n+        _additionalStreams = [ additionalStreams ];\n+    }\n+\n+    // filters stream to select needed files\n+    return _additionalStreams.map(stream => stream.pipe(es.through(file => {\n+        additionalFiles.push(file);\n+    })));\n+}\n+\n+function addAssetsToStream(paths, files) {\n+    const self = this;\n+    const gulpif = require('gulp-if');\n+    const concat = require('gulp-concat');\n+    const vfs = require('vinyl-fs');\n+    const extend = require('extend');\n+    let src;\n+    let globs;\n+    const name = paths.name;\n+    const basePath = paths.basePath;\n+    const filepaths = files[name].assets;\n+    const type = paths.type;\n+    const options = extend({}, pluginOptions);\n+    const gulpConcatOptions = {};\n+\n+    if (!filepaths.length) {\n+        return;\n+    }\n+\n+    unprocessedCounter.increment();\n+\n+    // Get relative file paths and join with search paths to send to vinyl-fs\n+    globs = filepaths\n+        .filter(url => !/^(?:\\w+:)?\\/\\//.test(url)) // test if url is relative\n+        .map(filepath => {\n+            paths.filepath = filepath;\n+\n+            return getGlobs(paths, files);\n+        });\n+\n+    src = vfs.src(globs, {\n+        base: basePath,\n+        nosort: true\n+    })\n+        .on('error', err => {\n+            self.emit('error', new Error(err));\n+        });\n+\n+    // add files from external streams\n+    src = addFilesFromExtStreams.call(self, additionalFiles, globs, src);\n+\n+    // If any external transforms were included, pipe all files to them first\n+    transforms.forEach(fn => {\n+        src = src.pipe(fn(name));\n+    });\n \n-module.exports = function () {\n-    return through.obj(function (file, enc, cb) {\n-        if (file.isStream()) {\n-            this.emit('error', new gutil.PluginError('gulp-useref', 'Streaming not supported'));\n-            return cb();\n+    // option for newLine in gulp-concat\n+    if (Object.prototype.hasOwnProperty.call(options, 'newLine')) {\n+        if (options.newLine === ';' && type === 'css') {\n+            options.newLine = null;\n         }\n+        gulpConcatOptions.newLine = options.newLine;\n+    }\n \n-        var output = useref(file.contents.toString());\n-        var html = output[0];\n",
+					"match": false,
+					"packageHash": "d1fab7452a93fcdb2611b3efbdb57746352eccae81a42a53edd9b4aa5a6b5902",
+					"size": 3716,
+					"sourceHash": "bf60dfa79ac0d1200408ddb680ac8cb8ac0f068b3bc6444772750bc76747d30a",
+					"status": "content"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -1,32 +1,50 @@\n {\n   \"name\": \"gulp-useref\",\n-  \"version\": \"0.4.4\",\n+  \"version\": \"5.0.0\",\n   \"description\": \"Parse build blocks in HTML files to replace references to non-optimized scripts or stylesheets.\",\n   \"main\": \"index.js\",\n   \"directories\": {\n     \"test\": \"test\"\n   },\n   \"dependencies\": {\n-    \"through2\": \"^0.5.1\",\n-    \"gulp-util\": \"^2.2.14\",\n-    \"glob\": \"^4.0.2\",\n-    \"node-useref\": \"^0.2.7\"\n+    \"event-stream\": \"^4.0.1\",\n+    \"extend\": \"^3.0.2\",\n+    \"glob\": \"^7.2.0\",\n+    \"gulp-concat\": \"^2.6.1\",\n+    \"gulp-if\": \"^3.0.0\",\n+    \"plugin-error\": \"^1.0.1\",\n+    \"through2\": \"^4.0.2\",\n+    \"useref\": \"^1.4.4\",\n+    \"vinyl-fs\": \"^3.0.3\"\n   },\n   \"devDependencies\": {\n-    \"mocha\": \"*\",\n+    \"async-once\": \"^1.0.1\",\n+    \"babel-eslint\": \"^10.1.0\",\n+    \"coveralls\": \"^3.1.1\",\n+    \"gulp\": \"^4.0.2\",\n+    \"gulp-eslint\": \"^6.0.0\",\n+    \"gulp-mocha\": \"^8.0.0\",\n+    \"gulp-rename\": \"^2.0.0\",\n+    \"mocha\": \"^9.2.2\",\n+    \"mock-gulp-dest\": \"^0.1.1\",\n+    \"nyc\": \"^15.1.0\",\n     \"should\": \"*\",\n-    \"gulp-mocha\": \"^0.4.1\",\n-    \"gulp-util\": \"^2.2.14\",\n-    \"gulp\": \"^3.6.1\",\n-    \"gulp-jshint\": \"^1.5.3\"\n+    \"vinyl\": \"^2.2.1\"\n   },\n-  \"scripts\": {\n-    \"test\": \"mocha\"\n-  },\n-  \"repository\": {\n-    \"type\": \"git\",\n-    \"url\": \"git://github.com/jonkemp/gulp-useref.git\"\n+  \"engines\": {\n+    \"node\": \">=0.10.0\"\n   },\n+  \"scripts\": {\n+    \"test\": \"mocha\",\n+    \"lint\": \"gulp lint\",\n+    \"coverage\": \"nyc npm test && nyc report\",\n+    \"coveralls\": \"nyc npm test && nyc report --reporter=lcov\"\n+  },\n+  \"files\": [\n+    \"index.js\",\n+    \"lib\"\n+  ],\n+  \"repository\": \"jonkemp/gulp-useref\",\n   \"keywords\": [\n     \"gulpplugin\",\n     \"html\",\n@@ -36,9 +54,5 @@\n     \"concat\"\n   ],\n   \"author\": \"Jonathan Kemp <kempdogg@gmail.com> (http://jonkemp.com/)\",\n-  \"license\": \"MIT\",\n-  \"bugs\": {\n-    \"url\": \"https://github.com/jonkemp/gulp-useref/issues\"\n-  },\n-  \"homepage\": \"https://github.com/jonkemp/gulp-useref\"\n+  \"license\": \"MIT\"\n }\n",
+					"match": false,
+					"packageHash": "d34c32faac7fa232cb3fd669bee7daf8ae8ffbb26669936c9c1873d3322dd518",
+					"size": 997,
+					"sourceHash": "1b5992015746357701a8a6bc6626007988a92aba60da2215a92d0ceb22a9f0af",
+					"status": "content"
+				},
+				"lib/addFilesFromExtStreams.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/addHtmlToStream.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/end.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/getGlobs.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/getPattern.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/reorderTheStream.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/unprocessedCounter.js": {
+					"match": false,
+					"status": "missing-in-package"
+				}
+			},
+			"summary": {
+				"differentFiles": 3,
+				"matchingFiles": 1,
+				"missingInPackage": 7,
+				"missingInSource": 2,
+				"score": 0.07692307692307693,
+				"totalFiles": 13
+			}
+		},
+		"prodDependencies": [
+			{
+				"name": "ansi-colors",
+				"version": "1.1.0"
+			},
+			{
+				"name": "ansi-wrap",
+				"version": "0.1.0"
+			},
+			{
+				"name": "append-buffer",
+				"version": "1.0.2"
+			},
+			{
+				"name": "arr-diff",
+				"version": "4.0.0"
+			},
+			{
+				"name": "arr-union",
+				"version": "3.1.0"
+			},
+			{
+				"name": "assign-symbols",
+				"version": "1.0.0"
+			},
+			{
+				"name": "balanced-match",
+				"version": "1.0.0"
+			},
+			{
+				"name": "brace-expansion",
+				"version": "1.1.8"
+			},
+			{
+				"name": "buffer-equal",
+				"version": "1.0.0"
+			},
+			{
+				"name": "clone",
+				"version": "2.1.2"
+			},
+			{
+				"name": "clone-buffer",
+				"version": "1.0.0"
+			},
+			{
+				"name": "clone-stats",
+				"version": "1.0.0"
+			},
+			{
+				"name": "cloneable-readable",
+				"version": "1.1.3"
+			},
+			{
+				"name": "concat-map",
+				"version": "0.0.1"
+			},
+			{
+				"name": "concat-with-sourcemaps",
+				"version": "1.1.0"
+			},
+			{
+				"name": "convert-source-map",
+				"version": "1.5.0"
+			},
+			{
+				"name": "core-util-is",
+				"version": "1.0.2"
+			},
+			{
+				"name": "define-properties",
+				"version": "1.1.3"
+			},
+			{
+				"name": "duplexer",
+				"version": "0.1.1"
+			},
+			{
+				"name": "duplexify",
+				"version": "3.6.1"
+			},
+			{
+				"name": "end-of-stream",
+				"version": "1.4.1"
+			},
+			{
+				"name": "event-stream",
+				"version": "4.0.1"
+			},
+			{
+				"name": "extend",
+				"version": "3.0.2"
+			},
+			{
+				"name": "extend-shallow",
+				"version": "3.0.2"
+			},
+			{
+				"name": "flush-write-stream",
+				"version": "1.0.3"
+			},
+			{
+				"name": "fork-stream",
+				"version": "0.0.4"
+			},
+			{
+				"name": "from",
+				"version": "0.1.7"
+			},
+			{
+				"name": "fs-mkdirp-stream",
+				"version": "1.0.0"
+			},
+			{
+				"name": "through2",
+				"version": "2.0.5"
+			},
+			{
+				"name": "fs.realpath",
+				"version": "1.0.0"
+			},
+			{
+				"name": "function-bind",
+				"version": "1.1.1"
+			},
+			{
+				"name": "glob",
+				"version": "7.2.0"
+			},
+			{
+				"name": "glob-parent",
+				"version": "3.1.0"
+			},
+			{
+				"name": "is-extglob",
+				"version": "2.1.1"
+			},
+			{
+				"name": "is-glob",
+				"version": "3.1.0"
+			},
+			{
+				"name": "glob-stream",
+				"version": "6.1.0"
+			},
+			{
+				"name": "graceful-fs",
+				"version": "4.1.11"
+			},
+			{
+				"name": "gulp-concat",
+				"version": "2.6.1"
+			},
+			{
+				"name": "gulp-if",
+				"version": "3.0.0"
+			},
+			{
+				"name": "inherits",
+				"version": "2.0.4"
+			},
+			{
+				"name": "through2",
+				"version": "3.0.2"
+			},
+			{
+				"name": "gulp-match",
+				"version": "1.1.0"
+			},
+			{
+				"name": "has-symbols",
+				"version": "1.0.0"
+			},
+			{
+				"name": "inflight",
+				"version": "1.0.6"
+			},
+			{
+				"name": "inherits",
+				"version": "2.0.3"
+			},
+			{
+				"name": "is-absolute",
+				"version": "1.0.0"
+			},
+			{
+				"name": "is-windows",
+				"version": "1.0.2"
+			},
+			{
+				"name": "is-buffer",
+				"version": "1.1.6"
+			},
+			{
+				"name": "is-extendable",
+				"version": "1.0.1"
+			},
+			{
+				"name": "is-negated-glob",
+				"version": "1.0.0"
+			},
+			{
+				"name": "is-plain-object",
+				"version": "2.0.4"
+			},
+			{
+				"name": "is-relative",
+				"version": "1.0.0"
+			},
+			{
+				"name": "is-unc-path",
+				"version": "1.0.0"
+			},
+			{
+				"name": "is-utf8",
+				"version": "0.2.1"
+			},
+			{
+				"name": "is-valid-glob",
+				"version": "1.0.0"
+			},
+			{
+				"name": "isarray",
+				"version": "1.0.0"
+			},
+			{
+				"name": "isobject",
+				"version": "3.0.1"
+			},
+			{
+				"name": "json-stable-stringify",
+				"version": "1.0.1"
+			},
+			{
+				"name": "jsonify",
+				"version": "0.0.0"
+			},
+			{
+				"name": "lazystream",
+				"version": "1.0.0"
+			},
+			{
+				"name": "lead",
+				"version": "1.0.0"
+			},
+			{
+				"name": "map-stream",
+				"version": "0.0.7"
+			},
+			{
+				"name": "merge-stream",
+				"version": "2.0.0"
+			},
+			{
+				"name": "minimatch",
+				"version": "3.0.4"
+			},
+			{
+				"name": "normalize-path",
+				"version": "2.1.1"
+			},
+			{
+				"name": "now-and-later",
+				"version": "2.0.0"
+			},
+			{
+				"name": "object-keys",
+				"version": "1.0.12"
+			},
+			{
+				"name": "object.assign",
+				"version": "4.1.0"
+			},
+			{
+				"name": "once",
+				"version": "1.4.0"
+			},
+			{
+				"name": "ordered-read-streams",
+				"version": "1.0.1"
+			},
+			{
+				"name": "path-dirname",
+				"version": "1.0.2"
+			},
+			{
+				"name": "path-is-absolute",
+				"version": "1.0.1"
+			},
+			{
+				"name": "pause-stream",
+				"version": "0.0.11"
+			},
+			{
+				"name": "plugin-error",
+				"version": "1.0.1"
+			},
+			{
+				"name": "process-nextick-args",
+				"version": "2.0.0"
+			},
+			{
+				"name": "pump",
+				"version": "2.0.1"
+			},
+			{
+				"name": "pumpify",
+				"version": "1.5.1"
+			},
+			{
+				"name": "readable-stream",
+				"version": "2.3.6"
+			},
+			{
+				"name": "string_decoder",
+				"version": "1.1.1"
+			},
+			{
+				"name": "remove-bom-buffer",
+				"version": "3.0.0"
+			},
+			{
+				"name": "remove-bom-stream",
+				"version": "1.2.0"
+			},
+			{
+				"name": "remove-trailing-separator",
+				"version": "1.1.0"
+			},
+			{
+				"name": "replace-ext",
+				"version": "1.0.1"
+			},
+			{
+				"name": "resolve-options",
+				"version": "1.1.0"
+			},
+			{
+				"name": "safe-buffer",
+				"version": "5.1.2"
+			},
+			{
+				"name": "source-map",
+				"version": "0.6.1"
+			},
+			{
+				"name": "split",
+				"version": "1.0.1"
+			},
+			{
+				"name": "stream-combiner",
+				"version": "0.2.2"
+			},
+			{
+				"name": "stream-shift",
+				"version": "1.0.0"
+			},
+			{
+				"name": "ternary-stream",
+				"version": "3.0.0"
+			},
+			{
+				"name": "duplexify",
+				"version": "4.1.1"
+			},
+			{
+				"name": "readable-stream",
+				"version": "3.4.0"
+			},
+			{
+				"name": "safe-buffer",
+				"version": "5.2.0"
+			},
+			{
+				"name": "string_decoder",
+				"version": "1.3.0"
+			},
+			{
+				"name": "through",
+				"version": "2.3.8"
+			},
+			{
+				"name": "through2",
+				"version": "4.0.2"
+			},
+			{
+				"name": "through2-filter",
+				"version": "2.0.0"
+			},
+			{
+				"name": "readable-stream",
+				"version": "3.6.0"
+			},
+			{
+				"name": "safe-buffer",
+				"version": "5.2.1"
+			},
+			{
+				"name": "to-absolute-glob",
+				"version": "2.0.2"
+			},
+			{
+				"name": "to-through",
+				"version": "2.0.0"
+			},
+			{
+				"name": "unc-path-regex",
+				"version": "0.1.2"
+			},
+			{
+				"name": "unique-stream",
+				"version": "2.2.1"
+			},
+			{
+				"name": "useref",
+				"version": "1.4.4"
+			},
+			{
+				"name": "util-deprecate",
+				"version": "1.0.2"
+			},
+			{
+				"name": "value-or-function",
+				"version": "3.0.0"
+			},
+			{
+				"name": "vinyl",
+				"version": "2.2.1"
+			},
+			{
+				"name": "vinyl-fs",
+				"version": "3.0.3"
+			},
+			{
+				"name": "vinyl-sourcemap",
+				"version": "1.1.0"
+			},
+			{
+				"name": "wrappy",
+				"version": "1.0.2"
+			},
+			{
+				"name": "xtend",
+				"version": "4.0.1"
+			}
+		]
+	}
+]

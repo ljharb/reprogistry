@@ -1,0 +1,749 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-09T15:30:27.084Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:11.7.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "gulp-useref@0.4.2",
+			"name": "gulp-useref",
+			"version": "0.4.2",
+			"location": "https://registry.npmjs.org/gulp-useref/-/gulp-useref-0.4.2.tgz",
+			"integrity": "sha512-jVMhzihfLi9mmzxoEfuElfbRXf91Y9mBwed7PuLWIFsUnrBRweGEi4oUA7iGPCOXgZl0uMw5Pr0jPqdK2Sl3LQ==",
+			"publishedAt": "2014-04-18T19:25:43.958Z",
+			"publishedWith": {
+				"node": null,
+				"npm": "1.4.3"
+			},
+			"dependencies": {
+				"glob": "^3.2.9",
+				"through2": "^0.4.1",
+				"gulp-util": "^2.2.14",
+				"node-useref": "^0.2.6"
+			}
+		},
+		"source": {
+			"integrity": "sha512-K05QdTpZenFWZlTjPahF79jO3U/RNZk8hhFru2XgCSyctkOxoFUie992fqVTMUIRpuiPEP2Mb/4RF8iXC0JVbw==",
+			"location": "git://github.com/jonkemp/gulp-useref.git",
+			"spec": "github:jonkemp/gulp-useref#HEAD"
+		},
+		"comparisonHash": "9ef46a5bd31291e57cbab41e2f17c57bd6da0b5b",
+		"diff": {
+			"files": {
+				".jshintrc": {
+					"match": false,
+					"packageHash": "fc60651e02c4b0b3149055802f23376ce89c4371260eb93ffb7f06e55272c99a",
+					"size": 354,
+					"status": "missing-in-source"
+				},
+				".npmignore": {
+					"match": false,
+					"packageHash": "16d30e4462189fb14dd611bdb708c510630c576a1f35b9383e89a4352da36c97",
+					"size": 13,
+					"status": "missing-in-source"
+				},
+				".travis.yml": {
+					"match": false,
+					"packageHash": "1bc0e622110c1dfeb434407a3d86722394dded0bc07dbbe6dc5d14bb92304f52",
+					"size": 144,
+					"status": "missing-in-source"
+				},
+				"README.md": {
+					"diff": "--- published/README.md\n+++ rebuilt/README.md\n@@ -1,131 +1,298 @@\n-# [gulp](https://github.com/wearefractal/gulp)-useref [![Build Status](https://travis-ci.org/jonkemp/gulp-useref.png?branch=master)](https://travis-ci.org/jonkemp/gulp-useref)\r\n-\r\n-> Parse build blocks in HTML files to replace references to non-optimized scripts or stylesheets with [useref](https://github.com/digisfera/useref)\r\n-\r\n-Inspired by the grunt plugin [grunt-useref](https://github.com/pajtai/grunt-useref). It can handle file concatenation but not minification. Files are then passed down the stream. For minification of assets or other modifications, use [gulp-filter](https://github.com/sindresorhus/gulp-filter) to filter specific types of assets.\r\n-\r\n-\r\n-## Install\r\n-\r\n-Install with [npm](https://npmjs.org/package/gulp-useref)\r\n-\r\n-```\r\n-npm install --save-dev gulp-useref\r\n-```\r\n-\r\n-\r\n-## Usage\r\n-\r\n-The following example will parse the build blocks in the HTML, replace them and pass those files through. Assets inside the build blocks will be concatenated and passed through in a stream as well.\r\n-\r\n-```js\r\n-var gulp = require('gulp'),\r\n-    useref = require('gulp-useref');\r\n-\r\n-gulp.task('default', function () {\r\n-\treturn gulp.src('app/*.html')\r\n-        .pipe(useref.assets())\r\n-        .pipe(useref.restore())\r\n-        .pipe(useref())\r\n-        .pipe(gulp.dest('dist'));\r\n-});\r\n-```\r\n-\r\n-If you want to minify your assets or perform some other modification, you can use [gulp-filter](https://github.com/sindresorhus/gulp-filter) to handle specific types of assets. When you want all the original files back, just call the restore method.\r\n-\r\n-```js\r\n-var gulp = require('gulp'),\r\n-    useref = require('gulp-useref'),\r\n-    filter = require('gulp-filter'),\r\n-    uglify = require('gulp-uglify'),\r\n-    minifyCss = require('gulp-minify-css');\r\n-\r\n-gulp.task('html', function () {\r\n-    var jsFilter = filter('**/*.js');\r\n-    var cssFilter = filter('**/*.css');\r\n-\r\n-    return gulp.src('app/*.html')\r\n-        .pipe(useref.assets())\r\n-        .pipe(jsFilter)\r\n-        .pipe(uglify())\r\n-        .pipe(jsFilter.restore())\r\n-        .pipe(cssFilter)\r\n-        .pipe(minifyCss())\r\n-        .pipe(cssFilter.restore())\r\n-        .pipe(useref.restore())\r\n-        .pipe(useref())\r\n-        .pipe(gulp.dest('dist'));\r\n-});\r\n-```\r\n-\r\n-\r\n-Blocks are expressed as:\r\n-\r\n-```html\r\n-<!-- build:<type>(alternate search path) <path> -->\r\n-... HTML Markup, list of script / link tags.\r\n-<!-- endbuild -->\r\n-```\r\n-\r\n-- **type**: either `js` or `css`\r\n-- **alternate search path**: (optional) By default the input files are relative to the treated file. Alternate search path allows one to change that\r\n-- **path**: the file path of the optimized file, the target output\r\n-\r\n-An example of this in completed form can be seen below:\r\n-\r\n-    <html>\r\n-    <head>\r\n-        <!-- build:css css/combined.css -->\r\n-        <link href=\"css/one.css\" rel=\"stylesheet\">\r\n-        <link href=\"css/two.css\" rel=\"stylesheet\">\r\n-        <!-- endbuild -->\r\n-    </head>\r\n-    <body>\r\n-        <!-- build:js scripts/combined.js -->\r\n-        <script type=\"text/javascript\" src=\"scripts/one.js\"></script>\r\n-        <script type=\"text/javascript\" src=\"scripts/two.js\"></script>\r\n-        <!-- endbuild -->\r\n-    </body>\r\n-    </html>\r\n-\r\n-\r\n-The resulting HTML would be:\r\n-\r\n-    <html>\r\n-    <head>\r\n-        <link rel=\"stylesheet\" href=\"css/combined.css\"/>\r\n-    </head>\r\n",
+					"match": false,
+					"packageHash": "76918e4b059f9f4d7d064a7b2b32205c5754a8fe0cc5aa09fdf475b971cd2e96",
+					"size": 4429,
+					"sourceHash": "7fb194c243f4b7c3f8f3392a5f108c2880a6ac6416e83c510a47dd361cdf56bc",
+					"status": "content"
+				},
+				"gulpfile.js": {
+					"match": false,
+					"packageHash": "fce236a6e2bc8cf8d51c7b8ae0709a28d9f15b774df3a8905606bc917de68b59",
+					"size": 569,
+					"status": "missing-in-source"
+				},
+				"index.js": {
+					"diff": "--- published/index.js\n+++ rebuilt/index.js\n@@ -1,91 +1,197 @@\n-'use strict';\r\n-var gutil = require('gulp-util');\r\n-var through = require('through2');\r\n-var useref = require('node-useref');\r\n-var path = require('path');\r\n-var fs = require('fs');\r\n-var glob = require('glob');\r\n-\r\n-var restoreStream = through.obj();\r\n-\r\n-module.exports = function () {\r\n-    return through.obj(function (file, enc, cb) {\r\n-        if (file.isStream()) {\r\n-            this.emit('error', new gutil.PluginError('gulp-useref', 'Streaming not supported'));\r\n-            return cb();\r\n-        }\r\n-\r\n-        var output = useref(file.contents.toString());\r\n-        var html = output[0];\r\n-\r\n-        try {\r\n-            file.contents = new Buffer(html);\r\n-        } catch (err) {\r\n-            this.emit('error', new gutil.PluginError('gulp-useref', err));\r\n-        }\r\n-\r\n-        this.push(file);\r\n-\r\n-        cb();\r\n-    });\r\n-};\r\n-\r\n-module.exports.assets = function (options) {\r\n-    var opts = options || {};\r\n-\r\n-    return through.obj(function (file, enc, cb) {\r\n-        var output = useref(file.contents.toString());\r\n-        var assets = output[1];\r\n-\r\n-        ['css', 'js'].forEach(function (type) {\r\n-            var files = assets[type];\r\n-            if (files) {\r\n-                Object.keys(files).forEach(function (name) {\r\n-                    var buffer = [];\r\n-                    var filepaths = files[name].assets;\r\n-\r\n-                    if (filepaths.length) {\r\n-                        var searchPaths;\r\n-                        if (files[name].searchPaths) {\r\n-                            searchPaths = path.join(file.cwd, files[name].searchPaths);\r\n-                        } else if (opts.searchPath) {\r\n-                            if (Array.isArray(opts.searchPath)) {\r\n-                                searchPaths = '{' + opts.searchPath.join(',') + '}';\r\n-                            } else {\r\n-                                searchPaths = opts.searchPath;\r\n-                            }\r\n-\r\n-                            searchPaths = path.join(file.cwd, searchPaths);\r\n-                        }\r\n-\r\n-                        filepaths.forEach(function (filepath) {\r\n-                            filepath = path.join((searchPaths || file.base), filepath);\r\n-                            filepath = glob.sync(filepath);\r\n-                            try {\r\n-                                buffer.push(fs.readFileSync(filepath[0]));\r\n-                            } catch (err) {\r\n-                                this.emit('error', new gutil.PluginError('gulp-useref', err));\r\n-                            }\r\n-                        }, this);\r\n-\r\n-                        var joinedFile = new gutil.File({\r\n-                            cwd: file.cwd,\r\n-                            base: file.base,\r\n-                            path: path.join(file.base, name),\r\n-                            contents: new Buffer(buffer.join(gutil.linefeed))\r\n-                        });\r\n-\r\n-                        this.push(joinedFile);\r\n-                    }\r\n-\r\n-                }, this);\r\n-            }\r\n-        }, this);\r\n-\r\n-        restoreStream.write(file, cb);\r\n-    });\r\n-};\r\n-\r\n-module.exports.restore = function () {\r\n-    return restoreStream.pipe(through.obj(), { end: false });\r\n-};\r\n+const path = require('path');\n+const PluginError = require('plugin-error');\n+const es = require('event-stream');\n+const through = require('through2');\n+const useref = require('useref');\n+const getGlobs = require('./lib/getGlobs');\n",
+					"match": false,
+					"packageHash": "b7be87166b90aea7b18040a70afed6a87292a13f514fe5ea3f7aa4955069d8ea",
+					"size": 3152,
+					"sourceHash": "bf60dfa79ac0d1200408ddb680ac8cb8ac0f068b3bc6444772750bc76747d30a",
+					"status": "content"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -1,44 +1,58 @@\n-{\r\n-  \"name\": \"gulp-useref\",\r\n-  \"version\": \"0.4.2\",\r\n-  \"description\": \"Parse build blocks in HTML files to replace references to non-optimized scripts or stylesheets.\",\r\n-  \"main\": \"index.js\",\r\n-  \"directories\": {\r\n-    \"test\": \"test\"\r\n-  },\r\n-  \"dependencies\": {\r\n-    \"through2\": \"^0.4.1\",\r\n-    \"gulp-util\": \"^2.2.14\",\r\n-    \"glob\": \"^3.2.9\",\r\n-    \"node-useref\": \"^0.2.6\"\r\n-  },\r\n-  \"devDependencies\": {\r\n-    \"mocha\": \"*\",\r\n-    \"should\": \"*\",\r\n-    \"gulp-mocha\": \"^0.4.1\",\r\n-    \"gulp-util\": \"^2.2.14\",\r\n-    \"gulp\": \"^3.6.1\",\r\n-    \"gulp-jshint\": \"^1.5.3\"\r\n-  },\r\n-  \"scripts\": {\r\n-    \"test\": \"mocha\"\r\n-  },\r\n-  \"repository\": {\r\n-    \"type\": \"git\",\r\n-    \"url\": \"git://github.com/jonkemp/gulp-useref.git\"\r\n-  },\r\n-  \"keywords\": [\r\n-    \"gulpplugin\",\r\n-    \"html\",\r\n-    \"scripts\",\r\n-    \"css\",\r\n-    \"optimize\",\r\n-    \"concat\"\r\n-  ],\r\n-  \"author\": \"Jonathan Kemp <kempdogg@gmail.com> (http://jonkemp.com/)\",\r\n-  \"license\": \"MIT\",\r\n-  \"bugs\": {\r\n-    \"url\": \"https://github.com/jonkemp/gulp-useref/issues\"\r\n-  },\r\n-  \"homepage\": \"https://github.com/jonkemp/gulp-useref\"\r\n-}\r\n+{\n+  \"name\": \"gulp-useref\",\n+  \"version\": \"5.0.0\",\n+  \"description\": \"Parse build blocks in HTML files to replace references to non-optimized scripts or stylesheets.\",\n+  \"main\": \"index.js\",\n+  \"directories\": {\n+    \"test\": \"test\"\n+  },\n+  \"dependencies\": {\n+    \"event-stream\": \"^4.0.1\",\n+    \"extend\": \"^3.0.2\",\n+    \"glob\": \"^7.2.0\",\n+    \"gulp-concat\": \"^2.6.1\",\n+    \"gulp-if\": \"^3.0.0\",\n+    \"plugin-error\": \"^1.0.1\",\n+    \"through2\": \"^4.0.2\",\n+    \"useref\": \"^1.4.4\",\n+    \"vinyl-fs\": \"^3.0.3\"\n+  },\n+  \"devDependencies\": {\n+    \"async-once\": \"^1.0.1\",\n+    \"babel-eslint\": \"^10.1.0\",\n+    \"coveralls\": \"^3.1.1\",\n+    \"gulp\": \"^4.0.2\",\n+    \"gulp-eslint\": \"^6.0.0\",\n+    \"gulp-mocha\": \"^8.0.0\",\n+    \"gulp-rename\": \"^2.0.0\",\n+    \"mocha\": \"^9.2.2\",\n+    \"mock-gulp-dest\": \"^0.1.1\",\n+    \"nyc\": \"^15.1.0\",\n+    \"should\": \"*\",\n+    \"vinyl\": \"^2.2.1\"\n+  },\n+  \"engines\": {\n+    \"node\": \">=0.10.0\"\n+  },\n+  \"scripts\": {\n+    \"test\": \"mocha\",\n+    \"lint\": \"gulp lint\",\n+    \"coverage\": \"nyc npm test && nyc report\",\n+    \"coveralls\": \"nyc npm test && nyc report --reporter=lcov\"\n+  },\n+  \"files\": [\n+    \"index.js\",\n+    \"lib\"\n+  ],\n+  \"repository\": \"jonkemp/gulp-useref\",\n+  \"keywords\": [\n+    \"gulpplugin\",\n+    \"html\",\n+    \"scripts\",\n+    \"css\",\n+    \"optimize\",\n",
+					"match": false,
+					"packageHash": "b27980542f7ff0739860ad12868b4be77269a45d1894988bfb3104f21deef424",
+					"size": 1041,
+					"sourceHash": "1b5992015746357701a8a6bc6626007988a92aba60da2215a92d0ceb22a9f0af",
+					"status": "content"
+				},
+				"test/.tmp/css/one.css": {
+					"match": false,
+					"packageHash": "cb4a4d141a6f5125ee7f61426ff4f363bda71128d2f78e03052cb9b76727362f",
+					"size": 27,
+					"status": "missing-in-source"
+				},
+				"test/.tmp/css/two.css": {
+					"match": false,
+					"packageHash": "6048abbe5236404468c44925cadd27e88a02c7ae52e886cee52d64234ba24e81",
+					"size": 92,
+					"status": "missing-in-source"
+				},
+				"test/.tmp/scripts/anotherone.js": {
+					"match": false,
+					"packageHash": "bedf6c909f7343a734b62aa1e4e5cfefa8a29f03d445871775da88b2dd588998",
+					"size": 39,
+					"status": "missing-in-source"
+				},
+				"test/.tmp/scripts/module1.js": {
+					"match": false,
+					"packageHash": "d4a1779d9fe2722b93179470ac0f59aa086f00bd483c56c83934855aecadd728",
+					"size": 31,
+					"status": "missing-in-source"
+				},
+				"test/.tmp/scripts/module2.js": {
+					"match": false,
+					"packageHash": "46346e1cae359aa2d2810437b85c08b7c8d5ed64c4ce3f1f8f02c89bce2b2567",
+					"size": 28,
+					"status": "missing-in-source"
+				},
+				"test/.tmp/scripts/that.js": {
+					"match": false,
+					"packageHash": "46346e1cae359aa2d2810437b85c08b7c8d5ed64c4ce3f1f8f02c89bce2b2567",
+					"size": 28,
+					"status": "missing-in-source"
+				},
+				"test/.tmp/scripts/this.js": {
+					"match": false,
+					"packageHash": "d4a1779d9fe2722b93179470ac0f59aa086f00bd483c56c83934855aecadd728",
+					"size": 31,
+					"status": "missing-in-source"
+				},
+				"test/.tmp/scripts/yetonemore.js": {
+					"match": false,
+					"packageHash": "3f4f92fe6e67268964f9c8a163450957d87cf4a81c5405bf82898541463a7ac7",
+					"size": 54,
+					"status": "missing-in-source"
+				},
+				"test/expected/01.html": {
+					"match": false,
+					"packageHash": "b89a420ff128c2de821f4c4a6929a835e67e644b86e1f62222f71b3c55d939c7",
+					"size": 85,
+					"status": "missing-in-source"
+				},
+				"test/expected/02.html": {
+					"match": false,
+					"packageHash": "9d4eda95d470d963282c5ce22edcb4fc2e09357056f7d1e2a21082da5349f4bc",
+					"size": 103,
+					"status": "missing-in-source"
+				},
+				"test/expected/03.html": {
+					"match": false,
+					"packageHash": "9d4eda95d470d963282c5ce22edcb4fc2e09357056f7d1e2a21082da5349f4bc",
+					"size": 103,
+					"status": "missing-in-source"
+				},
+				"test/expected/04.html": {
+					"match": false,
+					"packageHash": "b0c63a696a6b2f350e0dcf1b9bbb9ed325d6e18271d23470a1c9282559546733",
+					"size": 283,
+					"status": "missing-in-source"
+				},
+				"test/fixtures/01.html": {
+					"match": false,
+					"packageHash": "4d7b79ec50e9f13f22b6f00250c41489a655c09274a10529627267dbca67d333",
+					"size": 187,
+					"status": "missing-in-source"
+				},
+				"test/fixtures/02.html": {
+					"match": false,
+					"packageHash": "738cb7ef0db62fba5b7f394e6b693b0e144fb7f1d2291585cbadd309b8bbc21b",
+					"size": 244,
+					"status": "missing-in-source"
+				},
+				"test/fixtures/03.html": {
+					"match": false,
+					"packageHash": "07f864ee7adc3933c8de5e37c1e5cea64c62a201412494e66bcef772e72bfcd6",
+					"size": 274,
+					"status": "missing-in-source"
+				},
+				"test/fixtures/04.html": {
+					"match": false,
+					"packageHash": "8541db3074c2e06b795d61a2c9bde01c8c2cdf8e3218d03386dd9dbaa1a18328",
+					"size": 784,
+					"status": "missing-in-source"
+				},
+				"test/fixtures/05.html": {
+					"match": false,
+					"packageHash": "5fa24e9a2e1dfad42f53b49c784f20d2d94eecea752d315eb67b621efc2b0351",
+					"size": 193,
+					"status": "missing-in-source"
+				},
+				"test/fixtures/06.html": {
+					"match": false,
+					"packageHash": "746f7a7bbbd109c57d1eb57aab46ebbe50faf789097d651d80d8ba6134539a2f",
+					"size": 245,
+					"status": "missing-in-source"
+				},
+				"test/fixtures/07.html": {
+					"match": false,
+					"packageHash": "01a20b31e79e339aebf7b0eb3ba7f4038ac07a575ba4f41a564eaf897c1cb534",
+					"size": 386,
+					"status": "missing-in-source"
+				},
+				"test/fixtures/08.html": {
+					"match": false,
+					"packageHash": "139d61347ba90a1e398e68a05919f730866db6b6b6b7555e806ec3d3d241f032",
+					"size": 615,
+					"status": "missing-in-source"
+				},
+				"test/fixtures/09.html": {
+					"match": false,
+					"packageHash": "cfe28dd211a26803ea3f2756742977e5dc9f1c3e9d7967e116a72f77d79c24fb",
+					"size": 93,
+					"status": "missing-in-source"
+				},
+				"test/fixtures/css/four.css": {
+					"match": false,
+					"packageHash": "45da0221e98f065124c2457c32ecad21ecc0eb14acf5db7a88b8cf77e578135c",
+					"size": 68,
+					"status": "missing-in-source"
+				},
+				"test/fixtures/css/one.css": {
+					"match": false,
+					"packageHash": "cb4a4d141a6f5125ee7f61426ff4f363bda71128d2f78e03052cb9b76727362f",
+					"size": 27,
+					"status": "missing-in-source"
+				},
+				"test/fixtures/css/three.css": {
+					"match": false,
+					"packageHash": "9b5398718c1cb0ae20cf1507c94198cd15648406c607bd083541c56cbc64cdfc",
+					"size": 156,
+					"status": "missing-in-source"
+				},
+				"test/fixtures/css/two.css": {
+					"match": false,
+					"packageHash": "6048abbe5236404468c44925cadd27e88a02c7ae52e886cee52d64234ba24e81",
+					"size": 92,
+					"status": "missing-in-source"
+				},
+				"test/fixtures/scripts/anotherone.js": {
+					"match": false,
+					"packageHash": "bedf6c909f7343a734b62aa1e4e5cfefa8a29f03d445871775da88b2dd588998",
+					"size": 39,
+					"status": "missing-in-source"
+				},
+				"test/fixtures/scripts/that.js": {
+					"match": false,
+					"packageHash": "46346e1cae359aa2d2810437b85c08b7c8d5ed64c4ce3f1f8f02c89bce2b2567",
+					"size": 28,
+					"status": "missing-in-source"
+				},
+				"test/fixtures/scripts/this.js": {
+					"match": false,
+					"packageHash": "d4a1779d9fe2722b93179470ac0f59aa086f00bd483c56c83934855aecadd728",
+					"size": 31,
+					"status": "missing-in-source"
+				},
+				"test/fixtures/scripts/yetonemore.js": {
+					"match": false,
+					"packageHash": "3f4f92fe6e67268964f9c8a163450957d87cf4a81c5405bf82898541463a7ac7",
+					"size": 54,
+					"status": "missing-in-source"
+				},
+				"test/test.js": {
+					"match": false,
+					"packageHash": "1bec15f2edcd9ae453baae6f549047724691435783e582b343c98b4ff5bedfb2",
+					"size": 7255,
+					"status": "missing-in-source"
+				},
+				"lib/addFilesFromExtStreams.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/addHtmlToStream.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/end.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/getGlobs.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/getPattern.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/reorderTheStream.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/unprocessedCounter.js": {
+					"match": false,
+					"status": "missing-in-package"
+				}
+			},
+			"summary": {
+				"differentFiles": 3,
+				"matchingFiles": 1,
+				"missingInPackage": 7,
+				"missingInSource": 34,
+				"score": 0.022222222222222223,
+				"totalFiles": 45
+			}
+		},
+		"prodDependencies": [
+			{
+				"name": "ansi-colors",
+				"version": "1.1.0"
+			},
+			{
+				"name": "ansi-wrap",
+				"version": "0.1.0"
+			},
+			{
+				"name": "append-buffer",
+				"version": "1.0.2"
+			},
+			{
+				"name": "arr-diff",
+				"version": "4.0.0"
+			},
+			{
+				"name": "arr-union",
+				"version": "3.1.0"
+			},
+			{
+				"name": "assign-symbols",
+				"version": "1.0.0"
+			},
+			{
+				"name": "balanced-match",
+				"version": "1.0.0"
+			},
+			{
+				"name": "brace-expansion",
+				"version": "1.1.8"
+			},
+			{
+				"name": "buffer-equal",
+				"version": "1.0.0"
+			},
+			{
+				"name": "clone",
+				"version": "2.1.2"
+			},
+			{
+				"name": "clone-buffer",
+				"version": "1.0.0"
+			},
+			{
+				"name": "clone-stats",
+				"version": "1.0.0"
+			},
+			{
+				"name": "cloneable-readable",
+				"version": "1.1.3"
+			},
+			{
+				"name": "concat-map",
+				"version": "0.0.1"
+			},
+			{
+				"name": "concat-with-sourcemaps",
+				"version": "1.1.0"
+			},
+			{
+				"name": "convert-source-map",
+				"version": "1.5.0"
+			},
+			{
+				"name": "core-util-is",
+				"version": "1.0.2"
+			},
+			{
+				"name": "define-properties",
+				"version": "1.1.3"
+			},
+			{
+				"name": "duplexer",
+				"version": "0.1.1"
+			},
+			{
+				"name": "duplexify",
+				"version": "3.6.1"
+			},
+			{
+				"name": "end-of-stream",
+				"version": "1.4.1"
+			},
+			{
+				"name": "event-stream",
+				"version": "4.0.1"
+			},
+			{
+				"name": "extend",
+				"version": "3.0.2"
+			},
+			{
+				"name": "extend-shallow",
+				"version": "3.0.2"
+			},
+			{
+				"name": "flush-write-stream",
+				"version": "1.0.3"
+			},
+			{
+				"name": "fork-stream",
+				"version": "0.0.4"
+			},
+			{
+				"name": "from",
+				"version": "0.1.7"
+			},
+			{
+				"name": "fs-mkdirp-stream",
+				"version": "1.0.0"
+			},
+			{
+				"name": "through2",
+				"version": "2.0.5"
+			},
+			{
+				"name": "fs.realpath",
+				"version": "1.0.0"
+			},
+			{
+				"name": "function-bind",
+				"version": "1.1.1"
+			},
+			{
+				"name": "glob",
+				"version": "7.2.0"
+			},
+			{
+				"name": "glob-parent",
+				"version": "3.1.0"
+			},
+			{
+				"name": "is-extglob",
+				"version": "2.1.1"
+			},
+			{
+				"name": "is-glob",
+				"version": "3.1.0"
+			},
+			{
+				"name": "glob-stream",
+				"version": "6.1.0"
+			},
+			{
+				"name": "graceful-fs",
+				"version": "4.1.11"
+			},
+			{
+				"name": "gulp-concat",
+				"version": "2.6.1"
+			},
+			{
+				"name": "gulp-if",
+				"version": "3.0.0"
+			},
+			{
+				"name": "inherits",
+				"version": "2.0.4"
+			},
+			{
+				"name": "through2",
+				"version": "3.0.2"
+			},
+			{
+				"name": "gulp-match",
+				"version": "1.1.0"
+			},
+			{
+				"name": "has-symbols",
+				"version": "1.0.0"
+			},
+			{
+				"name": "inflight",
+				"version": "1.0.6"
+			},
+			{
+				"name": "inherits",
+				"version": "2.0.3"
+			},
+			{
+				"name": "is-absolute",
+				"version": "1.0.0"
+			},
+			{
+				"name": "is-windows",
+				"version": "1.0.2"
+			},
+			{
+				"name": "is-buffer",
+				"version": "1.1.6"
+			},
+			{
+				"name": "is-extendable",
+				"version": "1.0.1"
+			},
+			{
+				"name": "is-negated-glob",
+				"version": "1.0.0"
+			},
+			{
+				"name": "is-plain-object",
+				"version": "2.0.4"
+			},
+			{
+				"name": "is-relative",
+				"version": "1.0.0"
+			},
+			{
+				"name": "is-unc-path",
+				"version": "1.0.0"
+			},
+			{
+				"name": "is-utf8",
+				"version": "0.2.1"
+			},
+			{
+				"name": "is-valid-glob",
+				"version": "1.0.0"
+			},
+			{
+				"name": "isarray",
+				"version": "1.0.0"
+			},
+			{
+				"name": "isobject",
+				"version": "3.0.1"
+			},
+			{
+				"name": "json-stable-stringify",
+				"version": "1.0.1"
+			},
+			{
+				"name": "jsonify",
+				"version": "0.0.0"
+			},
+			{
+				"name": "lazystream",
+				"version": "1.0.0"
+			},
+			{
+				"name": "lead",
+				"version": "1.0.0"
+			},
+			{
+				"name": "map-stream",
+				"version": "0.0.7"
+			},
+			{
+				"name": "merge-stream",
+				"version": "2.0.0"
+			},
+			{
+				"name": "minimatch",
+				"version": "3.0.4"
+			},
+			{
+				"name": "normalize-path",
+				"version": "2.1.1"
+			},
+			{
+				"name": "now-and-later",
+				"version": "2.0.0"
+			},
+			{
+				"name": "object-keys",
+				"version": "1.0.12"
+			},
+			{
+				"name": "object.assign",
+				"version": "4.1.0"
+			},
+			{
+				"name": "once",
+				"version": "1.4.0"
+			},
+			{
+				"name": "ordered-read-streams",
+				"version": "1.0.1"
+			},
+			{
+				"name": "path-dirname",
+				"version": "1.0.2"
+			},
+			{
+				"name": "path-is-absolute",
+				"version": "1.0.1"
+			},
+			{
+				"name": "pause-stream",
+				"version": "0.0.11"
+			},
+			{
+				"name": "plugin-error",
+				"version": "1.0.1"
+			},
+			{
+				"name": "process-nextick-args",
+				"version": "2.0.0"
+			},
+			{
+				"name": "pump",
+				"version": "2.0.1"
+			},
+			{
+				"name": "pumpify",
+				"version": "1.5.1"
+			},
+			{
+				"name": "readable-stream",
+				"version": "2.3.6"
+			},
+			{
+				"name": "string_decoder",
+				"version": "1.1.1"
+			},
+			{
+				"name": "remove-bom-buffer",
+				"version": "3.0.0"
+			},
+			{
+				"name": "remove-bom-stream",
+				"version": "1.2.0"
+			},
+			{
+				"name": "remove-trailing-separator",
+				"version": "1.1.0"
+			},
+			{
+				"name": "replace-ext",
+				"version": "1.0.1"
+			},
+			{
+				"name": "resolve-options",
+				"version": "1.1.0"
+			},
+			{
+				"name": "safe-buffer",
+				"version": "5.1.2"
+			},
+			{
+				"name": "source-map",
+				"version": "0.6.1"
+			},
+			{
+				"name": "split",
+				"version": "1.0.1"
+			},
+			{
+				"name": "stream-combiner",
+				"version": "0.2.2"
+			},
+			{
+				"name": "stream-shift",
+				"version": "1.0.0"
+			},
+			{
+				"name": "ternary-stream",
+				"version": "3.0.0"
+			},
+			{
+				"name": "duplexify",
+				"version": "4.1.1"
+			},
+			{
+				"name": "readable-stream",
+				"version": "3.4.0"
+			},
+			{
+				"name": "safe-buffer",
+				"version": "5.2.0"
+			},
+			{
+				"name": "string_decoder",
+				"version": "1.3.0"
+			},
+			{
+				"name": "through",
+				"version": "2.3.8"
+			},
+			{
+				"name": "through2",
+				"version": "4.0.2"
+			},
+			{
+				"name": "through2-filter",
+				"version": "2.0.0"
+			},
+			{
+				"name": "readable-stream",
+				"version": "3.6.0"
+			},
+			{
+				"name": "safe-buffer",
+				"version": "5.2.1"
+			},
+			{
+				"name": "to-absolute-glob",
+				"version": "2.0.2"
+			},
+			{
+				"name": "to-through",
+				"version": "2.0.0"
+			},
+			{
+				"name": "unc-path-regex",
+				"version": "0.1.2"
+			},
+			{
+				"name": "unique-stream",
+				"version": "2.2.1"
+			},
+			{
+				"name": "useref",
+				"version": "1.4.4"
+			},
+			{
+				"name": "util-deprecate",
+				"version": "1.0.2"
+			},
+			{
+				"name": "value-or-function",
+				"version": "3.0.0"
+			},
+			{
+				"name": "vinyl",
+				"version": "2.2.1"
+			},
+			{
+				"name": "vinyl-fs",
+				"version": "3.0.3"
+			},
+			{
+				"name": "vinyl-sourcemap",
+				"version": "1.1.0"
+			},
+			{
+				"name": "wrappy",
+				"version": "1.0.2"
+			},
+			{
+				"name": "xtend",
+				"version": "4.0.1"
+			}
+		]
+	}
+]
