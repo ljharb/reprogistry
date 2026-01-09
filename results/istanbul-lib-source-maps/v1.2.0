@@ -1,0 +1,162 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-09T11:46:29.561Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:11.7.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "istanbul-lib-source-maps@1.2.0",
+			"name": "istanbul-lib-source-maps",
+			"version": "1.2.0",
+			"location": "https://registry.npmjs.org/istanbul-lib-source-maps/-/istanbul-lib-source-maps-1.2.0.tgz",
+			"integrity": "sha512-jr8wtWkHbTSCdWbs0qekBwp3pKm78h/iCdX6GssKXkOYpeSiInm1N0JgllTZuUOlGAtx6d1kJe9oguazg7snVQ==",
+			"publishedAt": "2017-04-29T05:00:10.266Z",
+			"publishedWith": {
+				"node": "7.1.0",
+				"npm": "4.2.0"
+			},
+			"dependencies": {
+				"debug": "^2.6.3",
+				"mkdirp": "^0.5.1",
+				"rimraf": "^2.6.1",
+				"source-map": "^0.5.3",
+				"istanbul-lib-coverage": "^1.1.0"
+			}
+		},
+		"source": {
+			"integrity": "sha512-9uSThXxeCqr7CPoADfcpeBT+OCoOWf7HRrRr67K8Ft+TILi5HrWJlRlk7CST7ystdTBUlEmF7oHmlX0ZEIx4UA==",
+			"location": "git+ssh://git@github.com/istanbuljs/istanbul-lib-source-maps.git",
+			"spec": "github:istanbuljs/istanbul-lib-source-maps#HEAD"
+		},
+		"comparisonHash": "9ef46a5bd31291e57cbab41e2f17c57bd6da0b5b",
+		"diff": {
+			"files": {
+				"CHANGELOG.md": {
+					"diff": "--- published/CHANGELOG.md\n+++ rebuilt/CHANGELOG.md\n@@ -1,21 +1,6 @@\n # Change Log\n \n-All notable changes to this project will be documented in this file.\n-See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.\n-\n-<a name=\"1.2.0\"></a>\n-# [1.2.0](https://github.com/istanbuljs/istanbul-lib-source-maps/compare/istanbul-lib-source-maps@1.1.1...istanbul-lib-source-maps@1.2.0) (2017-04-29)\n-\n-\n-### Features\n-\n-* pull in debug module, to make debug messages optional ([#36](https://github.com/istanbuljs/istanbuljs/issues/36)) ([189519d](https://github.com/istanbuljs/istanbul-lib-source-maps/commit/189519d))\n-\n-\n-\n-\n-<a name=\"1.1.1\"></a>\n-## [1.1.1](https://github.com/istanbuljs/istanbul-lib-source-maps/compare/istanbul-lib-source-maps@1.1.0...istanbul-lib-source-maps@1.1.1) (2017-03-27)\n+All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.\n \n <a name=\"1.1.0\"></a>\n # [1.1.0](https://github.com/istanbuljs/istanbul-lib-source-maps/compare/v1.0.2...v1.1.0) (2016-11-10)\n",
+					"match": false,
+					"packageHash": "a128589f085960cdc2a1cfed5c770282f18f4c3381078f8556e2e5cefc487092",
+					"size": 2155,
+					"sourceHash": "45fb3ac4bec43a0b0f78e2733ef0654313eaf8e5ecebebdd3bb1f6547ab1e522",
+					"status": "content"
+				},
+				"README.md": {
+					"diff": "--- published/README.md\n+++ rebuilt/README.md\n@@ -1,12 +1,7 @@\n istanbul-lib-source-maps\n ========================\n \n-[![Build Status](https://travis-ci.org/istanbuljs/istanbuljs.svg?branch=master)](https://travis-ci.org/istanbuljs/istanbuljs)\n+[![Greenkeeper badge](https://badges.greenkeeper.io/istanbuljs/istanbul-lib-source-maps.svg)](https://greenkeeper.io/)\n+[![Build Status](https://travis-ci.org/istanbuljs/istanbul-lib-source-maps.svg)](https://travis-ci.org/istanbuljs/istanbul-lib-source-maps)\n \n-Source map support for istanbuljs.\n-\n-## Debugging\n-\n-_istanbul-lib-source-maps_ uses the [debug](https://www.npmjs.com/package/debug) module.\n-Run your application with the environment variable `DEBUG=istanbuljs`, to receive debug\n-output.\n+Source map support for istanbul. Extremely immature at this point.\n",
+					"match": false,
+					"packageHash": "b28bbab6c656ef4522b653925e86383f5ddd05b8664e6d771e83a3d7901c754a",
+					"size": 413,
+					"sourceHash": "d106f1156776ea7042b966f24a97398b7c711cf5cd957c6d10a02fa7c1992767",
+					"status": "content"
+				},
+				"lib/map-store.js": {
+					"diff": "--- published/lib/map-store.js\n+++ rebuilt/lib/map-store.js\n@@ -4,8 +4,7 @@\n  */\n \"use strict\";\n \n-var debug = require('debug')('istanbuljs'),\n-    path = require('path'),\n+var path = require('path'),\n     fs = require('fs'),\n     pathutils = require('./pathutils'),\n     sourceStore = require('./source-store'),\n@@ -52,7 +51,7 @@\n                 data: sourceMapUrl.substring(pos + b64.length)\n             };\n         } else {\n-            debug('Unable to interpret source map URL: ' + sourceMapUrl);\n+            console.error('Unable to interpret source map URL: ', sourceMapUrl);\n         }\n         return;\n     }\n@@ -70,7 +69,7 @@\n     if (sourceMap && sourceMap.version) {\n         this.data[transformedFilePath] = { type: 'object', data: sourceMap };\n     } else {\n-        debug('Invalid source map object:' + JSON.stringify(sourceMap, null, 2));\n+        console.error('Invalid source map object', sourceMap);\n     }\n };\n /**\n@@ -136,8 +135,11 @@\n             });\n             return smc;\n         } catch (ex) {\n-            debug('Error returning source map for ' + filePath);\n-            debug(ex.stack);\n+            console.error('Error returning source map for ' + filePath);\n+            console.error(ex.message || ex);\n+            if (this.verbose) {\n+                console.error(ex.stack);\n+            }\n             return null;\n         }\n     }).transform(coverageMap);\n@@ -158,3 +160,4 @@\n module.exports = {\n     MapStore: MapStore\n };\n+\n",
+					"match": false,
+					"packageHash": "2d293e8d2f1ceee8cd17579b115f6feebfb06ad894ca66479892b44cbd173495",
+					"size": 5552,
+					"sourceHash": "809478a1afa5b7fbac54da8787b632c00f27911c6abbb96d4c7f62be5bf25f87",
+					"status": "content"
+				},
+				"lib/transformer.js": {
+					"diff": "--- published/lib/transformer.js\n+++ rebuilt/lib/transformer.js\n@@ -4,8 +4,7 @@\n  */\n \"use strict\";\n \n-var debug = require('debug')('istanbuljs'),\n-    pathutils = require('./pathutils'),\n+var pathutils = require('./pathutils'),\n     libCoverage = require('istanbul-lib-coverage'),\n     MappedCoverage = require('./mapped').MappedCoverage;\n \n@@ -20,7 +19,7 @@\n  * @returns {Object} the remapped location Object\n  */\n function getMapping(sourceMap, location, origFile) {\n-\n+ \n     if (!location) {\n         return null;\n     }\n@@ -168,7 +167,7 @@\n \n         changed = that.processFile(fc, sourceMap, getMappedCoverage);\n         if (!changed) {\n-            debug('File [' + file + '] ignored, nothing could be mapped');\n+            console.warn('File [' + file + '] ignored, nothing could be mapped');\n         }\n     });\n     return libCoverage.createCoverageMap(output);\n@@ -179,3 +178,5 @@\n         return new SourceMapTransformer(finder, opts);\n     }\n };\n+\n+\n",
+					"match": false,
+					"packageHash": "2881b82e8c3cae0528e12dc35969532139872fac0f1f1a3886e8e8e158e27ec1",
+					"size": 5332,
+					"sourceHash": "7ad40890f4ac244f4ed26653a7ec93d7cd2068ad2320ebcd436246b36d506a55",
+					"status": "content"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -1,30 +1,29 @@\n {\n   \"name\": \"istanbul-lib-source-maps\",\n-  \"version\": \"1.2.0\",\n+  \"version\": \"1.1.0\",\n   \"description\": \"Source maps support for istanbul\",\n   \"author\": \"Krishnan Anantheswaran <kananthmail-github@yahoo.com>\",\n   \"main\": \"index.js\",\n-  \"files\": [\n-    \"lib\",\n-    \"index.js\"\n-  ],\n   \"scripts\": {\n+    \"fast\": \"mocha test/\",\n     \"pretest\": \"jshint index.js lib/ test/\",\n-    \"test\": \"mocha\"\n+    \"test\": \"istanbul cover --include-all-sources --print=both _mocha --  test/\",\n+    \"xposttest\": \"istanbul check-coverage --statements 95 --branches 80\",\n+    \"release\": \"standard-version\"\n   },\n   \"dependencies\": {\n-    \"debug\": \"^2.6.3\",\n-    \"istanbul-lib-coverage\": \"^1.1.0\",\n+    \"istanbul-lib-coverage\": \"^1.0.0-alpha.0\",\n     \"mkdirp\": \"^0.5.1\",\n-    \"rimraf\": \"^2.6.1\",\n+    \"rimraf\": \"^2.4.4\",\n     \"source-map\": \"^0.5.3\"\n   },\n   \"devDependencies\": {\n     \"babel-core\": \"^6.2.1\",\n     \"chai\": \"^3.4.1\",\n-    \"is-windows\": \"^1.0.0\",\n+    \"istanbul\": \"^0.4.0\",\n     \"jshint\": \"^2.8.0\",\n     \"mocha\": \"^3.2.0\",\n+    \"standard-version\": \"^4.0.0\",\n     \"ts-node\": \"^2.0.0\"\n   },\n   \"license\": \"BSD-3-Clause\",\n",
+					"match": false,
+					"packageHash": "623e3a46499706b92c40f92549a3fc7dd4c1acb98e8aab734443aeedf2845bd0",
+					"size": 1092,
+					"sourceHash": "dddf96033e3c1199ecd6803f5b06924f5f40198e370ff7888f60591f65526c68",
+					"status": "content"
+				},
+				".doc.yml": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				".editorconfig": {
+					"match": false,
+					"status": "missing-in-package"
+				}
+			},
+			"summary": {
+				"differentFiles": 5,
+				"matchingFiles": 5,
+				"missingInPackage": 2,
+				"missingInSource": 0,
+				"score": 0.4166666666666667,
+				"totalFiles": 12
+			}
+		},
+		"prodDependencies": [
+			{
+				"name": "balanced-match",
+				"version": "1.0.2"
+			},
+			{
+				"name": "brace-expansion",
+				"version": "1.1.12"
+			},
+			{
+				"name": "concat-map",
+				"version": "0.0.1"
+			},
+			{
+				"name": "fs.realpath",
+				"version": "1.0.0"
+			},
+			{
+				"name": "inflight",
+				"version": "1.0.6"
+			},
+			{
+				"name": "inherits",
+				"version": "2.0.4"
+			},
+			{
+				"name": "istanbul-lib-coverage",
+				"version": "1.2.1"
+			},
+			{
+				"name": "minimatch",
+				"version": "3.1.2"
+			},
+			{
+				"name": "minimist",
+				"version": "1.2.8"
+			},
+			{
+				"name": "mkdirp",
+				"version": "0.5.6"
+			},
+			{
+				"name": "once",
+				"version": "1.4.0"
+			},
+			{
+				"name": "path-is-absolute",
+				"version": "1.0.1"
+			},
+			{
+				"name": "rimraf",
+				"version": "2.7.1"
+			},
+			{
+				"name": "glob",
+				"version": "7.2.3"
+			},
+			{
+				"name": "source-map",
+				"version": "0.5.7"
+			},
+			{
+				"name": "wrappy",
+				"version": "1.0.2"
+			}
+		]
+	}
+]
