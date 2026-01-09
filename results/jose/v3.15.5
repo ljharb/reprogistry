@@ -1,0 +1,51 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-08T23:36:02.232Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:11.7.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "jose@3.15.5",
+			"name": "jose",
+			"version": "3.15.5",
+			"location": "https://registry.npmjs.org/jose/-/jose-3.15.5.tgz",
+			"integrity": "sha512-7ytNKAsyTBqBSrJNYePG0rwXq0+lxHIMdVvOnCi0B80Zmsy94XEkceX1PqAGWvT0Ko9XAIPhu7JyCF5L/9mfNQ==",
+			"publishedAt": "2021-09-02T17:00:08.267Z",
+			"publishedWith": {
+				"node": "14.17.6",
+				"npm": "7.21.1"
+			},
+			"dependencies": {}
+		},
+		"source": {
+			"integrity": "sha512-2rLfO0NmfOL9tWC7D5Wj1DCBeQwtQ8EDPhVxbtgzKi7SURQmyfvHbMIC32bmrSdnW3Ej996dZvFnpaCK1fyOvQ==",
+			"location": "git+https://github.com/panva/jose.git",
+			"spec": "github:panva/jose#d49b333e093561cd8d5e8acb3f12d7c28e9ca37b"
+		},
+		"comparisonHash": "9ef46a5bd31291e57cbab41e2f17c57bd6da0b5b",
+		"diff": {
+			"files": {
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -46,6 +46,16 @@\n   },\n   \"license\": \"MIT\",\n   \"author\": \"Filip Skokan <panva.ip@gmail.com>\",\n+  \"imports\": {\n+    \"#dist/*\": {\n+      \"import\": \"./dist/node/esm/*.js\",\n+      \"require\": \"./dist/node/cjs/*.js\"\n+    },\n+    \"#dist/webcrypto/*\": {\n+      \"import\": \"./dist/node/webcrypto/esm/*.js\",\n+      \"require\": \"./dist/node/webcrypto/cjs/*.js\"\n+    }\n+  },\n   \"exports\": {\n     \"./package.json\": \"./package.json\",\n     \"./jwe/compact/decrypt\": {\n@@ -311,5 +321,68 @@\n     \"!dist/types/runtime/*\",\n     \"!dist/types/lib/*\",\n     \"dist/types/lib/jwt_producer.d.ts\"\n-  ]\n+  ],\n+  \"scripts\": {\n+    \"build\": \"tsc\",\n+    \"build-all\": \"run-s clear build:*\",\n+    \"build-fast-all\": \"run-s clear build-fast:*\",\n+    \"build-fast:browser\": \"npm run-script runtime-browser && npm run-script -s esbuild-find | xargs -0 esbuild --log-level=warning --target=es2018 --outdir=dist/browser --format=esm && echo '{\\\"type\\\": \\\"module\\\"}'> dist/browser/package.json\",\n+    \"build-fast:deno\": \"npm run-script build:deno\",\n+    \"build-fast:node-cjs\": \"npm run-script runtime-node && npm run-script -s esbuild-find | xargs -0 esbuild --log-level=warning --platform=node --target=node12 --outdir=dist/node/cjs --format=cjs\",\n+    \"build-fast:node-esm\": \"npm run-script runtime-node && npm run-script -s esbuild-find | xargs -0 esbuild --log-level=warning --platform=node --target=node12 --outdir=dist/node/esm --format=esm && echo '{\\\"type\\\": \\\"module\\\"}'> dist/node/esm/package.json\",\n+    \"build-fast:node-webcrypto-cjs\": \"npm run-script runtime-node-webcrypto && npm run-script -s esbuild-find | xargs -0 esbuild --log-level=warning --platform=node --target=esnext --outdir=dist/node/webcrypto/cjs --format=cjs\",\n+    \"build-fast:node-webcrypto-esm\": \"npm run-script runtime-node-webcrypto && npm run-script -s esbuild-find | xargs -0 esbuild --log-level=warning --platform=node --target=esnext --outdir=dist/node/webcrypto/esm --format=esm && echo '{\\\"type\\\": \\\"module\\\"}'> dist/node/webcrypto/esm/package.json\",\n+    \"build:browser\": \"run-s runtime-browser 'build -- -p ./tsconfig/browser.json' && echo '{\\\"type\\\": \\\"module\\\"}'> dist/browser/package.json\",\n+    \"build:deno\": \"npm run-script runtime-deno && find dist/deno -name '*.ts' -type f -print0 | xargs -0 sed -i '' -e \\\"s/@deno\\\\-expect\\\\-error/@ts-ignore/g\\\" -e \\\"s/\\\\.js'/.ts'/g\\\" -e \\\"s/\\\\.d'/.d.ts'/g\\\" && echo 'export type KeyObject = CryptoKey' > dist/deno/types.d.ts && tail -n +5 src/types.d.ts >> dist/deno/types.d.ts\",\n+    \"build:types\": \"npm run-script build -- -p ./tsconfig/types.json && cd src && find . -name '*.d.ts' -maxdepth 2 -type f -exec gcp --parents \\\"{}\\\" ../dist/types  \\\\; && cd .. && node ./tools/strip-dts-comments && run-s -s types:find | xargs -0 sed -i '' -e \\\"s/\\\\.js'/'/g\\\" -e \\\"s/\\\\.d'/'/g\\\"\",\n+    \"build:node-cjs\": \"run-s runtime-node 'build -- -p ./tsconfig/node-cjs.json'\",\n+    \"build:node-esm\": \"run-s runtime-node 'build -- -p ./tsconfig/node-esm.json' && echo '{\\\"type\\\": \\\"module\\\"}'> dist/node/esm/package.json\",\n+    \"build:node-webcrypto-cjs\": \"run-s runtime-node-webcrypto 'build -- -p ./tsconfig/node-webcrypto-cjs.json'\",\n+    \"build:node-webcrypto-esm\": \"run-s runtime-node-webcrypto 'build -- -p ./tsconfig/node-webcrypto-esm.json' && echo '{\\\"type\\\": \\\"module\\\"}'> dist/node/webcrypto/esm/package.json\",\n+    \"clear\": \"rm -rf dist\",\n+    \"coverage\": \"npm run-script runtime-node && c8 npm run-script test\",\n+    \"coverage-cryptokey\": \"npm run-script runtime-node && c8 npm run-script test-cryptokey\",\n+    \"coverage-webcrypto\": \"npm run-script runtime-node-webcrypto && c8 npm run-script test-webcrypto\",\n+    \"docs\": \"run-s docs:*\",\n+    \"docs:generate\": \"typedoc --allReflectionsHaveOwnDocument --excludePrivate --excludeProtected --gitRevision main --readme none --plugin typedoc-plugin-markdown --out docs --excludeExternals --tsconfig ./tsconfig/browser.json  --hideGenerator --hideBreadcrumbs src/types.d.ts src/jwt/*.ts src/jwe/**/*.ts src/jws/**/*.ts src/jwk/*.ts src/jwks/*.ts src/util/*.ts\",\n+    \"esbuild-find\": \"find src -type f -name '*.ts' -not -path '*/runtime/*/*' -not -name '*.d.ts' -print0\",\n+    \"runtime-browser\": \"run-s runtime:clear runtime:browser:* runtime:refs\",\n+    \"runtime-deno\": \"npm run-script runtime-browser && mkdir -p dist/deno && cp -r src/. dist/deno && rm -r dist/deno/runtime/browser dist/deno/runtime/node && rm dist/deno/.prettierrc.json\",\n+    \"runtime-node\": \"run-s runtime:clear runtime:node:* runtime:refs\",\n+    \"runtime-node-webcrypto\": \"run-s runtime:clear runtime:browser:* && cp ./src/runtime/node/webcrypto.ts ./src/runtime/ && cp ./src/runtime/node/fetch_jwks.ts ./src/runtime/ && cp ./src/runtime/node/base64url.ts ./src/runtime/ && cp ./src/runtime/node/zlib.ts ./src/runtime/ && run-s runtime:refs\",\n+    \"runtime:browser:copy\": \"cp ./src/runtime/browser/*.ts ./src/runtime\",\n+    \"runtime:clear\": \"run-s -s runtime:find | xargs -0 rm -f\",\n+    \"runtime:find\": \"find src/runtime -not -name '*.d.ts' -maxdepth 1 -type f -print0\",\n+    \"types:find\": \"find dist/types -name '*.d.ts' -type f -print0\",\n+    \"runtime:node:copy\": \"cp ./src/runtime/node/*.ts ./src/runtime\",\n+    \"runtime:refs\": \"run-s -s runtime:find | xargs -0 sed -i '' -e \\\"s/'\\\\.\\\\.\\\\//'\\\\.\\\\//g\\\" -e \\\"s/'\\\\.\\\\/\\\\.\\\\./'../g\\\"\",\n+    \"test\": \"npm run-script test-cjs && ava\",\n+    \"test-deno\": \"deno test --jobs --allow-net --allow-read test-deno\",\n+    \"test-browser\": \"find test-browser -type f -name '*.js' -print0 | xargs -0 npx esbuild --log-level=warning --outdir=dist-browser-tests --bundle && karma start\",\n+    \"test-cjs\": \"rm -rf test/cjs && find test -type f -name '*.mjs' -print0 | xargs -0 npx esbuild --log-level=warning --target=esnext --outdir=test/cjs --format=cjs\",\n+    \"test-cryptokey\": \"CRYPTOKEY=true npm test\",\n+    \"test-webcrypto\": \"WEBCRYPTO=true npm test\",\n+    \"prettier\": \"npx prettier --loglevel silent --write ./test ./src ./tools ./test-browser ./test-deno\"\n+  },\n+  \"devDependencies\": {\n+    \"@types/node\": \"^16.7.6\",\n+    \"ava\": \"^3.15.0\",\n+    \"bowser\": \"^2.11.0\",\n+    \"c8\": \"^7.8.0\",\n+    \"esbuild\": \"^0.12.24\",\n+    \"glob\": \"^7.1.7\",\n+    \"karma\": \"^6.3.4\",\n+    \"karma-browserstack-launcher\": \"1.6.0\",\n+    \"karma-qunit\": \"^4.1.2\",\n+    \"karma-summary-reporter\": \"^2.0.2\",\n+    \"nock\": \"^13.1.3\",\n+    \"npm-run-all\": \"^4.1.5\",\n+    \"prettier\": \"^2.3.2\",\n+    \"qunit\": \"^2.16.0\",\n+    \"tar\": \"^6.1.11\",\n+    \"timekeeper\": \"^2.2.0\",\n+    \"typedoc\": \"^0.21.9\",\n+    \"typedoc-plugin-markdown\": \"^3.10.4\",\n+    \"typescript\": \"^4.4.2\"\n+  }\n }\n",
+					"match": false,
+					"packageHash": "ea9b12a6806439c3e06699abdf428d092b1a66d200b3fdaf23234fdda7c341c9",
+					"size": 10888,
+					"sourceHash": "d606b759bd308f5a7d244637e247ea82b7101fbc77e56811495040042830ae43",
+					"status": "content"
+				}
+			},
+			"summary": {
+				"differentFiles": 1,
+				"matchingFiles": 255,
+				"missingInPackage": 0,
+				"missingInSource": 0,
+				"score": 0.99609375,
+				"totalFiles": 256
+			}
+		},
+		"prodDependencies": []
+	}
+]
