@@ -25,7 +25,48 @@ jobs:
 
       - run: git diff && git status
 
-      - name: commit changes
-        uses: elstudio/actions-js-build/commit@v4
-        with:
-          commitMessage: "update list of packages"
+      - name: commit and push changes
+        run: |
+          git config --global user.email "${GITHUB_ACTOR}@users.noreply.github.com"
+          git config --global user.name "${GITHUB_ACTOR}"
+
+          # Check if there are changes to commit
+          if git diff --quiet packages.txt; then
+            echo "::notice::No changes to packages.txt"
+            exit 0
+          fi
+
+          git add packages.txt
+          git commit -m 'update list of packages'
+
+          # Retry loop for push conflicts
+          for i in 1 2 3 4 5; do
+            git fetch origin data
+            if git rebase origin/data; then
+              if git push; then
+                echo "::notice::Successfully pushed on attempt $i"
+                exit 0
+              fi
+            else
+              git rebase --abort 2>/dev/null || true
+              git reset --hard origin/data
+              # Re-apply our changes
+              curl --remote-name-all https://raw.githubusercontent.com/herodevs/hd-critical-packages/refs/heads/main/npm.json
+              jq -r '.[].Name' npm.json > packages.txt
+              rm npm.json
+              if git diff --quiet packages.txt; then
+                echo "::notice::No changes after merge"
+                exit 0
+              fi
+              git add packages.txt
+              git commit -m 'update list of packages' || true
+              if git push; then
+                echo "::notice::Successfully pushed on attempt $i (via reset)"
+                exit 0
+              fi
+            fi
+            echo "::warning::Push attempt $i failed, retrying..."
+            sleep $((i * 2))
+          done
+          echo "::error::Failed to push after 5 attempts"
+          exit 1
