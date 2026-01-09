@@ -1,0 +1,65 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-09T04:42:48.493Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:11.7.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "fastclick@0.5.6",
+			"name": "fastclick",
+			"version": "0.5.6",
+			"location": "https://registry.npmjs.org/fastclick/-/fastclick-0.5.6.tgz",
+			"integrity": "sha512-b57bizQPIaa3VNbLAespiypG8q/18mZb7ve45QlGIyLK/t7RbH4LtUPfv2JfwW1iKw3j0le3E6fO5+oP6l2OQg==",
+			"publishedAt": "2013-02-15T17:52:08.957Z",
+			"publishedWith": {
+				"node": null,
+				"npm": "1.2.10"
+			},
+			"dependencies": {}
+		},
+		"source": {
+			"integrity": "sha512-XZoMLu8BvMV+dzVQdJfYFl2JFwN1tD5xUZupnrgy5MbunkyV9nWP11d88lUsD0HU8ukHC/6UkX2iVQeJa1JczQ==",
+			"location": "git://github.com/ftlabs/fastclick.git",
+			"spec": "github:ftlabs/fastclick#v0.5.6"
+		},
+		"comparisonHash": "9ef46a5bd31291e57cbab41e2f17c57bd6da0b5b",
+		"diff": {
+			"files": {
+				".npmignore": {
+					"match": false,
+					"packageHash": "e79cf2f19d63f0420d19a1be0f49abe2bededc064289ed09b627a367ef8f42d4",
+					"size": 42,
+					"status": "missing-in-source"
+				},
+				"README.md": {
+					"diff": "--- published/README.md\n+++ rebuilt/README.md\n@@ -1,3 +1,5 @@\n+## FT Labs, Google and Facebook will be hosting a discussion about making web apps agnostic to different input technologies at [Edge](http://edgeconf.com/), London, 9 February 2013.\n+\n # FastClick\n \n FastClick is a simple, easy-to-use library for eliminating the 300ms delay between a physical tap and the firing of a `click` event on mobile browsers. The aim is to make your application feel less laggy and more responsive while avoiding any interference with your current logic.\n",
+					"match": false,
+					"packageHash": "2eb1b3ab4acac86523d6795944aa4c6e09a98916660fcb44212e86688cd593f2",
+					"size": 4555,
+					"sourceHash": "1f6a2a888e5e4634c311b8ef75a1101a4c5844d8f23e7d6679862037ecd7fbcd",
+					"status": "content"
+				},
+				"lib/fastclick.js": {
+					"diff": "--- published/lib/fastclick.js\n+++ rebuilt/lib/fastclick.js\n@@ -88,6 +88,9 @@\n \tthis.onTouchStart = function() { FastClick.prototype.onTouchStart.apply(self, arguments); };\n \n \t/** @type function() */\n+\tthis.onTouchMove = function() { FastClick.prototype.onTouchMove.apply(self, arguments); };\n+\n+\t/** @type function() */\n \tthis.onTouchEnd = function() { FastClick.prototype.onTouchEnd.apply(self, arguments); };\n \n \t/** @type function() */\n@@ -101,6 +104,7 @@\n \t// Set up event handlers as required\n \tlayer.addEventListener('click', this.onClick, true);\n \tlayer.addEventListener('touchstart', this.onTouchStart, false);\n+\tlayer.addEventListener('touchmove', this.onTouchMove, false);\n \tlayer.addEventListener('touchend', this.onTouchEnd, false);\n \tlayer.addEventListener('touchcancel', this.onTouchCancel, false);\n \n@@ -397,7 +401,7 @@\n  */\n FastClick.prototype.touchHasMoved = function(event) {\n \t'use strict';\n-\tvar touch = event.changedTouches[0];\n+\tvar touch = event.targetTouches[0];\n \n \tif (Math.abs(touch.pageX - this.touchStartX) > 10 || Math.abs(touch.pageY - this.touchStartY) > 10) {\n \t\treturn true;\n@@ -408,6 +412,28 @@\n \n \n /**\n+ * Update the last position.\n+ *\n+ * @param {Event} event\n+ * @returns {boolean}\n+ */\n+FastClick.prototype.onTouchMove = function(event) {\n+\t'use strict';\n+\tif (!this.trackingClick) {\n+\t\treturn true;\n+\t}\n+\n+\t// If the touch has moved, cancel the click tracking\n+\tif (this.targetElement !== this.getTargetElementFromEventTarget(event.target) || this.touchHasMoved(event)) {\n+\t\tthis.trackingClick = false;\n+\t\tthis.targetElement = null;\n+\t}\n+\n+\treturn true;\n+};\n+\n+\n+/**\n  * Attempt to find the labelled control for the given label element.\n  *\n  * @param {EventTarget|HTMLLabelElement} labelElement\n@@ -442,12 +468,6 @@\n \t'use strict';\n \tvar forElement, trackingClickStart, targetTagName, scrollParent, touch, targetElement = this.targetElement;\n \n-\t// If the touch has moved, cancel the click tracking\n-\tif (this.touchHasMoved(event)) {\n-\t\tthis.trackingClick = false;\n-\t\tthis.targetElement = null;\n-\t}\n-\n \tif (!this.trackingClick) {\n \t\treturn true;\n \t}\n@@ -615,6 +635,7 @@\n \n \tlayer.removeEventListener('click', this.onClick, true);\n \tlayer.removeEventListener('touchstart', this.onTouchStart, false);\n+\tlayer.removeEventListener('touchmove', this.onTouchMove, false);\n \tlayer.removeEventListener('touchend', this.onTouchEnd, false);\n \tlayer.removeEventListener('touchcancel', this.onTouchCancel, false);\n };\n",
+					"match": false,
+					"packageHash": "cb7e92b54abf52a00c30cf901cfd98d66a14a084a7a82ecb35a121fc41268c41",
+					"size": 18585,
+					"sourceHash": "0151aed2e84ae7ce6c1d8f0ae56a71f901a28dee75140e0e0110d2218bed70c1",
+					"status": "content"
+				}
+			},
+			"summary": {
+				"differentFiles": 2,
+				"matchingFiles": 34,
+				"missingInPackage": 0,
+				"missingInSource": 1,
+				"score": 0.918918918918919,
+				"totalFiles": 37
+			}
+		},
+		"prodDependencies": []
+	}
+]

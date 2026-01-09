@@ -1,0 +1,165 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-09T04:41:55.166Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:11.7.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "fastclick@0.3.5",
+			"name": "fastclick",
+			"version": "0.3.5",
+			"location": "https://registry.npmjs.org/fastclick/-/fastclick-0.3.5.tgz",
+			"integrity": "sha512-WIOU6ERqWUEzpcFssopwEv6qqAeDSm5j0djr/sDgM2Z//rmpSnjvLjx0IHuJMsISCWNnV9KqtxIe3X1dVHQZcg==",
+			"publishedAt": "2012-11-11T23:33:45.239Z",
+			"publishedWith": {
+				"node": null,
+				"npm": "1.1.65"
+			},
+			"dependencies": {}
+		},
+		"source": {
+			"integrity": "sha512-sRqdg2oRs92PwRPfW1pZq2jqDYN3NRQd5oYrAzgjZTsIlZdvJWi+Fp8XlMZjMeLAAHbi0l3WnnLOitdK9BPk2A==",
+			"location": "git://github.com/ftlabs/fastclick.git",
+			"spec": "github:ftlabs/fastclick#HEAD"
+		},
+		"comparisonHash": "9ef46a5bd31291e57cbab41e2f17c57bd6da0b5b",
+		"diff": {
+			"files": {
+				".npmignore": {
+					"match": false,
+					"packageHash": "6bafe01bbf4e53044024b9ce281c5ca7f3b069a9b7af5bd0780b0157c2d93c9c",
+					"size": 35,
+					"status": "missing-in-source"
+				},
+				"LICENSE.txt": {
+					"match": false,
+					"packageHash": "f730b8e9fcaee6fd6592916ababb9fcbdd2cfd1b0d1df1254b1df11772c211a1",
+					"size": 1067,
+					"status": "missing-in-source"
+				},
+				"README.md": {
+					"diff": "--- published/README.md\n+++ rebuilt/README.md\n@@ -1,10 +1,22 @@\n-# FastClick\n+# FastClick #\n \n FastClick is a simple, easy-to-use library for eliminating the 300ms delay between a physical tap and the firing of a `click` event on mobile browsers. The aim is to make your application feel less laggy and more responsive while avoiding any interference with your current logic.\n \n FastClick is developed by [FT Labs](http://labs.ft.com/), part of the Financial Times.\n \n-## Compatibility\n+*Note: As of late 2015 most mobile browsers - notably Chrome and Safari - no longer have a 300ms touch delay, so fastclick offers no benefit on newer browsers, and risks introducing [bugs](https://github.com/ftlabs/fastclick/issues) into your application. Consider carefully whether you really need to use it.*\n+\n+[Explication en français](http://maxime.sh/2013/02/supprimer-le-lag-des-clics-sur-mobile-avec-fastclick/).\n+\n+[日本語で説明](https://developer.mozilla.org/ja/docs/Mozilla/Firefox_OS/Apps/Tips_and_techniques#Make_events_immediate)。\n+\n+## Why does the delay exist? ##\n+\n+According to [Google](https://developers.google.com/mobile/articles/fast_buttons):\n+\n+> ...mobile browsers will wait approximately 300ms from the time that you tap the button to fire the click event. The reason for this is that the browser is waiting to see if you are actually performing a double tap.\n+\n+## Compatibility ##\n \n The library has been deployed as part of the [FT Web App](http://app.ft.com/) and is tried and tested on the following mobile browsers:\n \n@@ -12,18 +24,24 @@\n * Chrome on iOS 5 and upwards\n * Chrome on Android (ICS)\n * Opera Mobile 11.5 and upwards\n-* Android Browser since Honeycomb\n+* Android Browser since Android 2\n * PlayBook OS 1 and upwards\n \n-FastClick doesn't attach any listeners on desktop browsers as it is not needed. Those that have been tested are:\n+## When it isn't needed ##\n+\n+FastClick doesn't attach any listeners on desktop browsers.\n+\n+Chrome 32+ on Android with `width=device-width` in the [viewport meta tag](https://developer.mozilla.org/en-US/docs/Mobile/Viewport_meta_tag) doesn't have a 300ms delay, therefore listeners aren't attached.\n+\n+```html\n+<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n+```\n \n-* Safari\n-* Chrome\n-* Internet Explorer\n-* Firefox\n-* Opera\n+Same goes for Chrome on Android (all versions) with `user-scalable=no` in the viewport meta tag. But be aware that `user-scalable=no` also disables pinch zooming, which may be an accessibility concern.\n \n-## Usage\n+For IE11+, you can use `touch-action: manipulation;` to disable double-tap-to-zoom on certain elements (like links and buttons).  For IE10 use `-ms-touch-action: manipulation`.\n+\n+## Usage ##\n \n Include fastclick.js in your JavaScript bundle or add it to your HTML page like this:\n \n@@ -36,26 +54,78 @@\n To instantiate FastClick on the `body`, which is the recommended method of use:\n \n ```js\n-window.addEventListener('load', function() {\n-\tnew FastClick(document.body);\n-}, false);\n+if ('addEventListener' in document) {\n+\tdocument.addEventListener('DOMContentLoaded', function() {\n+\t\tFastClick.attach(document.body);\n+\t}, false);\n+}\n+```\n+\n+Or, if you're using jQuery:\n+\n+```js\n+$(function() {\n+\tFastClick.attach(document.body);\n+});\n+```\n+\n+If you're using Browserify or another CommonJS-style module system, the `FastClick.attach` function will be returned when you call `require('fastclick')`. As a result, the easiest way to use FastClick with these loaders is as follows:\n+\n+```js\n+var attachFastClick = require('fastclick');\n+attachFastClick(document.body);\n+```\n+\n+### Minified ###\n+\n+Run `make` to build a minified version of FastClick using the Closure Compiler REST API. The minified file is saved to `build/fastclick.min.js` or you can [download a pre-minified version](https://origami-build.ft.com/bundles/js?modules=fastclick).\n+\n+Note: the pre-minified version is built using [our build service](http://origami.ft.com/docs/developer-guide/build-service/) which exposes the `FastClick` object through `Origami.fastclick` and will have the Browserify/CommonJS API (see above).\n+\n+```js\n+var attachFastClick = Origami.fastclick;\n+attachFastClick(document.body);\n ```\n \n",
+					"match": false,
+					"packageHash": "26012109d774a4965c1ccff2e749ff8c24127dd2c4ff3e4f983a3d2c5faf4d68",
+					"size": 3244,
+					"sourceHash": "34a98e9fa5c0df9deffca4647e1493621a7a458c20d5a36450f6e0f2bceba824",
+					"status": "content"
+				},
+				"examples/focus.html": {
+					"match": false,
+					"packageHash": "51440f000705a4e2e62af27af3593df2f3a15ef38358904881445ac96261e5d8",
+					"size": 1931,
+					"status": "missing-in-source"
+				},
+				"examples/index.html": {
+					"match": false,
+					"packageHash": "3869813a90f1eecc9c6fcdfd8e300103fddc147d8c472e1abb95ba6ae3740904",
+					"size": 281,
+					"status": "missing-in-source"
+				},
+				"examples/input.html": {
+					"match": false,
+					"packageHash": "862d2c91c6e75e3c1db3de0b81de3cbbf39395601bd8fa4361d520538b0ddd1b",
+					"size": 1920,
+					"status": "missing-in-source"
+				},
+				"examples/layer.html": {
+					"match": false,
+					"packageHash": "420694320426b6789d2b8764ce461fff2b6d42b85af910fe878212ab9445483d",
+					"size": 1384,
+					"status": "missing-in-source"
+				},
+				"lib/fastclick.js": {
+					"diff": "--- published/lib/fastclick.js\n+++ rebuilt/lib/fastclick.js\n@@ -1,376 +1,841 @@\n-/**\n- * @preserve FastClick: polyfill to remove click delays on browsers with touch UIs.\n- *\n- * @version 0.3.5\n- * @copyright The Financial Times Limited [All Rights Reserved]\n- * @license MIT License (see LICENSE.txt)\n- */\n-\n-/*jslint browser:true*/\n-/*global define*/\n-\n-\n-/**\n- * Instantiate fast-clicking listeners on the specificed layer.\n- *\n- * @constructor\n- * @param {Element} layer The layer to listen on\n- */\n-function FastClick(layer) {\n+;(function () {\n \t'use strict';\n-\tvar oldOnClick, that = this;\n+\n+\t/**\n+\t * @preserve FastClick: polyfill to remove click delays on browsers with touch UIs.\n+\t *\n+\t * @codingstandard ftlabs-jsv2\n+\t * @copyright The Financial Times Limited [All Rights Reserved]\n+\t * @license MIT License (see LICENSE.txt)\n+\t */\n+\n+\t/*jslint browser:true, node:true*/\n+\t/*global define, Event, Node*/\n+\n+\n+\t/**\n+\t * Instantiate fast-clicking listeners on the specified layer.\n+\t *\n+\t * @constructor\n+\t * @param {Element} layer The layer to listen on\n+\t * @param {Object} [options={}] The options to override the defaults\n+\t */\n+\tfunction FastClick(layer, options) {\n+\t\tvar oldOnClick;\n+\n+\t\toptions = options || {};\n+\n+\t\t/**\n+\t\t * Whether a click is currently being tracked.\n+\t\t *\n+\t\t * @type boolean\n+\t\t */\n+\t\tthis.trackingClick = false;\n+\n+\n+\t\t/**\n+\t\t * Timestamp for when click tracking started.\n+\t\t *\n+\t\t * @type number\n+\t\t */\n+\t\tthis.trackingClickStart = 0;\n+\n+\n+\t\t/**\n+\t\t * The element being tracked for a click.\n+\t\t *\n+\t\t * @type EventTarget\n+\t\t */\n+\t\tthis.targetElement = null;\n \n \n+\t\t/**\n+\t\t * X-coordinate of touch start event.\n+\t\t *\n+\t\t * @type number\n+\t\t */\n+\t\tthis.touchStartX = 0;\n+\n+\n+\t\t/**\n+\t\t * Y-coordinate of touch start event.\n+\t\t *\n+\t\t * @type number\n+\t\t */\n+\t\tthis.touchStartY = 0;\n+\n+\n+\t\t/**\n+\t\t * ID of the last touch, retrieved from Touch.identifier.\n+\t\t *\n+\t\t * @type number\n+\t\t */\n+\t\tthis.lastTouchIdentifier = 0;\n+\n+\n+\t\t/**\n+\t\t * Touchmove boundary, beyond which a click will be cancelled.\n",
+					"match": false,
+					"packageHash": "0e0b719d0c3a3ed3ee1ad0f197f78b2c76fb35fa1ded30eaee59e2465aa9a779",
+					"size": 9634,
+					"sourceHash": "188f4086427fd851e30dcc5e81f8289d85fb00cb2936832dc8839ffbfcc56cca",
+					"status": "content"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -1,12 +1,29 @@\n {\n   \"name\": \"fastclick\",\n-  \"version\": \"0.3.5\",\n-  \"author\": \"FT Labs <enquiries@labs.ft.com> (http://labs.ft.com/)\",\n+  \"version\": \"1.0.6\",\n   \"description\": \"Polyfill to remove click delays on browsers with touch UIs.\",\n+  \"maintainers\": [\n+    {\n+      \"name\": \"Matthew Caruana Galizia\",\n+      \"email\": \"m@m.cg\",\n+      \"url\": \"http://m.cg/\"\n+    }\n+  ],\n+  \"author\": {\n+    \"name\": \"Rowan Beentje\",\n+    \"email\": \"rowan.beentje@ft.com\"\n+  },\n   \"contributors\": [\n-    \"Matthew Caruana Galizia\",\n-    \"Rowan Beentje\"\n+    {\n+      \"name\": \"Rowan Beentje\",\n+      \"email\": \"rowan.beentje@ft.com\"\n+    },\n+    {\n+      \"name\": \"Matthew Caruana Galizia\",\n+      \"email\": \"m@m.cg\"\n+    }\n   ],\n+  \"main\": \"lib/fastclick.js\",\n   \"repository\": {\n     \"type\": \"git\",\n     \"url\": \"git://github.com/ftlabs/fastclick.git\"\n@@ -19,6 +36,14 @@\n     \"click\",\n     \"delay\"\n   ],\n-  \"license\": \"MIT\",\n+  \"licenses\": [\n+    {\n+      \"type\": \"MIT\",\n+      \"url\": \"http://opensource.org/licenses/MIT\"\n+    }\n+  ],\n+  \"implements\": [\n+    \"CommonJS/Modules/1.0\"\n+  ],\n   \"homepage\": \"https://github.com/ftlabs/fastclick\"\n }\n",
+					"match": false,
+					"packageHash": "5f9c82bd9985abd7f346f1161c12ab8192a06e39e9eb3ac078a6fefa67c59210",
+					"size": 540,
+					"sourceHash": "75b20e25b7e69200ce3537b8bbd4145dfba4e1fb337f95334900a1dc7130b54d",
+					"status": "content"
+				},
+				"tests/10.html": {
+					"match": false,
+					"packageHash": "800736fd1ccdb789bef96b2a082a3df8069f1e88570080e20784b761f8de277a",
+					"size": 926,
+					"status": "missing-in-source"
+				},
+				"tests/18.html": {
+					"match": false,
+					"packageHash": "c31e2e6122ad3680ae331fb7cda86cd375b4758741b6e1fa35462bc08caeac4b",
+					"size": 1408,
+					"status": "missing-in-source"
+				},
+				"tests/22.html": {
+					"match": false,
+					"packageHash": "244439e8ba30af740e8fccf77ba79590912ddf1b89a1c06d59c8bbc11ac2b191",
+					"size": 788,
+					"status": "missing-in-source"
+				},
+				"tests/23.html": {
+					"match": false,
+					"packageHash": "3abdf1a8253933a67caa3226b0670ca58f8d996e8169d97cdf0d60c016272e09",
+					"size": 1000,
+					"status": "missing-in-source"
+				},
+				"tests/24.html": {
+					"match": false,
+					"packageHash": "2b0274ac5bc30c53ffe3e73f79a396f99421a9f2b3b37de7507cb10af16832da",
+					"size": 1159,
+					"status": "missing-in-source"
+				},
+				"tests/6.html": {
+					"match": false,
+					"packageHash": "3a919a97a9d5c13dcf9acf835bc452f91faf61726997cd855fd2e303df7f4b28",
+					"size": 1077,
+					"status": "missing-in-source"
+				},
+				"tests/6b.html": {
+					"match": false,
+					"packageHash": "92b9e9ef23776e62bacbeaadafc84607378f1875496271ded8d6d3d90719db1b",
+					"size": 5171,
+					"status": "missing-in-source"
+				},
+				"tests/7.html": {
+					"match": false,
+					"packageHash": "57553ccdf55ab8b00d1f46cedebcb26e41e85bf82e29b77cc389bd2b6e938f53",
+					"size": 31588,
+					"status": "missing-in-source"
+				},
+				"tests/index.html": {
+					"match": false,
+					"packageHash": "0ea3ed7ebc9c3a442cd4d1818f55ed80b255140d458c0d41d40d955b290a7e59",
+					"size": 447,
+					"status": "missing-in-source"
+				},
+				".github/CODEOWNERS": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"LICENSE": {
+					"match": false,
+					"status": "missing-in-package"
+				}
+			},
+			"summary": {
+				"differentFiles": 3,
+				"matchingFiles": 0,
+				"missingInPackage": 2,
+				"missingInSource": 15,
+				"score": 0,
+				"totalFiles": 20
+			}
+		},
+		"prodDependencies": []
+	}
+]
