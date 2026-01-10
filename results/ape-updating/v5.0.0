@@ -1,0 +1,243 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-10T17:29:40.223Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:Running node v10.0.0 (npm v5.6.0)\n5.6.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "ape-updating@5.0.0",
+			"name": "ape-updating",
+			"version": "5.0.0",
+			"location": "https://registry.npmjs.org/ape-updating/-/ape-updating-5.0.0.tgz",
+			"integrity": "sha512-9rRm8jHg4qPH3R+lUT5VFH/ogCZ29mWlkKFUnij9kNMzV9cHej/OtuQjHuRXWFRqiWq566D8hi2rLfVfxz21Ug==",
+			"publishedAt": "2018-05-04T08:08:10.588Z",
+			"publishedWith": {
+				"node": "10.0.0",
+				"npm": "6.0.0"
+			},
+			"dependencies": {
+				"argx": "^3.0.0",
+				"colorprint": "^4.0.9",
+				"execcli": "^5.0.2",
+				"stringcase": "^4.1.1"
+			}
+		},
+		"source": {
+			"integrity": null,
+			"location": "git+https://github.com/ape-repo/ape-updating.git",
+			"spec": "github:ape-repo/ape-updating#e01b395c8e876bb0e367a399499e53d1e57481bb"
+		},
+		"comparisonHash": "9ef46a5bd31291e57cbab41e2f17c57bd6da0b5b",
+		"diff": {
+			"files": {
+				".travis.yml": {
+					"diff": "--- published/.travis.yml\n+++ rebuilt/.travis.yml\n@@ -1,8 +1,8 @@\n language: node_js\n node_js:\n-- '8'\n+- '6'\n before_install: \n-- npm install mocha -g\n+- npm install nodeunit mocha istanbul -g\n install:\n - npm install\n before_script:\n",
+					"match": false,
+					"packageHash": "d8e9f0c5d2624913278a19230457ef0e794238afc2aafe68cd00590fb61cfa77",
+					"size": 196,
+					"sourceHash": "f0fc64fa02170e10d4237f0476d7f8d4ff95b7a6fbe6c0370706d95c842e8b15",
+					"status": "content"
+				},
+				"lib/helpers/read_json.js": {
+					"diff": "--- published/lib/helpers/read_json.js\n+++ rebuilt/lib/helpers/read_json.js\n@@ -8,15 +8,18 @@\n 'use strict'\n \n const fs = require('fs')\n+const co = require('co')\n \n /** @lends readJson */\n-async function readJson (filename, callback) {\n-  const data = await new Promise((resolve, reject) =>\n-    fs.readFile(filename, (err, content) =>\n-      err ? reject(err) : resolve(content)\n+function readJson (filename, callback) {\n+  return co(function * () {\n+    let data = yield new Promise((resolve, reject) =>\n+      fs.readFile(filename, (err, content) =>\n+        err ? reject(err) : resolve(content)\n+      )\n     )\n-  )\n-  return JSON.parse(String(data))\n+    return JSON.parse(String(data))\n+  })\n }\n \n module.exports = readJson\n",
+					"match": false,
+					"packageHash": "3b0089ece84da20383f5cc16dcef4b62e382b563349e0a582add05ed7fee4d0b",
+					"size": 453,
+					"sourceHash": "b5b874309d56d5dd3a2d14e4d2c1fdc7bfa04ac7893a9034495b6db55a336e6e",
+					"status": "content"
+				},
+				"lib/helpers/write_json.js": {
+					"diff": "--- published/lib/helpers/write_json.js\n+++ rebuilt/lib/helpers/write_json.js\n@@ -9,15 +9,18 @@\n 'use strict'\n \n const fs = require('fs')\n+const co = require('co')\n \n /** @lends writeJson */\n-async function writeJson (filename, data) {\n-  const content = JSON.stringify(data, null, 2)\n-  await new Promise((resolve, reject) =>\n-    fs.writeFile(filename, content, (err) =>\n-      err ? reject(err) : resolve()\n+function writeJson (filename, data) {\n+  return co(function * () {\n+    let content = JSON.stringify(data, null, 2)\n+    yield new Promise((resolve, reject) =>\n+      fs.writeFile(filename, content, (err) =>\n+        err ? reject(err) : resolve()\n+      )\n     )\n-  )\n+  })\n }\n \n module.exports = writeJson\n",
+					"match": false,
+					"packageHash": "799dbee6be4c607c7d7156baf7ffeaf36571e2b4f55ec99ca04c1f17041cd768",
+					"size": 495,
+					"sourceHash": "64c6229296d7b9eb03b35a141d63f130da6873a4e4b967148834467924a801d5",
+					"status": "content"
+				},
+				"lib/index.js": {
+					"diff": "--- published/lib/index.js\n+++ rebuilt/lib/index.js\n@@ -5,10 +5,8 @@\n \n 'use strict'\n \n-const d = (module) => module && module.default || module\n-\n-const updateDependencies = d(require('./update_dependencies'))\n+let d = (module) => module && module.default || module\n \n module.exports = {\n-  updateDependencies\n+  get updateDependencies () { return d(require('./update_dependencies')) }\n }\n",
+					"match": false,
+					"packageHash": "21d63d9d55f81f02bc0a484b9a5a09dba4ab558770b02ba75f9c006a7be73646",
+					"size": 243,
+					"sourceHash": "3d6c6474bc9d80c6be233cc2036219dd5eed20e960d298e19f5e5dfb7f096a04",
+					"status": "content"
+				},
+				"lib/update_dependencies.js": {
+					"diff": "--- published/lib/update_dependencies.js\n+++ rebuilt/lib/update_dependencies.js\n@@ -11,6 +11,7 @@\n \n const argx = require('argx')\n const path = require('path')\n+const co = require('co')\n const os = require('os')\n const execcli = require('execcli')\n const colorprint = require('colorprint')\n@@ -18,85 +19,84 @@\n const readJson = require('./helpers/read_json')\n const outdatedModules = require('./helpers/outdated_modules')\n \n-const majorVersion = (versstring) => {\n-  const num = Number(versstring.split(/\\./g).shift().trim().replace(/[^0-9]/, ''))\n+let majorVersion = (versstring) => {\n+  let num = Number(versstring.split(/\\./g).shift().trim().replace(/[^0-9]/, ''))\n   return isNaN(num) ? -1 : num\n }\n \n /** @lends updateDependencies */\n-async function updateDependencies (options) {\n-  const args = argx(arguments)\n+function updateDependencies (options) {\n+  let args = argx(arguments)\n   if (args.pop('function')) {\n     throw new Error('[ape-updating] Callback is now deprecated. Use promise interface instead.')\n   }\n   options = args.pop('object') || {}\n \n-  const pkgPath = path.resolve(options.pkgPath || 'package.json')\n+  let pkgPath = path.resolve(options.pkgPath || 'package.json')\n \n-  const cwd = path.dirname(pkgPath)\n-  const pkg = await readJson(pkgPath)\n-  const ignore = /^git|\\//\n-  const outdated = outdatedModules()\n-\n-  const filterOutdated = (modules) => Object.keys(modules)\n-    .filter((name) => {\n-      const version = modules[name]\n-      const isBeta = /-/.test(version)\n-      if (isBeta) {\n-        return false\n-      }\n-      if (outdated[name]) {\n-        const {latest} = outdated[name]\n-        const hasUpdate = majorVersion(modules[name]) <= majorVersion(latest)\n-        if (hasUpdate) {\n-          return true\n+  let cwd = path.dirname(pkgPath)\n+  return co(function * () {\n+    let pkg = yield readJson(pkgPath)\n+    let ignore = /^git|\\//\n+    let outdated = outdatedModules()\n+\n+    let filterOutdated = (modules) => Object.keys(modules)\n+      .filter((name) => {\n+        if (outdated[ name ]) {\n+          let { latest } = outdated[ name ]\n+          let hasUpdate = majorVersion(modules[ name ]) <= majorVersion(latest)\n+          if (hasUpdate) {\n+            return true\n+          }\n+          if (latest === 'linked') {\n+            return true\n+          }\n         }\n-        if (latest === 'linked') {\n-          return true\n-        }\n-      }\n-      return modules[name] === '*'\n-    })\n-    .reduce((result, name) => Object.assign(result, {\n-      [name]: modules[name]\n-    }, {}), {})\n-\n-  let dependencies = _setAllProperty(filterOutdated(pkg['dependencies']), '*', {ignore})\n-  let devDependencies = _setAllProperty(filterOutdated(pkg['devDependencies']), '*', {ignore})\n-  pkg['dependencies'] = Object.assign(pkg['dependencies'], dependencies)\n-  pkg['devDependencies'] = Object.assign(pkg['devDependencies'], devDependencies)\n-  await writeJson(pkgPath, pkg)\n-  {\n-    let dependencyNames = Object.keys(dependencies).sort().filter((name) => !/^@/.test(name))\n-    colorprint.trace('dependencies to update:%s%s', os.EOL, dependencyNames)\n-    let args = ['install'].concat(dependencyNames).concat(['--save'])\n-    await npm(args, {cwd})\n-  }\n-  {\n-    let devDependencyNames = Object.keys(devDependencies).filter((name) => !/^@/.test(name))\n-    colorprint.trace('devDependencies to update:%s%s', os.EOL, devDependencyNames)\n-    let devArgs = ['install'].concat(devDependencyNames).concat(['--save-dev'])\n-    await npm(devArgs, {cwd})\n-  }\n-  await npm(['install'], {cwd})\n+        return modules[ name ] === '*'\n+      })\n+      .reduce((result, name) => Object.assign(result, {\n",
+					"match": false,
+					"packageHash": "74ecf97ae4b0760c1c8cb452a4f40c159a1c99f85151ce1b53ba9a34412ff320",
+					"size": 3265,
+					"sourceHash": "61689402d82a530778c443af5713048381ae01f1819ba125f4b48efda36c0743",
+					"status": "content"
+				},
+				"misc/mocks/package.json": {
+					"match": false,
+					"packageHash": "2f5d327fa7fe0c8fd62388383a16d32843d10514eeacfe1a7cd18218338bdd02",
+					"size": 176,
+					"status": "missing-in-source"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -1,6 +1,6 @@\n {\n   \"name\": \"ape-updating\",\n-  \"version\": \"5.0.0\",\n+  \"version\": \"4.1.2\",\n   \"description\": \"Dependency updating utility.\",\n   \"browser\": false,\n   \"main\": \"lib\",\n@@ -24,9 +24,10 @@\n   \"homepage\": \"https://github.com/ape-repo/ape-updating#readme\",\n   \"dependencies\": {\n     \"argx\": \"^3.0.0\",\n+    \"co\": \"^4.6.0\",\n     \"colorprint\": \"^4.0.9\",\n-    \"execcli\": \"^5.0.2\",\n-    \"stringcase\": \"^4.1.1\"\n+    \"execcli\": \"^4.0.11\",\n+    \"stringcase\": \"^3.2.1\"\n   },\n   \"devDependencies\": {\n     \"ape-covering\": \"^3.0.4\",\n@@ -34,12 +35,11 @@\n     \"ape-reporting\": \"^3.0.1\",\n     \"ape-tasking\": \"^4.0.8\",\n     \"ape-testing\": \"^4.0.2\",\n-    \"ape-tmpl\": \"^6.0.10\",\n-    \"co\": \"^4.6.0\",\n-    \"coz\": \"^7.0.1\"\n+    \"ape-tmpl\": \"^5.0.14\",\n+    \"coz\": \"^6.0.15\"\n   },\n   \"engines\": {\n-    \"node\": \">=8\",\n-    \"npm\": \">=5\"\n+    \"node\": \">=6\",\n+    \"npm\": \">=3\"\n   }\n }\n\\ No newline at end of file\n",
+					"match": false,
+					"packageHash": "3c0c01bd132e44fe3aef289de6101bda9c976265014214b990540768725c5b2b",
+					"size": 989,
+					"sourceHash": "36b1942fc9dba641a5a730b6965b1ed021e7aaf9d5c7317895d2343a286d90f6",
+					"status": "content"
+				},
+				"test/update_dependencies_test.js": {
+					"diff": "--- published/test/update_dependencies_test.js\n+++ rebuilt/test/update_dependencies_test.js\n@@ -6,6 +6,7 @@\n \n const updateDependencies = require('../lib/update_dependencies.js')\n const assert = require('assert')\n+const co = require('co')\n \n describe('update-dependencies', () => {\n   before((done) => {\n@@ -16,12 +17,12 @@\n     done()\n   })\n \n-  it('Update dependencies', async () => {\n-    const pkgPath = require.resolve('../misc/mocks/package.json')\n-    await updateDependencies({\n+  it('Update dependencies', () => co(function * () {\n+    let pkgPath = require.resolve('../doc/mocks/package.json')\n+    yield updateDependencies({\n       pkgPath: pkgPath\n     })\n-  })\n+  }))\n })\n \n /* global describe, before, after, it */\n",
+					"match": false,
+					"packageHash": "69ab58290032165380661ad424398620a0c47d03394accd87ce85682173573b3",
+					"size": 515,
+					"sourceHash": "05e30d70b841f1b00748b7f2fd00ee8f27e276efc9f5cd141cf692257663de98",
+					"status": "content"
+				},
+				"ci/cover.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"ci/report.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"doc/mocks/package.json": {
+					"match": false,
+					"status": "missing-in-package"
+				}
+			},
+			"summary": {
+				"differentFiles": 7,
+				"matchingFiles": 14,
+				"missingInPackage": 3,
+				"missingInSource": 1,
+				"score": 0.56,
+				"totalFiles": 25
+			}
+		},
+		"prodDependencies": [
+			{
+				"name": "ansi-regex",
+				"version": "2.1.1"
+			},
+			{
+				"name": "argx",
+				"version": "3.0.2"
+			},
+			{
+				"name": "arrayreduce",
+				"version": "2.1.0"
+			},
+			{
+				"name": "async",
+				"version": "1.5.2"
+			},
+			{
+				"name": "babel-runtime",
+				"version": "6.26.0"
+			},
+			{
+				"name": "cli-color",
+				"version": "1.4.0"
+			},
+			{
+				"name": "co",
+				"version": "4.6.0"
+			},
+			{
+				"name": "colorprint",
+				"version": "4.1.0"
+			},
+			{
+				"name": "commander",
+				"version": "2.20.3"
+			},
+			{
+				"name": "core-js",
+				"version": "2.6.12"
+			},
+			{
+				"name": "d",
+				"version": "1.0.2"
+			},
+			{
+				"name": "es5-ext",
+				"version": "0.10.64"
+			},
+			{
+				"name": "es6-iterator",
+				"version": "2.0.3"
+			},
+			{
+				"name": "es6-symbol",
+				"version": "3.1.4"
+			},
+			{
+				"name": "es6-weak-map",
+				"version": "2.0.3"
+			},
+			{
+				"name": "esniff",
+				"version": "2.0.1"
+			},
+			{
+				"name": "event-emitter",
+				"version": "0.3.5"
+			},
+			{
+				"name": "execcli",
+				"version": "4.0.11"
+			},
+			{
+				"name": "ext",
+				"version": "1.7.0"
+			},
+			{
+				"name": "findout",
+				"version": "2.1.2"
+			},
+			{
+				"name": "hasbin",
+				"version": "1.2.3"
+			},
+			{
+				"name": "iftype",
+				"version": "3.0.2"
+			},
+			{
+				"name": "is-promise",
+				"version": "2.2.2"
+			},
+			{
+				"name": "lru-queue",
+				"version": "0.1.0"
+			},
+			{
+				"name": "memoizee",
+				"version": "0.4.17"
+			},
+			{
+				"name": "next-tick",
+				"version": "1.1.0"
+			},
+			{
+				"name": "regenerator-runtime",
+				"version": "0.11.1"
+			},
+			{
+				"name": "stringcase",
+				"version": "3.2.1"
+			},
+			{
+				"name": "timers-ext",
+				"version": "0.1.8"
+			},
+			{
+				"name": "type",
+				"version": "2.7.3"
+			}
+		]
+	}
+]

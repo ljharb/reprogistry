@@ -1,0 +1,187 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-10T16:51:55.454Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:Running node v4.2.2 (npm v2.14.7)\n2.14.7",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "ape-updating@2.0.0",
+			"name": "ape-updating",
+			"version": "2.0.0",
+			"location": "https://registry.npmjs.org/ape-updating/-/ape-updating-2.0.0.tgz",
+			"integrity": "sha512-iuhEUXuniStguNscG1ScKXkbP9nUqfrHoGusYo/2tDvGO2fbm/h23wcpcNcItqZKl4FhtywoJZycuQ1THM8rYQ==",
+			"publishedAt": "2015-11-21T03:53:55.594Z",
+			"publishedWith": {
+				"node": "4.2.2",
+				"npm": "3.4.0"
+			},
+			"dependencies": {
+				"argx": "^1.3.1",
+				"async": "^1.5.0",
+				"colorprint": "^2.1.0",
+				"execcli": "^2.3.0"
+			}
+		},
+		"source": {
+			"integrity": null,
+			"location": "git+https://github.com/ape-repo/ape-updating.git",
+			"spec": "github:ape-repo/ape-updating#87b284ce4a03a335cb509ac74806ac3706439dcc"
+		},
+		"comparisonHash": "9ef46a5bd31291e57cbab41e2f17c57bd6da0b5b",
+		"diff": {
+			"files": {
+				".npmignore": {
+					"match": false,
+					"packageHash": "bab9964ef5755aaec1ace428aecec8e88da179b956085a1513d9fe3826b50900",
+					"size": 552,
+					"status": "missing-in-source"
+				},
+				"ci/test.js": {
+					"diff": "--- published/ci/test.js\n+++ rebuilt/ci/test.js\n@@ -13,8 +13,6 @@\n \n apeTasking.runTasks('test', [\n     (callback) => {\n-        apeTesting.runMocha('test/*_test.js', {\n-            timeout: 30000\n-        }, callback);\n+        apeTesting.runMocha('test/*_test.js', callback);\n     }\n ], true);\n",
+					"match": false,
+					"packageHash": "4e40cb0e919ee4d0b417287ad8dfe6244a7d7a7e96cb645ce0be4fc815367f02",
+					"size": 342,
+					"sourceHash": "2f2a90d745876ecb229c5a03aeca199bb2d3c228d3074f5936139fe7750d448d",
+					"status": "content"
+				},
+				"lib/update_dependencies.js": {
+					"diff": "--- published/lib/update_dependencies.js\n+++ rebuilt/lib/update_dependencies.js\n@@ -9,7 +9,7 @@\n \n \"use strict\";\n \n-const argx = require('argx'),\n+var argx = require('argx'),\n     path = require('path'),\n     os = require('os'),\n     async = require('async'),\n@@ -24,34 +24,34 @@\n     callback = args.pop('function') || argx.noop;\n     options = args.pop('object') || {};\n \n-    let pkgPath = path.resolve(options.pkgPath || 'package.json');\n+    var pkgPath = path.resolve(options.pkgPath || 'package.json');\n \n-    let cwd = path.dirname(pkgPath);\n+    var cwd = path.dirname(pkgPath);\n     async.waterfall([\n-        (callback) => {\n+        function (callback) {\n             _readJson(pkgPath, callback);\n         },\n-        (pkg, callback) => {\n-            let dependencies = _setAllProperty(pkg['dependencies'], '*'),\n+        function (pkg, callback) {\n+            var dependencies = _setAllProperty(pkg['dependencies'], '*'),\n                 devDependencies = _setAllProperty(pkg['devDependencies'], '*');\n             pkg['dependencies'] = dependencies;\n             pkg['devDependencies'] = devDependencies;\n             async.series([\n-                (callback) => {\n+                function (callback) {\n                     _writeJson(pkgPath, pkg, callback);\n                 },\n-                (callback) => {\n-                    let dependencyNames = Object.keys(dependencies).sort();\n+                function (callback) {\n+                    var dependencyNames = Object.keys(dependencies).sort();\n                     colorprint.trace('dependencies to update:%s%s', os.EOL, dependencyNames);\n-                    let args = ['install'].concat(dependencyNames).concat(['--save']);\n+                    var args = ['install'].concat(dependencyNames).concat(['--save']);\n                     execcli('npm', args, {\n                         cwd: path.dirname(pkgPath)\n                     }, callback);\n                 },\n-                (callback) => {\n-                    let devDependencyNames = Object.keys(devDependencies).sort();\n+                function (callback) {\n+                    var devDependencyNames = Object.keys(devDependencies).sort();\n                     colorprint.trace('devDependencies to update:%s%s', os.EOL, devDependencyNames);\n-                    let args = ['install'].concat(devDependencyNames).concat(['--save-dev']);\n+                    var args = ['install'].concat(devDependencyNames).concat(['--save-dev']);\n                     execcli('npm', args, {cwd: cwd}, callback);\n                 }\n             ], function (err) {\n@@ -67,7 +67,7 @@\n \n function _setAllProperty(obj, val) {\n     obj = obj || {};\n-    Object.keys(obj).forEach((key) => {\n+    Object.keys(obj).forEach(function (key) {\n         obj[key] = val;\n     });\n     return obj;\n",
+					"match": false,
+					"packageHash": "c7281fbd9be3d0147e64232c9d62752ed33259d88d3b1f6655b79c6fc19e3446",
+					"size": 2660,
+					"sourceHash": "6590e3c41b6e1c09ed3886e25ee9ae24528c1effc8ccf095f40d716ccd62ef6e",
+					"status": "content"
+				},
+				"test/update_dependencies_test.js": {
+					"diff": "--- published/test/update_dependencies_test.js\n+++ rebuilt/test/update_dependencies_test.js\n@@ -22,7 +22,7 @@\n         var pkgPath = require.resolve('../doc/mocks/package.json');\n         updateDependencies({\n             pkgPath: pkgPath\n-        }, (err) => {\n+        }, function (err) {\n             assert.ifError(err);\n             done();\n         });\n",
+					"match": false,
+					"packageHash": "236379c29de766e96c47e9445c04883fd403be14d985151edc1a9c4c5213fba2",
+					"size": 587,
+					"sourceHash": "0b42ca06f664ecaac76e69821b32d9fcfacb61a7733478e5c96fa54c737d1530",
+					"status": "content"
+				}
+			},
+			"summary": {
+				"differentFiles": 3,
+				"matchingFiles": 20,
+				"missingInPackage": 0,
+				"missingInSource": 1,
+				"score": 0.8333333333333334,
+				"totalFiles": 24
+			}
+		},
+		"prodDependencies": [
+			{
+				"name": "ansi-regex",
+				"version": "2.1.1"
+			},
+			{
+				"name": "argx",
+				"version": "1.3.1"
+			},
+			{
+				"name": "async",
+				"version": "1.5.2"
+			},
+			{
+				"name": "cli-color",
+				"version": "1.4.0"
+			},
+			{
+				"name": "colorprint",
+				"version": "2.1.0"
+			},
+			{
+				"name": "commander",
+				"version": "2.20.3"
+			},
+			{
+				"name": "d",
+				"version": "1.0.2"
+			},
+			{
+				"name": "es5-ext",
+				"version": "0.10.64"
+			},
+			{
+				"name": "es6-iterator",
+				"version": "2.0.3"
+			},
+			{
+				"name": "es6-symbol",
+				"version": "3.1.4"
+			},
+			{
+				"name": "es6-weak-map",
+				"version": "2.0.3"
+			},
+			{
+				"name": "esniff",
+				"version": "2.0.1"
+			},
+			{
+				"name": "event-emitter",
+				"version": "0.3.5"
+			},
+			{
+				"name": "execcli",
+				"version": "2.3.0"
+			},
+			{
+				"name": "arrayreduce",
+				"version": "1.1.0"
+			},
+			{
+				"name": "ext",
+				"version": "1.7.0"
+			},
+			{
+				"name": "extend",
+				"version": "3.0.2"
+			},
+			{
+				"name": "findout",
+				"version": "1.2.3"
+			},
+			{
+				"name": "hasbin",
+				"version": "1.2.3"
+			},
+			{
+				"name": "iftype",
+				"version": "1.1.1"
+			},
+			{
+				"name": "is-promise",
+				"version": "2.2.2"
+			},
+			{
+				"name": "lru-queue",
+				"version": "0.1.0"
+			},
+			{
+				"name": "memoizee",
+				"version": "0.4.17"
+			},
+			{
+				"name": "next-tick",
+				"version": "1.1.0"
+			},
+			{
+				"name": "stringcase",
+				"version": "1.2.8"
+			},
+			{
+				"name": "timers-ext",
+				"version": "0.1.8"
+			},
+			{
+				"name": "type",
+				"version": "2.7.3"
+			}
+		]
+	}
+]
