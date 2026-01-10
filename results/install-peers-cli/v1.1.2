@@ -1,0 +1,78 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-10T04:28:21.426Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:11.7.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "install-peers-cli@1.1.2",
+			"name": "install-peers-cli",
+			"version": "1.1.2",
+			"location": "https://registry.npmjs.org/install-peers-cli/-/install-peers-cli-1.1.2.tgz",
+			"integrity": "sha512-mbT9w4k1QBqs7NmtoRVnX2HoJqZR1ETP+OVPuyVlkp6tDLGrILbNxNRM3OtC4tz3fuaA9JO5rlqE7OcoyLc8Ow==",
+			"publishedAt": "2019-06-12T14:15:41.360Z",
+			"publishedWith": {
+				"node": null,
+				"npm": null
+			},
+			"dependencies": {
+				"executioner": "^2.0.1"
+			}
+		},
+		"source": {
+			"integrity": "sha512-sH35v3K/qfH8oECkUGTnYOpoPj7XFDtnhLICgBiMbJzjsliWAeVxgXXl7nx8H4KcI8jgyfQKKqJrvyt8yP1Xjg==",
+			"location": "git@github.com:alexindigo/install-peers-cli.git",
+			"spec": "github:alexindigo/install-peers-cli#HEAD"
+		},
+		"comparisonHash": "9ef46a5bd31291e57cbab41e2f17c57bd6da0b5b",
+		"diff": {
+			"files": {
+				"install.js": {
+					"diff": "--- published/install.js\n+++ rebuilt/install.js\n@@ -2,31 +2,32 @@\n \n var fs          = require('fs')\n   , path        = require('path')\n+  , program     = require('commander')\n   , installNpm  = require('./install-npm.js')\n   , installYarn = require('./install-yarn.js')\n \n-  , rootPath    = path.resolve(__dirname, '..', '..')\n+  , rootPath    = process.cwd()\n \n   , envLabel    = 'install_peers_skip'\n   ;\n \n-// in npm@3+ preinstall happens in `node_modules/.staging` folder\n-// so if we ended up in `node_modules/` jump one level up\n-if (path.basename(rootPath) === 'node_modules') {\n-  rootPath = path.resolve(rootPath, '..');\n-}\n+program.option('-f, --force-run', 'Force Run').parse(process.argv);\n \n-installPeerDeps();\n+if (program.forceRun) { \n+  installPeerDeps({ forceRun: true });\n+} else { \n+  installPeerDeps();\n+}\n \n // --- Subroutines\n \n-function installPeerDeps() {\n+function installPeerDeps({ forceRun = false } = {}) {\n   var argv;\n \n   // only run on `install`\n   if (process.env['npm_config_argv']) {\n     argv = JSON.parse(process.env['npm_config_argv']);\n-    if (argv && argv['cooked'][0] !== 'install') {\n+    if (!forceRun && argv && !['install', 'i'].includes(argv['cooked'][0])) {\n       console.log('Only run install-peer-deps after `install` command. Skipping.');\n       return;\n     }\n",
+					"match": false,
+					"packageHash": "b760673ed19e3bd4f3d3fbb291a1f5c39959e76db50005867daf8c26d4d76c4c",
+					"size": 2925,
+					"sourceHash": "84e1a76a6cf1aecb38e4da3f409ccced5f73f63387ac6691242bd968bf4db34c",
+					"status": "content"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -1,14 +1,17 @@\n {\n   \"name\": \"install-peers-cli\",\n-  \"version\": \"1.1.2\",\n+  \"version\": \"2.2.0\",\n   \"description\": \"CLI to install project's peerDependencies, without side effects.\",\n   \"main\": \"index.js\",\n-  \"repository\": \"git@github.com:alexindigo/install-peers-cli.git\",\n+  \"repository\": \"alexindigo/install-peers-cli\",\n   \"author\": \"Alex Indigo <iam@alexindigo.com>\",\n   \"license\": \"MIT\",\n   \"bin\": {\n     \"install-peers\": \"./install.js\"\n   },\n+  \"scripts\": {\n+    \"release\": \"scripts/release.sh\"\n+  },\n   \"keywords\": [\n     \"peerdependencies\",\n     \"peers\",\n@@ -26,6 +29,7 @@\n     \"lockfile\"\n   ],\n   \"dependencies\": {\n+    \"commander\": \"^2.20.0\",\n     \"executioner\": \"^2.0.1\"\n   }\n }\n",
+					"match": false,
+					"packageHash": "0e6a3bec47c2009c348104a12b484ca1db25d50b1deeb9317578f6737e42465a",
+					"size": 634,
+					"sourceHash": "95cb5ec9a8437cfbb3c6c935abdb3b9c12bf12c92e5c71cb2a0e0d590f5c0701",
+					"status": "content"
+				}
+			},
+			"summary": {
+				"differentFiles": 2,
+				"matchingFiles": 5,
+				"missingInPackage": 0,
+				"missingInSource": 0,
+				"score": 0.7142857142857143,
+				"totalFiles": 7
+			}
+		},
+		"prodDependencies": [
+			{
+				"name": "commander",
+				"version": "2.20.0"
+			},
+			{
+				"name": "executioner",
+				"version": "2.0.1"
+			},
+			{
+				"name": "fulcon",
+				"version": "1.0.2"
+			},
+			{
+				"name": "mixly",
+				"version": "1.0.0"
+			}
+		]
+	}
+]
