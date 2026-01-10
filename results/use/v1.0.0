@@ -1,0 +1,77 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-10T04:54:38.736Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:11.7.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "use@1.0.0",
+			"name": "use",
+			"version": "1.0.0",
+			"location": "https://registry.npmjs.org/use/-/use-1.0.0.tgz",
+			"integrity": "sha512-21Jb/i7D+Qqx2z1F54yjxWbKRn8QJfvpb2eOWheMwGSuL2b94+mxPLLvTWDnvZMvIt1NaZV9pJxM0Xor5uhQHw==",
+			"publishedAt": "2012-08-17T19:06:55.632Z",
+			"publishedWith": {
+				"node": null,
+				"npm": "1.1.49"
+			},
+			"dependencies": {}
+		},
+		"source": {
+			"integrity": "sha512-T5ILkdgSowM81BjG/+vmtJavupEZdoKwLAWDmn9d8A7nMh4qkij1DjrPDo7UlYoT7yiVhO/Qs+MH+6GRfnf0Aw==",
+			"location": "git://github.com/kgriffs/node-use.git",
+			"spec": "github:kgriffs/node-use#HEAD"
+		},
+		"comparisonHash": "9ef46a5bd31291e57cbab41e2f17c57bd6da0b5b",
+		"diff": {
+			"files": {
+				".npmignore": {
+					"match": false,
+					"packageHash": "318d9a16533732a69cda7bb7b174ee392fdd15be3d72a114cd8f2d51f3eab510",
+					"size": 6,
+					"status": "missing-in-source"
+				},
+				"README.md": {
+					"diff": "--- published/README.md\n+++ rebuilt/README.md\n@@ -18,9 +18,27 @@\n   'https',\n   'url',\n   'path',\n-  'stream'\n+  'stream',\n+\n+  'xregexp#XRegExp',\n+\n+  './helper'\n ));\n \n util.debug('Easy as pie...');\n+\n+XRegExp.replace(\n+  'x-key-lime', \n+  XRegExp('\\\\b\\\\w', 'g'), \n+  function(match) { \n+    return match.toUpperCase();\n+  }\n+);\n+\n+helper.doSomethingGrand();\n ```\n \n+### Warning ###\n+\n+This module does not work in strict mode. Only enable strict mode, if you need it, *after* the eval statement.\n+\n",
+					"match": false,
+					"packageHash": "329f0e1811a661896bb43bb2bb52b7b71224f7556e2556fea09bcb75654120c1",
+					"size": 258,
+					"sourceHash": "cbf5d6fbd90cceb2b72b6bf136f7ef1b1d532b08d8e787db55028824644c3d0b",
+					"status": "content"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -1,6 +1,6 @@\n {\n   \"name\": \"use\",\n-  \"version\": \"1.0.0\",\n+  \"version\": \"1.0.3\",\n   \"description\": \"DRY version of require()\",\n   \"bin\": {\n     \"moruga\": \"index.js\"\n@@ -18,6 +18,6 @@\n   \"scripts\": {\n     \"test\": \"node ./test.js\"\n   },\n-  \"license\": \"BSD\",\n+  \"license\": \"Apache 2.0\",\n   \"main\": \"use.js\"\n }\n",
+					"match": false,
+					"packageHash": "d4427bed30b9b00158199d1c71a5bdb03027f10fefc22175a4d0cbb2bf76ca3b",
+					"size": 444,
+					"sourceHash": "7acd137e75308a0851096bbd744e8cb7b555953df22762c671ebe5f2c6002f9c",
+					"status": "content"
+				},
+				"use.js": {
+					"diff": "--- published/use.js\n+++ rebuilt/use.js\n@@ -1,11 +1,26 @@\n var util = require('util');\n+var path = require('path');\n \n exports = module.exports = function use(moduleNames) {\n   var script = '';\n   moduleNames = Array.isArray(moduleNames) ? moduleNames : [].slice.call(arguments);\n \n   moduleNames.forEach(function (m) {\n-    script += util.format('var %s = require(\"%s\"); ', m, m);\n+    var tokens = m.split('#');\n+    \n+    if (tokens.length === 2) {\n+      var moduleName = tokens[0];\n+      var className = tokens[1];\n+\n+      script += util.format(\n+        'var %s = require(\"%s\").%s',\n+        className, moduleName, className)\n+    }\n+    else {\n+      script += util.format(\n+        'var %s = require(\"%s\"); ', \n+        path.basename(m), m);\n+    }\n   })\n \n   return script;\n",
+					"match": false,
+					"packageHash": "684eef682469c9442b8e1155c1199037651d521164d9aef8e6b5eca512c699cb",
+					"size": 312,
+					"sourceHash": "f3cf8bb5ec5750d157d31cc40a3dba63d648ec89188025dcf9cdda6d46f4f093",
+					"status": "content"
+				},
+				"LICENSE": {
+					"match": false,
+					"status": "missing-in-package"
+				}
+			},
+			"summary": {
+				"differentFiles": 3,
+				"matchingFiles": 2,
+				"missingInPackage": 1,
+				"missingInSource": 1,
+				"score": 0.2857142857142857,
+				"totalFiles": 7
+			}
+		},
+		"prodDependencies": []
+	}
+]
