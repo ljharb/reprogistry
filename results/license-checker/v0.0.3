@@ -1,0 +1,439 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-10T01:55:08.143Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:11.7.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "license-checker@0.0.3",
+			"name": "license-checker",
+			"version": "0.0.3",
+			"location": "https://registry.npmjs.org/license-checker/-/license-checker-0.0.3.tgz",
+			"integrity": "sha512-ZNeikpgrp7yIoZsDIkEkr7ka4Sv9xBb6ipuInbCV1vKc1VlsWLZNFdSb4SbF1wdUkGTDRas4A+Tki58Mp6wX5A==",
+			"publishedAt": "2013-04-25T14:43:17.791Z",
+			"publishedWith": {
+				"node": null,
+				"npm": "1.2.18"
+			},
+			"dependencies": {
+				"mkdirp": "*",
+				"treeify": "*",
+				"nopt": "*",
+				"read-installed": "*"
+			}
+		},
+		"source": {
+			"integrity": null,
+			"location": "http://github.com/davglass/license-checker.git",
+			"spec": "github:davglass/license-checker#HEAD"
+		},
+		"comparisonHash": "9ef46a5bd31291e57cbab41e2f17c57bd6da0b5b",
+		"diff": {
+			"files": {
+				".npmignore": {
+					"match": false,
+					"packageHash": "6043d55d9f80acc6475b07982d904ec7be1251021f80b08e3159dbb432a820b3",
+					"size": 116,
+					"status": "missing-in-source"
+				},
+				"LICENSE": {
+					"diff": "--- published/LICENSE\n+++ rebuilt/LICENSE\n@@ -1,5 +1,4 @@\n-Copyright 2012 Yahoo! Inc.\n-All rights reserved.\n+Copyright 2012 Yahoo Inc.\n \n Redistribution and use in source and binary forms, with or without\n modification, are permitted provided that the following conditions are met:\n",
+					"match": false,
+					"packageHash": "32c4c214ef1f8bbf5236383449cc751ed194a3e996958d2938c7e7f1b706f187",
+					"size": 1484,
+					"sourceHash": "adeb5a7f7d027ec14c3698be7a0f248978516ab39ccec4fb70689ba4753cdd67",
+					"status": "content"
+				},
+				"README.md": {
+					"diff": "--- published/README.md\n+++ rebuilt/README.md\n@@ -1,13 +1,17 @@\n NPM License Checker\n ===================\n \n+[![Build Status](https://www.travis-ci.org/davglass/license-checker.svg?branch=master)](https://www.travis-ci.org/davglass/license-checker)\n \n-Ever needed to see all the license info for a module and it's dependencies?\n+*As of v17.0.0 the `failOn` and `onlyAllow` arguments take semicolons as delimeters instead of commas. Some license names contain\n+commas and it messed with the parsing*\n+\n+Ever needed to see all the license info for a module and its dependencies?\n \n It's this easy:\n \n-```\n-npm -g license-checker\n+```shell\n+npm install -g license-checker\n \n mkdir foo\n cd foo\n@@ -18,7 +22,6 @@\n You should see something like this:\n \n ```\n-scanning ./yui-lint\n ├─ cli@0.4.3\n │  ├─ repository: http://github.com/chriso/cli\n │  └─ licenses: MIT\n@@ -53,23 +56,127 @@\n       └─ repository: http://github.com/yui/yui-lint\n ```\n \n-You can also specify `--unknown` to only show licenses that it can't determine or guessed at (from README)\n+An asterisk next to a license name means that it was deduced from\n+an other file than package.json (README, LICENSE, COPYING, ...)\n+You could see something like this:\n+\n+```\n+└─ debug@2.0.0\n+   ├─ repository: https://github.com/visionmedia/debug\n+   └─ licenses: MIT*\n+```\n+\n+Options\n+-------\n+\n+* `--production` only show production dependencies.\n+* `--development` only show development dependencies.\n+* `--start [path of the initial json to look for]`\n+* `--unknown` report guessed licenses as unknown licenses.\n+* `--onlyunknown` only list packages with unknown or guessed licenses.\n+* `--json` output in json format.\n+* `--csv` output in csv format.\n+* `--csvComponentPrefix` prefix column for component in csv format.\n+* `--out [filepath]` write the data to a specific file.\n+* `--customPath` to add a custom Format file in JSON\n+* `--exclude [list]` exclude modules which licenses are in the comma-separated list from the output\n+* `--relativeLicensePath` output the location of the license files as relative paths\n+* `--summary` output a summary of the license usage',\n+* `--failOn [list]` fail (exit with code 1) on the first occurrence of the licenses of the semicolon-separated list\n+* `--onlyAllow [list]` fail (exit with code 1) on the first occurrence of the licenses not in the semicolon-seperated list\n+* `--packages [list]` restrict output to the packages (package@version) in the semicolon-seperated list\n+* `--excludePackages [list]` restrict output to the packages (package@version) not in the semicolon-seperated list\n+* `--excludePrivatePackages` restrict output to not include any package marked as private\n+* `--direct look for direct dependencies only`\n+\n+Exclusions\n+----------\n+A list of licenses is the simplest way to describe what you want to exclude.\n+\n+You can use valid [SPDX identifiers](https://spdx.org/licenses/).\n+You can use valid SPDX expressions like `MIT OR X11`.\n+You can use non-valid SPDX identifiers, like `Public Domain`, since `npm` does\n+support some license strings that are not SPDX identifiers.\n+\n+Examples\n+--------\n+\n+```\n+license-checker --json > /path/to/licenses.json\n+license-checker --csv --out /path/to/licenses.csv\n+license-checker --unknown\n+license-checker --customPath customFormatExample.json\n+license-checker --exclude 'MIT, MIT OR X11, BSD, ISC'\n+license-checker --packages 'react@16.3.0;react-dom@16.3.0;lodash@4.3.1'\n+license-checker --excludePackages 'internal-1;internal-2'\n+license-checker --onlyunknown\n+```\n+\n+Custom format\n+-------------\n+\n+The `--customPath` option can be used with CSV to specify the columns. Note that\n+the first column, `module_name`, will always be used.\n+\n+When used with JSON format, it will add the specified items to the usual ones.\n+\n",
+					"match": false,
+					"packageHash": "33a13f7cb6f969d932b3971fa7ca729d354b431e1439d39622678ff7794332a5",
+					"size": 1780,
+					"sourceHash": "27d4db2fbf08c655fade7dff2a39b45f87f137c98e2d4fa043b4a01d54c2d466",
+					"status": "content"
+				},
+				"bin/license-checker": {
+					"diff": "--- published/bin/license-checker\n+++ rebuilt/bin/license-checker\n@@ -11,15 +11,99 @@\n var args = require('../lib/args').parse();\n var mkdirp = require('mkdirp');\n var path = require('path');\n+var chalk = require('chalk');\n var fs = require('fs');\n \n-checker.init(args, function(json) {\n+if (args.help) {\n+    console.error('license-checker@' + require('../package.json').version);\n+    var usage = [\n+        '',\n+        '   --production only show production dependencies.',\n+        '   --development only show development dependencies.',\n+        '   --unknown report guessed licenses as unknown licenses.',\n+        '   --start [path of the initial json to look for]',\n+        '   --onlyunknown only list packages with unknown or guessed licenses.',\n+        '   --json output in json format.',\n+        '   --csv output in csv format.',\n+        '   --csvComponentPrefix column prefix for components in csv file',\n+        '   --out [filepath] write the data to a specific file.',\n+        '   --customPath to add a custom Format file in JSON',\n+        '   --exclude [list] exclude modules which licenses are in the comma-separated list from the output',\n+        '   --relativeLicensePath output the location of the license files as relative paths',\n+        '   --summary output a summary of the license usage',\n+        '   --failOn [list] fail (exit with code 1) on the first occurrence of the licenses of the semicolon-separated list',\n+        '   --onlyAllow [list] fail (exit with code 1) on the first occurrence of the licenses not in the semicolon-seperated list',\n+        '   --direct look for direct dependencies only',\n+        '   --packages [list] restrict output to the packages (package@version) in the semicolon-seperated list',\n+        '   --excludePackages [list] restrict output to the packages (package@version) not in the semicolon-seperated list',\n+        '   --excludePrivatePackages restrict output to not include any package marked as private',\n+        '',\n+        '   --version The current version',\n+        '   --help  The text you are reading right now :)',\n+        ''\n+    ];\n+    console.error(usage.join('\\n'), '\\n');\n+    process.exit(0);\n+}\n+\n+if (args.version) {\n+    console.error(require('../package.json').version);\n+    process.exit(1);\n+}\n+\n+if (args.failOn && args.onlyAllow) {\n+    console.error('--failOn and --onlyAllow can not be used at the same time. Choose one or the other.');\n+    process.exit(1);\n+} else {\n+    var argValue = args.failOn || args.onlyAllow;\n+    if (argValue && argValue.indexOf(',') >= 0) {\n+        var argName = args.failOn ? 'failOn' : 'onlyAllow';\n+        console.warn('Warning: As of v17 the --' + argName + ' argument takes semicolons as delimeters instead of commas (some license names can contain commas)');\n+    }\n+}\n+\n+checker.init(args, function(err, json) {\n+\n+    var formattedOutput = '';\n+\n+    if (!!err) {\n+        console.error('Found error');\n+        console.error(err);\n+    }\n+\n+    if (shouldColorizeOutput(args)) {\n+        var keys = Object.keys(json);\n+        keys.forEach(function(key) {\n+            var keyParts = key.split('@');\n+            var colorizedKey = chalk.blue(keyParts[0]) + chalk.dim('@') + chalk.green(keyParts[1]);\n+            json[colorizedKey] = json[key];\n+            delete json[key];\n+        });\n+    }\n+\n     if (args.json) {\n-        var dir = path.dirname(args.json);\n+        formattedOutput = JSON.stringify(json, null, 2) + '\\n';\n+    } else if (args.csv) {\n+        formattedOutput = checker.asCSV(json, args.customFormat, args.csvComponentPrefix);\n+    } else if (args.markdown){\n+        formattedOutput = checker.asMarkDown(json, args.customFormat) + '\\n';\n+    } else if (args.summary) {\n+        formattedOutput = checker.asSummary(json);\n+    } else {\n+        formattedOutput = checker.asTree(json);\n+    }\n+\n+    if (args.files) {\n+        checker.asFiles(json, args.files);\n+    } else if (args.out) {\n+        var dir = path.dirname(args.out);\n         mkdirp.sync(dir);\n-        fs.writeFileSync(args.json, JSON.stringify(json, null, 4) + '\\n', 'utf8');\n-        console.log('file written', args.json);\n+        fs.writeFileSync(args.out, formattedOutput, 'utf8');\n     } else {\n-        checker.print(json);\n",
+					"match": false,
+					"packageHash": "8a47350b1245765c8df16c49be5f9e5a99455fb8498bada172235309d4cee001",
+					"size": 626,
+					"sourceHash": "150d7707d4532d57bdb5718637ff62fff1f075921c5ffaa084df27f900bfea76",
+					"status": "content"
+				},
+				"lib/args.js": {
+					"diff": "--- published/lib/args.js\n+++ rebuilt/lib/args.js\n@@ -5,28 +5,49 @@\n */\n \n var nopt = require('nopt'),\n+    chalk = require('chalk'),\n     known = {\n-        json: require('path'),\n+        production: Boolean,\n+        development: Boolean,\n+        json: Boolean,\n+        csv: Boolean,\n+        csvComponentPrefix: String,\n+        markdown: Boolean,\n+        out: require('path'),\n         unknown: Boolean,\n+        onlyunknown: Boolean,\n         version: Boolean,\n+        color: Boolean,\n         start: String,\n-        help: Boolean\n+        help: Boolean,\n+        relativeLicensePath: Boolean,\n+        exclude: String,\n+        customPath: require('path'),\n+        customFormat: { },\n+        files: require('path'),\n+        summary: Boolean,\n+        failOn: String,\n+        onlyAllow: String,\n+        direct: Boolean,\n+        packages: String,\n+        excludePackages: String,\n+        excludePrivatePackages: Boolean,\n     },\n     shorts = {\n-        \"v\" : [\"--version\"],\n-        \"h\" : [\"--help\"]\n+        \"v\": [\"--version\"],\n+        \"h\": [\"--help\"]\n     };\n \n-var raw = function (args) {\n-    var parsed = nopt(known, shorts, (args || process.argv));\n-    return parsed;\n+var raw = function(args) {\n+    return nopt(known, shorts, (args || process.argv));\n };\n \n-var has = function (a) {\n+/*istanbul ignore next */\n+var has = function(a) {\n     var cooked = raw().argv.cooked,\n         ret = false;\n \n-    cooked.forEach(function (o) {\n+    cooked.forEach(function(o) {\n         if ((o === '--' + a) || (o === '--no-' + a)) {\n             ret = true;\n         }\n@@ -45,12 +66,26 @@\n     if (parsed === undefined) {\n         parsed = clean();\n     }\n+    /*istanbul ignore else*/\n+    if (parsed.color === undefined) {\n+        parsed.color = chalk.supportsColor;\n+    }\n+    if (parsed.json || parsed.markdown || parsed.csv) {\n+        parsed.color = false;\n+    }\n     parsed.start = parsed.start || process.cwd();\n+    parsed.relativeLicensePath = !!parsed.relativeLicensePath;\n+\n+    if (parsed.direct) {\n+        parsed.direct = 0;\n+    } else {\n+        parsed.direct = Infinity;\n+    }\n \n     return parsed;\n };\n \n-var parse = function (args) {\n+var parse = function(args) {\n     var parsed = clean(args);\n     return setDefaults(parsed);\n };\n",
+					"match": false,
+					"packageHash": "2402dd076c13ccb6d75e7930d8963a39717afd6341529d35f3d0926cf195e43c",
+					"size": 1246,
+					"sourceHash": "dc1cac82618a9aefa11097783a2086573aa352465b035f822cf5aaccb07c1014",
+					"status": "content"
+				},
+				"lib/index.js": {
+					"diff": "--- published/lib/index.js\n+++ rebuilt/lib/index.js\n@@ -1,4 +1,3 @@\n-\n /*\n Copyright (c) 2013, Yahoo! Inc. All rights reserved.\n Code licensed under the BSD License:\n@@ -6,145 +5,623 @@\n */\n \n var UNKNOWN = 'UNKNOWN';\n-var data = {};\n+var UNLICENSED = 'UNLICENSED';\n+var fs = require('fs');\n+var path = require('path');\n var read = require('read-installed');\n+var chalk = require('chalk');\n var treeify = require('treeify');\n+var license = require('./license');\n+var licenseFiles = require('./license-files');\n+var debug = require('debug');\n+var mkdirp = require('mkdirp');\n+var spdxSatisfies = require('spdx-satisfies');\n+var spdxCorrect =require('spdx-correct');\n \n-var parseReadMe = function(str) {\n-    \n-    if (str.indexOf('MIT') > -1) {\n-        str = 'MIT*';\n-    } else if (str.indexOf('BSD') > -1) {\n-        str = 'BSD*';\n-    } else if (str.indexOf('Apache License') > -1) {\n-        str = 'Apache*';\n-    } else if (str.indexOf('DO WHAT THE FUCK YOU WANT TO PUBLIC LICENSE') > -1) {\n-        str = 'WTF*';\n-    } else {\n-        str = UNKNOWN;\n+// Set up debug logging\n+// https://www.npmjs.com/package/debug#stderr-vs-stdout\n+var debugError = debug('license-checker:error');\n+var debugLog = debug('license-checker:log');\n+debugLog.log = console.log.bind(console);\n+\n+var flatten = function(options) {\n+    var moduleInfo = { licenses: UNKNOWN },\n+        json = options.deps,\n+        data = options.data,\n+        key = json.name + '@' + json.version,\n+        colorize = options.color,\n+        unknown = options.unknown,\n+        readmeFile,\n+        licenseData, dirFiles, files = [], noticeFiles = [], licenseFile;\n+\n+    if (json.private) {\n+        moduleInfo.private = true;\n     }\n \n-    return str;\n-};\n+    // If we have processed this key already, just return the data object.\n+    // This was added so that we don't recurse forever if there was a circular\n+    // dependency in the dependency tree.\n+    /*istanbul ignore next*/\n+    if (data[key]) {\n+        return data;\n+    }\n \n-var flatten = function(json) {\n-    \n-    Object.keys(json).forEach(function(item) {\n-        switch (item) {\n-            case 'repository':\n-                if (typeof json[item] === 'object') {\n-                    json[item] = json[item].url.replace('git://github.com', 'https://github.com').replace('.git', '');\n-                }\n-                break;\n-            case 'url':\n-                if (typeof json[item] === 'object') {\n-                    json[item] = json[item].web;\n-                }\n-                if (json.repository) {\n-                    delete json[item];\n-                }\n-                break;\n-            case 'name':\n-            case 'version':\n-                break;\n-            case 'readme':\n-                if (json[item]) {\n-                    if (!json.licence && !json.licenses) {\n-                        json.licenses = parseReadMe(json[item]);\n-                    }\n-                    if (json.licenses === UNKNOWN) {\n-                        json.licenses = parseReadMe(json[item]);\n-                    }\n-                    delete json[item];\n-                }\n-                break;\n-            case 'license':\n-            case 'licenses':\n",
+					"match": false,
+					"packageHash": "6d46938cd9f39d5b726384f8c2f477a70f5e80d4ba8b5cdbf8b7850dfe0aeb8a",
+					"size": 4903,
+					"sourceHash": "c498185ee444ecc84c7289a85a27515d45bf12649ce39a3021efe036117f0593",
+					"status": "content"
+				},
+				"lib/stack.js": {
+					"diff": "--- published/lib/stack.js\n+++ rebuilt/lib/stack.js\n@@ -3,7 +3,7 @@\n Code licensed under the BSD License:\n http://yuilibrary.com/license/\n */\n-var Stack = function () {\n+var Stack = function() {\n     this.errors   = [];\n     this.finished = 0;\n     this.results  = [];\n@@ -11,13 +11,13 @@\n };\n \n Stack.prototype = {\n-    add: function (fn) {\n+    add: function(fn) {\n         var self  = this,\n             index = self.total;\n \n         self.total += 1;\n \n-        return function (err) {\n+        return function(err) {\n             if (err) { self.errors[index] = err; }\n \n             self.finished += 1;\n@@ -26,14 +26,14 @@\n         };\n     },\n \n-    test: function () {\n+    test: function() {\n         if (this.finished >= this.total && this.callback) {\n             this.callback.call(null, this.errors.length ? this.errors : null,\n-                    this.results, this.data);\n+                this.results, this.data);\n         }\n     },\n \n-    done: function (callback, data) {\n+    done: function(callback, data) {\n         this.callback = callback;\n         this.data     = data;\n         this.test();\n",
+					"match": false,
+					"packageHash": "d390322d6b7c36313127751b9390e2d4f81edcf4d61a511cbbbea74319f168a9",
+					"size": 984,
+					"sourceHash": "89d3a8d8035b6029769a575a77613d6e3228c89cf79e3a9a9a0f2181f948e9ea",
+					"status": "content"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -1,40 +1,121 @@\n {\n-    \"name\": \"license-checker\",\n-    \"description\": \"Check license info for a pacakge\",\n-    \"author\": \"Dav Glass <davglass@gmail.com>\",\n-    \"version\": \"0.0.3\",\n-    \"dependencies\": {\n-        \"mkdirp\": \"*\",\n-        \"treeify\": \"*\",\n-        \"nopt\": \"*\",\n-        \"read-installed\": \"*\"\n-    },\n-    \"devDependencies\": {\n-        \"yui-lint\": \"~0.1.1\",\n-        \"jshint\": \"~0.9.0\",\n-        \"vows\": \"*\" \n-    },\n-    \"keywords\": [\n-        \"license\", \"cli\", \"checker\", \"oss\"\n+  \"name\": \"license-checker\",\n+  \"description\": \"Check license info for a package\",\n+  \"author\": \"Dav Glass <davglass@gmail.com>\",\n+  \"version\": \"25.0.1\",\n+  \"contributors\": [\n+    \"Adam Weber <adamweber01@gmail.com>\",\n+    \"Andrew Couch <andy@couchand.com>\",\n+    \"Asharma <Asharma@agtinternational.com>\",\n+    \"Bryan English <bryan@bryanenglish.com>\",\n+    \"Christoph Werner <christoph@codepunkt.de>\",\n+    \"Cory Reed <creed@mrn.org>\",\n+    \"Damien Larmine <damien.larmine@gmail.com>\",\n+    \"Dan Rumney <dancrumb@gmail.com>\",\n+    \"Dav Glass <davglass@gmail.com>\",\n+    \"Dick Wiggers <dickje@gmail.com>\",\n+    \"Drew Folta <drew@folta.net>\",\n+    \"Elijah Insua <tmpvar@gmail.com>\",\n+    \"Francois Zaninotto <fzaninotto@gmail.com>\",\n+    \"Glen Arrowsmith <glen.arrowsmith@gmail.com>\",\n+    \"Helio Frota <00hf11@gmail.com>\",\n+    \"Holger Knust <holger.knust@certusview.com>\",\n+    \"Honza Javorek <mail@honzajavorek.cz>\",\n+    \"Ivan Latunov <ivan.latunov@chaosgroup.com>\",\n+    \"James Bloomer <github2@thebloomers.co.uk>\",\n+    \"Jonny Reeves <john.reeves@improbable.io>\",\n+    \"Jonny Reeves <jonny@improbable.io>\",\n+    \"Ladislav Prskavec <abtris@Ladislavs-MacBook-Pro.local>\",\n+    \"Ladislav Prskavec <ladislav@prskavec.net>\",\n+    \"Lorenzo Cesana <cesana.lorenzo@gmail.com>\",\n+    \"Mark Tse <mark.tse@d2l.com>\",\n+    \"Mark Tse <neverendingqs@users.noreply.github.com>\",\n+    \"Mattias Amnefelt <mattiasa@cantemo.com>\",\n+    \"Michael Kühnel <mail@michael-kuehnel.de>\",\n+    \"Michael Williamson <mike@zwobble.org>\",\n+    \"Paul Mandel <paul.mand3l@gmail.com>\",\n+    \"Peter Uithoven <peter@peteruithoven.nl>\",\n+    \"Philipp Tusch <philipp.tusch@huf-group.com>\",\n+    \"Rogier Schouten <github@workingcode.nl>\",\n+    \"Stan Senotrusov <stan@senotrusov.com>\",\n+    \"Stoyan Revov <st.revov@gmail.com>\",\n+    \"Tero Keski-Valkama <tero.keski-valkama@cybercom.com>\",\n+    \"Thomas Grainger <tagrain@gmail.com>\",\n+    \"Tim Brust <tim.brust@sinnerschrader.com>\",\n+    \"Tim Oxley <secoif@gmail.com>\",\n+    \"Timothée Mazzucotelli <timothee.mazzucotelli@gmail.com>\",\n+    \"Tobi <tobilg@gmail.com>\",\n+    \"Tobias Büschel <tobias.bueschel@gmail.com>\",\n+    \"Yukari Ishibashi <ibeucaly@users.noreply.github.com>\",\n+    \"Yuri Zapuchlak <yuri@vidmaker.com>\",\n+    \"badunk <baduncaduncan@gmail.com>\",\n+    \"creising <creising@gmail.com>\",\n+    \"gdw2 <gdwarner@Gmail.com>\",\n+    \"ktmouk <ktmouk@gmail.com>\",\n+    \"santiagocanti <santiago.canti@auth0.com>\",\n+    \"tbbstny <tbbstny@users.noreply.github.com>\",\n+    \"zodiac403 <zodiac403@gmx.de>\"\n+  ],\n+  \"dependencies\": {\n+    \"chalk\": \"^2.4.1\",\n+    \"debug\": \"^3.1.0\",\n+    \"mkdirp\": \"^0.5.1\",\n+    \"nopt\": \"^4.0.1\",\n+    \"read-installed\": \"~4.0.3\",\n+    \"semver\": \"^5.5.0\",\n+    \"spdx-correct\": \"^3.0.0\",\n+    \"spdx-expression-parse\": \"^3.0.0\",\n+    \"spdx-satisfies\": \"^4.0.0\",\n+    \"treeify\": \"^1.1.0\"\n+  },\n+  \"devDependencies\": {\n+    \"camden.jshint\": \"github:cfjedimaster/brackets-jshint\",\n+    \"detectionizr\": \"*\",\n+    \"eslint\": \"^4.19.1\",\n+    \"format-package-json\": \"^0.2.0\",\n+    \"git-contributors\": \"^0.2.3\",\n+    \"github-changes\": \"^1.1.2\",\n+    \"istanbul\": \"^0.4.3\",\n+    \"jenkins-mocha\": \"^6.0.0\",\n+    \"locale\": \"^0.1.0\",\n",
+					"match": false,
+					"packageHash": "f4fccd12ec298c3c5583e23a6f5c5ebe2bd5f2744dd789ff6647b6c2a2c433ad",
+					"size": 1122,
+					"sourceHash": "19595de1f4a4717de0550a8f02aadb7220e0e63359ed2ca778d674703b5bf6ed",
+					"status": "content"
+				},
+				".eslintignore": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				".eslintrc.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				".istanbul.yml": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				".travis.yml": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"CHANGELOG.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"customFormatExample.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/license-files.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/license.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"scripts/contrib.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"tests/.eslintrc.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"tests/bin-test.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"tests/config/custom_format_broken.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"tests/config/custom_format_correct.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"tests/failOn-test.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"tests/fixtures/custom-license-file/package.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"tests/fixtures/custom-license-url/package.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"tests/fixtures/excludeBSD/package.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"tests/fixtures/excludePublicDomain/package.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"tests/fixtures/excludeWithComma/package.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"tests/fixtures/privateModule/README.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"tests/fixtures/privateModule/package.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"tests/license-files-test.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"tests/license.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"tests/packages-test.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"tests/test.js": {
+					"match": false,
+					"status": "missing-in-package"
+				}
+			},
+			"summary": {
+				"differentFiles": 7,
+				"matchingFiles": 0,
+				"missingInPackage": 25,
+				"missingInSource": 1,
+				"score": 0,
+				"totalFiles": 33
+			}
+		},
+		"prodDependencies": [
+			{
+				"name": "abbrev",
+				"version": "1.0.9"
+			},
+			{
+				"name": "ansi-styles",
+				"version": "3.2.1"
+			},
+			{
+				"name": "array-find-index",
+				"version": "1.0.2"
+			},
+			{
+				"name": "asap",
+				"version": "2.0.6"
+			},
+			{
+				"name": "balanced-match",
+				"version": "1.0.2"
+			},
+			{
+				"name": "brace-expansion",
+				"version": "1.1.12"
+			},
+			{
+				"name": "chalk",
+				"version": "2.4.2"
+			},
+			{
+				"name": "color-convert",
+				"version": "1.9.3"
+			},
+			{
+				"name": "color-name",
+				"version": "1.1.3"
+			},
+			{
+				"name": "concat-map",
+				"version": "0.0.1"
+			},
+			{
+				"name": "debug",
+				"version": "3.2.7"
+			},
+			{
+				"name": "debuglog",
+				"version": "1.0.1"
+			},
+			{
+				"name": "dezalgo",
+				"version": "1.0.4"
+			},
+			{
+				"name": "escape-string-regexp",
+				"version": "1.0.5"
+			},
+			{
+				"name": "fs.realpath",
+				"version": "1.0.0"
+			},
+			{
+				"name": "function-bind",
+				"version": "1.1.2"
+			},
+			{
+				"name": "glob",
+				"version": "7.2.3"
+			},
+			{
+				"name": "graceful-fs",
+				"version": "4.2.11"
+			},
+			{
+				"name": "has-flag",
+				"version": "3.0.0"
+			},
+			{
+				"name": "hasown",
+				"version": "2.0.2"
+			},
+			{
+				"name": "hosted-git-info",
+				"version": "2.8.9"
+			},
+			{
+				"name": "inflight",
+				"version": "1.0.6"
+			},
+			{
+				"name": "inherits",
+				"version": "2.0.4"
+			},
+			{
+				"name": "is-core-module",
+				"version": "2.16.1"
+			},
+			{
+				"name": "json-parse-even-better-errors",
+				"version": "2.3.1"
+			},
+			{
+				"name": "minimatch",
+				"version": "3.1.2"
+			},
+			{
+				"name": "minimist",
+				"version": "1.2.8"
+			},
+			{
+				"name": "mkdirp",
+				"version": "0.5.6"
+			},
+			{
+				"name": "ms",
+				"version": "2.1.3"
+			},
+			{
+				"name": "nopt",
+				"version": "4.0.3"
+			},
+			{
+				"name": "normalize-package-data",
+				"version": "2.5.0"
+			},
+			{
+				"name": "resolve",
+				"version": "1.22.11"
+			},
+			{
+				"name": "npm-normalize-package-bin",
+				"version": "1.0.1"
+			},
+			{
+				"name": "once",
+				"version": "1.4.0"
+			},
+			{
+				"name": "os-homedir",
+				"version": "1.0.2"
+			},
+			{
+				"name": "os-tmpdir",
+				"version": "1.0.2"
+			},
+			{
+				"name": "osenv",
+				"version": "0.1.5"
+			},
+			{
+				"name": "path-is-absolute",
+				"version": "1.0.1"
+			},
+			{
+				"name": "path-parse",
+				"version": "1.0.7"
+			},
+			{
+				"name": "read-installed",
+				"version": "4.0.3"
+			},
+			{
+				"name": "read-package-json",
+				"version": "2.1.2"
+			},
+			{
+				"name": "readdir-scoped-modules",
+				"version": "1.1.0"
+			},
+			{
+				"name": "semver",
+				"version": "5.7.2"
+			},
+			{
+				"name": "slide",
+				"version": "1.1.6"
+			},
+			{
+				"name": "spdx-compare",
+				"version": "1.0.0"
+			},
+			{
+				"name": "spdx-correct",
+				"version": "3.2.0"
+			},
+			{
+				"name": "spdx-exceptions",
+				"version": "2.5.0"
+			},
+			{
+				"name": "spdx-expression-parse",
+				"version": "3.0.1"
+			},
+			{
+				"name": "spdx-license-ids",
+				"version": "3.0.22"
+			},
+			{
+				"name": "spdx-ranges",
+				"version": "2.1.1"
+			},
+			{
+				"name": "spdx-satisfies",
+				"version": "4.0.1"
+			},
+			{
+				"name": "supports-color",
+				"version": "5.5.0"
+			},
+			{
+				"name": "supports-preserve-symlinks-flag",
+				"version": "1.0.0"
+			},
+			{
+				"name": "treeify",
+				"version": "1.1.0"
+			},
+			{
+				"name": "util-extend",
+				"version": "1.0.3"
+			},
+			{
+				"name": "validate-npm-package-license",
+				"version": "3.0.4"
+			},
+			{
+				"name": "wrappy",
+				"version": "1.0.2"
+			}
+		]
+	}
+]
