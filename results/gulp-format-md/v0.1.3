@@ -1,0 +1,300 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-10T04:11:13.908Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:Running node v5.0.0 (npm v3.3.6)\n3.3.6",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "gulp-format-md@0.1.3",
+			"name": "gulp-format-md",
+			"version": "0.1.3",
+			"location": "https://registry.npmjs.org/gulp-format-md/-/gulp-format-md-0.1.3.tgz",
+			"integrity": "sha512-3Dfiwg/qYJOS4TIrYEooPT1zdDpv0Ed625y1hFIiohxuEwbu5ZWC++pMcKtBMv6GTnnL2ZnTFL8LscN6TC3mwQ==",
+			"publishedAt": "2015-12-15T21:37:29.468Z",
+			"publishedWith": {
+				"node": "5.0.0",
+				"npm": "3.3.6"
+			},
+			"dependencies": {
+				"extend-shallow": "^2.0.1",
+				"get-value": "^2.0.0",
+				"lazy-cache": "^0.2.4",
+				"plugin-error": "^0.1.2",
+				"pretty-remarkable": "^0.1.8",
+				"remarkable": "^1.6.1",
+				"through2": "^2.0.0"
+			}
+		},
+		"source": {
+			"integrity": null,
+			"location": "git+https://github.com/jonschlinkert/gulp-format-md.git",
+			"spec": "github:jonschlinkert/gulp-format-md#5a847584593bda5237ee13b71d84d40f923682b1"
+		},
+		"comparisonHash": "9ef46a5bd31291e57cbab41e2f17c57bd6da0b5b",
+		"diff": {
+			"files": {
+				"format.js": {
+					"diff": "--- published/format.js\n+++ rebuilt/format.js\n@@ -11,43 +11,43 @@\n \n module.exports = function(file, options) {\n   // pass some extra formatting info to `pretty-remarkable`\n-  var opts = utils.extend({author: {}}, options, file.options);\n+  var opts = utils.extend({author: {}, formatmd: {}}, options, file.options);\n+  if (!isMarkdown(file.extname) && opts.formatmd.force !== true) {\n+    return file;\n+  }\n+\n+  opts.username = opts.author.username;\n+  opts.name = opts.author.name;\n   file.data = file.data || {};\n \n   var str = file.contents.toString();\n-  var extracted = extractTables(str);\n-  str = extracted.str;\n+  var res = extractTables(str);\n+  str = res.str;\n \n   // prettify\n   str = pretty(str, opts);\n-  str = str.trim() + (opts.newline ? '\\n' : '');\n   str = fixParam(str);\n   str = fixList(str);\n \n-  extracted.keys.forEach(function(key) {\n-    var table = extracted.tables[key].trim();\n+  res.keys.forEach(function(key) {\n+    var table = res.tables[key].trim();\n     str = str.split(key).join(table);\n   });\n \n-  /**\n-   * TOC injection is done here since formatting can mess\n-   * up the toc structure, so we want to do this last\n-   */\n-\n-  if (file.data.toc) {\n-    if (typeof file.insertToc === 'function') {\n-      str = file.insertToc(str, file.data.toc);\n-    }\n-    if (typeof file.tocUnescape === 'function') {\n-      str = file.tocUnescape(str);\n-    }\n-  }\n-\n+  str = str.trim() + (opts.newline === false ? '' : '\\n');\n   file.contents = new Buffer(str);\n   return file;\n };\n \n /**\n+ * Return true if a file is a markdown file\n+ */\n+\n+function isMarkdown(ext) {\n+  return /^\\.?(md|mdown|mkdown|markdown)$/.test(ext);\n+}\n+\n+/**\n  * Fix list formatting\n  */\n \n",
+					"match": false,
+					"packageHash": "20425620d5f30047841bc4c7c58ae435c4ec9f54e7c0ce1546d23f44f67f78b5",
+					"size": 2584,
+					"sourceHash": "b0bb4752bf1d1cd7500805a429ae47423368b8937677c8d1ef583638453e8d62",
+					"status": "content"
+				},
+				"index.js": {
+					"diff": "--- published/index.js\n+++ rebuilt/index.js\n@@ -11,14 +11,8 @@\n var format = require('./format');\n \n module.exports = function(options) {\n+  var opts = {formatmd: options};\n   return utils.through.obj(function(file, enc, next) {\n-    if (!isMarkdown(file.extname)) {\n-      return next(null, file);\n-    }\n-    next(null, format(file, options));\n+    next(null, format(file, opts));\n   });\n };\n-\n-function isMarkdown(ext) {\n-  return /^\\.?(md|mdown|mkdown|markdown)$/.test(ext);\n-}\n",
+					"match": false,
+					"packageHash": "b46d8b289ebe772b4ce67ccb1249a47f690946b8f43ca2cbf09f785809981f49",
+					"size": 534,
+					"sourceHash": "5f5276053addf5c665f8b25ab03af4c09ed2fd7d6ff48d54bd204b538fb88156",
+					"status": "content"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -1,7 +1,7 @@\n {\n   \"name\": \"gulp-format-md\",\n   \"description\": \"Gulp plugin for beautifying markdown using pretty-remarkable.\",\n-  \"version\": \"0.1.3\",\n+  \"version\": \"0.1.2\",\n   \"homepage\": \"https://github.com/jonschlinkert/gulp-format-md\",\n   \"author\": \"Jon Schlinkert (https://github.com/jonschlinkert)\",\n   \"repository\": \"jonschlinkert/gulp-format-md\",\n@@ -63,4 +63,4 @@\n       ]\n     }\n   }\n-}\n+}\n\\ No newline at end of file\n",
+					"match": false,
+					"packageHash": "1ab247258d18039961c7393ee2a7a4552bac781fcc8efefb180c7d5724ca2d8c",
+					"size": 1366,
+					"sourceHash": "31014bb4c640b037511c5c7cab18e58ccd2b961b70d23505d43d75b0cc1d2ecc",
+					"status": "content"
+				},
+				"readme.md": {
+					"diff": "--- published/readme.md\n+++ rebuilt/readme.md\n@@ -93,4 +93,4 @@\n \n ***\n \n-_This file was generated by [verb](https://github.com/verbose/verb) on December 15, 2015._\n\\ No newline at end of file\n+_This file was generated by [verb](https://github.com/verbose/verb) on December 11, 2015._\n",
+					"match": false,
+					"packageHash": "d4b1e10754250fe6a3d98196c0dbfb6d47120adda765b0f6b2d5d023542f8106",
+					"size": 2505,
+					"sourceHash": "7498307f9a7d86c1125b826198839e3e90f1219ba9f7be5c2c6739b156fbba37",
+					"status": "content"
+				}
+			},
+			"summary": {
+				"differentFiles": 4,
+				"matchingFiles": 3,
+				"missingInPackage": 0,
+				"missingInSource": 0,
+				"score": 0.42857142857142855,
+				"totalFiles": 7
+			}
+		},
+		"prodDependencies": [
+			{
+				"name": "ansi-cyan",
+				"version": "0.1.1"
+			},
+			{
+				"name": "ansi-red",
+				"version": "0.1.1"
+			},
+			{
+				"name": "ansi-wrap",
+				"version": "0.1.0"
+			},
+			{
+				"name": "ansi-yellow",
+				"version": "0.1.1"
+			},
+			{
+				"name": "argparse",
+				"version": "1.0.10"
+			},
+			{
+				"name": "arr-flatten",
+				"version": "1.1.0"
+			},
+			{
+				"name": "arr-union",
+				"version": "2.1.0"
+			},
+			{
+				"name": "autolinker",
+				"version": "0.28.1"
+			},
+			{
+				"name": "concat-with-sourcemaps",
+				"version": "1.1.0"
+			},
+			{
+				"name": "core-util-is",
+				"version": "1.0.3"
+			},
+			{
+				"name": "expand-range",
+				"version": "1.8.2"
+			},
+			{
+				"name": "fill-range",
+				"version": "2.2.4"
+			},
+			{
+				"name": "is-number",
+				"version": "2.1.0"
+			},
+			{
+				"name": "isarray",
+				"version": "1.0.0"
+			},
+			{
+				"name": "isobject",
+				"version": "2.1.0"
+			},
+			{
+				"name": "kind-of",
+				"version": "3.2.2"
+			},
+			{
+				"name": "extend-shallow",
+				"version": "2.0.1"
+			},
+			{
+				"name": "get-value",
+				"version": "2.0.6"
+			},
+			{
+				"name": "gulp-header",
+				"version": "1.8.12"
+			},
+			{
+				"name": "lodash.template",
+				"version": "4.5.0"
+			},
+			{
+				"name": "lodash.templatesettings",
+				"version": "4.2.0"
+			},
+			{
+				"name": "inherits",
+				"version": "2.0.4"
+			},
+			{
+				"name": "is-buffer",
+				"version": "1.1.6"
+			},
+			{
+				"name": "is-extendable",
+				"version": "0.1.1"
+			},
+			{
+				"name": "kind-of",
+				"version": "6.0.3"
+			},
+			{
+				"name": "lazy-cache",
+				"version": "0.2.7"
+			},
+			{
+				"name": "list-item",
+				"version": "0.1.2"
+			},
+			{
+				"name": "is-number",
+				"version": "1.1.2"
+			},
+			{
+				"name": "lodash._reinterpolate",
+				"version": "3.0.0"
+			},
+			{
+				"name": "markdown-utils",
+				"version": "0.7.3"
+			},
+			{
+				"name": "array-slice",
+				"version": "0.2.3"
+			},
+			{
+				"name": "list-item",
+				"version": "1.1.1"
+			},
+			{
+				"name": "math-random",
+				"version": "1.0.4"
+			},
+			{
+				"name": "plugin-error",
+				"version": "0.1.2"
+			},
+			{
+				"name": "arr-diff",
+				"version": "1.1.0"
+			},
+			{
+				"name": "extend-shallow",
+				"version": "1.1.4"
+			},
+			{
+				"name": "kind-of",
+				"version": "1.1.0"
+			},
+			{
+				"name": "pretty-remarkable",
+				"version": "0.1.8"
+			},
+			{
+				"name": "lazy-cache",
+				"version": "0.1.0"
+			},
+			{
+				"name": "process-nextick-args",
+				"version": "2.0.1"
+			},
+			{
+				"name": "randomatic",
+				"version": "3.1.1"
+			},
+			{
+				"name": "is-number",
+				"version": "4.0.0"
+			},
+			{
+				"name": "readable-stream",
+				"version": "2.3.8"
+			},
+			{
+				"name": "remarkable",
+				"version": "1.7.4"
+			},
+			{
+				"name": "repeat-element",
+				"version": "1.1.4"
+			},
+			{
+				"name": "repeat-string",
+				"version": "1.6.1"
+			},
+			{
+				"name": "safe-buffer",
+				"version": "5.1.2"
+			},
+			{
+				"name": "source-map",
+				"version": "0.6.1"
+			},
+			{
+				"name": "sprintf-js",
+				"version": "1.0.3"
+			},
+			{
+				"name": "string_decoder",
+				"version": "1.1.1"
+			},
+			{
+				"name": "through2",
+				"version": "2.0.5"
+			},
+			{
+				"name": "to-gfm-code-block",
+				"version": "0.1.1"
+			},
+			{
+				"name": "util-deprecate",
+				"version": "1.0.2"
+			},
+			{
+				"name": "xtend",
+				"version": "4.0.2"
+			}
+		]
+	}
+]
