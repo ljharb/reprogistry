@@ -1,0 +1,145 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-10T04:10:00.783Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:11.7.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "gulp-cached@0.0.1",
+			"name": "gulp-cached",
+			"version": "0.0.1",
+			"location": "https://registry.npmjs.org/gulp-cached/-/gulp-cached-0.0.1.tgz",
+			"integrity": "sha512-w7JoMQ4G2mu+tR/1Jk5C7Q6pjZwx3TgyuUNwiG3D9fuojTE+8shxIk59f1cvjGzv9Ob6P88qUj+zldPSeR2QAA==",
+			"publishedAt": "2014-01-13T16:12:41.026Z",
+			"publishedWith": {
+				"node": null,
+				"npm": "1.3.23"
+			},
+			"dependencies": {
+				"through2": "~0.4.0",
+				"lodash.defaults": "~2.4.1"
+			}
+		},
+		"source": {
+			"integrity": null,
+			"location": "git://github.com/wearefractal/gulp-cached.git",
+			"spec": "github:wearefractal/gulp-cached#HEAD"
+		},
+		"comparisonHash": "9ef46a5bd31291e57cbab41e2f17c57bd6da0b5b",
+		"diff": {
+			"files": {
+				".npmignore": {
+					"match": false,
+					"packageHash": "9b5fc0102a30c8a3941cd5837f3f7af34439e2c50b6e5666d1225d79d112c858",
+					"size": 52,
+					"status": "missing-in-source"
+				},
+				".travis.yml": {
+					"diff": "--- published/.travis.yml\n+++ rebuilt/.travis.yml\n@@ -1,4 +1,3 @@\n language: node_js\n node_js:\n-  - \"0.9\"\n-  - \"0.10\"\n\\ No newline at end of file\n+  - \"0.10\"\n",
+					"match": false,
+					"packageHash": "094758f42558dff7d8e437624f2f76e729103c974e1dac6941194b3c251b5baa",
+					"size": 47,
+					"sourceHash": "e36b9b52fccb8114b8b8b13bdfbaa87342b07bda069b517ca34db9f85adaa3e3",
+					"status": "content"
+				},
+				"LICENSE": {
+					"diff": "--- published/LICENSE\n+++ rebuilt/LICENSE\n@@ -1,4 +1,4 @@\n-Copyright (c) 2014 Fractal <contact@wearefractal.com>\n+Copyright (c) 2015 Contra <yo@contra.io>\n \n Permission is hereby granted, free of charge, to any person obtaining\n a copy of this software and associated documentation files (the\n",
+					"match": false,
+					"packageHash": "53800a5812633becf5933cc1a676f9b1313e5a441c3d9f6416898023b678bb0a",
+					"size": 1078,
+					"sourceHash": "87e179ee72c39585357be5f48a66cff8a2dcb331877a930f6c07e1706426e7c1",
+					"status": "content"
+				},
+				"README.md": {
+					"diff": "--- published/README.md\n+++ rebuilt/README.md\n@@ -1,11 +1,11 @@\n-[![Build Status](https://travis-ci.org/wearefractal/gulp-cached.png?branch=master)](https://travis-ci.org/wearefractal/gulp-cached)\n+[![Build Status](https://travis-ci.org/contra/gulp-cached.png?branch=master)](https://travis-ci.org/contra/gulp-cached)\n \n [![NPM version](https://badge.fury.io/js/gulp-cached.png)](http://badge.fury.io/js/gulp-cached)\n \n ## Information\n \n <table>\n-<tr> \n+<tr>\n <td>Package</td><td>gulp-cached</td>\n </tr>\n <tr>\n@@ -20,17 +20,41 @@\n \n ## Usage\n \n+This keeps an in-memory cache of files (and their contents) that have passed through it. If a file has already passed through on the last run it will not be passed downstream. This means you only process what you need and save time + resources.\n+\n+Take this example:\n+\n ```javascript\n var cache = require('gulp-cached');\n \n gulp.task('lint', function(){\n-  return gulp.src(\"files/*.js\")\n+  return gulp.src('files/*.js')\n     .pipe(cache('linting'))\n     .pipe(jshint())\n     .pipe(jshint.reporter())\n });\n+\n+gulp.task('watch', function(){\n+  gulp.watch('files/*.js', ['lint']);\n+});\n+\n+gulp.task('default', ['watch','lint']);\n ```\n \n+- User saves `files/a.js` and the `lint` task is called\n+  - the files do not exist in the cache yet\n+  - `files/a.js` and `files/b.js` are linted\n+- User saves `files/b.js` and the `lint` task is called\n+  - the contents of the file changed from the previous value\n+  - `files/b.js` is linted\n+- User saves `files/a.js` and the `lint` task is called\n+  - the contents of the file have not changed from the previous value\n+  - nothing is linted\n+\n+So the first run will emit all of the items downstream. Runs after that will only emit if it has been changed from the last file that passed through it with the same path.\n+\n+Please note that this will not work with plugins that operate on sets of files (concat for example).\n+\n ### cache(cacheName[, opt])\n \n Creates a new cache hash or uses an existing one.\n@@ -45,7 +69,7 @@\n \n #### Possible options\n \n-`optimizeMemory` - Uses md5 instead of storing the whole file contents. Better if you are worried about large files and their effect on memory consumption. Default is `false`\n+`optimizeMemory` - Uses md5 instead of storing the whole file contents. Better if you are worried about large files and their effect on memory consumption. Default is `false`. In my experience this doesn't make much of a difference (only 25mb vs 26mb) but with a lot of files or a few large files this could be a big deal.\n \n ### Clearing the cache\n \n@@ -65,7 +89,7 @@\n \n (MIT License)\n \n-Copyright (c) 2014 Fractal <contact@wearefractal.com>\n+Copyright (c) 2015 Fractal <contact@contra.com>\n \n Permission is hereby granted, free of charge, to any person obtaining\n a copy of this software and associated documentation files (the\n",
+					"match": false,
+					"packageHash": "f3f8c0301d29bc54b3e80dd193d7e8ac80b9d1e77fb847336816069bfef83610",
+					"size": 2496,
+					"sourceHash": "c3fb4658ca7f31593e32c54bb6f2b27ee4de45c4e1f42e6a101974236f37c97e",
+					"status": "content"
+				},
+				"index.js": {
+					"diff": "--- published/index.js\n+++ rebuilt/index.js\n@@ -1,6 +1,4 @@\n var crypto = require('crypto');\n-var gutil = require('gulp-util');\n-var PluginError = require('gulp-util').PluginError;\n var defaults = require('lodash.defaults');\n var through = require('through2');\n \n@@ -14,23 +12,28 @@\n   }\n \n   var stream = through.obj(function(file, enc, callback){\n-    if (!file.isBuffer()) {\n-      this.push(file);\n-      return callback();\n-    }\n-\n-    var contents = file.contents.toString('utf8');\n+    var contents = file.checksum;\n \n-    // slower for each file\n-    // but good if you need to save on memory\n-    if (opts.optimizeMemory) {\n-      contents = crypto.createHash('md5').update(contents).digest('hex');\n+    if (!contents) {\n+      if (file.isStream()) {\n+        this.push(file);\n+        return callback();\n+      }\n+      if (file.isBuffer()) {\n+        contents = file.contents.toString('utf8');\n+\n+        // slower for each file\n+        // but good if you need to save on memory\n+        if (opts.optimizeMemory) {\n+          contents = crypto.createHash('md5').update(contents).digest('hex');\n+        }\n+      }\n     }\n \n     var cacheFile = plugin.caches[name][file.path];\n \n     // hit - ignore it\n-    if (cacheFile && cacheFile === contents) {\n+    if (typeof cacheFile !== 'undefined' && cacheFile === contents) {\n       callback();\n       return;\n     }\n@@ -45,4 +48,4 @@\n \n plugin.caches = {};\n \n-module.exports = plugin;\n\\ No newline at end of file\n+module.exports = plugin;\n",
+					"match": false,
+					"packageHash": "31d0afecbb4e9177cd7c588c5d80df50fdf6c331c7db61ddc495b65fcc149a17",
+					"size": 1102,
+					"sourceHash": "69af19c1b35e1aad9b17393b2c47a44f01545cd16d9b5467b816a31ddf21c102",
+					"status": "content"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -1,19 +1,22 @@\n {\n   \"name\": \"gulp-cached\",\n   \"description\": \"A simple in-memory file cache for gulp\",\n-  \"version\": \"0.0.1\",\n-  \"homepage\": \"http://github.com/wearefractal/gulp-cached\",\n-  \"repository\": \"git://github.com/wearefractal/gulp-cached.git\",\n-  \"author\": \"Fractal <contact@wearefractal.com> (http://wearefractal.com/)\",\n+  \"version\": \"1.1.1\",\n+  \"homepage\": \"http://github.com/contra/gulp-cached\",\n+  \"repository\": {\n+    \"type\": \"git\",\n+    \"url\": \"git://github.com/contra/gulp-cached.git\"\n+  },\n+  \"author\": \"Contra <yo@contra.io> (http://contra.io/)\",\n   \"main\": \"./index.js\",\n   \"dependencies\": {\n-    \"through2\": \"~0.4.0\",\n-    \"lodash.defaults\": \"~2.4.1\"\n+    \"lodash.defaults\": \"^4.2.0\",\n+    \"through2\": \"^2.0.1\"\n   },\n   \"devDependencies\": {\n-    \"mocha\": \"*\",\n-    \"should\": \"*\",\n-    \"gulp-util\": \"~2.2.9\"\n+    \"mocha\": \"^3.0.0\",\n+    \"should\": \"^11.0.0\",\n+    \"vinyl\": \"^2.0.0\"\n   },\n   \"scripts\": {\n     \"test\": \"mocha\"\n@@ -21,10 +24,8 @@\n   \"engines\": {\n     \"node\": \">= 0.9.0\"\n   },\n-  \"licenses\": [\n-    {\n-      \"type\": \"MIT\",\n-      \"url\": \"http://github.com/wearefractal/gulp-cached/raw/master/LICENSE\"\n-    }\n+  \"license\": \"MIT\",\n+  \"keywords\": [\n+    \"gulpplugin\"\n   ]\n }\n",
+					"match": false,
+					"packageHash": "a12241fb6fd1b55c80c6ef33a3d721ecf245d1b6e3e344fdd815259c22703c5c",
+					"size": 723,
+					"sourceHash": "8a8037109f4279f417d6d92e6be7bf0e4a9c429b9895a686c87d3b49230d95e4",
+					"status": "content"
+				},
+				"test/main.js": {
+					"diff": "--- published/test/main.js\n+++ rebuilt/test/main.js\n@@ -1,12 +1,13 @@\n var cache = require('../');\n var should = require('should');\n-var gutil = require('gulp-util');\n+var File = require('vinyl');\n+var through = require('through2');\n var PassThrough = require('stream').PassThrough;\n require('mocha');\n \n describe('gulp-cached', function() {\n   it('should create a cache that only allows a file through once', function(done) {\n-    var file = new gutil.File({\n+    var file = new File({\n       path: \"/home/file.js\",\n       contents: new Buffer(\"damn\")\n     });\n@@ -24,11 +25,11 @@\n   });\n \n   it('should create a cache that clears content when reset', function(done) {\n-    var file = new gutil.File({\n+    var file = new File({\n       path: \"/home/file.js\",\n       contents: new Buffer(\"damn\")\n     });\n-    var file2 = new gutil.File({\n+    var file2 = new File({\n       path: \"/home/file.js\",\n       contents: new Buffer(\"damnit\")\n     });\n@@ -68,7 +69,7 @@\n \n \n   it('should create separate caches that only allow a file through once each', function(done) {\n-    var file = new gutil.File({\n+    var file = new File({\n       path: \"/home/file.js\",\n       contents: new Buffer(\"damn\")\n     });\n@@ -105,10 +106,10 @@\n     stream.end();\n   });\n \n-  it('should create a cache that allows a null file through always', function(done) {\n-    var file = new gutil.File({\n+  it('should create a cache that allows a stream file through always', function(done) {\n+    var file = new File({\n       path: \"/home/file.js\",\n-      contents: null\n+      contents: through()\n     });\n     var stream = cache('testilo');\n     var count = 0;\n@@ -129,7 +130,7 @@\n   });\n \n   it('should create a cache that allows a streaming file through always', function(done) {\n-    var file = new gutil.File({\n+    var file = new File({\n       path: \"/home/file.js\",\n       contents: new PassThrough()\n     });\n@@ -144,6 +145,30 @@\n       done();\n     });\n     stream.write(file);\n+    stream.write(file);\n+    stream.write(file);\n+    stream.write(file);\n+    stream.write(file);\n+    stream.end();\n+  });\n+\n+  it('should create a cache that only allows a hashed streaming file through once', function(done) {\n+    var file = new File({\n+      path: \"/home/file.js\",\n+      contents: new PassThrough()\n+    });\n+    file.checksum = 'deadbeef';\n+    var stream = cache('testyeah');\n+    var count = 0;\n+    stream.on('data', function(nfile){\n+      count++;\n+      nfile.path.should.equal(file.path);\n+    });\n+    stream.on('end', function(){\n+      count.should.equal(1);\n+      done();\n+    });\n+    stream.write(file);\n     stream.write(file);\n     stream.write(file);\n     stream.write(file);\n",
+					"match": false,
+					"packageHash": "89d9a32a785e3c41c3a86e2a69851cb4c33ddca20550e541cc9b9ed106349b47",
+					"size": 3706,
+					"sourceHash": "d7e9d29b68238ccfb8240dd7a7de7015cd0b707bc0b67a2d8fc30900c0592f93",
+					"status": "content"
+				}
+			},
+			"summary": {
+				"differentFiles": 6,
+				"matchingFiles": 0,
+				"missingInPackage": 0,
+				"missingInSource": 1,
+				"score": 0,
+				"totalFiles": 7
+			}
+		},
+		"prodDependencies": [
+			{
+				"name": "core-util-is",
+				"version": "1.0.3"
+			},
+			{
+				"name": "inherits",
+				"version": "2.0.4"
+			},
+			{
+				"name": "isarray",
+				"version": "1.0.0"
+			},
+			{
+				"name": "lodash.defaults",
+				"version": "4.2.0"
+			},
+			{
+				"name": "process-nextick-args",
+				"version": "2.0.1"
+			},
+			{
+				"name": "readable-stream",
+				"version": "2.3.8"
+			},
+			{
+				"name": "safe-buffer",
+				"version": "5.1.2"
+			},
+			{
+				"name": "string_decoder",
+				"version": "1.1.1"
+			},
+			{
+				"name": "through2",
+				"version": "2.0.5"
+			},
+			{
+				"name": "util-deprecate",
+				"version": "1.0.2"
+			},
+			{
+				"name": "xtend",
+				"version": "4.0.2"
+			}
+		]
+	}
+]
