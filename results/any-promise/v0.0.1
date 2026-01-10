@@ -1,0 +1,191 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-10T05:56:28.092Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:11.7.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "any-promise@0.0.1",
+			"name": "any-promise",
+			"version": "0.0.1",
+			"location": "https://registry.npmjs.org/any-promise/-/any-promise-0.0.1.tgz",
+			"integrity": "sha512-bBfATBzzw3DEj8NueSKx/1+voY16dEsWXYnPB2s57vpMGOH/g3DL0B6s7fWRe1UfQWClVGDAq/LbEumiTKNRuA==",
+			"publishedAt": "2014-11-06T01:20:39.140Z",
+			"publishedWith": {
+				"node": null,
+				"npm": "1.3.25"
+			},
+			"dependencies": {}
+		},
+		"source": {
+			"integrity": null,
+			"location": "https://github.com/kevinbeaty/any-promise",
+			"spec": "github:kevinbeaty/any-promise#HEAD"
+		},
+		"comparisonHash": "9ef46a5bd31291e57cbab41e2f17c57bd6da0b5b",
+		"diff": {
+			"files": {
+				".npmignore": {
+					"match": false,
+					"packageHash": "4f3887aa61b8508cfe9583be068a44c555f8bd59c931c5218807b5020393955f",
+					"size": 46,
+					"status": "missing-in-source"
+				},
+				"LICENSE": {
+					"diff": "--- published/LICENSE\n+++ rebuilt/LICENSE\n@@ -1,4 +1,4 @@\n-Copyright (C) 2014 Kevin Beaty\n+Copyright (C) 2014-2016 Kevin Beaty\n \n Permission is hereby granted, free of charge, to any person obtaining a copy\n of this software and associated documentation files (the \"Software\"), to deal\n",
+					"match": false,
+					"packageHash": "9b1e607094a26afb30e627ec5a86c6b585224709cca8da2ac9ba214ea5d333c7",
+					"size": 1055,
+					"sourceHash": "bd54a6ab4e3ad0f73420d8e4d2a990179e6367e5752a6abac5f61ad4f4130a43",
+					"status": "content"
+				},
+				"README.md": {
+					"diff": "--- published/README.md\n+++ rebuilt/README.md\n@@ -2,16 +2,160 @@\n \n [![Build Status](https://secure.travis-ci.org/kevinbeaty/any-promise.svg)](http://travis-ci.org/kevinbeaty/any-promise)\n \n-Let your library support any ES6 compatible Promise library or polyfill and leave the choice to the end user. The end user can install a polyfill or `npm install` their preference before using this library and the installed library will be automatically detected.\n+Let your library support any ES 2015 (ES6) compatible `Promise` and leave the choice to application authors. The application can *optionally* register its preferred `Promise` implementation and it will be exported when requiring `any-promise` from library code.\n \n-Prefers a global `Promise` object (native or polyfill). If one is not detected, attempts to load libraries in the following order.  The first successful `require` will be exported.\n+If no preference is registered, defaults to the global `Promise` for newer Node.js versions. The browser version defaults to the window `Promise`, so polyfill or register as necessary.\n \n-  - [es6-promise](https://github.com/jakearchibald/es6-promise)\n-  - [promise](https://github.com/then/promise)\n-  - [native-promise-only](https://github.com/getify/native-promise-only)\n-  - [bluebird](https://github.com/petkaantonov/bluebird)\n-  - [rsvp](https://github.com/tildeio/rsvp.js)\n-  - [when](https://github.com/cujojs/when)\n-  - [q](https://github.com/kriskowal/q)\n+### Usage with global Promise:\n+\n+Assuming the global `Promise` is the desired implementation:\n+\n+```bash\n+# Install any libraries depending on any-promise\n+$ npm install mz\n+```\n+\n+The installed libraries will use global Promise by default.\n+\n+```js\n+// in library\n+var Promise = require('any-promise')  // the global Promise\n+\n+function promiseReturningFunction(){\n+    return new Promise(function(resolve, reject){...})\n+}\n+```\n+\n+### Usage with registration:\n+\n+Assuming `bluebird` is the desired Promise implementation:\n+\n+```bash\n+# Install preferred promise library\n+$ npm install bluebird\n+# Install any-promise to allow registration\n+$ npm install any-promise\n+# Install any libraries you would like to use depending on any-promise\n+$ npm install mz\n+```\n+\n+Register your preference in the application entry point before any other `require` of packages that load `any-promise`:\n+\n+```javascript\n+// top of application index.js or other entry point\n+require('any-promise/register/bluebird')\n+\n+// -or- Equivalent to above, but allows customization of Promise library\n+require('any-promise/register')('bluebird', {Promise: require('bluebird')})\n+```\n+\n+Now that the implementation is registered, you can use any package depending on `any-promise`:\n+\n+\n+```javascript\n+var fsp = require('mz/fs') // mz/fs will use registered bluebird promises\n+var Promise = require('any-promise')  // the registered bluebird promise \n+```\n+\n+It is safe to call `register` multiple times, but it must always be with the same implementation.\n+\n+Again, registration is *optional*. It should only be called by the application user if overriding the global `Promise` implementation is desired.\n+\n+### Optional Application Registration\n+\n+As an application author, you can *optionally* register a preferred `Promise` implementation on application startup (before any call to `require('any-promise')`:\n+\n+You must register your preference before any call to `require('any-promise')` (by you or required packages), and only one implementation can be registered. Typically, this registration would occur at the top of the application entry point.\n+\n+\n+#### Registration shortcuts\n+\n+If you are using a known `Promise` implementation, you can register your preference with a shortcut:\n+\n+\n+```js\n+require('any-promise/register/bluebird')\n+// -or-\n+import 'any-promise/register/q';\n+```\n+\n+Shortcut registration is the preferred registration method as it works in the browser and Node.js. It is also convenient for using with `import` and many test runners, that offer a `--require` flag:\n+\n+```\n+$ ava --require=any-promise/register/bluebird test.js\n+```\n+\n+Current known implementations include `bluebird`, `q`, `when`, `rsvp`, `es6-promise`, `promise`, `native-promise-only`, `pinkie`, `vow` and `lie`. If you are not using a known implementation, you can use another registration method described below.\n+\n",
+					"match": false,
+					"packageHash": "e94a387421572515aebf9b3caf863fa75839231d2343c41f0a38cbc8b3d40fd6",
+					"size": 1092,
+					"sourceHash": "f90e033ea9fe3af3f6f1f3c134243b04eb161a597351672e0757f115dbf79927",
+					"status": "content"
+				},
+				"any-promise.js": {
+					"match": false,
+					"packageHash": "2e7efcd6d1656f358d01d31fc62b5872d8d6fb783e1dbde486a460077ec3f35c",
+					"size": 999,
+					"status": "missing-in-source"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -1,10 +1,14 @@\n {\n   \"name\": \"any-promise\",\n-  \"version\": \"0.0.1\",\n+  \"version\": \"1.3.0\",\n   \"description\": \"Resolve any installed ES6 compatible promise\",\n-  \"main\": \"any-promise.js\",\n+  \"main\": \"index.js\",\n+  \"typings\": \"index.d.ts\",\n+  \"browser\": {\n+    \"./register.js\": \"./register-shim.js\"\n+  },\n   \"scripts\": {\n-    \"test\": \"make test\"\n+    \"test\": \"ava\"\n   },\n   \"repository\": {\n     \"type\": \"git\",\n@@ -22,14 +26,21 @@\n   \"homepage\": \"http://github.com/kevinbeaty/any-promise\",\n   \"dependencies\": {},\n   \"devDependencies\": {\n-    \"promise\": \"~6.0.1\",\n-    \"es6-promise\": \"~2.0.0\",\n-    \"rsvp\": \"~3.0.14\",\n-    \"bluebird\": \"~2.3.10\",\n-    \"when\": \"~3.5.2\",\n-    \"q\": \"~1.0.1\",\n-    \"native-promise-only\": \"~0.7.6-a\",\n-    \"promises-aplus-tests\": \"~2.1.0\",\n-    \"mocha\": \"~2.0.1\"\n+    \"ava\": \"^0.14.0\",\n+    \"bluebird\": \"^3.0.0\",\n+    \"es6-promise\": \"^3.0.0\",\n+    \"is-promise\": \"^2.0.0\",\n+    \"lie\": \"^3.0.0\",\n+    \"mocha\": \"^2.0.0\",\n+    \"native-promise-only\": \"^0.8.0\",\n+    \"phantomjs-prebuilt\": \"^2.0.0\",\n+    \"pinkie\": \"^2.0.0\",\n+    \"promise\": \"^7.0.0\",\n+    \"q\": \"^1.0.0\",\n+    \"rsvp\": \"^3.0.0\",\n+    \"vow\": \"^0.4.0\",\n+    \"webpack\": \"^1.0.0\",\n+    \"when\": \"^3.0.0\",\n+    \"zuul\": \"^3.0.0\"\n   }\n }\n",
+					"match": false,
+					"packageHash": "b2e5847b797c64a8428b14384d3d10d02b79ec10c2c29a46da5d91d8bb9b81bb",
+					"size": 808,
+					"sourceHash": "3a3627a9316f138084d8f83d51206b2479520714d8a00bc583562424c0a00ee8",
+					"status": "content"
+				},
+				"implementation.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"implementation.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"index.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"index.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"loader.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"register/bluebird.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"register/bluebird.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"register/es6-promise.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"register/es6-promise.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"register/lie.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"register/lie.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"register/native-promise-only.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"register/native-promise-only.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"register/pinkie.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"register/pinkie.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"register/promise.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"register/promise.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"register/q.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"register/q.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"register/rsvp.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"register/rsvp.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"register/vow.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"register/vow.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"register/when.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"register/when.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"register-shim.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"register.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"register.js": {
+					"match": false,
+					"status": "missing-in-package"
+				}
+			},
+			"summary": {
+				"differentFiles": 3,
+				"matchingFiles": 1,
+				"missingInPackage": 28,
+				"missingInSource": 2,
+				"score": 0.029411764705882353,
+				"totalFiles": 34
+			}
+		},
+		"prodDependencies": []
+	}
+]
