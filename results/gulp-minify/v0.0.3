@@ -1,0 +1,231 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-10T00:06:04.049Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:11.7.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "gulp-minify@0.0.3",
+			"name": "gulp-minify",
+			"version": "0.0.3",
+			"location": "https://registry.npmjs.org/gulp-minify/-/gulp-minify-0.0.3.tgz",
+			"integrity": "sha512-vNPzwDc8a6sg6e2dfc4VDl0pU2wH83d+Jxy36bxnY1Ko7KL6yrCNUCGoFhn9f3pIlyYqC4N8IizqEXq/CftKcw==",
+			"publishedAt": "2014-08-15T17:51:19.365Z",
+			"publishedWith": {
+				"node": null,
+				"npm": "1.4.14"
+			},
+			"dependencies": {
+				"gulp-util": "~2.2.14",
+				"minimatch": "^1.0.0",
+				"through2": "~0.4.0",
+				"uglify-js": "~2.4.6"
+			}
+		},
+		"source": {
+			"integrity": null,
+			"location": "https://github.com/hustxiaoc/gulp-minify.git",
+			"spec": "github:hustxiaoc/gulp-minify#HEAD"
+		},
+		"comparisonHash": "9ef46a5bd31291e57cbab41e2f17c57bd6da0b5b",
+		"diff": {
+			"files": {
+				"README.md": {
+					"diff": "--- published/README.md\n+++ rebuilt/README.md\n@@ -1,6 +1,15 @@\n # gulp-minify\n \n-> Minify JavaScript with UglifyJS2.\n+> Minify JavaScript with terser.\n+\n+[![Build Status](https://travis-ci.org/hustxiaoc/gulp-minify.svg?branch=master)](https://travis-ci.org/hustxiaoc/gulp-minify)\n+[![NPM version](https://badge.fury.io/js/gulp-minify.svg)](http://badge.fury.io/js/gulp-minify)\n+\n+## Note\n+\n+The latest version of  `gulp-minify` is using [terser](https://www.npmjs.com/package/terser) to minify files, this may cause some incompatible issues with earlier language versions for now, see https://github.com/hustxiaoc/gulp-minify/issues/27.\n+\n+So `gulp-minify@es5` is for the earlier language versions if your project is not ready for the ECMAScript 6 yet.\n \n ## Installation\n \n@@ -10,12 +19,30 @@\n \n ## Usage\n \n+_Basic usage_: the following minifies every `*.js` and `*.mjs` files to `*-min.js` and `*-min.mjs` respectively. Note that the original files are preserved.\n+\n ```javascript\n-var minify = require('gulp-minify');\n+const minify = require('gulp-minify');\n+\n+gulp.task('compress', function() {\n+  gulp.src(['lib/*.js', 'lib/*.mjs'])\n+    .pipe(minify())\n+    .pipe(gulp.dest('dist'))\n+});\n+```\n+\n+Options can be added to control more finely what's happening, for example:\n+\n+```javascript\n+const minify = require('gulp-minify');\n \n gulp.task('compress', function() {\n   gulp.src('lib/*.js')\n     .pipe(minify({\n+        ext:{\n+            src:'-debug.js',\n+            min:'.js'\n+        },\n         exclude: ['tasks'],\n         ignoreFiles: ['.combo.js', '-min.js']\n     }))\n@@ -25,46 +52,61 @@\n \n ## Options\n \n+- `ext`\n+    An object that specifies output src and minified file extensions.\n+\n+    - `src`\n+\n+        The suffix string of the filenames that output source files ends with.\n+\n+    - `min`\n+\n+        - When **string**: The suffix string of the filenames that output minified files ends with.\n+        - When **Array**: The regex expressions to be replaced with input filenames. For example: `[/\\.(.*)-source\\.js$/, '$1.js']`\n+\n - `exclude`\n \n     Will not minify files in the dirs.\n \n+- `noSource`\n+    Will not output the source code in the dest dirs.\n+\n - `ignoreFiles`\n \n     Will not minify files which matches the pattern.\n \n - `mangle`\n \n-\tPass `false` to skip mangling names.\n+    Pass `false` to skip mangling names.\n \n - `output`\n \n-\tPass an object if you wish to specify additional [output\n-\toptions](http://lisperator.net/uglifyjs/codegen). The defaults are\n-\toptimized for best compression.\n+    Pass an object if you wish to specify additional [output\n+    options](http://lisperator.net/uglifyjs/codegen). The defaults are\n+    optimized for best compression.\n \n - `compress`\n \n-\tPass an object to specify custom [compressor\n-\toptions](http://lisperator.net/uglifyjs/compress). Pass `false` to skip\n-\tcompression completely.\n+    Pass an object to specify custom [compressor\n+    options](http://lisperator.net/uglifyjs/compress). Pass `false` to skip\n+    compression completely.\n",
+					"match": false,
+					"packageHash": "f7eae9611431c189acba1006dc774fa178aec5dff727a5b1b53fbc12f6cc4c71",
+					"size": 1439,
+					"sourceHash": "ce1dd80956466c790c4026db2558a3543bda36ba3d115e24ec05a2a99f65847e",
+					"status": "content"
+				},
+				"index.js": {
+					"diff": "--- published/index.js\n+++ rebuilt/index.js\n@@ -1,92 +1,152 @@\n 'use strict';\n-var through = require('through2'),\n-\tuglify = require('uglify-js'),\n-\tminimatch = require('minimatch'),\n-\tpath = require('path'),\n-\tuglifyError = require('./lib/error.js'),\n-\treSourceMapComment = /\\n\\/\\/# sourceMappingURL=.+?$/,\n-\tpathSeparatorRe = /[\\/\\\\]/g;\n+const through = require(\"through2\");\n+const uglify = require('terser');\n+const minimatch = require('minimatch');\n+const path = require('path');\n+const Vinyl = require('vinyl');\n+const PluginError = require('plugin-error');\n+const colors = require('ansi-colors');\n+const reSourceMapComment = /\\n\\/\\/# sourceMappingURL=.+?$/;\n+const pathSeparatorRe = /[\\/\\\\]/g;\n+const jsExtensions = /\\.m?js$/;\n+\n+function parseExt(ext, byDefault = \".js\") {\n+\n+  let _ext = {};\n+\n+  if (!ext) {\n+    _ext = {\n+      min: \"-min\" + byDefault,\n+      src: byDefault\n+    }\n+  } else if (typeof ext === \"string\") {\n+    _ext = {\n+      min: ext,\n+      src: byDefault\n+    }\n+  } else {\n+    _ext = {\n+      min: ext.min || \"-min\" + byDefault,\n+      src: ext.src || byDefault\n+    }\n+  }\n+\n+  return _ext;\n+\n+}\n+\n+function formatError(error, file) {\n+  let filePath = error.file === 'stdin' ? file.path : error.file;\n+  let message = '';\n+\n+  filePath = filePath ? filePath : file.path;\n+  let relativePath = path.relative(process.cwd(), filePath);\n+\n+  message += colors.underline(relativePath) + '\\n';\n+  message += error.message + ' (line: ' + error.line  + ', col: ' + error.col + ', pos: ' + error.pos;\n+  error.message = colors.red(message);\n+  return error;\n+}\n \n module.exports = function(opt) {\n-    var options = opt || {};\n \n-\tfunction minify(file, encoding, callback) {\n+  //Set the options to the one provided or an empty object.\n+  let options = opt || {};\n \n-\t\tif (file.isNull()) {\n-\t\t\tthis.push(file);\n-\t\t\treturn callback();\n-\t\t}\n-\n-\t\tif (file.isStream()) {\n-\t\t\treturn callback(uglifyError('Streaming not supported', {\n-\t\t\t\tfileName: file.path,\n-\t\t\t\tshowStack: false\n-\t\t\t}));\n-\t\t}\n-\n-        var ignore = false;\n-\n-        if(options.exclude) {\n-            ignore = options.exclude.some(function(item) {\n-                return path.dirname(file.path).split(pathSeparatorRe).some(function(pathName) {\n-                    return minimatch(pathName, item);\n-                });\n-            });\n-        }\n-\n-        if(!ignore && options.ignoreFiles) {\n-            ignore = options.ignoreFiles.some(function(item) {\n-                return minimatch(path.basename(file.path), item);\n-            });\n-        }\n-\n-        if(ignore) {\n-            buffer.push(file);\n-            return;\n-        }\n-\n",
+					"match": false,
+					"packageHash": "f60274842da50a0c3b31b2fb9202be7f09a7f0993b5076bb64565d65a284142f",
+					"size": 2408,
+					"sourceHash": "6576c4f4900118b13866f431950942d2f4620dc699a59272cf62eabe486f9a4c",
+					"status": "content"
+				},
+				"lib/error.js": {
+					"match": false,
+					"packageHash": "95d28c194558f1614903ecc9f87749d19272b17bb55cb87a287263c64a85bffd",
+					"size": 261,
+					"status": "missing-in-source"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -1,28 +1,39 @@\n {\n   \"name\": \"gulp-minify\",\n-  \"version\": \"0.0.3\",\n-  \"description\": \"> Minify JavaScript with UglifyJS2.\",\n+  \"version\": \"3.1.0\",\n+  \"description\": \"Js minify plugin for gulp\",\n   \"main\": \"index.js\",\n   \"scripts\": {\n-    \"test\": \"echo \\\"Error: no test specified\\\" && exit 1\"\n+    \"test\": \"mocha\"\n   },\n+  \"files\": [\n+    \"index.js\"\n+  ],\n   \"repository\": {\n     \"type\": \"git\",\n     \"url\": \"https://github.com/hustxiaoc/gulp-minify.git\"\n   },\n-  \"author\": {\n-    \"name\": \"taojie.hjp@taobao.com\"\n-  },\n+  \"author\": \"308512341@qq.com\",\n   \"dependencies\": {\n-    \"gulp-util\": \"~2.2.14\",\n-    \"minimatch\": \"^1.0.0\",\n-    \"through2\": \"~0.4.0\",\n-    \"uglify-js\": \"~2.4.6\"\n+    \"ansi-colors\": \"^1.0.1\",\n+    \"minimatch\": \"^3.0.2\",\n+    \"plugin-error\": \"^0.1.2\",\n+    \"terser\": \"^3.7.6\",\n+    \"through2\": \"^2.0.3\",\n+    \"vinyl\": \"^2.1.0\"\n   },\n   \"license\": \"ISC\",\n   \"bugs\": {\n     \"url\": \"https://github.com/hustxiaoc/gulp-minify/issues\"\n   },\n   \"homepage\": \"https://github.com/hustxiaoc/gulp-minify\",\n-  \"readmeFilename\": \"README.md\"\n+  \"readmeFilename\": \"README.md\",\n+  \"devDependencies\": {\n+    \"gulp\": \"^4.0.0\",\n+    \"mocha\": \"^5.2.0\",\n+    \"rimraf\": \"^2.6.2\"\n+  },\n+  \"engines\": {\n+    \"node\": \">= 6.0.0\"\n+  }\n }\n",
+					"match": false,
+					"packageHash": "61c318d4da3609396c128730c8e2df34898066604da9d304139f558b06289462",
+					"size": 682,
+					"sourceHash": "bd6c76c153795e1a98cd08de52d216677dadd2a4cb01405b4fa30b955739ec0d",
+					"status": "content"
+				},
+				"LICENSE": {
+					"match": false,
+					"status": "missing-in-package"
+				}
+			},
+			"summary": {
+				"differentFiles": 3,
+				"matchingFiles": 0,
+				"missingInPackage": 1,
+				"missingInSource": 1,
+				"score": 0,
+				"totalFiles": 5
+			}
+		},
+		"prodDependencies": [
+			{
+				"name": "ansi-colors",
+				"version": "1.1.0"
+			},
+			{
+				"name": "ansi-cyan",
+				"version": "0.1.1"
+			},
+			{
+				"name": "ansi-red",
+				"version": "0.1.1"
+			},
+			{
+				"name": "ansi-wrap",
+				"version": "0.1.0"
+			},
+			{
+				"name": "arr-flatten",
+				"version": "1.1.0"
+			},
+			{
+				"name": "arr-union",
+				"version": "2.1.0"
+			},
+			{
+				"name": "balanced-match",
+				"version": "1.0.2"
+			},
+			{
+				"name": "brace-expansion",
+				"version": "1.1.12"
+			},
+			{
+				"name": "buffer-from",
+				"version": "1.1.2"
+			},
+			{
+				"name": "clone",
+				"version": "2.1.2"
+			},
+			{
+				"name": "clone-buffer",
+				"version": "1.0.0"
+			},
+			{
+				"name": "clone-stats",
+				"version": "1.0.0"
+			},
+			{
+				"name": "cloneable-readable",
+				"version": "1.1.3"
+			},
+			{
+				"name": "concat-map",
+				"version": "0.0.1"
+			},
+			{
+				"name": "core-util-is",
+				"version": "1.0.3"
+			},
+			{
+				"name": "inherits",
+				"version": "2.0.4"
+			},
+			{
+				"name": "isarray",
+				"version": "1.0.0"
+			},
+			{
+				"name": "minimatch",
+				"version": "3.1.2"
+			},
+			{
+				"name": "plugin-error",
+				"version": "0.1.2"
+			},
+			{
+				"name": "arr-diff",
+				"version": "1.1.0"
+			},
+			{
+				"name": "array-slice",
+				"version": "0.2.3"
+			},
+			{
+				"name": "extend-shallow",
+				"version": "1.1.4"
+			},
+			{
+				"name": "kind-of",
+				"version": "1.1.0"
+			},
+			{
+				"name": "process-nextick-args",
+				"version": "2.0.1"
+			},
+			{
+				"name": "readable-stream",
+				"version": "2.3.8"
+			},
+			{
+				"name": "remove-trailing-separator",
+				"version": "1.1.0"
+			},
+			{
+				"name": "replace-ext",
+				"version": "1.0.1"
+			},
+			{
+				"name": "safe-buffer",
+				"version": "5.1.2"
+			},
+			{
+				"name": "source-map-support",
+				"version": "0.5.21"
+			},
+			{
+				"name": "source-map",
+				"version": "0.6.1"
+			},
+			{
+				"name": "string_decoder",
+				"version": "1.1.1"
+			},
+			{
+				"name": "terser",
+				"version": "3.17.0"
+			},
+			{
+				"name": "commander",
+				"version": "2.20.3"
+			},
+			{
+				"name": "through2",
+				"version": "2.0.5"
+			},
+			{
+				"name": "util-deprecate",
+				"version": "1.0.2"
+			},
+			{
+				"name": "vinyl",
+				"version": "2.2.1"
+			},
+			{
+				"name": "xtend",
+				"version": "4.0.2"
+			}
+		]
+	}
+]
