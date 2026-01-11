@@ -1,0 +1,133 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-11T02:10:16.942Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:11.7.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "isbinaryfile@0.1.5",
+			"name": "isbinaryfile",
+			"version": "0.1.5",
+			"location": "https://registry.npmjs.org/isbinaryfile/-/isbinaryfile-0.1.5.tgz",
+			"integrity": "sha512-saacyZRAz2McFNfJ9RQApPuKYjf/6G5k2vAgJtBk9MR6qvzSWTnefSZZ20Kg1cFzzRBZv4K2KNlIcUd69rKIPw==",
+			"publishedAt": "2012-12-24T10:10:38.979Z",
+			"publishedWith": {
+				"node": null,
+				"npm": "1.1.69"
+			},
+			"dependencies": {}
+		},
+		"source": {
+			"integrity": "sha512-0+W8cAT/yakgViVs1lSH0r+36wWorxHyIG99xFgRdm8wU2eDIioTZkXKmnMO5Pfdd7fa4kIXbRLWMNV1qdTgpQ==",
+			"location": "https://github.com/gjtorikian/isBinaryFile",
+			"spec": "github:gjtorikian/isBinaryFile#HEAD"
+		},
+		"comparisonHash": "9ef46a5bd31291e57cbab41e2f17c57bd6da0b5b",
+		"diff": {
+			"files": {
+				".npmignore": {
+					"match": false,
+					"packageHash": "204f2ad804a26d32bd0696901f37636ec0fb4e87d47c76fbb0d01ed65fac1609",
+					"size": 96,
+					"status": "missing-in-source"
+				},
+				"README.md": {
+					"diff": "--- published/README.md\n+++ rebuilt/README.md\n@@ -1,57 +1,116 @@\n-isBinaryFile\n-============\n+# isBinaryFile\n \n Detects if a file is binary in Node.js. Similar to [Perl's `-B` switch](http://stackoverflow.com/questions/899206/how-does-perl-know-a-file-is-binary), in that:\n \n-* it reads the first few thousand bytes of a file\n-* checks for a `null` byte; if it's found, it's binary\n-* flags non-ASCII characters. After a certain number of \"weird\" characters, the file is flagged as binary\n+- it reads the first few thousand bytes of a file\n+- checks for a `null` byte; if it's found, it's binary\n+- flags non-ASCII characters. After a certain number of \"weird\" characters, the file is flagged as binary\n \n-All the logic is also pretty much ported from [ag](https://github.com/ggreer/the_silver_searcher).\n+Much of the logic is pretty much ported from [ag](https://github.com/ggreer/the_silver_searcher).\n \n-Note: if the file doesn't exist or it is empty, this function returns `false`.\n+Note: if the file doesn't exist or is a directory, an error is thrown.\n \n ## Installation\n \n ```\n-npm install isBinaryFile\n+npm install isbinaryfile\n ```\n \n ## Usage\n \n-If you pass in one argument, this module assumes it's just the file path, and performs the appropriate file read and stat functionality internally:\n+Returns `Promise<boolean>` (or just `boolean` for `*Sync`). `true` if the file is binary, `false` otherwise.\n \n-```javascript\n-var isBinaryFile = require(\"isbinaryfile\");\n+### isBinaryFile(filepath[, options])\n \n-if (isBinaryFile(process.argv[2]))\n-\tconsole.log(\"It is!\")\n-else\n-\tconsole.log(\"No.\")\n-```\n+- `filepath` - a `string` indicating the path to the file.\n+- `options` - an optional object with the following properties:\n+  - `encoding` - an encoding hint (see [Encoding Hints](#encoding-hints) below)\n+\n+### isBinaryFile(bytes[, options])\n+\n+- `bytes` - a `Buffer` of the file's contents.\n+- `options` - an optional object with the following properties:\n+  - `size` - the size of the buffer (defaults to `bytes.length`)\n+  - `encoding` - an encoding hint (see [Encoding Hints](#encoding-hints) below)\n+\n+### isBinaryFileSync(filepath[, options])\n+\n+Synchronous version of `isBinaryFile`.\n \n-Ta da. \n+### isBinaryFileSync(bytes[, options])\n \n+Synchronous version of `isBinaryFile` for buffers.\n \n-However, if you've already read and `stat()`-ed a file (for some other reason), you can pass in both the file's raw data and the stat's `size` info to save time:\n+### Examples\n+\n+Here's an arbitrary usage:\n \n ```javascript\n-fs.readFile(process.argv[2], function(err, data) {\n-\tfs.lstat(process.argv[2], function(err, stat) {\n-\t\tif (isBinaryFile(data, stat))\n-\t\t\tconsole.log(\"It is!\")\n-\t\telse\n-\t\t\tconsole.log(\"No.\")\n-\t});\n-});\n-```\n+import { isBinaryFile, isBinaryFileSync } from 'isbinaryfile';\n+import fs from 'fs';\n \n-## Testing\n+const filename = 'fixtures/pdf.pdf';\n \n-Install mocha on your machine:\n+// Async with file path\n+const result = await isBinaryFile(filename);\n+if (result) {\n+  console.log('It is binary!');\n+} else {\n+  console.log('No it is not.');\n+}\n \n+// Sync with buffer\n+const bytes = fs.readFileSync(filename);\n+console.log(isBinaryFileSync(bytes)); // true or false\n+\n+// With explicit size option\n+const partialBuffer = Buffer.alloc(100);\n+fs.readSync(fs.openSync(filename, 'r'), partialBuffer, 0, 100, 0);\n",
+					"match": false,
+					"packageHash": "cbe0cf1354c468c53f063531c7f715d303d25a3a701544f282bf45e6584885dd",
+					"size": 1461,
+					"sourceHash": "e5a43f3ca665ec361e1ea526c10b461fd2d06bd684b5ba87ed2dadce3dde2274",
+					"status": "content"
+				},
+				"index.js": {
+					"match": false,
+					"packageHash": "9e085c512a415fb4c16ef9d572eb5363db3f223af1c53f3326147abdad7ceea1",
+					"size": 1640,
+					"status": "missing-in-source"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -1,18 +1,65 @@\n {\n-    \"name\": \"isbinaryfile\",\n-    \"version\"         : \"0.1.5\",\n-    \"description\": \"Detects if a file is binary in Node.js. Similar to Perl's -B.\",\n-    \"main\"       : \"./lib/panino.js\",\n-    \"engines\": {\n-        \"node\": \">=0.6.0\"\n-    },\n-    \"maintainers\": [{\n-        \"name\": \"Garen J. Torikian\",\n-        \"email\": \"gjtorikian@gmail.com\"\n-    }],\n-    \"repository\": {\n-        \"type\": \"git\",\n-        \"url\": \"https://github.com/gjtorikian/isBinaryFile\"\n-    },\n-    \"devDependencies\" : { \"mocha\": \"\" }\n-}\n\\ No newline at end of file\n+  \"name\": \"isbinaryfile\",\n+  \"description\": \"Detects if a file is binary in Node.js. Similar to Perl's -B.\",\n+  \"version\": \"6.0.0\",\n+  \"type\": \"module\",\n+  \"keywords\": [\n+    \"text\",\n+    \"binary\",\n+    \"encoding\",\n+    \"istext\",\n+    \"is text\",\n+    \"isbinary\",\n+    \"is binary\",\n+    \"is text or binary\",\n+    \"is text or binary file\",\n+    \"isbinaryfile\",\n+    \"is binary file\",\n+    \"istextfile\",\n+    \"is text file\"\n+  ],\n+  \"devDependencies\": {\n+    \"@types/jest\": \"^29\",\n+    \"@types/node\": \"^25\",\n+    \"jest\": \"^29\",\n+    \"oxlint\": \"^1.31\",\n+    \"prettier\": \"^3\",\n+    \"ts-jest\": \"^29.4.6\",\n+    \"typescript\": \"^5\"\n+  },\n+  \"engines\": {\n+    \"node\": \">= 24.0.0\"\n+  },\n+  \"files\": [\n+    \"lib/**/*\"\n+  ],\n+  \"license\": \"MIT\",\n+  \"main\": \"./lib/index.js\",\n+  \"types\": \"./lib/index.d.ts\",\n+  \"exports\": {\n+    \".\": {\n+      \"types\": \"./lib/index.d.ts\",\n+      \"default\": \"./lib/index.js\"\n+    }\n+  },\n+  \"maintainers\": [\n+    {\n+      \"name\": \"Garen J. Torikian\",\n+      \"email\": \"gjtorikian@gmail.com\"\n+    }\n+  ],\n+  \"funding\": \"https://github.com/sponsors/gjtorikian/\",\n+  \"repository\": {\n+    \"type\": \"git\",\n+    \"url\": \"https://github.com/gjtorikian/isBinaryFile\"\n+  },\n+  \"scripts\": {\n+    \"build\": \"tsc\",\n+    \"format\": \"prettier --write \\\"src/**/*.ts\\\" \\\"test/**/*.ts\\\"\",\n+    \"lint\": \"oxlint src test\",\n+    \"prepare\": \"npm run build\",\n+    \"prepublishOnly\": \"npm test && npm run lint\",\n+    \"test\": \"NODE_OPTIONS='--experimental-vm-modules' jest --config jestconfig.json\",\n+    \"watch\": \"tsc -w\"\n+  }\n+}\n",
+					"match": false,
+					"packageHash": "710f10797472a5b37aed87c0cf5029856f31edb97bd690ffcc9106b2762d23ff",
+					"size": 493,
+					"sourceHash": "95ae73651bc2e8695be4298da7a41b513c7e9ccb21449010b512898ebeac8565",
+					"status": "content"
+				},
+				"tests/fixtures/01_grep": {
+					"match": false,
+					"packageHash": "10bdbb270eaa17afedb41223479edbbd1bcbce415ab24df389d7899bf1c8bd6c",
+					"size": 29664,
+					"status": "missing-in-source"
+				},
+				"tests/fixtures/02_perl_script": {
+					"match": false,
+					"packageHash": "a233f975b4b6622c21aa07bb8093e0f125513e2377094d56809ccb83723686e1",
+					"size": 40,
+					"status": "missing-in-source"
+				},
+				"tests/fixtures/03_Руководство_по_эксплуатации.rst": {
+					"match": false,
+					"packageHash": "468528286733e0de804bfae1689c6ceb53d6cf78d090a19765b6a1bdce10e510",
+					"size": 2854,
+					"status": "missing-in-source"
+				},
+				"tests/fixtures/04_HelloWorld.pdf": {
+					"match": false,
+					"packageHash": "04c37655f19278c4fb30fb8ab286df5fe7372465d5bae6e1eeea5aa8c7b4fc68",
+					"size": 1313,
+					"status": "missing-in-source"
+				},
+				"tests/fixtures/05_null_file.gif": {
+					"match": false,
+					"packageHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+					"size": 0,
+					"status": "missing-in-source"
+				},
+				"tests/fixtures/06_trunks.gif": {
+					"match": false,
+					"packageHash": "b54c6d48a183f07b3a7a32279f8d0579c8ffb6d97ffdfacee852a449d9b9e1aa",
+					"size": 40074,
+					"status": "missing-in-source"
+				},
+				"tests/test.js": {
+					"match": false,
+					"packageHash": "e8c1a4fe209730dfdc0be5008edcd21ebfc9e2abba6a8cd9e3b3111d41f13225",
+					"size": 2053,
+					"status": "missing-in-source"
+				},
+				"LICENSE.txt": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/encoding.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/encoding.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/index.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/index.js": {
+					"match": false,
+					"status": "missing-in-package"
+				}
+			},
+			"summary": {
+				"differentFiles": 2,
+				"matchingFiles": 0,
+				"missingInPackage": 5,
+				"missingInSource": 9,
+				"score": 0,
+				"totalFiles": 16
+			}
+		},
+		"prodDependencies": []
+	}
+]
