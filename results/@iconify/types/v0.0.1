@@ -1,0 +1,79 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-11T08:29:58.901Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:Running node v12.9.1 (npm v6.10.2)\n6.10.2",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "@iconify/types@0.0.1",
+			"name": "@iconify/types",
+			"version": "0.0.1",
+			"location": "https://registry.npmjs.org/@iconify/types/-/types-0.0.1.tgz",
+			"integrity": "sha512-MEioIVe+Uw2WIy/jtObdZ0oOY/c/0hfNxGk0hJnU2+mePGZq55Bk5dwwTTtHbSCvBvSQiIFCnBEUJGRwTjtmUw==",
+			"publishedAt": "2019-12-24T13:16:56.551Z",
+			"publishedWith": {
+				"node": "12.9.1",
+				"npm": "6.13.4"
+			},
+			"dependencies": {}
+		},
+		"source": {
+			"integrity": null,
+			"location": "git://github.com/iconify/types.git",
+			"spec": "github:iconify/types#HEAD"
+		},
+		"comparisonHash": "9ef46a5bd31291e57cbab41e2f17c57bd6da0b5b",
+		"diff": {
+			"files": {
+				".prettierrc": {
+					"diff": "--- published/.prettierrc\n+++ rebuilt/.prettierrc\n@@ -3,5 +3,6 @@\n \t\"singleQuote\": true,\n \t\"useTabs\": true,\n \t\"semi\": true,\n-\t\"quoteProps\": \"consistent\"\n+\t\"quoteProps\": \"consistent\",\n+\t\"endOfLine\": \"lf\"\n }\n",
+					"match": false,
+					"packageHash": "9765332a4536bcb5438027d6ef24ec81ceb9a062885e322cfc035b9183142119",
+					"size": 112,
+					"sourceHash": "c4b92ec9234b56208022c23fe90ccc5f8f4de70fe8de13f44d24339522347b8b",
+					"status": "content"
+				},
+				"README.md": {
+					"diff": "--- published/README.md\n+++ rebuilt/README.md\n@@ -1,3 +1,462 @@\n+This repository has been moved to Iconify monorepo.\n+\n+You can find the latest version here: https://github.com/iconify/iconify/tree/master/packages/types\n+\n # Iconify Types\n \n-Type definitions for using Iconify libraries and JSON files with TypeScript.\n+Type definitions for using Iconify icon sets with TypeScript.\n+\n+## Files structure\n+\n+Iconify icon sets are available in several formats:\n+\n+- Big JSON files that combine many icons in one file\n+- Node.js packages split into individual icons\n+\n+### Icon format\n+\n+Each icon is represented by the `IconifyIcon` type. It is a simple object with multiple string, number or boolean attributes.\n+\n+The only required attribute is:\n+\n+- `body`: string. Value contains inner HTML of an icon as a string, for example `<path d=\"...\"/>`.\n+\n+Optional attributes are represented by type `IconifyOptional`. They are split into several types: dimensions (`IconifyDimenisons` type) and transformations (`IconifyTransformations` type).\n+\n+Dimensions attributes:\n+\n+- `width`: number. viewBox width, number. If missing, value is set to 16.\n+- `height`: number. viewBox height, number. If missing, value is set to 16.\n+- `left`: number. viewBox left, number. If missing, the value is set to 0.\n+- `top`: number. viewBox top, number. If missing, the value is set to 0.\n+\n+Transformations:\n+\n+- `rotate`: number. Icon rotation. Iconify icons can be rotated in 90 degrees increments, allowing to reuse the same source icon for multiple icons, such as arrow-up being a copy of arrow-left rotated by 90 degrees. Values are 0 for 0 degrees, 1 for 90 degrees, 2 for 180 degrees, 3 for 270 degrees. The default value is 0.\n+- `hFlip`: boolean. Horizontal flip. Similar to the rotation transformation, an icon can be flipped horizontally and vertically. It can be used to quickly create aliases, such as arrow-left being an alias of arrow-right, but with hFlip set to true. The default value is false.\n+- `vFlip`: boolean. Vertical flip. The default value is false.\n+\n+Example of icon object:\n+\n+```js\n+const mdiHandIcon = {\n+\tbody:\n+\t\t'<path d=\"M6.58 19h8v3h-8v-3m13.16-7.4c-.19-.2-.45-.32-.74-.32l-.22.03l-3.2 1.69v-1.17l.51-8.93c.03-.55-.39-1.03-.94-1.06c-.55-.03-1.03.39-1.06.94l-.27 4.69h-.24l-1.04.11V2a1 1 0 0 0-1-1c-.54 0-1 .45-1 1v6.41l-.82.37l-.69-5.46c-.07-.55-.57-.94-1.12-.87c-.55.05-.94.55-.87 1.12l.77 6.06l-.38.17c-.13.05-.25.13-.36.2l-1.1-3.89c-.16-.57-.72-.91-1.26-.77c-.53.16-.83.74-.67 1.31l2.57 9.12c0 .03.02.07.03.1l.03.13h.01c.22.57.79 1 1.4 1h6.5c.39 0 .74-.16 1-.43l4.92-4.2l-.76-.77z\" fill=\"currentColor\"/>',\n+\twidth: 24,\n+\theight: 24,\n+};\n+```\n+\n+### Icon sets format\n+\n+Iconify icon sets format is available from multiple sources:\n+\n+- NPM package `@iconify/json` that includes all icon sets\n+- API responses used by SVG framework\n+\n+Icon set format structure is available as the `IconifyJSON` type. It is an object with several fields:\n+\n+- `prefix`: string. Icon set prefix.\n+- `icons`: object. Icons data. Value is an object that represents a set of icons, where the key is an icon name and value is `IconifyIcon` object (see \"Icon format\" above).\n+- `aliases`: object. Icon aliases, similar to the `icons` object (see \"Aliases\" section below).\n+\n+Example:\n+\n+```json\n+{\n+\t\"prefix\": \"mdi\",\n+\t\"icons\": {\n+\t\t\"home\": {\n+\t\t\t\"body\": \"<path d=\\\"M10 20v-6h4v6h5v-8h3L12 3L2 12h3v8h5z\\\" fill=\\\"currentColor\\\"/>\",\n+\t\t\t\"width\": 24,\n+\t\t\t\"height\": 24\n+\t\t},\n+\t\t\"arrow-left\": {\n+\t\t\t\"body\": \"<path d=\\\"M20 11v2H8l5.5 5.5l-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5L8 11h12z\\\" fill=\\\"currentColor\\\"/>\",\n+\t\t\t\"width\": 24,\n+\t\t\t\"height\": 24\n+\t\t}\n+\t}\n+}\n+```\n+\n+All icon properties except for `body` are optional and are represented by type `IconifyOptional`. Type `IconifyJSON` also extends type `IconifyOptional`, allowing all optional properties to be placed in the root object.\n+\n+If an icon is missing a property, look in the root object for the default value. If the root object does not have the default value, use Iconify default value for that property (see list of properties and default values in the \"Icon format\" section above).\n+\n+Default values in the root object make it possible to reduce duplication.\n+\n+Example:\n+\n+```json\n+{\n+\t\"prefix\": \"mdi\",\n+\t\"icons\": {\n+\t\t\"home\": {\n+\t\t\t\"body\": \"<path d=\\\"M10 20v-6h4v6h5v-8h3L12 3L2 12h3v8h5z\\\" fill=\\\"currentColor\\\"/>\"\n",
+					"match": false,
+					"packageHash": "64d2ec1a70d515385271f31dd65c4073d81979aff419e687bd5f4efca00d1d72",
+					"size": 94,
+					"sourceHash": "7c7127cdfd4fcd2e15a275521eae9151ed7d9c647d4b59eef9d0cd06921a93b9",
+					"status": "content"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -1,13 +1,12 @@\n {\n \t\"name\": \"@iconify/types\",\n-\t\"description\": \"Types for Iconify icons\",\n-\t\"version\": \"0.0.1\",\n+\t\"description\": \"Types for Iconify data\",\n+\t\"version\": \"1.0.1\",\n \t\"author\": \"Vjacheslav Trushkin\",\n \t\"license\": \"(Apache-2.0 OR GPL-2.0)\",\n-\t\"main\": \"types.ts\",\n-\t\"scripts\": {\n-\t\t\"lint\": \"eslint index.ts\"\n-\t},\n+\t\"main\": \"./index.js\",\n+\t\"types\": \"./types.ts\",\n+\t\"scripts\": {},\n \t\"bugs\": \"https://github.com/iconify/types/issues\",\n \t\"homepage\": \"https://github.com/iconify/types\",\n \t\"repository\": {\n",
+					"match": false,
+					"packageHash": "8858e022a1ba67d37d40ca4de15dc353e0a2f1cd99e94883a863fa41b59fb0be",
+					"size": 464,
+					"sourceHash": "fe5e10a713d6556bcb32a30d67bfc5bc6d6a5fc3be026a54feb6a46a87389c7a",
+					"status": "content"
+				},
+				"types.ts": {
+					"diff": "--- published/types.ts\n+++ rebuilt/types.ts\n@@ -1,5 +1,5 @@\n /**\n- * Icon dimensions\n+ * Icon dimensions.\n  *\n  * Used in:\n  *  icon (as is)\n@@ -7,12 +7,25 @@\n  *  root of JSON file (default values)\n  */\n export interface IconifyDimenisons {\n+\t// Left position of viewBox.\n+\t// Defaults to 0.\n+\tleft?: number;\n+\n+\t// Top position of viewBox.\n+\t// Defaults to 0.\n+\ttop?: number;\n+\n+\t// Width of viewBox.\n+\t// Defaults to 16.\n \twidth?: number;\n+\n+\t// Height of viewBox.\n+\t// Defaults to 16.\n \theight?: number;\n }\n \n /**\n- * Icon transformations\n+ * Icon transformations.\n  *\n  * Used in:\n  *  icon (as is)\n@@ -20,53 +33,188 @@\n  *  root of JSON file (default values)\n  */\n export interface IconifyTransformations {\n+\t// Number of 90 degrees rotations.\n+\t// 0 = 0, 1 = 90deg and so on.\n+\t// Defaults to 0.\n+\t// When merged (such as alias + icon), result is icon.rotation + alias.rotation.\n \trotate?: number;\n+\n+\t// Horizontal flip.\n+\t// Defaults to false.\n+\t// When merged, result is icon.hFlip !== alias.hFlip\n \thFlip?: boolean;\n+\n+\t// Vertical flip. (see hFlip comments)\n \tvFlip?: boolean;\n }\n \n /**\n- * Combination of dimensions and transformations\n+ * Combination of dimensions and transformations.\n  */\n export interface IconifyOptional\n \textends IconifyDimenisons,\n \t\tIconifyTransformations {}\n \n /**\n- * Alias\n+ * Alias.\n  */\n export interface IconifyAlias extends IconifyOptional {\n+\t// Parent icon index without prefix, required.\n \tparent: string;\n+\n+\t// IconifyOptional properties.\n+\t// Alias should have only properties that it overrides.\n+\t// Transformations are merged, not overridden. See IconifyTransformations comments.\n }\n \n /**\n- * Icon\n+ * Icon.\n  */\n export interface IconifyIcon extends IconifyOptional {\n+\t// Icon body: <path d=\"...\" />, required.\n \tbody: string;\n+\n+\t// IconifyOptional properties.\n+\t// If property is missing in JSON file, look in root object for default value.\n }\n \n /**\n- * \"icons\" field of JSON file\n+ * \"icons\" field of JSON file.\n  */\n export interface IconifyIcons {\n+\t// Index is name of icon, without prefix. Value is IconifyIcon object.\n \t[index: string]: IconifyIcon;\n }\n \n /**\n- * \"aliases\" field of JSON file\n+ * \"aliases\" field of JSON file.\n",
+					"match": false,
+					"packageHash": "021d3416a859f678a37d42950eb6d16ea47e7e34e29db1e3eb0b253f108fdeae",
+					"size": 1224,
+					"sourceHash": "dd6f7749989e6ad6e9e72b6a81d0f4f8f81a29eaf7a8c91d18b0fbe353f8637c",
+					"status": "content"
+				},
+				"index.js": {
+					"match": false,
+					"status": "missing-in-package"
+				}
+			},
+			"summary": {
+				"differentFiles": 4,
+				"matchingFiles": 2,
+				"missingInPackage": 1,
+				"missingInSource": 0,
+				"score": 0.2857142857142857,
+				"totalFiles": 7
+			}
+		},
+		"prodDependencies": []
+	}
+]
