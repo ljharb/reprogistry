@@ -1,0 +1,135 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-11T19:29:32.957Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:Running node v6.1.0 (npm v3.8.6)\n3.8.6",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "smart-buffer@1.1.15",
+			"name": "smart-buffer",
+			"version": "1.1.15",
+			"location": "https://registry.npmjs.org/smart-buffer/-/smart-buffer-1.1.15.tgz",
+			"integrity": "sha512-1+8bxygjTsNfvQe0/0pNBesTOlSHtOeG6b6LYbvsZCCHDKYZ40zcQo6YTnZBWrBSLWOCbrHljLdEmGMYebu7aQ==",
+			"publishedAt": "2017-01-30T18:55:36.587Z",
+			"publishedWith": {
+				"node": "6.1.0",
+				"npm": "3.8.6"
+			},
+			"dependencies": {}
+		},
+		"source": {
+			"integrity": null,
+			"location": "git+https://github.com/JoshGlazebrook/smart-buffer.git",
+			"spec": "github:JoshGlazebrook/smart-buffer#071f618b339a341c2617ac41ea2a77132fd307e8"
+		},
+		"comparisonHash": "9ef46a5bd31291e57cbab41e2f17c57bd6da0b5b",
+		"diff": {
+			"files": {
+				".npmignore": {
+					"match": false,
+					"packageHash": "cbb0f77f60aaa6219ab5c6133503612db563133a803cd40ce9763020cdf34da0",
+					"size": 49,
+					"status": "missing-in-source"
+				},
+				".travis.yml": {
+					"diff": "--- published/.travis.yml\n+++ rebuilt/.travis.yml\n@@ -1,11 +1,13 @@\n language: node_js\n node_js:\n-  - 0.10\n-  - 0.12\n-  - 4\n   - 6\n+  - 8\n+  - 10\n+  - 12\n   - stable\n \n-script: \"npm run coverage\"\n-# Send coverage data to Coveralls\n-after_script: \"cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js\"\n\\ No newline at end of file\n+before_script:\n+  - npm install -g typescript\n+  - tsc -p ./\n+\n+script: \"npm run coveralls\"\n\\ No newline at end of file\n",
+					"match": false,
+					"packageHash": "68a5eba41756ded064e412828c214846c8ce53383d11ff1ae3bfd19553798659",
+					"size": 214,
+					"sourceHash": "06d78b7b3773a8dfffdadba86271edeb3c0f353ad20593a6b23fe1b178c25db4",
+					"status": "content"
+				},
+				"LICENSE": {
+					"diff": "--- published/LICENSE\n+++ rebuilt/LICENSE\n@@ -1,6 +1,6 @@\n The MIT License (MIT)\n \n-Copyright (c) 2013 Josh Glazebrook\n+Copyright (c) 2013-2017 Josh Glazebrook\n \n Permission is hereby granted, free of charge, to any person obtaining a copy of\n this software and associated documentation files (the \"Software\"), to deal in\n",
+					"match": false,
+					"packageHash": "4f4f28866154c8d758241a64296e8790d45d7d912ff7b029930778c06d8f2a72",
+					"size": 1082,
+					"sourceHash": "c46e2c333e1c9e6fcfd130cf91b8e54bf67b60fabbc04996f7e199b990353ff3",
+					"status": "content"
+				},
+				"README.md": {
+					"diff": "--- published/README.md\n+++ rebuilt/README.md\n@@ -1,32 +1,65 @@\n smart-buffer  [![Build Status](https://travis-ci.org/JoshGlazebrook/smart-buffer.svg?branch=master)](https://travis-ci.org/JoshGlazebrook/smart-buffer)  [![Coverage Status](https://coveralls.io/repos/github/JoshGlazebrook/smart-buffer/badge.svg?branch=master)](https://coveralls.io/github/JoshGlazebrook/smart-buffer?branch=master)\n =============\n \n-smart-buffer is a light Buffer wrapper that takes away the need to keep track of what position to read and write data to and from the underlying Buffer. It also adds null terminating string operations and **grows** as you add more data.\n+smart-buffer is a Buffer wrapper that adds automatic read & write offset tracking, string operations, data insertions, and more.\n \n+![stats](https://nodei.co/npm/smart-buffer.png?downloads=true&downloadRank=true&stars=true \"stats\")\n \n-### What it's useful for:\n+**Key Features**:\n+* Proxies all of the Buffer write and read functions\n+* Keeps track of read and write offsets automatically\n+* Grows the internal Buffer as needed\n+* Useful string operations. (Null terminating strings)\n+* Allows for inserting values at specific points in the Buffer\n+* Built in TypeScript\n+* Type Definitions Provided\n+* Browser Support (using Webpack/Browserify)\n+* Full test coverage\n \n-I created smart-buffer because I wanted to simplify the process of using Buffer for building and reading network packets to send over a socket. Rather than having to keep track of which position I need to write a UInt16 to after adding a string of variable length, I simply don't have to.\n+**Requirements**:\n+* Node v4.0+ is supported at this time.  (Versions prior to 2.0 will work on node 0.10)\n \n-Key Features:\n-* Proxies all of the Buffer write and read functions.\n-* Keeps track of read and write positions for you.\n-* Grows the internal Buffer as you add data to it. \n-* Useful string operations. (Null terminating strings)\n-* Allows for inserting values at specific points in the internal Buffer.\n \n-#### Note:\n-smart-buffer can be used for writing to an underlying buffer as well as reading from it. It however does not function correctly if you're mixing both read and write operations with each other.\n+\n+## Breaking Changes in v4.0\n+\n+* Old constructor patterns have been completely removed. It's now required to use the SmartBuffer.fromXXX() factory constructors.\n+* rewind(), skip(), moveTo() have been removed. (see [offsets](#offsets))\n+* Internal private properties are now prefixed with underscores (_)\n+* **All** writeXXX() methods that are given an offset will now **overwrite data** instead of insert. (see [write vs insert](#write-vs-insert))\n+* insertXXX() methods have been added for when you want to insert data at a specific offset (this replaces the old behavior of writeXXX() when an offset was provided)\n+\n+\n+## Looking for v3 docs?\n+\n+Legacy documentation for version 3 and prior can be found [here](https://github.com/JoshGlazebrook/smart-buffer/blob/master/docs/README_v3.md).\n \n ## Installing:\n \n+`yarn add smart-buffer`\n+\n+or\n+\n `npm install smart-buffer`\n \n+Note: The published NPM package includes the built javascript library.\n+If you cloned this repo and wish to build the library manually use:\n+\n+`npm run build`\n+\n ## Using smart-buffer\n \n-### Example\n+```javascript\n+// Javascript\n+const SmartBuffer = require('smart-buffer').SmartBuffer;\n+\n+// Typescript\n+import { SmartBuffer, SmartBufferOptions} from 'smart-buffer';\n+```\n \n-Say you were building a packet that had to conform to the following protocol:\n+### Simple Example\n+\n+Building a packet that uses the following protocol specification:\n \n `[PacketType:2][PacketLength:2][Data:XX]`\n \n@@ -34,31 +67,31 @@\n \n ```javascript\n function createLoginPacket(username, password, age, country) {\n-    var packet = new SmartBuffer();\n-    packet.writeUInt16LE(0x0060); // Login Packet Type/ID\n+    const packet = new SmartBuffer();\n+    packet.writeUInt16LE(0x0060); // Some packet type\n     packet.writeStringNT(username);\n     packet.writeStringNT(password);\n     packet.writeUInt8(age);\n     packet.writeStringNT(country);\n-    packet.writeUInt16LE(packet.length - 2, 2);\n-    \n+    packet.insertUInt16LE(packet.length - 2, 2);\n+\n     return packet.toBuffer();\n }\n ```\n",
+					"match": false,
+					"packageHash": "26d94cfbec2b1f015d84fe4dbfa4b2403ee84047cb8fcbf861d60ed6e93a70e4",
+					"size": 10345,
+					"sourceHash": "e13c81937143705fff9268c12e213d354d689bbb79a0ac59f25f7caf79159c36",
+					"status": "content"
+				},
+				"build/smartbuffer.js": {
+					"match": false,
+					"packageHash": "da78fa74ad7277618621b18f95219139f0b6a2b427b3a17a099f7244c84258c2",
+					"size": 25060,
+					"status": "missing-in-source"
+				},
+				"build/smartbuffer.js.map": {
+					"match": false,
+					"packageHash": "550991226b41549401cad68e79ab540eddc6405f697dc184ac4decb13822f9da",
+					"size": 14581,
+					"status": "missing-in-source"
+				},
+				"lib/smart-buffer.js": {
+					"match": false,
+					"packageHash": "31297e44a15abe0ef3dc5bfa4f625ab8c479690be79329f5d7845ce940f5c7ab",
+					"size": 13740,
+					"status": "missing-in-source"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -1,8 +1,9 @@\n {\n   \"name\": \"smart-buffer\",\n-  \"version\": \"1.1.15\",\n-  \"description\": \"A smarter Buffer that keeps track of its own read and write positions while growing endlessly.\",\n-  \"main\": \"lib/smart-buffer.js\",\n+  \"version\": \"4.2.0\",\n+  \"description\": \"smart-buffer is a Buffer wrapper that adds automatic read & write offset tracking, string operations, data insertions, and more.\",\n+  \"main\": \"build/smartbuffer.js\",\n+  \"contributors\": [\"syvita\"],\n   \"homepage\": \"https://github.com/JoshGlazebrook/smart-buffer/\",\n   \"repository\": {\n     \"type\": \"git\",\n@@ -14,31 +15,65 @@\n   \"keywords\": [\n     \"buffer\",\n     \"smart\",\n-    \"serialize\",\n     \"packet\",\n+    \"serialize\",\n     \"network\",\n     \"cursor\",\n     \"simple\"\n   ],\n   \"engines\": {\n-    \"node\": \">= 0.10.15\",\n-    \"npm\": \">= 1.3.5\"\n+    \"node\": \">= 6.0.0\",\n+    \"npm\": \">= 3.0.0\"\n   },\n   \"author\": \"Josh Glazebrook\",\n   \"license\": \"MIT\",\n   \"readmeFilename\": \"README.md\",\n   \"devDependencies\": {\n-    \"chai\": \"^3.5.0\",\n-    \"coveralls\": \"^2.11.15\",\n-    \"istanbul\": \"^0.4.3\",\n-    \"mocha\": \"^3.2.0\",\n-    \"mocha-lcov-reporter\": \"^1.2.0\"\n+    \"@types/chai\": \"4.1.7\",\n+    \"@types/mocha\": \"5.2.7\",\n+    \"@types/node\": \"^12.0.0\",\n+    \"chai\": \"4.2.0\",\n+    \"coveralls\": \"3.0.5\",\n+    \"istanbul\": \"^0.4.5\",\n+    \"mocha\": \"6.2.0\",\n+    \"mocha-lcov-reporter\": \"^1.3.0\",\n+    \"nyc\": \"14.1.1\",\n+    \"source-map-support\": \"0.5.12\",\n+    \"ts-node\": \"8.3.0\",\n+    \"tslint\": \"5.18.0\",\n+    \"typescript\": \"^3.2.1\"\n   },\n-  \"typings\": \"typings/index\",\n+  \"typings\": \"typings/smartbuffer.d.ts\",\n   \"dependencies\": {},\n   \"scripts\": {\n-    \"test\": \"mocha test/smart-buffer.test.js\",\n-    \"coverage\": \"istanbul cover node_modules/mocha/bin/_mocha recursive test\",\n-    \"fullcoverage\": \"node_modules/.bin/istanbul -include-all-sources cover node_modules/mocha/bin/_mocha recursive test\"\n+    \"prepublish\": \"npm install -g typescript && npm run build\",\n+    \"test\": \"NODE_ENV=test mocha --recursive --require ts-node/register test/**/*.ts\",\n+    \"coverage\": \"NODE_ENV=test nyc npm test\",\n+    \"coveralls\": \"NODE_ENV=test nyc npm test && nyc report --reporter=text-lcov | coveralls\",\n+    \"lint\": \"tslint --type-check --project tsconfig.json 'src/**/*.ts'\",\n+    \"build\": \"tsc -p ./\"\n+  },\n+  \"nyc\": {\n+    \"extension\": [\n+      \".ts\",\n+      \".tsx\"\n+    ],\n+    \"include\": [\n+      \"src/*.ts\",\n+      \"src/**/*.ts\"\n+    ],\n+    \"exclude\": [\n+      \"**.*.d.ts\",\n+      \"node_modules\",\n+      \"typings\"\n+    ],\n+    \"require\": [\n+      \"ts-node/register\"\n+    ],\n+    \"reporter\": [\n+      \"json\",\n+      \"html\"\n+    ],\n+    \"all\": true\n   }\n }\n",
+					"match": false,
+					"packageHash": "744aa4e47a849dc70f654325339477f0f9cfa788e9efba4b00583a459163954e",
+					"size": 1211,
+					"sourceHash": "188644cdf467d6a768ad25ed3ee8eb845dc5cb29aadc4c88ca7c5cb5f631d66a",
+					"status": "content"
+				},
+				"test/smart-buffer.test.js": {
+					"match": false,
+					"packageHash": "ee6d0690b985b26e48bcf7aa750f96f8e5318510ed43d907c80244054faba16e",
+					"size": 14680,
+					"status": "missing-in-source"
+				},
+				"typings/index.d.ts": {
+					"match": false,
+					"packageHash": "73efbb6d5dc7c0c28d49ed79c4b772adacc1dc14db2dc01d34ad85b57fa2558a",
+					"size": 10548,
+					"status": "missing-in-source"
+				},
+				".prettierrc.yaml": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"docs/CHANGELOG.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"docs/README_v3.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"docs/ROADMAP.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"typings/smartbuffer.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"typings/utils.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				}
+			},
+			"summary": {
+				"differentFiles": 4,
+				"matchingFiles": 0,
+				"missingInPackage": 6,
+				"missingInSource": 6,
+				"score": 0,
+				"totalFiles": 16
+			}
+		},
+		"prodDependencies": []
+	}
+]
