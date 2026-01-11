@@ -1,0 +1,136 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-11T05:01:09.899Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:11.7.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "asn1@0.2.2",
+			"name": "asn1",
+			"version": "0.2.2",
+			"location": "https://registry.npmjs.org/asn1/-/asn1-0.2.2.tgz",
+			"integrity": "sha512-jkhsc2d+w9wCrma14ozbu1zAbNWcAjPIPAdP6PCHGu6JxOaUzcJQKDGgDooItj/O2uSwZEzhgOtTSNCk+jNDYQ==",
+			"publishedAt": "2014-09-03T18:29:15.607Z",
+			"publishedWith": {
+				"node": null,
+				"npm": "1.4.3"
+			},
+			"dependencies": {}
+		},
+		"source": {
+			"integrity": null,
+			"location": "git://github.com/mcavage/node-asn1.git",
+			"spec": "github:mcavage/node-asn1#HEAD"
+		},
+		"comparisonHash": "9ef46a5bd31291e57cbab41e2f17c57bd6da0b5b",
+		"diff": {
+			"files": {
+				".npmignore": {
+					"match": false,
+					"packageHash": "eaeff0b53839d259914dc3a4d043824bde9e0ddc936fe4c3b823ead1f30ba661",
+					"size": 19,
+					"status": "missing-in-source"
+				},
+				".travis.yml": {
+					"match": false,
+					"packageHash": "2303095d00b06eae42c100a926e77a42c4c3664dfbc22160a4c2fd559636cf8c",
+					"size": 44,
+					"status": "missing-in-source"
+				},
+				"README.md": {
+					"diff": "--- published/README.md\n+++ rebuilt/README.md\n@@ -1,3 +1,5 @@\n+# node-asn1\n+\n node-asn1 is a library for encoding and decoding ASN.1 datatypes in pure JS.\n Currently BER encoding is supported; at some point I'll likely have to do DER.\n \n@@ -5,7 +7,7 @@\n \n Mostly, if you're *actually* needing to read and write ASN.1, you probably don't\n need this readme to explain what and why.  If you have no idea what ASN.1 is,\n-see this: ftp://ftp.rsa.com/pub/pkcs/ascii/layman.asc\n+see [A Layman's Guide to a Subset of ASN.1, BER, and DER](layman.asc).\n \n The source is pretty much self-explanatory, and has read/write methods for the\n common types out there.\n@@ -16,7 +18,7 @@\n \n     var Ber = require('asn1').Ber;\n \n-    var reader = new Ber.Reader(new Buffer([0x30, 0x03, 0x01, 0x01, 0xff]));\n+    var reader = new Ber.Reader(Buffer.from([0x30, 0x03, 0x01, 0x01, 0xff]));\n \n     reader.readSequence();\n     console.log('Sequence len: ' + reader.length);\n@@ -47,4 +49,4 @@\n \n ## Bugs\n \n-See <https://github.com/mcavage/node-asn1/issues>.\n+See <https://github.com/joyent/node-asn1/issues>.\n",
+					"match": false,
+					"packageHash": "47e7e3c9b0c0ac404a8c4e28ae56934c29e80622b6626c26c40cc3fb90c05faf",
+					"size": 1201,
+					"sourceHash": "6f6964079c72a5ec0780991d6b833341bb0859c85b550d7ff669a45dc22785e8",
+					"status": "content"
+				},
+				"lib/ber/errors.js": {
+					"diff": "--- published/lib/ber/errors.js\n+++ rebuilt/lib/ber/errors.js\n@@ -3,7 +3,7 @@\n \n module.exports = {\n \n-  newInvalidAsn1Error: function(msg) {\n+  newInvalidAsn1Error: function (msg) {\n     var e = new Error();\n     e.name = 'InvalidAsn1Error';\n     e.message = msg || '';\n",
+					"match": false,
+					"packageHash": "e60f19366df8802845cf7cfc2bbf59d8c4db689351e733b364719245084d99ef",
+					"size": 239,
+					"sourceHash": "9408a1b48a19eb728cf9ed781b90bc03ddd111d88156d5b5913ce9b837487164",
+					"status": "content"
+				},
+				"lib/ber/index.js": {
+					"diff": "--- published/lib/ber/index.js\n+++ rebuilt/lib/ber/index.js\n@@ -7,7 +7,7 @@\n var Writer = require('./writer');\n \n \n-///--- Exports\n+// --- Exports\n \n module.exports = {\n \n",
+					"match": false,
+					"packageHash": "38a14464e790d49b26186cd32d93c5f53ddf25fc73f1e2f358ae254d25ec0ee0",
+					"size": 469,
+					"sourceHash": "8da323efc9ac8f5bb3b5fb4f067ca272796b31610c015f36762933551f04594b",
+					"status": "content"
+				},
+				"lib/ber/reader.js": {
+					"diff": "--- published/lib/ber/reader.js\n+++ rebuilt/lib/ber/reader.js\n@@ -1,18 +1,19 @@\n // Copyright 2011 Mark Cavage <mcavage@gmail.com> All rights reserved.\n \n var assert = require('assert');\n+var Buffer = require('safer-buffer').Buffer;\n \n var ASN1 = require('./types');\n var errors = require('./errors');\n \n \n-///--- Globals\n+// --- Globals\n \n var newInvalidAsn1Error = errors.newInvalidAsn1Error;\n \n \n \n-///--- API\n+// --- API\n \n function Reader(data) {\n   if (!data || !Buffer.isBuffer(data))\n@@ -24,18 +25,26 @@\n   // These hold the \"current\" state\n   this._len = 0;\n   this._offset = 0;\n-\n-  var self = this;\n-  this.__defineGetter__('length', function() { return self._len; });\n-  this.__defineGetter__('offset', function() { return self._offset; });\n-  this.__defineGetter__('remain', function() {\n-    return self._size - self._offset;\n-  });\n-  this.__defineGetter__('buffer', function() {\n-    return self._buf.slice(self._offset);\n-  });\n }\n \n+Object.defineProperty(Reader.prototype, 'length', {\n+  enumerable: true,\n+  get: function () { return (this._len); }\n+});\n+\n+Object.defineProperty(Reader.prototype, 'offset', {\n+  enumerable: true,\n+  get: function () { return (this._offset); }\n+});\n+\n+Object.defineProperty(Reader.prototype, 'remain', {\n+  get: function () { return (this._size - this._offset); }\n+});\n+\n+Object.defineProperty(Reader.prototype, 'buffer', {\n+  get: function () { return (this._buf.slice(this._offset)); }\n+});\n+\n \n /**\n  * Reads a single byte and advances offset; you can pass in `true` to make this\n@@ -44,7 +53,7 @@\n  * @param {Boolean} peek true means don't move offset.\n  * @return {Number} the next byte, null if not enough data.\n  */\n-Reader.prototype.readByte = function(peek) {\n+Reader.prototype.readByte = function (peek) {\n   if (this._size - this._offset < 1)\n     return null;\n \n@@ -57,7 +66,7 @@\n };\n \n \n-Reader.prototype.peek = function() {\n+Reader.prototype.peek = function () {\n   return this.readByte(true);\n };\n \n@@ -73,7 +82,7 @@\n  * @return {Number} the amount of offset to advance the buffer.\n  * @throws {InvalidAsn1Error} on bad ASN.1\n  */\n-Reader.prototype.readLength = function(offset) {\n+Reader.prototype.readLength = function (offset) {\n   if (offset === undefined)\n     offset = this._offset;\n \n@@ -84,10 +93,10 @@\n   if (lenB === null)\n     return null;\n \n-  if ((lenB & 0x80) == 0x80) {\n+  if ((lenB & 0x80) === 0x80) {\n     lenB &= 0x7f;\n \n-    if (lenB == 0)\n+    if (lenB === 0)\n       throw newInvalidAsn1Error('Indefinite length not supported');\n \n",
+					"match": false,
+					"packageHash": "72e020e40d14a9fd44ff86a73306c4374cf3c8a6b870d05c9086b53264657667",
+					"size": 5457,
+					"sourceHash": "5d0d7ec2de73921f0bff71872610488b30936b8cc4c98997966224c463046bbc",
+					"status": "content"
+				},
+				"lib/ber/writer.js": {
+					"diff": "--- published/lib/ber/writer.js\n+++ rebuilt/lib/ber/writer.js\n@@ -1,11 +1,12 @@\n // Copyright 2011 Mark Cavage <mcavage@gmail.com> All rights reserved.\n \n var assert = require('assert');\n+var Buffer = require('safer-buffer').Buffer;\n var ASN1 = require('./types');\n var errors = require('./errors');\n \n \n-///--- Globals\n+// --- Globals\n \n var newInvalidAsn1Error = errors.newInvalidAsn1Error;\n \n@@ -15,16 +16,16 @@\n };\n \n \n-///--- Helpers\n+// --- Helpers\n \n function merge(from, to) {\n   assert.ok(from);\n-  assert.equal(typeof(from), 'object');\n+  assert.equal(typeof (from), 'object');\n   assert.ok(to);\n-  assert.equal(typeof(to), 'object');\n+  assert.equal(typeof (to), 'object');\n \n   var keys = Object.getOwnPropertyNames(from);\n-  keys.forEach(function(key) {\n+  keys.forEach(function (key) {\n     if (to[key])\n       return;\n \n@@ -37,12 +38,12 @@\n \n \n \n-///--- API\n+// --- API\n \n function Writer(options) {\n   options = merge(DEFAULT_OPTS, options || {});\n \n-  this._buf = new Buffer(options.size || 1024);\n+  this._buf = Buffer.alloc(options.size || 1024);\n   this._size = this._buf.length;\n   this._offset = 0;\n   this._options = options;\n@@ -50,19 +51,19 @@\n   // A list of offsets in the buffer where we need to insert\n   // sequence tag/len pairs.\n   this._seq = [];\n-\n-  var self = this;\n-  this.__defineGetter__('buffer', function() {\n-    if (self._seq.length)\n-      throw new InvalidAsn1Error(self._seq.length + ' unended sequence(s)');\n-\n-    return self._buf.slice(0, self._offset);\n-  });\n }\n \n+Object.defineProperty(Writer.prototype, 'buffer', {\n+  get: function () {\n+    if (this._seq.length)\n+      throw newInvalidAsn1Error(this._seq.length + ' unended sequence(s)');\n+\n+    return (this._buf.slice(0, this._offset));\n+  }\n+});\n \n-Writer.prototype.writeByte = function(b) {\n-  if (typeof(b) !== 'number')\n+Writer.prototype.writeByte = function (b) {\n+  if (typeof (b) !== 'number')\n     throw new TypeError('argument must be a Number');\n \n   this._ensure(1);\n@@ -70,22 +71,22 @@\n };\n \n \n-Writer.prototype.writeInt = function(i, tag) {\n-  if (typeof(i) !== 'number')\n+Writer.prototype.writeInt = function (i, tag) {\n+  if (typeof (i) !== 'number')\n     throw new TypeError('argument must be a Number');\n-  if (typeof(tag) !== 'number')\n+  if (typeof (tag) !== 'number')\n     tag = ASN1.Integer;\n \n   var sz = 4;\n \n   while ((((i & 0xff800000) === 0) || ((i & 0xff800000) === 0xff800000 >> 0)) &&\n-         (sz > 1)) {\n+        (sz > 1)) {\n",
+					"match": false,
+					"packageHash": "fee3775e52d2a231fd98c11a75542d03e32c9cf2607d80ccbd2628fbc3be4c82",
+					"size": 7577,
+					"sourceHash": "839731c9473b8c4faf09db9411a6d149bc365a6bde239c80e5993ed63a134878",
+					"status": "content"
+				},
+				"lib/index.js": {
+					"diff": "--- published/lib/index.js\n+++ rebuilt/lib/index.js\n@@ -7,7 +7,7 @@\n \n \n \n-///--- Exported API\n+// --- Exported API\n \n module.exports = {\n \n",
+					"match": false,
+					"packageHash": "4f73f0447b2923e2d2841e39ca35d992c745848e711350d4f07cbb29a8b639aa",
+					"size": 320,
+					"sourceHash": "4db109c1c247a751645717e696e04eab975eef06bdf4713a16e81efc63575d87",
+					"status": "content"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -1,22 +1,31 @@\n {\n-  \"author\": \"Mark Cavage <mcavage@gmail.com>\",\n+  \"author\": \"Joyent (joyent.com)\",\n   \"contributors\": [\n+    \"Mark Cavage <mcavage@gmail.com>\",\n     \"David Gwynne <loki@animata.net>\",\n-    \"Yunong Xiao <yunong@joyent.com>\"\n+    \"Yunong Xiao <yunong@joyent.com>\",\n+    \"Alex Wilson <alex.wilson@joyent.com>\"\n   ],\n   \"name\": \"asn1\",\n   \"description\": \"Contains parsers and serializers for ASN.1 (currently BER only)\",\n-  \"version\": \"0.2.2\",\n+  \"version\": \"0.2.6\",\n   \"repository\": {\n     \"type\": \"git\",\n-    \"url\": \"git://github.com/mcavage/node-asn1.git\"\n+    \"url\": \"https://github.com/joyent/node-asn1.git\"\n   },\n   \"main\": \"lib/index.js\",\n-  \"dependencies\": {},\n+  \"dependencies\": {\n+    \"safer-buffer\": \"~2.1.0\"\n+  },\n   \"devDependencies\": {\n-    \"tap\": \"0.4.8\"\n+    \"istanbul\": \"^0.3.6\",\n+    \"faucet\": \"0.0.1\",\n+    \"tape\": \"^3.5.0\",\n+    \"eslint\": \"2.13.1\",\n+    \"eslint-plugin-joyent\": \"~1.3.0\"\n   },\n   \"scripts\": {\n-    \"test\": \"./node_modules/.bin/tap ./tst\"\n-  }\n+    \"test\": \"./node_modules/.bin/tape ./test/ber/*.test.js\"\n+  },\n+  \"license\": \"MIT\"\n }\n",
+					"match": false,
+					"packageHash": "ee01ef5f47d585d848616be5d6e95fcdfa3296a4aaf8b657e884d1523d331721",
+					"size": 529,
+					"sourceHash": "9931ef8d2e8857b7be3cc1fb13af4c943165046fe66337a8d7fec50fee8a5764",
+					"status": "content"
+				},
+				"tst/ber/reader.test.js": {
+					"match": false,
+					"packageHash": "ca3899129d10326373cb8e9cf63a0bf4f63aeddfcc9a6fd7da97cf219ef5cbb5",
+					"size": 5718,
+					"status": "missing-in-source"
+				},
+				"tst/ber/writer.test.js": {
+					"match": false,
+					"packageHash": "6971d2b62e3ce78bf334e02876d288fb5d1d4d83b739b19d8b274055e32152a9",
+					"size": 9455,
+					"status": "missing-in-source"
+				},
+				"Jenkinsfile": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"layman.asc": {
+					"match": false,
+					"status": "missing-in-package"
+				}
+			},
+			"summary": {
+				"differentFiles": 7,
+				"matchingFiles": 2,
+				"missingInPackage": 2,
+				"missingInSource": 4,
+				"score": 0.13333333333333333,
+				"totalFiles": 15
+			}
+		},
+		"prodDependencies": [
+			{
+				"name": "safer-buffer",
+				"version": "2.1.2"
+			}
+		]
+	}
+]
