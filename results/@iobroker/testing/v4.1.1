@@ -1,0 +1,513 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-11T07:13:28.990Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:Running node v16.20.2 (npm v8.19.4)\n8.19.4",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "@iobroker/testing@4.1.1",
+			"name": "@iobroker/testing",
+			"version": "4.1.1",
+			"location": "https://registry.npmjs.org/@iobroker/testing/-/testing-4.1.1.tgz",
+			"integrity": "sha512-TGl0o+ejiSUuJiyv6bYgOCkv3w/bOo0eEThAgl3sG3nyiWDBLuXCbtE18UlRLbFyYLOWZ1KETp1f0x7kHMKLxA==",
+			"publishedAt": "2024-03-05T11:37:37.977Z",
+			"publishedWith": {
+				"node": "16.20.2",
+				"npm": "8.19.4"
+			},
+			"dependencies": {
+				"chai": "^4.3.7",
+				"debug": "^4.3.4",
+				"mocha": "^10.2.0",
+				"sinon": "^15.0.1",
+				"fs-extra": "^10.1.0",
+				"sinon-chai": "^3.7.0",
+				"alcalzone-shared": "~4.0.3",
+				"chai-as-promised": "^7.1.1"
+			}
+		},
+		"source": {
+			"integrity": null,
+			"location": "git+https://github.com/AlCalzone/testing.git",
+			"spec": "github:AlCalzone/testing#26fdf7927718b44412b184233fbd4602968b4490"
+		},
+		"comparisonHash": "9ef46a5bd31291e57cbab41e2f17c57bd6da0b5b",
+		"diff": {
+			"files": {
+				"build/tests/integration/lib/dbConnection.d.ts": {
+					"diff": "--- published/build/tests/integration/lib/dbConnection.d.ts\n+++ rebuilt/build/tests/integration/lib/dbConnection.d.ts\n@@ -3,8 +3,8 @@\n /// <reference types=\"node\" />\n /// <reference types=\"node\" />\n import EventEmitter from \"events\";\n-export type ObjectsDB = Record<string, ioBroker.Object>;\n-export type StatesDB = Record<string, ioBroker.State>;\n+export declare type ObjectsDB = Record<string, ioBroker.Object>;\n+export declare type StatesDB = Record<string, ioBroker.State>;\n export interface DBConnection {\n     on(event: \"objectChange\", handler: ioBroker.ObjectChangeHandler): this;\n     on(event: \"stateChange\", handler: ioBroker.StateChangeHandler): this;\n",
+					"match": false,
+					"packageHash": "8a104d296688a54cd0be18f1de11b398e2b7bf53b1e6397f88ff51d7e61f6a81",
+					"size": 2648,
+					"sourceHash": "4c8834f174317c318088ebdbfb1ca246dcb4fb3d1094c18e313cd8383e8bfe43",
+					"status": "content"
+				},
+				"build/tests/packageFiles/index.js": {
+					"diff": "--- published/build/tests/packageFiles/index.js\n+++ rebuilt/build/tests/packageFiles/index.js\n@@ -93,13 +93,13 @@\n                 skipIfInvalid.call(this, \"package.json\");\n             });\n             const packageContent = require(packageJsonPath);\n-            const iopackContent = require(ioPackageJsonPath);\n             const requiredProperties = [\n                 \"name\",\n                 \"version\",\n                 \"description\",\n                 \"author\",\n                 \"license\",\n+                \"main\",\n                 \"repository\",\n                 \"repository.type\",\n             ];\n@@ -112,11 +112,6 @@\n                 (0, chai_1.expect)(name).to.match(/^[a-z]/, `The adapter name must start with a letter!`);\n                 (0, chai_1.expect)(name).to.match(/[a-z0-9]$/, `The adapter name must end with a letter or number!`);\n             });\n-            if (!iopackContent.common.onlyWWW) {\n-                it(`property main is defined for non onlyWWW adapters`, () => {\n-                    (0, chai_1.expect)(packageContent.main).to.not.be.undefined;\n-                });\n-            }\n             it(`The repository type is \"git\"`, () => {\n                 (0, chai_1.expect)(packageContent.repository.type).to.equal(\"git\");\n             });\n@@ -147,6 +142,7 @@\n                 \"common.desc\",\n                 \"common.icon\",\n                 \"common.extIcon\",\n+                \"common.license\",\n                 \"common.type\",\n                 \"common.authors\",\n                 \"native\",\n@@ -178,29 +174,6 @@\n                 (0, chai_1.expect)((0, typeguards_1.isObject)(news)).to.be.true;\n                 (0, chai_1.expect)(Object.keys(news).length).to.be.at.most(20);\n             });\n-            if (iopackContent.common.licenseInformation) {\n-                it(`if common.licenseInformation exists, it is an object with required properties`, () => {\n-                    (0, chai_1.expect)(iopackContent.common.licenseInformation).to.be.an(\"object\");\n-                    (0, chai_1.expect)(iopackContent.common.licenseInformation.type).to.be.oneOf([\"free\", \"commercial\", \"paid\", \"limited\"]);\n-                    if (iopackContent.common.licenseInformation.type !== \"free\") {\n-                        (0, chai_1.expect)(iopackContent.common.licenseInformation.link, \"License link is missing\").to.not.be.undefined;\n-                    }\n-                });\n-                it(`common.license should not exist together with common.licenseInformation`, () => {\n-                    (0, chai_1.expect)(iopackContent.common.license, \"common.license must be removed\").to.be.undefined;\n-                });\n-            }\n-            else {\n-                it(`common.license must exist without common.licenseInformation`, () => {\n-                    (0, chai_1.expect)(iopackContent.common.license, \"common.licenseInformation (preferred) or common.license (deprecated) must exist\").to.not.be.undefined;\n-                });\n-            }\n-            if (iopackContent.common.tier != undefined) {\n-                it(`common.tier must be 1, 2 or 3`, () => {\n-                    (0, chai_1.expect)(iopackContent.common.tier).to.be.at.least(1);\n-                    (0, chai_1.expect)(iopackContent.common.tier).to.be.at.most(3);\n-                });\n-            }\n             // If the adapter has a configuration page, check that a supported admin UI is used\n             const hasNoConfigPage = iopackContent.common.noConfig === true ||\n                 iopackContent.common.noConfig === \"true\" ||\n@@ -227,12 +200,7 @@\n                 (0, chai_1.expect)(iopackContent.common.version).to.equal(packageContent.version);\n             });\n             it(\"The license matches\", () => {\n-                if (iopackContent.common.licenseInformation) {\n-                    (0, chai_1.expect)(iopackContent.common.licenseInformation.license).to.equal(packageContent.license);\n-                }\n-                else {\n-                    (0, chai_1.expect)(iopackContent.common.license).to.equal(packageContent.license);\n-                }\n+                (0, chai_1.expect)(iopackContent.common.license).to.equal(packageContent.license);\n             });\n         });\n     });\n",
+					"match": false,
+					"packageHash": "c8d94cc1a875f7f409e42336dc05e919c81ad0e034d0c4129a8a379ecf64a694",
+					"size": 12903,
+					"sourceHash": "1a8819479c20b382cdea41abd899053901ffbf99ccce85961e179413263b0614",
+					"status": "content"
+				},
+				"build/tests/unit/mocks/mockAdapter.d.ts": {
+					"diff": "--- published/build/tests/unit/mocks/mockAdapter.d.ts\n+++ rebuilt/build/tests/unit/mocks/mockAdapter.d.ts\n@@ -2,7 +2,7 @@\n import type { MockDatabase } from \"./mockDatabase\";\n import { MockLogger } from \"./mockLogger\";\n import { Mock } from \"./tools\";\n-export type MockAdapter = Mock<ioBroker.Adapter> & {\n+export declare type MockAdapter = Mock<ioBroker.Adapter> & {\n     readyHandler: ioBroker.ReadyHandler | undefined;\n     objectChangeHandler: ioBroker.ObjectChangeHandler | undefined;\n     stateChangeHandler: ioBroker.StateChangeHandler | undefined;\n",
+					"match": false,
+					"packageHash": "243c16b2407360a8da3c76ffa100544624a001b0d4a7f4087502410bdcd581db",
+					"size": 842,
+					"sourceHash": "bcac3ab546b74254a683f13f340b8310e02fbb6cdf6f4d1afa847dd456dd1a9a",
+					"status": "content"
+				},
+				"build/tests/unit/mocks/mockLogger.d.ts": {
+					"diff": "--- published/build/tests/unit/mocks/mockLogger.d.ts\n+++ rebuilt/build/tests/unit/mocks/mockLogger.d.ts\n@@ -1,6 +1,6 @@\n /// <reference types=\"iobroker\" />\n import { Mock } from \"./tools\";\n-export type MockLogger = Mock<ioBroker.Logger> & {\n+export declare type MockLogger = Mock<ioBroker.Logger> & {\n     resetMock(): void;\n     resetMockHistory(): void;\n     resetMockBehavior(): void;\n",
+					"match": false,
+					"packageHash": "6bc0b6bb083e22b5c3ba92d2ea60e13e65422cac8e7ffa8c4c236a2226a0fb1a",
+					"size": 339,
+					"sourceHash": "20412a2ff8edcd63bcd11a31107a437fa94fcbc8a908e65ff576b82f67fba167",
+					"status": "content"
+				},
+				"build/tests/unit/mocks/tools.d.ts": {
+					"diff": "--- published/build/tests/unit/mocks/tools.d.ts\n+++ rebuilt/build/tests/unit/mocks/tools.d.ts\n@@ -1,13 +1,13 @@\n /// <reference types=\"sinon\" />\n import type { Equals, Overwrite } from \"alcalzone-shared/types\";\n-export type IsAny<T> = Equals<T extends never ? false : true, boolean>;\n-export type MockableMethods<T, All = Required<T>, NoAny = {\n+export declare type IsAny<T> = Equals<T extends never ? false : true, boolean>;\n+export declare type MockableMethods<T, All = Required<T>, NoAny = {\n     [K in keyof All]: IsAny<All[K]> extends true ? never : All[K] extends (...args: any[]) => void ? K : never;\n }> = NoAny[keyof NoAny];\n-export type Mock<T extends {}> = Overwrite<T, {\n+export declare type Mock<T extends {}> = Overwrite<T, {\n     [K in MockableMethods<T>]: sinon.SinonStub;\n }>;\n export declare function doResetHistory(parent: Record<string, any>): void;\n export declare function doResetBehavior(parent: Record<string, any>, implementedMethods: Record<string, any>): void;\n export declare function stubAndPromisifyImplementedMethods<T extends string>(parent: Record<T, any>, implementedMethods: Partial<Record<T, any>>, allowUserOverrides?: T[]): void;\n-export type ImplementedMethodDictionary<T> = Partial<Record<MockableMethods<T>, \"none\" | \"normal\" | \"no error\">>;\n+export declare type ImplementedMethodDictionary<T> = Partial<Record<MockableMethods<T>, \"none\" | \"normal\" | \"no error\">>;\n",
+					"match": false,
+					"packageHash": "e9275b6af89cb20951df573c963b4a2a642023e7de05dd29d42e41bf8963c7a8",
+					"size": 951,
+					"sourceHash": "f703b040584a262d45cf214c0a6937120317a085dfaa83e27fe114a3aab4a594",
+					"status": "content"
+				}
+			},
+			"summary": {
+				"differentFiles": 5,
+				"matchingFiles": 40,
+				"missingInPackage": 0,
+				"missingInSource": 0,
+				"score": 0.8888888888888888,
+				"totalFiles": 45
+			}
+		},
+		"prodDependencies": [
+			{
+				"name": "@sinonjs/commons",
+				"version": "2.0.0"
+			},
+			{
+				"name": "@sinonjs/fake-timers",
+				"version": "10.0.2"
+			},
+			{
+				"name": "@sinonjs/samsam",
+				"version": "7.0.1"
+			},
+			{
+				"name": "@sinonjs/text-encoding",
+				"version": "0.7.2"
+			},
+			{
+				"name": "alcalzone-shared",
+				"version": "4.0.3"
+			},
+			{
+				"name": "ansi-colors",
+				"version": "4.1.1"
+			},
+			{
+				"name": "ansi-regex",
+				"version": "5.0.1"
+			},
+			{
+				"name": "ansi-styles",
+				"version": "4.3.0"
+			},
+			{
+				"name": "anymatch",
+				"version": "3.1.2"
+			},
+			{
+				"name": "argparse",
+				"version": "2.0.1"
+			},
+			{
+				"name": "assertion-error",
+				"version": "1.1.0"
+			},
+			{
+				"name": "balanced-match",
+				"version": "1.0.0"
+			},
+			{
+				"name": "binary-extensions",
+				"version": "2.2.0"
+			},
+			{
+				"name": "brace-expansion",
+				"version": "1.1.11"
+			},
+			{
+				"name": "braces",
+				"version": "3.0.2"
+			},
+			{
+				"name": "browser-stdout",
+				"version": "1.3.1"
+			},
+			{
+				"name": "camelcase",
+				"version": "6.2.0"
+			},
+			{
+				"name": "chai",
+				"version": "4.3.7"
+			},
+			{
+				"name": "chai-as-promised",
+				"version": "7.1.1"
+			},
+			{
+				"name": "chalk",
+				"version": "4.1.0"
+			},
+			{
+				"name": "check-error",
+				"version": "1.0.2"
+			},
+			{
+				"name": "chokidar",
+				"version": "3.5.3"
+			},
+			{
+				"name": "cliui",
+				"version": "7.0.4"
+			},
+			{
+				"name": "color-convert",
+				"version": "2.0.1"
+			},
+			{
+				"name": "color-name",
+				"version": "1.1.4"
+			},
+			{
+				"name": "concat-map",
+				"version": "0.0.1"
+			},
+			{
+				"name": "debug",
+				"version": "4.3.4"
+			},
+			{
+				"name": "decamelize",
+				"version": "4.0.0"
+			},
+			{
+				"name": "deep-eql",
+				"version": "4.1.3"
+			},
+			{
+				"name": "diff",
+				"version": "5.0.0"
+			},
+			{
+				"name": "emoji-regex",
+				"version": "8.0.0"
+			},
+			{
+				"name": "escalade",
+				"version": "3.1.1"
+			},
+			{
+				"name": "escape-string-regexp",
+				"version": "4.0.0"
+			},
+			{
+				"name": "fill-range",
+				"version": "7.0.1"
+			},
+			{
+				"name": "find-up",
+				"version": "5.0.0"
+			},
+			{
+				"name": "flat",
+				"version": "5.0.2"
+			},
+			{
+				"name": "fs-extra",
+				"version": "10.1.0"
+			},
+			{
+				"name": "fs.realpath",
+				"version": "1.0.0"
+			},
+			{
+				"name": "fsevents",
+				"version": "2.3.2"
+			},
+			{
+				"name": "get-caller-file",
+				"version": "2.0.5"
+			},
+			{
+				"name": "get-func-name",
+				"version": "2.0.2"
+			},
+			{
+				"name": "glob",
+				"version": "7.2.0"
+			},
+			{
+				"name": "glob-parent",
+				"version": "5.1.2"
+			},
+			{
+				"name": "graceful-fs",
+				"version": "4.2.10"
+			},
+			{
+				"name": "has-flag",
+				"version": "4.0.0"
+			},
+			{
+				"name": "he",
+				"version": "1.2.0"
+			},
+			{
+				"name": "inflight",
+				"version": "1.0.6"
+			},
+			{
+				"name": "inherits",
+				"version": "2.0.4"
+			},
+			{
+				"name": "is-binary-path",
+				"version": "2.1.0"
+			},
+			{
+				"name": "is-extglob",
+				"version": "2.1.1"
+			},
+			{
+				"name": "is-fullwidth-code-point",
+				"version": "3.0.0"
+			},
+			{
+				"name": "is-glob",
+				"version": "4.0.3"
+			},
+			{
+				"name": "is-number",
+				"version": "7.0.0"
+			},
+			{
+				"name": "is-plain-obj",
+				"version": "2.1.0"
+			},
+			{
+				"name": "is-unicode-supported",
+				"version": "0.1.0"
+			},
+			{
+				"name": "isarray",
+				"version": "0.0.1"
+			},
+			{
+				"name": "js-yaml",
+				"version": "4.1.0"
+			},
+			{
+				"name": "jsonfile",
+				"version": "6.1.0"
+			},
+			{
+				"name": "just-extend",
+				"version": "4.2.1"
+			},
+			{
+				"name": "locate-path",
+				"version": "6.0.0"
+			},
+			{
+				"name": "lodash.get",
+				"version": "4.4.2"
+			},
+			{
+				"name": "log-symbols",
+				"version": "4.1.0"
+			},
+			{
+				"name": "loupe",
+				"version": "2.3.4"
+			},
+			{
+				"name": "minimatch",
+				"version": "3.1.2"
+			},
+			{
+				"name": "mocha",
+				"version": "10.2.0"
+			},
+			{
+				"name": "brace-expansion",
+				"version": "2.0.1"
+			},
+			{
+				"name": "minimatch",
+				"version": "5.0.1"
+			},
+			{
+				"name": "ms",
+				"version": "2.1.3"
+			},
+			{
+				"name": "supports-color",
+				"version": "8.1.1"
+			},
+			{
+				"name": "ms",
+				"version": "2.1.2"
+			},
+			{
+				"name": "nanoid",
+				"version": "3.3.3"
+			},
+			{
+				"name": "nise",
+				"version": "5.1.2"
+			},
+			{
+				"name": "@sinonjs/fake-timers",
+				"version": "7.1.2"
+			},
+			{
+				"name": "@sinonjs/commons",
+				"version": "1.8.6"
+			},
+			{
+				"name": "normalize-path",
+				"version": "3.0.0"
+			},
+			{
+				"name": "once",
+				"version": "1.4.0"
+			},
+			{
+				"name": "p-limit",
+				"version": "3.1.0"
+			},
+			{
+				"name": "p-locate",
+				"version": "5.0.0"
+			},
+			{
+				"name": "path-exists",
+				"version": "4.0.0"
+			},
+			{
+				"name": "path-is-absolute",
+				"version": "1.0.1"
+			},
+			{
+				"name": "path-to-regexp",
+				"version": "1.8.0"
+			},
+			{
+				"name": "pathval",
+				"version": "1.1.1"
+			},
+			{
+				"name": "picomatch",
+				"version": "2.3.1"
+			},
+			{
+				"name": "randombytes",
+				"version": "2.1.0"
+			},
+			{
+				"name": "readdirp",
+				"version": "3.6.0"
+			},
+			{
+				"name": "require-directory",
+				"version": "2.1.1"
+			},
+			{
+				"name": "safe-buffer",
+				"version": "5.2.1"
+			},
+			{
+				"name": "serialize-javascript",
+				"version": "6.0.0"
+			},
+			{
+				"name": "sinon",
+				"version": "15.0.1"
+			},
+			{
+				"name": "sinon-chai",
+				"version": "3.7.0"
+			},
+			{
+				"name": "string-width",
+				"version": "4.2.3"
+			},
+			{
+				"name": "strip-ansi",
+				"version": "6.0.1"
+			},
+			{
+				"name": "strip-json-comments",
+				"version": "3.1.1"
+			},
+			{
+				"name": "supports-color",
+				"version": "7.2.0"
+			},
+			{
+				"name": "to-regex-range",
+				"version": "5.0.1"
+			},
+			{
+				"name": "type-detect",
+				"version": "4.0.8"
+			},
+			{
+				"name": "universalify",
+				"version": "2.0.0"
+			},
+			{
+				"name": "workerpool",
+				"version": "6.2.1"
+			},
+			{
+				"name": "wrap-ansi",
+				"version": "7.0.0"
+			},
+			{
+				"name": "wrappy",
+				"version": "1.0.2"
+			},
+			{
+				"name": "y18n",
+				"version": "5.0.5"
+			},
+			{
+				"name": "yargs",
+				"version": "16.2.0"
+			},
+			{
+				"name": "yargs-parser",
+				"version": "20.2.4"
+			},
+			{
+				"name": "yargs-unparser",
+				"version": "2.0.0"
+			},
+			{
+				"name": "yocto-queue",
+				"version": "0.1.0"
+			}
+		]
+	}
+]

@@ -1,0 +1,753 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-11T07:14:35.780Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:Running node v20.18.1 (npm v10.8.2)\n10.8.2",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "@iobroker/testing@5.0.2",
+			"name": "@iobroker/testing",
+			"version": "5.0.2",
+			"location": "https://registry.npmjs.org/@iobroker/testing/-/testing-5.0.2.tgz",
+			"integrity": "sha512-iaUdV/vXLh0yd2WNEcpzMM6B3aFiN+dziYrf2jQi5EbIS2YwOT87AhF45tA8qzIipwLJ/ZZ/SNIgIsyB8UlPVw==",
+			"publishedAt": "2025-01-21T20:50:51.809Z",
+			"publishedWith": {
+				"node": "20.18.1",
+				"npm": "10.8.2"
+			},
+			"dependencies": {
+				"chai": "^4.5.0",
+				"debug": "^4.4.0",
+				"mocha": "^11.0.1",
+				"sinon": "^19.0.2",
+				"fs-extra": "^11.3.0",
+				"sinon-chai": "^3.7.0",
+				"alcalzone-shared": "~5.0.0",
+				"chai-as-promised": "^7.1.2"
+			}
+		},
+		"source": {
+			"integrity": null,
+			"location": "git+https://github.com/AlCalzone/testing.git",
+			"spec": "github:AlCalzone/testing#88808dd06003668de08cbe18cde2c58ced712ad8"
+		},
+		"comparisonHash": "9ef46a5bd31291e57cbab41e2f17c57bd6da0b5b",
+		"diff": {
+			"files": {
+				"build/lib/adapterTools.d.ts": {
+					"diff": "--- published/build/lib/adapterTools.d.ts\n+++ rebuilt/build/lib/adapterTools.d.ts\n@@ -1,37 +1,31 @@\n /**\n  * Loads an adapter's package.json\n- *\n  * @param adapterDir The directory the adapter resides in\n  */\n export declare function loadNpmPackage(adapterDir: string): Record<string, any>;\n /**\n  * Loads an adapter's io-package.json\n- *\n  * @param adapterDir The directory the adapter resides in\n  */\n export declare function loadIoPackage(adapterDir: string): Record<string, any>;\n export declare function getAdapterExecutionMode(adapterDir: string): ioBroker.AdapterCommon['mode'];\n /**\n  * Locates an adapter's main file\n- *\n  * @param adapterDir The directory the adapter resides in\n  */\n export declare function locateAdapterMainFile(adapterDir: string): Promise<string>;\n /**\n  * Locates an adapter's config to populate the `adapter.config` object with\n- *\n  * @param adapterDir The directory the adapter resides in\n  */\n export declare function loadAdapterConfig(adapterDir: string): Record<string, any>;\n /**\n  * Loads the adapter's common configuration from `io-package.json`\n- *\n  * @param adapterDir The directory the adapter resides in\n  */\n export declare function loadAdapterCommon(adapterDir: string): Record<string, any>;\n /**\n  * Loads the instanceObjects for an adapter from its `io-package.json`\n- *\n  * @param adapterDir The directory the adapter resides in\n  */\n export declare function loadInstanceObjects(adapterDir: string): ioBroker.Object[];\n",
+					"match": false,
+					"packageHash": "3bc04155460d7017dcfb109b5c6ac54d6e942501a08ca555c63ac8f129891a75",
+					"size": 1878,
+					"sourceHash": "963da760b0be2597f83a86c987742529672e980d02222a426b4057b768712c80",
+					"status": "content"
+				},
+				"build/lib/adapterTools.js": {
+					"diff": "--- published/build/lib/adapterTools.js\n+++ rebuilt/build/lib/adapterTools.js\n@@ -48,6 +48,7 @@\n exports.getAdapterFullName = getAdapterFullName;\n exports.getAdapterDependencies = getAdapterDependencies;\n // Add debug logging for tests\n+// @ts-expect-error no types\n const typeguards_1 = require(\"alcalzone-shared/typeguards\");\n const debug_1 = __importDefault(require(\"debug\"));\n const fs_extra_1 = require(\"fs-extra\");\n@@ -55,18 +56,18 @@\n const debug = (0, debug_1.default)('testing:unit:adapterTools');\n /**\n  * Loads an adapter's package.json\n- *\n  * @param adapterDir The directory the adapter resides in\n  */\n function loadNpmPackage(adapterDir) {\n+    // eslint-disable-next-line @typescript-eslint/no-require-imports\n     return require(path.join(adapterDir, 'package.json'));\n }\n /**\n  * Loads an adapter's io-package.json\n- *\n  * @param adapterDir The directory the adapter resides in\n  */\n function loadIoPackage(adapterDir) {\n+    // eslint-disable-next-line @typescript-eslint/no-require-imports\n     return require(path.join(adapterDir, 'io-package.json'));\n }\n function getAdapterExecutionMode(adapterDir) {\n@@ -75,7 +76,6 @@\n }\n /**\n  * Locates an adapter's main file\n- *\n  * @param adapterDir The directory the adapter resides in\n  */\n async function locateAdapterMainFile(adapterDir) {\n@@ -95,7 +95,7 @@\n         return ret;\n     }\n     // If both don't exist, JS-Controller uses <adapter name>.js as another fallback\n-    ret = path.join(adapterDir, `${ioPackage.common.name}.js`);\n+    ret = path.join(adapterDir, ioPackage.common.name + '.js');\n     debug(`  => trying ${ret}`);\n     if (await (0, fs_extra_1.pathExists)(ret)) {\n         debug(`  => found ${mainFile}`);\n@@ -105,7 +105,6 @@\n }\n /**\n  * Locates an adapter's config to populate the `adapter.config` object with\n- *\n  * @param adapterDir The directory the adapter resides in\n  */\n function loadAdapterConfig(adapterDir) {\n@@ -114,7 +113,6 @@\n }\n /**\n  * Loads the adapter's common configuration from `io-package.json`\n- *\n  * @param adapterDir The directory the adapter resides in\n  */\n function loadAdapterCommon(adapterDir) {\n@@ -123,7 +121,6 @@\n }\n /**\n  * Loads the instanceObjects for an adapter from its `io-package.json`\n- *\n  * @param adapterDir The directory the adapter resides in\n  */\n function loadInstanceObjects(adapterDir) {\n@@ -156,9 +153,8 @@\n             }\n             else if ((0, typeguards_1.isObject)(dep)) {\n                 const key = Object.keys(dep)[0];\n-                if (key) {\n+                if (key)\n                     ret[key] = dep[key] || 'latest';\n-                }\n             }\n         }\n     }\n",
+					"match": false,
+					"packageHash": "2024eab7a3d972e11645f7b377e4620bbcd43a8a169889128e467a71ed324855",
+					"size": 6156,
+					"sourceHash": "c0e1eff2ae687569dcd4e3625d01b5a78925b3dcb005a4397262d268edfe958f",
+					"status": "content"
+				},
+				"build/lib/executeCommand.d.ts": {
+					"diff": "--- published/build/lib/executeCommand.d.ts\n+++ rebuilt/build/lib/executeCommand.d.ts\n@@ -23,7 +23,6 @@\n export declare function executeCommand(command: string, options?: Partial<ExecuteCommandOptions>): Promise<ExecuteCommandResult>;\n /**\n  * Executes a command and returns the exit code and (if requested) the stdout\n- *\n  * @param command The command to execute\n  * @param args The command line arguments for the command\n  * @param options (optional) Some options for the command execution\n",
+					"match": false,
+					"packageHash": "02e73f026f07c1237425ad152e7319d01c7f64cf891e05c18536cc3c1d789734",
+					"size": 1659,
+					"sourceHash": "8a297a94a4d2c70b20f5623dc8329c1b2f2117d886376076060ca537d442b1e2",
+					"status": "content"
+				},
+				"build/lib/executeCommand.js": {
+					"diff": "--- published/build/lib/executeCommand.js\n+++ rebuilt/build/lib/executeCommand.js\n@@ -13,19 +13,16 @@\n             // no args were given\n             options = argsOrOptions;\n         }\n-        if (options == null) {\n+        if (options == null)\n             options = {};\n-        }\n-        if (args == null) {\n+        if (args == null)\n             args = [];\n-        }\n         const spawnOptions = {\n             stdio: [options.stdin || process.stdin, options.stdout || process.stdout, options.stderr || process.stderr],\n             windowsHide: true,\n         };\n-        if (options.cwd != null) {\n+        if (options.cwd != null)\n             spawnOptions.cwd = options.cwd;\n-        }\n         // Fix npm / node executable paths on Windows\n         if (isWindows) {\n             if (command === 'npm') {\n@@ -38,11 +35,10 @@\n                 command += '.exe';\n             }\n         }\n-        if (options.logCommandExecution == null) {\n+        if (options.logCommandExecution == null)\n             options.logCommandExecution = false;\n-        }\n         if (options.logCommandExecution) {\n-            console.log(`executing: ${command} ${args.join(' ')}`);\n+            console.log('executing: ' + `${command} ${args.join(' ')}`);\n         }\n         // Now execute the npm process and avoid throwing errors\n         try {\n@@ -60,18 +56,16 @@\n             if (options.stdout === 'pipe') {\n                 bufferedStdout = '';\n                 cmd.stdout.on('data', (chunk) => {\n-                    if (Buffer.isBuffer(chunk)) {\n+                    if (Buffer.isBuffer(chunk))\n                         chunk = chunk.toString('utf8');\n-                    }\n                     bufferedStdout += chunk;\n                 });\n             }\n             if (options.stderr === 'pipe') {\n                 bufferedStderr = '';\n                 cmd.stderr.on('data', (chunk) => {\n-                    if (Buffer.isBuffer(chunk)) {\n+                    if (Buffer.isBuffer(chunk))\n                         chunk = chunk.toString('utf8');\n-                    }\n                     bufferedStderr += chunk;\n                 });\n             }\n",
+					"match": false,
+					"packageHash": "9ce1a453e50feffd29ac71ea875440827ec07caeef98320e73d6ecb5584935ef",
+					"size": 3013,
+					"sourceHash": "7ba819e1a98624bd95f8e07a76baf24f5e3ba26119da7af2103c450bcc14a173",
+					"status": "content"
+				},
+				"build/lib/testAdapter.d.ts": {
+					"diff": "--- published/build/lib/testAdapter.d.ts\n+++ rebuilt/build/lib/testAdapter.d.ts\n@@ -1 +0,0 @@\n-export {};\n",
+					"match": false,
+					"packageHash": "8e609bb71c20b858c77f0e9f90bb1319db8477b13f9f965f1a1e18524bf50881",
+					"size": 11,
+					"sourceHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+					"status": "content"
+				},
+				"build/lib/testAdapter.js": {
+					"diff": "--- published/build/lib/testAdapter.js\n+++ rebuilt/build/lib/testAdapter.js\n@@ -1,7 +1,6 @@\n \"use strict\";\n // TODO: Do we need this file?\n // import * as utils from \"@iobroker/adapter-core\";\n-Object.defineProperty(exports, \"__esModule\", { value: true });\n // const adapter = utils.adapter({\n // \tname: \"foo\",\n // \tready() {\n",
+					"match": false,
+					"packageHash": "f1ef6e443e98a48449cf76dc7050ed9f2194f3c0dedbac0e5692d26f80b2c710",
+					"size": 267,
+					"sourceHash": "71bcd588c17729494d1e2a88e7712bfa98e1ea13a7129aea9dcc7c46fa3a5c45",
+					"status": "content"
+				},
+				"build/tests/index.d.ts": {
+					"diff": "--- published/build/tests/index.d.ts\n+++ rebuilt/build/tests/index.d.ts\n@@ -4,7 +4,7 @@\n import { createMocks } from './unit/harness/createMocks';\n import { createAsserts } from './unit/mocks/mockDatabase';\n export { TestHarness as IntegrationTestHarness } from './integration/lib/harness';\n-export type { MockAdapter } from './unit/mocks/mockAdapter';\n+export { MockAdapter } from './unit/mocks/mockAdapter';\n export { MockDatabase } from './unit/mocks/mockDatabase';\n /** Predefined test sets */\n export declare const tests: {\n@@ -19,6 +19,6 @@\n         createMocks: typeof createMocks;\n         createAsserts: typeof createAsserts;\n         /** @deprecated Adapter startup unit tests are no longer supported */\n-        startMockAdapter: () => any;\n+        startMockAdapter: () => {};\n     };\n };\n",
+					"match": false,
+					"packageHash": "cecc6814c2dc2ced2083a7fc4ed04a901f2cf6ff847f43722db3793c1a34bd3d",
+					"size": 1013,
+					"sourceHash": "caed35007ab42c7a821afd7c78bb28b9888a62c18b3d9681d3699618ad621459",
+					"status": "content"
+				},
+				"build/tests/integration/index.js": {
+					"diff": "--- published/build/tests/integration/index.js\n+++ rebuilt/build/tests/integration/index.js\n@@ -121,15 +121,10 @@\n                 // Adapters with these modes are allowed to \"immediately\" exit with code 0\n                 switch (harness.getAdapterExecutionMode()) {\n                     case 'schedule':\n-                        allowedExitCodes.add(0);\n-                        break;\n                     case 'once':\n-                        allowedExitCodes.add(0);\n-                        break;\n                     // @ts-expect-error subscribe was deprecated\n                     case 'subscribe':\n                         allowedExitCodes.add(0);\n-                        break;\n                 }\n                 return new Promise((resolve, reject) => {\n                     // Register a handler to check the alive state and exit codes\n@@ -152,7 +147,7 @@\n                             resolve(`The expected ${typeof code === 'number' ? 'exit code' : 'signal'} ${code} was received.`);\n                         }\n                     });\n-                    void harness.startAdapter();\n+                    harness.startAdapter();\n                 }).then(msg => console.log(msg));\n             });\n         });\n",
+					"match": false,
+					"packageHash": "3ee2a4e2936bd90e942c90b33160da948dead1ab5675a5cd77726a40c4c824f8",
+					"size": 9730,
+					"sourceHash": "6f7dd229789461cc154a65bb2b5e2bf35d931e89ba8c2ae1293d50a3728c336a",
+					"status": "content"
+				},
+				"build/tests/integration/lib/adapterSetup.js": {
+					"diff": "--- published/build/tests/integration/lib/adapterSetup.js\n+++ rebuilt/build/tests/integration/lib/adapterSetup.js\n@@ -78,9 +78,8 @@\n         const packResult = await (0, executeCommand_1.executeCommand)('npm', ['pack', '--loglevel', 'silent'], {\n             stdout: 'pipe',\n         });\n-        if (packResult.exitCode !== 0 || typeof packResult.stdout !== 'string') {\n+        if (packResult.exitCode !== 0 || typeof packResult.stdout !== 'string')\n             throw new Error(`Packing the adapter tarball failed!`);\n-        }\n         // The last non-empty line of `npm pack`s STDOUT contains the tarball path\n         const stdoutLines = packResult.stdout.trim().split(/[\\r\\n]+/);\n         const tarballName = stdoutLines[stdoutLines.length - 1].trim();\n@@ -102,16 +101,14 @@\n         packageJson.dependencies[this.adapterFullName] = `file:./${tarballName}`;\n         for (const [dep, version] of (0, objects_1.entries)((0, adapterTools_1.getAdapterDependencies)(this.adapterDir))) {\n             // Don't overwrite the js-controller GitHub dependency with a probably lower one\n-            if (dep === 'js-controller') {\n+            if (dep === 'js-controller')\n                 continue;\n-            }\n             packageJson.dependencies[`${this.appName}.${dep}`] = version;\n         }\n         await (0, fs_extra_1.writeJSON)(packageJsonPath, packageJson, { spaces: 2 });\n         debug('Deleting old remains of this adapter');\n-        if (await (0, fs_extra_1.pathExists)(this.testAdapterDir)) {\n+        if (await (0, fs_extra_1.pathExists)(this.testAdapterDir))\n             await (0, fs_extra_1.remove)(this.testAdapterDir);\n-        }\n         debug('Installing adapter');\n         // Defer to npm to install the controller (if it wasn't already)\n         await (0, executeCommand_1.executeCommand)('npm', ['i', '--omit=dev'], {\n@@ -129,16 +126,15 @@\n             cwd: this.testControllerDir,\n             stdout: 'ignore',\n         });\n-        if (addResult.exitCode !== 0) {\n+        if (addResult.exitCode !== 0)\n             throw new Error(`Adding the adapter instance failed!`);\n-        }\n         debug('  => done!');\n     }\n     async deleteOldInstances(dbConnection) {\n         debug('Removing old adapter instances...');\n         const allKeys = new Set([...(await dbConnection.getObjectIDs()), ...(await dbConnection.getStateIDs())]);\n         const instanceRegex = new RegExp(`^system\\\\.adapter\\\\.${this.adapterName}\\\\.\\\\d+`);\n-        const instanceObjsRegex = new RegExp(`^${this.adapterName}\\\\.\\\\d+\\\\.`);\n+        const instanceObjsRegex = new RegExp(`^${this.adapterName}\\\\.\\\\d+\\.`);\n         const belongsToAdapter = (id) => {\n             return (instanceRegex.test(id) ||\n                 instanceObjsRegex.test(id) ||\n",
+					"match": false,
+					"packageHash": "5aee368df4e62466f23d453c392b2efdc602c18044d50a024e3d6c0351f03897",
+					"size": 7693,
+					"sourceHash": "85140231096b287691eb358155ada8efbe7489801107b21e6d95c68d76626c1d",
+					"status": "content"
+				},
+				"build/tests/integration/lib/controllerSetup.d.ts": {
+					"diff": "--- published/build/tests/integration/lib/controllerSetup.d.ts\n+++ rebuilt/build/tests/integration/lib/controllerSetup.d.ts\n@@ -11,6 +11,8 @@\n     prepareTestDir(controllerVersion?: string): Promise<void>;\n     /**\n      * Tests if JS-Controller is already installed\n+     * @param appName The branded name of \"iobroker\"\n+     * @param testDir The directory the integration tests are executed in\n      */\n     isJsControllerInstalled(): Promise<boolean>;\n     /**\n@@ -23,18 +25,25 @@\n     setupJsController(): Promise<void>;\n     /**\n      * Changes the objects and states db to use alternative ports\n+     * @param appName The branded name of \"iobroker\"\n+     * @param testDir The directory the integration tests are executed in\n      */\n     setupSystemConfig(dbConnection: DBConnection): void;\n     /**\n      * Clears the log dir for integration tests (and creates it if it doesn't exist)\n+     * @param appName The branded name of \"iobroker\"\n+     * @param testDir The directory the integration tests are executed in\n      */\n     clearLogDir(): Promise<void>;\n     /**\n      * Clears the sqlite DB dir for integration tests (and creates it if it doesn't exist)\n+     * @param appName The branded name of \"iobroker\"\n+     * @param testDir The directory the integration tests are executed in\n      */\n     clearDBDir(): Promise<void>;\n     /**\n      * Disables all admin instances in the objects DB\n+     * @param objects The contents of objects.json\n      */\n     disableAdminInstances(dbConnection: DBConnection): Promise<void>;\n }\n",
+					"match": false,
+					"packageHash": "2c38bc9f1a158b48efb26afd48faecf22435b631df7e588a94a974f006bfad8e",
+					"size": 1379,
+					"sourceHash": "89822978711462fd8e77c32cb1456a57575e2d20a6bb21a9580a41380a169c84",
+					"status": "content"
+				},
+				"build/tests/integration/lib/controllerSetup.js": {
+					"diff": "--- published/build/tests/integration/lib/controllerSetup.js\n+++ rebuilt/build/tests/integration/lib/controllerSetup.js\n@@ -88,9 +88,8 @@\n         });\n         // Delete a possible package-lock.json as it can mess with future installations\n         const pckLockPath = path.join(this.testDir, 'package-lock.json');\n-        if (await (0, fs_extra_1.pathExists)(pckLockPath)) {\n+        if (await (0, fs_extra_1.pathExists)(pckLockPath))\n             await (0, fs_extra_1.unlink)(pckLockPath);\n-        }\n         // Set the engineStrict flag on new Node.js versions to be in line with newer ioBroker installations\n         const nodeMajorVersion = parseInt(process.versions.node.split('.')[0], 10);\n         if (nodeMajorVersion >= 10) {\n@@ -104,13 +103,14 @@\n             cwd: this.testDir,\n         });\n         // Prepare/clean the databases and config\n-        if (wasJsControllerInstalled) {\n+        if (wasJsControllerInstalled)\n             await this.setupJsController();\n-        }\n         debug('  => done!');\n     }\n     /**\n      * Tests if JS-Controller is already installed\n+     * @param appName The branded name of \"iobroker\"\n+     * @param testDir The directory the integration tests are executed in\n      */\n     async isJsControllerInstalled() {\n         debug('Testing if JS-Controller is installed...');\n@@ -187,13 +187,14 @@\n             cwd: this.testControllerDir,\n             stdout: 'ignore',\n         });\n-        if (setupResult.exitCode !== 0) {\n+        if (setupResult.exitCode !== 0)\n             throw new Error(`${this.appName} setup first failed!`);\n-        }\n         debug('  => done!');\n     }\n     /**\n      * Changes the objects and states db to use alternative ports\n+     * @param appName The branded name of \"iobroker\"\n+     * @param testDir The directory the integration tests are executed in\n      */\n     setupSystemConfig(dbConnection) {\n         debug(`Moving databases to different ports...`);\n@@ -205,6 +206,8 @@\n     }\n     /**\n      * Clears the log dir for integration tests (and creates it if it doesn't exist)\n+     * @param appName The branded name of \"iobroker\"\n+     * @param testDir The directory the integration tests are executed in\n      */\n     clearLogDir() {\n         debug('Cleaning log directory...');\n@@ -212,6 +215,8 @@\n     }\n     /**\n      * Clears the sqlite DB dir for integration tests (and creates it if it doesn't exist)\n+     * @param appName The branded name of \"iobroker\"\n+     * @param testDir The directory the integration tests are executed in\n      */\n     clearDBDir() {\n         debug('Cleaning SQLite directory...');\n@@ -219,6 +224,7 @@\n     }\n     /**\n      * Disables all admin instances in the objects DB\n+     * @param objects The contents of objects.json\n      */\n     async disableAdminInstances(dbConnection) {\n         debug('Disabling admin instances...');\n",
+					"match": false,
+					"packageHash": "b41f71256501329e0bc669ef948e9d98b49d14f3fb7141b1ed81a4e7f3e270a3",
+					"size": 10013,
+					"sourceHash": "96e4d6ba9f1b3064be6b7df03d8b5b91375b0fa8a981be80eb81949518f72471",
+					"status": "content"
+				},
+				"build/tests/integration/lib/dbConnection.js": {
+					"diff": "--- published/build/tests/integration/lib/dbConnection.js\n+++ rebuilt/build/tests/integration/lib/dbConnection.js\n@@ -55,43 +55,43 @@\n         this.testDir = testDir;\n         this.logger = logger;\n         this._isRunning = false;\n-        this.getObject = id => {\n+        this.getObject = async (id) => {\n             if (!this._objectsClient) {\n                 throw new Error('Objects DB is not running');\n             }\n             return this._objectsClient.getObjectAsync(id);\n         };\n-        this.setObject = (...args) => {\n+        this.setObject = async (...args) => {\n             if (!this._objectsClient) {\n                 throw new Error('Objects DB is not running');\n             }\n             return this._objectsClient.setObjectAsync(...args);\n         };\n-        this.delObject = (...args) => {\n+        this.delObject = async (...args) => {\n             if (!this._objectsClient) {\n                 throw new Error('Objects DB is not running');\n             }\n             return this._objectsClient.delObjectAsync(...args);\n         };\n-        this.getState = (id) => {\n+        this.getState = async (id) => {\n             if (!this._statesClient) {\n                 throw new Error('States DB is not running');\n             }\n             return this._statesClient.getStateAsync(id);\n         };\n-        this.setState = ((...args) => {\n+        this.setState = (async (...args) => {\n             if (!this._statesClient) {\n                 throw new Error('States DB is not running');\n             }\n             return this._statesClient.setStateAsync(...args);\n         });\n-        this.delState = (...args) => {\n+        this.delState = async (...args) => {\n             if (!this._statesClient) {\n                 throw new Error('States DB is not running');\n             }\n             return this._statesClient.delStateAsync(...args);\n         };\n-        this.getObjectViewAsync = (...args) => {\n+        this.getObjectViewAsync = async (...args) => {\n             if (!this._objectsClient) {\n                 throw new Error('Objects DB is not running');\n             }\n@@ -130,9 +130,8 @@\n         await this.stop();\n         const objects = await (0, fs_extra_1.readFile)(this.objectsPath);\n         const states = await (0, fs_extra_1.readFile)(this.statesPath);\n-        if (wasRunning) {\n+        if (wasRunning)\n             await this.start();\n-        }\n         return { objects, states };\n     }\n     async restore(objects, states) {\n@@ -141,9 +140,8 @@\n         await this.stop();\n         await (0, fs_extra_1.writeFile)(this.objectsPath, objects);\n         await (0, fs_extra_1.writeFile)(this.statesPath, states);\n-        if (wasRunning) {\n+        if (wasRunning)\n             await this.start();\n-        }\n     }\n     setSystemConfig(systemConfig) {\n         const systemFilename = path.join(this.testDataDir, `${this.appName}.json`);\n@@ -202,6 +200,7 @@\n             paths: [path.join(this.testDir, 'node_modules'), path.join(this.testControllerDir, 'node_modules')],\n         });\n         debug(`  => objects DB lib found at ${objectsDbPath}`);\n+        // eslint-disable-next-line @typescript-eslint/no-require-imports\n         const { Server, Client } = require(objectsDbPath);\n         // First create the server\n         await new Promise(resolve => {\n@@ -246,6 +245,7 @@\n             paths: [path.join(this.testDir, 'node_modules'), path.join(this.testControllerDir, 'node_modules')],\n         });\n         debug(`  => states DB lib found at ${statesDbPath}`);\n+        // eslint-disable-next-line @typescript-eslint/no-require-imports\n         const { Server, Client } = require(statesDbPath);\n         // First create the server\n         await new Promise(resolve => {\n@@ -281,13 +281,13 @@\n         }\n         this._statesClient.pushMessage(instanceId, msg, callback);\n     }\n-    getStateIDs(pattern = '*') {\n+    async getStateIDs(pattern = '*') {\n         if (!this._statesClient) {\n             throw new Error('States DB is not running');\n         }\n",
+					"match": false,
+					"packageHash": "b67b3e31ed0534e1af572970d676a8670e8161a15f3e70dfcd846fbc8323a245",
+					"size": 11123,
+					"sourceHash": "528321b08b1b5ce7b71147010089c3cd78130d3ce3053e4ae7646bd4b3c0391a",
+					"status": "content"
+				},
+				"build/tests/integration/lib/harness.d.ts": {
+					"diff": "--- published/build/tests/integration/lib/harness.d.ts\n+++ rebuilt/build/tests/integration/lib/harness.d.ts\n@@ -1,4 +1,4 @@\n-import { type ChildProcess } from 'child_process';\n+import { ChildProcess } from 'child_process';\n import { EventEmitter } from 'events';\n import type { DBConnection } from './dbConnection';\n export interface TestHarness {\n@@ -41,13 +41,11 @@\n     stopController(): Promise<void>;\n     /**\n      * Starts the adapter in a separate process and monitors its status\n-     *\n      * @param env Additional environment variables to set\n      */\n     startAdapter(env?: NodeJS.ProcessEnv): Promise<void>;\n     /**\n      * Starts the adapter in a separate process and resolves after it has started\n-     *\n      * @param waitForConnection By default, the test will wait for the adapter's `alive` state to become true. Set this to `true` to wait for the `info.connection` state instead.\n      * @param env Additional environment variables to set\n      */\n",
+					"match": false,
+					"packageHash": "c348d60e6f6e997415a804e92523110cfddb65e8403244e3fc43aa20f2a0a216",
+					"size": 3220,
+					"sourceHash": "88db6518acc455f1ebbb28ec9a3bdd30f19154159f1bcd5961756b4d1a4033ba",
+					"status": "content"
+				},
+				"build/tests/integration/lib/harness.js": {
+					"diff": "--- published/build/tests/integration/lib/harness.js\n+++ rebuilt/build/tests/integration/lib/harness.js\n@@ -37,7 +37,9 @@\n };\n Object.defineProperty(exports, \"__esModule\", { value: true });\n exports.TestHarness = void 0;\n+// @ts-expect-error no types\n const async_1 = require(\"alcalzone-shared/async\");\n+// @ts-expect-error no types\n const objects_1 = require(\"alcalzone-shared/objects\");\n const child_process_1 = require(\"child_process\");\n const debug_1 = __importDefault(require(\"debug\"));\n@@ -114,9 +116,8 @@\n     }\n     /** Stops the controller instance (and the adapter if it is running) */\n     async stopController() {\n-        if (!this.isControllerRunning()) {\n+        if (!this.isControllerRunning())\n             return;\n-        }\n         if (!this.didAdapterStop()) {\n             debug('Stopping adapter instance...');\n             // Give the adapter time to stop (as long as configured in the io-package.json)\n@@ -126,9 +127,7 @@\n                     .common.stopTimeout;\n                 stopTimeout += 1000;\n             }\n-            catch {\n-                // ignore\n-            }\n+            catch { }\n             stopTimeout ||= 5000; // default 5s\n             debug(`  => giving it ${stopTimeout}ms to terminate`);\n             await Promise.race([this.stopAdapter(), (0, async_1.wait)(stopTimeout)]);\n@@ -147,16 +146,13 @@\n     }\n     /**\n      * Starts the adapter in a separate process and monitors its status\n-     *\n      * @param env Additional environment variables to set\n      */\n     async startAdapter(env = {}) {\n-        if (this.isAdapterRunning()) {\n+        if (this.isAdapterRunning())\n             throw new Error('The adapter is already running!');\n-        }\n-        else if (this.didAdapterStop()) {\n+        else if (this.didAdapterStop())\n             throw new Error('This test harness has already been used. Please create a new one for each test!');\n-        }\n         const mainFileAbsolute = await (0, adapterTools_1.locateAdapterMainFile)(this.testAdapterDir);\n         const mainFileRelative = path.relative(this.testAdapterDir, mainFileAbsolute);\n         const onClose = (code, signal) => {\n@@ -174,7 +170,6 @@\n     }\n     /**\n      * Starts the adapter in a separate process and resolves after it has started\n-     *\n      * @param waitForConnection By default, the test will wait for the adapter's `alive` state to become true. Set this to `true` to wait for the `info.connection` state instead.\n      * @param env Additional environment variables to set\n      */\n@@ -183,7 +178,7 @@\n             const waitForStateId = waitForConnection\n                 ? `${this.adapterName}.0.info.connection`\n                 : `system.adapter.${this.adapterName}.0.alive`;\n-            void this.on('stateChange', (id, state) => {\n+            this.on('stateChange', async (id, state) => {\n                 if (id === waitForStateId && state && state.val === true) {\n                     resolve();\n                 }\n@@ -204,15 +199,12 @@\n     }\n     /** Stops the adapter process */\n     stopAdapter() {\n-        if (!this.isAdapterRunning()) {\n+        if (!this.isAdapterRunning())\n             return;\n-        }\n-        // eslint-disable-next-line no-async-promise-executor\n         return new Promise(async (resolve) => {\n             const onClose = (code, signal) => {\n-                if (!this._adapterProcess) {\n+                if (!this._adapterProcess)\n                     return;\n-                }\n                 this._adapterProcess.removeAllListeners();\n                 this._adapterExit = code != undefined ? code : signal;\n                 this._adapterProcess = undefined;\n@@ -279,7 +271,7 @@\n                 ack: false,\n                 time: Date.now(),\n             },\n-        }, (err, id) => console.log(`published message ${id}`));\n+        }, (err, id) => console.log('published message ' + id));\n     }\n }\n exports.TestHarness = TestHarness;\n",
+					"match": false,
+					"packageHash": "384408e4e198e6efa189e34a48caef17649cc25514c7df16a19e4d569756b967",
+					"size": 11640,
+					"sourceHash": "4fdf4b051967ebe0c35638118c60fd459fb5c6c2d008240a067e15dadb1473c4",
+					"status": "content"
+				},
+				"build/tests/integration/lib/tools.d.ts": {
+					"diff": "--- published/build/tests/integration/lib/tools.d.ts\n+++ rebuilt/build/tests/integration/lib/tools.d.ts\n@@ -1,34 +1,29 @@\n /**\n  * Locates the directory where JS-Controller is installed for integration tests\n- *\n  * @param appName The branded name of \"iobroker\"\n  * @param testDir The directory the integration tests are executed in\n  */\n export declare function getTestControllerDir(appName: string, testDir: string): string;\n /**\n  * Locates the directory where JS-Controller stores its data for integration tests\n- *\n  * @param appName The branded name of \"iobroker\"\n  * @param testDir The directory the integration tests are executed in\n  */\n export declare function getTestDataDir(appName: string, testDir: string): string;\n /**\n  * Locates the directory where JS-Controller stores its logs for integration tests\n- *\n  * @param appName The branded name of \"iobroker\"\n  * @param testDir The directory the integration tests are executed in\n  */\n export declare function getTestLogDir(appName: string, testDir: string): string;\n /**\n  * Locates the directory where JS-Controller stores its sqlite db during integration tests\n- *\n  * @param appName The branded name of \"iobroker\"\n  * @param testDir The directory the integration tests are executed in\n  */\n export declare function getTestDBDir(appName: string, testDir: string): string;\n /**\n- * Locates the directory where the adapter will be stored for integration tests\n- *\n+ * Locates the directory where the adapter will be be stored for integration tests\n  * @param adapterDir The root directory of the adapter\n  * @param testDir The directory the integration tests are executed in\n  */\n",
+					"match": false,
+					"packageHash": "56e40ecee646d586f2d3eb388f87e940e2b5f71be1e28aba388b9ebcf3c40ce4",
+					"size": 1492,
+					"sourceHash": "1a0098a0d9aa360765a16fbee5241e4e733bf9bb25cfe35cff91ac3f91aa967e",
+					"status": "content"
+				},
+				"build/tests/integration/lib/tools.js": {
+					"diff": "--- published/build/tests/integration/lib/tools.js\n+++ rebuilt/build/tests/integration/lib/tools.js\n@@ -42,7 +42,6 @@\n const adapterTools_1 = require(\"../../../lib/adapterTools\");\n /**\n  * Locates the directory where JS-Controller is installed for integration tests\n- *\n  * @param appName The branded name of \"iobroker\"\n  * @param testDir The directory the integration tests are executed in\n  */\n@@ -51,7 +50,6 @@\n }\n /**\n  * Locates the directory where JS-Controller stores its data for integration tests\n- *\n  * @param appName The branded name of \"iobroker\"\n  * @param testDir The directory the integration tests are executed in\n  */\n@@ -60,7 +58,6 @@\n }\n /**\n  * Locates the directory where JS-Controller stores its logs for integration tests\n- *\n  * @param appName The branded name of \"iobroker\"\n  * @param testDir The directory the integration tests are executed in\n  */\n@@ -69,7 +66,6 @@\n }\n /**\n  * Locates the directory where JS-Controller stores its sqlite db during integration tests\n- *\n  * @param appName The branded name of \"iobroker\"\n  * @param testDir The directory the integration tests are executed in\n  */\n@@ -77,8 +73,7 @@\n     return path.resolve(getTestDataDir(appName, testDir), 'sqlite');\n }\n /**\n- * Locates the directory where the adapter will be stored for integration tests\n- *\n+ * Locates the directory where the adapter will be be stored for integration tests\n  * @param adapterDir The root directory of the adapter\n  * @param testDir The directory the integration tests are executed in\n  */\n",
+					"match": false,
+					"packageHash": "3113d6fa5b5cfc113d02c7b35704ad6b1d8b38ffafe4a3534e1e09666f205811",
+					"size": 3450,
+					"sourceHash": "dbafbcc5574ce41eabeb9147d999bc2b0c0b0cf9b6b28b9c431f6ccea76794e7",
+					"status": "content"
+				},
+				"build/tests/packageFiles/index.js": {
+					"diff": "--- published/build/tests/packageFiles/index.js\n+++ rebuilt/build/tests/packageFiles/index.js\n@@ -34,6 +34,7 @@\n })();\n Object.defineProperty(exports, \"__esModule\", { value: true });\n exports.validatePackageFiles = validatePackageFiles;\n+// @ts-expect-error no types\n const typeguards_1 = require(\"alcalzone-shared/typeguards\");\n const chai_1 = require(\"chai\");\n const fs = __importStar(require(\"fs\"));\n@@ -51,9 +52,8 @@\n         'io-package.json': false,\n     };\n     function skipIfInvalid(...filenames) {\n-        if (filenames.some(f => invalidFiles[f])) {\n+        if (filenames.some(f => invalidFiles[f]))\n             return this.skip();\n-        }\n     }\n     function markAsInvalid(filename) {\n         if (this.currentTest.state === 'failed' && invalidFiles[filename] === false) {\n@@ -67,6 +67,7 @@\n         it(`The property \"${propertyPath}\" exists`, () => {\n             let prev = targetObj;\n             for (const part of propertyParts) {\n+                // eslint-disable-next-line @typescript-eslint/no-unused-expressions\n                 (0, chai_1.expect)(prev[part]).to.not.be.undefined;\n                 prev = prev[part];\n             }\n@@ -84,6 +85,7 @@\n                         skipIfInvalid.call(this, filename);\n                     });\n                     it('exists', () => {\n+                        // eslint-disable-next-line @typescript-eslint/no-unused-expressions\n                         (0, chai_1.expect)(fs.existsSync(packagePath), `${filename} is missing in the adapter dir. Please create it!`).to.be.true;\n                     });\n                     it('contains valid JSON', () => {\n@@ -92,7 +94,9 @@\n                         }, `${filename} contains invalid JSON!`).not.to.throw();\n                     });\n                     it('is an object', () => {\n-                        (0, chai_1.expect)(require(packagePath), `${filename} must contain an object!`).to.be.an('object');\n+                        (0, chai_1.expect)(\n+                        // eslint-disable-next-line @typescript-eslint/no-require-imports\n+                        require(packagePath), `${filename} must contain an object!`).to.be.an('object');\n                     });\n                 });\n             }\n@@ -101,7 +105,9 @@\n             beforeEach(function () {\n                 skipIfInvalid.call(this, 'package.json');\n             });\n+            // eslint-disable-next-line @typescript-eslint/no-require-imports\n             const packageContent = require(packageJsonPath);\n+            // eslint-disable-next-line @typescript-eslint/no-require-imports\n             const iopackContent = require(ioPackageJsonPath);\n             const requiredProperties = [\n                 'name',\n@@ -117,12 +123,13 @@\n                 let name = packageContent.name;\n                 (0, chai_1.expect)(name).to.match(/^iobroker\\./, `The npm package name must start with lowercase \"iobroker.\"!`);\n                 name = name.replace(/^iobroker\\./, '');\n-                (0, chai_1.expect)(name).to.match(/[-a-z0-9_]+/, `The adapter name must only contain lowercase letters, numbers, \"-\" and \"_\"!`);\n+                (0, chai_1.expect)(name).to.match(/[a-z0-9_\\-]+/, `The adapter name must only contain lowercase letters, numbers, \"-\" and \"_\"!`);\n                 (0, chai_1.expect)(name).to.match(/^[a-z]/, `The adapter name must start with a letter!`);\n                 (0, chai_1.expect)(name).to.match(/[a-z0-9]$/, `The adapter name must end with a letter or number!`);\n             });\n             if (!iopackContent.common.onlyWWW) {\n                 it(`property main is defined for non onlyWWW adapters`, () => {\n+                    // eslint-disable-next-line @typescript-eslint/no-unused-expressions\n                     (0, chai_1.expect)(packageContent.main).to.not.be.undefined;\n                 });\n             }\n@@ -137,7 +144,6 @@\n                     'peerDependencies',\n                 ]) {\n                     if ((0, typeguards_1.isObject)(packageContent[depType]) && 'npm' in packageContent[depType]) {\n-                        // eslint-disable-next-line @typescript-eslint/only-throw-error\n                         throw new chai_1.AssertionError(`npm must not be listed in ${depType}, found \"${packageContent[depType].npm}\"!`);\n                     }\n                 }\n@@ -147,6 +153,7 @@\n             beforeEach(function () {\n                 skipIfInvalid.call(this, 'io-package.json');\n             });\n+            // eslint-disable-next-line @typescript-eslint/no-require-imports\n             const iopackContent = require(ioPackageJsonPath);\n             const requiredProperties = [\n                 'common.name',\n@@ -162,9 +169,8 @@\n             ];\n             requiredProperties.forEach(prop => ensurePropertyExists(prop, iopackContent));\n             it(`The title does not contain \"adapter\" or \"iobroker\"`, () => {\n-                if (!iopackContent.title) {\n+                if (!iopackContent.title)\n                     return;\n-                }\n                 (0, chai_1.expect)(iopackContent.common.title).not.to.match(/iobroker|adapter/i);\n             });\n             it(`titleLang is an object to support multiple languages`, () => {\n",
+					"match": false,
+					"packageHash": "4a83c0eae83aa3b6231eaa0ef301937d23fb0dd407d52bb09c93fe419edbb889",
+					"size": 13448,
+					"sourceHash": "20616fe96fca9f8aec788a443ea5dd2a8f393ed3474d742ffcef1906f81e9187",
+					"status": "content"
+				},
+				"build/tests/unit/harness/createMocks.d.ts": {
+					"diff": "--- published/build/tests/unit/harness/createMocks.d.ts\n+++ rebuilt/build/tests/unit/harness/createMocks.d.ts\n@@ -1,4 +1,3 @@\n-import { type MockAdapter } from '../mocks/mockAdapter';\n import { MockDatabase } from '../mocks/mockDatabase';\n /**\n  * Creates a new set of mocks, including a mock database and a mock adapter.\n@@ -6,5 +5,5 @@\n  */\n export declare function createMocks(adapterOptions: Partial<ioBroker.AdapterOptions>): {\n     database: MockDatabase;\n-    adapter: MockAdapter;\n+    adapter: any;\n };\n",
+					"match": false,
+					"packageHash": "ee0b282724c7783b22051e7671946800dc6100ca2ab0aff126cb5b1fa43313e0",
+					"size": 412,
+					"sourceHash": "24009258ab7d2262df5b9eb990c94023137388684d9592c9895737e0b93f90de",
+					"status": "content"
+				},
+				"build/tests/unit/harness/createMocks.js": {
+					"diff": "--- published/build/tests/unit/harness/createMocks.js\n+++ rebuilt/build/tests/unit/harness/createMocks.js\n@@ -7,6 +7,7 @@\n  * Creates a new set of mocks, including a mock database and a mock adapter.\n  * To test the startup of an adapter, use `startMockAdapter` instead.\n  */\n+// eslint-disable-next-line @typescript-eslint/explicit-function-return-type\n function createMocks(adapterOptions) {\n     const databaseMock = new mockDatabase_1.MockDatabase();\n     const adapterMock = mockAdapter_1.createAdapterMock.bind(undefined)(databaseMock, adapterOptions);\n",
+					"match": false,
+					"packageHash": "025091058cbcec81b0440d24e766f1690980b410ff4e4c322dda94fe87d1bfaa",
+					"size": 665,
+					"sourceHash": "116107ee4061a47cde3c95d3793b6c8058a46dde4b0b46654a0bb8a826dde7e2",
+					"status": "content"
+				},
+				"build/tests/unit/index.js": {
+					"diff": "--- published/build/tests/unit/index.js\n+++ rebuilt/build/tests/unit/index.js\n@@ -7,7 +7,7 @@\n  * This is meant to be executed in a mocha context.\n  */\n function testAdapterWithMocks(_adapterDir, options = {}) {\n-    describe(`Unit tests`, () => {\n+    describe(`Unit tests`, async () => {\n         // Call the user's tests\n         if (typeof options.defineAdditionalTests === 'function') {\n             options.defineAdditionalTests();\n@@ -19,6 +19,5 @@\n                 console.warn(`from package.json and from your Travis/Github Actions workflow.\\u001b[0m`);\n             });\n         }\n-        return Promise.resolve();\n     });\n }\n",
+					"match": false,
+					"packageHash": "0caf7a96cce318c4b48b1b987c67e28a669b8006ff77e547d8106dad1872a9e0",
+					"size": 957,
+					"sourceHash": "2c5cd32b7a313a538bc8c1afbd69d8c84971a42aeaf8e9d052f879730ecf12d3",
+					"status": "content"
+				},
+				"build/tests/unit/mocks/mockAdapter.d.ts": {
+					"diff": "--- published/build/tests/unit/mocks/mockAdapter.d.ts\n+++ rebuilt/build/tests/unit/mocks/mockAdapter.d.ts\n@@ -1,6 +1,6 @@\n import type { MockDatabase } from './mockDatabase';\n-import { type MockLogger } from './mockLogger';\n-import { type Mock } from './tools';\n+import { MockLogger } from './mockLogger';\n+import { Mock } from './tools';\n export type MockAdapter = Mock<ioBroker.Adapter> & {\n     readyHandler: ioBroker.ReadyHandler | undefined;\n     objectChangeHandler: ioBroker.ObjectChangeHandler | undefined;\n",
+					"match": false,
+					"packageHash": "c0a3818f72bc5e48087c4f85731273ea5db48971431cf294ae8cc60f1fb3b4e8",
+					"size": 817,
+					"sourceHash": "db03681296a4ad6112c133b43c265ffe28e63cd406f7b5c746eba8e387364e16",
+					"status": "content"
+				},
+				"build/tests/unit/mocks/mockAdapter.js": {
+					"diff": "--- published/build/tests/unit/mocks/mockAdapter.js\n+++ rebuilt/build/tests/unit/mocks/mockAdapter.js\n@@ -75,16 +75,14 @@\n };\n function getCallback(...args) {\n     const lastArg = args[args.length - 1];\n-    if (typeof lastArg === 'function') {\n+    if (typeof lastArg === 'function')\n         return lastArg;\n-    }\n }\n /** Stub implementation which can be promisified */\n const asyncEnabledStub = ((...args) => {\n     const callback = getCallback(...args);\n-    if (typeof callback === 'function') {\n+    if (typeof callback === 'function')\n         callback();\n-    }\n });\n /**\n  * Creates an adapter mock that is connected to a given database mock\n@@ -117,34 +115,28 @@\n         sendToHost: asyncEnabledStub,\n         idToDCS: (0, sinon_1.stub)(),\n         getObject: ((id, ...args) => {\n-            if (!id.startsWith(ret.namespace)) {\n-                id = `${ret.namespace}.${id}`;\n-            }\n+            if (!id.startsWith(ret.namespace))\n+                id = ret.namespace + '.' + id;\n             const callback = getCallback(...args);\n-            if (callback) {\n+            if (callback)\n                 callback(null, db.getObject(id));\n-            }\n         }),\n         setObject: ((id, obj, ...args) => {\n-            if (!id.startsWith(ret.namespace)) {\n-                id = `${ret.namespace}.${id}`;\n-            }\n+            if (!id.startsWith(ret.namespace))\n+                id = ret.namespace + '.' + id;\n             obj._id = id;\n             db.publishObject(obj);\n             const callback = getCallback(...args);\n-            if (callback) {\n+            if (callback)\n                 callback(null, { id });\n-            }\n         }),\n         setObjectNotExists: ((id, obj, ...args) => {\n-            if (!id.startsWith(ret.namespace)) {\n-                id = `${ret.namespace}.${id}`;\n-            }\n+            if (!id.startsWith(ret.namespace))\n+                id = ret.namespace + '.' + id;\n             const callback = getCallback(...args);\n             if (db.hasObject(id)) {\n-                if (callback) {\n+                if (callback)\n                     callback(null, { id });\n-                }\n             }\n             else {\n                 ret.setObject(id, obj, callback);\n@@ -161,12 +153,10 @@\n             if (typeof callback === 'function') {\n                 let objects = (0, objects_1.values)(db.getObjects('*'));\n                 objects = objects.filter(obj => obj.type === search);\n-                if (startkey) {\n+                if (startkey)\n                     objects = objects.filter(obj => obj._id >= startkey);\n-                }\n-                if (endkey) {\n+                if (endkey)\n                     objects = objects.filter(obj => obj._id <= endkey);\n-                }\n                 callback(null, {\n                     rows: objects.map(obj => ({\n                         id: obj._id,\n@@ -198,55 +188,47 @@\n             }\n         }),\n         extendObject: ((id, obj, ...args) => {\n-            if (!id.startsWith(ret.namespace)) {\n-                id = `${ret.namespace}.${id}`;\n-            }\n+            if (!id.startsWith(ret.namespace))\n+                id = ret.namespace + '.' + id;\n             const existing = db.getObject(id) || {};\n             const target = (0, objects_1.extend)({}, existing, obj);\n             target._id = id;\n             db.publishObject(target);\n             const callback = getCallback(...args);\n-            if (callback) {\n+            if (callback)\n                 callback(null, { id: target._id, value: target }, id);\n-            }\n         }),\n         delObject: ((id, ...args) => {\n",
+					"match": false,
+					"packageHash": "7eb6f3cc4ebb32663b0653203de3b21f5590db69ff3775fda19aff41fdb43a2d",
+					"size": 19779,
+					"sourceHash": "89730027089be828393052a0d7c062f7d6417717984dffc77cb30b6197ff7c44",
+					"status": "content"
+				},
+				"build/tests/unit/mocks/mockAdapterCore.d.ts": {
+					"diff": "--- published/build/tests/unit/mocks/mockAdapterCore.d.ts\n+++ rebuilt/build/tests/unit/mocks/mockAdapterCore.d.ts\n@@ -1,5 +1,9 @@\n-import { type MockAdapter } from './mockAdapter';\n+import { MockAdapter } from './mockAdapter';\n import type { MockDatabase } from './mockDatabase';\n+interface MockAdapterConstructor {\n+    new (nameOrOptions: string | ioBroker.AdapterOptions): MockAdapter;\n+    (nameOrOptions: string | ioBroker.AdapterOptions): MockAdapter;\n+}\n export interface MockAdapterCoreOptions {\n     onAdapterCreated?: (adapter: MockAdapter) => void;\n     adapterDir?: string;\n@@ -7,8 +11,9 @@\n export declare function mockAdapterCore(database: MockDatabase, options?: MockAdapterCoreOptions): {\n     controllerDir: string;\n     getConfig: () => Record<string, any>;\n-    Adapter: (this: MockAdapter | void, nameOrOptions: string | ioBroker.AdapterOptions) => MockAdapter;\n-    adapter: (this: MockAdapter | void, nameOrOptions: string | ioBroker.AdapterOptions) => MockAdapter;\n+    Adapter: MockAdapterConstructor;\n+    adapter: MockAdapterConstructor;\n     getAbsoluteDefaultDataDir: () => string;\n     getAbsoluteInstanceDataDir: (adapterObject: MockAdapter) => string;\n };\n+export {};\n",
+					"match": false,
+					"packageHash": "ce543b1e5ca190e82952c20ca990b6fe10f58336524f575e05719618346cedcb",
+					"size": 726,
+					"sourceHash": "700e5a9779df733b0a5838da66aa2582e5740ff05049ee9e98abf6c8a1743ccd",
+					"status": "content"
+				},
+				"build/tests/unit/mocks/mockAdapterCore.js": {
+					"diff": "--- published/build/tests/unit/mocks/mockAdapterCore.js\n+++ rebuilt/build/tests/unit/mocks/mockAdapterCore.js\n@@ -37,6 +37,7 @@\n const os = __importStar(require(\"os\"));\n const path = __importStar(require(\"path\"));\n const mockAdapter_1 = require(\"./mockAdapter\");\n+// eslint-disable-next-line @typescript-eslint/explicit-function-return-type\n function mockAdapterCore(database, options = {}) {\n     /**\n      * The root directory of JS-Controller\n@@ -64,14 +65,12 @@\n     }\n     const AdapterConstructor = function (nameOrOptions) {\n         // This needs to be a class with the correct `this` context or the ES6 tests won't work\n-        if (!(this instanceof AdapterConstructor)) {\n+        if (!(this instanceof AdapterConstructor))\n             return new AdapterConstructor(nameOrOptions);\n-        }\n         const createAdapterMockOptions = typeof nameOrOptions === 'string' ? { name: nameOrOptions } : nameOrOptions;\n         mockAdapter_1.createAdapterMock.bind(this)(database, createAdapterMockOptions);\n-        if (typeof options.onAdapterCreated === 'function') {\n+        if (typeof options.onAdapterCreated === 'function')\n             options.onAdapterCreated(this);\n-        }\n         return this;\n     };\n     return {\n",
+					"match": false,
+					"packageHash": "04bd6e373c631f053152e2835a7e88fc80f27bac0da203be3422ef72527bf1c1",
+					"size": 3410,
+					"sourceHash": "d6cd9d292855ff2726096f5272cec09fca8164d6530a1f114d39ebf7303d0cee",
+					"status": "content"
+				},
+				"build/tests/unit/mocks/mockDatabase.d.ts": {
+					"diff": "--- published/build/tests/unit/mocks/mockDatabase.d.ts\n+++ rebuilt/build/tests/unit/mocks/mockDatabase.d.ts\n@@ -33,20 +33,19 @@\n /**\n  * Returns a collection of predefined assertions to be used in unit tests\n  * Those include assertions for:\n- * - State exists\n- * - State has a certain value, ack flag, object property\n- * - Object exists\n- * - Object has a certain common or native part\n- *\n+ * * State exists\n+ * * State has a certain value, ack flag, object property\n+ * * Object exists\n+ * * Object has a certain common or native part\n  * @param db The mock database to operate on\n  * @param adapter The mock adapter to operate on\n  */\n export declare function createAsserts(db: MockDatabase, adapter: MockAdapter): {\n-    assertObjectExists: (id: string | string[]) => void;\n-    assertStateExists: (id: string | string[]) => void;\n-    assertStateHasValue: (id: string | string[], value: any) => void;\n-    assertStateIsAcked: (id: string | string[], ack: boolean) => void;\n-    assertStateProperty: (id: string | string[], property: string, value: any) => void;\n-    assertObjectCommon: (id: string | string[], common: ioBroker.ObjectCommon) => void;\n-    assertObjectNative: (id: string | string[], native: Record<string, any>) => void;\n+    assertObjectExists(id: string | string[]): void;\n+    assertStateExists(id: string | string[]): void;\n+    assertStateHasValue(id: string | string[], value: any): void;\n+    assertStateIsAcked(id: string | string[], ack?: boolean): void;\n+    assertStateProperty(id: string | string[], property: string, value: any): void;\n+    assertObjectCommon(id: string | string[], common: ioBroker.ObjectCommon): void;\n+    assertObjectNative(id: string | string[], native: Record<string, any>): void;\n };\n",
+					"match": false,
+					"packageHash": "39d66f4c53230b70b05b263e213b4b65c75737f9162f2d27aa22559b3785f352",
+					"size": 2639,
+					"sourceHash": "5cbefb7777c208c353d2784f59c89c444dc7b488d6bdcddb1e592c079ff24aac",
+					"status": "content"
+				},
+				"build/tests/unit/mocks/mockDatabase.js": {
+					"diff": "--- published/build/tests/unit/mocks/mockDatabase.js\n+++ rebuilt/build/tests/unit/mocks/mockDatabase.js\n@@ -33,12 +33,10 @@\n         this.clearStates();\n     }\n     publishObject(obj) {\n-        if (obj._id == null) {\n+        if (obj._id == null)\n             throw new Error('An object must have an ID');\n-        }\n-        if (obj.type == null) {\n+        if (obj.type == null)\n             throw new Error('An object must have a type');\n-        }\n         const completeObject = (0, objects_1.extend)({}, objectTemplate, obj);\n         this.objects.set(obj._id, completeObject);\n     }\n@@ -75,30 +73,28 @@\n         }\n     }\n     hasObject(namespaceOrId, id) {\n-        id = namespaceOrId + (id ? `.${id}` : '');\n+        id = namespaceOrId + (id ? '.' + id : '');\n         return this.objects.has(id);\n     }\n     getObject(namespaceOrId, id) {\n         // combines getObject and getForeignObject into one\n-        id = namespaceOrId + (id ? `.${id}` : '');\n+        id = namespaceOrId + (id ? '.' + id : '');\n         return this.objects.get(id);\n     }\n     hasState(namespaceOrId, id) {\n-        id = namespaceOrId + (id ? `.${id}` : '');\n+        id = namespaceOrId + (id ? '.' + id : '');\n         return this.states.has(id);\n     }\n     getState(namespaceOrId, id) {\n         // combines getObject and getForeignObject into one\n-        id = namespaceOrId + (id ? `.${id}` : '');\n+        id = namespaceOrId + (id ? '.' + id : '');\n         return this.states.get(id);\n     }\n-    getObjects(namespaceOrPattern, \n-    // eslint-disable-next-line @typescript-eslint/no-redundant-type-constituents\n-    patternOrType, type) {\n+    getObjects(namespaceOrPattern, patternOrType, type) {\n         // combines getObjects and getForeignObjects into one\n         let pattern;\n         if (type != null) {\n-            pattern = namespaceOrPattern + (patternOrType ? `.${patternOrType}` : '');\n+            pattern = namespaceOrPattern + (patternOrType ? '.' + patternOrType : '');\n         }\n         else if (patternOrType != null) {\n             if (['state', 'channel', 'device'].indexOf(patternOrType) > -1) {\n@@ -106,7 +102,7 @@\n                 pattern = namespaceOrPattern;\n             }\n             else {\n-                pattern = `${namespaceOrPattern}.${patternOrType}`;\n+                pattern = namespaceOrPattern + '.' + patternOrType;\n             }\n         }\n         else {\n@@ -127,14 +123,14 @@\n /**\n  * Returns a collection of predefined assertions to be used in unit tests\n  * Those include assertions for:\n- * - State exists\n- * - State has a certain value, ack flag, object property\n- * - Object exists\n- * - Object has a certain common or native part\n- *\n+ * * State exists\n+ * * State has a certain value, ack flag, object property\n+ * * Object exists\n+ * * Object has a certain common or native part\n  * @param db The mock database to operate on\n  * @param adapter The mock adapter to operate on\n  */\n+// eslint-disable-next-line @typescript-eslint/explicit-function-return-type\n function createAsserts(db, adapter) {\n     function normalizeID(id) {\n         if (Array.isArray(id)) {\n",
+					"match": false,
+					"packageHash": "d0305d03cca7a21ccfbcebaabae53f1817825e7874824b695079e4abd9fe0021",
+					"size": 6611,
+					"sourceHash": "d226ec078137358cf89922717289d051d2269f2bdc8c31037f7d956b1c6af1c5",
+					"status": "content"
+				},
+				"build/tests/unit/mocks/mockLogger.d.ts": {
+					"diff": "--- published/build/tests/unit/mocks/mockLogger.d.ts\n+++ rebuilt/build/tests/unit/mocks/mockLogger.d.ts\n@@ -1,4 +1,4 @@\n-import { type Mock } from './tools';\n+import { Mock } from './tools';\n export type MockLogger = Mock<ioBroker.Logger> & {\n     resetMock(): void;\n     resetMockHistory(): void;\n",
+					"match": false,
+					"packageHash": "af18656138ebc811ca414b277078967af27bce4853eb01e4d5966c3e3aa10cab",
+					"size": 309,
+					"sourceHash": "05fe7041113695ddf39c46573bc2b0c4d313b2b479f8287da4e5db39c47966b2",
+					"status": "content"
+				},
+				"build/tests/unit/mocks/tools.js": {
+					"diff": "--- published/build/tests/unit/mocks/tools.js\n+++ rebuilt/build/tests/unit/mocks/tools.js\n@@ -3,25 +3,23 @@\n exports.doResetHistory = doResetHistory;\n exports.doResetBehavior = doResetBehavior;\n exports.stubAndPromisifyImplementedMethods = stubAndPromisifyImplementedMethods;\n+// @ts-expect-error no types\n const async_1 = require(\"alcalzone-shared/async\");\n const sinon_1 = require(\"sinon\");\n function doResetHistory(parent) {\n     for (const prop of Object.keys(parent)) {\n         const val = parent[prop];\n-        if (val && typeof val.resetHistory === 'function') {\n+        if (val && typeof val.resetHistory === 'function')\n             val.resetHistory();\n-        }\n     }\n }\n function doResetBehavior(parent, implementedMethods) {\n     for (const prop of Object.keys(parent)) {\n-        if (prop in implementedMethods || (prop.endsWith('Async') && prop.slice(0, -5) in implementedMethods)) {\n+        if (prop in implementedMethods || (prop.endsWith('Async') && prop.slice(0, -5) in implementedMethods))\n             continue;\n-        }\n         const val = parent[prop];\n-        if (val && typeof val.resetBehavior === 'function') {\n+        if (val && typeof val.resetBehavior === 'function')\n             val.resetBehavior();\n-        }\n     }\n }\n function dontOverwriteThis() {\n@@ -31,27 +29,26 @@\n     // The methods implemented above are no stubs, but we claimed they are\n     // Therefore hook them up with a real stub\n     for (const methodName of Object.keys(implementedMethods)) {\n-        if (methodName.endsWith('Async')) {\n+        if (methodName.endsWith('Async'))\n             continue;\n-        }\n         const originalMethod = parent[methodName];\n         const callbackFake = (parent[methodName] = (0, sinon_1.stub)());\n         callbackFake.callsFake(originalMethod);\n         // Prevent the user from changing the stub's behavior\n-        if (!allowUserOverrides.includes(methodName)) {\n+        if (allowUserOverrides.indexOf(methodName) === -1) {\n             callbackFake.returns = dontOverwriteThis;\n             callbackFake.callsFake = dontOverwriteThis;\n         }\n         // Construct the async fake if there's any\n         const asyncType = implementedMethods[methodName];\n-        if (asyncType === 'none') {\n+        if (asyncType === 'none')\n             continue;\n-        }\n         const promisifyMethod = asyncType === 'no error' ? async_1.promisifyNoError : async_1.promisify;\n         const asyncFake = (0, sinon_1.stub)().callsFake(promisifyMethod(originalMethod, parent));\n         parent[`${methodName}Async`] = asyncFake;\n         // Prevent the user from changing the stub's behavior\n-        if (!allowUserOverrides.includes(methodName) || !allowUserOverrides.includes(`${methodName}Async`)) {\n+        if (allowUserOverrides.indexOf(methodName) === -1 ||\n+            allowUserOverrides.indexOf((methodName + 'Async')) === -1) {\n             asyncFake.returns = dontOverwriteThis;\n             asyncFake.callsFake = dontOverwriteThis;\n         }\n",
+					"match": false,
+					"packageHash": "f274e4b0af1a9c6f78ec70a5b249c6045a3352dfcd34bb4bf4d9ca0b67868afe",
+					"size": 2547,
+					"sourceHash": "e5cfde0f95daded969a69e927fc64312f7fed2fa1796107ca6fc2b2620f221f5",
+					"status": "content"
+				}
+			},
+			"summary": {
+				"differentFiles": 28,
+				"matchingFiles": 17,
+				"missingInPackage": 0,
+				"missingInSource": 0,
+				"score": 0.37777777777777777,
+				"totalFiles": 45
+			}
+		},
+		"prodDependencies": [
+			{
+				"name": "@isaacs/cliui",
+				"version": "8.0.2"
+			},
+			{
+				"name": "ansi-regex",
+				"version": "6.1.0"
+			},
+			{
+				"name": "ansi-styles",
+				"version": "6.2.1"
+			},
+			{
+				"name": "emoji-regex",
+				"version": "9.2.2"
+			},
+			{
+				"name": "string-width",
+				"version": "5.1.2"
+			},
+			{
+				"name": "strip-ansi",
+				"version": "7.1.0"
+			},
+			{
+				"name": "wrap-ansi",
+				"version": "8.1.0"
+			},
+			{
+				"name": "@pkgjs/parseargs",
+				"version": "0.11.0"
+			},
+			{
+				"name": "@sinonjs/commons",
+				"version": "3.0.1"
+			},
+			{
+				"name": "type-detect",
+				"version": "4.0.8"
+			},
+			{
+				"name": "@sinonjs/fake-timers",
+				"version": "13.0.2"
+			},
+			{
+				"name": "@sinonjs/samsam",
+				"version": "8.0.2"
+			},
+			{
+				"name": "@sinonjs/text-encoding",
+				"version": "0.7.3"
+			},
+			{
+				"name": "alcalzone-shared",
+				"version": "5.0.0"
+			},
+			{
+				"name": "ansi-colors",
+				"version": "4.1.3"
+			},
+			{
+				"name": "ansi-regex",
+				"version": "5.0.1"
+			},
+			{
+				"name": "ansi-styles",
+				"version": "4.3.0"
+			},
+			{
+				"name": "anymatch",
+				"version": "3.1.2"
+			},
+			{
+				"name": "argparse",
+				"version": "2.0.1"
+			},
+			{
+				"name": "assertion-error",
+				"version": "1.1.0"
+			},
+			{
+				"name": "balanced-match",
+				"version": "1.0.0"
+			},
+			{
+				"name": "binary-extensions",
+				"version": "2.2.0"
+			},
+			{
+				"name": "braces",
+				"version": "3.0.3"
+			},
+			{
+				"name": "browser-stdout",
+				"version": "1.3.1"
+			},
+			{
+				"name": "camelcase",
+				"version": "6.2.0"
+			},
+			{
+				"name": "chai",
+				"version": "4.5.0"
+			},
+			{
+				"name": "chai-as-promised",
+				"version": "7.1.2"
+			},
+			{
+				"name": "chalk",
+				"version": "4.1.0"
+			},
+			{
+				"name": "check-error",
+				"version": "1.0.3"
+			},
+			{
+				"name": "chokidar",
+				"version": "3.5.3"
+			},
+			{
+				"name": "cliui",
+				"version": "7.0.4"
+			},
+			{
+				"name": "color-convert",
+				"version": "2.0.1"
+			},
+			{
+				"name": "color-name",
+				"version": "1.1.4"
+			},
+			{
+				"name": "cross-spawn",
+				"version": "7.0.6"
+			},
+			{
+				"name": "debug",
+				"version": "4.4.0"
+			},
+			{
+				"name": "decamelize",
+				"version": "4.0.0"
+			},
+			{
+				"name": "deep-eql",
+				"version": "4.1.4"
+			},
+			{
+				"name": "diff",
+				"version": "5.2.0"
+			},
+			{
+				"name": "eastasianwidth",
+				"version": "0.2.0"
+			},
+			{
+				"name": "emoji-regex",
+				"version": "8.0.0"
+			},
+			{
+				"name": "escalade",
+				"version": "3.2.0"
+			},
+			{
+				"name": "escape-string-regexp",
+				"version": "4.0.0"
+			},
+			{
+				"name": "fill-range",
+				"version": "7.1.1"
+			},
+			{
+				"name": "find-up",
+				"version": "5.0.0"
+			},
+			{
+				"name": "flat",
+				"version": "5.0.2"
+			},
+			{
+				"name": "foreground-child",
+				"version": "3.3.0"
+			},
+			{
+				"name": "signal-exit",
+				"version": "4.1.0"
+			},
+			{
+				"name": "fs-extra",
+				"version": "11.3.0"
+			},
+			{
+				"name": "fsevents",
+				"version": "2.3.3"
+			},
+			{
+				"name": "get-caller-file",
+				"version": "2.0.5"
+			},
+			{
+				"name": "get-func-name",
+				"version": "2.0.2"
+			},
+			{
+				"name": "glob",
+				"version": "10.4.5"
+			},
+			{
+				"name": "glob-parent",
+				"version": "5.1.2"
+			},
+			{
+				"name": "brace-expansion",
+				"version": "2.0.1"
+			},
+			{
+				"name": "jackspeak",
+				"version": "3.4.3"
+			},
+			{
+				"name": "minimatch",
+				"version": "9.0.5"
+			},
+			{
+				"name": "path-scurry",
+				"version": "1.11.1"
+			},
+			{
+				"name": "graceful-fs",
+				"version": "4.2.10"
+			},
+			{
+				"name": "has-flag",
+				"version": "4.0.0"
+			},
+			{
+				"name": "he",
+				"version": "1.2.0"
+			},
+			{
+				"name": "is-binary-path",
+				"version": "2.1.0"
+			},
+			{
+				"name": "is-extglob",
+				"version": "2.1.1"
+			},
+			{
+				"name": "is-fullwidth-code-point",
+				"version": "3.0.0"
+			},
+			{
+				"name": "is-glob",
+				"version": "4.0.3"
+			},
+			{
+				"name": "is-number",
+				"version": "7.0.0"
+			},
+			{
+				"name": "is-plain-obj",
+				"version": "2.1.0"
+			},
+			{
+				"name": "is-unicode-supported",
+				"version": "0.1.0"
+			},
+			{
+				"name": "isexe",
+				"version": "2.0.0"
+			},
+			{
+				"name": "js-yaml",
+				"version": "4.1.0"
+			},
+			{
+				"name": "jsonfile",
+				"version": "6.1.0"
+			},
+			{
+				"name": "just-extend",
+				"version": "6.2.0"
+			},
+			{
+				"name": "locate-path",
+				"version": "6.0.0"
+			},
+			{
+				"name": "lodash.get",
+				"version": "4.4.2"
+			},
+			{
+				"name": "log-symbols",
+				"version": "4.1.0"
+			},
+			{
+				"name": "loupe",
+				"version": "2.3.7"
+			},
+			{
+				"name": "lru-cache",
+				"version": "10.4.3"
+			},
+			{
+				"name": "minipass",
+				"version": "7.1.2"
+			},
+			{
+				"name": "mocha",
+				"version": "11.0.1"
+			},
+			{
+				"name": "minimatch",
+				"version": "5.1.6"
+			},
+			{
+				"name": "supports-color",
+				"version": "8.1.1"
+			},
+			{
+				"name": "ms",
+				"version": "2.1.3"
+			},
+			{
+				"name": "nise",
+				"version": "6.1.1"
+			},
+			{
+				"name": "normalize-path",
+				"version": "3.0.0"
+			},
+			{
+				"name": "p-limit",
+				"version": "3.1.0"
+			},
+			{
+				"name": "p-locate",
+				"version": "5.0.0"
+			},
+			{
+				"name": "package-json-from-dist",
+				"version": "1.0.0"
+			},
+			{
+				"name": "path-exists",
+				"version": "4.0.0"
+			},
+			{
+				"name": "path-key",
+				"version": "3.1.1"
+			},
+			{
+				"name": "path-to-regexp",
+				"version": "8.1.0"
+			},
+			{
+				"name": "pathval",
+				"version": "1.1.1"
+			},
+			{
+				"name": "picomatch",
+				"version": "2.3.1"
+			},
+			{
+				"name": "randombytes",
+				"version": "2.1.0"
+			},
+			{
+				"name": "readdirp",
+				"version": "3.6.0"
+			},
+			{
+				"name": "require-directory",
+				"version": "2.1.1"
+			},
+			{
+				"name": "safe-buffer",
+				"version": "5.2.1"
+			},
+			{
+				"name": "serialize-javascript",
+				"version": "6.0.2"
+			},
+			{
+				"name": "shebang-command",
+				"version": "2.0.0"
+			},
+			{
+				"name": "shebang-regex",
+				"version": "3.0.0"
+			},
+			{
+				"name": "sinon",
+				"version": "19.0.2"
+			},
+			{
+				"name": "sinon-chai",
+				"version": "3.7.0"
+			},
+			{
+				"name": "diff",
+				"version": "7.0.0"
+			},
+			{
+				"name": "string-width",
+				"version": "4.2.3"
+			},
+			{
+				"name": "string-width-cjs",
+				"version": "4.2.3"
+			},
+			{
+				"name": "strip-ansi",
+				"version": "6.0.1"
+			},
+			{
+				"name": "strip-ansi-cjs",
+				"version": "6.0.1"
+			},
+			{
+				"name": "strip-json-comments",
+				"version": "3.1.1"
+			},
+			{
+				"name": "supports-color",
+				"version": "7.2.0"
+			},
+			{
+				"name": "to-regex-range",
+				"version": "5.0.1"
+			},
+			{
+				"name": "type-detect",
+				"version": "4.1.0"
+			},
+			{
+				"name": "universalify",
+				"version": "2.0.0"
+			},
+			{
+				"name": "which",
+				"version": "2.0.2"
+			},
+			{
+				"name": "workerpool",
+				"version": "6.5.1"
+			},
+			{
+				"name": "wrap-ansi",
+				"version": "7.0.0"
+			},
+			{
+				"name": "wrap-ansi-cjs",
+				"version": "7.0.0"
+			},
+			{
+				"name": "y18n",
+				"version": "5.0.5"
+			},
+			{
+				"name": "yargs",
+				"version": "16.2.0"
+			},
+			{
+				"name": "yargs-parser",
+				"version": "20.2.9"
+			},
+			{
+				"name": "yargs-unparser",
+				"version": "2.0.0"
+			},
+			{
+				"name": "yocto-queue",
+				"version": "0.1.0"
+			}
+		]
+	}
+]
