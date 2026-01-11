@@ -18,14 +18,40 @@ permissions:
 jobs:
   process-queue:
     runs-on: ubuntu-latest
-    concurrency:
-      group: cache-queue-processor
-      cancel-in-progress: false
     outputs:
       tasks: ${{ steps.get-tasks.outputs.tasks }}
       empty: ${{ steps.get-tasks.outputs.empty }}
 
     steps:
+      - name: Wait for other runs to complete
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          WORKFLOW_NAME="cron: process cache queue"
+          MAX_WAIT=1800  # 30 minutes max wait
+          POLL_INTERVAL=30
+          WAITED=0
+
+          while [ $WAITED -lt $MAX_WAIT ]; do
+            # Find runs that are still in progress (excluding this one)
+            OLDER_RUNS=$(gh run list --repo "${{ github.repository }}" --workflow "${WORKFLOW_NAME}" --json databaseId,status \
+              | jq --arg current "${{ github.run_id }}" \
+              '[.[] | select(.status == "in_progress" or .status == "queued") | select(.databaseId != ($current | tonumber))] | length')
+
+            if [ "$OLDER_RUNS" = "0" ]; then
+              echo "::notice::No other runs in progress, proceeding"
+              break
+            fi
+
+            echo "::notice::Waiting for $OLDER_RUNS other run(s) to complete... (waited ${WAITED}s)"
+            sleep $POLL_INTERVAL
+            WAITED=$((WAITED + POLL_INTERVAL))
+          done
+
+          if [ $WAITED -ge $MAX_WAIT ]; then
+            echo "::warning::Timed out waiting for other runs, proceeding anyway"
+          fi
+
       - uses: actions/checkout@v6
         with:
           fetch-depth: 0
