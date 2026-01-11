@@ -85,6 +85,7 @@ const DEFAULT_CACHE_FILE = 'cache.json';
 /** @type {import('child_process').ExecSyncOptions} */
 const EXEC_OPTIONS = {
 	stdio: ['pipe', 'pipe', 'pipe'],
+	maxBuffer: 50 * 1024 * 1024, // 50MB to avoid ENOBUFS errors
 };
 
 /**
@@ -213,13 +214,36 @@ function ensureNodeVersion(nodeVersion) {
 }
 
 /**
+ * Extract npm version from output that may include nvm prefix.
+ *
+ * @param {string} output
+ * @returns {string}
+ */
+function extractNpmVersion(output) {
+	/*
+	 * nvm exec outputs "Running node vX.X.X (npm vX.X.X)" before the actual output
+	 * npm --version outputs just "X.X.X"
+	 */
+	const lines = output.split('\n').map((l) => l.trim()).filter(Boolean);
+	// Find the last line that looks like a version (the actual npm --version output)
+	for (let i = lines.length - 1; i >= 0; i--) {
+		if ((/^\d+\.\d+\.\d+/).test(lines[i])) {
+			return lines[i];
+		}
+	}
+	// Fallback: return last non-empty line
+	return lines[lines.length - 1] || output.trim();
+}
+
+/**
  * @param {string | null} [nodeVersion]
  * @returns {string}
  */
 function getNpmVersion(nodeVersion) {
 	if (nodeVersion && isNvmAvailable()) {
 		try {
-			return execWithNodeVersion(nodeVersion, 'npm --version');
+			const output = execWithNodeVersion(nodeVersion, 'npm --version');
+			return extractNpmVersion(output);
 		} catch {
 			// Fall back to current npm
 		}
