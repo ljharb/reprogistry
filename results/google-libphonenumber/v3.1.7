@@ -1,0 +1,51 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-11T21:18:38.111Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:Running node v9.1.0 (npm v5.5.1)\n5.5.1",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "google-libphonenumber@3.1.7",
+			"name": "google-libphonenumber",
+			"version": "3.1.7",
+			"location": "https://registry.npmjs.org/google-libphonenumber/-/google-libphonenumber-3.1.7.tgz",
+			"integrity": "sha512-3xLk2uqeWx8epwTQNv20MvJxA+EOg7JQ3lIQOU31JsLjNnkqlBgUy9aeSYQHhBcUtqjMH6oJIs25LLaEg/pw+A==",
+			"publishedAt": "2018-06-17T23:50:22.273Z",
+			"publishedWith": {
+				"node": "9.1.0",
+				"npm": "6.1.0"
+			},
+			"dependencies": {}
+		},
+		"source": {
+			"integrity": null,
+			"location": "git+https://github.com/ruimarinho/google-libphonenumber.git",
+			"spec": "github:ruimarinho/google-libphonenumber#b01e6489f23cb699c4af7b507c1daa70b72e7da5"
+		},
+		"comparisonHash": "9ef46a5bd31291e57cbab41e2f17c57bd6da0b5b",
+		"diff": {
+			"files": {
+				"dist/libphonenumber.js": {
+					"diff": "--- published/dist/libphonenumber.js\n+++ rebuilt/dist/libphonenumber.js\n@@ -82,6 +82,14 @@\n   }\n };\n goog.module.get = function(a) {\n+  if (!COMPILED && a in goog.loadedModules_) {\n+    if (goog.loadedModules_[a].type != goog.ModuleType.GOOG) {\n+      throw Error(\"Can only goog.module.get for goog.modules.\");\n+    }\n+    if (goog.loadedModules_[a].moduleId != a) {\n+      throw Error(\"Cannot goog.module.get by path.\");\n+    }\n+  }\n   return goog.module.getInternal_(a);\n };\n goog.module.getInternal_ = function(a) {\n@@ -110,6 +118,9 @@\n   var a = goog.global.$jscomp;\n   return a ? \"function\" != typeof a.getCurrentModulePath ? !1 : !!a.getCurrentModulePath() : !1;\n };\n+goog.getModulePath_ = function() {\n+  return goog.moduleLoaderState_ && goog.moduleLoaderState_.path;\n+};\n goog.module.declareLegacyNamespace = function() {\n   if (!COMPILED && !goog.isInGoogModuleLoader_()) {\n     throw Error(\"goog.module.declareLegacyNamespace must be called from within a goog.module\");\n@@ -119,29 +130,6 @@\n   }\n   goog.moduleLoaderState_.declareLegacyNamespace = !0;\n };\n-goog.module.declareNamespace = function(a) {\n-  if (!COMPILED) {\n-    if (!goog.isInEs6ModuleLoader_()) {\n-      throw Error(\"goog.module.declareNamespace may only be called from within an ES6 module\");\n-    }\n-    if (goog.moduleLoaderState_ && goog.moduleLoaderState_.moduleName) {\n-      throw Error(\"goog.module.declareNamespace may only be called once per module.\");\n-    }\n-    if (a in goog.loadedModules_) {\n-      throw Error('Module with namespace \"' + a + '\" already exists.');\n-    }\n-  }\n-  if (goog.moduleLoaderState_) {\n-    goog.moduleLoaderState_.moduleName = a;\n-  } else {\n-    var b = goog.global.$jscomp;\n-    if (!b || \"function\" != typeof b.getCurrentModulePath) {\n-      throw Error('Module with namespace \"' + a + '\" has been loaded incorrectly.');\n-    }\n-    b = b.require(b.getCurrentModulePath());\n-    goog.loadedModules_[a] = {exports:b, type:goog.ModuleType.ES6, moduleId:a};\n-  }\n-};\n goog.setTestOnly = function(a) {\n   if (goog.DISALLOW_TEST_ONLY_CODE) {\n     throw a = a || \"\", Error(\"Importing test-only code into non-debug environment\" + (a ? \": \" + a : \".\"));\n@@ -173,7 +161,20 @@\n goog.logToConsole_ = function(a) {\n   goog.global.console && goog.global.console.error(a);\n };\n+goog.isPath_ = function(a) {\n+  return 0 == a.indexOf(\"./\") || 0 == a.indexOf(\"../\");\n+};\n goog.require = function(a) {\n+  if (goog.isPath_(a)) {\n+    if (goog.isInGoogModuleLoader_()) {\n+      if (!goog.getModulePath_()) {\n+        throw Error(\"Current module has no path information. Was it loaded via goog.loadModule without a path argument?\");\n+      }\n+      a = goog.normalizePath_(goog.getModulePath_() + \"/../\" + a);\n+    } else {\n+      throw Error(\"Cannot require by path outside of goog.modules.\");\n+    }\n+  }\n   if (!COMPILED) {\n     goog.ENABLE_DEBUG_LOADER && goog.debugLoader_.requested(a);\n     if (goog.isProvided_(a)) {\n@@ -232,27 +233,30 @@\n goog.workaroundSafari10EvalBug = function(a) {\n   return \"(function(){\" + a + \"\\n;})();\\n\";\n };\n-goog.loadModule = function(a) {\n-  var b = goog.moduleLoaderState_;\n+goog.loadModule = function(a, b) {\n+  var c = goog.moduleLoaderState_;\n   try {\n-    goog.moduleLoaderState_ = {moduleName:\"\", declareLegacyNamespace:!1, type:goog.ModuleType.GOOG};\n+    goog.moduleLoaderState_ = {moduleName:\"\", declareLegacyNamespace:!1, type:goog.ModuleType.GOOG, path:b};\n     if (goog.isFunction(a)) {\n-      var c = a.call(void 0, {});\n+      var d = a.call(void 0, {});\n     } else {\n       if (goog.isString(a)) {\n-        goog.useSafari10Workaround() && (a = goog.workaroundSafari10EvalBug(a)), c = goog.loadModuleFromSource_.call(void 0, a);\n+        goog.useSafari10Workaround() && (a = goog.workaroundSafari10EvalBug(a)), d = goog.loadModuleFromSource_.call(void 0, a);\n       } else {\n         throw Error(\"Invalid module definition\");\n       }\n     }\n",
+					"match": false,
+					"packageHash": "a9db8e9d1a59284d8bb648aff9232f392d607080ec38f679884dbe13d631b016",
+					"size": 553417,
+					"sourceHash": "d9621bc34232b50401f09d9d6c00aa5266a12bba3a47fc8cd06a4f209e7b914d",
+					"status": "content"
+				}
+			},
+			"summary": {
+				"differentFiles": 1,
+				"matchingFiles": 4,
+				"missingInPackage": 0,
+				"missingInSource": 0,
+				"score": 0.8,
+				"totalFiles": 5
+			}
+		},
+		"prodDependencies": []
+	}
+]
