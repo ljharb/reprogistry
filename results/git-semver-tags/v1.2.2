@@ -1,0 +1,273 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-12T18:37:39.214Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:4.2.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "git-semver-tags@1.2.2",
+			"name": "git-semver-tags",
+			"version": "1.2.2",
+			"location": "https://registry.npmjs.org/git-semver-tags/-/git-semver-tags-1.2.2.tgz",
+			"integrity": "sha512-fhINopzKBQ8m6YlQt7gPf6T6hFnTF84O7U+8kYJmfjjKk7gbmKGj+BLcKNWi+japPbBwCeXXnfKwThpJpR9ZnQ==",
+			"publishedAt": "2017-10-01T05:39:29.763Z",
+			"publishedWith": {
+				"node": "7.10.0",
+				"npm": "5.4.2"
+			},
+			"dependencies": {
+				"meow": "^3.3.0",
+				"semver": "^5.0.1"
+			}
+		},
+		"source": {
+			"integrity": null,
+			"location": "git+https://github.com/stevemao/git-semver-tags.git",
+			"spec": "github:stevemao/git-semver-tags#HEAD"
+		},
+		"comparisonHash": "9ef46a5bd31291e57cbab41e2f17c57bd6da0b5b",
+		"diff": {
+			"files": {
+				"CHANGELOG.md": {
+					"match": false,
+					"packageHash": "60929e4b810a413d1983f944eb303617485f21173fa29b98258fe1ef6c6d7149",
+					"size": 1268,
+					"status": "missing-in-source"
+				},
+				"README.md": {
+					"diff": "--- published/README.md\n+++ rebuilt/README.md\n@@ -15,10 +15,10 @@\n ## Usage\n \n ```js\n-var gitSemverTags = require('git-semver-tags', [options]);\n+var gitSemverTags = require('git-semver-tags');\n \n-gitSemverTags(function(err, tags) {\n-  console.log(tags);\n+gitSemverTags(function(err, tag) {\n+  console.log(tag);\n   //=> [ 'v2.0.0', 'v1.0.0' ]\n });\n ```\n@@ -30,12 +30,6 @@\n v1.0.0\n ```\n \n-## Options\n-\n-* `opts.lernaTags`: extract lerna style tags (`foo-package@2.0.0`) from the\n-  git history, rather than `v1.0.0` format.\n-* `opts.package`: what package should lerna style tags be listed for, e.g.,\n-  `foo-package`.\n \n ## License\n \n",
+					"match": false,
+					"packageHash": "68ea5c4911395d2e72108d74deeacf0e7cd5f38489000b4dfd32ebf940534c43",
+					"size": 1624,
+					"sourceHash": "da5d08aa63167f63728915fb13739a5a2124a0d865bc10d02c400f608fc00bd4",
+					"status": "content"
+				},
+				"cli.js": {
+					"diff": "--- published/cli.js\n+++ rebuilt/cli.js\n@@ -3,13 +3,10 @@\n var meow = require('meow');\n var gitSemverTags = require('./');\n \n-var args = meow({\n+meow({\n   help: [\n     'Usage',\n-    '  git-semver-tags',\n-    'Options',\n-    ' --lerna parse lerna style git tags',\n-    ' --package when listing lerna style tags, filter by a package'\n+    '  git-semver-tags'\n   ]\n });\n \n@@ -20,7 +17,4 @@\n   }\n \n   console.log(tags.join('\\n'));\n-}, {\n-  lernaTags: args.flags.lerna,\n-  package: args.flags.package\n });\n",
+					"match": false,
+					"packageHash": "0277f39ca18816af7654d23f812e6b5ea035916b9b4f6eff2018e37a42568ddf",
+					"size": 511,
+					"sourceHash": "043378919cf6f7b163c027d299560e18b23f9527b23b4fcba97dffb52c238d7a",
+					"status": "content"
+				},
+				"index.js": {
+					"diff": "--- published/index.js\n+++ rebuilt/index.js\n@@ -4,22 +4,7 @@\n var regex = /tag:\\s*(.+?)[,\\)]/gi;\n var cmd = 'git log --decorate --no-color';\n \n-function lernaTag(tag, pkg) {\n-  if (pkg && !(new RegExp('^' + pkg + '@')).test(tag)) {\n-    return false;\n-  } else {\n-    return /^.+@[0-9]+\\.[0-9]+\\.[0-9]+(-.+)?$/.test(tag);\n-  }\n-}\n-\n-module.exports = function(callback, opts) {\n-  opts = opts || {};\n-\n-  if (opts.package && !opts.lernaTags) {\n-    callback(Error('opts.package should only be used when running in lerna mode'));\n-    return;\n-  }\n-\n+module.exports = function(callback) {\n   exec(cmd, {\n     maxBuffer: Infinity\n   }, function(err, data) {\n@@ -34,11 +19,7 @@\n       var match;\n       while (match = regex.exec(decorations)) {\n         var tag = match[1];\n-        if (opts.lernaTags) {\n-          if (lernaTag(tag, opts.package)) {\n-            tags.push(tag);\n-          }\n-        } else if (semverValid(tag)) {\n+        if (semverValid(tag)) {\n           tags.push(tag);\n         }\n       }\n",
+					"match": false,
+					"packageHash": "fa6f4a0f291264d1c615025e813d9548f0a079b2dd65919c1a756d6ba6597174",
+					"size": 1097,
+					"sourceHash": "21395e60661902ec5a72177cf92894616d5728a93a58301e0c81cb9f58d28113",
+					"status": "content"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -1,6 +1,6 @@\n {\n   \"name\": \"git-semver-tags\",\n-  \"version\": \"1.2.2\",\n+  \"version\": \"1.1.2\",\n   \"description\": \"Get all git semver tags of your repository in reverse chronological order\",\n   \"homepage\": \"https://github.com/stevemao/git-semver-tags\",\n   \"author\": {\n@@ -27,6 +27,7 @@\n     \"semver\": \"^5.0.1\"\n   },\n   \"devDependencies\": {\n+    \"coveralls\": \"^2.11.2\",\n     \"git-dummy-commit\": \"^1.1.0\",\n     \"istanbul\": \"^0.4.2\",\n     \"jscs\": \"^2.9.0\",\n@@ -35,9 +36,9 @@\n     \"shelljs\": \"^0.5.1\"\n   },\n   \"scripts\": {\n+    \"coverage\": \"istanbul cover _mocha -- -R spec && rm -rf ./coverage\",\n     \"lint\": \"jshint *.js --exclude node_modules && jscs *.js\",\n-    \"test\": \"npm run-script lint && mocha --timeout 30000\",\n-    \"test-windows\": \"mocha --timeout 30000\"\n+    \"test\": \"npm run-script lint && mocha --timeout 10000\"\n   },\n   \"bin\": {\n     \"git-semver-tags\": \"cli.js\"\n",
+					"match": false,
+					"packageHash": "4bbcc81ccf26ddd64f84c64ff525306f8a5c3b2169b18ed4a03fc7cce265e5f3",
+					"size": 1030,
+					"sourceHash": "ad7b441cc0412db5885fcc58c42f259b78c5593f5cd3ba51edfe5808189d4e73",
+					"status": "content"
+				}
+			},
+			"summary": {
+				"differentFiles": 4,
+				"matchingFiles": 0,
+				"missingInPackage": 0,
+				"missingInSource": 1,
+				"score": 0,
+				"totalFiles": 5
+			}
+		},
+		"prodDependencies": [
+			{
+				"name": "array-find-index",
+				"version": "1.0.2"
+			},
+			{
+				"name": "camelcase",
+				"version": "2.1.1"
+			},
+			{
+				"name": "camelcase-keys",
+				"version": "2.1.0"
+			},
+			{
+				"name": "currently-unhandled",
+				"version": "0.4.1"
+			},
+			{
+				"name": "decamelize",
+				"version": "1.2.0"
+			},
+			{
+				"name": "error-ex",
+				"version": "1.3.4"
+			},
+			{
+				"name": "function-bind",
+				"version": "1.1.2"
+			},
+			{
+				"name": "get-stdin",
+				"version": "4.0.1"
+			},
+			{
+				"name": "graceful-fs",
+				"version": "4.2.11"
+			},
+			{
+				"name": "hasown",
+				"version": "2.0.2"
+			},
+			{
+				"name": "hosted-git-info",
+				"version": "2.8.9"
+			},
+			{
+				"name": "indent-string",
+				"version": "2.1.0"
+			},
+			{
+				"name": "repeating",
+				"version": "2.0.1"
+			},
+			{
+				"name": "is-arrayish",
+				"version": "0.2.1"
+			},
+			{
+				"name": "is-core-module",
+				"version": "2.16.1"
+			},
+			{
+				"name": "is-finite",
+				"version": "1.1.0"
+			},
+			{
+				"name": "is-utf8",
+				"version": "0.2.1"
+			},
+			{
+				"name": "load-json-file",
+				"version": "1.1.0"
+			},
+			{
+				"name": "loud-rejection",
+				"version": "1.6.0"
+			},
+			{
+				"name": "map-obj",
+				"version": "1.0.1"
+			},
+			{
+				"name": "meow",
+				"version": "3.7.0"
+			},
+			{
+				"name": "minimist",
+				"version": "1.2.0"
+			},
+			{
+				"name": "normalize-package-data",
+				"version": "2.5.0"
+			},
+			{
+				"name": "resolve",
+				"version": "1.22.11"
+			},
+			{
+				"name": "object-assign",
+				"version": "4.1.1"
+			},
+			{
+				"name": "parse-json",
+				"version": "2.2.0"
+			},
+			{
+				"name": "path-parse",
+				"version": "1.0.7"
+			},
+			{
+				"name": "path-type",
+				"version": "1.1.0"
+			},
+			{
+				"name": "pify",
+				"version": "2.3.0"
+			},
+			{
+				"name": "pinkie",
+				"version": "2.0.4"
+			},
+			{
+				"name": "pinkie-promise",
+				"version": "2.0.1"
+			},
+			{
+				"name": "read-pkg",
+				"version": "1.1.0"
+			},
+			{
+				"name": "read-pkg-up",
+				"version": "1.0.1"
+			},
+			{
+				"name": "find-up",
+				"version": "1.1.2"
+			},
+			{
+				"name": "path-exists",
+				"version": "2.1.0"
+			},
+			{
+				"name": "redent",
+				"version": "1.0.0"
+			},
+			{
+				"name": "semver",
+				"version": "5.7.2"
+			},
+			{
+				"name": "signal-exit",
+				"version": "3.0.7"
+			},
+			{
+				"name": "spdx-correct",
+				"version": "3.2.0"
+			},
+			{
+				"name": "spdx-exceptions",
+				"version": "2.5.0"
+			},
+			{
+				"name": "spdx-expression-parse",
+				"version": "3.0.1"
+			},
+			{
+				"name": "spdx-license-ids",
+				"version": "3.0.22"
+			},
+			{
+				"name": "strip-bom",
+				"version": "2.0.0"
+			},
+			{
+				"name": "strip-indent",
+				"version": "1.0.1"
+			},
+			{
+				"name": "supports-preserve-symlinks-flag",
+				"version": "1.0.0"
+			},
+			{
+				"name": "trim-newlines",
+				"version": "1.0.0"
+			},
+			{
+				"name": "validate-npm-package-license",
+				"version": "3.0.4"
+			}
+		]
+	}
+]
