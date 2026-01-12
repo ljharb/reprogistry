@@ -1,0 +1,104 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-12T13:14:06.393Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:2.15.11",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "portscanner@0.1.2",
+			"name": "portscanner",
+			"version": "0.1.2",
+			"location": "https://registry.npmjs.org/portscanner/-/portscanner-0.1.2.tgz",
+			"integrity": "sha512-ao38T0s1Nc3FNKNqDVd/MC0fhRZA+Dy4Djn/5+JaNDztiyufA4JvB/huxXlIG5U1BavEgQk/o6OQrl8gkbSNCg==",
+			"publishedAt": "2011-11-30T03:47:07.051Z",
+			"publishedWith": {
+				"node": "v0.4.11",
+				"npm": "1.0.103"
+			},
+			"dependencies": {
+				"async": "0.1.15"
+			}
+		},
+		"source": {
+			"integrity": null,
+			"location": "git://github.com/baalexander/node-portscanner.git",
+			"spec": "github:baalexander/node-portscanner#HEAD"
+		},
+		"comparisonHash": "9ef46a5bd31291e57cbab41e2f17c57bd6da0b5b",
+		"diff": {
+			"files": {
+				".npmignore": {
+					"match": false,
+					"packageHash": "13b1369ecafeeb0998b8b8cd30eaf1c4dcc9a268f7a93e39d6ce9b7ef70c9184",
+					"size": 32,
+					"status": "missing-in-source"
+				},
+				"README.md": {
+					"diff": "--- published/README.md\n+++ rebuilt/README.md\n@@ -1,20 +1,24 @@\n+# portscanner\n \n-## The What\n+[![npm](https://img.shields.io/npm/v/portscanner.svg)](https://www.npmjs.com/package/portscanner)\n+[![JavaScript Style Guide](https://img.shields.io/badge/code%20style-standard-brightgreen.svg)](http://standardjs.com/)\n \n-The portscanner module is an asynchronous JavaScript port scanner for Node.js.\n+The portscanner module is\n+an asynchronous JavaScript port scanner for Node.js.\n \n-Portscanner can check a port, or range of ports, for 'open' or 'closed'\n-statuses.\n+Portscanner can check a port,\n+or range of ports,\n+for 'open' or 'closed' statuses.\n \n-## The How\n+[Looking for maintainer](https://github.com/baalexander/node-portscanner/issues/25)!\n \n-### To Install\n+## Install\n \n ```bash\n npm install portscanner\n ```\n \n-### To Use\n+## Usage\n \n A brief example:\n \n@@ -22,37 +26,54 @@\n var portscanner = require('portscanner')\n \n // Checks the status of a single port\n-portscanner.checkPortStatus(3000, 'localhost', function(error, status) {\n+portscanner.checkPortStatus(3000, '127.0.0.1', function(error, status) {\n   // Status is 'open' if currently in use or 'closed' if available\n   console.log(status)\n })\n \n // Find the first available port. Asynchronously checks, so first port\n // determined as available is returned.\n-portscanner.findAPortNotInUse(3000, 3010, 'localhost', function(error, port) {\n+portscanner.findAPortNotInUse(3000, 3010, '127.0.0.1', function(error, port) {\n   console.log('AVAILABLE PORT AT: ' + port)\n })\n \n // Find the first port in use or blocked. Asynchronously checks, so first port\n // to respond is returned.\n-portscanner.findAPortInUse(3000, 3010, 'localhost', function(error, port) {\n+portscanner.findAPortInUse(3000, 3010, '127.0.0.1', function(error, port) {\n+  console.log('PORT IN USE AT: ' + port)\n+})\n+\n+// You can also pass array of ports to check\n+portscanner.findAPortInUse([3000, 3005, 3006], '127.0.0.1', function(error, port) {\n+  console.log('PORT IN USE AT: ' + port)\n+})\n+\n+// And skip host param. Default is '127.0.0.1'\n+portscanner.findAPortNotInUse(3000, 4000, function(error, port) {\n+  console.log('PORT IN USE AT: ' + port)\n+})\n+\n+// And use promises\n+portscanner.findAPortNotInUse(3000, 4000).then(function(port) {\n   console.log('PORT IN USE AT: ' + port)\n })\n ```\n \n The example directory contains a more detailed example.\n \n-### To Test\n+## Test\n \n-Bleh. I am a fan of testing, but currently looking into an easier way to test\n-several HTTP connections. If any ideas, please message me.\n+```sh\n+npm test\n+```\n \n-## The Future\n+## Future\n \n-Please create issues, or better yet, pull requests, for port scanning related\n-features you'd like to see included.\n+Please create issues or pull requests\n+for port scanning related features\n+you'd like to see included.\n \n-## The License (MIT)\n+## License (MIT)\n \n-Released under the MIT license. See the LICENSE file for the complete wording.\n+[MIT](LICENSE)\n \n",
+					"match": false,
+					"packageHash": "a440919f0df8821aa94235e2ab9ff43004f4d8832b8d178c3eadbfdc11b4570c",
+					"size": 1442,
+					"sourceHash": "81fd8bfa5d4c9d59bd7d8f56e0d2797a9fdf1d44aab6921383053de3b1cd16f0",
+					"status": "content"
+				},
+				"lib/portscanner.js": {
+					"diff": "--- published/lib/portscanner.js\n+++ rebuilt/lib/portscanner.js\n@@ -1,130 +1,251 @@\n-var net    = require('net')\n-  , Socket = net.Socket\n-  , async  = require('async')\n-\n-var portscanner = exports\n+var net = require('net')\n+var Socket = net.Socket\n+var async = require('async')\n+var isNumberLike = require('is-number-like')\n+var promisify = require('./promisify')\n \n /**\n  * Finds the first port with a status of 'open', implying the port is in use and\n  * there is likely a service listening on it.\n- *\n- * @param {Number} startPort  - Port to begin status check on (inclusive).\n- * @param {Number} endPort    - Last port to check status on (inclusive).\n- *                              Defaults to 65535.\n- * @param {String} host       - Where to scan. Defaults to 'localhost'.\n- * @param {Function} callback - function (error, port) { ... }\n- *   - {Object|null} error    - Any errors that occurred while port scanning.\n- *   - {Number|Boolean} port  - The first open port found. Note, this is the\n- *                              first port that returns status as 'open', not\n- *                              necessarily the first open port checked. If no\n- *                              open port is found, the value is false.\n  */\n-portscanner.findAPortInUse = function(startPort, endPort, host, callback) {\n-  findAPortWithStatus('open', startPort, endPort, host, callback)\n+/**\n+ * @param {Number} startPort - Port to begin status check on (inclusive).\n+ * @param {Number} [endPort=65535] - Last port to check status on (inclusive).\n+ * @param {String} [host='127.0.0.1'] - Host of where to scan.\n+ * @param {findPortCallback} [callback] - Function to call back with error or results.\n+ * @returns {Promise}\n+ * @example\n+ * // scans through 3000 to 3002 (inclusive)\n+ * portscanner.findAPortInUse(3000, 3002, '127.0.0.1', console.log)\n+ * // returns a promise in the absence of a callback\n+ * portscanner.findAPortInUse(3000, 3002, '127.0.0.1').then(console.log)\n+ * @example\n+ * // scans through 3000 to 65535 on '127.0.0.1'\n+ * portscanner.findAPortInUse(3000, console.log)\n+ */\n+/**\n+ * @param {Array} postList - Array of ports to check status on.\n+ * @param {String} [host='127.0.0.1'] - Host of where to scan.\n+ * @param {findPortCallback} [callback] - Function to call back with error or results.\n+ * @returns {Promise}\n+ * @example\n+ * // scans 3000 and 3002 only, not 3001.\n+ * portscanner.findAPortInUse([3000, 3002], console.log)\n+ */\n+function findAPortInUse () {\n+  var params = [].slice.call(arguments)\n+  params.unshift('open')\n+  return findAPortWithStatus.apply(null, params)\n }\n \n /**\n  * Finds the first port with a status of 'closed', implying the port is not in\n- * use.\n- *\n- * @param {Number} startPort  - Port to begin status check on (inclusive).\n- * @param {Number} endPort    - Last port to check status on (inclusive).\n- *                              Defaults to 65535.\n- * @param {String} host       - Where to scan. Defaults to 'localhost'.\n- * @param {Function} callback - function (error, port) { ... }\n- *   - {Object|null} error    - Any errors that occurred while port scanning.\n- *   - {Number|Boolean} port  - The first closed port found. Note, this is the\n- *                              first port that returns status as 'closed', not\n- *                              necessarily the first closed port checked. If no\n- *                              closed port is found, the value is false.\n+ * use. Accepts identical parameters as {@link findAPortInUse}\n  */\n-portscanner.findAPortNotInUse = function(startPort, endPort, host, callback) {\n-  findAPortWithStatus('closed', startPort, endPort, host, callback)\n+function findAPortNotInUse () {\n+  var params = [].slice.call(arguments)\n+  params.unshift('closed')\n+  return findAPortWithStatus.apply(null, params)\n }\n \n /**\n  * Checks the status of an individual port.\n- *\n- * @param {Number} port       - Port to check status on.\n- * @param {String} host       - Where to scan. Defaults to 'localhost'.\n- * @param {Function} callback - function (error, port) { ... }\n- *   - {Object|null} error    - Any errors that occurred while port scanning.\n- *   - {String} status        - 'open' if the port is in use.\n- *                              'closed' if the port is available.\n  */\n-portscanner.checkPortStatus = function(port, host, callback) {\n-  host = host || 'localhost'\n+/**\n+ * @param {Number} port - Port to check status on.\n+ * @param {String} [host='127.0.0.1'] - Host of where to scan.\n",
+					"match": false,
+					"packageHash": "d6cb89d972c2c1092d93e210a3dc92155ced2f3d0d13c414af80bf2b2ceb088e",
+					"size": 4428,
+					"sourceHash": "6a57a6d80c360ca905a96e9818dd8056945198ff63397f1d39efb7e1f0554f1b",
+					"status": "content"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -1,24 +1,50 @@\n-{ \"name\" : \"portscanner\"\n-, \"description\" : \"Asynchronous port scanner for Node.js\"\n-, \"keywords\" : [ \"portscanner\", \"port\", \"scanner\", \"checker\", \"status\" ]\n-, \"version\" : \"0.1.2\"\n-, \"preferGlobal\" : false\n-, \"homepage\" : \"https://github.com/baalexander/node-portscanner\"\n-, \"author\" : \"Brandon Alexander <baalexander@gmail.com> (https://github.com/baalexander)\"\n-, \"repository\" :\n-  { \"type\" : \"git\"\n-  , \"url\" : \"git://github.com/baalexander/node-portscanner.git\"\n-  }\n-, \"bugs\" : { \"url\" : \"https://github.com/baalexander/node-portscanner/issues\" }\n-, \"directories\" : { \"lib\" : \"./lib\" }\n-, \"main\" : \"./lib/portscanner.js\"\n-, \"dependencies\" : { \"async\" : \"0.1.15\" }\n-, \"devDependencies\" : { }\n-, \"engines\" : { \"node\" : \">=0.4\", \"npm\" : \">=1.0.0\" }\n-, \"licenses\" :\n-  [ { \"type\" : \"MIT\"\n-    , \"url\" : \"https://github.com/baalexander/node-portscanner/raw/master/LICENSE\"\n-    }\n-  ]\n+{\n+  \"name\": \"portscanner\",\n+  \"description\": \"Asynchronous port scanner for Node.js\",\n+  \"scripts\": {\n+    \"coverage\": \"nyc npm run test\",\n+    \"test\": \"ava\",\n+    \"lint\": \"standard\"\n+  },\n+  \"keywords\": [\n+    \"portscanner\",\n+    \"port\",\n+    \"scanner\",\n+    \"checker\",\n+    \"status\"\n+  ],\n+  \"version\": \"2.2.0\",\n+  \"preferGlobal\": false,\n+  \"homepage\": \"https://github.com/baalexander/node-portscanner\",\n+  \"author\": [\n+    \"Brandon Alexander <baalexander@gmail.com> (https://github.com/baalexander)\",\n+    \"Sean Massa <endangeredmassa@gmail.com> (http://massalabs.com)\"\n+  ],\n+  \"repository\": {\n+    \"type\": \"git\",\n+    \"url\": \"git://github.com/baalexander/node-portscanner.git\"\n+  },\n+  \"bugs\": {\n+    \"url\": \"https://github.com/baalexander/node-portscanner/issues\"\n+  },\n+  \"directories\": {\n+    \"lib\": \"./lib\"\n+  },\n+  \"main\": \"./lib/portscanner.js\",\n+  \"dependencies\": {\n+    \"async\": \"^2.6.0\",\n+    \"is-number-like\": \"^1.0.3\"\n+  },\n+  \"devDependencies\": {\n+    \"ava\": \"^0.25.0\",\n+    \"nyc\": \"^11.3.0\",\n+    \"eslint\": \"^3.10.2\",\n+    \"eslint-config-standard\": \"^6.2.1\",\n+    \"standard\": \"^8.5.0\"\n+  },\n+  \"engines\": {\n+    \"node\": \">=0.4\",\n+    \"npm\": \">=1.0.0\"\n+  },\n+  \"license\": \"MIT\"\n }\n-\n",
+					"match": false,
+					"packageHash": "310f4e8dc46739239feb4b853f6b16fb858ba650890599b76fa33bbb2e7f5d33",
+					"size": 868,
+					"sourceHash": "318e33d15863522430c28ff39aa7d0c221ba2f4df9ba399a41558367945b7c56",
+					"status": "content"
+				},
+				".circleci/config.yml": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"CHANGELOG.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/promisify.js": {
+					"match": false,
+					"status": "missing-in-package"
+				}
+			},
+			"summary": {
+				"differentFiles": 3,
+				"matchingFiles": 1,
+				"missingInPackage": 3,
+				"missingInSource": 1,
+				"score": 0.125,
+				"totalFiles": 8
+			}
+		},
+		"prodDependencies": [
+			{
+				"name": "async",
+				"version": "2.6.4"
+			},
+			{
+				"name": "is-number-like",
+				"version": "1.0.8"
+			},
+			{
+				"name": "lodash",
+				"version": "4.17.21"
+			},
+			{
+				"name": "lodash.isfinite",
+				"version": "3.3.2"
+			}
+		]
+	}
+]

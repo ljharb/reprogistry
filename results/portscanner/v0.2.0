@@ -1,0 +1,86 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-12T13:17:24.255Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:11.7.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "portscanner@0.2.0",
+			"name": "portscanner",
+			"version": "0.2.0",
+			"location": "https://registry.npmjs.org/portscanner/-/portscanner-0.2.0.tgz",
+			"integrity": "sha512-4jFkJ1qvY3yTaUN61DTqpbsGD5BVKAQ/ZsC2295jduyGS+HS2fWXgJfzVb7HyasveNg2XCCu1rRyQON/guE1AA==",
+			"publishedAt": "2014-01-07T15:46:01.582Z",
+			"publishedWith": {
+				"node": null,
+				"npm": "1.2.30"
+			},
+			"dependencies": {
+				"async": "0.1.15"
+			}
+		},
+		"source": {
+			"integrity": "sha512-Eg4DIVY1ZCKu72zT94xZTUIzaEnrwggCCWC9J7K+dnsU19F036an7t99KAB05eeAvyjtRJpDhqNPA9p5iFAbtQ==",
+			"location": "git://github.com/baalexander/node-portscanner.git",
+			"spec": "github:baalexander/node-portscanner#v0.2.0"
+		},
+		"comparisonHash": "9ef46a5bd31291e57cbab41e2f17c57bd6da0b5b",
+		"diff": {
+			"files": {
+				".npmignore": {
+					"match": false,
+					"packageHash": "13b1369ecafeeb0998b8b8cd30eaf1c4dcc9a268f7a93e39d6ce9b7ef70c9184",
+					"size": 32,
+					"status": "missing-in-source"
+				},
+				"README.md": {
+					"diff": "--- published/README.md\n+++ rebuilt/README.md\n@@ -22,20 +22,20 @@\n var portscanner = require('portscanner')\n \n // Checks the status of a single port\n-portscanner.checkPortStatus(3000, 'localhost', function(error, status) {\n+portscanner.checkPortStatus(3000, '127.0.0.1', function(error, status) {\n   // Status is 'open' if currently in use or 'closed' if available\n   console.log(status)\n })\n \n // Find the first available port. Asynchronously checks, so first port\n // determined as available is returned.\n-portscanner.findAPortNotInUse(3000, 3010, 'localhost', function(error, port) {\n+portscanner.findAPortNotInUse(3000, 3010, '127.0.0.1', function(error, port) {\n   console.log('AVAILABLE PORT AT: ' + port)\n })\n \n // Find the first port in use or blocked. Asynchronously checks, so first port\n // to respond is returned.\n-portscanner.findAPortInUse(3000, 3010, 'localhost', function(error, port) {\n+portscanner.findAPortInUse(3000, 3010, '127.0.0.1', function(error, port) {\n   console.log('PORT IN USE AT: ' + port)\n })\n ```\n",
+					"match": false,
+					"packageHash": "a440919f0df8821aa94235e2ab9ff43004f4d8832b8d178c3eadbfdc11b4570c",
+					"size": 1442,
+					"sourceHash": "38660218e2fdb751190f6bcc7e130aa49d2f3de7db5b2920807902404a0e454f",
+					"status": "content"
+				},
+				"lib/portscanner.js": {
+					"diff": "--- published/lib/portscanner.js\n+++ rebuilt/lib/portscanner.js\n@@ -11,7 +11,7 @@\n  * @param {Number} startPort  - Port to begin status check on (inclusive).\n  * @param {Number} endPort    - Last port to check status on (inclusive).\n  *                              Defaults to 65535.\n- * @param {String} host       - Where to scan. Defaults to 'localhost'.\n+ * @param {String} host       - Where to scan. Defaults to '127.0.0.1'.\n  * @param {Function} callback - function (error, port) { ... }\n  *   - {Object|null} error    - Any errors that occurred while port scanning.\n  *   - {Number|Boolean} port  - The first open port found. Note, this is the\n@@ -30,7 +30,7 @@\n  * @param {Number} startPort  - Port to begin status check on (inclusive).\n  * @param {Number} endPort    - Last port to check status on (inclusive).\n  *                              Defaults to 65535.\n- * @param {String} host       - Where to scan. Defaults to 'localhost'.\n+ * @param {String} host       - Where to scan. Defaults to '127.0.0.1'.\n  * @param {Function} callback - function (error, port) { ... }\n  *   - {Object|null} error    - Any errors that occurred while port scanning.\n  *   - {Number|Boolean} port  - The first closed port found. Note, this is the\n@@ -47,9 +47,9 @@\n  *\n  * @param {Number} port           - Port to check status on.\n  * @param {String|Object} options - host or options\n- *   - {String} host              - Host of where to scan. Defaults to 'localhost'.\n+ *   - {String} host              - Host of where to scan. Defaults to '127.0.0.1'.\n  *   - {Object} options\n- *     - {String} host            - Host of where to scan. Defaults to 'localhost'.\n+ *     - {String} host            - Host of where to scan. Defaults to '127.0.0.1'.\n  *     - {Number} timeout         - Connection timeout. Defaults to 400ms.\n  * @param {Function} callback     - function (error, port) { ... }\n  *   - {Object|null} error        - Any errors that occurred while port scanning.\n@@ -62,7 +62,7 @@\n     options = {host: options}\n   }\n \n-  var host = options.host || 'localhost'\n+  var host = options.host || '127.0.0.1'\n   var timeout = options.timeout || 400\n \n   var socket = new Socket()\n@@ -115,12 +115,12 @@\n   var checkNextPort = function(callback) {\n     portscanner.checkPortStatus(port, host, function(error, statusOfPort) {\n       numberOfPortsChecked++\n-      if (error) {\n-        callback(error)\n-      }\n-      else if (statusOfPort === status) {\n+      if (statusOfPort === status) {\n         foundPort = true\n-        callback(null, port)\n+        callback(error, port)\n+      }\n+      else if (error) {\n+        callback(error)\n       }\n       else {\n         port++\n",
+					"match": false,
+					"packageHash": "7dea3cfa862391ad4a386e821231b06803380b5be97c3e47295f6836cb5f8108",
+					"size": 5086,
+					"sourceHash": "1bad4c14ce12e5a4cf1dc7310fbb5909247a43e2d6f9d5704c7ce6fcaeda2adb",
+					"status": "content"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -1,27 +1,43 @@\n-{ \"name\" : \"portscanner\"\n-, \"description\" : \"Asynchronous port scanner for Node.js\"\n-, \"keywords\" : [ \"portscanner\", \"port\", \"scanner\", \"checker\", \"status\" ]\n-, \"version\" : \"0.2.0\"\n-, \"preferGlobal\" : false\n-, \"homepage\" : \"https://github.com/baalexander/node-portscanner\"\n-, \"author\" : [\n-    \"Brandon Alexander <baalexander@gmail.com> (https://github.com/baalexander)\"\n-  , \"Sean Massa <endangeredmassa@gmail.com> (http://massalabs.com)\"\n-  ]\n-, \"repository\" :\n-  { \"type\" : \"git\"\n-  , \"url\" : \"git://github.com/baalexander/node-portscanner.git\"\n-  }\n-, \"bugs\" : { \"url\" : \"https://github.com/baalexander/node-portscanner/issues\" }\n-, \"directories\" : { \"lib\" : \"./lib\" }\n-, \"main\" : \"./lib/portscanner.js\"\n-, \"dependencies\" : { \"async\" : \"0.1.15\" }\n-, \"devDependencies\" : { }\n-, \"engines\" : { \"node\" : \">=0.4\", \"npm\" : \">=1.0.0\" }\n-, \"licenses\" :\n-  [ { \"type\" : \"MIT\"\n-    , \"url\" : \"https://github.com/baalexander/node-portscanner/raw/master/LICENSE\"\n+{\n+  \"name\": \"portscanner\",\n+  \"description\": \"Asynchronous port scanner for Node.js\",\n+  \"keywords\": [\n+    \"portscanner\",\n+    \"port\",\n+    \"scanner\",\n+    \"checker\",\n+    \"status\"\n+  ],\n+  \"version\": \"0.2.0\",\n+  \"preferGlobal\": false,\n+  \"homepage\": \"https://github.com/baalexander/node-portscanner\",\n+  \"author\": [\n+    \"Brandon Alexander <baalexander@gmail.com> (https://github.com/baalexander)\",\n+    \"Sean Massa <endangeredmassa@gmail.com> (http://massalabs.com)\"\n+  ],\n+  \"repository\": {\n+    \"type\": \"git\",\n+    \"url\": \"git://github.com/baalexander/node-portscanner.git\"\n+  },\n+  \"bugs\": {\n+    \"url\": \"https://github.com/baalexander/node-portscanner/issues\"\n+  },\n+  \"directories\": {\n+    \"lib\": \"./lib\"\n+  },\n+  \"main\": \"./lib/portscanner.js\",\n+  \"dependencies\": {\n+    \"async\": \"0.1.15\"\n+  },\n+  \"devDependencies\": {},\n+  \"engines\": {\n+    \"node\": \">=0.4\",\n+    \"npm\": \">=1.0.0\"\n+  },\n+  \"licenses\": [\n+    {\n+      \"type\": \"MIT\",\n+      \"url\": \"https://github.com/baalexander/node-portscanner/raw/master/LICENSE\"\n     }\n   ]\n }\n-\n",
+					"match": false,
+					"packageHash": "f680acaca5945be07c42d3d836c66134ae79cce754d63250880fde33e026275d",
+					"size": 946,
+					"sourceHash": "86f6708a8762b2b2fb0de92c879e32fe7e90e2b4bd5135355420bc29b52f49e2",
+					"status": "content"
+				},
+				"test.md": {
+					"match": false,
+					"packageHash": "0350a5f13d4399d1f0a90d3e48b616f800a856a577867f5edf19054b28dac1fe",
+					"size": 1762,
+					"status": "missing-in-source"
+				}
+			},
+			"summary": {
+				"differentFiles": 3,
+				"matchingFiles": 1,
+				"missingInPackage": 0,
+				"missingInSource": 2,
+				"score": 0.16666666666666666,
+				"totalFiles": 6
+			}
+		},
+		"prodDependencies": [
+			{
+				"name": "async",
+				"version": "0.1.15"
+			}
+		]
+	}
+]
