@@ -1,0 +1,165 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-12T13:58:01.447Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:3.10.10",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "filemanager-webpack-plugin@1.0.12",
+			"name": "filemanager-webpack-plugin",
+			"version": "1.0.12",
+			"location": "https://registry.npmjs.org/filemanager-webpack-plugin/-/filemanager-webpack-plugin-1.0.12.tgz",
+			"integrity": "sha512-ltdkQQwDuwjB+uO38EOFsjaZ5vUHASri/Fk+kxHklihavCtbxslYmDkbf9iSpXW4CVLNd/e6oRQC3TX49KIpYA==",
+			"publishedAt": "2017-11-16T13:10:11.310Z",
+			"publishedWith": {
+				"node": "6.11.0",
+				"npm": "3.10.10"
+			},
+			"dependencies": {
+				"mv": "^2.1.1",
+				"cpr": "^2.2.0",
+				"rimraf": "^2.6.1",
+				"make-dir": "^1.1.0"
+			}
+		},
+		"source": {
+			"integrity": null,
+			"location": "git+https://github.com/gregnb/filemanager-webpack-plugin.git",
+			"spec": "github:gregnb/filemanager-webpack-plugin#625e60b7c135980f77d11c91bb2774204f1d2a7c"
+		},
+		"comparisonHash": "9ef46a5bd31291e57cbab41e2f17c57bd6da0b5b",
+		"diff": {
+			"files": {
+				".npmignore": {
+					"match": false,
+					"packageHash": "18bf040a2e0bfc9d5c866d3daaffeefae4fe5d859160ea2a9afc0180f46e398f",
+					"size": 473,
+					"status": "missing-in-source"
+				},
+				"lib/index.js.map": {
+					"diff": "--- published/lib/index.js.map\n+++ rebuilt/lib/index.js.map\n@@ -1 +1 @@\n-{\"version\":3,\"file\":\"index.js\",\"sources\":[\"../src/index.js\"],\"sourcesContent\":[\"const cpr = require('cpr');\\nconst rimraf = require('rimraf');\\nconst mv = require('mv');\\nconst makeDir = require('make-dir');\\n\\nclass FileManagerPlugin {\\n  \\n  constructor(options) {\\n    \\n    this.options = this.setOptions(options);\\n    this.isWin = /^win/.test(process.platform);\\n\\n    /* cpr options */\\n    this.cprOptions = {\\n      deleteFirst: true,\\n      overwrite: true,\\n      confirm: true \\n    };\\n    \\n  }\\n\\n  setOptions(userOptions) {\\n\\n    const defaultOptions = {\\n      verbose: false,\\n      moveWithMkdirp: false,\\n      onStart: {},\\n      onEnd: {}\\n    };\\n\\n    for (const key in defaultOptions) {\\n      if (userOptions.hasOwnProperty(key)) {\\n        defaultOptions[key] = userOptions[key];\\n      }\\n    }\\n\\n    return defaultOptions;\\n\\n  }\\n\\n  checkOptions(stage) {\\n\\n    if (this.options.verbose && Object.keys(this.options[stage]).length) {\\n      console.log(`FileManagerPlugin: processing ${stage} event`);\\n    }\\n\\n    let operationList = [];\\n\\n    if (this.options[stage] && Array.isArray(this.options[stage])) {\\n      this.options[stage].map(opts => operationList.push(...this.parseFileOptions(opts, true)));\\n    } else {\\n      operationList.push(...this.parseFileOptions(this.options[stage]));\\n    }\\n\\n    if(operationList.length) {\\n\\n      operationList.reduce((previous, fn) => {\\n        return previous.then(retVal => fn(retVal));\\n      }, Promise.resolve());\\n\\n    }\\n\\n\\n  }\\n\\n  parseFileOptions(options, preserveOrder = false) {\\n\\n    const optKeys = Object.keys(options);\\n\\n    let commandOrder = [];\\n\\n    for (let i = 0; i < optKeys.length; i++) {\\n\\n      const fileAction = optKeys[i];\\n      const fileOptions = options[fileAction];\\n\\n      switch (fileAction) {\\n      \\n        case 'copy':\\n\\n          for(let key in fileOptions) {\\n\\n            const command = fileOptions[key];\\n\\n            if (!command.source || !command.destination) {\\n              if (this.options.verbose) {\\n                console.log('  - FileManagerPlugin: Warning - copy parameter has to be formated as follows: { source: <string>, destination: <string> }');\\n              }\\n              return;\\n            }\\n\\n            \\n            commandOrder.push(() => new Promise((resolve, reject) => {\\n\\n              if (this.options.verbose) {\\n                console.log(`  - FileManagerPlugin: Start copy source: ${command.source} to destination: ${command.destination}`)\\n              }\\n\\n              cpr(command.source, command.destination, this.cprOptions, (err, files) => {\\n                if (err && this.options.verbose) {\\n                  console.log('  - FileManagerPlugin: Error - copy failed', err);\\n                }\\n                \\n                if (this.options.verbose) {\\n                  console.log(`  - FileManagerPlugin: Finished copy source: ${command.source} to destination: ${command.destination}`)\\n                }\\n\\n                resolve(err);\\n              \\n              });\\n\\n            }));\\n            \\n          }          \\n\\n          break;\\n        \\n        \\n        case 'move':\\n\\n          for(let key in fileOptions) {\\n          \\n            const command = fileOptions[key];\\n\\n            if (!command.source || !command.destination) {\\n              if (this.options.verbose) {\\n                console.log('  - FileManagerPlugin: Warning - move parameter has to be formated as follows: { source: <string>, destination: <string> }');\\n              }\\n              return;\\n            }\\n\\n            commandOrder.push(() => new Promise((resolve, reject) => {\\n              \\n              if (this.options.verbose) {\\n                console.log(`  - FileManagerPlugin: Start move source: ${command.source} to destination: ${command.destination}`)\\n              }\\n\\n              mv(command.source, command.destination, { mkdirp: this.options.moveWithMkdirp }, (err) => {\\n                if (err && this.options.verbose) {\\n                  console.log('  - FileManagerPlugin: Error - move failed', err);\\n                }\\n                \\n                if (this.options.verbose) {\\n                  console.log(`  - FileManagerPlugin: Finished move source: ${command.source} to destination: ${command.destination}`)\\n                }\\n\\n                resolve(err);\\n              });\\n            }));\\n\\n          }\\n\\n          break;\\n\\n        case 'delete':\\n\\n          for(let key in fileOptions) {\\n\\n            const path = fileOptions[key];\\n\\n            commandOrder.push(() => new Promise((resolve, reject) => {\\n\\n              if (this.options.verbose) {\\n                console.log(`  - FileManagerPlugin: Starting delete path ${path}`)\\n              }\\n              \\n              if (typeof path !== 'string') {\\n                if (this.options.verbose) {\\n                  console.log('  - FileManagerPlugin: Warning - delete parameter has to be type of string. Process canceled.');\\n                }\\n                return;\\n              }\\n\\n              rimraf(path, { }, (response) => {\\n                if (this.options.verbose && response === null) {\\n                  console.log(`  - FileManagerPlugin: Finished delete path ${path}`)\\n                }\\n                resolve();\\n              });\\n\\n            }));\\n\\n          }\\n\\n          break;\\n          \\n        case 'mkdir':\\n        \\n          for(let key in fileOptions) {\\n            \\n            const path = fileOptions[key];\\n            \\n            if (this.options.verbose) {\\n              console.log(`  - FileManagerPlugin: Creating path ${path}`)\\n            }\\n            \\n            if (typeof path !== 'string') {\\n              if (this.options.verbose) {\\n                console.log('  - FileManagerPlugin: Warning - mkdir parameter has to be type of string. Process canceled.');\\n              }\\n              return;\\n            }\\n            \\n            commandOrder.push(() => makeDir(path));\\n          }\\n\\n          break;\\n\\n        default: \\n          break;\\n\\n      }\\n\\n    }\\n \\n    return commandOrder;\\n\\n  }\\n\\n\\n  apply(compiler) {\\n\\n    compiler.plugin(\\\"compilation\\\", (comp) => {\\n\\n      this.checkOptions(\\\"onStart\\\");\\n\\n    });\\n\\n    compiler.plugin('after-emit', (compliation, callback) => {\\n\\n      this.checkOptions(\\\"onEnd\\\");\\n\\n      callback();\\n   \\n    });\\n\\n  }\\n\\n}\\n\\nexport default FileManagerPlugin;\\n\"],\"names\":[\"cpr\",\"require\",\"rimraf\",\"mv\",\"makeDir\",\"FileManagerPlugin\",\"options\",\"setOptions\",\"isWin\",\"test\",\"process\",\"platform\",\"cprOptions\",\"userOptions\",\"defaultOptions\",\"key\",\"hasOwnProperty\",\"stage\",\"verbose\",\"Object\",\"keys\",\"length\",\"log\",\"operationList\",\"Array\",\"isArray\",\"map\",\"push\",\"parseFileOptions\",\"opts\",\"reduce\",\"previous\",\"fn\",\"then\",\"retVal\",\"Promise\",\"resolve\",\"optKeys\",\"commandOrder\",\"i\",\"fileAction\",\"fileOptions\",\"command\",\"source\",\"destination\",\"reject\",\"err\",\"files\",\"mkdirp\",\"moveWithMkdirp\",\"path\",\"response\",\"compiler\",\"plugin\",\"comp\",\"checkOptions\",\"compliation\",\"callback\"],\"mappings\":\"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\"}\n\\ No newline at end of file\n+{\"version\":3,\"file\":\"index.js\",\"sources\":[\"../src/index.js\"],\"sourcesContent\":[\"const cpr = require('cpr');\\r\\nconst rimraf = require('rimraf');\\r\\nconst mv = require('mv');\\r\\nconst makeDir = require('make-dir');\\r\\n\\r\\nclass FileManagerPlugin {\\r\\n  \\r\\n  constructor(options) {\\r\\n    \\r\\n    this.options = this.setOptions(options);\\r\\n    this.isWin = /^win/.test(process.platform);\\r\\n\\r\\n    /* cpr options */\\r\\n    this.cprOptions = {\\r\\n      deleteFirst: true,\\r\\n      overwrite: true,\\r\\n      confirm: true \\r\\n    };\\r\\n    \\r\\n  }\\r\\n\\r\\n  setOptions(userOptions) {\\r\\n\\r\\n    const defaultOptions = {\\r\\n      verbose: false,\\r\\n      moveWithMkdirp: false,\\r\\n      onStart: {},\\r\\n      onEnd: {}\\r\\n    };\\r\\n\\r\\n    for (const key in defaultOptions) {\\r\\n      if (userOptions.hasOwnProperty(key)) {\\r\\n        defaultOptions[key] = userOptions[key];\\r\\n      }\\r\\n    }\\r\\n\\r\\n    return defaultOptions;\\r\\n\\r\\n  }\\r\\n\\r\\n  checkOptions(stage) {\\r\\n\\r\\n    if (this.options.verbose && Object.keys(this.options[stage]).length) {\\r\\n      console.log(`FileManagerPlugin: processing ${stage} event`);\\r\\n    }\\r\\n\\r\\n    let operationList = [];\\r\\n\\r\\n    if (this.options[stage] && Array.isArray(this.options[stage])) {\\r\\n      this.options[stage].map(opts => operationList.push(...this.parseFileOptions(opts, true)));\\r\\n    } else {\\r\\n      operationList.push(...this.parseFileOptions(this.options[stage]));\\r\\n    }\\r\\n\\r\\n    if(operationList.length) {\\r\\n\\r\\n      operationList.reduce((previous, fn) => {\\r\\n        return previous.then(retVal => fn(retVal));\\r\\n      }, Promise.resolve());\\r\\n\\r\\n    }\\r\\n\\r\\n\\r\\n  }\\r\\n\\r\\n  parseFileOptions(options, preserveOrder = false) {\\r\\n\\r\\n    const optKeys = Object.keys(options);\\r\\n\\r\\n    let commandOrder = [];\\r\\n\\r\\n    for (let i = 0; i < optKeys.length; i++) {\\r\\n\\r\\n      const fileAction = optKeys[i];\\r\\n      const fileOptions = options[fileAction];\\r\\n\\r\\n      switch (fileAction) {\\r\\n      \\r\\n        case 'copy':\\r\\n\\r\\n          for(let key in fileOptions) {\\r\\n\\r\\n            const command = fileOptions[key];\\r\\n\\r\\n            if (!command.source || !command.destination) {\\r\\n              if (this.options.verbose) {\\r\\n                console.log('  - FileManagerPlugin: Warning - copy parameter has to be formated as follows: { source: <string>, destination: <string> }');\\r\\n              }\\r\\n              return;\\r\\n            }\\r\\n\\r\\n            \\r\\n            commandOrder.push(() => new Promise((resolve, reject) => {\\r\\n\\r\\n              if (this.options.verbose) {\\r\\n                console.log(`  - FileManagerPlugin: Start copy source: ${command.source} to destination: ${command.destination}`)\\r\\n              }\\r\\n\\r\\n              cpr(command.source, command.destination, this.cprOptions, (err, files) => {\\r\\n                if (err && this.options.verbose) {\\r\\n                  console.log('  - FileManagerPlugin: Error - copy failed', err);\\r\\n                }\\r\\n                \\r\\n                if (this.options.verbose) {\\r\\n                  console.log(`  - FileManagerPlugin: Finished copy source: ${command.source} to destination: ${command.destination}`)\\r\\n                }\\r\\n\\r\\n                resolve(err);\\r\\n              \\r\\n              });\\r\\n\\r\\n            }));\\r\\n            \\r\\n          }          \\r\\n\\r\\n          break;\\r\\n        \\r\\n        \\r\\n        case 'move':\\r\\n\\r\\n          for(let key in fileOptions) {\\r\\n          \\r\\n            const command = fileOptions[key];\\r\\n\\r\\n            if (!command.source || !command.destination) {\\r\\n              if (this.options.verbose) {\\r\\n                console.log('  - FileManagerPlugin: Warning - move parameter has to be formated as follows: { source: <string>, destination: <string> }');\\r\\n              }\\r\\n              return;\\r\\n            }\\r\\n\\r\\n            commandOrder.push(() => new Promise((resolve, reject) => {\\r\\n              \\r\\n              if (this.options.verbose) {\\r\\n                console.log(`  - FileManagerPlugin: Start move source: ${command.source} to destination: ${command.destination}`)\\r\\n              }\\r\\n\\r\\n              mv(command.source, command.destination, { mkdirp: this.options.moveWithMkdirp }, (err) => {\\r\\n                if (err && this.options.verbose) {\\r\\n                  console.log('  - FileManagerPlugin: Error - move failed', err);\\r\\n                }\\r\\n                \\r\\n                if (this.options.verbose) {\\r\\n                  console.log(`  - FileManagerPlugin: Finished move source: ${command.source} to destination: ${command.destination}`)\\r\\n                }\\r\\n\\r\\n                resolve(err);\\r\\n              });\\r\\n            }));\\r\\n\\r\\n          }\\r\\n\\r\\n          break;\\r\\n\\r\\n        case 'delete':\\r\\n\\r\\n          for(let key in fileOptions) {\\r\\n\\r\\n            const path = fileOptions[key];\\r\\n\\r\\n            commandOrder.push(() => new Promise((resolve, reject) => {\\r\\n\\r\\n              if (this.options.verbose) {\\r\\n                console.log(`  - FileManagerPlugin: Starting delete path ${path}`)\\r\\n              }\\r\\n              \\r\\n              if (typeof path !== 'string') {\\r\\n                if (this.options.verbose) {\\r\\n                  console.log('  - FileManagerPlugin: Warning - delete parameter has to be type of string. Process canceled.');\\r\\n                }\\r\\n                return;\\r\\n              }\\r\\n\\r\\n              rimraf(path, { }, (response) => {\\r\\n                if (this.options.verbose && response === null) {\\r\\n                  console.log(`  - FileManagerPlugin: Finished delete path ${path}`)\\r\\n                }\\r\\n                resolve();\\r\\n              });\\r\\n\\r\\n            }));\\r\\n\\r\\n          }\\r\\n\\r\\n          break;\\r\\n          \\r\\n        case 'mkdir':\\r\\n        \\r\\n          for(let key in fileOptions) {\\r\\n            \\r\\n            const path = fileOptions[key];\\r\\n            \\r\\n            if (this.options.verbose) {\\r\\n              console.log(`  - FileManagerPlugin: Creating path ${path}`)\\r\\n            }\\r\\n            \\r\\n            if (typeof path !== 'string') {\\r\\n              if (this.options.verbose) {\\r\\n                console.log('  - FileManagerPlugin: Warning - mkdir parameter has to be type of string. Process canceled.');\\r\\n              }\\r\\n              return;\\r\\n            }\\r\\n            \\r\\n            commandOrder.push(() => makeDir(path));\\r\\n          }\\r\\n\\r\\n          break;\\r\\n\\r\\n        default: \\r\\n          break;\\r\\n\\r\\n      }\\r\\n\\r\\n    }\\r\\n \\r\\n    return commandOrder;\\r\\n\\r\\n  }\\r\\n\\r\\n\\r\\n  apply(compiler) {\\r\\n\\r\\n    compiler.plugin(\\\"compilation\\\", (comp) => {\\r\\n\\r\\n      this.checkOptions(\\\"onStart\\\");\\r\\n\\r\\n    });\\r\\n\\r\\n    compiler.plugin('after-emit', (compliation, callback) => {\\r\\n\\r\\n      this.checkOptions(\\\"onEnd\\\");\\r\\n\\r\\n      callback();\\r\\n   \\r\\n    });\\r\\n\\r\\n  }\\r\\n\\r\\n}\\r\\n\\r\\nexport default FileManagerPlugin;\\r\\n\"],\"names\":[\"cpr\",\"require\",\"rimraf\",\"mv\",\"makeDir\",\"FileManagerPlugin\",\"options\",\"setOptions\",\"isWin\",\"test\",\"process\",\"platform\",\"cprOptions\",\"userOptions\",\"defaultOptions\",\"key\",\"hasOwnProperty\",\"stage\",\"verbose\",\"Object\",\"keys\",\"length\",\"log\",\"operationList\",\"Array\",\"isArray\",\"map\",\"push\",\"parseFileOptions\",\"opts\",\"reduce\",\"previous\",\"fn\",\"then\",\"retVal\",\"Promise\",\"resolve\",\"optKeys\",\"commandOrder\",\"i\",\"fileAction\",\"fileOptions\",\"command\",\"source\",\"destination\",\"reject\",\"err\",\"files\",\"mkdirp\",\"moveWithMkdirp\",\"path\",\"response\",\"compiler\",\"plugin\",\"comp\",\"checkOptions\",\"compliation\",\"callback\"],\"mappings\":\"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\"}\n\\ No newline at end of file\n",
+					"match": false,
+					"packageHash": "b587cde0584d8e5e4c969310543124472d56b2218a9ae9cc4e71ad6371a2cc04",
+					"size": 10960,
+					"sourceHash": "3a1582cb3a75ce6ab34aef2efdb7a22f4d25ca67d29e096a8215c76b36ed33b5",
+					"status": "content"
+				},
+				"newfile.js": {
+					"match": false,
+					"packageHash": "5776a2de95de727ce161338a4640bf5addd523f2fd04716856b242664ae47cfa",
+					"size": 27346,
+					"status": "missing-in-source"
+				},
+				"webpack.config.js": {
+					"diff": "--- published/webpack.config.js\n+++ rebuilt/webpack.config.js\n@@ -23,7 +23,7 @@\n           { source: \"./dist\", destination: \"./testing1\" },\n           { source: \"./dist\", destination: \"./testing2\" },\n           { source: \"./dist/bundle.js\", destination: \"./newfile.js\" }\n-        ],\n+        ]\n       }\n       /*\n       onEnd: [\n",
+					"match": false,
+					"packageHash": "0dc10ab43e7646896ecf31be8d51cb4278a43677e0b64efe17d13a5e1e4a1b86",
+					"size": 977,
+					"sourceHash": "a705b862b85676e602955c600e5bb4d1c2fc9b5823288c2ae6e3e421b01df85d",
+					"status": "content"
+				}
+			},
+			"summary": {
+				"differentFiles": 2,
+				"matchingFiles": 10,
+				"missingInPackage": 0,
+				"missingInSource": 2,
+				"score": 0.7142857142857143,
+				"totalFiles": 14
+			}
+		},
+		"prodDependencies": [
+			{
+				"name": "balanced-match",
+				"version": "1.0.2"
+			},
+			{
+				"name": "brace-expansion",
+				"version": "1.1.12"
+			},
+			{
+				"name": "concat-map",
+				"version": "0.0.1"
+			},
+			{
+				"name": "cpr",
+				"version": "2.2.0"
+			},
+			{
+				"name": "fs.realpath",
+				"version": "1.0.0"
+			},
+			{
+				"name": "glob",
+				"version": "7.2.3"
+			},
+			{
+				"name": "graceful-fs",
+				"version": "4.2.11"
+			},
+			{
+				"name": "inflight",
+				"version": "1.0.6"
+			},
+			{
+				"name": "inherits",
+				"version": "2.0.4"
+			},
+			{
+				"name": "make-dir",
+				"version": "1.3.0"
+			},
+			{
+				"name": "minimatch",
+				"version": "3.1.2"
+			},
+			{
+				"name": "minimist",
+				"version": "1.2.8"
+			},
+			{
+				"name": "mkdirp",
+				"version": "0.5.6"
+			},
+			{
+				"name": "mv",
+				"version": "2.1.1"
+			},
+			{
+				"name": "glob",
+				"version": "6.0.4"
+			},
+			{
+				"name": "rimraf",
+				"version": "2.4.5"
+			},
+			{
+				"name": "ncp",
+				"version": "2.0.0"
+			},
+			{
+				"name": "once",
+				"version": "1.4.0"
+			},
+			{
+				"name": "path-is-absolute",
+				"version": "1.0.1"
+			},
+			{
+				"name": "pify",
+				"version": "3.0.0"
+			},
+			{
+				"name": "rimraf",
+				"version": "2.7.1"
+			},
+			{
+				"name": "wrappy",
+				"version": "1.0.2"
+			}
+		]
+	}
+]
