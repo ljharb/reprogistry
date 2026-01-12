@@ -1,0 +1,81 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-12T05:12:00.916Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:2.10.1",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "argx@1.0.3",
+			"name": "argx",
+			"version": "1.0.3",
+			"location": "https://registry.npmjs.org/argx/-/argx-1.0.3.tgz",
+			"integrity": "sha512-0eId7YfRrafKwasb/eFTe1yTW3LyV784kbm6OfeMDWloI1BsaJzifh87mABOZpE5rTDek7oa/3MLdAeTyfw6yA==",
+			"publishedAt": "2015-07-13T01:10:34.737Z",
+			"publishedWith": {
+				"node": "0.12.4",
+				"npm": "2.10.1"
+			},
+			"dependencies": {}
+		},
+		"source": {
+			"integrity": null,
+			"location": "git+https://github.com/okunishinishi/node-argx.git",
+			"spec": "github:okunishinishi/node-argx#dce88daaca34b1db54f6f62bf6a93d39fbefa046"
+		},
+		"comparisonHash": "9ef46a5bd31291e57cbab41e2f17c57bd6da0b5b",
+		"diff": {
+			"files": {
+				".npmignore": {
+					"match": false,
+					"packageHash": "2ef0d5d180b99fe477a4b9ff3cdecf16803690b0277d26634b323426cae76a78",
+					"size": 543,
+					"status": "missing-in-source"
+				},
+				"README.md": {
+					"diff": "--- published/README.md\n+++ rebuilt/README.md\n@@ -16,24 +16,23 @@\n \n ```javascript\n /**\n- * This an example to declare an variadic functions.\n+ * This an example to declare an variadic functions\n  */\n \n var argx = require('argx');\n \n function doSomething(values, options, callback) {\n     var args = argx(arguments);\n-    callback = args.pop('function') || function noop(){}; // Consume last argument if it's a function. \n-    options = args.pop('object') || {}; // Consume last argument if it's an object. \n-    values = args.remain(); // Get remaining arguments as array.\n+    callback = args.pop('function') || function noop(){};\n+    options = args.pop('object') || {};\n+    values = args.remain();\n     /*...*/\n }\n \n+\n doSomething('foo', 'bar');\n doSomething('foo', 'bar', {verbose:true});\n-doSomething('foo', 'bar', function(err){});\n doSomething('foo', 'bar', {verbose:true}, function(err){});\n-\n ```\n \n \n@@ -47,8 +46,6 @@\n API\n -----\n \n-API guide for Argx instance, returned by `argx(arguments)`.\n-\n | Signature | Description |\n | --- | --- | --- |\n | .pop() | Pop a argument value from last. |\n@@ -59,15 +56,7 @@\n | .shift(2) | Shift multiple values from top. |\n | .shift('function') | Shift only if the top value conform the type. |\n | .shift(3, 'function') | Shift values while conforming the type. |\n-| .remain() | Shift all remained values. Always returns an array. |\n-\n-Note that .pop()/.shift() methods returns values as array only if multiple hits.\n-If you want to make sure to keep values as array, use `[].concat()`.\n-\n-```javascript\n-var args = argx(arguments);\n-var values = [].concat(args.pop(2,'string')) // Always array.\n-``\n+| .remain() | Shift all remained values. |\n \n \n License\n",
+					"match": false,
+					"packageHash": "a433f2ef28102915387a384709df099485dbd2f8bb5cd8f1ea929530017828d2",
+					"size": 3705,
+					"sourceHash": "0b71628ce429d82997faccc670697f27badc4876be3078f309bd012d965d07d4",
+					"status": "content"
+				},
+				"argx.js": {
+					"diff": "--- published/argx.js\n+++ rebuilt/argx.js\n@@ -106,11 +106,4 @@\n     return new Argx(args);\n }\n \n-/**\n- * Function to do nothing.\n- */\n-argx.noop = function noop() {\n-    // Do nothing.\n-};\n-\n module.exports = argx;\n",
+					"match": false,
+					"packageHash": "1416f69422d9edac80db3a6cd113b44ebef2f8596b67aa6ac55967d1283695ea",
+					"size": 2874,
+					"sourceHash": "589250cfd8f70fdff6de8f7734735cb4cf4035fe475bcd92eba7dc7c54805d4a",
+					"status": "content"
+				},
+				"argx_test.js": {
+					"diff": "--- published/argx_test.js\n+++ rebuilt/argx_test.js\n@@ -26,19 +26,13 @@\n         test.equal(args.remain().length, 2);\n     })('v1', 'v2', {});\n \n-    (function foo4() {\n+    (function foo2() {\n         var args = argx(arguments);\n         test.ok(!args.pop('function'));\n         test.ok(!args.pop(\"1\", 'object'));\n         test.equal(args.remain().length, 2);\n     })('v1', 'v2');\n \n-    (function foo4() {\n-        var args = argx(arguments);\n-        test.ok(args.pop(2).length, 2);\n-        test.ok(args.remain().length, 2);\n-    })('v1', 'v2', 'v3', 'v4', 'v5');\n-\n \n     test.done();\n };\n@@ -52,17 +46,5 @@\n         test.equal(args.shift(), undefined);\n         test.equal(args.shift(124), undefined);\n     })('v1', 'v2', {}, noop);\n-\n-    (function foo2() {\n-        var args = argx(arguments);\n-        test.ok(args.shift(2).length, 2);\n-        test.ok(args.remain().length, 2);\n-    })('v1', 'v2', 'v3', 'v4', 'v5');\n-\n-    test.done();\n-};\n-\n-exports['Use noop.'] = function (test) {\n-    test.ifError(argx.noop());\n     test.done();\n };\n\\ No newline at end of file\n",
+					"match": false,
+					"packageHash": "13b30b2781403bf6c3cf6f168d44a4638bf1dba9cbc4bdf5f055e107268aea0a",
+					"size": 1668,
+					"sourceHash": "b0d88b94a0ad4480adce036cebf88a6abde0dad395c53b92749304aed2d58667",
+					"status": "content"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -1,6 +1,6 @@\n {\n   \"name\": \"argx\",\n-  \"version\": \"1.0.3\",\n+  \"version\": \"1.0.2\",\n   \"description\": \"Parse function arguments. Useful to implement variadic functions.\",\n   \"main\": \"index.js\",\n   \"scripts\": {\n",
+					"match": false,
+					"packageHash": "cc36a63465cd93321d2977c56cfd628d4199b7d25214997a759d4866fe024d4c",
+					"size": 1029,
+					"sourceHash": "b23007a8fb1283de86a6cef0c53747422c472e867fa4877aeea959e7dba61f3f",
+					"status": "content"
+				}
+			},
+			"summary": {
+				"differentFiles": 4,
+				"matchingFiles": 4,
+				"missingInPackage": 0,
+				"missingInSource": 1,
+				"score": 0.4444444444444444,
+				"totalFiles": 9
+			}
+		},
+		"prodDependencies": []
+	}
+]
