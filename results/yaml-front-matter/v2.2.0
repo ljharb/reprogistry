@@ -1,0 +1,199 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-12T08:43:35.390Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:11.7.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "yaml-front-matter@2.2.0",
+			"name": "yaml-front-matter",
+			"version": "2.2.0",
+			"location": "https://registry.npmjs.org/yaml-front-matter/-/yaml-front-matter-2.2.0.tgz",
+			"integrity": "sha512-NQBvLskT2AFIfPgtm+ZufHewICKFSLmf3TM3qU5gbFWNrYb2vM8/ohD0XJCg5VuI1GZ2BUnG5iNu5lenCy+ktw==",
+			"publishedAt": "2014-02-17T06:31:13.270Z",
+			"publishedWith": {
+				"node": null,
+				"npm": "1.3.8"
+			},
+			"dependencies": {
+				"commander": "1.0.0",
+				"js-yaml": "~3.0.1"
+			}
+		},
+		"source": {
+			"integrity": "sha512-YML9LDv1eCvLA3Mro4TbCm/RfwsNeyZpzYY7nLSCsqRZlHuNxjOvWzIcT4XxebwjSJeyNWvPCCjIEk3hTR8anw==",
+			"location": "https://github.com/dworthen/js-yaml-front-matter",
+			"spec": "github:dworthen/js-yaml-front-matter#HEAD"
+		},
+		"comparisonHash": "9ef46a5bd31291e57cbab41e2f17c57bd6da0b5b",
+		"diff": {
+			"files": {
+				".npmignore": {
+					"match": false,
+					"packageHash": "fe6bf05797a1073ddbc4162d6bb142ec06e6b82d19f2d8ab08ae5567ac9e4557",
+					"size": 52,
+					"status": "missing-in-source"
+				},
+				"Makefile": {
+					"match": false,
+					"packageHash": "1ce1d537431225ce671ef1800c58828e0371849a879fe320fa09bee7fb07e3a8",
+					"size": 59,
+					"status": "missing-in-source"
+				},
+				"README.md": {
+					"diff": "--- published/README.md\n+++ rebuilt/README.md\n@@ -1,147 +1,215 @@\n # Yaml Front Matter\n \n-parses yaml at the top of a file, plus the file content into an object literal.\n+Parses yaml or json at the front of a string. Places the parsed content, plus the rest of the string content, into an object literal.\n \n-## Example\n+[Online Demo](https://dworthen.github.io/js-yaml-front-matter/).\n \n-This \n+#### Breaking Changes\n \n-    ---\n-    name: Derek Worthen\n-    age: young\n-    contact: \n-     email: email@domain.com\n-     address: some location\n-    pets: \n-     - cat\n-     - dog\n-     - bat\n-    match: !!js/regexp /pattern/gim\n-    run: !!js/function function() { }\n-    ---\n-    Some Other content\n-    \n-becomes\n+This readme is for the 4.x release, which introduces breaking changes. View the [changelog](CHANGELOG.md) for more information.\n+\n+[3.x readme](https://github.com/dworthen/js-yaml-front-matter/tree/v3.4.0)\n+\n+## Example\n+\n+This\n \n-    { name: 'Derek Worthen',\n-      age: 'young',\n-      contact: { email: 'email@domain.com', address: 'some location' },\n-      pets: [ 'cat', 'dog', 'bat' ],\n-      match: /pattern/gim,\n-      run: [Function],\n-      __content: 'Some Other Content' }\n+```yaml\n+---\n+name: Derek Worthen\n+age: 127\n+contact:\n+  email: email@domain.com\n+  address: some location\n+pets:\n+  - cat\n+  - dog\n+  - bat\n+match: !!js/regexp /pattern/gim\n+run: !!js/function function() { }\n+---\n+Some Other content\n+```\n+\n+```js\n+var fs = require('fs');\n+var yamlFront = require('yaml-front-matter');\n+\n+fs.readFile('./some/file.txt', 'utf8', function(fileContents) {\n+    console.log(yamlFront.loadFront(fileContents));\n+});\n+\n+```\n+\n+outputs\n+\n+```js\n+{ \n+    name: 'Derek Worthen',\n+    age: 127,\n+    contact: { email: 'email@domain.com', address: 'some location' },\n+    pets: [ 'cat', 'dog', 'bat' ],\n+    match: /pattern/gim,\n+    run: [Function],\n+    __content: '\\nSome Other Content' \n+}\n+```\n \n May also use JSON\n \n-    ---\n-    {\n+```json\n+---\n+{\n     \"name\": \"Derek Worthen\",\n     \"age\": \"young\",\n     \"anArray\": [\"one\",\"two\"],\n     \"subObj\":{\"field1\": \"one\"}\n-    }\n-    ---\n-      \n",
+					"match": false,
+					"packageHash": "e962665f1ba8d3558165cb523bdf0f9e2dda0b7db72b1674bcc0a41a57fd4407",
+					"size": 4654,
+					"sourceHash": "254641171d950374180c531fe63e00ee54fdc4e4a907a92e8fef99644c506047",
+					"status": "content"
+				},
+				"bin/js-yaml-front.js": {
+					"diff": "--- published/bin/js-yaml-front.js\n+++ rebuilt/bin/js-yaml-front.js\n@@ -1,18 +1,48 @@\n #!/usr/bin/env node\n \n-var program= require('commander')\n-  , jsYaml = require('../lib/js-yaml-front');\n+var program = require('commander')\n+    , yamlFront = require('../')\n+    , package = require('../package.json');\n \n program\n-  .version('1.0.1')\n-  .usage('[options] <file>')\n-  .option('-c, --content [name]', 'set the property name for the files contents [__content]')\n-  .parse(process.argv);\n+    .version(package.version, '-v, --version')\n+    .usage('[options] <string>')\n+    .option('-c, --content [name]', 'set the property name for the files contents [__content]')\n+    .option('--pretty', 'prints the json output with spaces.')\n+    .on('--help', function() {\n+        console.log('');\n+        console.log('   Examples')\n+        console.log('');\n+        console.log('     Basic');\n+        console.log('       yaml-front-matter <yaml-front-matter>');\n+        console.log('');\n+        console.log('     Piping content from an input file to an output file')\n+        console.log('       cat ./some/file.txt | yaml-front-matter > output.txt');\n+    });\n+    \n+program.parse(process.argv);\n \n-if(program.args.length > 0) {\n-  if(program.content) {\n-    console.log(jsYaml.loadFront(program.args[0], program.content));\n-  } else {\n-    console.log(jsYaml.loadFront(program.args[0]));\n-  }  \n+if (program.args.length > 0) {\n+    processData(program.args[0]);\n+} else {\n+    var data = '';\n+    process.stdin.on('readable', function () {\n+        var chunk;\n+        while (chunk = process.stdin.read()) {\n+            data += chunk;\n+        }\n+    });\n+\n+    process.stdin.on('end', function () {\n+        // There will be a trailing \\n from the user hitting enter. Get rid of it.\n+        // data = data.replace(\"\\r\\n\", '\\n');\n+        processData(data);\n+    });\n+}\n+\n+function processData(data) {\n+    console.log(JSON.stringify(yamlFront.safeLoadFront(data,\n+        { contentKeyName: program.content || '__content' }), \n+        undefined, \n+        program.pretty ? 2 : 0));\n }\n\\ No newline at end of file\n",
+					"match": false,
+					"packageHash": "9c21be9b00a6cbb7786ed554a7fac08f07e7a5ec954ec9647019dee00364e678",
+					"size": 471,
+					"sourceHash": "ac68306ffc7733aaf6e17d6c47b27bc85d07b70bb2eb942e173c8e907df17c14",
+					"status": "content"
+				},
+				"index.js": {
+					"match": false,
+					"packageHash": "d29a61c24479fdc20d5377fea1fff69b652572f48e9aa1f00bd78181a55536b6",
+					"size": 49,
+					"status": "missing-in-source"
+				},
+				"lib/js-yaml-front.js": {
+					"match": false,
+					"packageHash": "6cd78eca6ff9731106bcc6ad02715791e7d21896a2bc67c18abb79ccd8ed8757",
+					"size": 937,
+					"status": "missing-in-source"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -1,28 +1,42 @@\n {\n   \"author\": \"Derek Worthen\",\n+  \"license\": \"MIT\",\n   \"name\": \"yaml-front-matter\",\n-  \"description\": \"yaml front matter for JS using the js-yaml module\",\n-  \"version\": \"2.2.0\",\n+  \"description\": \"yaml front matter for JS. Parse yaml or JSON from the beginning of files.\",\n+  \"main\": \"dist/yamlFront.js\",\n+  \"module\": \"src/index.js\",\n+  \"version\": \"4.1.1\",\n+  \"keywords\": [\n+    \"yaml\",\n+    \"front matter\",\n+    \"json\"\n+  ],\n   \"repository\": {\n     \"type\": \"git\",\n-    \"url\": \"https://github.com/dworthen/js-yaml-front-matter\"\n+    \"url\": \"git+https://github.com/dworthen/js-yaml-front-matter\"\n   },\n   \"dependencies\": {\n-    \"commander\": \"1.0.0\",\n-    \"js-yaml\": \"~3.0.1\"\n+    \"commander\": \"^6.2.0\",\n+    \"js-yaml\": \"^3.14.1\"\n   },\n   \"devDependencies\": {\n-    \"should\": \"0.6.3\",\n-    \"mocha\": \"~1.3.0\"\n-  },\n-  \"engines\": {\n-    \"node\": \">=0.8\"\n+    \"@babel/core\": \"^7.12.10\",\n+    \"@babel/preset-env\": \"^7.12.10\",\n+    \"babel-loader\": \"^8.2.2\",\n+    \"mocha\": \"^8.2.1\",\n+    \"should\": \"^13.2.3\",\n+    \"standard-version\": \"^9.0.0\",\n+    \"webpack\": \"^4.44.2\",\n+    \"webpack-cli\": \"^4.2.0\"\n   },\n   \"bin\": {\n-    \"yaml-front-matter\": \"bin/js-yaml-front.js\",\n-    \"js-yaml\": \"node_modules/js-yaml/bin/js-yaml.js\"\n+    \"yaml-front-matter\": \"bin/js-yaml-front.js\"\n   },\n   \"scripts\": {\n-    \"test\": \"./node_modules/mocha/bin/mocha -u bdd --reporter spec\"\n+    \"test\": \"npm run build && mocha -u bdd --reporter spec\",\n+    \"start\": \"npm run build:browser && http-server ./docs -p 8080\",\n+    \"release\": \"standard-version\",\n+    \"build\": \"webpack --mode production\",\n+    \"build:browser\": \"webpack --mode production --env.browser\"\n   }\n }\n",
+					"match": false,
+					"packageHash": "546d24f74a9999cffd25783252ed15a327f62f798ae6880985b2ea6aa9168500",
+					"size": 653,
+					"sourceHash": "f63e0d71782d890a79b97c9a325c1202595f162b45412bcfed8f1480c9e2d3b4",
+					"status": "content"
+				},
+				"test/fixtures/testExtraDashes.html": {
+					"match": false,
+					"packageHash": "3221f724b4aa33dcfe30b5bcf45f51b3119e122c63c086f947ec5ab256d34c0d",
+					"size": 162,
+					"status": "missing-in-source"
+				},
+				"test/fixtures/testFile.html": {
+					"match": false,
+					"packageHash": "079aa3ab8e96965eb8a58d45ee7ee175c5f32963d69c968451dc0c4145a8573a",
+					"size": 114,
+					"status": "missing-in-source"
+				},
+				"test/js-yaml-front.test.js": {
+					"diff": "--- published/test/js-yaml-front.test.js\n+++ rebuilt/test/js-yaml-front.test.js\n@@ -1,100 +1,152 @@\n-var should = require('should');\n+var fs = require(\"fs\");\n+var path = require(\"path\");\n+var jsYaml = require(\"../dist/yamlFront\");\n+var should = require(\"should\");\n+\n+describe(\"js-yaml-front\", function() {\n+  var results = null;\n+  var testStr = null;\n+  var testStrWithExtraDashes = null;\n+  var testJsonStr = null;\n+  var testSafeYamlStr = null;\n+\n+  var simpleYaml = fs.readFileSync(\n+    path.resolve(__dirname, \"./fixtures/yaml.txt\"),\n+    \"utf8\"\n+  );\n+  var yamlWithDashes = fs.readFileSync(\n+    path.resolve(__dirname, \"./fixtures/yamlWithExtraDashes.txt\"),\n+    \"utf8\"\n+  );\n+  var safeYaml = fs.readFileSync(\n+    path.resolve(__dirname, \"./fixtures/safeYaml.txt\"),\n+    \"utf8\"\n+  );\n+\n+  var json = fs.readFileSync(\n+    path.resolve(__dirname, \"./fixtures/json.txt\"),\n+    \"utf8\"\n+  );\n+\n+  //   var testJsonStr = '---\\n{\"post\": \"title one\",\\n\"anArray\": [\"one\",\"two\"],\\n\"subObject\":\\n';\n+  //       testJsonStr += '{\"obj1\": \"cool\", \"obj2\": \"two\"}}\\n---\\ncontent\\nmore';\n+\n+  beforeEach(function() {\n+    results = null;\n+    testStr = simpleYaml;\n+    testStrWithExtraDashes = yamlWithDashes;\n+    testJsonStr = json;\n+    testSafeYamlStr = safeYaml;\n+  });\n \n-describe('js-yaml-front', function() {\n+  function testSimpleYaml(key) {\n+    key = key || \"__content\";\n+    results.should.have.property(\"post\", \"title one\");\n+    results.should.have.property(\"anArray\");\n+    results.anArray.should.containEql(\"one\");\n+    results.anArray.should.containEql(\"two\");\n+    results.should.have.property(\"subObject\");\n+    results.subObject.should.have.property(\"obj1\", \"cool\");\n+    results.subObject.should.have.property(\"obj2\", \"two\");\n+    results.should.have.property(\"reg\");\n+    results.reg.should.be.an.instanceOf(RegExp);\n+    results.should.have.property(\"fun\");\n+    results.fun.should.Function();\n+    results.should.have.property(key);\n+    results[key].should.match(/content\\r?\\nmore/);\n+  }\n+\n+  function testYamlWithDashes(key) {\n+    key = key || \"__content\";\n+    results.subObject.should.have.property(\"obj2\", \"two ---\");\n+    results.should.have.property(key);\n+    results[key].should.match(/content\\r?\\nmore/);\n+  }\n+\n+  function testSafeYaml(key) {\n+    key = key || \"__content\";\n+    results.should.not.have.property(\"reg\");\n+    results.should.not.have.property(\"fun\");\n+    results.should.have.property(key);\n+    results[key].should.match(/content\\r?\\nmore/);\n+  }\n+\n+  function testJson(key) {\n+    key = key || \"__content\";\n+    results.should.have.property(\"post\", \"title one\");\n+    results.should.have.property(\"anArray\");\n+    results.anArray.should.containEql(\"one\");\n+    results.anArray.should.containEql(\"two\");\n+    results.should.have.property(\"subObject\");\n+    results.subObject.should.have.property(\"obj1\", \"cool\");\n+    results.subObject.should.have.property(\"obj2\", \"two\");\n+    results.should.have.property(key);\n+    results[key].should.match(/content\\r?\\nmore/);\n+  }\n+\n+  describe(\"loadFront\", function() {\n+    describe(\"loading yaml\", function() {\n+      it(\"should support loading yaml-front-matter\", function() {\n+        results = jsYaml.loadFront(testStr);\n+        testSimpleYaml();\n+      });\n+    });\n \n-  var jsYaml = require('../lib/js-yaml-front')\n",
+					"match": false,
+					"packageHash": "4579bb59ff1c9aad11ea41534f14e8dac300df6b239071eafc2f8e20c87e1842",
+					"size": 3410,
+					"sourceHash": "21cc2b6e575c8d6f2db4f133505ad44c18bef87df3522c11302d78c6320079bc",
+					"status": "content"
+				},
+				"CHANGELOG.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"LICENSE.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"dist/yamlFront.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"docs/css/base.css": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"docs/css/layout.css": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"docs/css/skeleton.css": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"docs/index.html": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"docs/js/handlebars.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"docs/js/yamlFront.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/index.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/fixtures/json.txt": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/fixtures/safeYaml.txt": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/fixtures/yaml.txt": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/fixtures/yamlWithExtraDashes.txt": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"webpack.config.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"yaml-front-matter": {
+					"match": false,
+					"status": "missing-in-package"
+				}
+			},
+			"summary": {
+				"differentFiles": 4,
+				"matchingFiles": 0,
+				"missingInPackage": 16,
+				"missingInSource": 6,
+				"score": 0,
+				"totalFiles": 26
+			}
+		},
+		"prodDependencies": [
+			{
+				"name": "argparse",
+				"version": "1.0.10"
+			},
+			{
+				"name": "commander",
+				"version": "6.2.0"
+			},
+			{
+				"name": "esprima",
+				"version": "4.0.1"
+			},
+			{
+				"name": "js-yaml",
+				"version": "3.14.1"
+			},
+			{
+				"name": "sprintf-js",
+				"version": "1.0.3"
+			}
+		]
+	}
+]
