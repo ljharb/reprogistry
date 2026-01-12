@@ -1,0 +1,114 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-12T06:52:07.288Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:11.7.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "xmldoc@0.1.2",
+			"name": "xmldoc",
+			"version": "0.1.2",
+			"location": "https://registry.npmjs.org/xmldoc/-/xmldoc-0.1.2.tgz",
+			"integrity": "sha512-oFJMmRr43hPjq0ho5zgGR8AE1i8678nas3GcWKb6oyt+x4iENW/5bDcXbFHkjg1cn8Rhno8feQcOTnWngOnSSA==",
+			"publishedAt": "2013-09-08T14:34:03.004Z",
+			"publishedWith": {
+				"node": null,
+				"npm": "1.2.32"
+			},
+			"dependencies": {
+				"sax": "0.4.2"
+			}
+		},
+		"source": {
+			"integrity": null,
+			"location": "git://github.com/nfarina/xmldoc.git",
+			"spec": "github:nfarina/xmldoc#HEAD"
+		},
+		"comparisonHash": "9ef46a5bd31291e57cbab41e2f17c57bd6da0b5b",
+		"diff": {
+			"files": {
+				".npmignore": {
+					"match": false,
+					"packageHash": "51a57ed606b740d419cba04b5755e58d6b5e635208ed80606f25ae5eece80597",
+					"size": 35,
+					"status": "missing-in-source"
+				},
+				"README.md": {
+					"diff": "--- published/README.md\n+++ rebuilt/README.md\n@@ -1,27 +1,60 @@\n+[![Build Status](https://travis-ci.org/nfarina/xmldoc.svg)](https://travis-ci.org/nfarina/xmldoc)\n+[![Coverage Status](https://coveralls.io/repos/github/nfarina/xmldoc/badge.svg?branch=master)](https://coveralls.io/github/nfarina/xmldoc?branch=master)\n \n ## Introduction\n \n-`xmldoc` lets you parse XML documents with ease. It's a pure-JavaScript, one-file XML document class with a single dependency on the excellent [`sax`][sax] parser.\n+`xmldoc` lets you parse XML documents with ease. It's a lightweight XML document class with a single dependency on the excellent [`sax`][sax] parser.\n \n For more on why I wrote this class, see the [blog post][blog].\n \n-  [blog]: http://nfarina.com/post/34302964969/a-lightweight-xml-document-class-for-nodejs-javascript\n+As of version 2.0, `xmldoc` fully supports TypeScript and can be imported in both CommonJS and ESM environments.\n+\n+[blog]: http://nfarina.com/post/34302964969/a-lightweight-xml-document-class-for-nodejs-javascript\n+\n+## Release Notes\n+\n+See [CHANGELOG.md](./CHANGELOG.md) for details.\n \n ## Installation\n \n-    npm install xmldoc\n+```bash\n+npm install xmldoc\n+# or\n+yarn add xmldoc\n+```\n \n Or just download the repository and include it in your `node_modules` directly. Or just download the [single JS file][blob]!\n \n-  [blob]: https://github.com/nfarina/xmldoc/blob/master/lib/xmldoc.js\n+[blob]: https://github.com/nfarina/xmldoc/blob/master/lib/xmldoc.js\n \n ## Usage\n \n-    var xmldoc = require('../lib/xmldoc');\n+### CommonJS (Node.js)\n+\n+```js\n+const { XmlDocument } = require(\"xmldoc\");\n+\n+const document = new XmlDocument(\"<some>xml</some>\");\n+\n+// do things\n+```\n+\n+### ESM / TypeScript\n+\n+```ts\n+// ESM environments\n+import { XmlDocument } from \"xmldoc\";\n \n-    var document = new xmldoc.XmlDocument(\"<some>xml</some>\");\n+const document = new XmlDocument(\"<some>xml</some>\");\n+```\n \n-    ... do things\n+### React Native\n+\n+If you're using React Native, you may need to install `buffer` and `stream` separately:\n+\n+```bash\n+npm install buffer stream xmldoc\n+```\n \n ## Classes\n \n@@ -31,17 +64,24 @@\n \n ## Members\n \n-* `name` - the node name, like \"tat\" for `<tat>`.\n-* `attr` - an object dict containing attribute properties, like `bookNode.attr.title` for `<book title=\"...\">`.\n-* `val` - the string \"value\" of the node, if any, like \"world\" for `<hello>world</hello>`.\n-* `children` - an array of `XmlElement` children of the node.\n-\n-Each member defaults to a sensible \"empty\" value like `{}` for `attr`, `[]` for `children`, and `\"\"` for `val`.\n+| Member name                                      | Default empty value | Description                                                                                                                                                                      |\n+| :----------------------------------------------- | :------------------ | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |\n+| `name`                                           |                     | Node name, like \"tat\" for `<tat>`. XML \"namespaces\" are ignored by the underlying [sax-js](https://github.com/isaacs/sax-js) parser: so `<office:body>` becomes `\"office:body\"`. |\n+| `attr`                                           | `{}`                | Object dict containing attribute properties. Like `bookNode.attr.title` for `<book title=\"...\">`.                                                                                |\n+| `val`                                            | `\"\"`                | String \"value\" of the node, if any. Like `\"world\"` for `<hello>world</hello>`.                                                                                                   |\n+| `children`                                       | `[]`                | Array of `XmlElement` children of the node.                                                                                                                                      |\n+| `firstChild`                                     |                     | What it sounds like. `null` if no children.                                                                                                                                      |\n+| `lastChild`                                      |                     | What it sounds like. `null` if no children.                                                                                                                                      |\n+| `line`, `column`, `position`, `startTagPosition` |                     | Information about the element's original position in the XML string.                                                                                                             |\n \n ## Methods\n \n All methods with `child` in the name operate only on direct children; they do not do a deep/recursive search.\n \n+It's important to note that `xmldoc` is designed for when you know exactly what you want from your XML file. For instance, it's great for parsing API responses with known structures, but it's not great at teasing things out of HTML documents from the web.\n+\n+If you need to do lots of searching through your XML document, I highly recommend trying a different library like [node-elementtree](https://github.com/racker/node-elementtree).\n+\n ### eachChild(func)\n \n",
+					"match": false,
+					"packageHash": "004c1a9cb870faa46876367239f1aeb0715faf32c96c336c7b6aee28c9ef0ed3",
+					"size": 3723,
+					"sourceHash": "3d58c53cd7bf13125613faef538cb4a6f03e078d950b0bd89210d48cabcb27b2",
+					"status": "content"
+				},
+				"examples/example.js": {
+					"match": false,
+					"packageHash": "890b00d38b70ea85bf4b54b7a3c8111da40c280ddcd0ca363a79bbd5d18b2d5b",
+					"size": 1567,
+					"status": "missing-in-source"
+				},
+				"examples/test.html": {
+					"match": false,
+					"packageHash": "894d392390b9d08678cccb020761e8fc130ddb7fa1c216d9abba637c1af9a58e",
+					"size": 848,
+					"status": "missing-in-source"
+				},
+				"examples/test.xml": {
+					"match": false,
+					"packageHash": "f45d018442326c1eb73d51f143b939120b67a1635481261fbcee5a7d11164c07",
+					"size": 617,
+					"status": "missing-in-source"
+				},
+				"index.js": {
+					"diff": "--- published/index.js\n+++ rebuilt/index.js\n@@ -1,3 +1,2 @@\n-// This file is just added for convenience so this repository can be\n-// directly checked out into a project's deps folder\n-module.exports = require('./lib/xmldoc');\n+// This file provides backward compatibility for existing CommonJS consumers\n+module.exports = require(\"./lib/xmldoc\");\n",
+					"match": false,
+					"packageHash": "e9e234eca3ab426c6d00d503163bd9a123ba2ae1e57ddd6c9640bab5de8da522",
+					"size": 164,
+					"sourceHash": "2faecb23ae451e4781999350d844fb5d13aa9d4e75d24b0ae4609db86c13c2ab",
+					"status": "content"
+				},
+				"lib/xmldoc.js": {
+					"diff": "--- published/lib/xmldoc.js\n+++ rebuilt/lib/xmldoc.js\n@@ -1,210 +1,413 @@\n (function () {\n+  var sax;\n \n-// global on the server, window in the browser\n-var sax, root = this;\n+  if (\n+    typeof module !== \"undefined\" &&\n+    module.exports &&\n+    !global.xmldocAssumeBrowser\n+  ) {\n+    // We're being used in a Node-like environment\n+    sax = require(\"sax\");\n+  } else {\n+    // assume it's attached to the Window object in a browser\n+    sax = this.sax;\n+\n+    if (!sax) {\n+      // no sax for you!\n+      throw new Error(\n+        \"Expected sax to be defined. Make sure you're including sax.js before this file.\",\n+      );\n+    }\n+  }\n+\n+  /**\n+   * XmlElement is our basic building block. Everything is an XmlElement; even XmlDocument\n+   * behaves like an XmlElement by inheriting its attributes and functions.\n+   */\n+  function XmlElement(tag, parser) {\n+    // If you didn't hand us a parser (common case) see if we can grab one\n+    // from the current execution stack.\n+    if (!parser) {\n+      var delegate = delegates[delegates.length - 1];\n+\n+      if (delegate.parser) {\n+        parser = delegate.parser;\n+      }\n+    }\n+\n+    this.name = tag.name;\n+    this.attr = tag.attributes;\n+    this.val = \"\";\n+    this.children = [];\n+    this.firstChild = null;\n+    this.lastChild = null;\n+\n+    // Assign parse information\n+    this.line = parser ? parser.line : null;\n+    this.column = parser ? parser.column : null;\n+    this.position = parser ? parser.position : null;\n+    this.startTagPosition = parser ? parser.startTagPosition : null;\n+  }\n \n-if (typeof module !== 'undefined' && module.exports) {\n-  sax = require('sax');\n-  root = module.exports;\n-}\n-else {\n-  sax = root.sax;\n-  if (!sax) // no sax for you!\n-    throw new Error(\"Expected sax to be defined. Make sure you're including sax.js before this file.\");\n-}\n-\n-/*\n-XmlElement is our basic building block. Everything is an XmlElement; even XmlDocument\n-behaves like an XmlElement by inheriting its attributes and functions.\n-*/\n-\n-function XmlElement(tag) {\n-  this.name = tag.name;\n-  this.attr = tag.attributes || {};\n-  this.val = \"\";\n-  this.children = [];\n-}\n-\n-// SaxParser handlers\n-\n-XmlElement.prototype._opentag = function(tag) {\n-\n-  var child = new XmlElement(tag);\n-  \n-  // add to our children array\n-  this.children.push(child);\n-\n-  // update first/last pointers\n-  if (!this.firstChild) this.firstChild = child;\n-  this.lastChild = child;\n-\n-  delegates.unshift(child);\n-}\n-\n-XmlElement.prototype._closetag = function() {\n-  delegates.shift();\n-}\n-\n-XmlElement.prototype._text = function(text) {\n-  if (text) this.val += text;\n",
+					"match": false,
+					"packageHash": "bea019a85954f667ef49a9834f9ed4c6d26de4360db9092ee6368d78b3d72c30",
+					"size": 5443,
+					"sourceHash": "0efec98ca930cd16e5a70a7a9f3589959c68a69f3d8fcc3c55f51adf6a279e90",
+					"status": "content"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -1,4 +1,7 @@\n {\n+  \"//\": [\n+    \"glob is set to ^13.0.0 to fix a security vulnerability in the previous version\"\n+  ],\n   \"name\": \"xmldoc\",\n   \"description\": \"A lightweight XML Document class for JavaScript.\",\n   \"author\": {\n@@ -6,15 +9,41 @@\n     \"email\": \"nfarina@gmail.com\",\n     \"url\": \"http://nfarina.com\"\n   },\n-  \"version\": \"0.1.2\",\n-  \"main\": \"./index\",\n-  \"dependencies\": {\n-    \"sax\": \"0.4.2\"\n+  \"version\": \"2.0.3\",\n+  \"packageManager\": \"yarn@4.12.0\",\n+  \"type\": \"commonjs\",\n+  \"main\": \"./lib/xmldoc.js\",\n+  \"types\": \"./dist/xmldoc.d.ts\",\n+  \"exports\": {\n+    \".\": {\n+      \"types\": \"./dist/xmldoc.d.ts\",\n+      \"import\": \"./dist/xmldoc.js\",\n+      \"require\": \"./lib/xmldoc.js\",\n+      \"default\": \"./lib/xmldoc.js\"\n+    }\n   },\n-  \"license\": {\n-    \"type\": \"MIT\",\n-    \"url\": \"https://raw.github.com/nfarina/xmldoc-js/master/LICENSE\"\n+  \"files\": [\n+    \"dist/*.js\",\n+    \"dist/*.d.ts\",\n+    \"dist/*.map\",\n+    \"lib\",\n+    \"LICENSE\",\n+    \"README.md\",\n+    \"CHANGELOG.md\",\n+    \"index.js\",\n+    \"index.d.ts\"\n+  ],\n+  \"scripts\": {\n+    \"test\": \"yarn test:js || true && yarn test:ts\",\n+    \"test:js\": \"tap test/*.js\",\n+    \"test:ts\": \"vitest run test/ts\",\n+    \"coverage\": \"npm test:js -- --cov --coverage-report=html\",\n+    \"clean\": \"rm -rf dist\",\n+    \"build\": \"tsc --sourceMap\",\n+    \"prepublishOnly\": \"npm run clean && npm run build\",\n+    \"format\": \"prettier --write .\"\n   },\n+  \"license\": \"MIT\",\n   \"repository\": {\n     \"type\": \"git\",\n     \"url\": \"git://github.com/nfarina/xmldoc.git\"\n@@ -23,7 +52,34 @@\n     {\n       \"name\": \"Nick Farina\",\n       \"email\": \"nfarina@gmail.com\"\n+    },\n+    {\n+      \"name\": \"Caleb Meredith\",\n+      \"email\": \"calebmeredith8@gmail.com\"\n     }\n   ],\n-  \"readmeFilename\": \"README.md\"\n-}\n+  \"readmeFilename\": \"README.md\",\n+  \"dependencies\": {\n+    \"sax\": \"^1.4.3\"\n+  },\n+  \"devDependencies\": {\n+    \"@types/sax\": \"^1.2.7\",\n+    \"prettier\": \"^3.7.4\",\n+    \"tap\": \"^21.5.0\",\n+    \"typescript\": \"^5.9.3\",\n+    \"vitest\": \"^4.0.15\"\n+  },\n+  \"engines\": {\n+    \"node\": \">=12.0.0\"\n+  },\n+  \"resolutions\": {\n+    \"glob\": \"^13.0.0\"\n+  },\n+  \"keywords\": [\n+    \"xml\",\n+    \"sax\",\n+    \"parser\",\n+    \"xpath\",\n+    \"document\"\n+  ]\n+}\n\\ No newline at end of file\n",
+					"match": false,
+					"packageHash": "9963c907a86a0f60ecb31481297f4ffdb98beb1b63f4da5297a92fa61378d16f",
+					"size": 624,
+					"sourceHash": "e5b2dbdd68c286c7b15190e9437e1d52ef3c3279b312aa2e1dba8b29152b27f2",
+					"status": "content"
+				},
+				"CHANGELOG.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"index.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				}
+			},
+			"summary": {
+				"differentFiles": 4,
+				"matchingFiles": 1,
+				"missingInPackage": 2,
+				"missingInSource": 4,
+				"score": 0.09090909090909091,
+				"totalFiles": 11
+			}
+		},
+		"prodDependencies": [
+			{
+				"name": "sax",
+				"version": "1.4.4"
+			}
+		]
+	}
+]
