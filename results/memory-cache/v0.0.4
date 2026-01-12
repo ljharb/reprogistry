@@ -1,0 +1,95 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-12T04:30:29.299Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:11.7.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "memory-cache@0.0.4",
+			"name": "memory-cache",
+			"version": "0.0.4",
+			"location": "https://registry.npmjs.org/memory-cache/-/memory-cache-0.0.4.tgz",
+			"integrity": "sha512-zABeDJz1uOKxdTho82G0EgpKl4tDLtDyoFH4AB+OOU7JKgg1AxUpDeh8k9VZ850PQCv4amsugFao7KXqxNkAOA==",
+			"publishedAt": "2012-09-18T03:46:36.181Z",
+			"publishedWith": {
+				"node": null,
+				"npm": "1.1.59"
+			},
+			"dependencies": {}
+		},
+		"source": {
+			"integrity": null,
+			"location": "git://github.com/ptarjan/node-cache.git",
+			"spec": "github:ptarjan/node-cache#HEAD"
+		},
+		"comparisonHash": "9ef46a5bd31291e57cbab41e2f17c57bd6da0b5b",
+		"diff": {
+			"files": {
+				"README.md": {
+					"diff": "--- published/README.md\n+++ rebuilt/README.md\n@@ -1,50 +1,72 @@\n-# node-cache\n+# memory-cache [![Build Status](https://travis-ci.org/ptarjan/node-cache.svg?branch=master)](https://travis-ci.org/ptarjan/node-cache)\n \n A simple in-memory cache for node.js\n \n ## Installation\n \n-    npm install memory-cache\n+    npm install memory-cache --save\n \n ## Usage\n \n-    var cache = require('memory-cache');\n+```javascript\n+var cache = require('memory-cache');\n \n-    // now just use the cache\n+// now just use the cache\n \n-    cache.put('foo', 'bar');\n-    console.log(cache.get('foo'))\n+cache.put('foo', 'bar');\n+console.log(cache.get('foo'));\n \n-    // that wasn't too interesting, here's the good part\n+// that wasn't too interesting, here's the good part\n \n-    cache.put('houdini', 'disapear', 100) // Time in ms\n-    console.log('Houdini will now ' + cache.get('houdini'));\n+cache.put('houdini', 'disappear', 100, function(key, value) {\n+    console.log(key + ' did ' + value);\n+}); // Time in ms\n \n-    setTimeout(function() {\n-      console.log('Houdini is ' + cache.get('houdini'));\n-    }, 200);\n+console.log('Houdini will now ' + cache.get('houdini'));\n+\n+setTimeout(function() {\n+    console.log('Houdini is ' + cache.get('houdini'));\n+}, 200);\n+\n+\n+// create new cache instance\n+var newCache = new cache.Cache();\n+\n+newCache.put('foo', 'newbaz');\n+\n+setTimeout(function() {\n+  console.log('foo in old cache is ' + cache.get('foo'));\n+  console.log('foo in new cache is ' + newCache.get('foo'));\n+}, 200);\n+```\n \n which should print\n \n     bar\n-    Houdini will now disapear\n+    Houdini will now disappear\n+    houdini did disappear\n     Houdini is null\n+    foo in old cache is baz\n+    foo in new cache is newbaz\n \n ## API\n \n-### put = function(key, value, time)\n+### put = function(key, value, time, timeoutCallback)\n \n-* Simply stores a value. \n-* If time isn't passed in, it is stored forever.\n-* Will actually remove the value in the specified time (via `setTimeout`)\n+* Simply stores a value\n+* If time isn't passed in, it is stored forever\n+* Will actually remove the value in the specified time in ms (via `setTimeout`)\n+* timeoutCallback is optional function fired after entry has expired with key and value passed (`function(key, value) {}`)\n+* Returns the cached value\n \n ### get = function(key)\n \n-* Retreives a value for a given key\n+* Retrieves a value for a given key\n+* If value isn't cached, returns `null`\n \n ### del = function(key)\n \n-* Deletes a key\n+* Deletes a key, returns a boolean specifying whether or not the key was deleted\n \n ### clear = function()\n \n@@ -65,19 +87,39 @@\n \n ### hits = function()\n \n-* Returns the number of cache hits\n+* Returns the number of cache hits (only monitored in debug mode)\n",
+					"match": false,
+					"packageHash": "39ed3ad06509c6ff260a3ea3fea5fc6f06cb4a75b7ed1a87ebc81d564fcbd5fe",
+					"size": 1555,
+					"sourceHash": "f8c34f1842a76e5bdf0d3dc33508005b713d3e001de80f3de4890279bfabadd9",
+					"status": "content"
+				},
+				"index.js": {
+					"diff": "--- published/index.js\n+++ rebuilt/index.js\n@@ -1,79 +1,190 @@\n-var cache = {}\n-function now() { return (new Date).getTime(); }\n-var debug = false;\n-var hitCount = 0;\n-var missCount = 0;\n-\n-exports.put = function(key, value, time) {\n-  if (debug) console.log('caching: '+key+' = '+value+' (@'+time+')');\n-  var oldRecord = cache[key];\n-\tif (oldRecord) {\n-\t\tclearTimeout(oldRecord.timeout);\n-\t}\n-\n-\tvar expire = time + now();\n-\tvar record = {value: value, expire: expire};\n-\n-\tif (!isNaN(expire)) {\n-\t\tvar timeout = setTimeout(function() {\n-\t    exports.del(key);\n-\t  }, time);\n-\t\trecord.timeout = timeout;\n-\t}\n+'use strict';\n \n-\tcache[key] = record;\n-}\n+function Cache () {\n+  var _cache = Object.create(null);\n+  var _hitCount = 0;\n+  var _missCount = 0;\n+  var _size = 0;\n+  var _debug = false;\n+\n+  this.put = function(key, value, time, timeoutCallback) {\n+    if (_debug) {\n+      console.log('caching: %s = %j (@%s)', key, value, time);\n+    }\n \n-exports.del = function(key) {\n-  delete cache[key];\n-}\n+    if (typeof time !== 'undefined' && (typeof time !== 'number' || isNaN(time) || time <= 0)) {\n+      throw new Error('Cache timeout must be a positive number');\n+    } else if (typeof timeoutCallback !== 'undefined' && typeof timeoutCallback !== 'function') {\n+      throw new Error('Cache timeout callback must be a function');\n+    }\n \n-exports.clear = function() {\n-  cache = {};\n-}\n+    var oldRecord = _cache[key];\n+    if (oldRecord) {\n+      clearTimeout(oldRecord.timeout);\n+    } else {\n+      _size++;\n+    }\n+\n+    var record = {\n+      value: value,\n+      expire: time + Date.now()\n+    };\n+\n+    if (!isNaN(record.expire)) {\n+      record.timeout = setTimeout(function() {\n+        _del(key);\n+        if (timeoutCallback) {\n+          timeoutCallback(key, value);\n+        }\n+      }.bind(this), time);\n+    }\n \n-exports.get = function(key) {\n-  var data = cache[key];\n-  if (typeof data != \"undefined\") {\n-    if (isNaN(data.expire) || data.expire >= now()) {\n-\t  if (debug) hitCount++;\n-      return data.value;\n+    _cache[key] = record;\n+\n+    return value;\n+  };\n+\n+  this.del = function(key) {\n+    var canDelete = true;\n+\n+    var oldRecord = _cache[key];\n+    if (oldRecord) {\n+      clearTimeout(oldRecord.timeout);\n+      if (!isNaN(oldRecord.expire) && oldRecord.expire < Date.now()) {\n+        canDelete = false;\n+      }\n     } else {\n-      // free some space\n-      if (debug) missCount++;\n-      exports.del(key);\n+      canDelete = false;\n     }\n",
+					"match": false,
+					"packageHash": "68189fcb466369d45a859525b109650ffa9df107fceb6c72845adae314338c5b",
+					"size": 1451,
+					"sourceHash": "080bbdd424b66ccb062e39e8439653f2058c50fe94e830b2e4051db929084123",
+					"status": "content"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -1,18 +1,42 @@\n {\n-  \"name\" : \"memory-cache\",\n-  \"description\" : \"A simple in-memory cache. put() get() and delete()\",\n-  \"author\" : \"Paul Tarjan <npm@paulisageek.com>\",\n-  \"url\" : \"https://github.com/ptarjan/node-cache\",\n-  \"keywords\" : [\n+  \"name\": \"memory-cache\",\n+  \"description\": \"A simple in-memory cache. put(), get() and del()\",\n+  \"author\": \"Paul Tarjan <npm@paulisageek.com>\",\n+  \"contributors\": [\n+    {\n+      \"name\": \"Ramon Snir\",\n+      \"email\": \"ramon@dynamicyield.com\"\n+    },\n+    {\n+      \"name\": \"Jacob Wenger\",\n+      \"email\": \"wenger.jacob@gmail.com\"\n+    }\n+  ],\n+  \"keywords\": [\n     \"cache\",\n     \"ram\",\n     \"simple\",\n     \"storage\"\n   ],\n-  \"main\" : \"./index.js\",\n-  \"version\" : \"0.0.4\",\n-  \"repository\" : { \n-    \"type\" : \"git\", \n-    \"url\" : \"git://github.com/ptarjan/node-cache.git\"\n+  \"main\": \"./index.js\",\n+  \"version\": \"0.2.0\",\n+  \"repository\": {\n+    \"type\": \"git\",\n+    \"url\": \"git://github.com/ptarjan/node-cache.git\"\n+  },\n+  \"scripts\": {\n+    \"test\": \"./node_modules/.bin/gulp test\"\n+  },\n+  \"license\": \"BSD-2-Clause\",\n+  \"devDependencies\": {\n+    \"chai\": \"^2.2.0\",\n+    \"gulp\": \"^3.8.11\",\n+    \"gulp-exit\": \"0.0.2\",\n+    \"gulp-istanbul\": \"^0.7.0\",\n+    \"gulp-jshint\": \"^1.10.0\",\n+    \"gulp-mocha\": \"^2.0.1\",\n+    \"jshint-stylish\": \"^1.0.1\",\n+    \"sinon\": \"^1.14.1\",\n+    \"sinon-chai\": \"^2.7.0\"\n   }\n }\n",
+					"match": false,
+					"packageHash": "5c1167559670ddfcbc6f10b54821c3047d6e776ed4e2f275b9ce46966f30c600",
+					"size": 425,
+					"sourceHash": "b512a5712769e5d7e50b73bd2ded3a2247fb1c348cf9171a59fbf6e90e958daf",
+					"status": "content"
+				},
+				"test.js": {
+					"diff": "--- published/test.js\n+++ rebuilt/test.js\n@@ -1,53 +1,839 @@\n-var cache = require('./index')\n-;\n+/* global describe, it, before, beforeEach, afterEach */\n+'use strict';\n \n-cache.debug(false);\n+var chai = require('chai'),\n+    expect = chai.expect,\n+    sinon = require('sinon'),\n+    sinonChai = require('sinon-chai'),\n+    Cache = require('./index').Cache,\n+    cache = new Cache(),\n+    clock;\n+\n+chai.use(sinonChai);\n+\n+\n+describe('node-cache', function() {\n+  beforeEach(function() {\n+    clock = sinon.useFakeTimers();\n+\n+    cache.clear();\n+  });\n+\n+  afterEach(function() {\n+    clock.restore();\n+  });\n+\n+  describe('put()', function() {\n+    before(function() {\n+      cache.debug(false);\n+    });\n+\n+    it('should allow adding a new item to the cache', function() {\n+      expect(function() {\n+        cache.put('key', 'value');\n+      }).to.not.throw();\n+    });\n+\n+    it('should allow adding a new item to the cache with a timeout', function() {\n+      expect(function() {\n+        cache.put('key', 'value', 100);\n+      }).to.not.throw();\n+    });\n+\n+    it('should allow adding a new item to the cache with a timeout callback', function() {\n+      expect(function() {\n+        cache.put('key', 'value', 100, function() {});\n+      }).to.not.throw();\n+    });\n+\n+    it('should throw an error given a non-numeric timeout', function() {\n+      expect(function() {\n+        cache.put('key', 'value', 'foo');\n+      }).to.throw();\n+    });\n+\n+    it('should throw an error given a timeout of NaN', function() {\n+      expect(function() {\n+        cache.put('key', 'value', NaN);\n+      }).to.throw();\n+    });\n+\n+    it('should throw an error given a timeout of 0', function() {\n+      expect(function() {\n+        cache.put('key', 'value', 0);\n+      }).to.throw();\n+    });\n+\n+    it('should throw an error given a negative timeout', function() {\n+      expect(function() {\n+        cache.put('key', 'value', -100);\n+      }).to.throw();\n+    });\n+\n+    it('should throw an error given a non-function timeout callback', function() {\n+      expect(function() {\n+        cache.put('key', 'value', 100, 'foo');\n+      }).to.throw();\n+    });\n+\n+    it('should cause the timeout callback to fire once the cache item expires', function() {\n+      var spy = sinon.spy();\n+      cache.put('key', 'value', 1000, spy);\n+      clock.tick(999);\n+      expect(spy).to.not.have.been.called;\n+      clock.tick(1);\n+      expect(spy).to.have.been.calledOnce.and.calledWith('key', 'value');\n+    });\n+\n+    it('should override the timeout callback on a new put() with a different timeout callback', function() {\n+      var spy1 = sinon.spy();\n+      var spy2 = sinon.spy();\n+      cache.put('key', 'value', 1000, spy1);\n+      clock.tick(999);\n+      cache.put('key', 'value', 1000, spy2)\n+      clock.tick(1001);\n",
+					"match": false,
+					"packageHash": "b1cacca7d7210a303321360b70f70376b3a83f3b3bfa7a91dbff9f68d864cade",
+					"size": 1258,
+					"sourceHash": "a098a54b1ed1151ceda276cff9f38f94fff2ccf0dbf2ad8ee8aa6237c1ad1477",
+					"status": "content"
+				},
+				".jsbeautifyrc": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				".jshintrc": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				".travis.yml": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"LICENSE.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"gulpfile.js": {
+					"match": false,
+					"status": "missing-in-package"
+				}
+			},
+			"summary": {
+				"differentFiles": 4,
+				"matchingFiles": 0,
+				"missingInPackage": 5,
+				"missingInSource": 0,
+				"score": 0,
+				"totalFiles": 9
+			}
+		},
+		"prodDependencies": []
+	}
+]
