@@ -96,9 +96,9 @@ async function installWithRetry(packageDir, maxRetries = 5) {
 	}
 }
 
-import normalizeGitUrl from './normalize-git-url.mjs';
 import COMPARISON_HASH from './comparison-hash.mjs';
 import reproduce from './reproduce.mjs';
+import { cloneWithFallback, parseSourceLocation } from './repo-fallback.mjs';
 
 /**
  * @typedef {{ name: string, version: string }} DepInfo
@@ -242,42 +242,6 @@ async function extractTarball(tarballPath, destDir) {
 }
 
 /**
- * Parse source location to extract clone URL and subdirectory for monorepos.
- *
- * @param {string} location - Source location URL
- * @returns {{ cloneUrl: string, subdir: string | null }} Clone URL and optional subdirectory
- */
-function parseSourceLocation(location) {
-	// Handle git+https://..., git://, and ssh:// formats
-	let url = normalizeGitUrl(location);
-
-	// Handle GitHub tree URLs (monorepos): https://github.com/org/repo/tree/branch/path/to/package
-	const treeMatch = url.match(/^(?<base>https:\/\/github\.com\/[^/]+\/[^/]+)\/tree\/[^/]+\/(?<subdir>.+)$/);
-	if (treeMatch?.groups) {
-		return {
-			cloneUrl: `${treeMatch.groups.base}.git`,
-			subdir: treeMatch.groups.subdir,
-		};
-	}
-
-	// Handle GitHub blob URLs (shouldn't happen but just in case)
-	const blobMatch = url.match(/^(?<base>https:\/\/github\.com\/[^/]+\/[^/]+)\/blob\//);
-	if (blobMatch?.groups) {
-		return {
-			cloneUrl: `${blobMatch.groups.base}.git`,
-			subdir: null,
-		};
-	}
-
-	// Regular git URL - ensure it ends with .git
-	if (!url.endsWith('.git') && url.includes('github.com')) {
-		url = `${url}.git`;
-	}
-
-	return { cloneUrl: url, subdir: null };
-}
-
-/**
  * Perform file-level comparison between published and rebuilt packages.
  * Also extracts production dependencies from the generated lockfile.
  *
@@ -307,8 +271,8 @@ async function performComparison(result) {
 		const { cloneUrl, subdir } = parseSourceLocation(result.source.location);
 		const packageDir = subdir ? path.join(sourceDir, subdir) : sourceDir;
 
-		// Clone the repo (shallow clone of the specific commit)
-		execSync(`git clone --depth 1 "${cloneUrl}" "${sourceDir}" 2>/dev/null || git clone "${cloneUrl}" "${sourceDir}"`, { stdio: 'pipe' });
+		// Clone the repo with fallback to alternative URLs if primary fails
+		await cloneWithFallback(cloneUrl, sourceDir, result.package.name);
 
 		/*
 		 * Fetch and checkout the specific commit or tag
