@@ -1,0 +1,190 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-13T01:48:07.796Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:11.7.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "worker-farm@0.0.1",
+			"name": "worker-farm",
+			"version": "0.0.1",
+			"location": "https://registry.npmjs.org/worker-farm/-/worker-farm-0.0.1.tgz",
+			"integrity": "sha512-R9NhlOHOrDW4IWBUsiBczrkNH03KI/pxtUE2c1qZkACXKV311SDgfFfiP8zs26FmpaED/fxAkjzYrSMAcMa78g==",
+			"publishedAt": "2013-01-09T00:21:30.302Z",
+			"publishedWith": {
+				"node": null,
+				"npm": "1.1.69"
+			},
+			"dependencies": {}
+		},
+		"source": {
+			"integrity": null,
+			"location": "https://github.com/rvagg/node-worker-farm.git",
+			"spec": "github:rvagg/node-worker-farm#HEAD"
+		},
+		"comparisonHash": "9ef46a5bd31291e57cbab41e2f17c57bd6da0b5b",
+		"diff": {
+			"files": {
+				".jshintrc": {
+					"match": false,
+					"packageHash": "e67acc72cf03319e4d75d7dd29f512cb36eaf073802ae98dc6ef7c38e40a480a",
+					"size": 545,
+					"status": "missing-in-source"
+				},
+				".npmignore": {
+					"match": false,
+					"packageHash": "16d30e4462189fb14dd611bdb708c510630c576a1f35b9383e89a4352da36c97",
+					"size": 13,
+					"status": "missing-in-source"
+				},
+				".travis.yml": {
+					"diff": "--- published/.travis.yml\n+++ rebuilt/.travis.yml\n@@ -1,9 +1,12 @@\n language: node_js\n node_js:\n-  - 0.8\n+  - 6\n+  - 8\n+  - 10\n+  - 12\n branches:\n   only:\n     - master\n notifications:\n   email:\n-    - rod@vagg.org\n\\ No newline at end of file\n+    - rod@vagg.org\n",
+					"match": false,
+					"packageHash": "c17a2d752253e320700f1ffcd622ad99f8d8b8145ad44621b0aad24c4eba98b9",
+					"size": 108,
+					"sourceHash": "f14dcea33924595ab19660d71921de279b85f72767621cdf40494449b269e0e9",
+					"status": "content"
+				},
+				"LICENSE": {
+					"match": false,
+					"packageHash": "c24b881149e922dbd813a9e3f72477bacb4518ab2cdbfe893c9a03615fee05eb",
+					"size": 1811,
+					"status": "missing-in-source"
+				},
+				"README.md": {
+					"diff": "--- published/README.md\n+++ rebuilt/README.md\n@@ -1,4 +1,7 @@\n-# Worker Farm [![Build Status](https://secure.travis-ci.org/rvagg/node-worker-farm.png)](http://travis-ci.org/rvagg/node-worker-farm)\n+# Worker Farm [![Build Status](https://secure.travis-ci.org/rvagg/node-worker-farm.svg)](http://travis-ci.org/rvagg/node-worker-farm)\n+\n+[![NPM](https://nodei.co/npm/worker-farm.png?downloads=true&downloadRank=true&stars=true)](https://nodei.co/npm/worker-farm/)\n+\n \n Distribute processing tasks to child processes with an über-simple API and baked-in durability & custom concurrency options. *Available in npm as <strong>worker-farm</strong>*.\n \n@@ -74,7 +77,7 @@\n \n ## API\n \n-Worker Farm exports a main function an an `end()` method. The main function sets up a \"farm\" of coordinated child-process workers and it can be used to instantiate multiple farms, all operating independently.\n+Worker Farm exports a main function and an `end()` method. The main function sets up a \"farm\" of coordinated child-process workers and it can be used to instantiate multiple farms, all operating independently.\n \n ### workerFarm([options, ]pathToModule[, exportedMethods])\n \n@@ -100,25 +103,48 @@\n \n ```js\n {\n-    maxCallsPerWorker           : -1\n+    workerOptions               : {}\n+  , maxCallsPerWorker           : Infinity\n   , maxConcurrentWorkers        : require('os').cpus().length\n   , maxConcurrentCallsPerWorker : 10\n+  , maxConcurrentCalls          : Infinity\n+  , maxCallTime                 : Infinity\n+  , maxRetries                  : Infinity\n+  , autoStart                   : false\n+  , onChild                     : function() {}\n }\n ```\n \n+  * **<code>workerOptions</code>** allows you to customize all the parameters passed to child nodes. This object supports [all possible options of `child_process.fork`](https://nodejs.org/api/child_process.html#child_process_child_process_fork_modulepath_args_options). The default options passed are the parent `execArgv`, `cwd` and `env`. Any (or all) of them can be overridden, and others can be added as well.\n+\n   * **<code>maxCallsPerWorker</code>** allows you to control the lifespan of your child processes. A positive number will indicate that you only want each child to accept that many calls before it is terminated. This may be useful if you need to control memory leaks or similar in child processes.\n \n   * **<code>maxConcurrentWorkers</code>** will set the number of child processes to maintain concurrently. By default it is set to the number of CPUs available on the current system, but it can be any reasonable number, including `1`.\n \n-  * **<code>maxConcurrentCallsPerWorker</code>** allows you to control the *concurrency* of individual child processes. Calls are placed into a queue and farmed out to child processes according to the number of calls they are allowed to handle concurrently. It is arbitrarily set to 10 by default so that calls are shared relatively evenly across workers, however if your calls predictably take a similar amount of time then you could set it to `-1` and Worker Farm won't queue any calls but spread them evenly across child processes and let them go at it. If your calls aren't I/O bound then it won't matter what value you use here as the individual workers won't be able to execute more than a single call at a time.\n+  * **<code>maxConcurrentCallsPerWorker</code>** allows you to control the *concurrency* of individual child processes. Calls are placed into a queue and farmed out to child processes according to the number of calls they are allowed to handle concurrently. It is arbitrarily set to 10 by default so that calls are shared relatively evenly across workers, however if your calls predictably take a similar amount of time then you could set it to `Infinity` and Worker Farm won't queue any calls but spread them evenly across child processes and let them go at it. If your calls aren't I/O bound then it won't matter what value you use here as the individual workers won't be able to execute more than a single call at a time.\n+\n+  * **<code>maxConcurrentCalls</code>** allows you to control the maximum number of calls in the queue&mdash;either actively being processed or waiting for a worker to be processed. `Infinity` indicates no limit but if you have conditions that may endlessly queue jobs and you need to set a limit then provide a `>0` value and any calls that push the limit will return on their callback with a `MaxConcurrentCallsError` error (check `err.type == 'MaxConcurrentCallsError'`).\n+\n+  * **<code>maxCallTime</code>** *(use with caution, understand what this does before you use it!)* when `!== Infinity`, will cap a time, in milliseconds, that *any single call* can take to execute in a worker. If this time limit is exceeded by just a single call then the worker running that call will be killed and any calls running on that worker will have their callbacks returned with a `TimeoutError` (check `err.type == 'TimeoutError'`). If you are running with `maxConcurrentCallsPerWorker` value greater than `1` then **all calls currently executing** will fail and will be automatically resubmitted unless you've changed the `maxRetries` option. Use this if you have jobs that may potentially end in infinite loops that you can't programatically end with your child code. Preferably run this with a `maxConcurrentCallsPerWorker` so you don't interrupt other calls when you have a timeout. This timeout operates on a per-call basis but will interrupt a whole worker.\n+\n+  * **<code>maxRetries</code>** allows you to control the max number of call requeues after worker termination (unexpected or timeout). By default this option is set to `Infinity` which means that each call of each terminated worker will always be auto requeued. When the number of retries exceeds `maxRetries` value, the job callback will be executed with a `ProcessTerminatedError`. Note that if you are running with finite `maxCallTime` and `maxConcurrentCallsPerWorkers` greater than `1` then any `TimeoutError` will increase the retries counter *for each* concurrent call of the terminated worker.\n+\n+  * **<code>autoStart</code>** when set to `true` will start the workers as early as possible. Use this when your workers have to do expensive initialization. That way they'll be ready when the first request comes through.\n+\n+  * **<code>onChild</code>** when new child process starts this callback will be called with subprocess object as an argument. Use this when you need to add some custom communication with child processes.\n \n ### workerFarm.end(farm)\n \n Child processes stay alive waiting for jobs indefinitely and your farm manager will stay alive managing its workers, so if you need it to stop then you have to do so explicitly. If you send your farm API to `workerFarm.end()` then it'll cleanly end your worker processes. Note though that it's a *soft* ending so it'll wait for child processes to finish what they are working on before asking them to die.\n \n+Any calls that are queued and not yet being handled by a child process will be discarded. `end()` only waits for those currently in progress.\n+\n Once you end a farm, it won't handle any more calls, so don't even try!\n \n+## Related\n+\n+* [farm-cli](https://github.com/Kikobeats/farm-cli) – Launch a farm of workers from CLI.\n \n-## Licence\n+## License\n \n-Worker Farm is Copyright (c) 2012 Rod Vagg [@rvagg](https://twitter.com/rvagg) and licenced under the MIT licence. All rights not explicitly granted in the MIT license are reserved. See the included LICENSE file for more details.\n+Worker Farm is Copyright (c) Rod Vagg and licensed under the MIT license. All rights not explicitly granted in the MIT license are reserved. See the included LICENSE.md file for more details.\n",
+					"match": false,
+					"packageHash": "66e6a80a5d5bec19952fecb9bdf567277b71483814c5ecccde57900a78685ef7",
+					"size": 7077,
+					"sourceHash": "16557f193bea88b2a93ad5ebe12d1f1c313031b64aebd8615523a5e81d857fa8",
+					"status": "content"
+				},
+				"examples/basic/child.js": {
+					"diff": "--- published/examples/basic/child.js\n+++ rebuilt/examples/basic/child.js\n@@ -1,3 +1,5 @@\n+'use strict'\n+\n module.exports = function (inp, callback) {\n   callback(null, inp + ' BAR (' + process.pid + ')')\n-}\n\\ No newline at end of file\n+}\n",
+					"match": false,
+					"packageHash": "ca9ae9cca684159e0d7198f882b7561d518d01dafc20579f5a631593f3f7e224",
+					"size": 98,
+					"sourceHash": "7a6606e2d84a067a3ce642fed87290272e73166872778c36c4fd807169376436",
+					"status": "content"
+				},
+				"examples/basic/index.js": {
+					"diff": "--- published/examples/basic/index.js\n+++ rebuilt/examples/basic/index.js\n@@ -1,11 +1,13 @@\n-var workerFarm = require('../../')\n+'use strict'\n+\n+let workerFarm = require('../../')\n   , workers    = workerFarm(require.resolve('./child'))\n   , ret        = 0\n \n-for (var i = 0; i < 10; i++) {\n+for (let i = 0; i < 10; i++) {\n   workers('#' + i + ' FOO', function (err, outp) {\n     console.log(outp)\n     if (++ret == 10)\n       workerFarm.end(workers)\n   })\n-}\n\\ No newline at end of file\n+}\n",
+					"match": false,
+					"packageHash": "995e7dc62f37ed2156bf2be8a6b2cb3d6e45ab0b105f9c6ca504f272fc038ff5",
+					"size": 272,
+					"sourceHash": "728a1d55e00423faa8b81a3db863d9ab5c89f196967f0736b417ea67e5a2e389",
+					"status": "content"
+				},
+				"examples/pi/calc.js": {
+					"diff": "--- published/examples/pi/calc.js\n+++ rebuilt/examples/pi/calc.js\n@@ -1,3 +1,5 @@\n+'use strict'\n+\n /* A simple π estimation function using a Monte Carlo method\n  * For 0 to `points`, take 2 random numbers < 1, square and add them to\n  * find the area under that point in a 1x1 square. If that area is <= 1\n@@ -9,7 +11,7 @@\n  */\n \n module.exports = function (points, callback) {\n-  var inside = 0\n+  let inside = 0\n     , i = points\n \n   while (i--)\n@@ -17,4 +19,4 @@\n       inside++\n \n   callback(null, (inside / points) * 4)\n-}\n\\ No newline at end of file\n+}\n",
+					"match": false,
+					"packageHash": "ee5c4a1d3dc8d90bf44d6e688412de22facc502fe3657e59dad317a556045176",
+					"size": 668,
+					"sourceHash": "2591e5aae094ff1195de2c3b437863ce70301dc1f6315260f4564f1f9d331b1c",
+					"status": "content"
+				},
+				"examples/pi/index.js": {
+					"diff": "--- published/examples/pi/index.js\n+++ rebuilt/examples/pi/index.js\n@@ -1,12 +1,14 @@\n+'use strict'\n+\n const CHILDREN         = 500\n     , POINTS_PER_CHILD = 1000000\n     , FARM_OPTIONS     = {\n           maxConcurrentWorkers        : require('os').cpus().length\n-        , maxCallsPerWorker           : -1\n+        , maxCallsPerWorker           : Infinity\n         , maxConcurrentCallsPerWorker : 1\n       }\n \n-var workerFarm = require('../../')\n+let workerFarm = require('../../')\n   , calcDirect = require('./calc')\n   , calcWorker = workerFarm(FARM_OPTIONS, require.resolve('./calc'))\n \n@@ -16,7 +18,7 @@\n   , tally = function (finish, err, avg) {\n       ret.push(avg)\n       if (ret.length == CHILDREN) {\n-        var pi  = ret.reduce(function (a, b) { return a + b }) / ret.length\n+        let pi  = ret.reduce(function (a, b) { return a + b }) / ret.length\n           , end = +new Date()\n         console.log('π ≈', pi, '\\t(' + Math.abs(pi - Math.PI), 'away from actual!)')\n         console.log('took', end - start, 'milliseconds')\n@@ -28,7 +30,7 @@\n   , calc = function (method, callback) {\n       ret   = []\n       start = +new Date()\n-      for (var i = 0; i < CHILDREN; i++)\n+      for (let i = 0; i < CHILDREN; i++)\n         method(POINTS_PER_CHILD, tally.bind(null, callback))\n     }\n \n@@ -36,4 +38,4 @@\n calc(calcDirect, function () {\n   console.log('Doing it the fast (multi-process) way...')\n   calc(calcWorker, process.exit)\n-})\n\\ No newline at end of file\n+})\n",
+					"match": false,
+					"packageHash": "8e1a294e54a80f031b5998ce9367df1e76d19e9e054f8c4aa48304eb324cedeb",
+					"size": 1187,
+					"sourceHash": "578023b4154e6fbceb8b41e272f22597de1c54a9f6f374010d9a9d93adef30ab",
+					"status": "content"
+				},
+				"lib/child/index.js": {
+					"diff": "--- published/lib/child/index.js\n+++ rebuilt/lib/child/index.js\n@@ -1,32 +1,56 @@\n-var $module\n+'use strict'\n \n-var handle = function (data) {\n-      var idx      = data.idx\n-        , child    = data.child\n-        , method   = data.method\n-        , args     = data.args\n-        , callback = function () {\n-            process.send({\n-                idx   : idx\n-              , child : child\n-              , args  : Array.prototype.slice.call(arguments)\n-            })\n+let $module\n+\n+/*\n+  let contextProto = this.context;\n+  while (contextProto = Object.getPrototypeOf(contextProto)) {\n+    completionGroups.push(Object.getOwnPropertyNames(contextProto));\n+  }\n+*/\n+\n+\n+function handle (data) {\n+  let idx      = data.idx\n+    , child    = data.child\n+    , method   = data.method\n+    , args     = data.args\n+    , callback = function () {\n+        let _args = Array.prototype.slice.call(arguments)\n+        if (_args[0] instanceof Error) {\n+          let e = _args[0]\n+          _args[0] = {\n+              '$error'  : '$error'\n+            , 'type'    : e.constructor.name\n+            , 'message' : e.message\n+            , 'stack'   : e.stack\n           }\n-        , exec\n+          Object.keys(e).forEach(function(key) {\n+            _args[0][key] = e[key]\n+          })\n+        }\n+        process.send({ owner: 'farm', idx: idx, child: child, args: _args })\n+      }\n+    , exec\n \n-      if (method == null && typeof $module == 'function')\n-        exec = $module\n-      else if (typeof $module[method] == 'function')\n-        exec = $module[method]\n+  if (method == null && typeof $module == 'function')\n+    exec = $module\n+  else if (typeof $module[method] == 'function')\n+    exec = $module[method]\n \n-      if (!exec)\n-        return console.error('NO SUCH METHOD:', method)\n+  if (!exec)\n+    return console.error('NO SUCH METHOD:', method)\n+\n+  exec.apply(null, args.concat([ callback ]))\n+}\n \n-      exec.apply(null, args.concat([ callback ]))\n-    }\n \n process.on('message', function (data) {\n+  if (data.owner !== 'farm') {\n+    return;\n+  }\n+\n   if (!$module) return $module = require(data.module)\n-  if (data == 'die') return process.exit(0)\n+  if (data.event == 'die') return process.exit(0)\n   handle(data)\n-})\n\\ No newline at end of file\n+})\n",
+					"match": false,
+					"packageHash": "3d8891797646fbf133bd8473eaaf8265d375acecf9a33270a4d1995dfa41048b",
+					"size": 847,
+					"sourceHash": "860521937ca81ebce51cef398fa76d303e79d8ac63d522ff04b5dadf3f2daddc",
+					"status": "content"
+				},
+				"lib/farm.js": {
+					"diff": "--- published/lib/farm.js\n+++ rebuilt/lib/farm.js\n@@ -1,196 +1,348 @@\n-const fork = require('./fork')\n+'use strict'\n \n-var Farm = {\n-        // make a handle to pass back in the form of an external API\n-        mkhandle : function (method) {\n-          return function () {\n-            var args = Array.prototype.slice.call(arguments)\n-            this.addCall({\n-                method   : method\n-              , callback : args.pop()\n-              , args     : args\n-            })\n-          }.bind(this)\n-        }\n-\n-        // a constructor of sorts\n-      , setup: function (methods) {\n-          var iface\n-          if (!methods) { // single-function export\n-            iface = this.mkhandle()\n-          } else { // multiple functions on the export\n-            iface = {}\n-            methods.forEach(function (m) {\n-              iface[m] = this.mkhandle(m)\n-            }.bind(this))\n-          }\n-\n-          this.searchStart    = -1\n-          this.childId        = -1\n-          this.children       = {}\n-          this.activeChildren = 0\n-          this.callQueue      = []\n-\n-          return iface\n-        }\n-\n-        // when a child exits, check if there are any outstanding jobs and requeue them\n-      , onExit: function (childId) {\n-          // delay this to give any sends a chance to finish\n-          setTimeout(function () {\n-            var doQueue = false\n-            if (this.children[childId] && this.children[childId].activeCalls) {\n-              this.children[childId].calls.reverse().forEach(function (call) {\n-                if (call) {\n-                  this.callQueue.unshift(call)\n-                  doQueue = true\n-                }\n-              }.bind(this))\n-            }\n-            this.stopChild(childId)\n-            doQueue && this.processQueue()\n-          }.bind(this), 10)\n-        }\n-\n-        // start a new worker\n-      , startChild: function () {\n-          this.children[++this.childId] = {\n-              send        : fork(this.path, this.receive.bind(this), this.onExit.bind(this, this.childId))\n-            , calls       : []\n-            , activeCalls : 0\n-          }\n-          this.activeChildren++\n-        }\n-\n-        // stop a worker, identified by id\n-      , stopChild: function (child) {\n-          if (this.children[child]) {\n-            this.children[child].send('die')\n-            ;delete this.children[child]\n-            this.activeChildren--\n-          }\n-        }\n-\n-        // called from a child process, the data contains information needed to\n-        // look up the child and the original call so we can invoke the callback\n-      , receive: function (data) {\n-          var idx   = data.idx\n-            , child = data.child\n-            , args  = data.args\n-\n-          if (this.children[child]) {\n-            if (this.children[child].calls[idx]) {\n-              this.children[child].calls[idx].callback.apply(null, args)\n-              ;delete this.children[child].calls[idx]\n-              this.children[child].activeCalls--\n-              if (this.options.maxCallsPerWorker != -1\n-                  && this.children[child].calls.length >= this.options.maxCallsPerWorker\n-                  && !Object.keys(this.children[child].calls).length) {\n-                // this child has finished its run, kill it\n-                this.stopChild(child)\n-              }\n-              // allow any outstanding calls to be processed\n-              this.processQueue()\n-            } else\n-              console.error(\n-                  'Worker Farm: Received message for unknown index for existing child. '\n",
+					"match": false,
+					"packageHash": "f1c4c175d115771c8c2523bf754d0f8d29234f598a7eba9971187f0a33f14cbf",
+					"size": 7187,
+					"sourceHash": "6b5dba566ec13d63241ecbfda326d7d433013ccbd41fa3788fb253c0abb64c66",
+					"status": "content"
+				},
+				"lib/fork.js": {
+					"diff": "--- published/lib/fork.js\n+++ rebuilt/lib/fork.js\n@@ -1,23 +1,33 @@\n+'use strict'\n+\n const childProcess = require('child_process')\n     , childModule  = require.resolve('./child/index')\n \n-var fork = function (forkModule, receive, onExit) {\n-      var child = childProcess.fork(childModule, {\n-              env: process.env\n-            , cwd: process.cwd()\n-          })\n-\n-      child.on('message', receive)\n-      child.on('exit', onExit)\n-      child.send({ module: forkModule })\n-      // return a send() function for this child\n-      return function (data) {\n-        try {\n-          child.send(data)\n-        } catch (e) {\n-          // this *should* be picked up by onExit and the operation requeued\n-        }\n-      }\n-    }\n \n-module.exports = fork\n\\ No newline at end of file\n+function fork (forkModule, workerOptions) {\n+  // suppress --debug / --inspect flags while preserving others (like --harmony)\n+  let filteredArgs = process.execArgv.filter(function (v) {\n+        return !(/^--(debug|inspect)/).test(v)\n+      })\n+    , options       = Object.assign({\n+          execArgv : filteredArgs\n+        , env      : process.env\n+        , cwd      : process.cwd()\n+      }, workerOptions)\n+    , child         = childProcess.fork(childModule, process.argv, options)\n+\n+  child.on('error', function() {\n+    // this *should* be picked up by onExit and the operation requeued\n+  })\n+\n+  child.send({ owner: 'farm', module: forkModule })\n+\n+  // return a send() function for this child\n+  return {\n+      send  : child.send.bind(child)\n+    , child : child\n+  }\n+}\n+\n+\n+module.exports = fork\n",
+					"match": false,
+					"packageHash": "3385546768e331c07c900140126f0b037599bea47642e29aec7e155efd19cb23",
+					"size": 655,
+					"sourceHash": "79cc0409b9e3d731cfdbb2aadde41b5499fcff8a2aea32e7cf45140c4f0d2f30",
+					"status": "content"
+				},
+				"lib/index.js": {
+					"diff": "--- published/lib/index.js\n+++ rebuilt/lib/index.js\n@@ -1,40 +1,34 @@\n-const DEFAULT_OPTIONS = {\n-         maxCallsPerWorker           : -1\n-       , maxConcurrentWorkers        : require('os').cpus().length\n-       , maxConcurrentCallsPerWorker : 10\n-     }\n-   , extend           = require('util')._extend\n-   , Farm             = require('./farm')\n-   , farms            = [] // keep record of farms so we can end() them if required\n-\n-var farm = function (options, path, methods) {\n-      var farm\n-\n-      if (typeof options == 'string') {\n-        methods = path\n-        path = options\n-        options = {}\n-      }\n-\n-      options = extend(Object.create(DEFAULT_OPTIONS), options)\n-\n-      farm = Object.create(Farm, {\n-          options : { writable: false, value: options }\n-        , path    : { writable: false, value: path }\n-      })\n-\n-      farms.push({ farm: farm, api: farm.setup(methods) })\n-\n-      // return the public API\n-      return farms[farms.length - 1].api\n-    }\n-\n-  , end = function (api, callback) {\n-      for (var i = 0; i < farms.length; i++)\n-        if (farms[i] && farms[i].api === api)\n-          return farms[i].farm.end(callback)\n-      process.nextTick(callback.bind(null, 'Worker farm not found!'))\n-    }\n+'use strict'\n+\n+const Farm = require('./farm')\n+\n+let farms = [] // keep record of farms so we can end() them if required\n+\n+\n+function farm (options, path, methods) {\n+  if (typeof options == 'string') {\n+    methods = path\n+    path = options\n+    options = {}\n+  }\n+\n+  let f   = new Farm(options, path)\n+    , api = f.setup(methods)\n+\n+  farms.push({ farm: f, api: api })\n+\n+  // return the public API\n+  return api\n+}\n+\n+\n+function end (api, callback) {\n+  for (let i = 0; i < farms.length; i++)\n+    if (farms[i] && farms[i].api === api)\n+      return farms[i].farm.end(callback)\n+  process.nextTick(callback.bind(null, new Error('Worker farm not found!')))\n+}\n+\n \n module.exports     = farm\n-module.exports.end = end\n\\ No newline at end of file\n+module.exports.end = end\n",
+					"match": false,
+					"packageHash": "6c9b6d37525303bbf0224151a876e4252174fca01abd047f0f4966302c93b212",
+					"size": 1196,
+					"sourceHash": "4bd2fe1d8fcf65512ae949dd4dc89472ff35a2622f23a51f7bc7a862a902ba35",
+					"status": "content"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -1,24 +1,31 @@\n {\n-    \"name\"            : \"worker-farm\"\n-  , \"description\"     : \"Distribute processing tasks to child processes with an über-simple API and baked-in durability & custom concurrency options.\"\n-  , \"version\"         : \"0.0.1\"\n-  , \"homepage\"        : \"https://github.com/rvagg/node-worker-farm\"\n-  , \"authors\"         : [\n-        \"Rod Vagg @rvagg <rod@vagg.org> (https://github.com/rvagg)\"\n-    ]\n-  , \"keywords\"        : [\"worker\", \"child\", \"processing\", \"farm\" ]\n-  , \"main\"            : \"./lib/index.js\"\n-  , \"repository\"      : {\n-        \"type\"            : \"git\"\n-      , \"url\"             : \"https://github.com/rvagg/node-worker-farm.git\"\n-    }\n-  , \"dependencies\" : {\n-    }\n-  , \"devDependencies\" : {\n-        \"tape\"            : \"*\"\n-    }\n-  , \"scripts\": {\n-        \"test\"            : \"node ./tests/\"\n-    }\n-  , \"license\"             : \"MIT\"\n-}\n\\ No newline at end of file\n+  \"name\": \"worker-farm\",\n+  \"description\": \"Distribute processing tasks to child processes with an über-simple API and baked-in durability & custom concurrency options.\",\n+  \"version\": \"1.7.0\",\n+  \"homepage\": \"https://github.com/rvagg/node-worker-farm\",\n+  \"authors\": [\n+    \"Rod Vagg @rvagg <rod@vagg.org> (https://github.com/rvagg)\"\n+  ],\n+  \"keywords\": [\n+    \"worker\",\n+    \"child\",\n+    \"processing\",\n+    \"farm\"\n+  ],\n+  \"main\": \"./lib/index.js\",\n+  \"repository\": {\n+    \"type\": \"git\",\n+    \"url\": \"https://github.com/rvagg/node-worker-farm.git\"\n+  },\n+  \"dependencies\": {\n+    \"errno\": \"~0.1.7\"\n+  },\n+  \"devDependencies\": {\n+    \"tape\": \"~4.10.1\"\n+  },\n+  \"scripts\": {\n+    \"test\": \"node ./tests/\"\n+  },\n+  \"types\": \"./index.d.ts\",\n+  \"license\": \"MIT\"\n+}\n",
+					"match": false,
+					"packageHash": "2eea90c6f7c66c06890ec1f3a419173994291bada0dd4a34e7b1f180ac42fced",
+					"size": 837,
+					"sourceHash": "e2d400967705108fd4e9855de27e97ab2454709c8424bdd5848bc7ac6131a870",
+					"status": "content"
+				},
+				"tests/child.js": {
+					"diff": "--- published/tests/child.js\n+++ rebuilt/tests/child.js\n@@ -1,16 +1,87 @@\n+'use strict'\n+\n+const fs = require('fs')\n+const started = Date.now()\n+\n+\n module.exports = function (timeout, callback) {\n-  callback = callback.bind(null, null, process.pid, Math.random())\n+  callback = callback.bind(null, null, process.pid, Math.random(), timeout)\n   if (timeout)\n     return setTimeout(callback, timeout)\n   callback()\n }\n \n+\n+module.exports.args = function (callback) {\n+  callback(null, {\n+      argv     : process.argv\n+    , cwd      : process.cwd()\n+    , execArgv : process.execArgv\n+  })\n+}\n+\n+\n module.exports.run0 = function (callback) {\n   module.exports(0, callback)\n }\n \n+\n module.exports.killable = function (id, callback) {\n   if (Math.random() < 0.5)\n     return process.exit(-1)\n   callback(null, id, process.pid)\n-}\n\\ No newline at end of file\n+}\n+\n+\n+module.exports.err = function (type, message, data, callback) {\n+  if (typeof data == 'function') {\n+    callback = data\n+    data = null\n+  } else {\n+    let err = new Error(message)\n+    Object.keys(data).forEach(function(key) {\n+      err[key] = data[key]\n+    })\n+    callback(err)\n+    return\n+  }\n+\n+  if (type == 'TypeError')\n+    return callback(new TypeError(message))\n+  callback(new Error(message))\n+}\n+\n+\n+module.exports.block = function () {\n+  while (true);\n+}\n+\n+\n+// use provided file path to save retries count among terminated workers\n+module.exports.stubborn = function (path, callback) {\n+  function isOutdated(path) {\n+    return ((new Date).getTime() - fs.statSync(path).mtime.getTime()) > 2000\n+  }\n+\n+  // file may not be properly deleted, check if modified no earler than two seconds ago\n+  if (!fs.existsSync(path) || isOutdated(path)) {\n+    fs.writeFileSync(path, '1')\n+    process.exit(-1)\n+  }\n+\n+  let retry = parseInt(fs.readFileSync(path, 'utf8'))\n+  if (Number.isNaN(retry))\n+    return callback(new Error('file contents is not a number'))\n+\n+  if (retry > 4) {\n+    callback(null, 12)\n+  } else {\n+    fs.writeFileSync(path, String(retry + 1))\n+    process.exit(-1)\n+  }\n+}\n+\n+\n+module.exports.uptime = function (callback) {\n+  callback(null, Date.now() - started)\n+}\n",
+					"match": false,
+					"packageHash": "343049e49275890a5b6137f8d90fe232617c64aa6df9450211ffcc14b3b79c5d",
+					"size": 406,
+					"sourceHash": "4f4974fd7c9a2ef011a7ea544e0107e9b72e5b2cdf0c8d061b7410d4de6dd504",
+					"status": "content"
+				},
+				"tests/index.js": {
+					"diff": "--- published/tests/index.js\n+++ rebuilt/tests/index.js\n@@ -1,50 +1,78 @@\n-var tape       = require('tape')\n-  , workerFarm = require('../')\n-  , childPath  = require.resolve('./child')\n-\n-  , uniq = function (ar) {\n-      var a = [], i, j\n-      o: for (i = 0; i < ar.length; ++i) {\n-        for (j = 0; j < a.length; ++j) if (a[j] == ar[i]) continue o\n-        a[a.length] = ar[i]\n-      }\n-      return a\n-    }\n+'use strict'\n+\n+const tape          = require('tape')\n+    , child_process = require('child_process')\n+    , workerFarm    = require('../')\n+    , childPath     = require.resolve('./child')\n+    , fs            = require('fs')\n+    , os            = require('os')\n+\n+function uniq (ar) {\n+  let a = [], i, j\n+  o: for (i = 0; i < ar.length; ++i) {\n+    for (j = 0; j < a.length; ++j) if (a[j] == ar[i]) continue o\n+    a[a.length] = ar[i]\n+  }\n+  return a\n+}\n+\n \n // a child where module.exports = function ...\n tape('simple, exports=function test', function (t) {\n-  t.plan(3)\n+  t.plan(4)\n \n-  var child = workerFarm(childPath)\n+  let child = workerFarm(childPath)\n   child(0, function (err, pid, rnd) {\n     t.ok(pid > process.pid, 'pid makes sense')\n-    t.ok(pid < process.pid + 100, 'pid makes sense')\n-    t.ok(rnd > 0 && rnd < 1, 'rnd result makes sense')\n+    t.ok(pid < process.pid + 750, 'pid makes sense')\n+    t.ok(rnd >= 0 && rnd < 1, 'rnd result makes sense')\n   })\n \n-  workerFarm.end(child, t.end.bind(t))\n+  workerFarm.end(child, function () {\n+    t.ok(true, 'workerFarm ended')\n+  })\n })\n \n+\n // a child where we have module.exports.fn = function ...\n tape('simple, exports.fn test', function (t) {\n-  t.plan(3)\n+  t.plan(4)\n \n-  var child = workerFarm(childPath, [ 'run0' ])\n+  let child = workerFarm(childPath, [ 'run0' ])\n   child.run0(function (err, pid, rnd) {\n     t.ok(pid > process.pid, 'pid makes sense')\n-    t.ok(pid < process.pid + 100, 'pid makes sense')\n-    t.ok(rnd > 0 && rnd < 1, 'rnd result makes sense')\n+    t.ok(pid < process.pid + 750, 'pid makes sense')\n+    t.ok(rnd >= 0 && rnd < 1, 'rnd result makes sense')\n   })\n \n-  workerFarm.end(child, t.end.bind(t))\n+  workerFarm.end(child, function () {\n+    t.ok(true, 'workerFarm ended')\n+  })\n })\n \n+\n+tape('on child', function (t) {\n+    t.plan(2)\n+\n+    let child = workerFarm({ onChild: function(subprocess) { childPid = subprocess.pid } }, childPath)\n+      , childPid = null;\n+\n+    child(0, function(err, pid) {\n+      t.equal(childPid, pid)\n+    })\n+\n+    workerFarm.end(child, function () {\n+      t.ok(true, 'workerFarm ended')\n+    })\n+})\n+\n+\n // use the returned pids to check that we're using a single child process\n // when maxConcurrentWorkers = 1\n tape('single worker', function (t) {\n-  t.plan(1)\n+  t.plan(2)\n \n",
+					"match": false,
+					"packageHash": "3c620a2a88e12e055808c06bdb53616b78951f7e546ebd9f39d58b5033182b83",
+					"size": 7239,
+					"sourceHash": "e2608e679a1117c809bb99d32855a4cde7e324767e2a3bd0701d1e2f806a2fca",
+					"status": "content"
+				},
+				".editorconfig": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"LICENSE.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"index.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"tests/debug.js": {
+					"match": false,
+					"status": "missing-in-package"
+				}
+			},
+			"summary": {
+				"differentFiles": 13,
+				"matchingFiles": 0,
+				"missingInPackage": 4,
+				"missingInSource": 3,
+				"score": 0,
+				"totalFiles": 20
+			}
+		},
+		"prodDependencies": [
+			{
+				"name": "errno",
+				"version": "0.1.8"
+			},
+			{
+				"name": "prr",
+				"version": "1.0.1"
+			}
+		]
+	}
+]
