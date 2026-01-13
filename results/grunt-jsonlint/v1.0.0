@@ -1,0 +1,322 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-13T18:47:26.528Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:11.7.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "grunt-jsonlint@1.0.0",
+			"name": "grunt-jsonlint",
+			"version": "1.0.0",
+			"location": "https://registry.npmjs.org/grunt-jsonlint/-/grunt-jsonlint-1.0.0.tgz",
+			"integrity": "sha512-KZcx99q8NudcVkPkJDLXwXMT9OBrczWG1k5pZ6s4bxjNZvIAqa4n94WKt1pEpDPgXtGNfnRxf1ZdHdxMZINArw==",
+			"publishedAt": "2013-02-21T01:12:18.443Z",
+			"publishedWith": {
+				"node": null,
+				"npm": "1.2.11"
+			},
+			"dependencies": {
+				"jsonlint": "1.5.1"
+			}
+		},
+		"source": {
+			"integrity": "sha512-IvEm98y8esduXHj8gtMd+HygnoHLWj2F1tP77ki6K7fRd1YXIN13Y+WqtfHyeCYg8s+bPDZPy4IXJhZhIbCIhQ==",
+			"location": "https://github.com/brandonramirez/grunt-jsonlint",
+			"spec": "github:brandonramirez/grunt-jsonlint#HEAD"
+		},
+		"comparisonHash": "9ef46a5bd31291e57cbab41e2f17c57bd6da0b5b",
+		"diff": {
+			"files": {
+				".npmignore": {
+					"match": false,
+					"packageHash": "43b01a54f3fc105a8413d3a78c4c053c5038194df5dfeda1d83849e81d031b13",
+					"size": 33,
+					"status": "missing-in-source"
+				},
+				"Gruntfile.js": {
+					"match": false,
+					"packageHash": "2be08958af7718c66361b5d136ce1760a48f8c86c5abe6867dc086dd48c62e60",
+					"size": 802,
+					"status": "missing-in-source"
+				},
+				"README.md": {
+					"diff": "--- published/README.md\n+++ rebuilt/README.md\n@@ -1,9 +1,9 @@\n-grunt-jsonlint\n+grunt-jsonlint [![Node.js CI](https://github.com/brandonramirez/grunt-jsonlint/actions/workflows/node.js.yml/badge.svg)](https://github.com/brandonramirez/grunt-jsonlint/actions/workflows/node.js.yml)\n ==============\n \n-Validate JSON files from grunt.\n+Validate [JSON]/[JSON5] files from [Grunt].\n \n-Requires grunt 0.4\n+Requires Grunt 1.6+ and node 18+.\n \n # Install\n \n@@ -15,7 +15,10 @@\n \n     jsonlint: {\n       sample: {\n-        src: [ 'some/valid.json' ]\n+        src: [ 'some/valid.json' ],\n+        options: {\n+          formatter: 'prose'\n+        }\n       }\n     }\n \n@@ -23,16 +26,181 @@\n \n     grunt.loadNpmTasks('grunt-jsonlint');\n \n-An error will be thrown if the JSON file contains syntax errors.\n+An error will be thrown if the JSON file contains syntax errors.  To prefer an error format compatible with Visual Studio, change the formatter to 'msbuild'.\n \n-# Roadmap\n+Here's a simple [tutorial](http://grunt-tasks.com/grunt-jsonlint/ \"grunt\") on how to use grunt-jsonlint\n \n-The underlying jsonlint library has many feasures not yet exposed.\n-Each of these would be valuable in grunt.\n+# Customizing\n \n-* Schema validation\n-* Sort file by key\n+There are a couple of options, which can support non-standard JSON syntax, usually used in configuration files for convenience:\n+\n+    jsonlint: {\n+      all: {\n+        src: [ 'some/settings.json' ],\n+        options: {\n+          ignoreComments: true,\n+          ignoreTrailingCommas: true,\n+          allowSingleQuotedStrings: true,\n+          allowDuplicateObjectKeys: false,\n+          mode: 'json5'\n+        }\n+      }\n+    }\n+\n+* `ignoreComments`, when true JavaScript-style single-line and multiple-line comments will be recognised and ignored during parsing\n+* `ignoreTrailingCommas`, when true trailing commas in objects and arrays will be ignored during parsing\n+* `allowSingleQuotedStrings`, when true single quotes will be accepted as alternative delimiters for strings\n+* `allowDuplicateObjectKeys`, when false, duplicate object keys will be reported as an error\n+* `mode`, when set to \"json\", \"cjson\" or \"json5\", enables multiple flags according to the referred input type\n+\n+| Mode    | Enabled Options   |\n+| ------- | ----------------- |\n+| \"json\"  | (none)            |\n+| \"cjson\" | `ignoreComments`  |\n+| \"json5\" | `ignoreComments`, `ignoreTrailingCommas`, `allowSingleQuotedStrings` and other JSON5 specifics |\n+\n+# Formatting\n+\n+Add the following (multi-)task to your `Gruntfile`:\n+\n+    jsonlint: {\n+      all: {\n+        src: [ 'some/valid.json' ],\n+        options: {\n+          format: true,\n+          prettyPrint: false,\n+          indent: 2,\n+          sortKeys: false,\n+          pruneComments: false,\n+          stripObjectKeys: false,\n+          enforceDoubleQuotes: false,\n+          enforceSingleQuotes: false,\n+          trimTrailingCommas: false\n+        }\n+      }\n+    }\n+\n+* `format`, when `true` `JSON.stringify` will be used to format the JavaScript (if it is valid)\n+* `prettyPrint`, when `true` `JSON.stringify` will be used to format the JavaScript (if it is valid)\n+* `indent`, the value passed to `JSON.stringify`, it can be the number of spaces, or string like \"\\t\"\n+* `sortKeys`, when `true` keys of objects in the output JSON will be sorted alphabetically (`format` has to be set to `true`)\n+* `pruneComments`, when `true` comments will be omitted from the prettified output (CJSON feature, `prettyPrint` has to be set to `true`)\n+* `stripObjectKeys`, when `true` quotes surrounding object keys will be stripped if the key is a JavaScript identifier name (JSON5 feature, `prettyPrint` has to be set to `true`)\n+* `enforceDoubleQuotes`, when `true` string literals will be consistently surrounded by double quotes (JSON5 feature, `prettyPrint` has to be set to `true`)\n+* `enforceSingleQuotes`, when `true` string literals will be consistently surrounded by single quotes (JSON5 feature, `prettyPrint` has to be set to `true`)\n+* `trimTrailingCommas`, when `true` trailing commas after all array items and object entries will be omitted (JSON5 feature, `prettyPrint` has to be set to `true`)\n",
+					"match": false,
+					"packageHash": "8b7d373bc13457d17ede6cf878c8c85e6237ac7f8b296d894cc1a5f2208250eb",
+					"size": 689,
+					"sourceHash": "186120033d6c46eba4ab831c6126c9a88fa439ef478575af6b6a08ec2915e985",
+					"status": "content"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -1,10 +1,19 @@\n {\n   \"name\": \"grunt-jsonlint\",\n-  \"version\": \"1.0.0\",\n+  \"version\": \"3.0.0\",\n   \"description\": \"Validate JSON files from grunt.\",\n   \"main\": \"tasks/jsonlint.js\",\n   \"scripts\": {\n-    \"test\": \"grunt jshint jsonlint\"\n+    \"test\": \"nyc grunt test\",\n+    \"fix-lint-errors\": \"eslint --fix tasks/ lib/ test/*.js\"\n+  },\n+  \"files\": [\n+    \"lib\",\n+    \"tasks\",\n+    \"LICENSE-MIT\"\n+  ],\n+  \"engines\": {\n+    \"node\": \">=18\"\n   },\n   \"repository\": \"https://github.com/brandonramirez/grunt-jsonlint\",\n   \"bugs\": \"https://github.com/brandonramirez/grunt-jsonlint/issues\",\n@@ -14,12 +23,30 @@\n     \"validate\"\n   ],\n   \"author\": \"Brandon Ramirez <brandon.s.ramirez@gmail.com> (http://www.brandonsramirez.com/)\",\n+  \"contributors\": [\n+    \"Fred Ghosn (https://github.com/fredghosn)\",\n+    \"Ferdinand Prantl (https://github.com/prantlf)\"\n+  ],\n   \"license\": \"MIT\",\n   \"dependencies\": {\n-    \"jsonlint\": \"1.5.1\"\n+    \"@prantlf/jsonlint\": \"^14.0.3\"\n   },\n   \"devDependencies\": {\n-    \"grunt\": \"~0.4.0\",\n-    \"grunt-contrib-jshint\": \"~0.1.1\"\n+    \"async\": \"^3.2.5\",\n+    \"eslint\": \"8.2\",\n+    \"eslint-config-airbnb-base\": \"^15.0.0\",\n+    \"eslint-plugin-import\": \"^2.29.1\",\n+    \"expect.js\": \"^0.3.1\",\n+    \"fs-writefile-promise\": \"^3.0.2\",\n+    \"grunt\": \"^1.6.1\",\n+    \"grunt-eslint\": \"^25.0.0\",\n+    \"grunt-mocha-test\": \"^0.13.3\",\n+    \"lodash\": \"^4.17.21\",\n+    \"mkdirp-promise\": \"^5.0.1\",\n+    \"mocha\": \"^10.4.0\",\n+    \"nyc\": \"^15.1.0\",\n+    \"promise\": \"^8.3.0\",\n+    \"sinon\": \"^17.0.1\",\n+    \"sinon-expect\": \"^0.3.0\"\n   }\n }\n",
+					"match": false,
+					"packageHash": "56a8eded789c16429f37c61fe99bd34fa90d28242fa8ce62f07a1674f5d56752",
+					"size": 649,
+					"sourceHash": "825d79510469409f2efaeceeae5a235369499d26f7cf7460e30d5efe753db422",
+					"status": "content"
+				},
+				"tasks/jsonlint.js": {
+					"diff": "--- published/tasks/jsonlint.js\n+++ rebuilt/tasks/jsonlint.js\n@@ -6,27 +6,16 @@\n  * Licensed under the MIT license.\n  */\n \n-module.exports = function (grunt) {\n-  \"use strict\";\n+const jsonlint = require('@prantlf/jsonlint');\n+const validator = require('@prantlf/jsonlint/lib/validator');\n+const sorter = require('@prantlf/jsonlint/lib/sorter');\n+const printer = require('@prantlf/jsonlint/lib/printer');\n+const gruntJsonLintTask = require('../lib/grunt-jsonlint-task');\n \n-  var jsonlint = require('jsonlint');\n-\n-  grunt.registerMultiTask(\"jsonlint\", \"Validate JSON files.\", function () {\n-    if (this.files != null) {\n-      this.files.forEach(function (mapping) {\n-        mapping.src.forEach(function (file) {\n-          grunt.log.debug('Validating \"' + file + '\"...');\n-\n-          try {\n-            jsonlint.parse(grunt.file.read(file));\n-            grunt.log.writeln('File \"' + file + '\" is valid JSON.');\n-          }\n-          catch (e) {\n-            grunt.log.error('File \"' + file + '\" failed JSON validation.');\n-            grunt.fail.warn(e);\n-          }\n-        });\n-      });\n-    }\n-  });\n+module.exports = (grunt) => {\n+  grunt.registerMultiTask(\n+    'jsonlint',\n+    'Validate JSON files.',\n+    gruntJsonLintTask(grunt, jsonlint, validator, sorter, printer)\n+  );\n };\n",
+					"match": false,
+					"packageHash": "5fd915b63b89c3037e6ab2465cfa38f3201802ae33ab7d22e212d6b615affae6",
+					"size": 832,
+					"sourceHash": "4b12c9a14f009bac32b177cb7864a1c9785d998446d503720e67ca916398e9e9",
+					"status": "content"
+				},
+				"test/invalid.json": {
+					"match": false,
+					"packageHash": "07503594bc67828b24020f1aa4edfdc50c02dfac01dc83e56b56ea573a11528f",
+					"size": 209,
+					"status": "missing-in-source"
+				},
+				"test/valid.json": {
+					"match": false,
+					"packageHash": "4b336d5646acf6f737ed2595590ea6493ec0f7ec993be9c12b30d8953e8ce67b",
+					"size": 209,
+					"status": "missing-in-source"
+				},
+				"lib/formatters/prose.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/formatters/visual-studio.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/grunt-jsonlint-task.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/reporters/exception.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/reporters/jshint-style.js": {
+					"match": false,
+					"status": "missing-in-package"
+				}
+			},
+			"summary": {
+				"differentFiles": 3,
+				"matchingFiles": 1,
+				"missingInPackage": 5,
+				"missingInSource": 4,
+				"score": 0.07692307692307693,
+				"totalFiles": 13
+			}
+		},
+		"prodDependencies": [
+			{
+				"name": "@babel/code-frame",
+				"version": "7.12.11"
+			},
+			{
+				"name": "@babel/helper-validator-identifier",
+				"version": "7.24.5"
+			},
+			{
+				"name": "@babel/highlight",
+				"version": "7.24.5"
+			},
+			{
+				"name": "@nodelib/fs.scandir",
+				"version": "2.1.5"
+			},
+			{
+				"name": "@nodelib/fs.stat",
+				"version": "2.0.5"
+			},
+			{
+				"name": "@nodelib/fs.walk",
+				"version": "1.2.8"
+			},
+			{
+				"name": "@prantlf/jsonlint",
+				"version": "14.0.3"
+			},
+			{
+				"name": "ajv",
+				"version": "8.12.0"
+			},
+			{
+				"name": "ajv-draft-04",
+				"version": "1.0.0"
+			},
+			{
+				"name": "diff",
+				"version": "5.1.0"
+			},
+			{
+				"name": "json-schema-traverse",
+				"version": "1.0.0"
+			},
+			{
+				"name": "ansi-styles",
+				"version": "3.2.1"
+			},
+			{
+				"name": "braces",
+				"version": "3.0.3"
+			},
+			{
+				"name": "callsites",
+				"version": "3.1.0"
+			},
+			{
+				"name": "chalk",
+				"version": "2.4.2"
+			},
+			{
+				"name": "color-convert",
+				"version": "1.9.3"
+			},
+			{
+				"name": "color-name",
+				"version": "1.1.3"
+			},
+			{
+				"name": "cosmiconfig",
+				"version": "8.1.3"
+			},
+			{
+				"name": "argparse",
+				"version": "2.0.1"
+			},
+			{
+				"name": "js-yaml",
+				"version": "4.1.0"
+			},
+			{
+				"name": "error-ex",
+				"version": "1.3.2"
+			},
+			{
+				"name": "escape-string-regexp",
+				"version": "1.0.5"
+			},
+			{
+				"name": "fast-deep-equal",
+				"version": "3.1.3"
+			},
+			{
+				"name": "fast-glob",
+				"version": "3.2.12"
+			},
+			{
+				"name": "fastq",
+				"version": "1.14.0"
+			},
+			{
+				"name": "fill-range",
+				"version": "7.1.1"
+			},
+			{
+				"name": "glob-parent",
+				"version": "5.1.2"
+			},
+			{
+				"name": "has-flag",
+				"version": "3.0.0"
+			},
+			{
+				"name": "import-fresh",
+				"version": "3.3.0"
+			},
+			{
+				"name": "is-arrayish",
+				"version": "0.2.1"
+			},
+			{
+				"name": "is-extglob",
+				"version": "2.1.1"
+			},
+			{
+				"name": "is-glob",
+				"version": "4.0.3"
+			},
+			{
+				"name": "is-number",
+				"version": "7.0.0"
+			},
+			{
+				"name": "js-tokens",
+				"version": "4.0.0"
+			},
+			{
+				"name": "json-parse-even-better-errors",
+				"version": "2.3.1"
+			},
+			{
+				"name": "lines-and-columns",
+				"version": "1.2.4"
+			},
+			{
+				"name": "merge2",
+				"version": "1.4.1"
+			},
+			{
+				"name": "micromatch",
+				"version": "4.0.5"
+			},
+			{
+				"name": "parent-module",
+				"version": "1.0.1"
+			},
+			{
+				"name": "parse-json",
+				"version": "5.2.0"
+			},
+			{
+				"name": "path-type",
+				"version": "4.0.0"
+			},
+			{
+				"name": "picocolors",
+				"version": "1.0.0"
+			},
+			{
+				"name": "picomatch",
+				"version": "2.3.1"
+			},
+			{
+				"name": "punycode",
+				"version": "2.1.1"
+			},
+			{
+				"name": "queue-microtask",
+				"version": "1.2.3"
+			},
+			{
+				"name": "require-from-string",
+				"version": "2.0.2"
+			},
+			{
+				"name": "resolve-from",
+				"version": "4.0.0"
+			},
+			{
+				"name": "reusify",
+				"version": "1.0.4"
+			},
+			{
+				"name": "run-parallel",
+				"version": "1.2.0"
+			},
+			{
+				"name": "supports-color",
+				"version": "5.5.0"
+			},
+			{
+				"name": "to-regex-range",
+				"version": "5.0.1"
+			},
+			{
+				"name": "uri-js",
+				"version": "4.2.2"
+			}
+		]
+	}
+]
