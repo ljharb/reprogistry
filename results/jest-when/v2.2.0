@@ -1,0 +1,118 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-14T08:31:59.795Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:6.4.1",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "jest-when@2.2.0",
+			"name": "jest-when",
+			"version": "2.2.0",
+			"location": "https://registry.npmjs.org/jest-when/-/jest-when-2.2.0.tgz",
+			"integrity": "sha512-W3zxc3kPAs48n0vAQA1jLSG38kCAIpDjeyoeV6s6LkxJRHd1w9FWeXnRIAv9OUsaV1bwVYou/jIz2HMxFb2GwA==",
+			"publishedAt": "2019-01-08T15:13:59.315Z",
+			"publishedWith": {
+				"node": "11.0.0",
+				"npm": "6.4.1"
+			},
+			"dependencies": {
+				"bunyan": "^1.8.12",
+				"expect": "^22.4.3"
+			}
+		},
+		"source": {
+			"integrity": null,
+			"location": "git+https://github.com/timkindberg/jest-when.git",
+			"spec": "github:timkindberg/jest-when#abb626cccaec46df3e537be208baf58a0d0c1c40"
+		},
+		"comparisonHash": "9ef46a5bd31291e57cbab41e2f17c57bd6da0b5b",
+		"diff": {
+			"files": {
+				".eslintignore": {
+					"match": false,
+					"packageHash": "f3ca341a0ddbc23dc7cb5b229d3c361759f585b13b920de488fcfb54d9ab38fe",
+					"size": 9,
+					"status": "missing-in-source"
+				},
+				".eslintrc": {
+					"match": false,
+					"packageHash": "baaab3c8f1c179e6a8f069096903262310210e1ba343f2651a9ce7f125f7c4e4",
+					"size": 162,
+					"status": "missing-in-source"
+				},
+				".travis.yml": {
+					"match": false,
+					"packageHash": "7faa96ba2be34a51d5019b0fce8092299d8e8368847ad14f5c79d416c4715997",
+					"size": 277,
+					"status": "missing-in-source"
+				},
+				"README.md": {
+					"diff": "--- published/README.md\n+++ rebuilt/README.md\n@@ -4,27 +4,47 @@\n [![codecov](https://codecov.io/gh/timkindberg/jest-when/branch/master/graph/badge.svg)](https://codecov.io/gh/timkindberg/jest-when)\n [![GitHub license](https://img.shields.io/github/license/timkindberg/jest-when.svg)](https://github.com/timkindberg/jest-when/blob/master/LICENSE)\n [![npm](https://img.shields.io/npm/v/jest-when.svg)](https://www.npmjs.com/package/jest-when)\n+[![ThoughtWorks Tech Radar 2020 | Adopt](https://img.shields.io/badge/Tech%20Radar-Adopt-b3005d)](https://www.thoughtworks.com/radar/languages-and-frameworks?blipid=201911030)\n \n-An extended, sugary way to mock return values for specific arguments only\n+Specify dynamic return values for specifically matched mocked function arguments. Flexible matchers. Feels like canonical jest syntax.\n \n-> Many thanks to @jonasholtkamp. He forked this repo when I was inactive and stewarded several key features and bug fixes!\n+ThoughtWorks says:\n+> jest-when is a lightweight JavaScript library that complements Jest by matching mock function call arguments. Jest is a great tool for testing the stack; jest-when allows you to expect specific arguments for mock functions which enables you to write more robust unit tests of modules with many dependencies. It's easy to use and provides great support for multiple matchers, which is why our teams have made jest-when their default choice for mocking in this space.\n \n-### Features\n+### Introduction\n `jest-when` allows you to use a set of the original\n [Jest mock functions](https://facebook.github.io/jest/docs/en/mock-function-api) in order to train\n your mocks only based on parameters your mocked function is called with.\n \n-An example statement would be as follows:\n+#### An Example\n+\n+So in jest if you want to mock a return value you would do:\n \n ```javascript\n-when(fn).calledWith(1).mockReturnValue('yay!')\n+const fn = jest.fn()\n+fn.mockReturnValue('yay!')\n ```\n \n-The trained mock function `fn` will now behave as follows -- assumed no other trainings took place:\n-* return `yay!` if called with `1` _as first parameter_\n-* return `undefined` if called with _any other first parameter_ than `1`\n+But that will return \"yay!\" regardless of what arguments are send to the `fn`. If you want to change the return value\n+based on the arguments, you have to use `mockImplementation` and it can be a bit cumbersome.\n \n-For extended usage see the examples below.\n+`jest-when` makes this easy and fun!\n+\n+```javascript\n+when(fn).calledWith(1).mockReturnValue('yay!')\n+```\n+\n+Now, the mock function `fn` will behave as follows&mdash;assuming no other trainings took place:\n+* return `yay!` if called with `1` _as the only parameter_\n+* return `undefined` if called with _any parameters other_ than `1`\n+\n+So the steps are:\n+```javascript\n+const fn = jest.fn()                    // 1) Start with any normal jest mock function\n+when(fn)                                // 2) Wrap it with when()\n+  .calledWith(/* any matchers here */)  // 3) Add your matchers with calledWith()\n+  .mockReturnValue(/* some value */)    // 4) Then use any of the normal set of jest mock functions\n+```\n \n The supported set of mock functions is:\n * `mockReturnValue`\n@@ -36,7 +56,25 @@\n * `mockImplementation`\n * `mockImplementationOnce`\n \n-### Usage\n+For extended usage see the examples below.\n+\n+### Features\n+\n+- Match literals: `1`, `true`, `\"string\"`, `/regex/`, `null`, etc\n+- Match objects or arrays: `{ foo: true }`, `[1, 2, 3]`\n+- Match [asymmetric matchers](https://jestjs.io/docs/en/expect#expectanything): expect.any(), expect.objectContaining(), expect.stringMatching(), etc\n+- Setup multiple matched calls with differing returns\n+- Chaining of mock trainings\n+- Replacement of mock trainings\n+- One-time trainings, removed after they are matched\n+- Promises, resolved or rejected\n+- Can also wrap jest.spyOn functions with when()\n+- Supports function matchers\n+- Setup a default behavior\n+- Supports resetting mocks between tests\n+- Supports verifying all whenMocks were called\n+\n+### Usage Examples\n \n #### Installation\n ```bash\n@@ -83,19 +121,11 @@\n when(fn).calledWith(1).mockReturnValue('nay!')\n expect(fn(1)).toEqual('nay!')\n ```\n-This replacement of the training does only happen for mock functions _not_ ending in `*Once`.\n+This replacement of the training only happens for mock functions _not_ ending in `*Once`.\n Trainings like `mockReturnValueOnce` are removed after a matching function call anyway.\n \n Thanks to [@fkloes](https://github.com/fkloes).\n \n-#### Supports multiple args with partial argument matching:\n-```javascript\n-when(fn).calledWith(1, true).mockReturnValue('yay!')\n-\n",
+					"match": false,
+					"packageHash": "71b29f37a88136bcdce6774c7c2f5dba0a23a3689ae6a304f8e81c741c75f218",
+					"size": 6070,
+					"sourceHash": "17f0f2d0ecbc80f50a31d8591b85d875a6260d0cbe09f3c64b349e00d3e46d89",
+					"status": "content"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -1,6 +1,6 @@\n {\n   \"name\": \"jest-when\",\n-  \"version\": \"2.2.0\",\n+  \"version\": \"3.7.0\",\n   \"description\": \"An extension lib for jest\",\n   \"license\": \"MIT\",\n   \"main\": \"src/when.js\",\n@@ -8,7 +8,8 @@\n     \"test\": \"jest\",\n     \"lint\": \"eslint src/\",\n     \"lint.fix\": \"eslint src/ --fix\",\n-    \"stryker\": \"stryker run\"\n+    \"stryker\": \"stryker run\",\n+    \"release\": \"np\"\n   },\n   \"repository\": {\n     \"type\": \"git\",\n@@ -18,24 +19,27 @@\n     \"Tim Kindberg <timkindberg@gmail.com>\",\n     \"Jonas Holtkamp <jonas.holtkamp@senacor.com>\"\n   ],\n-  \"dependencies\": {\n-    \"bunyan\": \"^1.8.12\",\n-    \"expect\": \"^22.4.3\"\n+  \"dependencies\": {},\n+  \"peerDependencies\": {\n+    \"jest\": \">= 25\"\n   },\n+  \"files\": [\n+    \"/src/when.js\"\n+  ],\n   \"devDependencies\": {\n+    \"@stryker-mutator/core\": \"^2.0.0\",\n+    \"@stryker-mutator/html-reporter\": \"^2.0.0\",\n+    \"@stryker-mutator/javascript-mutator\": \"^2.0.0\",\n+    \"@stryker-mutator/jest-runner\": \"^2.0.0\",\n     \"eslint\": \"^4.19.1\",\n     \"eslint-config-standard\": \"^11.0.0\",\n     \"eslint-plugin-import\": \"^2.12.0\",\n     \"eslint-plugin-node\": \"^6.0.1\",\n     \"eslint-plugin-promise\": \"^3.7.0\",\n     \"eslint-plugin-standard\": \"^3.1.0\",\n-    \"jest\": \"^22.1.1\",\n-    \"pre-commit\": \"^1.2.2\",\n-    \"stryker\": \"^0.24.0\",\n-    \"stryker-api\": \"^0.17.1\",\n-    \"stryker-html-reporter\": \"^0.14.1\",\n-    \"stryker-javascript-mutator\": \"^0.7.1\",\n-    \"stryker-jest-runner\": \"^0.7.0\"\n+    \"jest\": \"^27.0.0\",\n+    \"np\": \"^7.3.0\",\n+    \"pre-commit\": \"^1.2.2\"\n   },\n   \"jest\": {\n     \"verbose\": false,\n",
+					"match": false,
+					"packageHash": "6ebed955a9bb7448973728f2a85cd0e163d6da6faf27b8171c780209e4c9c3c2",
+					"size": 1390,
+					"sourceHash": "7b024bf1fb02aab3c86643eabfb3adb5a40f0a749333b724d4e886fbf601d320",
+					"status": "content"
+				},
+				"src/log.js": {
+					"match": false,
+					"packageHash": "69bf2a0552ec48d8cb0f766c0ae0b87e3409bad4879e44a8dc2e3033f4134398",
+					"size": 338,
+					"status": "missing-in-source"
+				},
+				"src/log.test.js": {
+					"match": false,
+					"packageHash": "c7fc98a615c05e769e14091ec6cf26a12dfb25fa28526f23ca0502372496e422",
+					"size": 1671,
+					"status": "missing-in-source"
+				},
+				"src/when.js": {
+					"diff": "--- published/src/when.js\n+++ rebuilt/src/when.js\n@@ -1,9 +1,30 @@\n-const utils = require('expect/build/jasmine_utils')\n-const logger = require('./log')('when')\n+const assert = require('assert')\n \n-const checkArgumentMatchers = (assertCall, args) => (match, matcher, i) => {\n-  logger.debug(`matcher check, match: ${match}, index: ${i}`)\n+let registry = new Set()\n \n+const getCallLines = () => (new Error()).stack.split('\\n').slice(4).join('\\n')\n+\n+/**\n+ * A hack to capture a reference to the `equals` jasmineUtil\n+ */\n+let equals = () => {}\n+expect.extend({\n+  __capture_equals__ () {\n+    equals = this.equals\n+    return { pass: true }\n+  }\n+})\n+expect().__capture_equals__()\n+let JEST_MATCHERS_OBJECT = Symbol.for('$$jest-matchers-object')\n+// Hackily reset assertionCalls back to zero incase dev's tests are using expect.assertions()\n+global[JEST_MATCHERS_OBJECT].state.assertionCalls = 0\n+// Hackily delete the custom matcher that we added\n+delete global[JEST_MATCHERS_OBJECT].matchers.__capture_equals__\n+/**\n+ * End hack\n+ */\n+\n+const checkArgumentMatchers = (expectCall, args) => (match, matcher, i) => {\n   // Propagate failure to the end\n   if (!match) {\n     return false\n@@ -11,103 +32,221 @@\n \n   const arg = args[i]\n \n-  logger.debug(`   matcher: ${matcher}`)\n-  logger.debug(`   arg: ${arg}`)\n+  const isFunctionMatcher = typeof matcher === 'function' && matcher._isFunctionMatcher\n \n   // Assert the match for better messaging during a failure\n-  if (assertCall) {\n-    expect(arg).toEqual(matcher)\n+  if (expectCall) {\n+    if (isFunctionMatcher) {\n+      const isMatch = matcher(arg)\n+      const msg = `Failed function matcher within expectCalledWith: ${matcher.name}(${JSON.stringify(arg)}) did not return true\\n\\n\\n...rest of the stack...`\n+      assert.equal(isMatch, true, msg)\n+    } else {\n+      expect(arg).toEqual(matcher)\n+    }\n+  }\n+\n+  if (isFunctionMatcher) {\n+    return matcher(arg, equals)\n   }\n \n-  return utils.equals(arg, matcher)\n+  return equals(arg, matcher)\n }\n+\n+const NO_CALLED_WITH_YET = Symbol('NO_CALLED_WITH')\n+\n class WhenMock {\n-  constructor (fn, defaultValue = { isSet: false, val: undefined }) {\n+  constructor (fn) {\n     // Incrementing ids assigned to each call mock to help with sorting as new mocks are added\n     this.nextCallMockId = 0\n     this.fn = fn\n+    fn.__whenMock__ = this\n     this.callMocks = []\n+    this._origMock = fn.getMockImplementation()\n+    this._defaultImplementation = null\n \n-    if (defaultValue.isSet) {\n-      this.fn.mockImplementation(() => {\n-        throw new Error('Uninteded use: Only use default value in combination with .calledWith(..), ' +\n-          'or use standard mocking without jest-when.')\n-      })\n-    }\n-\n-    const _mockReturnValue = (matchers, assertCall, once = false) => (val) => {\n+    const _mockImplementation = (matchers, expectCall, once = false) => (mockImplementation) => {\n+      if (matchers[0] === NO_CALLED_WITH_YET) {\n+        this._defaultImplementation = mockImplementation\n+      }\n       // To enable dynamic replacement during a test:\n       // * call mocks with equal matchers are removed\n       // * `once` mocks are used prioritized\n       this.callMocks = this.callMocks\n-        .filter((callMock) => once || callMock.once || !utils.equals(callMock.matchers, matchers))\n-        .concat({ matchers, val, assertCall, once, id: this.nextCallMockId })\n+        .filter((callMock) => once || callMock.once || !equals(callMock.matchers, matchers))\n+        .concat({ matchers, mockImplementation, expectCall, once, called: false, id: this.nextCallMockId, callLines: getCallLines() })\n         .sort((a, b) => {\n",
+					"match": false,
+					"packageHash": "1ddcb9d6d41873f41de297f46796bc4aeb1eeeb42f5723baf3e2b5d2fa942143",
+					"size": 4074,
+					"sourceHash": "d93bb7b6e59e22c5dda4ce354343aa25f760df5c7d0da44b6bf3f64385a66079",
+					"status": "content"
+				},
+				"src/when.test.js": {
+					"match": false,
+					"packageHash": "fe4f30e30408ff97267090c75355f8aba390a551858eb347602cd8d36c9dcaf9",
+					"size": 11782,
+					"status": "missing-in-source"
+				},
+				"stryker.conf.js": {
+					"match": false,
+					"packageHash": "2325d79bd08a1436fb3e696c94122e478b2cced66a4b6609486107364777f172",
+					"size": 392,
+					"status": "missing-in-source"
+				},
+				"yarn.lock": {
+					"match": false,
+					"packageHash": "2dfd4dcc6901572a7659c3208ec151da2d7ea3631e40b0156f2f0d78260a73ef",
+					"size": 175531,
+					"status": "missing-in-source"
+				}
+			},
+			"summary": {
+				"differentFiles": 3,
+				"matchingFiles": 1,
+				"missingInPackage": 0,
+				"missingInSource": 8,
+				"score": 0.08333333333333333,
+				"totalFiles": 12
+			}
+		},
+		"prodDependencies": []
+	}
+]
