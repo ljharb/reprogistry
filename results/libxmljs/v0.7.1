@@ -1,0 +1,872 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-13T15:09:24.520Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:11.7.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "libxmljs@0.7.1",
+			"name": "libxmljs",
+			"version": "0.7.1",
+			"location": "https://registry.npmjs.org/libxmljs/-/libxmljs-0.7.1.tgz",
+			"integrity": "sha512-hcrxVbJVoqzXH5/NMq3gyMwrWVf83MKdh2CdSMO+DXnH68MiKu9GCPsemrbZT7XMiFMc81XGXVKO8uNxLBfbMQ==",
+			"publishedAt": "2013-03-11T07:31:47.146Z",
+			"publishedWith": {
+				"node": null,
+				"npm": "1.2.11"
+			},
+			"dependencies": {
+				"bindings": "1.0.0"
+			}
+		},
+		"source": {
+			"integrity": "sha512-YHosacAJXj3J+pvidAr0Wz+ZaJzcCkA2hp09jAYRXnqaS8tRdy/075bGkZIcTabu8740TPP1ueV7u4ON3x2zuQ==",
+			"location": "http://github.com/polotek/libxmljs.git",
+			"spec": "github:polotek/libxmljs#HEAD"
+		},
+		"comparisonHash": "9ef46a5bd31291e57cbab41e2f17c57bd6da0b5b",
+		"diff": {
+			"files": {
+				".npmignore": {
+					"match": false,
+					"packageHash": "d2cf1ab40e3ded66952bec369c3a63399f60b3c69e0fa806016fe8e5e850a1a4",
+					"size": 55,
+					"status": "missing-in-source"
+				},
+				".travis.yml": {
+					"match": false,
+					"packageHash": "0bd60e8b610f7a6b2b9e1857cd9a86c3406981eecbba4160f69d4c425ccd02fd",
+					"size": 57,
+					"status": "missing-in-source"
+				},
+				"Makefile": {
+					"diff": "--- published/Makefile\n+++ rebuilt/Makefile\n@@ -1,5 +1,5 @@\n \n-target=./build/Release/libxmljs.node\n+target=./build/Release/xmljs.node\n \n all: $(target)\n \n",
+					"match": false,
+					"packageHash": "d15c8e8f967f3f8aa6c39dee182e38af752a9d614dcff1f108662999f3364a86",
+					"size": 210,
+					"sourceHash": "de71c9e6976241edd8cad95ecf5a50482fc58e4cace843a3e664f29021fcb7ee",
+					"status": "content"
+				},
+				"README.md": {
+					"diff": "--- published/README.md\n+++ rebuilt/README.md\n@@ -1,71 +1,82 @@\n-# Libxmljs\n-[![Build Status](https://secure.travis-ci.org/polotek/libxmljs.png?branch=master)](http://travis-ci.org/polotek/libxmljs)\n+# libxmljs\n \n-LibXML bindings for [node.js](http://nodejs.org/)\n+[![npm version](https://badge.fury.io/js/libxmljs.svg)](https://badge.fury.io/js/libxmljs)\n+[![Downloads monthly](https://img.shields.io/npm/dm/libxmljs.svg)](https://npmjs.org/package/libxmljs)\n+[![Downloads total](https://img.shields.io/npm/dt/libxmljs.svg)](https://npmjs.org/package/libxmljs)\n+[![Test & Upload](https://github.com/libxmljs/libxmljs/actions/workflows/test-deploy.yml/badge.svg)](https://github.com/libxmljs/libxmljs/actions/workflows/test-deploy.yml)\n+\n+`npm install libxmljs`\n+\n+NodeJS bindings for [libxml2](https://en.wikipedia.org/wiki/Libxml2) written in\n+Typescript\n+\n+## Documentation\n+\n+[https://libxmljs.github.io/libxmljs/](https://libxmljs.github.io/libxmljs/)\n+\n+## Examples\n+\n+For more examples, check out the [test suite](https://github.com/libxmljs/libxmljs/tree/master/test).\n \n ```javascript\n-var libxmljs = require(\"libxmljs\");\n-var xml =  '<?xml version=\"1.0\" encoding=\"UTF-8\"?>' +\n-           '<root>' +\n-               '<child foo=\"bar\">' +\n-                   '<grandchild baz=\"fizbuzz\">grandchild content</grandchild>' +\n-               '</child>' +\n-               '<sibling>with content!</sibling>' +\n-           '</root>';\n-\n-var xmlDoc = libxmljs.parseXml(xml);\n-\n-// xpath queries\n-var gchild = xmlDoc.get('//grandchild');\n+import libxmljs from \"libxmljs\";\n+\n+libxmljs\n+    .parseXmlAsync(\n+        `\n+        <?xml version=\"1.0\" encoding=\"UTF-8\"?>\n+        <root>\n+            <child foo=\"bar\">\n+            <grandchild baz=\"fizbuzz\">grandchild content</grandchild>\n+            </child>\n+            <sibling>with content!</sibling>\n+        </root>\n+        `\n+    )\n+    .then((xmlDoc) => {\n+        const gchild = xmlDoc.find(\"//grandchild\")[0];\n \n-console.log(gchild.text());  // prints \"grandchild content\"\n+        console.log(gchild.text()); // prints \"grandchild content\"\n \n-var children = xmlDoc.root().childNodes();\n-var child = children[0];\n+        const child = xmlDoc.root()?.child(0);\n \n-console.log(child.attr('foo').value()); // prints \"bar\"\n+        console.log(child?.getAttribute(\"foo\")?.value()); // prints \"bar\"\n+    });\n ```\n \n-## Basics\n+## Package Scripts\n \n-* Docs - [http://github.com/polotek/libxmljs/wiki](http://github.com/polotek/libxmljs/wiki)\n-* Mailing list - [http://groups.google.com/group/libxmljs](http://groups.google.com/group/libxmljs)\n+`npm run init-submodules`\n \n-## API and Examples\n+> Clones libxml2 source code to `vendor/libxml2`\n \n-Check out the wiki [http://github.com/polotek/libxmljs/wiki](http://github.com/polotek/libxmljs/wiki).\n+`npm run configure`\n \n-See the [examples](https://github.com/polotek/libxmljs/tree/master/examples) folder.\n+> Generate new cmake config headers with cmake in vendor/libxml2.config. Used when updating to a new libxml2 version.\n \n-## Requirements\n+`npm run build`\n \n-* [libxml2](http://www.xmlsoft.org/)\n+> Build the C++ source code using node-gyp\n \n-You will need have the libxml2 library installed and also the libxml2-devel (libxml2-dev on debian systems)\n-package. This comes with the `xml2-config` utility that is needed for\n-compiling.  **This command must be in your path.**\n+`npm run swig`\n \n-## Installation\n+> Generate a new `src/libxml2.cc` and `swig.xml` file by processing the native code using SWIG. Used when making changes\n+> to native code or any of the SWIG interface files (src/\\*.i)\n \n",
+					"match": false,
+					"packageHash": "02a1894230b07e5e725317b7933224306dbaee51a7b971ff7c4e9232e768c598",
+					"size": 1727,
+					"sourceHash": "44f703ff2fe15d79b3f8feb9ceed826006bca941ea75efa0e320a59c81687e60",
+					"status": "content"
+				},
+				"binding.gyp": {
+					"diff": "--- published/binding.gyp\n+++ rebuilt/binding.gyp\n@@ -1,39 +1,96 @@\n {\n-  'targets': [\n-    {\n-      'target_name': 'xmljs',\n-      'sources': [\n-        'src/libxmljs.cc',\n-        'src/xml_attribute.cc',\n-        'src/xml_document.cc',\n-        'src/xml_element.cc',\n-        'src/xml_namespace.cc',\n-        'src/xml_node.cc',\n-        'src/xml_sax_parser.cc',\n-        'src/xml_syntax_error.cc',\n-        'src/xml_xpath_context.cc',\n-      ],\n-      'conditions': [\n-        ['OS==\"win\"', {\n-          # no Windows support yet...\n-        }, {\n-          'libraries': [\n-            '<!@(xml2-config --libs)'\n-          ],\n-        }],\n-        ['OS==\"mac\"', {\n-          # cflags on OS X are stupid and have to be defined like this\n-          'xcode_settings': {\n-            'OTHER_CFLAGS': [\n-              '<!@(xml2-config --cflags)'\n-            ]\n-          }\n-        }, {\n-          'cflags': [\n-            '<!@(xml2-config --cflags)'\n-          ],\n-        }]\n-      ]\n-    }\n-  ]\n+    'targets': [\n+        {\n+            'target_name': 'xmljs',\n+            'product_extension': 'node',\n+            'type': 'shared_library',\n+            'include_dirs': [\n+                'src/include',\n+                'vendor/libxml2',\n+                'vendor/libxml2/include',\n+                'vendor/libxml2/include/libxml',\n+                'vendor/libxml2.config',\n+                'vendor/libxml2.config/include',\n+                \"<!(node -e \\\"require('nan')\\\")\"\n+            ],\n+            'cflags': ['-Wall -Wno-unused-result -O3'],\n+            'xcode_settings': {\n+                'OTHER_CFLAGS': ['-Wall -Wno-unused-result -O3']\n+            },\n+            'defines': [\n+                'BUILDING_NODE_EXTENSION',\n+                'IN_LIBXMLJS',\n+                '_REENTRANT',\n+            ],\n+            'sources': [\n+                'src/xml_sax_parser.cc',\n+                'src/libxml2.cc',\n+                'vendor/libxml2/buf.c',\n+                'vendor/libxml2/catalog.c',\n+                'vendor/libxml2/chvalid.c',\n+                'vendor/libxml2/dict.c',\n+                'vendor/libxml2/encoding.c',\n+                'vendor/libxml2/entities.c',\n+                'vendor/libxml2/error.c',\n+                'vendor/libxml2/globals.c',\n+                'vendor/libxml2/hash.c',\n+                'vendor/libxml2/HTMLparser.c',\n+                'vendor/libxml2/HTMLtree.c',\n+                'vendor/libxml2/legacy.c',\n+                'vendor/libxml2/list.c',\n+                'vendor/libxml2/parser.c',\n+                'vendor/libxml2/parserInternals.c',\n+                'vendor/libxml2/pattern.c',\n+                'vendor/libxml2/relaxng.c',\n+                'vendor/libxml2/SAX2.c',\n+                'vendor/libxml2/SAX.c',\n+                'vendor/libxml2/tree.c',\n+                'vendor/libxml2/threads.c',\n+                'vendor/libxml2/uri.c',\n+                'vendor/libxml2/valid.c',\n+                'vendor/libxml2/xinclude.c',\n+                'vendor/libxml2/xlink.c',\n+                'vendor/libxml2/xmlIO.c',\n+                'vendor/libxml2/xmlmemory.c',\n+                'vendor/libxml2/xmlmodule.c',\n+                'vendor/libxml2/xmlreader.c',\n+                'vendor/libxml2/xmlregexp.c',\n+                'vendor/libxml2/xmlsave.c',\n+                'vendor/libxml2/xmlschemas.c',\n+                'vendor/libxml2/xmlschemastypes.c',\n",
+					"match": false,
+					"packageHash": "80eb26f01ab2939c46c09d3e7c30742e468175ee434a3ac050bffad2616bb4af",
+					"size": 891,
+					"sourceHash": "763358322274c726eb3b05bdc3795b73e41d6a95d6f059adbcb98803448e1247",
+					"status": "content"
+				},
+				"docs/Home.md": {
+					"match": false,
+					"packageHash": "bd7bf44d621a8c37a875b22e0dfd93b3395dc601fb306761558fb028163fdefd",
+					"size": 2540,
+					"status": "missing-in-source"
+				},
+				"docs/Migrating-from-0.4.x-to-0.5.0.md": {
+					"match": false,
+					"packageHash": "a93d2a11b93a814210680e9652f344fdca4355fd06f3dcf6627187a4ddbb79f3",
+					"size": 1930,
+					"status": "missing-in-source"
+				},
+				"docs/_Sidebar.md": {
+					"match": false,
+					"packageHash": "ffb367bc006a4b2554ec8427eec3deb6331e77db684da3db339a8fba6e9602ba",
+					"size": 152,
+					"status": "missing-in-source"
+				},
+				"docs/api/Attribute.md": {
+					"match": false,
+					"packageHash": "bf67577daf2187dab4261293c3ee292cb87c552772dd1f9a6282037d1939d52a",
+					"size": 1558,
+					"status": "missing-in-source"
+				},
+				"docs/api/Element.md": {
+					"match": false,
+					"packageHash": "4bc41cbbef2c07cab74b6e38c488b1efbb7c0a1b8370d2416e9d590c65a59e0d",
+					"size": 6346,
+					"status": "missing-in-source"
+				},
+				"docs/api/HtmlDocument.md": {
+					"match": false,
+					"packageHash": "85fb90b7fed7f04c037489935c167e407301f9be927e6bef82c37b23706a45e4",
+					"size": 103,
+					"status": "missing-in-source"
+				},
+				"docs/api/Libxmljs.md": {
+					"match": false,
+					"packageHash": "54624e184215495c5beb7debde14d205c2c581f238b7f869ca55a8687163f167",
+					"size": 648,
+					"status": "missing-in-source"
+				},
+				"docs/api/Namespace.md": {
+					"match": false,
+					"packageHash": "0a7d94262a3773a2a697943911bf7457f5d72e12b15c5fc47c5b9bc3ce244525",
+					"size": 731,
+					"status": "missing-in-source"
+				},
+				"docs/api/SaxParser.md": {
+					"match": false,
+					"packageHash": "6ab8279b3c5389ad212cd2f7e383a5573873ae3347e5b77c18cffe2bfbd61ec2",
+					"size": 1754,
+					"status": "missing-in-source"
+				},
+				"docs/api/SaxPushParser.md": {
+					"match": false,
+					"packageHash": "1c1b6c6e0e671a570fdbae9692a8f891e8a80521ef4c347d504b53ab1b03dd09",
+					"size": 1771,
+					"status": "missing-in-source"
+				},
+				"docs/api/SyntaxError.md": {
+					"match": false,
+					"packageHash": "1bf7906bd7ffc654f7512e3d41eff656cfe02cf41610e0b02bf54ca7685a8674",
+					"size": 1092,
+					"status": "missing-in-source"
+				},
+				"docs/api/XmlDocument.md": {
+					"match": false,
+					"packageHash": "3559bbe8addfd331feeb4149085fdf20ad54491d87daf05c5f30876746050e3f",
+					"size": 2257,
+					"status": "missing-in-source"
+				},
+				"examples/cdata.js": {
+					"match": false,
+					"packageHash": "92c091439ed1c0dda0ded8ca373816390212dfba565b89ee0dcb6bc0d2cb3a74",
+					"size": 495,
+					"status": "missing-in-source"
+				},
+				"index.js": {
+					"match": false,
+					"packageHash": "35f4443ce3f14c0c212bfc8306025c309c02189911ca8c4c6b7a8139115fa7db",
+					"size": 1238,
+					"status": "missing-in-source"
+				},
+				"lib/bindings.js": {
+					"match": false,
+					"packageHash": "e7e3b9be92259356d4fa68de0468410ebdbbd8938ad0436a06d77148030385e3",
+					"size": 47,
+					"status": "missing-in-source"
+				},
+				"lib/document.js": {
+					"match": false,
+					"packageHash": "4be85837c927b15333dd0da120bfd9db99447e3529ee1b95e54778ef2d9e7f24",
+					"size": 3389,
+					"status": "missing-in-source"
+				},
+				"lib/element.js": {
+					"match": false,
+					"packageHash": "a5b17565282592b574a68b5372331f507c3aae7721610dca727d627215e40db6",
+					"size": 2341,
+					"status": "missing-in-source"
+				},
+				"lib/sax_parser.js": {
+					"match": false,
+					"packageHash": "a055d69a03bdcc1477765c62b37e6dfab52fabeae08af2440be1ea18ee94a8b7",
+					"size": 1049,
+					"status": "missing-in-source"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -1,30 +1,55 @@\n {\n   \"name\": \"libxmljs\",\n-  \"author\": \"Marco Rogers - http://github.com/polotek\",\n-  \"contributors\": [\n-    \"Jeff Smick\"\n-  ],\n-  \"description\": \"libxml bindings for v8 javascript engine\",\n-  \"version\": \"0.7.1\",\n-  \"scripts\": {\n-    \"test\": \"node --expose_gc ./node_modules/nodeunit/bin/nodeunit test\"\n+  \"binary\": {\n+    \"module_name\": \"xmljs\",\n+    \"module_path\": \"./build/Release/\",\n+    \"host\": \"https://github.com\",\n+    \"remote_path\": \"./libxmljs/libxmljs/releases/download/v{version}/\",\n+    \"package_name\": \"{node_abi}-{platform}-{arch}.tar.gz\"\n   },\n+  \"description\": \"libxml bindings for v8 javascript engine\",\n+  \"version\": \"1.0.12\",\n   \"repository\": {\n     \"type\": \"git\",\n-    \"url\": \"http://github.com/polotek/libxmljs.git\"\n+    \"url\": \"http://github.com/libxmljs/libxmljs.git\"\n   },\n   \"bugs\": {\n-    \"mail\": \"\",\n-    \"url\": \"http://github.com/polotek/libxmljs/issues\"\n+    \"url\": \"http://github.com/libxmljs/libxmljs/issues\"\n   },\n-  \"main\": \"./index\",\n+  \"license\": \"MIT\",\n   \"engines\": {\n-    \"node\": \">=0.4.7\"\n+    \"node\": \">=0.8.0\"\n+  },\n+  \"main\": \"dist/index.js\",\n+  \"types\": \"dist/index.d.ts\",\n+  \"scripts\": {\n+    \"init-submodules\": \"git submodule update --init --recursive\",\n+    \"configure\": \"cd vendor/libxml2.config && cmake configure ../libxml2 && cd ../..\",\n+    \"preinstall\": \"node scripts/preinstall.js\",\n+    \"install\": \"node-pre-gyp install --fallback-to-build --loglevel http -j max\",\n+    \"package\": \"node-pre-gyp package\",\n+    \"build\": \"node-gyp rebuild -j max\",\n+    \"build-debug\": \"node-gyp rebuild -j max --debug\",\n+    \"swig\": \"bash scripts/swig.sh && node scripts/swigfix.js\",\n+    \"tsgenerate\": \"node scripts/swig2ts.js\",\n+    \"tsgenerate-debug\": \"lldb -- `which node` scripts/swig2ts.js\",\n+    \"tsc\": \"node --stack_size=10000 -e \\\"process.argv=['node','tsc','--diagnostics','--extendedDiagnostics','--listEmittedFiles'];require('./node_modules/typescript/lib/tsc.js')\\\"\",\n+    \"dev\": \"node --stack-size=10000 -e \\\"process.argv=['node','tsc','-w'];require('./node_modules/typescript/lib/tsc.js')\\\"\",\n+    \"lint\": \"tslint -p tsconfig.json\",\n+    \"test\": \"node --stack-size=10000 --expose_gc ./node_modules/nodeunit/bin/nodeunit dist/test\",\n+    \"test-debug\": \"lldb -- `which node` --stack-size=10000 --expose_gc ./node_modules/nodeunit/bin/nodeunit dist/test\",\n+    \"docs\": \"typedoc --includeVersion --excludePrivate --out docs lib/index.ts\"\n   },\n   \"dependencies\": {\n-    \"bindings\": \"1.0.0\"\n+    \"@mapbox/node-pre-gyp\": \"^1.0.9\",\n+    \"bindings\": \"~1.3.0\",\n+    \"nan\": \"^2.23.1\"\n   },\n   \"devDependencies\": {\n-    \"nodeunit\": \"*\"\n+    \"@types/bindings\": \"^1.5.0\",\n+    \"nodeunit\": \"^0.11.3\",\n+    \"tslint\": \"^6.1.3\",\n+    \"typedoc\": \"^0.23.28\",\n+    \"typescript\": \"^5.0.2\"\n   }\n }\n",
+					"match": false,
+					"packageHash": "3d27fc78fc7592cc122864d4334c2931be99bddd460901e31c15bc35e90a3c88",
+					"size": 641,
+					"sourceHash": "fb2d6609aaa276031d68aff480acf286351b17cbe8743781fbb4d1bcc91d1ae7",
+					"status": "content"
+				},
+				"src/html_document.cc": {
+					"match": false,
+					"packageHash": "13772898491555f79531de7928901d3e577e275f24178f6b0015a0d0ebfb83f1",
+					"size": 177,
+					"status": "missing-in-source"
+				},
+				"src/html_document.h": {
+					"match": false,
+					"packageHash": "539dc1e8ce76e96a873a546f8bbc0712656f70f9f015e4476cd317a470078a83",
+					"size": 398,
+					"status": "missing-in-source"
+				},
+				"src/libxmljs.cc": {
+					"match": false,
+					"packageHash": "212b8078512519f184b1a8bcbcdb0dfdf3b91207db565df9f76a671ea1e2a995",
+					"size": 3577,
+					"status": "missing-in-source"
+				},
+				"src/libxmljs.h": {
+					"match": false,
+					"packageHash": "44b6c615376285944f5ac60e1722fcdf8a64d1c9478fac6650ee0cfd3c13a431",
+					"size": 1022,
+					"status": "missing-in-source"
+				},
+				"src/xml_attribute.cc": {
+					"match": false,
+					"packageHash": "0116c53e712e23e67ca75e5b53248e2734addb81cb928a59e73850431ab0421b",
+					"size": 4147,
+					"status": "missing-in-source"
+				},
+				"src/xml_attribute.h": {
+					"match": false,
+					"packageHash": "f2f6b623d5fabb903c9a994fbeea6d1644b9b9ed2d884f9dabde54c9da9ae627",
+					"size": 1131,
+					"status": "missing-in-source"
+				},
+				"src/xml_document.cc": {
+					"match": false,
+					"packageHash": "fd52723d2c17410b0ffe77da470cd2fec12867cf95e8fbf2bc195bfc176184fc",
+					"size": 11783,
+					"status": "missing-in-source"
+				},
+				"src/xml_document.h": {
+					"match": false,
+					"packageHash": "5600bd4402892c670f5119a6b10572d66c8a377e5768a546c2f7e3202499a95d",
+					"size": 1742,
+					"status": "missing-in-source"
+				},
+				"src/xml_element.cc": {
+					"match": false,
+					"packageHash": "8b06b2fecefbd570959e3952c89d7d076610a299c0e9264251cc10a1d99dece0",
+					"size": 15100,
+					"status": "missing-in-source"
+				},
+				"src/xml_element.h": {
+					"match": false,
+					"packageHash": "c39defeac04dcd0a743b79ca31ca23ee73e8f41c4b0df1ab09f2479a8c71d73d",
+					"size": 2348,
+					"status": "missing-in-source"
+				},
+				"src/xml_namespace.cc": {
+					"match": false,
+					"packageHash": "e76d677550cfcf11a940fc7605738bbba85e1348b1a16a1ff12111090368ebd0",
+					"size": 3846,
+					"status": "missing-in-source"
+				},
+				"src/xml_namespace.h": {
+					"match": false,
+					"packageHash": "f46099e395a0b1a32ff499725cb3f7e8122d7b037326f430f6b2da1e6364171b",
+					"size": 925,
+					"status": "missing-in-source"
+				},
+				"src/xml_node.cc": {
+					"match": false,
+					"packageHash": "4ecbbb6a7907662ce4b3b73c46598e4839a9c1d971da721e3232f2d082dc72d0",
+					"size": 12002,
+					"status": "missing-in-source"
+				},
+				"src/xml_node.h": {
+					"match": false,
+					"packageHash": "efc8e5d1391a56b7b737eb9875254b6b1ad9bcdeebef0f6db95ce18c0d558e30",
+					"size": 1945,
+					"status": "missing-in-source"
+				},
+				"src/xml_sax_parser.cc": {
+					"diff": "--- published/src/xml_sax_parser.cc\n+++ rebuilt/src/xml_sax_parser.cc\n@@ -1,364 +1,384 @@\n // Copyright 2009, Squish Tech, LLC.\n \n+#include \"nan.h\"\n #include <node.h>\n \n-#include <libxml/parserInternals.h>\n+#include \"parserInternals.h\"\n \n #include \"libxmljs.h\"\n-\n #include \"xml_sax_parser.h\"\n \n-libxmljs::XmlSaxParser* LXJS_GET_PARSER_FROM_CONTEXT(void *context)\n-{\n-    _xmlParserCtxt* the_context = static_cast<_xmlParserCtxt*>(context);\n-    return static_cast<libxmljs::XmlSaxParser*>(the_context->_private);\n+libxmljs::XmlSaxParser *LXJS_GET_PARSER_FROM_CONTEXT(void *context) {\n+    _xmlParserCtxt *the_context = static_cast<_xmlParserCtxt *>(context);\n+    return static_cast<libxmljs::XmlSaxParser *>(the_context->_private);\n }\n \n+#define EMIT_SYMBOL_STRING \"emit\"\n+\n namespace {\n-    using namespace v8; // node 0.4.7 fails to use v8:: in NODE_PSYMBOL\n-    v8::Persistent<v8::String> emit_symbol = NODE_PSYMBOL(\"emit\");\n-}\n+using namespace v8; // node 0.4.7 fails to use v8:: in NODE_PSYMBOL\n+Nan::Persistent<v8::String> emit_symbol;\n+} // namespace\n \n namespace libxmljs {\n \n-XmlSaxParser::XmlSaxParser()\n-    : context_(NULL)\n-{\n+XmlSaxParser::XmlSaxParser() : context_(NULL) {\n     xmlSAXHandler tmp = {\n-        0,  // internalSubset;\n-        0,  // isStandalone;\n-        0,  // hasInternalSubset;\n-        0,  // hasExternalSubset;\n-        0,  // resolveEntity;\n-        0,  // getEntity;\n-        0,  // entityDecl;\n-        0,  // notationDecl;\n-        0,  // attributeDecl;\n-        0,  // elementDecl;\n-        0,  // unparsedEntityDecl;\n-        0,  // setDocumentLocator;\n+        0, // internalSubset;\n+        0, // isStandalone;\n+        0, // hasInternalSubset;\n+        0, // hasExternalSubset;\n+        0, // resolveEntity;\n+        0, // getEntity;\n+        0, // entityDecl;\n+        0, // notationDecl;\n+        0, // attributeDecl;\n+        0, // elementDecl;\n+        0, // unparsedEntityDecl;\n+        0, // setDocumentLocator;\n         XmlSaxParser::start_document,\n-        XmlSaxParser::end_document,  // endDocument;\n-        0,  // startElement;\n-        0,  // endElement;\n-        0,  // reference;\n-        XmlSaxParser::characters,  // characters;\n-        0,  // ignorableWhitespace;\n-        0,  // processingInstruction;\n-        XmlSaxParser::comment,  // comment;\n-        XmlSaxParser::warning,  // warning;\n-        XmlSaxParser::error,  // error;\n-        0,  // fatalError; /* unused error() get all the errors */\n-        0,  // getParameterEntity;\n-        XmlSaxParser::cdata_block,  // cdataBlock;\n-        0,  // externalSubset;\n-        XML_SAX2_MAGIC, /* force SAX2 */\n-        this,  /* _private */\n-        XmlSaxParser::start_element_ns,  // startElementNs;\n-        XmlSaxParser::end_element_ns,  // endElementNs;\n-        0  // SaxParserCallback::structured_error // serror\n+        XmlSaxParser::end_document, // endDocument;\n+        0,                          // startElement;\n+        0,                          // endElement;\n+        0,                          // reference;\n+        XmlSaxParser::characters,   // characters;\n+        0,                          // ignorableWhitespace;\n+        0,                          // processingInstruction;\n+        XmlSaxParser::comment,      // comment;\n+        XmlSaxParser::warning,      // warning;\n+        XmlSaxParser::error,        // error;\n+        0, // fatalError; /* unused error() get all the errors */\n+        0, // getParameterEntity;\n+        XmlSaxParser::cdata_block,      // cdataBlock;\n+        0,                              // externalSubset;\n+        XML_SAX2_MAGIC,                 /* force SAX2 */\n",
+					"match": false,
+					"packageHash": "797198bc9d4a23cfb84ae9ba163b1fabf6e2d8e4c6d2938b9529cd4fc17d8d41",
+					"size": 12162,
+					"sourceHash": "55c9c0e3a204f47b843b1d839d3ab805466d1522c0e84f961cf219d958f97b67",
+					"status": "content"
+				},
+				"src/xml_sax_parser.h": {
+					"match": false,
+					"packageHash": "71f7e5e2bd37d8e74b2309349b884d061ae69d46224a9ab39cfd43922070b5ba",
+					"size": 2294,
+					"status": "missing-in-source"
+				},
+				"src/xml_syntax_error.cc": {
+					"match": false,
+					"packageHash": "c29abb7a4d21f794c9401c247778c04a2c8f0e6ef97ce76ea8fb990d41b7b37b",
+					"size": 1834,
+					"status": "missing-in-source"
+				},
+				"src/xml_syntax_error.h": {
+					"match": false,
+					"packageHash": "6e3caf444c2b5b6e8962a1f225bf3ac2cc7507e659fe0b97b7958e6e599f6b38",
+					"size": 597,
+					"status": "missing-in-source"
+				},
+				"src/xml_xpath_context.cc": {
+					"match": false,
+					"packageHash": "9963f0dab8408bb249ef9a379c60ac55c278ac1f4aef4cff0382c1465000c85f",
+					"size": 1634,
+					"status": "missing-in-source"
+				},
+				"src/xml_xpath_context.h": {
+					"match": false,
+					"packageHash": "6ae6ee482a6f669f1b6d4e37975b6cc2d1765bcc4011443a2178aefbe9a63876",
+					"size": 487,
+					"status": "missing-in-source"
+				},
+				"test/attribute.js": {
+					"match": false,
+					"packageHash": "1731c90c9ef9d933cb0e34bacf317634cb15380ba5d253883faf30eccf8b2f64",
+					"size": 2592,
+					"status": "missing-in-source"
+				},
+				"test/document.js": {
+					"match": false,
+					"packageHash": "f26609954ef654629a0311a8b8ecd1b2abb513aacd51ffb8fa786afe833ff432",
+					"size": 6785,
+					"status": "missing-in-source"
+				},
+				"test/element.js": {
+					"match": false,
+					"packageHash": "69454f9accbb3c0d424b7321f6343cd1b511b91f88733431a5e76b5aef34c8b5",
+					"size": 4689,
+					"status": "missing-in-source"
+				},
+				"test/html_parser.js": {
+					"match": false,
+					"packageHash": "0d22ad1926c1d9eb13c18f7ab6b141a1cbeab0ebb66012777185f38f4eabb142",
+					"size": 3617,
+					"status": "missing-in-source"
+				},
+				"test/main.js": {
+					"match": false,
+					"packageHash": "9750ff3912d9d1a8de55bd9b81ee59fd2914c9867f4c3f4a658c40c7cb1178b3",
+					"size": 426,
+					"status": "missing-in-source"
+				},
+				"test/namespace.js": {
+					"match": false,
+					"packageHash": "f1733beb8e2ca7713f6e48d38a15220ef5d66cba7627fe24046b80315902be9a",
+					"size": 5751,
+					"status": "missing-in-source"
+				},
+				"test/node_attributes.js": {
+					"match": false,
+					"packageHash": "904453ad7fb5da0dbf3404337ba052ad0836035e0db27815ded3926e373edf17",
+					"size": 2163,
+					"status": "missing-in-source"
+				},
+				"test/ref_integrity.js": {
+					"match": false,
+					"packageHash": "336f529078efb62679875092072885a1ce91d2f7b38833ed0153ec7e440b32f5",
+					"size": 735,
+					"status": "missing-in-source"
+				},
+				"test/searching.js": {
+					"match": false,
+					"packageHash": "98c75f25d8896eedb6fb8081616fb3f71e5e03f7f4ec0a548b5d402d1726957a",
+					"size": 4520,
+					"status": "missing-in-source"
+				},
+				"test/text_node.js": {
+					"match": false,
+					"packageHash": "086ae7c4a064b17ee4355907ed5d7ce41b8e8c2eeabf3baa7a6272e017cdac81",
+					"size": 857,
+					"status": "missing-in-source"
+				},
+				"test/traversal.js": {
+					"match": false,
+					"packageHash": "ef9dcdc2f7ae6f0c3b948fcd8f14846392dd3b8a065709aca3693b942b7d511e",
+					"size": 3210,
+					"status": "missing-in-source"
+				},
+				"test/xml_parser.js": {
+					"match": false,
+					"packageHash": "df6d092fc59a612296ebc7a2c3b90ab2b55934d1b7a965defecdbd36954335f1",
+					"size": 2431,
+					"status": "missing-in-source"
+				},
+				"test/xml_sax_parser.js": {
+					"match": false,
+					"packageHash": "a0efa22c40c30dfb514510cb088269ac66510eab93ed1dd259e8e8537c6ba2cd",
+					"size": 4722,
+					"status": "missing-in-source"
+				},
+				"wscript": {
+					"match": false,
+					"packageHash": "dd9a0cc446d1b2223a757f80b67aacab2f67c23bc665ff9bec63bb17b3c8c318",
+					"size": 964,
+					"status": "missing-in-source"
+				},
+				".clang-format": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				".gitmodules": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				".prettierrc": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				".tslintrc": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"index.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/api.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/bindings/constants.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/bindings/functions.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/bindings/index.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/bindings/types.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/bindings/variables.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/document.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/index.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/node.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/parse.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/sax.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/schema.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/types.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/version.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"scripts/preinstall.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"scripts/swig.bat": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"scripts/swig.sh": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"scripts/swig2ts.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"scripts/swigfix.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"scripts/swigfix_node24.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/include/libxmljs.h": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/include/xml_sax_parser.h": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/include/xml_syntax_error.h": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"src/libxml2.cc": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/attribute.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/comment.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/document.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/element.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/fixtures/baseurl.dtd": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/html_parser.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/imports.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/main.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/memory_management.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/namespace.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/node_attributes.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/pi.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/ref_integrity.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/searching.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/text.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/text_node.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/traversal.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/xml_parser.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/xml_sax_parser.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/z_memory_leak.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"tsconfig.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"typedoc.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"vendor/libxml2.config/config.h": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"vendor/libxml2.config/libxml/xmlversion.h": {
+					"match": false,
+					"status": "missing-in-package"
+				}
+			},
+			"summary": {
+				"differentFiles": 5,
+				"matchingFiles": 9,
+				"missingInPackage": 53,
+				"missingInSource": 53,
+				"score": 0.075,
+				"totalFiles": 120
+			}
+		},
+		"prodDependencies": [
+			{
+				"name": "@mapbox/node-pre-gyp",
+				"version": "1.0.9"
+			},
+			{
+				"name": "ansi-regex",
+				"version": "5.0.1"
+			},
+			{
+				"name": "are-we-there-yet",
+				"version": "2.0.0"
+			},
+			{
+				"name": "chownr",
+				"version": "2.0.0"
+			},
+			{
+				"name": "detect-libc",
+				"version": "2.0.1"
+			},
+			{
+				"name": "emoji-regex",
+				"version": "8.0.0"
+			},
+			{
+				"name": "fs-minipass",
+				"version": "2.1.0"
+			},
+			{
+				"name": "gauge",
+				"version": "3.0.2"
+			},
+			{
+				"name": "is-fullwidth-code-point",
+				"version": "3.0.0"
+			},
+			{
+				"name": "make-dir",
+				"version": "3.1.0"
+			},
+			{
+				"name": "semver",
+				"version": "6.3.1"
+			},
+			{
+				"name": "minipass",
+				"version": "3.1.6"
+			},
+			{
+				"name": "minizlib",
+				"version": "2.1.2"
+			},
+			{
+				"name": "mkdirp",
+				"version": "1.0.4"
+			},
+			{
+				"name": "nopt",
+				"version": "5.0.0"
+			},
+			{
+				"name": "npmlog",
+				"version": "5.0.1"
+			},
+			{
+				"name": "readable-stream",
+				"version": "3.6.0"
+			},
+			{
+				"name": "rimraf",
+				"version": "3.0.2"
+			},
+			{
+				"name": "string-width",
+				"version": "4.2.3"
+			},
+			{
+				"name": "strip-ansi",
+				"version": "6.0.1"
+			},
+			{
+				"name": "tar",
+				"version": "6.1.11"
+			},
+			{
+				"name": "yallist",
+				"version": "4.0.0"
+			},
+			{
+				"name": "abbrev",
+				"version": "1.1.1"
+			},
+			{
+				"name": "agent-base",
+				"version": "6.0.2"
+			},
+			{
+				"name": "debug",
+				"version": "4.3.4"
+			},
+			{
+				"name": "ansi-regex",
+				"version": "2.1.1"
+			},
+			{
+				"name": "aproba",
+				"version": "1.2.0"
+			},
+			{
+				"name": "balanced-match",
+				"version": "1.0.0"
+			},
+			{
+				"name": "bindings",
+				"version": "1.3.1"
+			},
+			{
+				"name": "brace-expansion",
+				"version": "1.1.11"
+			},
+			{
+				"name": "code-point-at",
+				"version": "1.1.0"
+			},
+			{
+				"name": "color-support",
+				"version": "1.1.3"
+			},
+			{
+				"name": "concat-map",
+				"version": "0.0.1"
+			},
+			{
+				"name": "console-control-strings",
+				"version": "1.1.0"
+			},
+			{
+				"name": "delegates",
+				"version": "1.0.0"
+			},
+			{
+				"name": "fs.realpath",
+				"version": "1.0.0"
+			},
+			{
+				"name": "glob",
+				"version": "7.1.6"
+			},
+			{
+				"name": "has-unicode",
+				"version": "2.0.1"
+			},
+			{
+				"name": "https-proxy-agent",
+				"version": "5.0.0"
+			},
+			{
+				"name": "inflight",
+				"version": "1.0.6"
+			},
+			{
+				"name": "inherits",
+				"version": "2.0.4"
+			},
+			{
+				"name": "is-fullwidth-code-point",
+				"version": "1.0.0"
+			},
+			{
+				"name": "minimatch",
+				"version": "3.1.2"
+			},
+			{
+				"name": "ms",
+				"version": "2.1.2"
+			},
+			{
+				"name": "nan",
+				"version": "2.23.1"
+			},
+			{
+				"name": "node-fetch",
+				"version": "2.6.7"
+			},
+			{
+				"name": "number-is-nan",
+				"version": "1.0.1"
+			},
+			{
+				"name": "object-assign",
+				"version": "4.1.1"
+			},
+			{
+				"name": "once",
+				"version": "1.4.0"
+			},
+			{
+				"name": "path-is-absolute",
+				"version": "1.0.1"
+			},
+			{
+				"name": "safe-buffer",
+				"version": "5.1.2"
+			},
+			{
+				"name": "semver",
+				"version": "7.5.4"
+			},
+			{
+				"name": "lru-cache",
+				"version": "6.0.0"
+			},
+			{
+				"name": "set-blocking",
+				"version": "2.0.0"
+			},
+			{
+				"name": "signal-exit",
+				"version": "3.0.3"
+			},
+			{
+				"name": "string_decoder",
+				"version": "1.1.1"
+			},
+			{
+				"name": "string-width",
+				"version": "1.0.2"
+			},
+			{
+				"name": "strip-ansi",
+				"version": "3.0.1"
+			},
+			{
+				"name": "tr46",
+				"version": "0.0.3"
+			},
+			{
+				"name": "util-deprecate",
+				"version": "1.0.2"
+			},
+			{
+				"name": "webidl-conversions",
+				"version": "3.0.1"
+			},
+			{
+				"name": "whatwg-url",
+				"version": "5.0.0"
+			},
+			{
+				"name": "wide-align",
+				"version": "1.1.3"
+			},
+			{
+				"name": "wrappy",
+				"version": "1.0.2"
+			}
+		]
+	}
+]
