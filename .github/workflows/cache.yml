@@ -51,6 +51,11 @@ jobs:
 
             (async () => {
               const packument = await pacote.packument('${PACKAGE}');
+              if (!packument || !packument.versions) {
+                console.error('Package not found or has no versions: ${PACKAGE}');
+                fs.appendFileSync(process.env.GITHUB_OUTPUT, 'matrix=[]\npackage=${PACKAGE}\nremaining=\n');
+                process.exit(0);
+              }
               const allVersions = Object.keys(packument.versions);
               const range = new Range('${VERSIONS}');
               const matching = allVersions.filter(v => range.test(v));
