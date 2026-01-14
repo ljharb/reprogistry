@@ -190,6 +190,24 @@ async function getProdDeps(dir) {
 	}
 }
 
+/**
+ * Save production dependencies to file for queueing.
+ *
+ * @param {DepInfo[]} deps - Dependencies to save
+ * @param {string} ver - Package version (for file naming)
+ */
+async function saveDepsForQueue(deps, ver) {
+	if (deps.length === 0) {
+		return;
+	}
+	const safeVersion = ver.replace(/\+/g, '__');
+	const depsDir = '/tmp/deps';
+	await mkdir(depsDir, { recursive: true });
+	const depsPath = path.join(depsDir, `${safeVersion}.json`);
+	await writeFile(depsPath, JSON.stringify(deps));
+	console.log(`  -> Wrote ${deps.length} deps to ${depsPath}`);
+}
+
 const { PACKAGE: pkg, VERSION: version } = process.env;
 
 if (!pkg || !version) {
@@ -246,10 +264,11 @@ async function extractTarball(tarballPath, destDir) {
  * Also extracts production dependencies from the generated lockfile.
  *
  * @param {ReproduceResult} result - Reproduce result
+ * @param {string} ver - Package version (for deps file naming)
  * @returns {Promise<ComparisonWithDeps>} Comparison result with dependencies
  * @throws {Error} If comparison fails
  */
-async function performComparison(result) {
+async function performComparison(result, ver) {
 	const tempDir = path.join(tmpdir(), `reproduce-compare-${Date.now()}`);
 	const publishedDir = path.join(tempDir, 'published');
 	const rebuiltDir = path.join(tempDir, 'rebuilt');
@@ -293,6 +312,9 @@ async function performComparison(result) {
 
 		// Extract production dependencies from the generated lockfile
 		const prodDependencies = await getProdDeps(packageDir);
+
+		// Save deps immediately so they're captured even if comparison fails later
+		await saveDepsForQueue(prodDependencies, ver);
 
 		const packOutput = execSync(
 			`cd "${packageDir}" && npm pack --pack-destination "${tempDir}"`,
@@ -352,7 +374,7 @@ const reproduceResult = /** @type {ReproduceResult} */ (result);
 /** @type {ComparisonWithDeps | null} */
 let comparisonWithDeps = null;
 try {
-	comparisonWithDeps = await performComparison(reproduceResult);
+	comparisonWithDeps = await performComparison(reproduceResult, version);
 	console.log(`  -> Score: ${Math.round((comparisonWithDeps.comparison.summary?.score ?? 0) * 100)}%`);
 	if (comparisonWithDeps.prodDependencies.length > 0) {
 		console.log(`  -> Found ${comparisonWithDeps.prodDependencies.length} production dependencies`);
@@ -408,13 +430,3 @@ deduped.sort((a, b) => {
 
 await writeFile(dataPath, `${JSON.stringify(deduped, null, '\t')}\n`);
 console.log(`  -> Saved to ${dataPath}`);
-
-// Write dependency info for queueing (if any deps found)
-if (enhancedResult.prodDependencies && enhancedResult.prodDependencies.length > 0) {
-	const safeVersion = version.replace(/\+/g, '__');
-	const depsDir = '/tmp/deps';
-	await mkdir(depsDir, { recursive: true });
-	const depsPath = path.join(depsDir, `${safeVersion}.json`);
-	await writeFile(depsPath, JSON.stringify(enhancedResult.prodDependencies));
-	console.log(`  -> Wrote ${enhancedResult.prodDependencies.length} deps to ${depsPath}`);
-}
