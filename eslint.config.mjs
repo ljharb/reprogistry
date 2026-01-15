@@ -1,5 +1,7 @@
 import baseConfig from '@ljharb/eslint-config/flat/node/latest';
 
+import nodeConfig from '@ljharb/eslint-config/flat/node/22';
+
 export default [
 	{
 		ignores: ['dashboard/**'],
@@ -23,6 +25,18 @@ export default [
 			'max-statements': 'off',
 			'no-underscore-dangle': 'off',
 			'sort-keys': 'off',
+		},
+	},
+	...nodeConfig.map((config) => ({
+		...config,
+		files: config.files
+			? config.files.map((file) => `packages/cli/${file}`)
+			: ['packages/cli/**'],
+	})),
+	{
+		files: ['packages/cli/**/*.mjs'],
+		rules: {
+			'no-extra-parens': 'off',
 		},
 	},
 ];

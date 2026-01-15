@@ -1,0 +1,66 @@
+name: CLI CI
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'packages/cli/**'
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'packages/cli/**'
+
+permissions:
+  contents: read
+
+defaults:
+  run:
+    working-directory: packages/cli
+
+jobs:
+  matrix:
+    runs-on: ubuntu-latest
+    outputs:
+      latest: ${{ steps.set-matrix.outputs.latest }}
+      minors: ${{ steps.set-matrix.outputs.minors }}
+    steps:
+      - uses: ljharb/actions/node/matrix@main
+        id: set-matrix
+        with:
+          versionsAsRoot: true
+          preset: '^22.20 || ^24.13 || >= 25.3'
+
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: ljharb/actions/node/install@main
+        with:
+          node-version: 'lts/*'
+      - run: npm run lint
+
+  test:
+    needs: matrix
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        node-version: ${{ fromJson(needs.matrix.outputs.minors) }}
+    steps:
+      - uses: actions/checkout@v6
+      - uses: ljharb/actions/node/install@main
+        with:
+          node-version: ${{ matrix.node-version }}
+      - run: npm run tests-only
+
+  test-latest:
+    needs: matrix
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: ljharb/actions/node/install@main
+        with:
+          node-version: ${{ needs.matrix.outputs.latest }}
+      - run: npm run tests-only
