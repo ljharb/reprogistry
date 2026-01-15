@@ -1,0 +1,46 @@
+name: Precompute Package Data
+
+on:
+  schedule:
+    - cron: '30 * * * *'  # Run every hour at :30
+  workflow_dispatch:  # Allow manual trigger
+  push:
+    branches:
+      - data  # Also run when data branch is updated
+
+jobs:
+  precompute:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Fetch data branch
+        run: git fetch origin data:refs/remotes/origin/data
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 'lts/*'
+
+      - name: Run precompute
+        run: node scripts/precompute.mjs precompute-output/packages
+
+      - name: Setup precompute branch
+        run: |
+          cd precompute-output
+          git init
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Commit and push
+        run: |
+          cd precompute-output
+          git add -A
+          git commit -m "Update precomputed data" || echo "No changes to commit"
+          git branch -M precompute
+          git remote add origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
+          git push -f origin precompute
