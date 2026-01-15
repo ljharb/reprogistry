@@ -32,14 +32,8 @@ const processVersion = function (safePkg, vDir) {
 			return null;
 		}
 
-		// Calculate score
-		let score = null;
-		if (latest.diff && latest.diff.files) {
-			const files = Object.values(latest.diff.files);
-			const total = files.length;
-			const matching = files.filter((f) => f.match).length;
-			score = total > 0 ? matching / total : null;
-		}
+		// Get score from diff summary
+		const score = latest.diff && latest.diff.summary ? latest.diff.summary.score : null;
 
 		return {
 			reproduced: latest.reproduced,
