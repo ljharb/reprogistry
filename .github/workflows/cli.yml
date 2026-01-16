@@ -23,8 +23,8 @@ jobs:
   matrix:
     runs-on: ubuntu-latest
     outputs:
-      latest: ${{ steps.set-matrix.outputs.latest }}
-      minors: ${{ steps.set-matrix.outputs.minors }}
+      requireds: ${{ steps.set-matrix.outputs.requireds }}
+      optionals: ${{ steps.set-matrix.outputs.optionals }}
     steps:
       - uses: ljharb/actions/node/matrix@main
         id: set-matrix
@@ -47,20 +47,10 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        node-version: ${{ fromJson(needs.matrix.outputs.minors) }}
+        node-version: ${{ fromJson(needs.matrix.outputs.requireds) }}
     steps:
       - uses: actions/checkout@v6
       - uses: ljharb/actions/node/install@main
         with:
           node-version: ${{ matrix.node-version }}
-      - run: npm run tests-only
-
-  test-latest:
-    needs: matrix
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v6
-      - uses: ljharb/actions/node/install@main
-        with:
-          node-version: ${{ needs.matrix.outputs.latest }}
       - run: npm run tests-only
