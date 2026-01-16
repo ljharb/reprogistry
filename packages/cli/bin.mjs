@@ -135,12 +135,29 @@ if (!versionData) {
 	process.exit(0);
 }
 
-const tier = getTier(versionData.score);
+// Handle both data formats: simple (score directly) and rich (score in latestResult)
+/** @type {number | null | undefined} */
+const versionScore = typeof versionData.score === 'number'
+	? versionData.score
+	: versionData.latestResult?.score;
+const versionReproduced = typeof versionData.reproduced === 'boolean'
+	? versionData.reproduced
+	: versionData.latestResult?.reproduced;
+
+const tier = getTier(versionScore);
+
+// Get transitive dependencies from precomputed data (rich format) or fall back to direct deps
+const prodDeps = versionData.prodDependencies
+	|| versionData.latestResult?.prodDependencies
+	|| [];
+// If we have prodDependencies, use those (transitive); otherwise fall back to direct deps from manifest
+const depNames = prodDeps.length > 0
+	? [...new Set(prodDeps.map((/** @type {{ name: string }} */ d) => d.name))]
+	: (dependencies ? Object.keys(dependencies) : []);
 
 // Fetch dependency reproducibility data
 /** @type {{ name: string, score: number | null, tier: string, tracked: boolean }[]} */
 const depResults = [];
-const depNames = dependencies ? Object.keys(dependencies) : [];
 
 if (depNames.length > 0) {
 	const depFetches = depNames.map(async (depName) => {
@@ -157,15 +174,20 @@ if (depNames.length > 0) {
 				};
 			}
 			const depData = await depResponse.json();
-			// Get latest version's score
+			// Get latest version's score (handle both simple and rich formats)
 			const latestVersion = depData.versions && depData.versions[0];
-			if (latestVersion && typeof latestVersion.score === 'number') {
-				return {
-					name: depName,
-					score: latestVersion.score,
-					tier: getTier(latestVersion.score),
-					tracked: true,
-				};
+			if (latestVersion) {
+				const depScore = typeof latestVersion.score === 'number'
+					? latestVersion.score
+					: latestVersion.latestResult?.score;
+				if (typeof depScore === 'number') {
+					return {
+						name: depName,
+						score: depScore,
+						tier: getTier(depScore),
+						tracked: true,
+					};
+				}
 			}
 			return {
 				name: depName,
@@ -203,29 +225,38 @@ if (values.json) {
 	console.log(JSON.stringify({
 		dependencies: depStats,
 		name: packageName,
-		reproduced: versionData.reproduced,
-		score: versionData.score,
-		status: versionData.reproduced ? 'reproducible' : 'not-reproducible',
+		reproduced: versionReproduced,
+		score: versionScore,
+		status: versionReproduced ? 'reproducible' : 'not-reproducible',
 		tier,
 		version: versionData.version,
 	}));
 } else {
 	console.log(`Package: ${packageName}`);
 	console.log(`Version: ${versionData.version}`);
-	console.log(`\nReproducible: ${versionData.reproduced ? 'Yes' : 'No'}`);
-	if (typeof versionData.score === 'number') {
-		const pct = (versionData.score * 100).toFixed(1);
-		console.log(`Score: ${pct}%`);
+	if (typeof versionScore === 'number') {
+		const pct = (versionScore * 100).toFixed(1);
+		console.log(`\nReproducibility: ${pct}% (${tier})`);
+	} else {
+		console.log('\nReproducibility: No data available');
 	}
-	console.log(`Tier: ${tier}`);
 
 	if (depStats.total > 0) {
-		console.log(`\nDirect Dependencies: ${depStats.total} total, ${depStats.tracked} tracked, ${depStats.missing} missing`);
+		console.log(`\nTransitive Dependencies: ${depStats.total} total, ${depStats.tracked} tracked, ${depStats.missing} missing`);
 		if (depStats.averageScore !== null) {
 			const avgPct = (depStats.averageScore * 100).toFixed(1);
-			console.log(`Average Dep Score: ${avgPct}% (${depStats.averageTier})`);
+			console.log(`Average Score: ${avgPct}% (${depStats.averageTier})`);
+		}
+		// Only show high-risk dependencies
+		const highRiskDeps = depResults.filter((d) => d.tier === 'High Risk');
+		if (highRiskDeps.length > 0) {
+			console.log('\nHigh Risk:');
+			for (const dep of highRiskDeps) {
+				const depPct = (/** @type {number} */ (dep.score) * 100).toFixed(1);
+				console.log(`  ${dep.name}: ${depPct}%`);
+			}
 		}
 	} else {
-		console.log('\nDirect Dependencies: None');
+		console.log('\nTransitive Dependencies: None');
 	}
 }

@@ -88,8 +88,17 @@ test('reprogistry CLI', (t) => {
 		st.equal(result.exitCode, 0, 'exits with 0');
 		st.ok(result.stdout.includes('Package: is-callable'), 'shows package name');
 		st.ok(result.stdout.includes('Version: 1.2.7'), 'shows version');
-		st.ok(result.stdout.includes('Score:'), 'shows score');
-		st.ok(result.stdout.includes('Tier:'), 'shows tier');
+		st.ok(result.stdout.includes('Reproducibility:'), 'shows reproducibility');
+		st.ok((/Reproducibility: \d+\.\d+%/).test(result.stdout), 'shows reproducibility as percentage');
+		st.ok((/\(Perfect\)|\(Excellent\)|\(Good\)|\(High Risk\)/).test(result.stdout), 'shows tier in parentheses');
+		st.end();
+	});
+
+	t.test('shows transitive dependencies label', (st) => {
+		const result = runCli(['@babel/code-frame@7.8.3']);
+		st.equal(result.exitCode, 0, 'exits with 0');
+		st.ok(result.stdout.includes('Transitive Dependencies:'), 'shows transitive dependencies');
+		st.notOk(result.stdout.includes('Direct Dependencies:'), 'does not say direct dependencies');
 		st.end();
 	});
 
