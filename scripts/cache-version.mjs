@@ -380,16 +380,19 @@ try {
 		console.log(`  -> Found ${comparisonWithDeps.prodDependencies.length} production dependencies`);
 	}
 } catch (err) {
+	// Comparison failed (e.g., repo unreachable) - save result without diff data
 	console.error(`  -> Comparison failed: ${/** @type {Error} */ (err).message}`);
-	process.exit(1);
+	console.log('  -> Saving result without diff data');
 }
 
 /** @type {EnhancedResult} */
 const enhancedResult = {
 	...reproduceResult,
 	comparisonHash: COMPARISON_HASH,
-	diff: comparisonWithDeps.comparison,
-	prodDependencies: comparisonWithDeps.prodDependencies,
+	...(comparisonWithDeps && {
+		diff: comparisonWithDeps.comparison,
+		prodDependencies: comparisonWithDeps.prodDependencies,
+	}),
 };
 
 existing.push(enhancedResult);
