@@ -2,7 +2,7 @@
 
 import { execSync } from 'child_process';
 import { mkdirSync, writeFileSync } from 'fs';
-import { join } from 'path';
+import { dirname, join } from 'path';
 
 const OUTPUT_DIR = process.argv[2] || 'precompute-output/packages';
 
@@ -14,6 +14,9 @@ const packagesRaw = execSync('git show origin/data:packages.txt', { encoding: 'u
 const packageList = packagesRaw.trim().split('\n').filter(Boolean);
 
 console.log(`Processing ${packageList.length} packages...`);
+
+/** @type {{ name: string, latestVersion: string, latestScore: number | null, versionCount: number }[]} */
+const packageIndex = [];
 
 /**
  * @param {string} safePkg
@@ -82,6 +85,15 @@ const processPackage = function (pkg) {
 		const outputPath = join(OUTPUT_DIR, `${safeFilename}.json`);
 		writeFileSync(outputPath, JSON.stringify(output));
 
+		// Add to index
+		const latest = versions[0];
+		packageIndex.push({
+			latestScore: latest.score,
+			latestVersion: latest.version,
+			name: pkg,
+			versionCount: versions.length,
+		});
+
 		console.log(`  ${pkg}: ${versions.length} versions`);
 	} catch (e) {
 		const err = /** @type {Error} */ (e);
@@ -90,5 +102,10 @@ const processPackage = function (pkg) {
 };
 
 packageList.forEach(processPackage);
+
+// Write packages index
+const indexPath = join(dirname(OUTPUT_DIR), 'packages.json');
+writeFileSync(indexPath, JSON.stringify({ packages: packageIndex }));
+console.log(`\nWrote index with ${packageIndex.length} packages to ${indexPath}`);
 
 console.log('Done.');
