@@ -1,0 +1,85 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-17T03:31:37.867Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:6.2.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "svelte@3.0.0-beta.2",
+			"name": "svelte",
+			"version": "3.0.0-beta.2",
+			"location": "https://registry.npmjs.org/svelte/-/svelte-3.0.0-beta.2.tgz",
+			"integrity": "sha512-7E+HzH9R1VXtmMB0DfGVtG32m+KAPhgjptsf+jM5Qetu4ULQgfv4TQ6IGrPiQ0wquXISRlV8t7qeqkADzDgu3A==",
+			"publishedAt": "2019-02-04T03:19:55.866Z",
+			"publishedWith": {
+				"node": "10.9.0",
+				"npm": "6.2.0"
+			},
+			"dependencies": {}
+		},
+		"source": {
+			"integrity": "sha512-U0UG1pbb6HtZ236Vsdyuwa1GRRZM8NROVDAFrFr3jXcKDNk6MplE0DHRFDYaqAqU+Al4ZR2gRYX+LLAHRLM14w==",
+			"location": "git+https://github.com/sveltejs/svelte.git",
+			"spec": "github:sveltejs/svelte#183c9ca403218a8e85e1753e796da8ff49c7ae50"
+		},
+		"comparisonHash": "9ef46a5bd31291e57cbab41e2f17c57bd6da0b5b",
+		"diff": {
+			"files": {
+				"CHANGELOG.md": {
+					"match": false,
+					"packageHash": "e9b58cf73546a6d67e3b140b6016464c704317db6fc2b4d7d0993ab29ff2718d",
+					"size": 71036,
+					"status": "missing-in-source"
+				},
+				"cli/chunk-5170679c.js": {
+					"match": false,
+					"packageHash": "310d290fef0c2dc85046fc476b00b73bd71736fa5d79323c1b79921d1005b536",
+					"size": 6699,
+					"status": "missing-in-source"
+				},
+				"cli/compile.js": {
+					"match": false,
+					"packageHash": "b1d21985afe1e6fec87544f7a9c21a8b14c12ca0c15436c6d1523c14badd8dc3",
+					"size": 6693,
+					"status": "missing-in-source"
+				},
+				"cli/index.js": {
+					"diff": "--- published/cli/index.js\n+++ rebuilt/cli/index.js\n@@ -369,7 +369,7 @@\n \n var lib$1 = str => new Sade(str);\n \n-var version = \"3.0.0-beta.2\";\n+var version = \"3.0.0-beta.1\";\n \n const prog = lib$1('svelte').version(version);\n prog\n",
+					"match": false,
+					"packageHash": "581f83f2b70a9927e60d9c11e0c6f8dfc0e009d494c66fd06c7536b05e6cb4cc",
+					"size": 10180,
+					"sourceHash": "4cac65e24462585e36c6801dd8b95a98feb1ff50032d08e6a175b4b09202ba33",
+					"status": "content"
+				},
+				"compiler.js": {
+					"diff": "--- published/compiler.js\n+++ rebuilt/compiler.js\n@@ -1,14274 +1,4806 @@\n-(function (global, factory) {\n-\ttypeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :\n-\ttypeof define === 'function' && define.amd ? define(['exports'], factory) :\n-\t(global = global || self, factory(global.svelte = {}));\n-}(this, function (exports) { 'use strict';\n-\n-\tfunction assign(tar, src) {\n-\t\tfor (var k in src) tar[k] = src[k];\n-\t\treturn tar;\n-\t}\n-\n-\tconst now = (typeof process !== 'undefined' && process.hrtime)\n-\t    ? () => {\n-\t        const t = process.hrtime();\n-\t        return t[0] * 1e3 + t[1] / 1e6;\n-\t    }\n-\t    : () => self.performance.now();\n-\tfunction collapseTimings(timings) {\n-\t    const result = {};\n-\t    timings.forEach(timing => {\n-\t        result[timing.label] = Object.assign({\n-\t            total: timing.end - timing.start\n-\t        }, timing.children && collapseTimings(timing.children));\n-\t    });\n-\t    return result;\n-\t}\n-\tclass Stats {\n-\t    constructor({ onwarn }) {\n-\t        this.startTime = now();\n-\t        this.stack = [];\n-\t        this.currentChildren = this.timings = [];\n-\t        this.onwarn = onwarn;\n-\t        this.warnings = [];\n-\t    }\n-\t    start(label) {\n-\t        const timing = {\n-\t            label,\n-\t            start: now(),\n-\t            end: null,\n-\t            children: []\n-\t        };\n-\t        this.currentChildren.push(timing);\n-\t        this.stack.push(timing);\n-\t        this.currentTiming = timing;\n-\t        this.currentChildren = timing.children;\n-\t    }\n-\t    stop(label) {\n-\t        if (label !== this.currentTiming.label) {\n-\t            throw new Error(`Mismatched timing labels (expected ${this.currentTiming.label}, got ${label})`);\n-\t        }\n-\t        this.currentTiming.end = now();\n-\t        this.stack.pop();\n-\t        this.currentTiming = this.stack[this.stack.length - 1];\n-\t        this.currentChildren = this.currentTiming ? this.currentTiming.children : this.timings;\n-\t    }\n-\t    render(component) {\n-\t        const timings = Object.assign({\n-\t            total: now() - this.startTime\n-\t        }, collapseTimings(this.timings));\n-\t        // TODO would be good to have this info even\n-\t        // if options.generate is false\n-\t        const imports = component && component.imports.map(node => {\n-\t            return {\n-\t                source: node.source.value,\n-\t                specifiers: node.specifiers.map(specifier => {\n-\t                    return {\n-\t                        name: (specifier.type === 'ImportDefaultSpecifier' ? 'default' :\n-\t                            specifier.type === 'ImportNamespaceSpecifier' ? '*' :\n-\t                                specifier.imported.name),\n-\t                        as: specifier.local.name\n-\t                    };\n-\t                })\n-\t            };\n-\t        });\n-\t        return {\n-\t            timings,\n-\t            warnings: this.warnings,\n-\t            vars: component.vars.filter(variable => !variable.global && !variable.implicit && !variable.internal).map(variable => ({\n-\t                name: variable.name,\n-\t                export_name: variable.export_name || null,\n-\t                injected: variable.injected || false,\n-\t                module: variable.module || false,\n-\t                mutated: variable.mutated || false,\n-\t                reassigned: variable.reassigned || false,\n-\t                referenced: variable.referenced || false,\n-\t                writable: variable.writable || false\n-\t            }))\n-\t        };\n-\t    }\n-\t    warn(warning) {\n-\t        this.warnings.push(warning);\n-\t        this.onwarn(warning);\n-\t    }\n-\t}\n-\n-\t// Reserved word lists for various dialects of the language\n-\n",
+					"match": false,
+					"packageHash": "cdd182ac093ef324ef103f896c937b98e21d8e01ef79c59076d5d80cfaaea94c",
+					"size": 807214,
+					"sourceHash": "dc8971043e34b76d3c5a2e7d87d6eb9f4e9b33925a7b014ff9df687105d45259",
+					"status": "content"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -1,6 +1,6 @@\n {\n   \"name\": \"svelte\",\n-  \"version\": \"3.0.0-beta.2\",\n+  \"version\": \"3.0.0-beta.1\",\n   \"description\": \"The magical disappearing UI framework\",\n   \"module\": \"index.mjs\",\n   \"main\": \"index\",\n",
+					"match": false,
+					"packageHash": "f536e5adf6c1f59421570908a319b5116224e9a26e7db5cf9064c045784f25f2",
+					"size": 2637,
+					"sourceHash": "c9f267a55c31188c515b104b9d715ea6a3c772c4636a10e2917142916ad0b5c1",
+					"status": "content"
+				}
+			},
+			"summary": {
+				"differentFiles": 3,
+				"matchingFiles": 17,
+				"missingInPackage": 0,
+				"missingInSource": 3,
+				"score": 0.7391304347826086,
+				"totalFiles": 23
+			}
+		},
+		"prodDependencies": []
+	}
+]

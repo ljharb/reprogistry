@@ -1,0 +1,79 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-17T03:29:53.042Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:6.5.0-next.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "svelte@3.0.0-alpha20",
+			"name": "svelte",
+			"version": "3.0.0-alpha20",
+			"location": "https://registry.npmjs.org/svelte/-/svelte-3.0.0-alpha20.tgz",
+			"integrity": "sha512-Z8DaC4UBgSd538z7DKHtbb8btrhzcMb+J9doZArt1z2RzBhytWXAEpKDjaus4RckXzWMMOEkEYVjM8l6EMl1rg==",
+			"publishedAt": "2019-01-27T00:18:45.144Z",
+			"publishedWith": {
+				"node": "11.6.0",
+				"npm": "6.5.0-next.0"
+			},
+			"dependencies": {}
+		},
+		"source": {
+			"integrity": "sha512-w3VBkV4ZGa6eVDJJ4EpT82S0RRABIToJKrkR/Q8RyXmdENpIoU6bPYm0aIcR0Emfe4cVqF8ofmDL1K6OiI8HBg==",
+			"location": "git+https://github.com/sveltejs/svelte.git",
+			"spec": "github:sveltejs/svelte#c2e6d1bf0db20272a4ce53ffbf62c96e4e468ce3"
+		},
+		"comparisonHash": "9ef46a5bd31291e57cbab41e2f17c57bd6da0b5b",
+		"diff": {
+			"files": {
+				"CHANGELOG.md": {
+					"match": false,
+					"packageHash": "e9b58cf73546a6d67e3b140b6016464c704317db6fc2b4d7d0993ab29ff2718d",
+					"size": 71036,
+					"status": "missing-in-source"
+				},
+				"cli/compile.js": {
+					"match": false,
+					"packageHash": "b1d21985afe1e6fec87544f7a9c21a8b14c12ca0c15436c6d1523c14badd8dc3",
+					"size": 6693,
+					"status": "missing-in-source"
+				},
+				"cli/index.js": {
+					"diff": "--- published/cli/index.js\n+++ rebuilt/cli/index.js\n@@ -369,7 +369,7 @@\n \n var lib$1 = str => new Sade(str);\n \n-var version = \"3.0.0-alpha20\";\n+var version = \"3.0.0-alpha19\";\n \n const prog = lib$1('svelte').version(version);\n prog\n",
+					"match": false,
+					"packageHash": "573b876a59d371abea3a4e271080ea07d191c18fb6896efb81a2d51ac778c530",
+					"size": 10181,
+					"sourceHash": "497cd378cc2f322f3acde3cb6b60facc9984623e4d631727f5f9dcf264c10921",
+					"status": "content"
+				},
+				"compiler.js": {
+					"diff": "--- published/compiler.js\n+++ rebuilt/compiler.js\n@@ -1,14228 +1,4755 @@\n-(function (global, factory) {\n-\ttypeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :\n-\ttypeof define === 'function' && define.amd ? define(['exports'], factory) :\n-\t(global = global || self, factory(global.svelte = {}));\n-}(this, function (exports) { 'use strict';\n-\n-\tfunction assign(tar, src) {\n-\t\tfor (var k in src) tar[k] = src[k];\n-\t\treturn tar;\n-\t}\n-\n-\tconst now = (typeof process !== 'undefined' && process.hrtime)\n-\t    ? () => {\n-\t        const t = process.hrtime();\n-\t        return t[0] * 1e3 + t[1] / 1e6;\n-\t    }\n-\t    : () => self.performance.now();\n-\tfunction collapseTimings(timings) {\n-\t    const result = {};\n-\t    timings.forEach(timing => {\n-\t        result[timing.label] = Object.assign({\n-\t            total: timing.end - timing.start\n-\t        }, timing.children && collapseTimings(timing.children));\n-\t    });\n-\t    return result;\n-\t}\n-\tclass Stats {\n-\t    constructor({ onwarn }) {\n-\t        this.startTime = now();\n-\t        this.stack = [];\n-\t        this.currentChildren = this.timings = [];\n-\t        this.onwarn = onwarn;\n-\t        this.warnings = [];\n-\t    }\n-\t    start(label) {\n-\t        const timing = {\n-\t            label,\n-\t            start: now(),\n-\t            end: null,\n-\t            children: []\n-\t        };\n-\t        this.currentChildren.push(timing);\n-\t        this.stack.push(timing);\n-\t        this.currentTiming = timing;\n-\t        this.currentChildren = timing.children;\n-\t    }\n-\t    stop(label) {\n-\t        if (label !== this.currentTiming.label) {\n-\t            throw new Error(`Mismatched timing labels (expected ${this.currentTiming.label}, got ${label})`);\n-\t        }\n-\t        this.currentTiming.end = now();\n-\t        this.stack.pop();\n-\t        this.currentTiming = this.stack[this.stack.length - 1];\n-\t        this.currentChildren = this.currentTiming ? this.currentTiming.children : this.timings;\n-\t    }\n-\t    render(component) {\n-\t        const timings = Object.assign({\n-\t            total: now() - this.startTime\n-\t        }, collapseTimings(this.timings));\n-\t        // TODO would be good to have this info even\n-\t        // if options.generate is false\n-\t        const imports = component && component.imports.map(node => {\n-\t            return {\n-\t                source: node.source.value,\n-\t                specifiers: node.specifiers.map(specifier => {\n-\t                    return {\n-\t                        name: (specifier.type === 'ImportDefaultSpecifier' ? 'default' :\n-\t                            specifier.type === 'ImportNamespaceSpecifier' ? '*' :\n-\t                                specifier.imported.name),\n-\t                        as: specifier.local.name\n-\t                    };\n-\t                })\n-\t            };\n-\t        });\n-\t        return {\n-\t            props: component.props.map(prop => prop.as),\n-\t            timings,\n-\t            warnings: this.warnings,\n-\t            imports,\n-\t            templateReferences: component && component.template_references\n-\t        };\n-\t    }\n-\t    warn(warning) {\n-\t        this.warnings.push(warning);\n-\t        this.onwarn(warning);\n-\t    }\n-\t}\n-\n-\t// Reserved word lists for various dialects of the language\n-\n-\tvar reservedWords = {\n-\t  3: \"abstract boolean byte char class double enum export extends final float goto implements import int interface long native package private protected public short static super synchronized throws transient volatile\",\n-\t  5: \"class enum extends super const export import\",\n-\t  6: \"enum\",\n-\t  strict: \"implements interface let package private protected public static yield\",\n-\t  strictBind: \"eval arguments\"\n-\t};\n",
+					"match": false,
+					"packageHash": "1c65b23a8a285183dca74adf9eed7950b5ff1f549c0c5c84c2f4cb6fed970ec2",
+					"size": 798975,
+					"sourceHash": "cfea341ac64205e61c54a2c9ed40577858a3d9a6b74acf2bbbf2fce43dd723d5",
+					"status": "content"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -1,6 +1,6 @@\n {\n   \"name\": \"svelte\",\n-  \"version\": \"3.0.0-alpha20\",\n+  \"version\": \"3.0.0-alpha19\",\n   \"description\": \"The magical disappearing UI framework\",\n   \"module\": \"index.mjs\",\n   \"main\": \"index.js\",\n",
+					"match": false,
+					"packageHash": "f250deb3ba1e384771c4c8ef2968763abee71c13cf68a4f1e787cb8f06628d4f",
+					"size": 2641,
+					"sourceHash": "8817d23558bd248a2226893453d4b482db90c78b63df2ee6759c6a99f3c24e70",
+					"status": "content"
+				}
+			},
+			"summary": {
+				"differentFiles": 3,
+				"matchingFiles": 17,
+				"missingInPackage": 0,
+				"missingInSource": 2,
+				"score": 0.7727272727272727,
+				"totalFiles": 22
+			}
+		},
+		"prodDependencies": []
+	}
+]

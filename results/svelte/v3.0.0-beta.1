@@ -1,0 +1,63 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-17T03:30:49.214Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:6.5.0-next.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "svelte@3.0.0-beta.1",
+			"name": "svelte",
+			"version": "3.0.0-beta.1",
+			"location": "https://registry.npmjs.org/svelte/-/svelte-3.0.0-beta.1.tgz",
+			"integrity": "sha512-dgHSTKrDdmFOyPQv3l3SGm73UV0i2j2yDFKMe62T4Q53IynGYkPUbzEkT28cb9AHmfcKU2MdywcNRz0TveM5YQ==",
+			"publishedAt": "2019-02-04T03:15:36.458Z",
+			"publishedWith": {
+				"node": "11.6.0",
+				"npm": "6.5.0-next.0"
+			},
+			"dependencies": {}
+		},
+		"source": {
+			"integrity": "sha512-U0UG1pbb6HtZ236Vsdyuwa1GRRZM8NROVDAFrFr3jXcKDNk6MplE0DHRFDYaqAqU+Al4ZR2gRYX+LLAHRLM14w==",
+			"location": "git+https://github.com/sveltejs/svelte.git",
+			"spec": "github:sveltejs/svelte#183c9ca403218a8e85e1753e796da8ff49c7ae50"
+		},
+		"comparisonHash": "9ef46a5bd31291e57cbab41e2f17c57bd6da0b5b",
+		"diff": {
+			"files": {
+				"CHANGELOG.md": {
+					"match": false,
+					"packageHash": "e9b58cf73546a6d67e3b140b6016464c704317db6fc2b4d7d0993ab29ff2718d",
+					"size": 71036,
+					"status": "missing-in-source"
+				},
+				"cli/compile.js": {
+					"match": false,
+					"packageHash": "b1d21985afe1e6fec87544f7a9c21a8b14c12ca0c15436c6d1523c14badd8dc3",
+					"size": 6693,
+					"status": "missing-in-source"
+				},
+				"compiler.js": {
+					"diff": "--- published/compiler.js\n+++ rebuilt/compiler.js\n@@ -1,14274 +1,4806 @@\n-(function (global, factory) {\n-\ttypeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :\n-\ttypeof define === 'function' && define.amd ? define(['exports'], factory) :\n-\t(global = global || self, factory(global.svelte = {}));\n-}(this, function (exports) { 'use strict';\n-\n-\tfunction assign(tar, src) {\n-\t\tfor (var k in src) tar[k] = src[k];\n-\t\treturn tar;\n-\t}\n-\n-\tconst now = (typeof process !== 'undefined' && process.hrtime)\n-\t    ? () => {\n-\t        const t = process.hrtime();\n-\t        return t[0] * 1e3 + t[1] / 1e6;\n-\t    }\n-\t    : () => self.performance.now();\n-\tfunction collapseTimings(timings) {\n-\t    const result = {};\n-\t    timings.forEach(timing => {\n-\t        result[timing.label] = Object.assign({\n-\t            total: timing.end - timing.start\n-\t        }, timing.children && collapseTimings(timing.children));\n-\t    });\n-\t    return result;\n-\t}\n-\tclass Stats {\n-\t    constructor({ onwarn }) {\n-\t        this.startTime = now();\n-\t        this.stack = [];\n-\t        this.currentChildren = this.timings = [];\n-\t        this.onwarn = onwarn;\n-\t        this.warnings = [];\n-\t    }\n-\t    start(label) {\n-\t        const timing = {\n-\t            label,\n-\t            start: now(),\n-\t            end: null,\n-\t            children: []\n-\t        };\n-\t        this.currentChildren.push(timing);\n-\t        this.stack.push(timing);\n-\t        this.currentTiming = timing;\n-\t        this.currentChildren = timing.children;\n-\t    }\n-\t    stop(label) {\n-\t        if (label !== this.currentTiming.label) {\n-\t            throw new Error(`Mismatched timing labels (expected ${this.currentTiming.label}, got ${label})`);\n-\t        }\n-\t        this.currentTiming.end = now();\n-\t        this.stack.pop();\n-\t        this.currentTiming = this.stack[this.stack.length - 1];\n-\t        this.currentChildren = this.currentTiming ? this.currentTiming.children : this.timings;\n-\t    }\n-\t    render(component) {\n-\t        const timings = Object.assign({\n-\t            total: now() - this.startTime\n-\t        }, collapseTimings(this.timings));\n-\t        // TODO would be good to have this info even\n-\t        // if options.generate is false\n-\t        const imports = component && component.imports.map(node => {\n-\t            return {\n-\t                source: node.source.value,\n-\t                specifiers: node.specifiers.map(specifier => {\n-\t                    return {\n-\t                        name: (specifier.type === 'ImportDefaultSpecifier' ? 'default' :\n-\t                            specifier.type === 'ImportNamespaceSpecifier' ? '*' :\n-\t                                specifier.imported.name),\n-\t                        as: specifier.local.name\n-\t                    };\n-\t                })\n-\t            };\n-\t        });\n-\t        return {\n-\t            timings,\n-\t            warnings: this.warnings,\n-\t            vars: component.vars.filter(variable => !variable.global && !variable.implicit && !variable.internal).map(variable => ({\n-\t                name: variable.name,\n-\t                export_name: variable.export_name || null,\n-\t                injected: variable.injected || false,\n-\t                module: variable.module || false,\n-\t                mutated: variable.mutated || false,\n-\t                reassigned: variable.reassigned || false,\n-\t                referenced: variable.referenced || false,\n-\t                writable: variable.writable || false\n-\t            }))\n-\t        };\n-\t    }\n-\t    warn(warning) {\n-\t        this.warnings.push(warning);\n-\t        this.onwarn(warning);\n-\t    }\n-\t}\n-\n-\t// Reserved word lists for various dialects of the language\n-\n",
+					"match": false,
+					"packageHash": "dc990b810d12f5d5eda6a425d217a8b9d2ed086754d07834fc168d8c065b67f5",
+					"size": 806956,
+					"sourceHash": "dc8971043e34b76d3c5a2e7d87d6eb9f4e9b33925a7b014ff9df687105d45259",
+					"status": "content"
+				}
+			},
+			"summary": {
+				"differentFiles": 1,
+				"matchingFiles": 19,
+				"missingInPackage": 0,
+				"missingInSource": 2,
+				"score": 0.8636363636363636,
+				"totalFiles": 22
+			}
+		},
+		"prodDependencies": []
+	}
+]
