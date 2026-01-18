@@ -1,0 +1,202 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-18T03:55:22.393Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:11.7.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "gulp-prompt@0.0.4",
+			"name": "gulp-prompt",
+			"version": "0.0.4",
+			"location": "https://registry.npmjs.org/gulp-prompt/-/gulp-prompt-0.0.4.tgz",
+			"integrity": "sha512-alVkprMLppIbSNqE1wIrf1c7rY/6EolHssfRD37+a/rD3Xs2w8iZSCZlIx5a3BRVg9WfPpnPT2mjNsGDijBPZg==",
+			"publishedAt": "2014-02-10T17:57:09.819Z",
+			"publishedWith": {
+				"node": null,
+				"npm": "1.3.14"
+			},
+			"dependencies": {
+				"inquirer": "~0.3.5",
+				"event-stream": "~3.0.20",
+				"lodash": "~2.4.1"
+			}
+		},
+		"source": {
+			"integrity": null,
+			"location": "git://github.com/Freyskeyd/gulp-prompt.git",
+			"spec": "github:Freyskeyd/gulp-prompt#HEAD"
+		},
+		"comparisonHash": "9ef46a5bd31291e57cbab41e2f17c57bd6da0b5b",
+		"diff": {
+			"files": {
+				".npmignore": {
+					"match": false,
+					"packageHash": "48dc21970d60573f99cc9965d22d2a1d0a24bc2f03b62044c1482928b6cf824d",
+					"size": 58,
+					"status": "missing-in-source"
+				},
+				"README.md": {
+					"diff": "--- published/README.md\n+++ rebuilt/README.md\n@@ -1,69 +1,233 @@\n # Gulp prompt\n \n+If you are interested in getting involved please send us an e-mail or open an issue.\n+There are a couple of open issues and small clean up projects that we could use some help with.\n+\n+<a href=\"https://codeclimate.com/github/shannonlal/gulp-prompt/maintainability\"><img src=\"https://api.codeclimate.com/v1/badges/b9e10756dc89eb1d7c19/maintainability\" /></a>\n+\n Add interaction to gulp tasks.\n \n-## Confirm\n+## .confirm([options])\n+\n+Options:\n+\n+ - **message** - Message to be displayed\n+ - **default** - Default response if none is provided\n \n-Default message and false value as default value:\n+This method will allow the pipe to continue if the user input is true, otherwise, it will be terminated.\n+\n+Default usage:\n ```javascript\n-gulp.task('default', function () {\n \n-  gulp.src('test.js')\n-      .pipe(prompt.confirm())\n-      .pipe(gulp.dest('dest'));\n+gulp.src('test.js')\n+\t.pipe(prompt.confirm())\n+\t.pipe(gulp.dest('dest'));\n \n-});\n ```\n \n-Custom message and false value as default value:\n+If a string is provided to the options, it will be set as the message:\n ```javascript\n-gulp.task('default', function () {\n \n-  gulp.src('test.js')\n-      .pipe(prompt.confirm('Are you ready for Gulp?'))\n-      .pipe(gulp.dest('dest'));\n-});\n+gulp.src('test.js')\n+\t.pipe(prompt.confirm('Are you ready for Gulp?'))\n+\t.pipe(gulp.dest('dest'));\n+\n ```\n \n-Custom message and true value as default value:\n+Example when using options:\n ```javascript\n-gulp.task('default', function () {\n \n-  gulp.src('test.js')\n-      .pipe(prompt.confirm(\n-        {\n-          message: 'Are you ready for Gulp?',\n-          default: true\n-        })\n-      )\n-      .pipe(gulp.dest('dest'));\n+gulp.src('test.js')\n+\t.pipe(prompt.confirm({\n+\t\tmessage: 'Continue?',\n+\t\tdefault: true\n+\t}))\n+\t.pipe(gulp.dest('dest'));\n+\n+```\n+\n+## .prompt(questions, callback)\n+\n+This is a clean pass-through function for gulp to utilize the full [Inquirer.js Library](https://github.com/SBoudrias/Inquirer.js), please refer to them for documentation on corresponding parameters.\n+\n+Please note that all types are avaiable, not just the examples below.\n+\n+Example Input:\n+```javascript\n+\n+gulp.src('test.js')\n+\t.pipe(prompt.prompt({\n+\t\ttype: 'input',\n+\t\tname: 'task',\n+\t\tmessage: 'Which task would you like to run?'\n+\t}, function(res){\n+\t\t//value is in res.task (the name option gives the key)\n+\t}));\n \n-});\n ```\n \n Example Checkbox:\n ```javascript\n-var gulp = require('gulp'),\n-    prompt = require('gulp-prompt'),\n-    _ = require('lodash');\n",
+					"match": false,
+					"packageHash": "00e930a06fa43e900013eda622f47ee73263429959da444b2abcf73bf508be54",
+					"size": 1313,
+					"sourceHash": "13672010586eb5736dcd0ad7495fc5aea4bbf95f63c8b52c8f509baec3c0c7d6",
+					"status": "content"
+				},
+				"index.js": {
+					"diff": "--- published/index.js\n+++ rebuilt/index.js\n@@ -1,6 +1,152 @@\n+var inq = require('inquirer'),\n+  es  = require('event-stream'),\n+  template = require(\"lodash.template\");\n+\n module.exports = {\n-  confirm: require('./lib/confirm'),\n-  input: require('./lib/input'),\n-  checkbox: require('./lib/checkbox'),\n-  password: require('./lib/password')\n-};\n\\ No newline at end of file\n+\n+  /**\n+   * The following method will act as a proxy to the inquirer\n+   * prompt function.  It will pass the questions object directly to \n+   * inqurier's prompt function\n+   * @param {*} questions\n+   * @param {*} callback\n+   */\n+  prompt: function(questions, callback) {\n+    var prompted = false;\n+    return es.map(function(file, cb) {\n+\n+      /**\n+       * The following chainHandler was designed to be called recursively so as to allow\n+       * users the ability to chain multple calls to inquirer together.  It will stop \n+       * calls to the chain handler when the chain function returns undefined.\n+       * @param {objects} options \n+       */\n+      var chainHandler = function( options ){\n+        \n+        return new Promise( (resolve,reject)=>{\n+            inq.prompt([options]).then( resp =>{\n+              let opts = chainFunction( options, resp );\n+              if( typeof opts === 'undefined'){\n+                return resolve('response');\n+              }else{\n+                chainHandler( opts );\n+              }\n+            }).catch( err =>{\n+              reject( 'Unexpected Error');\n+            });\n+        });\n+      }\n+\n+      if (prompted === true) {\n+        cb(null,file);\n+        return;\n+      }\n+\n+      if (!questions instanceof Array) {\n+        questions = [questions];\n+      }\n+\n+      if (typeof callback !== 'function') {\n+        callback = function(){};\n+      }\n+      if( typeof questions.chainFunction === 'undefined' ){\n+        inq.prompt(questions).then(function(res) {\n+          callback(res);\n+          cb(null, file);\n+        });\n+\n+        prompted = true;\n+      }else{\n+        chainFunction = questions.chainFunction;\n+        return chainHandler( questions ).then(function(res) {\n+          if (res.val) {\n+            cb(null, file);\n+          }\n+        }).catch( err => {\n+          cb(null, file);\n+        });\n+  \n+        prompted = true;\n+      }\n+    });\n+  },\n+\n+  confirm: function(options) {\n+    var prompted = false;\n+    var chainFunction;\n+    return es.map(function(file, cb) {\n+\n+      if (prompted === true) {\n+        cb(null,file);\n+        return;\n+      }\n+\n+      /**\n+       * The following chainHandler was designed to be called recursively so as to allow\n+       * users the ability to chain multple calls to inquirer together.  It will stop \n+       * calls to the chain handler when the chain function returns undefined.\n+       * @param {objects} options \n+       */\n+      var chainHandler = function( options ){\n+        \n",
+					"match": false,
+					"packageHash": "64488a4f90b4d13603498c26bd24cdc8652ee9c9a61b9520b81536b6ec7f538c",
+					"size": 168,
+					"sourceHash": "dd2b668c3e9970e2b33a658e33a958a9e45144b4e3b21e2ca98c0a1165a4649b",
+					"status": "content"
+				},
+				"lib/checkbox.js": {
+					"match": false,
+					"packageHash": "3ff1310208aecea0489945e649a3c5b16e4c4b2d5126ed74b7d5195188336610",
+					"size": 678,
+					"status": "missing-in-source"
+				},
+				"lib/confirm.js": {
+					"match": false,
+					"packageHash": "ad900c249362a3e9f8b68d50a5336a05ca2abab4e3597ebced6bbf3534aee690",
+					"size": 563,
+					"status": "missing-in-source"
+				},
+				"lib/input.js": {
+					"match": false,
+					"packageHash": "0ccc62a67342b48c7cadf89201036f86340f138b736748673a9d8b880b4c4648",
+					"size": 602,
+					"status": "missing-in-source"
+				},
+				"lib/password.js": {
+					"match": false,
+					"packageHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+					"size": 0,
+					"status": "missing-in-source"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -1,10 +1,12 @@\n {\n   \"name\": \"gulp-prompt\",\n-  \"version\": \"0.0.4\",\n+  \"version\": \"1.1.0\",\n   \"description\": \"Add interactive console prompts to gulp\",\n   \"main\": \"index.js\",\n   \"scripts\": {\n-    \"test\": \"mocha\"\n+    \"test\": \"mocha\",\n+    \"eslint\": \"./node_modules/.bin/eslint -c eslintrc.json ./**/*.js\",\n+    \"es-watch\": \"./node_modules/.bin/esw -w -c eslintrc.json ./**/*.js\"\n   },\n   \"keywords\": [\n     \"gulpplugin\",\n@@ -13,13 +15,18 @@\n   \"author\": \"Simon Paitrault <contact@freyskeyd.fr>\",\n   \"license\": \"MIT\",\n   \"dependencies\": {\n-    \"inquirer\": \"~0.3.5\",\n-    \"event-stream\": \"~3.0.20\",\n-    \"lodash\": \"~2.4.1\"\n+    \"event-stream\": \"3.3.4\",\n+    \"inquirer\": \"^3.3.0\",\n+    \"lodash.template\": \"^4.4.0\"\n   },\n   \"devDependencies\": {\n-    \"inquirer\": \"~0.3.5\",\n-    \"event-stream\": \"~3.0.20\"\n+    \"assert\": \"^1.4.1\",\n+    \"eslint\": \"^4.7.2\",\n+    \"eslint-watch\": \"^3.1.2\",\n+    \"inquirer\": \"1.2.x\",\n+    \"mocha\": \"^3.5.3\",\n+    \"proxyquire\": \"^1.8.0\",\n+    \"vinyl-source-stream\": \"^1.1.0\"\n   },\n   \"directories\": {\n     \"test\": \"test\"\n",
+					"match": false,
+					"packageHash": "2f1804fcc0e8df44db68aa67efe1cdcb449308d8c8d8ff5d1f6bbede6999356b",
+					"size": 706,
+					"sourceHash": "fe88ad9c6cc289dc7c2c007c74f4abb1eab591f69f7cf7756b1b8aeb8880ccfd",
+					"status": "content"
+				},
+				".travis.yml": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"CHANGELOG.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"eslintrc.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"examples/README.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"examples/chain-confirm-gulpfile.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"examples/chain-prompt-gulpfile.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"examples/first-choice-selection-gulpfile.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"examples/list-selection-gulpfile.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"examples/template-replacement-gulpfile.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/chain-confirm-spec.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/chain-prompt-spec.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/confirm-spec.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/gulp-prompt-spec.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/prompt-spec.js": {
+					"match": false,
+					"status": "missing-in-package"
+				}
+			},
+			"summary": {
+				"differentFiles": 3,
+				"matchingFiles": 1,
+				"missingInPackage": 14,
+				"missingInSource": 5,
+				"score": 0.043478260869565216,
+				"totalFiles": 23
+			}
+		},
+		"prodDependencies": [
+			{
+				"name": "duplexer",
+				"version": "0.1.1"
+			},
+			{
+				"name": "event-stream",
+				"version": "3.3.4"
+			},
+			{
+				"name": "from",
+				"version": "0.1.7"
+			},
+			{
+				"name": "lodash._reinterpolate",
+				"version": "3.0.0"
+			},
+			{
+				"name": "lodash.template",
+				"version": "4.4.0"
+			},
+			{
+				"name": "lodash.templatesettings",
+				"version": "4.1.0"
+			},
+			{
+				"name": "map-stream",
+				"version": "0.1.0"
+			},
+			{
+				"name": "pause-stream",
+				"version": "0.0.11"
+			},
+			{
+				"name": "split",
+				"version": "0.3.3"
+			},
+			{
+				"name": "stream-combiner",
+				"version": "0.0.4"
+			},
+			{
+				"name": "through",
+				"version": "2.3.8"
+			}
+		]
+	}
+]
