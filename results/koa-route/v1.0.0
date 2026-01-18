@@ -1,0 +1,88 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-18T03:12:51.958Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:11.7.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "koa-route@1.0.0",
+			"name": "koa-route",
+			"version": "1.0.0",
+			"location": "https://registry.npmjs.org/koa-route/-/koa-route-1.0.0.tgz",
+			"integrity": "sha512-yvPtNBojl1NG6Z11JBWeeORYOGRRmPV6vA5YIsf7S0/AyfAG7zDacE61bQHVrQmX3ChjBm3KAHmpqXbFZuUQDw==",
+			"publishedAt": "2013-11-06T21:14:01.049Z",
+			"publishedWith": {
+				"node": null,
+				"npm": "1.3.13"
+			},
+			"dependencies": {
+				"path-to-regexp": "0.0.2",
+				"methods": "0.1.0",
+				"debug": "*"
+			}
+		},
+		"source": {
+			"integrity": "sha512-ytLrdDPF/qTMh20BxZCNpIUY329SoGu84xjGYeNsp/jkGT3OpZfkuK646sDScVJQ9XdsLXJVMml1dXMA5EIuxQ==",
+			"location": "git://github.com/koajs/route",
+			"spec": "github:koajs/route#HEAD"
+		},
+		"comparisonHash": "9ef46a5bd31291e57cbab41e2f17c57bd6da0b5b",
+		"diff": {
+			"files": {
+				"Readme.md": {
+					"diff": "--- published/Readme.md\n+++ rebuilt/Readme.md\n@@ -1,14 +1,16 @@\n-\n # koa-route\n \n  Uber simple route middleware for koa.\n \n-```\n-var _ = require('koa-route');\n+```js\n+const _ = require('koa-route');\n app.use(_.get('/pets', pets.list));\n app.use(_.get('/pets/:name', pets.show));\n ```\n \n+ If you need a full-featured solution check out [koa-router](https://github.com/koajs/router),\n+ a Koa clone of express-resource.\n+\n ## Installation\n \n ```js\n@@ -20,36 +22,38 @@\n   Contrived resource-oriented example:\n \n ```js\n-var _ = require('koa-route');\n-var koa = require('koa');\n-var app = koa();\n+const _ = require('koa-route');\n+const Koa = require('koa');\n+const app = new Koa();\n \n-var db = {\n+const db = {\n   tobi: { name: 'tobi', species: 'ferret' },\n   loki: { name: 'loki', species: 'ferret' },\n   jane: { name: 'jane', species: 'ferret' }\n };\n \n-var pets = {\n-  list: function *(){\n-    var names = Object.keys(db);\n-    this.body = 'pets: ' + names.join(', ');\n+const pets = {\n+  list: (ctx) => {\n+    const names = Object.keys(db);\n+    ctx.body = 'pets: ' + names.join(', ');\n   },\n \n-  show: function *(name){\n-    var pet = db[name];\n-    if (!pet) return this.error('cannot find that pet', 404);\n-    this.body = pet.name + ' is a ' + pet.species;\n+  show: (ctx, name) => {\n+    const pet = db[name];\n+    if (!pet) return ctx.throw('cannot find that pet', 404);\n+    ctx.body = pet.name + ' is a ' + pet.species;\n   }\n };\n \n app.use(_.get('/pets', pets.list));\n app.use(_.get('/pets/:name', pets.show));\n \n-app.listen(3000);\n-console.log('listening on port 3000');\n+app.listen(3000, (err) => {\n+  if (err) console.error(err.stack);\n+  else console.log('listening on port 3000');\n+});\n ```\n \n ## License\n \n-  MIT\n\\ No newline at end of file\n+  MIT\n",
+					"match": false,
+					"packageHash": "e6e83519b51bcdf2fa04cf4f092a02719f39ec0bb8a31ccdb4f1b4c1383b4afb",
+					"size": 952,
+					"sourceHash": "f7f767408cd97df339f5db0c58137552e0a59bcd2525c5839044b2707c86a2ab",
+					"status": "content"
+				},
+				"index.js": {
+					"diff": "--- published/index.js\n+++ rebuilt/index.js\n@@ -1,35 +1,73 @@\n \n+'use strict';\n+\n /**\n  * Module dependencies.\n  */\n \n-var pathToRegexp = require('path-to-regexp');\n-var debug = require('debug')('koa-route');\n-var methods = require('methods');\n+const { pathToRegexp } = require('path-to-regexp');\n+const debug = require('debug')('koa-route');\n+const methods = require('methods');\n \n methods.forEach(function(method){\n-  exports[method] = create(method);\n+  module.exports[method] = create(method);\n });\n \n+module.exports.del = module.exports.delete;\n+module.exports.all = create();\n+\n function create(method) {\n-  method = method.toUpperCase();\n+  if (method) method = method.toUpperCase();\n+\n+  return function(path, fn, opts){\n+    const keys = [];\n+    const re = pathToRegexp(path, keys, opts);\n+    debug('%s %s -> %s', method || 'ALL', path, re);\n+\n+    const createRoute = function(routeFunc) {\n+      return function (ctx, next){\n+        // method\n+        if (!matches(ctx, method)) return next();\n \n-  return function(path, fn){\n-    var re = pathToRegexp(path);\n-    debug('%s %s -> %s', method, path, re);\n-\n-    return function(next){\n-      return function *(){\n-        var m = re.exec(this.path);\n-        \n+        // path\n+        const m = re.exec(ctx.path);\n         if (m) {\n-          var args = m.slice(1);\n-          debug('%s %s matches %s %j', this.method, path, this.path, args);\n-          yield fn.apply(this, args);\n+          const args = m.slice(1).map(decode);\n+          ctx.routePath = path;\n+          debug('%s %s matches %s %j', ctx.method, path, ctx.path, args);\n+          args.unshift(ctx);\n+          args.push(next);\n+          return Promise.resolve(routeFunc.apply(ctx, args));\n         }\n \n-        yield next;\n+        // miss\n+        return next();\n       }\n+    };\n+\n+    if (fn) {\n+      return createRoute(fn);\n+    } else {\n+      return createRoute;\n     }\n   }\n-}\n\\ No newline at end of file\n+}\n+\n+/**\n+ * Decode value.\n+ */\n+\n+function decode(val) {\n+  if (val) return decodeURIComponent(val);\n+}\n+\n+/**\n+ * Check request method.\n+ */\n+\n+function matches(ctx, method) {\n+  if (!method) return true;\n+  if (ctx.method === method) return true;\n+  if (method === 'GET' && ctx.method === 'HEAD') return true;\n+  return false;\n+}\n",
+					"match": false,
+					"packageHash": "fc507ff2b07076885af3a39ce08069d78a948af2c13d37023016f2c9b0a11f59",
+					"size": 713,
+					"sourceHash": "8561a5fecc4516c53fb11b717b00a84a95c47d8e1b106c885c1ad2c36a90db60",
+					"status": "content"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -2,7 +2,7 @@\n   \"name\": \"koa-route\",\n   \"description\": \"Koa route middleware\",\n   \"repository\": \"koajs/route\",\n-  \"version\": \"1.0.0\",\n+  \"version\": \"4.0.1\",\n   \"keywords\": [\n     \"koa\",\n     \"middleware\",\n@@ -13,13 +13,20 @@\n   \"files\": [\n     \"index.js\"\n   ],\n+  \"main\": \"index.js\",\n   \"devDependencies\": {\n-    \"koa\": \"0.0.1\"\n+    \"koa\": \"^2.15.0\",\n+    \"mocha\": \"^10.3.0\",\n+    \"should\": \"*\",\n+    \"supertest\": \"^6.3.4\"\n   },\n   \"license\": \"MIT\",\n   \"dependencies\": {\n-    \"path-to-regexp\": \"0.0.2\",\n-    \"methods\": \"0.1.0\",\n-    \"debug\": \"*\"\n+    \"debug\": \"*\",\n+    \"methods\": \"~1.1.0\",\n+    \"path-to-regexp\": \"^6.2.1\"\n+  },\n+  \"scripts\": {\n+    \"test\": \"NODE_ENV=test mocha --harmony --require should --reporter spec --exit\"\n   }\n }\n",
+					"match": false,
+					"packageHash": "34a209ac2e17b4f9d9f3ee674e0e660d220e730f418390e24aad2ebea88e0692",
+					"size": 407,
+					"sourceHash": "9d4d31567530f114df1859d624cb015ae3db884adce72801674f349f458143e3",
+					"status": "content"
+				}
+			},
+			"summary": {
+				"differentFiles": 3,
+				"matchingFiles": 0,
+				"missingInPackage": 0,
+				"missingInSource": 0,
+				"score": 0,
+				"totalFiles": 3
+			}
+		},
+		"prodDependencies": [
+			{
+				"name": "debug",
+				"version": "4.3.4"
+			},
+			{
+				"name": "methods",
+				"version": "1.1.2"
+			},
+			{
+				"name": "ms",
+				"version": "2.1.2"
+			},
+			{
+				"name": "path-to-regexp",
+				"version": "6.2.1"
+			}
+		]
+	}
+]
