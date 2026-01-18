@@ -1,0 +1,581 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-18T19:28:15.877Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:11.7.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "handlebars-helpers@0.3.9",
+			"name": "handlebars-helpers",
+			"version": "0.3.9",
+			"location": "https://registry.npmjs.org/handlebars-helpers/-/handlebars-helpers-0.3.9.tgz",
+			"integrity": "sha512-jKqbSghrKscg5PdqjGptNBNAxOFRzy9NzV8XO4WkgNG+eyP7aH7CoBO5Pklyxtbxctin2QUVyO0mXjXQb9qIVg==",
+			"publishedAt": "2013-10-07T00:36:55.494Z",
+			"publishedWith": {
+				"node": null,
+				"npm": "1.3.11"
+			},
+			"dependencies": {
+				"handlebars": "1.0.10",
+				"helper-prettify": "~0.1.7",
+				"helper-repeat": "~0.1.0",
+				"highlight.js": "~7.3.0",
+				"iconv-lite": "~0.2.11",
+				"js-prettify": "~1.4.0",
+				"js-yaml": "~2.1.0",
+				"lodash": "~1.3.1",
+				"marked": "~0.2.9",
+				"matchdep": "~0.1.2",
+				"matchkeys": "~0.1.1",
+				"mime": "~1.2.10",
+				"minimatch": "~0.2.12",
+				"to": "~0.2.9"
+			}
+		},
+		"source": {
+			"integrity": null,
+			"location": "git://github.com/assemble/handlebars-helpers.git",
+			"spec": "github:assemble/handlebars-helpers#0.3.9"
+		},
+		"comparisonHash": "9ef46a5bd31291e57cbab41e2f17c57bd6da0b5b",
+		"diff": {
+			"files": {
+				".npmignore": {
+					"match": false,
+					"packageHash": "58f4c7be4aa5234abdc87098dc21d441a3ab761cf7de41872a37d659763f338e",
+					"size": 94,
+					"status": "missing-in-source"
+				},
+				"Gruntfile.js": {
+					"diff": "--- published/Gruntfile.js\n+++ rebuilt/Gruntfile.js\n@@ -28,23 +28,15 @@\n         boss: true,\n         eqnull: true,\n         node: true,\n-        globals: {\n-          it: true,\n-          describe: true,\n-          expect: true,\n-          module: true,\n-          exports: true,\n-          require: true\n-        }\n+        strict: false\n       },\n       all: [\n         'Gruntfile.js',\n-        'test/**/*.js',\n+        // 'test/**/*.js',\n         'lib/**/*.js'\n       ]\n     },\n \n-\n     // Run mocha tests.\n     mochaTest: {\n       files: ['test/**/*_test.js']\n@@ -63,31 +55,15 @@\n     // Clean test files before building or re-testing.\n     clean: {\n       helpers: ['lib/**/*']\n-    },\n-\n-    // Configuration to be run (and then tested).\n-    discrepancy: {\n-      options: {\n-        compare: '_docs/**/*.md.hbs',\n-      },\n-      lib: {\n-        files: {\n-          'undocumented.md': ['lib/helpers/*.js']\n-        }\n-      }\n-    },\n+    }\n   });\n \n   // Load plugins to provide the necessary tasks\n   require('matchdep').filterDev('grunt-*').forEach(grunt.loadNpmTasks);\n \n-  // Load local tasks.\n-  grunt.loadTasks('tasks');\n-\n   // Tests to be run\n   grunt.registerTask('test', ['mochaTest']);\n \n   // By default, build templates using helpers and run all tests.\n   grunt.registerTask('default', ['jshint', 'test', 'sync', 'readme']);\n-\n-};\n+};\n\\ No newline at end of file\n",
+					"match": false,
+					"packageHash": "d5f895648233fdf228dad17d6448cb35be58febea79d1b916ff931c38650876e",
+					"size": 1792,
+					"sourceHash": "7665c36cfd1b6d5a4c6721a53ac751b06bad9c0fa0338e3f6fe5d3c3b349975d",
+					"status": "content"
+				},
+				"lib/helpers/helpers-code.js": {
+					"diff": "--- published/lib/helpers/helpers-code.js\n+++ rebuilt/lib/helpers/helpers-code.js\n@@ -3,125 +3,111 @@\n  * Copyright (c) 2013 Jon Schlinkert, Brian Woodward, contributors\n  * Licensed under the MIT License (MIT).\n  */\n-'use strict';\n \n-\n-// Node.js\n-var path = require('path');\n-\n-\n-// node_modules\n var Handlebars = require('../helpers/helpers').Handlebars;\n-\n-\n-// Local utils\n var Utils = require('../utils/utils');\n var Glob = require('../utils/glob');\n+var path = require('path');\n \n \n-// The module to be exported\n-var helpers = {\n-\n-  /**\n-   * {{embed}}\n-   *\n-   * Embeds code from an external file as preformatted\n-   * text. The first parameter requires a path to the file\n-   * you want to embed. There second second optional parameter\n-   * is for specifying (forcing) syntax highlighting for\n-   * language of choice.\n-   *\n-   * @syntax:\n-   *   {{ embed [file] [lang] }}\n-   * @usage:\n-   *   {{embed 'path/to/file.js'}} or\n-   *   {{embed 'path/to/file.hbs' 'html'}}\n-   */\n-  embed: function (src, lang) {\n-    var content = Glob.globFiles(src);\n-    var ext = path.extname(src).replace(/^(\\.)/gm, '');\n-\n-    var output;\n-    if (Utils.isUndefined(lang)) {\n-      lang = ext;\n-    } else {\n-      lang = lang;\n-    }\n-    switch (ext) {\n-    case 'md':\n-    case 'markdown':\n-    case 'mdown':\n-      output = content.replace(/^(```)/gm, '&#x60;&#x60;&#x60;');\n-      ext = 'md';\n-      break;\n-    case 'txt':\n-      output = content;\n-      ext = 'text';\n-      break;\n-    case 'hbs':\n-    case 'hbars':\n-      output = content.replace(/^(---)/gm, '---');\n-      ext = 'html';\n-      break;\n-    case 'less':\n-      output = content;\n-      ext = 'scss';\n-      break;\n-    case void 0:\n-      output = content;\n-      ext = '';\n-      break;\n-    default:\n-      output = content;\n-      ext = '';\n-    }\n-    var result = '``` ' + lang + '\\n' + output + '\\n```\\n';\n-    return new Utils.safeString(result);\n-  },\n-\n-  /**\n-   * {{jsFiddle}}\n-   * Embed a jsFiddle, second parameter sets tabs\n-   *\n-   * @type   {Object}\n-   * @usage: {{ jsfiddle [id] [tabs] }}\n-   */\n-  jsfiddle: function (id, tabs) {\n-    var result;\n-    if (Utils.isUndefined(tabs)) {\n-      tabs = 'result,js,html,css';\n-    }\n-    result = '<iframe width=\"100%\" height=\"300\" src=\"http://jsfiddle.net/' + id + '/embedded/' + tabs + '/presentation/\" allowfullscreen=\"allowfullscreen\" frameborder=\"0\"></iframe>';\n-    return new Utils.safeString(result);\n-  },\n-\n-  /**\n",
+					"match": false,
+					"packageHash": "99e73d5099daa164e72b5a0406e98dca48eaa03abeffa8496c033fdee3890609",
+					"size": 2996,
+					"sourceHash": "097b5c6d2effea9ac08b0d968c4fdbcdc7bc7ad9fd4306ede7baa5fc83f81e48",
+					"status": "content"
+				},
+				"lib/helpers/helpers-collections.js": {
+					"diff": "--- published/lib/helpers/helpers-collections.js\n+++ rebuilt/lib/helpers/helpers-collections.js\n@@ -3,17 +3,10 @@\n  * Copyright (c) 2013 Jon Schlinkert, Brian Woodward, contributors\n  * Licensed under the MIT License (MIT).\n  */\n-'use strict';\n \n-\n-// node_modules\n var Handlebars = require('../helpers/helpers').Handlebars;\n-var _          = require('lodash');\n-\n-\n-// Local utils\n-var Utils      = require('../utils/utils');\n-\n+var Utils = require('../utils/utils');\n+var _ = require('lodash');\n \n // The module to be exported\n var helpers = module.exports = {\n@@ -220,17 +213,17 @@\n     start = start = block.hash.start || 0;\n     len = (items ? items.length : 0);\n     end = block.hash.end || len;\n-    out = '';\n+    out = \"\";\n     if (end > len) {\n       end = len;\n     }\n-    if ('function' === typeof block) {\n+    if (\"function\" === typeof block) {\n       i = start;\n       while (i < end) {\n         if (i > start) {\n           out += delimiter;\n         }\n-        if ('string' === typeof items[i]) {\n+        if (\"string\" === typeof items[i]) {\n           out += items[i];\n         } else {\n           out += block(items[i]);\n@@ -258,7 +251,7 @@\n   withSort: function (array, field, options) {\n     array = _.cloneDeep(array);\n     var getDescendantProp = function (obj, desc) {\n-      var arr = desc.split('.');\n+      var arr = desc.split(\".\");\n       while (arr.length && (obj = obj[arr.shift()])) {\n         continue;\n       }\n@@ -355,8 +348,8 @@\n     if (options.data) {\n       data = Handlebars.createFrame(options.data);\n     }\n-    if (context && typeof context === 'object') {\n-      if (typeof context.length === 'number') {\n+    if (context && typeof context === \"object\") {\n+      if (typeof context.length === \"number\") {\n         var j = context.length;\n         while (i < j) {\n           if (data) {data.index = i;}\n@@ -410,10 +403,10 @@\n       // stick an index property onto the item, starting\n       // with 1, may make configurable later\n       item = array[i];\n-      item['index'] = i + 1;\n-      item['_total'] = total;\n-      item['isFirst'] = i === 0;\n-      item['isLast'] = i === (total - 1);\n+      item[\"index\"] = i + 1;\n+      item[\"_total\"] = total;\n+      item[\"isFirst\"] = i === 0;\n+      item[\"isLast\"] = i === (total - 1);\n       // show the inside of the block\n       buffer += fn.fn(item);\n       i++;\n@@ -429,7 +422,7 @@\n    */\n   each: function(context, options) {\n     var fn = options.fn, inverse = options.inverse;\n-    var i = 0, ret = '', data;\n+    var i = 0, ret = \"\", data;\n     var current;\n \n     if (options.data) {\n@@ -482,7 +475,7 @@\n       }\n       return results;\n     })();\n-    return content.join('');\n+    return content.join(\"\");\n   },\n \n \n@@ -547,4 +540,4 @@\n     Handlebars.registerHelper(helper, helpers[helper]);\n   }\n   return this;\n",
+					"match": false,
+					"packageHash": "6325c5a23c988ccc351c504016d00dbf545507c4835482fd4b7c6187c94ea1d7",
+					"size": 13565,
+					"sourceHash": "55cea5fb9835ec2445d0e65d1e87a9c3a251431989526b3b996d3d5155d8b03f",
+					"status": "content"
+				},
+				"lib/helpers/helpers-comparisons.js": {
+					"diff": "--- published/lib/helpers/helpers-comparisons.js\n+++ rebuilt/lib/helpers/helpers-comparisons.js\n@@ -3,15 +3,14 @@\n  * Copyright (c) 2013 Jon Schlinkert, Brian Woodward, contributors\n  * Licensed under the MIT License (MIT).\n  */\n-'use strict';\n \n \n-// node_modules\n+// NPM modules.\n var _ = require('lodash');\n \n \n // The module to be exported\n-var helpers = {\n+var helpers = module.exports = {\n \n   contains: function (str, pattern, options) {\n     if (str.indexOf(pattern) !== -1) {\n@@ -113,13 +112,13 @@\n     /*jshint eqeqeq: false*/\n \n     if (arguments.length < 3) {\n-      throw new Error('Handlerbars Helper \"compare\" needs 2 parameters');\n+      throw new Error(\"Handlerbars Helper 'compare' needs 2 parameters\");\n     }\n \n     if (options === undefined) {\n       options = right;\n       right = operator;\n-      operator = '===';\n+      operator = \"===\";\n     }\n \n     var operators = {\n@@ -135,7 +134,7 @@\n     };\n \n     if (!operators[operator]) {\n-      throw new Error('Handlerbars Helper \"compare\" doesn\\'t know the operator ' + operator);\n+      throw new Error(\"Handlerbars Helper 'compare' doesn't know the operator \" + operator);\n     }\n \n     var result = operators[operator](left, right);\n@@ -372,6 +371,4 @@\n       Handlebars.registerHelper(helper, helpers[helper]);\n     }\n   }\n-};\n-\n-\n+};\n\\ No newline at end of file\n",
+					"match": false,
+					"packageHash": "5a1b76c76f8a9397dad9e70a2b79ff9fbfca8f13cd59b3f53dcadd062d8c5a10",
+					"size": 9131,
+					"sourceHash": "346a9e739abcea37c8c6c07b58e95475e1d4a13dd8e61ad2ef7546ac09fd6801",
+					"status": "content"
+				},
+				"lib/helpers/helpers-data.js": {
+					"diff": "--- published/lib/helpers/helpers-data.js\n+++ rebuilt/lib/helpers/helpers-data.js\n@@ -3,23 +3,18 @@\n  * Copyright (c) 2013 Jon Schlinkert, Brian Woodward, contributors\n  * Licensed under the MIT License (MIT).\n  */\n-'use strict';\n-\n-\n-// Node.js\n-var fs = require('fs');\n \n+'use strict';\n \n // node_modules\n+var fs = require('fs');\n var _ = require('lodash');\n \n-\n // Local utils\n var Utils = require('../utils/utils');\n \n-\n // The module to be exported\n-var helpers = {\n+var helpers = module.exports = {\n \n   /**\n    * {{value}}\n@@ -88,4 +83,4 @@\n       Handlebars.registerHelper(helper, helpers[helper]);\n     }\n   }\n-};\n+};\n\\ No newline at end of file\n",
+					"match": false,
+					"packageHash": "a51ba3cc84901307d89711f56405b59c0c3211a58d9a25a27efd63e0a002568a",
+					"size": 2141,
+					"sourceHash": "3318ee412aad6b6bd301eed50ce87a1181f7f180de699f03a3de4668a2387e76",
+					"status": "content"
+				},
+				"lib/helpers/helpers-dates.js": {
+					"diff": "--- published/lib/helpers/helpers-dates.js\n+++ rebuilt/lib/helpers/helpers-dates.js\n@@ -3,17 +3,15 @@\n  * Copyright (c) 2013 Jon Schlinkert, Brian Woodward, contributors\n  * Licensed under the MIT License (MIT).\n  */\n-'use strict';\n \n+'use strict';\n \n // Local utils\n var Utils = require('../utils/utils');\n var Dates = require('../utils/dates');\n \n-\n-\n // The module to be exported\n-var helpers = {\n+var helpers = module.exports = {\n \n   /**\n    * {{formatData}}\n@@ -77,4 +75,4 @@\n       Handlebars.registerHelper(helper, helpers[helper]);\n     }\n   }\n-};\n+};\n\\ No newline at end of file\n",
+					"match": false,
+					"packageHash": "99883f4d710e915f53d13b68398ec89b90c3b7ad0ecf1da9e353a75b3a5d6503",
+					"size": 2119,
+					"sourceHash": "58977bd2a639d9b33f57b59a2d4f1306be14bc634357b29fd91efd5fc789c2ab",
+					"status": "content"
+				},
+				"lib/helpers/helpers-files.js": {
+					"diff": "--- published/lib/helpers/helpers-files.js\n+++ rebuilt/lib/helpers/helpers-files.js\n@@ -3,19 +3,16 @@\n  * Copyright (c) 2013 Jon Schlinkert, Brian Woodward, contributors\n  * Licensed under the MIT License (MIT).\n  */\n-'use strict';\n \n+'use strict';\n \n // node_modules\n var grunt = require('grunt');\n \n-\n // Local utils\n var Utils = require('../utils/utils');\n var Glob = require('../utils/glob');\n \n-\n-\n module.exports.register = function (Handlebars, options) {\n \n   exports = {\n@@ -88,4 +85,4 @@\n       Handlebars.registerHelper(helper, exports[helper]);\n     }\n   }\n-};\n+};\n\\ No newline at end of file\n",
+					"match": false,
+					"packageHash": "a13e8641ea55a52fd38f8ea15c9fc7d8e0343b94f6fbe376d3dac3bf9b9322d6",
+					"size": 2611,
+					"sourceHash": "679b6298fc366b09e3843277316f8d25c9efd5aa43d0ef8b0bf3714d18619904",
+					"status": "content"
+				},
+				"lib/helpers/helpers-html.js": {
+					"diff": "--- published/lib/helpers/helpers-html.js\n+++ rebuilt/lib/helpers/helpers-html.js\n@@ -3,14 +3,12 @@\n  * Copyright (c) 2013 Jon Schlinkert, Brian Woodward, contributors\n  * Licensed under the MIT License (MIT).\n  */\n-'use strict';\n \n+'use strict';\n \n // Local utils\n var Utils = require('../utils/utils');\n-var HTML  = require('../utils/html');\n-\n-\n+var HTML = require('../utils/html');\n \n module.exports.register = function (Handlebars, options) {\n   options = options || {};\n",
+					"match": false,
+					"packageHash": "9c8a7ceaea7f9812f7f83722078f58ed8138e62149468a5e8745d1ac1dbe21b4",
+					"size": 3091,
+					"sourceHash": "f3fa65271d14997ec29226f6e537cc674b51c24c260d058c31203042b2222937",
+					"status": "content"
+				},
+				"lib/helpers/helpers-i18n.js": {
+					"diff": "--- published/lib/helpers/helpers-i18n.js\n+++ rebuilt/lib/helpers/helpers-i18n.js\n@@ -3,11 +3,10 @@\n  * Copyright (c) 2013 Jon Schlinkert, Brian Woodward, contributors\n  * Licensed under the MIT License (MIT).\n  */\n-'use strict';\n \n \n // The module to be exported\n-var helpers = {\n+var helpers = module.exports = {\n \n \n   /**\n@@ -46,4 +45,4 @@\n       Handlebars.registerHelper(helper, helpers[helper]);\n     }\n   }\n-};\n+};\n\\ No newline at end of file\n",
+					"match": false,
+					"packageHash": "080902f8ffead6ec88a19cc5cc7ebe6fe7ef759c784d0d18c71609240b969bb9",
+					"size": 1434,
+					"sourceHash": "97e7235caf84b377e6a930cef47afe5a153007a75764f35da50ea9c1c3a8d1b7",
+					"status": "content"
+				},
+				"lib/helpers/helpers-inflections.js": {
+					"diff": "--- published/lib/helpers/helpers-inflections.js\n+++ rebuilt/lib/helpers/helpers-inflections.js\n@@ -3,16 +3,16 @@\n  * Copyright (c) 2013 Jon Schlinkert, Brian Woodward, contributors\n  * Licensed under the MIT License (MIT).\n  */\n-'use strict';\n \n+'use strict';\n \n // Local utils\n-var Utils    = require('../utils/utils');\n-var _indexOf = require('../utils/lib/indexOf');\n+var Utils = require('../utils/utils');\n+var __indexOf = require('../utils/lib/indexOf');\n \n \n // The module to be exported\n-var helpers = {\n+var helpers = module.exports = {\n \n   inflect: function (count, singular, plural, include) {\n     var word = count > 1 || count === 0 ? plural : singular;\n@@ -26,7 +26,7 @@\n   ordinalize: function (value) {\n     var _ref;\n     var normal = Math.abs(Math.round(value));\n-    if (_ref = normal % 100, _indexOf.call([11, 12, 13], _ref) >= 0) {\n+    if (_ref = normal % 100, __indexOf.call([11, 12, 13], _ref) >= 0) {\n       return \"\" + value + \"th\";\n     } else {\n       switch (normal % 10) {\n@@ -51,4 +51,4 @@\n       Handlebars.registerHelper(helper, helpers[helper]);\n     }\n   }\n-};\n+};\n\\ No newline at end of file\n",
+					"match": false,
+					"packageHash": "01c58e50ae6c3ab1ae2a78837aa96aaf170f56f5b42fbf0ce1563fcb819e8dbc",
+					"size": 1279,
+					"sourceHash": "331dcb46da9bd7810244f0cde1136dd37bc6d27af2e1d09747e2dc0be96ee394",
+					"status": "content"
+				},
+				"lib/helpers/helpers-logging.js": {
+					"diff": "--- published/lib/helpers/helpers-logging.js\n+++ rebuilt/lib/helpers/helpers-logging.js\n@@ -3,24 +3,15 @@\n  * Copyright (c) 2013 Jon Schlinkert, Brian Woodward, contributors\n  * Licensed under the MIT License (MIT).\n  */\n-'use strict';\n \n-\n-// Node.js\n-var util  = require('util');\n-\n-\n-// node_modules\n+var Utils = require('../utils/utils');\n var grunt = require('grunt');\n+var util  = require('util');\n var to    = require('to');\n \n \n-// Local utils\n-var Utils = require('../utils/utils');\n-\n-\n // The module to be exported\n-var helpers = {\n+var helpers = module.exports = {\n \n   /**\n    * {{debug}}\n@@ -108,4 +99,4 @@\n       Handlebars.registerHelper(helper, helpers[helper]);\n     }\n   }\n-};\n+};\n\\ No newline at end of file\n",
+					"match": false,
+					"packageHash": "dc5b9ba970aa2698e31c1e5f644d904d3bcf92d77a1a572d32152b49d3c41f65",
+					"size": 2776,
+					"sourceHash": "9a3f04a3d80e255b2620618fa569171e1d8ae0af4203b6076b5dd60e0a775114",
+					"status": "content"
+				},
+				"lib/helpers/helpers-markdown.js": {
+					"diff": "--- published/lib/helpers/helpers-markdown.js\n+++ rebuilt/lib/helpers/helpers-markdown.js\n@@ -3,19 +3,13 @@\n  * Copyright (c) 2013 Jon Schlinkert, Brian Woodward, contributors\n  * Licensed under the MIT License (MIT).\n  */\n-'use strict';\n \n-\n-// node_modules\n+var Utils = require('../utils/utils');\n+var Glob = require('../utils/glob');\n var hljs  = require('highlight.js');\n var _     = require('lodash');\n \n \n-// Local utils\n-var Utils = require('../utils/utils');\n-var Glob  = require('../utils/glob');\n-\n-\n // Export helpers\n module.exports.register = function (Handlebars, options) {\n \n@@ -64,7 +58,8 @@\n    *   <h1>This is a title </h1>\n    */\n   Handlebars.registerHelper(\"markdown\", function (options) {\n-    return Markdown.convert(options.fn(this));\n+    var content = options.fn(this);\n+    return Markdown.convert(content);\n   });\n \n   if (typeof process !== 'undefined') {\n",
+					"match": false,
+					"packageHash": "ace220762dab8d369150f61c43ab8e6ef8f289e4274efbf7555c1a9bcdcd177b",
+					"size": 2072,
+					"sourceHash": "7799d669e45301edf0ace29fd6452b94b61cc6f9923aa426a19cc8b8755ab6d7",
+					"status": "content"
+				},
+				"lib/helpers/helpers-math.js": {
+					"diff": "--- published/lib/helpers/helpers-math.js\n+++ rebuilt/lib/helpers/helpers-math.js\n@@ -3,15 +3,12 @@\n  * Copyright (c) 2013 Jon Schlinkert, Brian Woodward, contributors\n  * Licensed under the MIT License (MIT).\n  */\n-'use strict';\n \n-\n-// node_modules\n var _ = require('lodash');\n \n \n // The module to be exported\n-var helpers = {\n+var helpers = module.exports = {\n \n   add: function (value, addition) {\n     return value + addition;\n@@ -63,4 +60,4 @@\n       Handlebars.registerHelper(helper, helpers[helper]);\n     }\n   }\n-};\n+};\n\\ No newline at end of file\n",
+					"match": false,
+					"packageHash": "38a39989d9324cdb600ade3d2279bbb8e03d8277f140753838003ade2eb2254c",
+					"size": 1222,
+					"sourceHash": "c360272cec2ef752a7f349b97baca2bded2d5533e6f4625308096554120d4017",
+					"status": "content"
+				},
+				"lib/helpers/helpers-miscellaneous.js": {
+					"diff": "--- published/lib/helpers/helpers-miscellaneous.js\n+++ rebuilt/lib/helpers/helpers-miscellaneous.js\n@@ -1,13 +1,12 @@\n /**\n- * Handlebars Helpers: Misc. Helpers\n+ * Handlebars Misc. Helpers\n  * Copyright (c) 2013 Jon Schlinkert, Brian Woodward, contributors\n  * Licensed under the MIT License (MIT).\n  */\n-'use strict';\n \n \n // The module to be exported\n-var helpers = {\n+var helpers = module.exports = {\n \n   default: function (value, defaultValue) {\n     return value != null ? value : defaultValue;\n@@ -33,4 +32,4 @@\n       Handlebars.registerHelper(helper, helpers[helper]);\n     }\n   }\n-};\n+};\n\\ No newline at end of file\n",
+					"match": false,
+					"packageHash": "990061abd734a2fa70b728dbbd9ea5c619f7d1c756dc482afebd719cb415ab15",
+					"size": 779,
+					"sourceHash": "316c9b7ef4f93335d1777653e005fb11d7436e4719f0a7accaf59417bae9765d",
+					"status": "content"
+				},
+				"lib/helpers/helpers-numbers.js": {
+					"diff": "--- published/lib/helpers/helpers-numbers.js\n+++ rebuilt/lib/helpers/helpers-numbers.js\n@@ -1,21 +1,15 @@\n /**\n- * Handlebars Helpers: Number Helpers\n+ * Handlebars Number Helpers\n  * Copyright (c) 2013 Jon Schlinkert, Brian Woodward, contributors\n  * Licensed under the MIT License (MIT).\n  */\n-'use strict';\n \n-\n-// node_modules\n-var _ = require('lodash');\n-\n-\n-// Local utils.\n var Utils = require('../utils/utils');\n+var _ = require('lodash');\n \n \n // The module to be exported\n-var helpers = {\n+var helpers = module.exports = {\n \n   /**\n    * {{addCommas}}\n@@ -111,4 +105,4 @@\n       Handlebars.registerHelper(helper, helpers[helper]);\n     }\n   }\n-};\n+};\n\\ No newline at end of file\n",
+					"match": false,
+					"packageHash": "bc7f19644a8f14b9becd5e1d0092da23b61a30b79077a97905eddfab051a73b2",
+					"size": 2576,
+					"sourceHash": "071686c648f81fbb34f6869bfc8d803ab66dc50747694286d37d3b79cb60075e",
+					"status": "content"
+				},
+				"lib/helpers/helpers-path.js": {
+					"diff": "--- published/lib/helpers/helpers-path.js\n+++ rebuilt/lib/helpers/helpers-path.js\n@@ -1,21 +1,15 @@\n /**\n- * Handlebars Helpers: Path Helpers\n+ * Handlebars Path Helpers\n  * Copyright (c) 2013 Jon Schlinkert, Brian Woodward, contributors\n  * Licensed under the MIT License (MIT).\n  */\n-'use strict';\n \n-\n-// Node.js\n var path = require('path');\n-\n-\n-// Local utils.\n var Utils = require('../utils/utils');\n \n \n // The module to be exported\n-var helpers = {\n+var helpers = module.exports = {\n \n   /**\n    * {{directory}}\n",
+					"match": false,
+					"packageHash": "c1b2312345664504756071880087f164923e6b9f318e11e4c82f5246c8e7a6ff",
+					"size": 2111,
+					"sourceHash": "1277b26b5459577b88d6282f6531fe3d75a85db80d52e7f73a388345d99205a5",
+					"status": "content"
+				},
+				"lib/helpers/helpers-strings.js": {
+					"diff": "--- published/lib/helpers/helpers-strings.js\n+++ rebuilt/lib/helpers/helpers-strings.js\n@@ -1,17 +1,14 @@\n /**\n- * Handlebars Helpers: String Helpers\n+ * Handlebars String Helpers\n  * Copyright (c) 2013 Jon Schlinkert, Brian Woodward, contributors\n  * Licensed under the MIT License (MIT).\n  */\n-'use strict';\n \n-\n-// Local utils.\n var Utils = require('../utils/utils');\n \n \n // The module to be exported\n-var helpers = {\n+var helpers = module.exports = {\n \n   /**\n    * {{capitalizeFirst}}\n@@ -258,4 +255,4 @@\n       Handlebars.registerHelper(helper, helpers[helper]);\n     }\n   }\n-};\n+};\n\\ No newline at end of file\n",
+					"match": false,
+					"packageHash": "b9c39a51e774e7f5471fa35f435c0ee51be18b7519ccbb42f6c565caa386149c",
+					"size": 6675,
+					"sourceHash": "3ba36024e315a7ec949627cb7570391a277a0f22c18735eb8b6d9fb8b60a4867",
+					"status": "content"
+				},
+				"lib/helpers/helpers-url.js": {
+					"diff": "--- published/lib/helpers/helpers-url.js\n+++ rebuilt/lib/helpers/helpers-url.js\n@@ -1,21 +1,15 @@\n /**\n- * Handlebars Helpers: URL Helpers\n+ * Handlebars URL Helpers\n  * Copyright (c) 2013 Jon Schlinkert, Brian Woodward, contributors\n  * Licensed under the MIT License (MIT).\n  */\n-'use strict';\n \n-\n-// Node.js\n-var url   = require('url');\n-\n-// Local utils\n+var url = require('url');\n var Utils = require('../utils/utils');\n \n \n-\n // The module to be exported\n-var helpers = {\n+var helpers = module.exports = {\n \n   stripQuerystring: function (url) {\n     return url.split(\"?\")[0];\n@@ -29,8 +23,8 @@\n    * the UTF-8 encoding of the character.\n    *\n    * @author: Jon Schlinkert <http://github.com/jonschlinkert>\n-   * @param  {String} uri: The un-encoded string\n-   * @return {String}      The endcoded string.\n+   * @param  {[type]} uri [description]\n+   * @return {[type]}     [description]\n    */\n   encodeURI: function (uri) {\n     return encodeURIComponent(uri);\n@@ -92,4 +86,4 @@\n       Handlebars.registerHelper(helper, helpers[helper]);\n     }\n   }\n-};\n+};\n\\ No newline at end of file\n",
+					"match": false,
+					"packageHash": "022a5d951d512a42cd7fc148f52df1bfb9563f65faaf1db2dffcc5257db079ae",
+					"size": 2545,
+					"sourceHash": "bd0faa6f4dc4df1103257c091d1131c55b08a5c145b62902228a34c5d8e3e2c7",
+					"status": "content"
+				},
+				"lib/utils/dates.js": {
+					"diff": "--- published/lib/utils/dates.js\n+++ rebuilt/lib/utils/dates.js\n@@ -4,9 +4,6 @@\n  * Copyright (c) 2013 Jon Schlinkert, Brian Woodward, contributors\n  * Licensed under the MIT License (MIT).\n  */\n-'use strict';\n-\n-\n \n var Dates = module.exports = {};\n \n",
+					"match": false,
+					"packageHash": "660837085bbfec11c59e7cf2f320c13e6bb54e4e7861ec8a480820fb3aad8039",
+					"size": 4942,
+					"sourceHash": "c22f444b7d70a4ec6d848c1a7c2952a0fac965395a49fe5b43d8e6b65322b14d",
+					"status": "content"
+				},
+				"lib/utils/glob.js": {
+					"diff": "--- published/lib/utils/glob.js\n+++ rebuilt/lib/utils/glob.js\n@@ -4,17 +4,12 @@\n  * Copyright (c) 2013 Jon Schlinkert, Brian Woodward, contributors\n  * Licensed under the MIT License (MIT).\n  */\n-'use strict';\n \n \n-// node_modules\n+var grunt = require('grunt');\n var minimatch = require('minimatch');\n-var grunt     = require('grunt');\n-var _         = require('lodash');\n-\n-\n-// Local utils\n var compareFn = require('./lib/compare');\n+var _ = require('lodash');\n \n \n // The module to be exported.\n@@ -111,4 +106,4 @@\n   });\n   return result;\n \n-};\n+};\n\\ No newline at end of file\n",
+					"match": false,
+					"packageHash": "92d46e08aec3bbadaf946b9866dd2347b7ecf18f0f847205b55b33c48544713f",
+					"size": 2859,
+					"sourceHash": "be9cc03548a1b0b620e870c15be39562d4e520f92f1857416a70ee6d2c96abec",
+					"status": "content"
+				},
+				"lib/utils/html.js": {
+					"diff": "--- published/lib/utils/html.js\n+++ rebuilt/lib/utils/html.js\n@@ -4,25 +4,18 @@\n  * Copyright (c) 2013 Jon Schlinkert, Brian Woodward, contributors\n  * Licensed under the MIT License (MIT).\n  */\n-'use strict';\n \n-\n-// Node.js\n var fs = require('fs');\n-\n-\n-// node_modules\n var prettify = require('js-prettify').html;\n-\n-\n-// Local utils.\n-var Utils = require('./utils');\n-\n+var Utils = require('./utils.js');\n \n \n // The module to be exported.\n var HTML = module.exports = {};\n \n+HTML.read = function(filepath) {\n+  return fs.readFileSync(String(filepath), 'utf8');\n+};\n \n /**\n  * Remove extra newlines from HTML, respect indentation\n",
+					"match": false,
+					"packageHash": "b20832a59135398ade3df3f09f001076258b4bc6d5b0e4516c54213dae2d04b6",
+					"size": 2015,
+					"sourceHash": "78f6928ccd00c5e04e27108ddcc9d0dfdac30ba2027733ef3701882596fc117e",
+					"status": "content"
+				},
+				"lib/utils/lib/compare.js": {
+					"diff": "--- published/lib/utils/lib/compare.js\n+++ rebuilt/lib/utils/lib/compare.js\n@@ -4,6 +4,8 @@\n  * Copyright (c) 2013 Jon Schlinkert, Brian Woodward, contributors\n  * Licensed under the MIT License (MIT).\n  */\n+\n+\n 'use strict';\n \n \n@@ -22,4 +24,4 @@\n   };\n }\n \n-module.exports = exports = compareFn;\n+module.exports = exports = compareFn;\n\\ No newline at end of file\n",
+					"match": false,
+					"packageHash": "c0e258d26aa65d748d03d9e76a5593f26be8b6a7794c0b5f200a196c00a95af0",
+					"size": 549,
+					"sourceHash": "3d6dbef86e403cf7949102e61e7cec467b9e2c98c270fb7209fd2aca23e7a8b8",
+					"status": "content"
+				},
+				"lib/utils/lib/each-property.js": {
+					"diff": "--- published/lib/utils/lib/each-property.js\n+++ rebuilt/lib/utils/lib/each-property.js\n@@ -4,6 +4,8 @@\n  * Copyright (c) 2013 Jon Schlinkert, Brian Woodward, contributors\n  * Licensed under the MIT License (MIT).\n  */\n+\n+\n 'use strict';\n \n \n",
+					"match": false,
+					"packageHash": "037a0a940ef35c79c46e58bf6fdd9ceebc27bcef308b64bdec4cc8dc171233cb",
+					"size": 578,
+					"sourceHash": "e888440f43afff8931df2e7184de12791b22c3bbd4eb3e74ca6c8d03ac42b486",
+					"status": "content"
+				},
+				"lib/utils/lib/indexOf.js": {
+					"diff": "--- published/lib/utils/lib/indexOf.js\n+++ rebuilt/lib/utils/lib/indexOf.js\n@@ -4,14 +4,16 @@\n  * Copyright (c) 2013 Jon Schlinkert, Brian Woodward, contributors\n  * Licensed under the MIT License (MIT).\n  */\n+\n+\n 'use strict';\n \n \n-var _indexOf = [].indexOf || function (item) {\n+var __indexOf = [].indexOf || function (item) {\n   for (var i = 0, l = this.length; i < l; i++) {\n     if (i in this && this[i] === item) {return i;}\n   }\n   return -1;\n };\n \n-exports = module.exports = _indexOf;\n+exports = module.exports = __indexOf;\n\\ No newline at end of file\n",
+					"match": false,
+					"packageHash": "bc2bb87f743e5564dee3b534a791b0d15aad7cadb62494546eb70f0f4e87627f",
+					"size": 414,
+					"sourceHash": "b1e70d9fd5785146fdad97195efec499b1cdc26dfca2d97a6f2998e3dbcc167e",
+					"status": "content"
+				},
+				"lib/utils/markdown.js": {
+					"diff": "--- published/lib/utils/markdown.js\n+++ rebuilt/lib/utils/markdown.js\n@@ -4,18 +4,11 @@\n  * Copyright (c) 2013 Jon Schlinkert, Brian Woodward, contributors\n  * Licensed under the MIT License (MIT).\n  */\n-'use strict';\n \n-\n-// Node.js\n-var fs = require(\"fs\");\n-\n-\n-// node_modules\n var marked = require(\"marked\");\n-var hljs   = require(\"highlight.js\");\n-var _      = require(\"lodash\");\n-\n+var hljs = require(\"highlight.js\");\n+var fs = require(\"fs\");\n+var _ = require(\"lodash\");\n \n \n // The module to be exported.\n@@ -87,4 +80,4 @@\n  */\n module.exports.Markdown = function (options) {\n   return new Markdown(options);\n-};\n+};\n\\ No newline at end of file\n",
+					"match": false,
+					"packageHash": "02b696f647ff0461aaf7a6a6f918a072faa9e817435a4446c6d9180d7be4d373",
+					"size": 1905,
+					"sourceHash": "edff347bc1177ce61d8b2c989799eb35216031bc43a854508e53694d09df8cc8",
+					"status": "content"
+				},
+				"lib/utils/utils.js": {
+					"diff": "--- published/lib/utils/utils.js\n+++ rebuilt/lib/utils/utils.js\n@@ -4,23 +4,21 @@\n  * Copyright (c) 2013 Jon Schlinkert, Brian Woodward, contributors\n  * Licensed under the MIT License (MIT).\n  */\n-'use strict';\n \n \n-// Node.js\n-var path = require('path');\n-var fs   = require('path');\n+'use strict';\n \n \n // node_modules\n-var minimatch = require('minimatch');\n+var minimatch = require(\"minimatch\");\n var iconv     = require('iconv-lite');\n-var grunt     = require('grunt');\n-var _         = require('lodash');\n+var grunt     = require(\"grunt\");\n+var path      = require('path');\n+var _         = require(\"lodash\");\n \n \n // YAML lib.\n-var to   = require('to');\n+var to   = require(\"to\");\n var YAML = to.format.yaml;\n \n \n@@ -28,8 +26,7 @@\n var Handlebars = require('../helpers/helpers').Handlebars;\n \n \n-// Config object.\n-var config = grunt.file.readJSON('./package.json');\n+var config = grunt.file.readJSON(\"./package.json\");\n \n \n // The module to be exported.\n@@ -51,26 +48,26 @@\n \n \n Utils.isFunction = function (obj) {\n-  return typeof obj === 'function';\n+  return typeof obj === \"function\";\n };\n \n \n Utils.isBoolean = function (obj) {\n   var undef = void 0;\n   var type = typeof obj;\n-  return obj !== undef && type === 'boolean' || type === 'Boolean';\n+  return obj !== undef && type === \"boolean\" || type === \"Boolean\";\n };\n \n \n Utils.isNumber = function (obj) {\n   var undef = void 0;\n-  return obj !== undef && obj !== null && (typeof obj === 'number' || obj instanceof Number);\n+  return obj !== undef && obj !== null && (typeof obj === \"number\" || obj instanceof Number);\n };\n \n \n Utils.isObject = function (obj) {\n   var undef = void 0;\n-  return obj !== null && obj !== undef && typeof obj === 'object';\n+  return obj !== null && obj !== undef && typeof obj === \"object\";\n };\n \n \n@@ -82,14 +79,14 @@\n \n Utils.detectType = function (value) {\n   switch (typeof value) {\n-  case 'string':\n-    return 'str';\n-  case 'number':\n-    return 'num';\n-  case 'object':\n-    return 'obj';\n+  case \"string\":\n+    return \"str\";\n+  case \"number\":\n+    return \"num\";\n+  case \"object\":\n+    return \"obj\";\n   default:\n-    return 'other';\n+    return \"other\";\n   }\n };\n \n@@ -103,7 +100,7 @@\n \n var toString = function (val) {\n   if (val == null) {\n-    return '';\n",
+					"match": false,
+					"packageHash": "f5b1aa55c0a542f06a28b4e53e0079903a447c76dfb11fa4226764d3e4e30ca1",
+					"size": 11435,
+					"sourceHash": "0652bba8667eac8ebb1625c90f4e46207b84f82dc142260762122c956cbb31c7",
+					"status": "content"
+				},
+				"tasks/discrepancy.js": {
+					"match": false,
+					"packageHash": "ec50eb247c16df9a7a63e83b389c03460bf3b504d5913485ae1abdbe23def7f0",
+					"size": 1219,
+					"status": "missing-in-source"
+				},
+				"test/fixtures/complex.md": {
+					"match": false,
+					"packageHash": "b8cc450055447af7c06e4943883cc675e5ec55caacda58d1292b4d929c83fead",
+					"size": 178,
+					"status": "missing-in-source"
+				},
+				"test/fixtures/simple.md": {
+					"match": false,
+					"packageHash": "7ae5b423930fc8cf14ca4b8e4dfdd3a04e062b6a86c1dc19b3eb781597598a92",
+					"size": 76,
+					"status": "missing-in-source"
+				},
+				"test/helper-lib_test.js": {
+					"diff": "--- published/test/helper-lib_test.js\n+++ rebuilt/test/helper-lib_test.js\n@@ -1,5 +1,3 @@\n-/*global require:true */\n-\n /**\n  * Handlebars Helpers Tests: Helper Lib\n  * http://github.com/assemble/handlebars-helpers\n@@ -7,13 +5,12 @@\n  * Licensed under the MIT License (MIT).\n  */\n \n-\n require('should');\n var Handlebars = require('handlebars');\n require('../lib/helper-lib').register(Handlebars, {});\n \n describe('loaded helpers', function() {\n-\n+  \n   it('should have prettify helper', function() {\n     var source = '{{#prettify}}<div>Some HTML</div>{{/prettify}}';\n     var template = Handlebars.compile(source);\n@@ -26,4 +23,4 @@\n     var content = template();\n   });\n \n-});\n+});\n\\ No newline at end of file\n",
+					"match": false,
+					"packageHash": "3977c6ff25daa6463da80269a209a16539b57fb3e41e319a5e4b7d306ff3c89a",
+					"size": 792,
+					"sourceHash": "6aa3657e4ffbe802838190c80895428d6ce678a6fd6034bb886af38331ae34a6",
+					"status": "content"
+				},
+				"test/helpers/code_test.js": {
+					"diff": "--- published/test/helpers/code_test.js\n+++ rebuilt/test/helpers/code_test.js\n@@ -6,20 +6,17 @@\n  */\n \n \n-// node_modules\n-require(\"should\");\n-var Handlebars = require(\"handlebars\");\n-\n-// Local helpers\n+require('should');\n+var Handlebars = require('handlebars');\n require('../../lib/helpers/helpers-code').register(Handlebars, {});\n \n-\n-var source, template, context;\n-\n-context = {\n+var context = {\n   AUTHORS: 'Brian Woodward (http://github.com/doowb)\\nJon Schlinkert (http://github.com/jonschlinkert)'\n };\n \n+// TODO: embed\n+\n+var source, template;\n describe('jsfiddle', function() {\n   describe('{{jsfiddle id}}', function() {\n     it('should return a jsfiddle embed link, with default tabs assigned', function() {\n",
+					"match": false,
+					"packageHash": "54254a27ffe2e3d5e391c4f9523675fce648427c9b8d13fbea2357692cb3f178",
+					"size": 1745,
+					"sourceHash": "8314fc85a941274dad9ab90895a9e35714786b2d7e1b935d60f217ecb1f0e244",
+					"status": "content"
+				},
+				"test/helpers/collections_test.js": {
+					"diff": "--- published/test/helpers/collections_test.js\n+++ rebuilt/test/helpers/collections_test.js\n@@ -5,20 +5,15 @@\n  * Licensed under the MIT License (MIT).\n  */\n \n-\n-// node_modules\n require('should');\n var Handlebars = require('handlebars');\n-\n-// Local helpers\n require('../../lib/helpers/helpers-collections').register(Handlebars, {});\n \n-var source, template, context;\n-\n-context = {\n+var context = {\n   collection: ['Amy Wong', 'Bender', 'Dr. Zoidberg', 'Fry', 'Hermes Conrad', 'Leela', 'Professor Farnsworth', 'Scruffy']\n };\n \n+var source, template;\n describe('first', function() {\n   describe('{{first collection}}', function() {\n     it('should return the first item in a collection.', function() {\n@@ -37,14 +32,14 @@\n });\n \n describe('withFirst', function() {\n-  describe('{{#withFirst collection}} \\n <p>{{this}} is smart.</p> \\n {{/withFirst}}', function() {\n+  describe('{{#withFirst collection}} \\n\\ <p>{{this}} is smart.</p> \\n\\ {{/withFirst}}', function() {\n     it('should use the first item in a collection inside a block.', function() {\n       source = '{{#withFirst collection}}<p>{{this}} is smart.</p>{{/withFirst}}';\n       template = Handlebars.compile(source);\n       template(context).should.equal('<p>Amy Wong is smart.</p>');\n     });\n   });\n-  describe('{{#withFirst collection 2}} \\n <p>{{this}} is smart.</p> \\n {{/withFirst}}', function() {\n+  describe('{{#withFirst collection 2}} \\n\\ <p>{{this}} is smart.</p> \\n\\ {{/withFirst}}', function() {\n     it('should use the first two items in a collection inside a block.', function() {\n       source = '{{#withFirst collection 2}}<p>{{this}} is smart.</p>{{/withFirst}}';\n       template = Handlebars.compile(source);\n@@ -71,14 +66,14 @@\n });\n \n describe('withLast', function() {\n-  describe('{{#withLast collection}} \\n <p>{{this}} is dumb.</p> \\n {{/withLast}}', function() {\n+  describe('{{#withLast collection}} \\n\\ <p>{{this}} is dumb.</p> \\n\\ {{/withLast}}', function() {\n     it('should use the last item in a collection inside a block.', function() {\n       source = '{{#withLast collection}}<p>{{this}} is dumb.</p>{{/withLast}}';\n       template = Handlebars.compile(source);\n       template(context).should.equal('<p>Scruffy is dumb.</p>');\n     });\n   });\n-  describe('{{#withLast collection 2}} \\n <p>{{this}} is dumb.</p> \\n {{/withLast}}', function() {\n+  describe('{{#withLast collection 2}} \\n\\ <p>{{this}} is dumb.</p> \\n\\ {{/withLast}}', function() {\n     it('should use the last two items in a collection inside a block.', function() {\n       source = '{{#withLast collection 2}}<p>{{this}} is dumb.</p>{{/withLast}}';\n       template = Handlebars.compile(source);\n@@ -98,7 +93,7 @@\n });\n \n describe('withAfter', function() {\n-  describe('{{#withAfter collection 5}} \\n <{{this}}> \\n {{/withAfter}}', function() {\n+  describe('{{#withAfter collection 5}} \\n\\ <{{this}}> \\n\\ {{/withAfter}}', function() {\n     it('should use all of the items in a collection after the specified count inside a block.', function() {\n       source = '{{#withAfter collection 5}}<{{this}}>{{/withAfter}}';\n       template = Handlebars.compile(source);\n@@ -118,7 +113,7 @@\n });\n \n describe('withBefore', function() {\n-  describe('{{#withBefore collection 5}} \\n <{{this}}> \\n {{/withBefore}}', function() {\n+  describe('{{#withBefore collection 5}} \\n\\ <{{this}}> \\n\\ {{/withBefore}}', function() {\n     it('should use all of the items in a collection before the specified count inside a block.', function() {\n       source = '{{#withBefore collection 5}}<{{this}}>{{/withBefore}}';\n       template = Handlebars.compile(source);\n@@ -181,14 +176,14 @@\n });\n \n describe('withSort', function() {\n-  describe('{{#withSort collection}} \\n <p>{{this}}</p> \\n {{/withSort}}', function() {\n+  describe('{{#withSort collection}} \\n\\ <p>{{this}}</p> \\n\\ {{/withSort}}', function() {\n     it('should sort the collection in lexicographical order and use it in a block.', function() {\n       source = '{{#withSort collection}}<p>{{this}}</p>{{/withSort}}';\n       template = Handlebars.compile(source);\n       template(context).should.equal('<p>Amy Wong</p><p>Bender</p><p>Dr. Zoidberg</p><p>Fry</p><p>Hermes Conrad</p><p>Leela</p><p>Professor Farnsworth</p><p>Scruffy</p>');\n     });\n   });\n-  describe('{{#withSort collection \"deliveries\"}} \\n {{name}}: {{deliveries}} <br> \\n {{/withSort}}', function() {\n+  describe('{{#withSort collection \"deliveries\"}} \\n\\ {{name}}: {{deliveries}} <br> \\n\\ {{/withSort}}', function() {\n     it('should sort the collection by deliveries and use it in a block.', function() {\n       var source, template, _context;\n       source = '{{#withSort collection \"deliveries\"}}{{name}}: {{deliveries}} <br>{{/withSort}}';\n@@ -235,7 +230,7 @@\n });\n \n describe('lengthEqual', function() {\n-  describe('{{#lengthEqual collection 3}} \\n There are 3 people in Planet Express. \\n {{else}} \\n This is not Planet Express. \\n {{/lengthEqual}}', function() {\n+  describe('{{#lengthEqual collection 3}} \\n\\ There are 3 people in Planet Express. \\n\\ {{else}} \\n\\ This is not Planet Express. \\n\\ {{/lengthEqual}}', function() {\n",
+					"match": false,
+					"packageHash": "45abd8ad69d6db5467a06c818656bb6ec2f048b2f8cebabf5b27953bf1666b3c",
+					"size": 12180,
+					"sourceHash": "075faa1bfb06f07bf7787855eaf06132f75bd5ed2ac63048e18c27cdf12d2696",
+					"status": "content"
+				},
+				"test/helpers/comparisons_test.js": {
+					"diff": "--- published/test/helpers/comparisons_test.js\n+++ rebuilt/test/helpers/comparisons_test.js\n@@ -5,45 +5,42 @@\n  * Licensed under the MIT License (MIT).\n  */\n \n-// node_modules\n+\n require('should');\n var Handlebars = require('handlebars');\n-\n-// Local helpers\n require('../../lib/helpers/helpers-comparisons').register(Handlebars, {});\n \n-var source, template, context;\n \n describe('compare', function() {\n   describe('{{#compare left \"<=\" right}}The value is greater than or equal to 10{{else}}The value is lower than 10{{/compare}}', function() {\n     it('should render the first block if the left value is equal or greater.', function() {\n-      context = {\n+      var context = {\n         left: 10,\n         right: 15\n       };\n-      source = '{{#compare left \"<=\" right}}The value is greater than or equal to 10{{else}}The value is lower than 10{{/compare}}';\n-      template = Handlebars.compile(source);\n+      var source = '{{#compare left \"<=\" right}}The value is greater than or equal to 10{{else}}The value is lower than 10{{/compare}}';\n+      var template = Handlebars.compile(source);\n       template(context).should.equal('The value is greater than or equal to 10');\n     });\n   });\n   describe('{{#compare unicorns \"<\" ponies}}I knew it, unicorns are just low-quality ponies!{{/compare}}', function() {\n     it('should render the first block if the left value is less than the right.', function() {\n-      context = {\n+      var context = {\n         unicorns: 5,\n         ponies: 6\n       };\n-      source = '{{#compare unicorns \"<\" ponies}}I knew it, unicorns are just low-quality ponies!{{/compare}}';\n-      template = Handlebars.compile(source);\n+      var source = '{{#compare unicorns \"<\" ponies}}I knew it, unicorns are just low-quality ponies!{{/compare}}';\n+      var template = Handlebars.compile(source);\n       template(context).should.equal('I knew it, unicorns are just low-quality ponies!');\n     });\n   });\n   describe('{{#compare obj \"typeof\" \"object\"}}It\\'s an object.{{else}}It\\'s not an object.{{/compare}}', function() {\n     it('should render the first block if the right value is an object.', function() {\n-      context = {\n+      var context = {\n         obj: {}\n       };\n-      source = '{{#compare obj \"typeof\" \"object\"}}It\\'s an object.{{else}}It\\'s not an object.{{/compare}}';\n-      template = Handlebars.compile(source);\n+      var source = '{{#compare obj \"typeof\" \"object\"}}It\\'s an object.{{else}}It\\'s not an object.{{/compare}}';\n+      var template = Handlebars.compile(source);\n       template(context).should.equal('It\\'s an object.');\n     });\n   });\n@@ -52,9 +49,9 @@\n describe('contains', function() {\n   describe('{{#contains bender \"z\"}} Kiss my shiny metal ass! {{else}} Never mind :( {{/contains}}', function() {\n     it('should render a block if the condition is true.', function() {\n-      source = '{{#contains bender \"great\"}}Kiss my shiny metal ass!{{else}}Never mind :({{/contains}}';\n-      template = Handlebars.compile(source);\n-      context = {\n+      var source = '{{#contains bender \"great\"}}Kiss my shiny metal ass!{{else}}Never mind :({{/contains}}';\n+      var template = Handlebars.compile(source);\n+      var context = {\n         bender: 'Bender is great!'\n       };\n       template(context).should.equal('Kiss my shiny metal ass!');\n@@ -62,9 +59,9 @@\n   });\n   describe('{{#contains bender \"z\"}} Kiss my shiny metal ass! {{else}} Never mind :( {{/contains}}', function() {\n     it('should render a block if the condition is true.', function() {\n-      source = '{{#contains bender \"zzz\"}}Kiss my shiny metal ass!{{else}}Never mind :({{/contains}}';\n-      template = Handlebars.compile(source);\n-      context = {\n+      var source = '{{#contains bender \"zzz\"}}Kiss my shiny metal ass!{{else}}Never mind :({{/contains}}';\n+      var template = Handlebars.compile(source);\n+      var context = {\n         bender: 'Bender is great!'\n       };\n       template(context).should.equal('Never mind :(');\n@@ -75,9 +72,9 @@\n describe('is', function() {\n   describe('{{#is bender \"great\"}} Kiss my shiny metal ass! {{else}} Never mind :( {{/is}}', function() {\n     it('should render a block if the condition is true.', function() {\n-      source = '{{#is bender \"great\"}}Kiss my shiny metal ass!{{else}}Never mind :({{/is}}';\n-      template = Handlebars.compile(source);\n-      context = {\n+      var source = '{{#is bender \"great\"}}Kiss my shiny metal ass!{{else}}Never mind :({{/is}}';\n+      var template = Handlebars.compile(source);\n+      var context = {\n         bender: 'great'\n       };\n       template(context).should.equal('Kiss my shiny metal ass!');\n@@ -88,9 +85,9 @@\n describe('isnt', function() {\n   describe('{{#isnt number 2}} Kiss my great metal ass! {{else}} Never mind :( {{/isnt}}', function() {\n",
+					"match": false,
+					"packageHash": "5e52c1685fbb48e582651bcc33c761da5ba4f74ab07217524d60eb9a3f0550b5",
+					"size": 6969,
+					"sourceHash": "8867d93754915b8f25ce1e57af6ef017e748b1912cc12c4a57ea6b14b87a788c",
+					"status": "content"
+				},
+				"test/helpers/dates_test.js": {
+					"diff": "--- published/test/helpers/dates_test.js\n+++ rebuilt/test/helpers/dates_test.js\n@@ -5,21 +5,17 @@\n  * Licensed under the MIT License (MIT).\n  */\n \n-// node_modules\n require('should');\n var Handlebars = require('handlebars');\n-\n-// Local helpers\n require('../../lib/helpers/helpers-dates').register(Handlebars, {});\n \n-var source, template, context;\n \n describe('formatDate', function() {\n   describe('{{formatDate date format}}', function() {\n     it('should return the date formated into a string given a specified format.', function() {\n-      source = '{{formatDate date \"%F\"}}';\n-      template = Handlebars.compile(source);\n-      context = {\n+      var source = '{{formatDate date \"%F\"}}';\n+      var template = Handlebars.compile(source);\n+      var context = {\n         date: new Date('2/21/1992')\n       };\n       template(context).should.equal('1992-02-21');\n@@ -31,8 +27,8 @@\n   describe('{{now}}', function() {\n     it('should return the current date.', function() {\n       var date = new Date().getTime();\n-      source = '{{now}}';\n-      template = Handlebars.compile(source);\n+      var source = '{{now}}';\n+      var template = Handlebars.compile(source);\n       return new Date(template()).getTime().should.be.within(date - 1000, date + 1000);\n     });\n   });\n@@ -41,9 +37,9 @@\n describe('timeago', function() {\n   describe('{{timeago date}}', function() {\n     it('should return a human-readable time phrase from the given a date', function() {\n-      source = '{{timeago date}}';\n-      template = Handlebars.compile(source);\n-      context = {\n+      var source = '{{timeago date}}';\n+      var template = Handlebars.compile(source);\n+      var context = {\n         date: new Date()\n       };\n       template(context).should.equal('Just now');\n",
+					"match": false,
+					"packageHash": "a2faceaf3bd48a492636a35e88df4c319f5fb2c965e8f42992f64fef82092c70",
+					"size": 1513,
+					"sourceHash": "73d7430a9591e077a25368797d35eeb6de34d3e2e529de3357c547cbf159b943",
+					"status": "content"
+				},
+				"test/helpers/file_test.js": {
+					"diff": "--- published/test/helpers/file_test.js\n+++ rebuilt/test/helpers/file_test.js\n@@ -5,11 +5,8 @@\n  * Licensed under the MIT License (MIT).\n  */\n \n-// node_modules\n require('should');\n var Handlebars = require('handlebars');\n-\n-// Local helpers\n require('../../lib/helpers/helpers-files').register(Handlebars, {});\n \n \n",
+					"match": false,
+					"packageHash": "7c6f28f84c948e538766ef3c25530bb728f60fc1d282a5086fa43cba7684f7d0",
+					"size": 1502,
+					"sourceHash": "317d2edfd955243facd284a62321b22ff0c4f27c1454f682fe512ae869b6fef3",
+					"status": "content"
+				},
+				"test/helpers/i18n_test.js": {
+					"diff": "--- published/test/helpers/i18n_test.js\n+++ rebuilt/test/helpers/i18n_test.js\n@@ -5,11 +5,8 @@\n  * Licensed under the MIT License (MIT).\n  */\n \n-// node_modules\n require('should');\n var Handlebars = require('handlebars');\n-\n-// Local helpers\n require('../../lib/helpers/helpers-i18n').register(Handlebars, {});\n \n var context = {\n",
+					"match": false,
+					"packageHash": "9167aee81be23e9eeadca676fc50e5e2c768596231006a4ce872ed02b08f0def",
+					"size": 1021,
+					"sourceHash": "60c1ddb1aaecf609c39bcf9d4dd6c68953a38564a1ecea2bc661c3d091e2d54f",
+					"status": "content"
+				},
+				"test/helpers/inflections_test.js": {
+					"diff": "--- published/test/helpers/inflections_test.js\n+++ rebuilt/test/helpers/inflections_test.js\n@@ -5,20 +5,17 @@\n  * Licensed under the MIT License (MIT).\n  */\n \n-// node_moduls\n+\n require('should');\n var Handlebars = require('handlebars');\n-\n-// Local helpers\n require('../../lib/helpers/helpers-inflections').register(Handlebars, {});\n \n-\n describe('inflect', function() {\n   describe('{{inflect enemies \"enemy\" \"enemies\"}}', function() {\n     it('should return the plural or singular form of a word based on a value.', function() {\n       var source = '{{inflect enemies \"enemy\" \"enemies\"}}';\n       var template = Handlebars.compile(source);\n-      var context = {\n+      context = {\n         enemies: 3\n       };\n       template(context).should.equal('enemies');\n",
+					"match": false,
+					"packageHash": "a04de6056bf0c88b74faf0a5c040a7e65a5e082661d855cfed2c271bd9e71f0a",
+					"size": 1526,
+					"sourceHash": "a7d6c874f8766525c12828dabd418d39aedf90f32ff147a8116c824e9e72b12e",
+					"status": "content"
+				},
+				"test/helpers/markdown_test.js": {
+					"diff": "--- published/test/helpers/markdown_test.js\n+++ rebuilt/test/helpers/markdown_test.js\n@@ -5,67 +5,57 @@\n  * Licensed under the MIT License (MIT).\n  */\n \n-// Node.js\n-var path = require('path');\n-\n-// node_modules\n-require('should');\n-var Handlebars = require('handlebars');\n-var grunt      = require('grunt');\n-var chalk      = require('chalk');\n-\n-var fixtures = path.join.bind(process.cwd(), './test/fixtures');\n-var helpers  = path.join.bind(__dirname, '../../lib/helpers');\n-\n-// Local helpers\n-require(helpers('helpers-markdown')).register(Handlebars, {\n+require(\"should\");\n+var Handlebars = require(\"handlebars\");\n+require(\"../../lib/helpers/helpers-markdown\").register(Handlebars, {\n   marked: {\n     gfm: true\n   }\n });\n \n+var path = require(\"path\");\n+var grunt = require(\"grunt\");\n+var pkg = grunt.file.readJSON('package.json');\n \n-// Fixtures\n-var fixtureSimple     = '{{#markdown}}\\n## Some Markdown\\n\\n - one\\n - two\\n - three\\n\\n[Click here](http://github.com)\\n{{/markdown}}';\n-var fixtureCodeBlock  = '{{#markdown}}\\n## Some Markdown\\n\\n```js\\nvar foo=\"bar\";\\n```{{/markdown}}';\n-\n-// Expected\n-var expectedSimple    = '<h2>Some Markdown</h2>\\n<ul>\\n<li>one</li>\\n<li>two</li>\\n<li>three</li>\\n</ul>\\n<p><a href=\"http://github.com\">Click here</a></p>\\n';\n-var expectedCodeBlock = '<h2>Some Markdown</h2>\\n<pre><code class=\"language-js\"><span class=\"keyword\">var</span> foo=<span class=\"string\">\"bar\"</span>;</code></pre>\\n';\n-\n-var template;\n-\n-describe(chalk.bold('Should convert:'), function() {\n-\n-  // Blocks of inline markdown\n-  describe('an inline block of markdown to HTML', function() {\n-    it('{{#markdown}}', function(done) {\n-      template = Handlebars.compile(fixtureSimple);\n-      template().should.equal(expectedSimple);\n-      done();\n-    });\n-  });\n \n-  // Included markdown\n-  describe('imported markdown files to HTML', function() {\n-    it('{{md \"simple.md\"}}', function(done) {\n-      var fixture  = fixtures('simple.md');\n-      template = Handlebars.compile('{{md fixture}}');\n-      template({fixture: fixture}).should.equal(expectedSimple);\n+var simple = \"{{#markdown}}\\n## Some Markdown\\n\\n - one\\n - two\\n - three\\n\\n[Click here](http://github.com)\\n{{/markdown}}\";\n+var simpleExpected = \"<h2>Some Markdown</h2>\\n<ul>\\n<li>one</li>\\n<li>two</li>\\n<li>three</li>\\n</ul>\\n<p><a href=\\\"http://github.com\\\">Click here</a></p>\\n\";\n+\n+describe(\"markdown\", function() {\n+  describe(\"should convert a block of markdown to HTML\", function() {\n+    it(\"{{#markdown}}\", function(done) {\n+      var template = Handlebars.compile(simple);\n+      template().should.equal(simpleExpected);\n       done();\n     });\n   });\n-\n-  // With user-defined options\n-  describe('markdown to HTML, with user-defined', function() {\n-    it('langPrefix', function(done) {\n-      require('../../lib/helpers/helpers-markdown').register(Handlebars, {\n-        marked: {langPrefix: 'language-'}\n+  describe(\"md\", function() {\n+    describe(\"should convert an imported markdown file to HTML\", function() {\n+      it(\"{{md simple1.md}}\", function(done) {\n+        var filename = path.join(__dirname, \"../fixtures/simple1.md\");\n+        var source = \"{{md filename}}\";\n+        var template = Handlebars.compile(source);\n+        template({\n+          filename: filename\n+        }).should.equal(simpleExpected);\n+        done();\n       });\n-      template = Handlebars.compile(fixtureCodeBlock);\n-      template().should.equal(expectedCodeBlock);\n-      done();\n     });\n   });\n });\n \n+describe(\"markdown options\", function() {\n+  it(\"langPrefix\", function(done) {\n+    require(\"../../lib/helpers/helpers-markdown\").register(Handlebars, {\n+      marked: {\n+        gfm: true,\n+        langPrefix: 'language-'\n",
+					"match": false,
+					"packageHash": "0c9138b9e1fe2f7b32477bba54beaaa219a748da2a43dd8c304d6b1095248d08",
+					"size": 2284,
+					"sourceHash": "be9966e57ca432c25d120796e28ff13115422af4c364772ace981249169bdb86",
+					"status": "content"
+				},
+				"test/helpers/math_test.js": {
+					"diff": "--- published/test/helpers/math_test.js\n+++ rebuilt/test/helpers/math_test.js\n@@ -5,11 +5,8 @@\n  * Licensed under the MIT License (MIT).\n  */\n \n-// node_modules\n require('should');\n var Handlebars = require('handlebars');\n-\n-// Local helpers\n require('../../lib/helpers/helpers-math').register(Handlebars, {});\n \n var context = {\n",
+					"match": false,
+					"packageHash": "158eafee5128a4388ad7c7aafa1ddc0a5dfa8334194fb888e07d5680ae9ce0b2",
+					"size": 3813,
+					"sourceHash": "7ce03ecb943ddb58d97f7557fdba5508b8e8c446f718b0b5f4f235f7740b3e3d",
+					"status": "content"
+				},
+				"test/helpers/miscellaneous_test.js": {
+					"diff": "--- published/test/helpers/miscellaneous_test.js\n+++ rebuilt/test/helpers/miscellaneous_test.js\n@@ -5,11 +5,9 @@\n  * Licensed under the MIT License (MIT).\n  */\n \n-// node_modules\n+\n require('should');\n var Handlebars = require('handlebars');\n-\n-// Local helpers\n require('../../lib/helpers/helpers-miscellaneous').register(Handlebars, {});\n \n describe('default', function() {\n",
+					"match": false,
+					"packageHash": "7c808298b46ba9ef4c219de825c0c07a9a8eb531d658a59cfed9c2686d953274",
+					"size": 816,
+					"sourceHash": "7abd78229184d9f896705ba9f54c89b51cf56da96078bb53ddc640074f081580",
+					"status": "content"
+				},
+				"test/helpers/numbers_test.js": {
+					"diff": "--- published/test/helpers/numbers_test.js\n+++ rebuilt/test/helpers/numbers_test.js\n@@ -5,11 +5,8 @@\n  * Licensed under the MIT License (MIT).\n  */\n \n-// node_modules\n require('should');\n var Handlebars = require('handlebars');\n-\n-// Local helpers\n require('../../lib/helpers/helpers-numbers').register(Handlebars, {});\n \n // TODO: formatNumber\n",
+					"match": false,
+					"packageHash": "b70ab15d5ddc9c46ed7fc522570b7292d4d88fcb044dbeb7eb227d256f546c86",
+					"size": 4376,
+					"sourceHash": "de3f02cad357877494dff3ba33edead53c474cb603f0feaf14cf0058037ca72f",
+					"status": "content"
+				},
+				"test/helpers/path_test.js": {
+					"diff": "--- published/test/helpers/path_test.js\n+++ rebuilt/test/helpers/path_test.js\n@@ -5,11 +5,8 @@\n  * Licensed under the MIT License (MIT).\n  */\n \n-// node_modules\n require('should');\n var Handlebars = require('handlebars');\n-\n-// Local helpers\n require('../../lib/helpers/helpers-path').register(Handlebars, {});\n \n \n",
+					"match": false,
+					"packageHash": "2667bddb7a817a1fda4ac29edc71680611db3a52de5b6d7125d6d70138eac495",
+					"size": 3356,
+					"sourceHash": "fc73c48ebcc806dab24f0762e7ba1f2c37d9e4b10f5802b519b299b1bfcb47fe",
+					"status": "content"
+				},
+				"test/helpers/strings_test.js": {
+					"diff": "--- published/test/helpers/strings_test.js\n+++ rebuilt/test/helpers/strings_test.js\n@@ -5,20 +5,16 @@\n  * Licensed under the MIT License (MIT).\n  */\n \n-// node_modules\n-require(\"should\");\n-var Handlebars = require(\"handlebars\");\n-\n-// Local helpers\n+require('should');\n+var Handlebars = require('handlebars');\n require('../../lib/helpers/helpers-strings').register(Handlebars, {});\n \n-var source, template;\n \n describe('lowercase', function() {\n   describe('{{lowercase string}}', function() {\n     it('should return the string in lowercase', function() {\n-      source = '{{lowercase \"BENDER SHOULD NOT BE ALLOWED ON TV\"}}';\n-      template = Handlebars.compile(source);\n+      var source = '{{lowercase \"BENDER SHOULD NOT BE ALLOWED ON TV\"}}';\n+      var template = Handlebars.compile(source);\n       template().should.equal('bender should not be allowed on tv');\n     });\n   });\n@@ -27,8 +23,8 @@\n describe('uppercase', function() {\n   describe('{{uppercase string}}', function() {\n     it('should return the string in uppercase', function() {\n-      source = '{{uppercase \"bender should not be allowed on tv\"}}';\n-      template = Handlebars.compile(source);\n+      var source = '{{uppercase \"bender should not be allowed on tv\"}}';\n+      var template = Handlebars.compile(source);\n       template().should.equal('BENDER SHOULD NOT BE ALLOWED ON TV');\n     });\n   });\n@@ -37,8 +33,8 @@\n describe('capitalizeFirst', function() {\n   describe('{{capitalizeFirst string}}', function() {\n     it('should return the string with the first word capitalized.', function() {\n-      source = '{{capitalizeFirst \"bender should not be allowed on tv\"}}';\n-      template = Handlebars.compile(source);\n+      var source = '{{capitalizeFirst \"bender should not be allowed on tv\"}}';\n+      var template = Handlebars.compile(source);\n       template().should.equal('Bender should not be allowed on tv');\n     });\n   });\n@@ -47,8 +43,8 @@\n describe('capitalizeEach', function() {\n   describe('{{capitalizeEach string}}', function() {\n     it('should return the string with the every word capitalized.', function() {\n-      source = '{{capitalizeEach \"bender should not bE allowed on tV\"}}';\n-      template = Handlebars.compile(source);\n+      var source = '{{capitalizeEach \"bender should not bE allowed on tV\"}}';\n+      var template = Handlebars.compile(source);\n       template().should.equal('Bender Should Not BE Allowed On TV');\n     });\n   });\n@@ -57,8 +53,8 @@\n describe('titleize', function() {\n   describe('{{titleize string}}', function() {\n     it('should return the string in title case.', function() {\n-      source = '{{titleize \"Bender-should-Not-be-allowed_on_Tv\"}}';\n-      template = Handlebars.compile(source);\n+      var source = '{{titleize \"Bender-should-Not-be-allowed_on_Tv\"}}';\n+      var template = Handlebars.compile(source);\n       template().should.equal('Bender Should Not Be Allowed On Tv');\n     });\n   });\n@@ -67,8 +63,8 @@\n describe('sentence', function() {\n   describe('{{sentence string}}', function() {\n     it('should capitalize the first word of each sentence in a string and convert the rest of the sentence to lowercase.', function() {\n-      source = '{{sentence \"bender should NOT be allowed on TV. fry SHOULD be allowed on TV.\"}}';\n-      template = Handlebars.compile(source);\n+      var source = '{{sentence \"bender should NOT be allowed on TV. fry SHOULD be allowed on TV.\"}}';\n+      var template = Handlebars.compile(source);\n       template().should.equal('Bender should not be allowed on tv. Fry should be allowed on tv.');\n     });\n   });\n@@ -77,8 +73,8 @@\n describe('reverse', function() {\n   describe('{{reverse string}}', function() {\n     it('should return the string in reverse.', function() {\n-      source = '{{reverse \"bender should NOT be allowed on TV.\"}}';\n-      template = Handlebars.compile(source);\n+      var source = '{{reverse \"bender should NOT be allowed on TV.\"}}';\n+      var template = Handlebars.compile(source);\n       template().should.equal('.VT no dewolla eb TON dluohs redneb');\n     });\n   });\n@@ -87,15 +83,15 @@\n describe('truncate', function() {\n   describe('{{truncate string 31}}', function() {\n     it('should return then string truncated by a specified length.', function() {\n-      source = '{{truncate \"Bender should not be allowed on tv.\" 31}}';\n-      template = Handlebars.compile(source);\n+      var source = '{{truncate \"Bender should not be allowed on tv.\" 31}}';\n",
+					"match": false,
+					"packageHash": "5dd444108671a153216b5ca6d1964fac03d0c690df8634b0cab223a890f2910e",
+					"size": 6130,
+					"sourceHash": "b04a9987321e6cad88a26dd87a07e2f55d7e64ef72bc89eaf527315516499aba",
+					"status": "content"
+				},
+				"test/helpers/url_test.js": {
+					"diff": "--- published/test/helpers/url_test.js\n+++ rebuilt/test/helpers/url_test.js\n@@ -5,30 +5,26 @@\n  * Licensed under the MIT License (MIT).\n  */\n \n-// node_modules\n-require(\"should\");\n-var Handlebars = require(\"handlebars\");\n \n-// Local helpers\n+require('should');\n+var Handlebars = require('handlebars');\n require('../../lib/helpers/helpers-url').register(Handlebars, {});\n \n-var source, template;\n-\n describe('urlresolve', function() {\n   describe('{{urlresolve base href}}', function() {\n     it('should take a base URL, and a href URL,' + 'and resolve them as a browser would for an anchor tag', function() {\n-      source = '{{urlresolve \"/one/two/three\" \"four\"}}';\n-      template = Handlebars.compile(source);\n+      var source = '{{urlresolve \"/one/two/three\" \"four\"}}';\n+      var template = Handlebars.compile(source);\n       template().should.equal(\"/one/two/four\");\n     });\n     it('should take a base URL, and a href URL, and resolve them as a browser would for an anchor tag', function() {\n-      source = '{{urlresolve \"http://example.com/\" \"/one\"}}';\n-      template = Handlebars.compile(source);\n+      var source = '{{urlresolve \"http://example.com/\" \"/one\"}}';\n+      var template = Handlebars.compile(source);\n       template().should.equal(\"http://example.com/one\");\n     });\n     it('should take a base URL, and a href URL, and resolve them as a browser would for an anchor tag', function() {\n-      source = '{{urlresolve \"http://example.com/one\" \"/two\"}}';\n-      template = Handlebars.compile(source);\n+      var source = '{{urlresolve \"http://example.com/one\" \"/two\"}}';\n+      var template = Handlebars.compile(source);\n       template().should.equal(\"http://example.com/two\");\n     });\n   });\n",
+					"match": false,
+					"packageHash": "816f5fb857f4842671e0423631524e0f1c938e14df46c32363a171e94369cd10",
+					"size": 2015,
+					"sourceHash": "7bb810a952e6857037d6815b8e2bcf4410a49ffaef2936fa7c9c37f996c7b516",
+					"status": "content"
+				},
+				"test/utils/markdown_test.js": {
+					"diff": "--- published/test/utils/markdown_test.js\n+++ rebuilt/test/utils/markdown_test.js\n@@ -5,41 +5,33 @@\n  * Licensed under the MIT License (MIT).\n  */\n \n-// Node.js\n-var path = require('path');\n-\n-// node_modules\n require('should');\n-var Handlebars = require('handlebars');\n-var expect     = require('chai').expect;\n-var chalk      = require('chalk');\n+var path = require('path');\n+expect = require('chai').expect;\n \n-// Local helpers\n var markdown = require('../../lib/utils/markdown').Markdown({\n   gfm: true,\n-  highlight: 'auto'\n+  highlight: \"auto\"\n });\n \n-var fixtures = path.join.bind(process.cwd(), 'test/fixtures');\n-var context;\n-\n-describe(chalk.bold('Convert Markdown to HTML: '), function() {\n-  var simple         = '## Some Markdown\\n\\n - one\\n - two\\n - three\\n\\n[Click here](http://github.com)';\n-  var simpleExpected = '<h2>Some Markdown</h2>\\n<ul>\\n<li>one</li>\\n<li>two</li>\\n<li>three</li>\\n</ul>\\n<p><a href=\"http://github.com\">Click here</a></p>\\n';\n-\n-  it('should convert a markdown string', function(done) {\n-    context = markdown.convert(simple);\n+describe(\"Converting Markdown Files\", function() {\n+  var simple = \"## Some Markdown\\n\\n - one\\n - two\\n - three\\n\\n[Click here](http://github.com)\";\n+  var simpleExpected = \"<h2>Some Markdown</h2>\\n<ul>\\n<li>one</li>\\n<li>two</li>\\n<li>three</li>\\n</ul>\\n<p><a href=\\\"http://github.com\\\">Click here</a></p>\\n\";\n+\n+  it(\"should convert a markdown string\", function(done) {\n+    var data;\n+    data = markdown.convert(simple);\n     done();\n   });\n-  it('should read a markdown file', function(done) {\n-    var file = fixtures('simple.md');\n-    context = markdown.read(file);\n-    expect(context).to.equal(simpleExpected);\n+  it(\"should read a markdown file\", function(done) {\n+    var filename = path.join(__dirname, '../fixtures/simple1.md');\n+    var data = markdown.read(filename);\n+    expect(data).to.equal(simpleExpected);\n     done();\n   });\n-  it('should convert a markdown file with code highlighting', function(done) {\n-    var file = fixtures('complex.md');\n-    context = markdown.read(file);\n+  it(\"should convert a markdown file with code highlighting\", function(done) {\n+    var filename = path.join(__dirname, '../fixtures/complex1.md');\n+    var data = markdown.read(filename);\n     done();\n   });\n });\n",
+					"match": false,
+					"packageHash": "84c346d40ea8925dd6ae887265061b44d10fd161dd5c04ade8e813c68d4a2798",
+					"size": 1408,
+					"sourceHash": "3283a43e696d3bbacd0d2e6cebebb1ca816361bb4c45e923bb8d4e1d101680a7",
+					"status": "content"
+				},
+				"test/utils/utils_test.js": {
+					"diff": "--- published/test/utils/utils_test.js\n+++ rebuilt/test/utils/utils_test.js\n@@ -1,3 +1,4 @@\n+/*jshint mocha:true */\n /**\n  * Handlebars Helpers Tests: Utils\n  * http://github.com/assemble/handlebars-helpers\n",
+					"match": false,
+					"packageHash": "04898bca8b8611cf680197c8acb27c46e997996753c65a773c5aea1ee5137a87",
+					"size": 1462,
+					"sourceHash": "384d7051d20c2556b65af2e07850f88c9e9f48c420344600070e0ef5daee4762",
+					"status": "content"
+				},
+				"undocumented.md": {
+					"match": false,
+					"packageHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+					"size": 0,
+					"status": "missing-in-source"
+				},
+				"test/fixtures/complex1.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/fixtures/simple1.md": {
+					"match": false,
+					"status": "missing-in-package"
+				}
+			},
+			"summary": {
+				"differentFiles": 43,
+				"matchingFiles": 26,
+				"missingInPackage": 2,
+				"missingInSource": 5,
+				"score": 0.34210526315789475,
+				"totalFiles": 76
+			}
+		},
+		"prodDependencies": [
+			{
+				"name": "abbrev",
+				"version": "1.1.1"
+			},
+			{
+				"name": "ansi-styles",
+				"version": "0.2.0"
+			},
+			{
+				"name": "argparse",
+				"version": "0.1.16"
+			},
+			{
+				"name": "underscore.string",
+				"version": "2.4.0"
+			},
+			{
+				"name": "chalk",
+				"version": "0.2.1"
+			},
+			{
+				"name": "config-chain",
+				"version": "1.1.13"
+			},
+			{
+				"name": "esprima",
+				"version": "1.0.4"
+			},
+			{
+				"name": "handlebars",
+				"version": "1.0.10"
+			},
+			{
+				"name": "uglify-js",
+				"version": "1.2.6"
+			},
+			{
+				"name": "handy",
+				"version": "0.0.13"
+			},
+			{
+				"name": "has-color",
+				"version": "0.1.7"
+			},
+			{
+				"name": "helper-prettify",
+				"version": "0.1.7"
+			},
+			{
+				"name": "helper-repeat",
+				"version": "0.1.0"
+			},
+			{
+				"name": "highlight.js",
+				"version": "7.3.0"
+			},
+			{
+				"name": "htmlparser",
+				"version": "1.7.7"
+			},
+			{
+				"name": "iconv-lite",
+				"version": "0.2.11"
+			},
+			{
+				"name": "ini",
+				"version": "1.3.8"
+			},
+			{
+				"name": "js-prettify",
+				"version": "1.4.0"
+			},
+			{
+				"name": "nopt",
+				"version": "2.1.2"
+			},
+			{
+				"name": "js-yaml",
+				"version": "2.1.3"
+			},
+			{
+				"name": "lodash",
+				"version": "1.3.1"
+			},
+			{
+				"name": "lru-cache",
+				"version": "2.7.3"
+			},
+			{
+				"name": "marked",
+				"version": "0.2.10"
+			},
+			{
+				"name": "matchdep",
+				"version": "0.1.2"
+			},
+			{
+				"name": "matchkeys",
+				"version": "0.1.3"
+			},
+			{
+				"name": "mime",
+				"version": "1.2.11"
+			},
+			{
+				"name": "minimatch",
+				"version": "0.2.14"
+			},
+			{
+				"name": "mkdirp",
+				"version": "0.3.5"
+			},
+			{
+				"name": "optimist",
+				"version": "0.3.7"
+			},
+			{
+				"name": "proto-list",
+				"version": "1.2.4"
+			},
+			{
+				"name": "resolve-dep",
+				"version": "0.1.3"
+			},
+			{
+				"name": "sigmund",
+				"version": "1.0.1"
+			},
+			{
+				"name": "to",
+				"version": "0.2.9"
+			},
+			{
+				"name": "underscore",
+				"version": "1.7.0"
+			},
+			{
+				"name": "wordwrap",
+				"version": "0.0.3"
+			}
+		]
+	}
+]
