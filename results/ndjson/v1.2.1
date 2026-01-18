@@ -1,0 +1,141 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-18T07:14:57.786Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:11.7.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "ndjson@1.2.1",
+			"name": "ndjson",
+			"version": "1.2.1",
+			"location": "https://registry.npmjs.org/ndjson/-/ndjson-1.2.1.tgz",
+			"integrity": "sha512-MVUYeKhFWuSvCmQnGCzj4pxUGOqMv0yBcQS473Q2VuS25n0neY44+mgPPa6B/br4hn3a9hFFnEGJt7X5ufmohA==",
+			"publishedAt": "2014-09-23T22:56:44.422Z",
+			"publishedWith": {
+				"node": null,
+				"npm": "1.4.9"
+			},
+			"dependencies": {
+				"split2": "^0.2.1",
+				"through2": "^0.6.1"
+			}
+		},
+		"source": {
+			"integrity": null,
+			"location": "git://github.com/maxogden/ndjson.git",
+			"spec": "github:maxogden/ndjson#HEAD"
+		},
+		"comparisonHash": "9ef46a5bd31291e57cbab41e2f17c57bd6da0b5b",
+		"diff": {
+			"files": {
+				".npmignore": {
+					"match": false,
+					"packageHash": "dba27c31aad935787bb275c3e5e4e957708f15386de599eff1db476022cd7e4c",
+					"size": 12,
+					"status": "missing-in-source"
+				},
+				"index.js": {
+					"diff": "--- published/index.js\n+++ rebuilt/index.js\n@@ -1,32 +1,31 @@\n var through = require('through2')\n var split = require('split2')\n var EOL = require('os').EOL\n+var stringify = require('json-stringify-safe')\n \n module.exports = parse\n-module.exports.serialize = serialize\n+module.exports.serialize = module.exports.stringify = serialize\n module.exports.parse = parse\n \n-function parse(opts) {\n+function parse (opts) {\n   opts = opts || {}\n   opts.strict = opts.strict !== false\n \n-  function strict(row) {\n-    if (row) return JSON.parse(row)\n-  }\n-\n-  function nonStrict(row) {\n+  function parseRow (row) {\n     try {\n       if (row) return JSON.parse(row)\n-    } catch(e) {\n-      // ignore\n+    } catch (e) {\n+      if (opts.strict) {\n+        this.emit('error', new Error('Could not parse row ' + row.slice(0, 50) + '...'))\n+      }\n     }\n   }\n \n-  return opts.strict ? split(strict) : split(nonStrict)\n+  return split(parseRow, opts)\n }\n \n-function serialize() {\n-  return through.obj(function(obj, enc, cb) {\n-    cb(null, JSON.stringify(obj) + EOL)\n+function serialize (opts) {\n+  return through.obj(opts, function(obj, enc, cb) {\n+    cb(null, stringify(obj) + EOL)\n   })\n }\n",
+					"match": false,
+					"packageHash": "a1e3e7fabd2b1d1b960fd2b8c015d99e8f2728cd3a3968aa76d04e37f40b85dc",
+					"size": 626,
+					"sourceHash": "51fc83480b2cacf0b0a595ff4a076e7defb8fe81dc5b43e73ab8f6d5f4b16b46",
+					"status": "content"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -1,19 +1,25 @@\n {\n   \"name\": \"ndjson\",\n-  \"version\": \"1.2.1\",\n-  \"description\": \"streaming line delimited json parser + serializer\",\n+  \"version\": \"1.5.0\",\n+  \"description\": \"streaming newline delimited json parser + serializer\",\n   \"main\": \"index.js\",\n   \"scripts\": {\n     \"test\": \"tape test.js\"\n   },\n+  \"bin\": {\n+    \"ndjson\": \"cli.js\"\n+  },\n   \"author\": \"max ogden\",\n-  \"license\": \"BSD\",\n+  \"license\": \"BSD-3-Clause\",\n   \"dependencies\": {\n-    \"split2\": \"^0.2.1\",\n-    \"through2\": \"^0.6.1\"\n+    \"json-stringify-safe\": \"^5.0.1\",\n+    \"minimist\": \"^1.2.0\",\n+    \"split2\": \"^2.1.0\",\n+    \"through2\": \"^2.0.3\"\n   },\n   \"devDependencies\": {\n-    \"tape\": \"^2.13.3\"\n+    \"concat-stream\": \"^1.5.0\",\n+    \"tape\": \"^4.6.3\"\n   },\n   \"repository\": {\n     \"type\": \"git\",\n@@ -22,5 +28,9 @@\n   \"bugs\": {\n     \"url\": \"https://github.com/maxogden/ndjson/issues\"\n   },\n-  \"homepage\": \"https://github.com/maxogden/ndjson\"\n+  \"homepage\": \"https://github.com/maxogden/ndjson\",\n+  \"keywords\": [\n+    \"ndjson\",\n+    \"ldjson\"\n+  ]\n }\n",
+					"match": false,
+					"packageHash": "cb31972b97806300457d1836f9688c56f989a6a0e3bd91d312f12bcd1889a51c",
+					"size": 569,
+					"sourceHash": "6dc510980528156e1d7bd3c3140cbb8a786ff5e0787d0a74a8b49ca21c019022",
+					"status": "content"
+				},
+				"readme.md": {
+					"diff": "--- published/readme.md\n+++ rebuilt/readme.md\n@@ -1,16 +1,19 @@\n+# Development on this npm package is moved to https://github.com/ndjson/ndjson.js\n+\n+\n # ndjson\n \n-#### streaming line delimited json parser + serializer\n+streaming [newline delimited json](https://en.wikipedia.org/wiki/Line_Delimited_JSON) parser + serializer. Available as a JS API or a command line tool\n \n [![NPM](https://nodei.co/npm/ndjson.png)](https://nodei.co/npm/ndjson/)\n \n ## usage\n \n ```\n-var ldj = require('ndjson')\n+var ndjson = require('ndjson')\n ```\n \n-#### ldj.parse()\n+#### ndjson.parse(opts)\n \n returns a transform stream that accepts newline delimited json and emits objects\n \n@@ -23,26 +26,26 @@\n {\"hello\": \"world\"}\n ```\n \n-If you want to discard non-valid JSON messages, you can call `ldj.parse({strict: false})`\n+If you want to discard non-valid JSON messages, you can call `ndjson.parse({strict: false})`\n \n usage:\n \n ```js\n fs.createReadStream('data.txt')\n-  .pipe(ldj.parse())\n+  .pipe(ndjson.parse())\n   .on('data', function(obj) {\n     // obj is a javascript object\n   })\n ```\n \n-#### ldj.serialize()\n+#### ndjson.serialize() / ndjson.stringify()\n \n returns a transform stream that accepts json objects and emits newline delimited json\n \n example usage:\n \n ```js\n-var serialize = ldj.serialize()\n+var serialize = ndjson.serialize()\n serialize.on('data', function(line) {\n   // line is a line of stringified JSON with a newline delimiter at the end\n })\n@@ -52,4 +55,4 @@\n \n ### license\n \n-BSD\n+BSD-3-Clause\n",
+					"match": false,
+					"packageHash": "56aa1b6016301d348389632c3169eeae7cef39c34152259b32951427941d4cb8",
+					"size": 957,
+					"sourceHash": "6ef0774d55176de31c45d2920a9d77d3cf88374b5e57f7828856c700cf07cc0f",
+					"status": "content"
+				},
+				"test.js": {
+					"diff": "--- published/test.js\n+++ rebuilt/test.js\n@@ -1,6 +1,7 @@\n var test = require('tape')\n var ndj = require('./')\n var os = require('os')\n+var concat = require('concat-stream')\n \n test('.parse', function(t) {\n   var parser = ndj.parse()\n@@ -25,11 +26,60 @@\n   parser.write('{\"hello\": \"world\"}\\n{\"hola\": \"mundo\"}\\n')\n })\n \n+test('.parse - strict:true error', function (t) {\n+  var parser = ndj.parse({strict: true})\n+  try {\n+    parser.write('{\"no\":\"json\"\\n')\n+  } catch(e) {\n+    t.pass('error thrown')\n+    t.end()\n+  }\n+})\n+\n+test('.parse - strict:true error event', function (t) {\n+  var parser = ndj.parse({strict: true})\n+  parser.on('error', function (err) {\n+    t.pass('error event called')\n+    t.end()\n+  })\n+  try {\n+    parser.write('{\"no\":\"json\"\\n')\n+  } catch(e) {\n+    t.fail('should not throw')\n+  }\n+})\n+\n+test('.parse - strict:false error', function (t) {\n+  var parser = ndj.parse({strict: false})\n+  parser.once('data', function (data) {\n+    t.ok(data.json, 'parse second one')\n+    t.end()\n+  })\n+  try {\n+    parser.write('{\"json\":false\\n{\"json\":true}\\n')\n+  } catch(e) {\n+    t.fail('should not call an error')\n+  }\n+})\n+\n test('.serialize', function(t) {\n   var serializer = ndj.serialize()\n-  serializer.on('data', function(data) {\n+  serializer.pipe(concat(function(data) {\n     t.equal(data, '{\"hello\":\"world\"}' + os.EOL)\n     t.end()\n-  })\n+  }))\n   serializer.write({hello: 'world'})\n+  serializer.end()\n+})\n+\n+test('.serialize circular', function(t) {\n+  var serializer = ndj.serialize()\n+  serializer.pipe(concat(function(data) {\n+    t.equal(data, '{\"obj\":\"[Circular ~]\"}' + os.EOL)\n+    t.end()\n+  }))\n+  var obj = {}\n+  obj.obj = obj\n+  serializer.write(obj)\n+  serializer.end()\n })\n",
+					"match": false,
+					"packageHash": "09d105712a3905a389a807d8ab3bb2e471f0c6d9ca29d159f662831a4e57ecb4",
+					"size": 768,
+					"sourceHash": "ad309ac527ab416bfbf1d4a7690ab5e480cb906335794e3a49bdad5d76efe3c4",
+					"status": "content"
+				},
+				"cli.js": {
+					"match": false,
+					"status": "missing-in-package"
+				}
+			},
+			"summary": {
+				"differentFiles": 4,
+				"matchingFiles": 1,
+				"missingInPackage": 1,
+				"missingInSource": 1,
+				"score": 0.14285714285714285,
+				"totalFiles": 7
+			}
+		},
+		"prodDependencies": [
+			{
+				"name": "core-util-is",
+				"version": "1.0.3"
+			},
+			{
+				"name": "inherits",
+				"version": "2.0.4"
+			},
+			{
+				"name": "isarray",
+				"version": "1.0.0"
+			},
+			{
+				"name": "json-stringify-safe",
+				"version": "5.0.1"
+			},
+			{
+				"name": "minimist",
+				"version": "1.2.8"
+			},
+			{
+				"name": "process-nextick-args",
+				"version": "2.0.1"
+			},
+			{
+				"name": "readable-stream",
+				"version": "2.3.8"
+			},
+			{
+				"name": "safe-buffer",
+				"version": "5.1.2"
+			},
+			{
+				"name": "split2",
+				"version": "2.2.0"
+			},
+			{
+				"name": "string_decoder",
+				"version": "1.1.1"
+			},
+			{
+				"name": "through2",
+				"version": "2.0.5"
+			},
+			{
+				"name": "util-deprecate",
+				"version": "1.0.2"
+			},
+			{
+				"name": "xtend",
+				"version": "4.0.2"
+			}
+		]
+	}
+]
