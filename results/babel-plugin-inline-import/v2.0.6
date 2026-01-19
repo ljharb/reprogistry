@@ -1,0 +1,96 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-19T07:55:06.448Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:4.2.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "babel-plugin-inline-import@2.0.6",
+			"name": "babel-plugin-inline-import",
+			"version": "2.0.6",
+			"location": "https://registry.npmjs.org/babel-plugin-inline-import/-/babel-plugin-inline-import-2.0.6.tgz",
+			"integrity": "sha512-qBzP75IsHIorzBxdczHQx2YAcf8pOoLKe37tYrCzkIdqnq56vpBhpu4Jg0PKJEMcle2Xz0mQA9ps8dSjLTrHBw==",
+			"publishedAt": "2017-07-16T11:48:10.347Z",
+			"publishedWith": {
+				"node": "7.10.0",
+				"npm": "4.2.0"
+			},
+			"dependencies": {
+				"require-resolve": "0.0.2"
+			}
+		},
+		"source": {
+			"integrity": null,
+			"location": "git+https://github.com/quadric/babel-plugin-inline-import.git",
+			"spec": "github:quadric/babel-plugin-inline-import#3ddca12e72b18c641ca18ba3bc5ec96beae8ce80"
+		},
+		"comparisonHash": "9ef46a5bd31291e57cbab41e2f17c57bd6da0b5b",
+		"diff": {
+			"files": {
+				"CHANGELOG.md": {
+					"match": false,
+					"packageHash": "fae280c3fa563723ed86933749c2c3d24bcbe854ab8e9a9d26cbb760584ab78a",
+					"size": 1268,
+					"status": "missing-in-source"
+				},
+				"README.md": {
+					"diff": "--- published/README.md\n+++ rebuilt/README.md\n@@ -98,6 +98,7 @@\n \n * If you are using `babel-node` or `babel-register`, you can [disable babel cache (`BABEL_DISABLE_CACHE=1`)](https://babeljs.io/docs/usage/babel-register/#environment-variables-babel-disable-cache).\n * If you are using webpack with `babel-loader`, you can use [babel-inline-import-loader](https://github.com/elliottsj/babel-inline-import-loader).\n+* An *alternative library* for webpack is [raw-loader](https://webpack.js.org/loaders/raw-loader/). Advantage = detects changes to imported file w/o additional config or losing babel's cache. Disadvantage: maintain 2 separate configs. E.g. 1) one w/ `raw-loader` for webpack, and 2) another one for babel using `babel-plugin-inline-import`. E.g. if you use a *create-react-app / CRA* based React app, you may have 1) for `yarn start` / webpack and 2) for `yarn test` / babel. For CRA, [craco](https://github.com/gsoft-inc/craco) and [craco-raw-loader](https://github.com/melMass/craco-raw-loader) may help.\n \n Also make sure that your task runner is watching for changes in the _imported file_ as well. You can see it working [here](https://github.com/Quadric/perfect-graphql-starter/blob/master/nodemon.json).\n \n",
+					"match": false,
+					"packageHash": "075da152bec29b154f3107903141efd64b3d03e0bde871d265cb2e4ae7c1a593",
+					"size": 2839,
+					"sourceHash": "c6ccd5073386ba2db91526b431dde00a5ff6796fad6e216e5e7c5fb6cda5d14e",
+					"status": "content"
+				},
+				"build/helper.js": {
+					"diff": "--- published/build/helper.js\n+++ rebuilt/build/helper.js\n@@ -1,105 +1,74 @@\n+\"use strict\";\n+\n Object.defineProperty(exports, \"__esModule\", {\n   value: true\n });\n+exports.default = void 0;\n \n-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if (\"value\" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();\n-\n-var _fs = require('fs');\n-\n-var _fs2 = _interopRequireDefault(_fs);\n-\n-var _path = require('path');\n+require(\"core-js/modules/es6.object.to-string\");\n \n-var _path2 = _interopRequireDefault(_path);\n+var _fs = _interopRequireDefault(require(\"fs\"));\n \n-var _requireResolve = require('require-resolve');\n+var _path = _interopRequireDefault(require(\"path\"));\n \n-var _requireResolve2 = _interopRequireDefault(_requireResolve);\n+var _requireResolve = _interopRequireDefault(require(\"require-resolve\"));\n \n function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }\n \n-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError(\"Cannot call a class as a function\"); } }\n+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }\n \n-var BabelInlineImportHelper = function () {\n-  function BabelInlineImportHelper() {\n-    _classCallCheck(this, BabelInlineImportHelper);\n-  }\n-\n-  _createClass(BabelInlineImportHelper, null, [{\n-    key: 'shouldBeInlined',\n-    value: function shouldBeInlined(givenPath, extensions) {\n-      var accept = typeof extensions === 'string' ? [extensions] : extensions || BabelInlineImportHelper.extensions;\n-\n-      var _iteratorNormalCompletion = true;\n-      var _didIteratorError = false;\n-      var _iteratorError = undefined;\n-\n-      try {\n-        for (var _iterator = accept[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {\n-          var extension = _step.value;\n-\n-          if (givenPath.endsWith(extension)) {\n-            return true;\n-          }\n-        }\n-      } catch (err) {\n-        _didIteratorError = true;\n-        _iteratorError = err;\n-      } finally {\n-        try {\n-          if (!_iteratorNormalCompletion && _iterator.return) {\n-            _iterator.return();\n-          }\n-        } finally {\n-          if (_didIteratorError) {\n-            throw _iteratorError;\n-          }\n-        }\n+class BabelInlineImportHelper {\n+  static shouldBeInlined(givenPath, extensions) {\n+    const accept = typeof extensions === 'string' ? [extensions] : extensions || BabelInlineImportHelper.extensions;\n+\n+    for (const extension of accept) {\n+      if (givenPath.endsWith(extension)) {\n+        return true;\n       }\n+    }\n \n-      return false;\n+    return false;\n+  }\n+\n+  static getContents(givenPath, reference) {\n+    if (!reference) {\n+      throw new Error('\"reference\" argument must be specified');\n     }\n-  }, {\n-    key: 'getContents',\n-    value: function getContents(givenPath, reference) {\n-      if (!reference) {\n-        throw new Error('\"reference\" argument must be specified');\n-      }\n \n-      var mod = (0, _requireResolve2.default)(givenPath, _path2.default.resolve(reference));\n+    const mod = (0, _requireResolve.default)(givenPath, _path.default.resolve(reference));\n \n-      if (!mod || !mod.src) {\n-        throw new Error('Path \\'' + givenPath + '\\' could not be found for \\'' + reference + '\\'');\n-      }\n+    if (!mod || !mod.src) {\n",
+					"match": false,
+					"packageHash": "47c0408aca342861ac7c12b7bce6bb3420ba8addee16b3cf88e9a98c04d46f3d",
+					"size": 3668,
+					"sourceHash": "57fedfcf3d599e09921b6eee62cb55e9382d9c7572c3c534e95f7c0a92c7977e",
+					"status": "content"
+				},
+				"build/index.js": {
+					"diff": "--- published/build/index.js\n+++ rebuilt/build/index.js\n@@ -1,58 +1,62 @@\n+\"use strict\";\n+\n Object.defineProperty(exports, \"__esModule\", {\n   value: true\n });\n+exports.default = _default;\n \n-exports.default = function (_ref) {\n-  var t = _ref.types;\n-\n-  var BabelInlineImport = function BabelInlineImport() {\n-    _classCallCheck(this, BabelInlineImport);\n+var _helper = _interopRequireDefault(require(\"./helper\"));\n \n-    return {\n-      visitor: {\n-        ImportDeclaration: {\n-          exit: function exit(path, state) {\n-            var givenPath = path.node.source.value;\n-            var reference = state && state.file && state.file.opts.filename;\n-            var extensions = state && state.opts && state.opts.extensions;\n-\n-            if (_helper2.default.shouldBeInlined(givenPath, extensions)) {\n-              if (path.node.specifiers.length > 1) {\n-                throw new Error('Destructuring inlined import is not allowed. Check the import statement for \\'' + givenPath + '\\'');\n-              }\n+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }\n \n-              // Here we detect the use of Meteor by checking global.meteorBabelHelpers\n-              if (global.meteorBabelHelpers && _helper2.default.hasRoot(reference)) {\n-                reference = _helper2.default.transformRelativeToRootPath(reference);\n+function _default({\n+  types: t\n+}) {\n+  class BabelInlineImport {\n+    constructor() {\n+      return {\n+        visitor: {\n+          ImportDeclaration: {\n+            exit(path, state) {\n+              const givenPath = path.node.source.value;\n+              let reference = state && state.file && state.file.opts.filename;\n+              const extensions = state && state.opts && state.opts.extensions;\n+\n+              if (_helper.default.shouldBeInlined(givenPath, extensions)) {\n+                if (path.node.specifiers.length > 1) {\n+                  throw new Error(`Destructuring inlined import is not allowed. Check the import statement for '${givenPath}'`);\n+                }\n+\n+                const specifier = path.node.specifiers[0];\n+                const id = specifier.local.name;\n+\n+                const content = _helper.default.getContents(givenPath, reference);\n+\n+                let variableValue = t.stringLiteral(content); // import * as x from ...\n+\n+                if (specifier.type === 'ImportNamespaceSpecifier') {\n+                  variableValue = t.objectExpression([t.objectProperty(t.identifier('default'), variableValue)]);\n+                }\n+\n+                const variable = t.variableDeclarator(t.identifier(id), variableValue);\n+                path.replaceWith({\n+                  type: 'VariableDeclaration',\n+                  kind: 'const',\n+                  declarations: [variable],\n+                  leadingComments: [{\n+                    type: 'CommentBlock',\n+                    value: ` babel-plugin-inline-import '${givenPath}' `\n+                  }]\n+                });\n               }\n-\n-              var id = path.node.specifiers[0].local.name;\n-              var content = _helper2.default.getContents(givenPath, reference);\n-              var variable = t.variableDeclarator(t.identifier(id), t.stringLiteral(content));\n-\n-              path.replaceWith({\n-                type: 'VariableDeclaration',\n-                kind: 'const',\n-                declarations: [variable],\n-                leadingComments: [{\n-                  type: 'CommentBlock',\n-                  value: ' babel-plugin-inline-import \\'' + givenPath + '\\' '\n-                }]\n-              });\n             }\n+\n           }\n         }\n-      }\n-    };\n-  };\n+      };\n+    }\n \n-  return new BabelInlineImport();\n-};\n",
+					"match": false,
+					"packageHash": "64ca03006179a7a87f002ce113b8886d960613602d2426339fee3e571f8d112d",
+					"size": 2100,
+					"sourceHash": "65412f52e60a4dc3427538f314b74230507f7be14bdce5e222760d827210414b",
+					"status": "content"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -1,6 +1,6 @@\n {\n   \"name\": \"babel-plugin-inline-import\",\n-  \"version\": \"2.0.6\",\n+  \"version\": \"3.0.0\",\n   \"description\": \"Babel plugin to make raw files importable\",\n   \"author\": \"Victor Duarte (Quadric ApS) <contact@quadric.net>\",\n   \"license\": \"MIT\",\n@@ -19,8 +19,8 @@\n   ],\n   \"repository\": \"Quadric/babel-plugin-inline-import\",\n   \"scripts\": {\n-    \"test\": \"mocha test/*.spec.js --require config/mocha.js --compilers js:babel-core/register\",\n-    \"test-watch\": \"mocha test/*.spec.js --require config/mocha.js --compilers js:babel-core/register --watch\",\n+    \"test\": \"mocha test/*.spec.js --require @babel/register --require @babel/polyfill --require config/mocha.js\",\n+    \"test-watch\": \"mocha test/*.spec.js --require @babel/register --require @babel/polyfill --require config/mocha.js --watch\",\n     \"lint-js\": \"eslint plugin\",\n     \"prepare\": \"babel -d build/ plugin/\"\n   },\n@@ -28,14 +28,16 @@\n     \"require-resolve\": \"0.0.2\"\n   },\n   \"devDependencies\": {\n-    \"babel-cli\": \"6.x.x\",\n-    \"babel-core\": \"^6.14.0\",\n-    \"babel-eslint\": \"^6.1.2\",\n-    \"babel-preset-es2015-without-strict\": \"0.0.4\",\n-    \"babel-preset-stage-1\": \"^6.13.0\",\n-    \"chai\": \"^3.5.0\",\n-    \"eslint\": \"^3.4.0\",\n-    \"mocha\": \"^3.0.2\",\n-    \"sinon\": \"^1.17.5\"\n+    \"@babel/cli\": \"^7.0.0\",\n+    \"@babel/core\": \"^7.0.0\",\n+    \"@babel/polyfill\": \"^7.4.3\",\n+    \"@babel/preset-env\": \"^7.4.3\",\n+    \"@babel/register\": \"^7.4.0\",\n+    \"@babel/plugin-proposal-class-properties\": \"^7.4.0\",\n+    \"babel-eslint\": \"^10.0.1\",\n+    \"chai\": \"^4.2.0\",\n+    \"eslint\": \"^5.16.0\",\n+    \"mocha\": \"^6.1.3\",\n+    \"sinon\": \"^7.3.2\"\n   }\n }\n",
+					"match": false,
+					"packageHash": "4fef93257a5a2f5e72315983d2e1d44c142bb21cd9438dfceb889fb03b780ae3",
+					"size": 1099,
+					"sourceHash": "3450dbc3099825c162e76e66f561338adf90866e54b02a900ebcea61009b1dc1",
+					"status": "content"
+				}
+			},
+			"summary": {
+				"differentFiles": 4,
+				"matchingFiles": 1,
+				"missingInPackage": 0,
+				"missingInSource": 1,
+				"score": 0.16666666666666666,
+				"totalFiles": 6
+			}
+		},
+		"prodDependencies": [
+			{
+				"name": "path-extra",
+				"version": "1.0.3"
+			},
+			{
+				"name": "require-resolve",
+				"version": "0.0.2"
+			},
+			{
+				"name": "x-path",
+				"version": "0.0.2"
+			}
+		]
+	}
+]
