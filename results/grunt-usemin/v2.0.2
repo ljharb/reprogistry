@@ -1,0 +1,151 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-19T08:20:02.134Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:11.7.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "grunt-usemin@2.0.2",
+			"name": "grunt-usemin",
+			"version": "2.0.2",
+			"location": "https://registry.npmjs.org/grunt-usemin/-/grunt-usemin-2.0.2.tgz",
+			"integrity": "sha512-ZkKumgV+YHLWFcH/yl2ZZ1E2/Zhnms0yOas1REVOQT8u/wmhO4oDkYPbKJxQPKEGkv+CyjV8ezyBL9H1eAg5eA==",
+			"publishedAt": "2013-11-20T06:10:13.833Z",
+			"publishedWith": {
+				"node": null,
+				"npm": "1.3.8"
+			},
+			"dependencies": {
+				"debug": "~0.7.2",
+				"lodash": "~1.0.1"
+			}
+		},
+		"source": {
+			"integrity": "sha512-TExDV5V6BuT1KKlxRydO2tH3QIg5XnqAltDvEJiTKhqV5kjXyzAsttUrKa1rXMDE8bWFB+GBwkRY5qD6sZngbg==",
+			"location": "git://github.com/yeoman/grunt-usemin.git",
+			"spec": "github:yeoman/grunt-usemin#a26f298b69220eb22996cf02391710f32c4615c4"
+		},
+		"comparisonHash": "9ef46a5bd31291e57cbab41e2f17c57bd6da0b5b",
+		"diff": {
+			"files": {
+				"README.md": {
+					"diff": "--- published/README.md\n+++ rebuilt/README.md\n@@ -12,21 +12,118 @@\n ```\n \n [grunt]: http://gruntjs.com/\n-[Getting Started]: http://gruntjs.com/getting-started\n+[Getting Started]: https://github.com/gruntjs/grunt/blob/devel/docs/getting_started.md\n \n ## Tasks\n \n-`usemin` exports 2 different tasks:\n+`usemin` is exporting 2 different tasks:\n \n- - `useminPrepare` prepares the configuration to transform specific construction (blocks) in the scrutinized file into a single line, targeting an optimized version of the files (e.g concatenated, uglifyjs-ed ...)\n+ - `useminPrepare` which purpose is to detect specific construction (blocks) in the scrutinized file, and to build the needed configuration to apply a transformation flow to the files referenced in the block.\n \n- - `usemin` replaces the blocks by the file they reference, and replaces all references to assets by their revisioned version if it is found on the disk. This target modifies the files it is working on.\n+ - `usemin` which purpose is to replace blocks by the file they referenced, and replace all references to assets by their revved version , if it is found on the disk. This target modifies the files it is working on.\n \n-Usually, `useminPrepare` is launched first, then the steps of the transformation flow (for example, `concat`, `uglify`, and `cssmin`), and then, in the end `usemin` is launched.\n+Usually, `useminPrepare` is launched first, then the steps of the transformation flow (for example, `concat`, `uglify`, `cssmin` and `requirejs`), and then, in the end `usemin` is launched.\n+\n+\n+## The usemin task\n+\n+The `usemin` task has 2 actions:\n+\n+- First it replaces all the blocks with a single \"summary\" line, pointing at a file creating by the transformation flow.\n+- Then it looks for references to assets (i.e. images, scripts, ...), and tries to replace them with their revved version if it can find one on disk\n+\n+### On directories\n+\n+When `usemin` tries to replace referenced assets with their revved version it has to look at a collection of directories (asset search paths): for each of the directory of this collection it will look at the bellow tree, and try to find the revved version.\n+This asset search directories collection is by default set to the location of the file that is scrutinized but can be modified (see Options bellow).\n+\n+#### Example 1: file `dist/html/index.html` has the following content:\n+\n+``` html\n+<link rel=\"stylesheet\" href=\"styles/main.css\">\n+<img src=\"../images/test.png\">\n+```\n+By default `usemin` will look under `dist/html` for revved versions of:\n+\n+- `styles/main.css`: a revved version of `main.css` will be looked at under the `dist/html/styles` directory. For example a file `dist/html/styles/main.1234.css` will match (although `dist/html/main.1234.css` won't: the path of the referenced file is important)\n+- `../images/test.png`: it basically means that a revved version of `test.png` will be looked for under the `dist/images` directory\n+\n+#### Example 2: file `dist/html/index.html` has the following content:\n+\n+``` html\n+    <link rel=\"stylesheet\" href=\"/styles/main.css\">\n+    <img src=\"/images/test.png\">\n+```\n+By default `usemin` will look under `dist/html` for revved versions of `styles/main.css` and `images/test.png`. Now let's suppose our assets are scattered in `dist/assets`. By changing the asset search path list to `['dist/assets']`, the revved versions of the files will be looked under `dist/assets` (and thus, for example, `dist/assets/images/test.875487.png` and `dist/assets/styles/main.98090.css`) will be found.\n+\n+### Options\n+\n+#### assetsDirs\n+\n+Type: 'Array'\n+Default: Single item array set to the value of the directory where the currently looked at file is.\n+\n+List of directories where we should start to look for revved version of the assets referenced in the currently looked at file.\n+\n+Example:\n+``` js\n+usemin: {\n+  html: 'build/index.html',\n+  options: {\n+    assetsDirs: ['foo/bar', 'bar']\n+  }\n+}\n+```\n+\n+#### patterns\n+\n+Type: 'Object'\n+Default: Empty\n+\n+Allows for user defined pattern to replace reference to files. For example, let's suppose that you want for some reason replace\n+all references to `'image.png'` in your Javascript files by the revved version of `image.png` found bellow the directory `images`.\n+By specifying something along the lines of:\n+\n+```js\n+usemin: {\n+  js: '*.js',\n+  options: {\n+    assetsDirs: 'images',\n+    patterns: {\n+      js: [[/(image\\.png)/, 'Replacing reference to image.png']]\n+    }\n+  }\n+}\n+```\n+\n+So in short:\n+\n+* key in pattern should match the target (e.g `js` key for the target `js`)\n+* Each pattern is an array of arrays. These arrays are composed of 4 items (last 2 are optionals):\n+  * First one if the regexp to use. The first group is the one that is supposed to represent the file\n",
+					"match": false,
+					"packageHash": "5cec12d18ef476fa062d7e3f0aa3e458e3f22c75dea2c62e55b28084fb2a78e9",
+					"size": 16286,
+					"sourceHash": "23cf29316500aab9de6b420709f7238116fbdac4c1bed2e1d13f05581e8443b5",
+					"status": "content"
+				},
+				"index.html": {
+					"diff": "--- published/index.html\n+++ rebuilt/index.html\n@@ -71,6 +71,11 @@\n     <script src=\"scripts/vendor/bootstrap/bootstrap-tab.js\"></script>\n     <!-- endbuild -->\n \n+    <!-- build:js scripts/amd-app.js -->\n+    <script data-main=\"scripts/main\" src=\"scripts/vendor/require.js\"></script>\n+    <!-- endbuild -->\n+\n+    <script data-main=\"scripts/main\" src=\"scripts/vendor/require.js\"></script>\n     <a href=\"<?php echo URL::to('admin/create') ?>\"><i class='icon-plus icon-white'></i>&nbsp;&nbsp;New</a>\n     <img src=\"images/test.png\">\n     <img src=\"images/misc/test.png\">\n",
+					"match": false,
+					"packageHash": "c739ec3e67a8de7f0ca47100b0f5901d33ca11a6ed6fe012ca11bb58cedfac20",
+					"size": 3798,
+					"sourceHash": "cf285d795ac157af02392d3a4516f1dba610d821abab4ce7596372e4b7acf2ce",
+					"status": "content"
+				},
+				"lib/config/concat.js": {
+					"diff": "--- published/lib/config/concat.js\n+++ rebuilt/lib/config/concat.js\n@@ -10,16 +10,13 @@\n // It aslo conveys whether or not the current process is the last of the pipe\n //\n exports.createConfig = function(context, block) {\n-  var cfg = {files: []};\n+  var cfg = {};\n   // FIXME: check context has all the needed info\n   var outfile = path.join(context.outDir, block.dest);\n \n   // Depending whether or not we're the last of the step we're not going to output the same thing\n-  var files = {};\n-  files.dest = outfile;\n-  files.src = [];\n-  context.inFiles.forEach(function(f) { files.src.push(path.join(context.inDir, f));} );\n-  cfg.files.push(files);\n+  cfg[outfile] = [];\n+  context.inFiles.forEach(function(f) { cfg[outfile].push(path.join(context.inDir, f));} );\n   context.outFiles = [block.dest];\n   return cfg;\n };\n",
+					"match": false,
+					"packageHash": "b3a5569fb7801484eaff75145667a9dd04106d1b5c05c63ab50ffc10e79e1235",
+					"size": 828,
+					"sourceHash": "d479ad1a40d206d6529fcbbd0c419d58a34fc5fa909fb8bc5e10151e8a82b930",
+					"status": "content"
+				},
+				"lib/config/cssmin.js": {
+					"match": false,
+					"packageHash": "c0794ba493451c674128bd109bb8007618e2e5c41d2f442a5bcaf3b943e1bf5c",
+					"size": 828,
+					"status": "missing-in-source"
+				},
+				"lib/config/uglifyjs.js": {
+					"diff": "--- published/lib/config/uglifyjs.js\n+++ rebuilt/lib/config/uglifyjs.js\n@@ -11,26 +11,22 @@\n // It aslo conveys whether or not the current process is the last of the pipe\n //\n exports.createConfig = function(context, block) {\n-  var cfg = {files:[]};\n+  var cfg = {};\n   context.outFiles = [];\n \n   // Depending whether or not we're the last of the step we're not going to output the same thing:\n   // if we're the last one we must use the block dest file name for output\n   // otherwise uglify each input file into it's given outputfile\n   if (context.last === true) {\n-    var files = {};\n     var ofile = path.join(context.outDir, block.dest);\n-    files.dest = ofile;\n-    files.src = context.inFiles.map(function(fname) { return path.join(context.inDir, fname);});\n-    // cfg[ofile] = context.inFiles.map(function(fname) { return path.join(context.inDir, fname);});\n-    cfg.files.push(files);\n+    cfg[ofile] = context.inFiles.map(function(fname) { return path.join(context.inDir, fname);});\n     context.outFiles.push(block.dest);\n   } else {\n     context.inFiles.forEach(function(fname) {\n       var file = path.join(context.inDir, fname);\n       var outfile = path.join(context.outDir, fname);\n-      cfg.files.push({src: [file], dest: outfile});\n-      // cfg[outfile] = [file];\n+\n+      cfg[outfile] = [file];\n       context.outFiles.push(fname);\n     });\n   }\n",
+					"match": false,
+					"packageHash": "e550117611539db2a364ad133e7a67000a76582d717d3194c2d370f1673e11d7",
+					"size": 1367,
+					"sourceHash": "a6db85a83ec8a128076f15f82bf0bd2084430b5b4c57e1b4c0b276fb3dd35d91",
+					"status": "content"
+				},
+				"lib/configwriter.js": {
+					"diff": "--- published/lib/configwriter.js\n+++ rebuilt/lib/configwriter.js\n@@ -3,18 +3,6 @@\n var File = require('./file');\n var _ = require('lodash');\n \n-var deepMerge = function(origCfg, cfg) {\n-  var outCfg = origCfg;\n-\n-  if (origCfg.files && cfg.files) {\n-    outCfg.files = _.union(origCfg.files, cfg.files);\n-  } else if (cfg.files) {\n-    outCfg.files = cfg.files;\n-  }\n-\n-  return outCfg;\n-};\n-\n //\n // Create a config writer for the furnished flow.\n // The created config will:\n@@ -29,99 +17,69 @@\n //\n // Additional configurations post-processors can be also given.\n // These post-processors are updating additional configuration based on the output of the flow.\n+// For example the requirejs configuration post-processor will update the requirejs based\n+// on the information provided by the flow (regarding for example the output directory,\n+// the name of the main file, and so on).\n //\n // For example:\n //\n-//   var w = new ConfigWriter( ['concat', 'uglifyjs'], [], {input: 'app', staging: '.tmp', dest: 'dist'});\n+//   var w = new ConfigWriter( ['concat', 'uglifyjs'], ['requirejs'], {input: 'app', staging: '.tmp', dest: 'dist'});\n //\n //   We'll:\n //     - have files config/concat.js and config/uglifyjs.js implementing each config writer\n //     - Use .tmp for the output of concat and input of uglifyjs\n //     - Deliver for each block the requested file under dist directory\n+//     - Will update requirejs (for the concerned blocks) to take the main file in dist\n //\n //\n-var ConfigWriter = module.exports = function ( flow, dirs ) {\n+var ConfigWriter = module.exports = function ( flow, postprocessorsList, dirs ) {\n   var self = this;\n   this.flow = flow;\n   // FIXME: check dest and staging are furnished\n-  this.root = dirs.root;\n+  this.inputDir = dirs.input;\n   this.dest = dirs.dest;\n   this.staging = dirs.staging;\n-  this.steps = {};\n+  this.steps = [];\n+  this.writersCount = flow.length;\n   this.postprocessors = [];\n \n   // We need to create all the needed config writers, given them their output directory\n   // E.g, if we do have the flow concat | uglifyjs, the output dir will be .tmp/concat and dist\n   // if the flow is concat | uglifyjs | foo, the dirs will be .tmp/concat, .tmp/uglifyjs, dist\n-  flow.blockTypes().forEach(function(blockType) {\n-    self.steps[blockType] = [];\n-    self.postprocessors[blockType] = [];\n-\n-    flow.steps(blockType).forEach(function(item) {\n-      var step;\n-      if (typeof item  === 'string' || item instanceof String) {\n-        step = require(path.join(__dirname, 'config', item));\n-      } else {\n-        // Assume this is a user furnished step\n-        // FIXME: Add checks on object attributes\n-        step = item;\n-      }\n-      self.steps[blockType].push(step);\n-    });\n-\n-    flow.post(blockType).forEach(function(item) {\n-      var pp;\n-      if (typeof item  === 'string' || item instanceof String) {\n-        pp = require(path.join(__dirname, 'config', item));\n-      } else {\n-        // Assume this is a user furnished post-processor\n-        // FIXME: Add checks on object attributes\n-        pp = item;\n-      }\n-      self.postprocessors[blockType].push(pp);\n-    });\n-\n+  flow.forEach(function(item) {\n+    var step;\n+    if (typeof item  === 'string' || item instanceof String) {\n+      step = require(path.join(__dirname, 'config', item));\n+    } else {\n+      // Assume this is a user furnished step\n+      // FIXME: Add checks on object attributes\n+      step = item;\n+    }\n+    self.steps.push(step);\n   });\n \n-  // postprocessorsList.forEach(function(item) {\n-  //   var pp;\n",
+					"match": false,
+					"packageHash": "26fd64fd93aa3b3863faec9fab9ad42f5aad724cd50cb2327d3a427248d4c48a",
+					"size": 6295,
+					"sourceHash": "848a9049a3072457ad2613f599d20998207473310b9772991b642104d61a6d77",
+					"status": "content"
+				},
+				"lib/file.js": {
+					"diff": "--- published/lib/file.js\n+++ rebuilt/lib/file.js\n@@ -28,6 +28,14 @@\n //         '    <!-- endbuild -->'\n //       ]\n //     }\n+// Note that when treating an HTML file making usage of requireJS\n+// an additional information for the block is added, regarding RequireJS\n+// configuration. For example:\n+//\n+//       requirejs: {\n+//         name: 'scripts/main',\n+//         dest: 'scripts/foo.js'\n+//       }\n //\n // Note also that dest is expressed relatively from the root. I.e., if the block starts with:\n //    <!-- build:css /foo/css/site.css -->\n@@ -81,15 +89,6 @@\n         last.searchPath.push(build[2]);\n       }\n     }\n-    // Check IE conditionals\n-    var isConditionalStart = l.match(/<!--\\[[^\\]]+\\]>/);\n-    var isConditionalEnd = l.match(/<!\\[endif\\]-->/);\n-    if (block && isConditionalStart) {\n-      last.conditionalStart = isConditionalStart;\n-    }\n-    if (block && isConditionalEnd) {\n-      last.conditionalEnd = isConditionalEnd;\n-    }\n \n     // switch back block flag when endbuild\n     if (block && endbuild) {\n@@ -102,23 +101,6 @@\n       var asset = l.match(/(href|src)=[\"']([^'\"]+)[\"']/);\n       if (asset && asset[2]) {\n         last.src.push(asset[2]);\n-\n-        var media = l.match(/media=['\"]([^'\"]+)['\"]/);\n-        // FIXME: media attribute should be present for all members of the block *and* having the same value\n-        if ( media ) {\n-          last.media = media[1];\n-        }\n-\n-        // preserve defer attribute\n-        var defer = / defer/.test(l);\n-        if (defer && last.defer === false || last.defer && !defer) {\n-          throw new Error('Error: You are not suppose to mix deferred and non-deferred scripts in one block.');\n-        } else if (defer) {\n-          last.defer = true;\n-        } else {\n-          last.defer = false;\n-        }\n-\n         // RequireJS uses a data-main attribute on the script tag to tell it\n         // to load up the main entry point of the amp app\n         //\n@@ -127,7 +109,21 @@\n         // the furnished requirejs as an asset (src)\n         var main = l.match(/data-main=['\"]([^'\"]+)['\"]/);\n         if (main) {\n-          throw new Error('require.js blocks are no more supported.');\n+          last.requirejs = last.requirejs || {};\n+          last.requirejs.dest = last.dest;\n+          last.requirejs.baseUrl = path.dirname(main[1]);\n+          last.requirejs.name = path.basename(main[1]);\n+          last.requirejs.src = last.src.pop(); // e.g the require.js scripts\n+          var req = l.match(/src=['\"]([^'\"]+)['\"]/);\n+          if (req) {\n+            // FIXME: this is silly, we already have it in last.requirejs.src\n+            last.requirejs.origScript = req[1];\n+          } else {\n+            // For whatever reason ...\n+            last.requirejs.origScript = 'scripts/vendor/require.js';\n+          }\n+          last.requirejs.srcDest = last.requirejs.origScript;\n+          last.src.push(last.dest);\n         }\n       }\n       last.raw.push(l);\n@@ -149,4 +145,4 @@\n \n   // Let's parse !!!\n   this.blocks = getBlocks(this.content);\n-};\n+};\n\\ No newline at end of file\n",
+					"match": false,
+					"packageHash": "1ea8a912e696f7312603070ef2bcfa7d0e82f1009defe07445cd16e9a294a0a8",
+					"size": 4569,
+					"sourceHash": "75c88234505026bff8271faefc478b95f258645fb6f663e7a5e55f860b12ec73",
+					"status": "content"
+				},
+				"lib/fileprocessor.js": {
+					"diff": "--- published/lib/fileprocessor.js\n+++ rebuilt/lib/fileprocessor.js\n@@ -1,6 +1,8 @@\n 'use strict';\n var debug = require('debug')('fileprocessor');\n var File = require('./file');\n+// var HTMLProcessor = require('./htmlprocessor');\n+// var CSSProcessor = require('./cssprocessor');\n var _ = require('lodash');\n \n var _defaultPatterns = {\n@@ -35,7 +37,7 @@\n     ],\n \t  'css': [\n       /*jshint regexp:false */\n-      [ /(?:src=|url\\(\\s*)['\"]?([^'\"\\)]+)['\"]?\\s*\\)?/gm,\n+      [ /url\\(\\s*['\"]?([^'\"\\)]+)['\"]?\\s*\\)/gm,\n       'Update the CSS to reference our revved images'\n       ]\n     ]\n@@ -70,10 +72,12 @@\n FileProcessor.prototype.replaceBlocks = function replaceBlocks(file) {\n   var result = file.content;\n   var linefeed = /\\r\\n/g.test(result) ? '\\r\\n' : '\\n';\n+\n   file.blocks.forEach(function (block) {\n     var blockLine = block.raw.join(linefeed);\n     result = result.replace(blockLine, this.replaceWith(block));\n   }, this);\n+\n   return result;\n };\n \n@@ -81,15 +85,15 @@\n FileProcessor.prototype.replaceWith = function replaceWith(block) {\n   var result;\n   var dest = block.dest;\n-  var conditionalStart = block.conditionalStart ? block.conditionalStart + '\\n' + block.indent : '';\n-  var conditionalEnd = block.conditionalEnd ? '\\n' + block.indent + block.conditionalEnd : '';\n+\n   if (block.type === 'css') {\n-    var media = block.media ? ' media=\"' + block.media + '\"' : '';\n-    result = block.indent + conditionalStart + '<link rel=\"stylesheet\" href=\"' + dest + '\"' + media + '/>' + conditionalEnd;\n-  } else if (block.defer) {\n-    result = block.indent + conditionalStart + '<script defer src=\"' + dest + '\"><\\/script>' + conditionalEnd;\n+    result = block.indent + '<link rel=\"stylesheet\" href=\"' + dest + '\">';\n+  } else if (block.requirejs !== undefined) {\n+    var dataMain = block.requirejs.dest;\n+    var requireSrc = block.requirejs.src;\n+    result = block.indent + '<script data-main=\"' + dataMain + '\" src=\"' + requireSrc + '\"><\\/script>';\n   } else if (block.type === 'js') {\n-    result = block.indent + conditionalStart + '<script src=\"' + dest + '\"><\\/script>' + conditionalEnd;\n+    result = block.indent + '<script src=\"' + dest + '\"><\\/script>';\n   } /*else {\n     result = '';\n   }*/\n",
+					"match": false,
+					"packageHash": "15421d73a99b9200c56310cd6009416888e47495ae64b8f0f58608d0d63377f8",
+					"size": 4982,
+					"sourceHash": "15bde0a2f3d03826292869bfbf3a15e37dff7106b5bb31372c98686ab771a5a7",
+					"status": "content"
+				},
+				"lib/flow.js": {
+					"match": false,
+					"packageHash": "b4a4f56c66e24738ccd3d9054794defa71d62f5e95cc8f82d815931397733246",
+					"size": 1173,
+					"status": "missing-in-source"
+				},
+				"lib/revvedfinder.js": {
+					"diff": "--- published/lib/revvedfinder.js\n+++ rebuilt/lib/revvedfinder.js\n@@ -59,7 +59,6 @@\n \n   searchPaths.forEach(function(sp) {\n     var searchString = path.join(sp, dirname, basename + '.*' + extname);\n-    var prefixSearchString = path.join(sp, dirname, '*.' + basename + extname);\n \n     if (searchString.indexOf('#') === 0) {\n       // patterns starting with # are treated as comments by the glob implementation which returns undefined,\n@@ -67,9 +66,9 @@\n       return;\n     }\n \n-    debug('Looking for %s and %s on disk', searchString, prefixSearchString);\n+    debug('Looking for %s on disk', searchString);\n \n-    var files = self.expandfn([searchString, prefixSearchString]);\n+    var files = self.expandfn(searchString);\n \n     debug('Found ', files);\n \n",
+					"match": false,
+					"packageHash": "116643e84e1aec78bcf8f778ca0125cdfb63928be0550613246f4235ecbfe543",
+					"size": 6572,
+					"sourceHash": "53e801d93b40a6812ee97196217ea452f9821d41baf20ae7e713a0b8c588a5fb",
+					"status": "content"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -1,6 +1,6 @@\n {\n   \"name\": \"grunt-usemin\",\n-  \"version\": \"2.0.2\",\n+  \"version\": \"2.0.0\",\n   \"description\": \"Grunt task replaces references to non-optimized scripts or stylesheets into a set of HTML files (or any templates/views).\",\n   \"keywords\": [\n     \"gruntplugin\",\n@@ -40,11 +40,5 @@\n   },\n   \"licenses\": {\n     \"type\": \"BSD\"\n-  },\n-  \"gitHead\": \"a26f298b69220eb22996cf02391710f32c4615c4\",\n-  \"readmeFilename\": \"README.md\",\n-  \"directories\": {\n-    \"test\": \"test\"\n-  },\n-  \"license\": \"BSD\"\n+  }\n }\n",
+					"match": false,
+					"packageHash": "fc6dd76ff967f49fd725f2fb51bc404d24a658ef6339edeaf8fc84dd3f39b1f2",
+					"size": 1143,
+					"sourceHash": "518ccc43f5420f0805b8828b1c83a832e593db624d26f6e1f4416d1a59865b5b",
+					"status": "content"
+				},
+				"tasks/usemin.js": {
+					"diff": "--- published/tasks/usemin.js\n+++ rebuilt/tasks/usemin.js\n@@ -9,41 +9,21 @@\n //  - a dedicated one for the furnished target\n //  - a general one\n //  - the default one\n-var getFlowFromConfig = function(config, target) {\n-  var Flow = require('../lib/flow');\n-  var flow = new Flow({ steps: {'js': ['concat', 'uglifyjs'], 'css': ['concat', 'cssmin']}, post: {}});\n+var getFlowFromConfig = function(config,target) {\n+  var flow = { steps: ['concat', 'uglifyjs'], post: ['requirejs']};\n   if (config.options && config.options.flow) {\n     if (config.options.flow[target]) {\n-      flow.setSteps(config.options.flow[target].steps);\n-      flow.setPost(config.options.flow[target].post);\n+      flow.steps = config.options.flow[target].steps;\n+      flow.post = config.options.flow[target].post;\n     } else {\n-      flow.setSteps(config.options.flow.steps);\n-      flow.setPost(config.options.flow.post);\n+      flow.steps = config.options.flow.steps;\n+      flow.post = config.options.flow.post;\n     }\n   }\n   return flow;\n };\n \n //\n-// Return which locator to use to get the revisioned version (revved) of the files, with, by order of\n-// preference:\n-// - a map object passed in option (revmap)\n-// - a map object produced by grunt-filerev if available\n-// - a disk lookup\n-//\n-var getLocator = function (grunt, options) {\n-  var locator;\n-  if (options.revmap) {\n-    locator = grunt.file.readJSON(options.revmap);\n-  } else if (grunt.filerev && grunt.filerev.summary) {\n-    locator = grunt.filerev.summary;\n-  } else {\n-    locator = function (p) { return grunt.file.expand({filter: 'isFile'}, p); };\n-  }\n-  return locator;\n-};\n-\n-//\n // ### Usemin\n \n // Replaces references to non-optimized scripts or stylesheets\n@@ -89,6 +69,19 @@\n // initializes for you the corresponding Grunt config for the concat / uglify tasks\n // when `type=js`, the concat / cssmin tasks when `type=css`.\n //\n+// The task also handles use of RequireJS, for the scenario where you specify\n+// the main entry point for your application using the \"data-main\" attribute\n+// as follows:\n+//\n+//     <!-- build:js js/app.min.js -->\n+//     <script data-main=\"js/main\" src=\"js/vendor/require.js\"></script>\n+//     <!-- -->\n+//\n+// One doesn't need to specify a concat/uglify/cssmin or requirejs configuration anymore.\n+//\n+// Inspired by previous work in https://gist.github.com/3024891\n+// For related sample, see: cli/test/tasks/usemin-handler/index.html\n+//\n \n module.exports = function (grunt) {\n   var FileProcessor = require('../lib/fileprocessor');\n@@ -116,8 +109,7 @@\n       patterns = options.type;\n     }\n \n-    // var locator = options.revmap ? grunt.file.readJSON(options.revmap) : function (p) { return grunt.file.expand({filter: 'isFile'}, p); };\n-    var locator = getLocator(grunt, options);\n+    var locator = options.revmap ? grunt.file.readJSON(options.revmap) : function (p) { return grunt.file.expand({filter: 'isFile'}, p); };\n     var revvedfinder = new RevvedFinder(locator);\n     var handler = new FileProcessor(patterns, revvedfinder, function (msg) { grunt.log.writeln(msg);});\n \n@@ -140,34 +132,29 @@\n   grunt.registerMultiTask('useminPrepare', 'Using HTML markup as the primary source of information', function () {\n     var options = this.options();\n     // collect files\n+    var files = grunt.file.expand({filter: 'isFile'}, this.data);\n     var dest = options.dest || 'dist';\n-    var staging = options.staging || '.tmp';\n-    var root = options.root;\n \n     grunt.log\n-      .writeln('Going through ' + grunt.log.wordlist(this.filesSrc) + ' to update the config')\n+      .writeln('Going through ' + grunt.log.wordlist(files) + ' to update the config')\n       .writeln('Looking for build script HTML comment blocks');\n \n     var flow = getFlowFromConfig(grunt.config('useminPrepare'), this.target);\n \n-    var c = new ConfigWriter( flow, {root: root, dest: dest, staging: staging} );\n+    var c = new ConfigWriter( flow.steps, flow.post, {input: 'app', dest: dest, staging: '.tmp'} );\n \n     var cfgNames = [];\n",
+					"match": false,
+					"packageHash": "6680231213e7c2fbc1277e6708548c28caa8ab5c2e79a33c45110c4348aea034",
+					"size": 6384,
+					"sourceHash": "c0779ab490863d2382c313154e778dd8ff2285f969488a804b26b2fa8008fcc4",
+					"status": "content"
+				},
+				"Gruntfile.js": {
+					"match": false,
+					"status": "missing-in-package"
+				}
+			},
+			"summary": {
+				"differentFiles": 10,
+				"matchingFiles": 1,
+				"missingInPackage": 1,
+				"missingInSource": 2,
+				"score": 0.07142857142857142,
+				"totalFiles": 14
+			}
+		},
+		"prodDependencies": [
+			{
+				"name": "debug",
+				"version": "0.7.4"
+			},
+			{
+				"name": "lodash",
+				"version": "1.0.2"
+			}
+		]
+	}
+]

@@ -1,0 +1,198 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-19T08:17:59.408Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:11.7.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "grunt-usemin@0.1.6",
+			"name": "grunt-usemin",
+			"version": "0.1.6",
+			"location": "https://registry.npmjs.org/grunt-usemin/-/grunt-usemin-0.1.6.tgz",
+			"integrity": "sha512-Bqa4KR/4R9SZFjmMVqrYbkorlUkUWmEGFYOf02DVMKNwTopRZnrSaX/mlIwYLmOR3GtqTHUVJuszrroZNVayRg==",
+			"publishedAt": "2013-02-13T05:51:08.919Z",
+			"publishedWith": {
+				"node": null,
+				"npm": "1.1.61"
+			},
+			"dependencies": {}
+		},
+		"source": {
+			"integrity": null,
+			"location": "git://github.com/yeoman/grunt-usemin.git",
+			"spec": "github:yeoman/grunt-usemin#HEAD"
+		},
+		"comparisonHash": "9ef46a5bd31291e57cbab41e2f17c57bd6da0b5b",
+		"diff": {
+			"files": {
+				".jshintrc": {
+					"match": false,
+					"packageHash": "6a10cd7febfde79668ec2ed0b2eddcda3102340ab64df6fa98ccaca25daadff3",
+					"size": 448,
+					"status": "missing-in-source"
+				},
+				".npmignore": {
+					"match": false,
+					"packageHash": "13ac92ef5bb38316a8e79b2791ff49e46a6397796be68e5886a3df5ed49072d8",
+					"size": 77,
+					"status": "missing-in-source"
+				},
+				".travis.yml": {
+					"match": false,
+					"packageHash": "abc71d4ee06248842046093b4d0936a7c09bd0130fb66b1446135d972fa0b328",
+					"size": 171,
+					"status": "missing-in-source"
+				},
+				"Gruntfile.js": {
+					"match": false,
+					"packageHash": "46f1643630ba429ff61b1fb8858e2366d544d625e2e9af898500163e75dd7720",
+					"size": 388,
+					"status": "missing-in-source"
+				},
+				"README.md": {
+					"diff": "--- published/README.md\n+++ rebuilt/README.md\n@@ -1,41 +1,96 @@\n-# grunt-usemin [![Build Status](https://secure.travis-ci.org/yeoman/grunt-usemin.png?branch=master)](http://travis-ci.org/yeoman/grunt-usemin)\n+# grunt-usemin [![Linux Build Status](https://img.shields.io/travis/yeoman/grunt-usemin/master.svg?style=flat&label=Linux%20build)](https://travis-ci.org/yeoman/grunt-usemin) [![Windows Build status](https://img.shields.io/appveyor/ci/addyosmani/grunt-usemin/master.svg?style=flat&label=Windows%20build)](https://ci.appveyor.com/project/addyosmani/grunt-usemin/branch/master)\n+[![Gitter](https://img.shields.io/badge/GITTER-join%20chat-green.svg)](https://gitter.im/yeoman/yeoman)\n \n-> Replaces references to non-optimized scripts or stylesheets into a set of HTML files (or any templates/views).\n+> Replaces references from non-optimized scripts, stylesheets and other assets to their optimized version within a set of HTML files (or any templates/views).\n+\n+## Important\n+\n+3.1.0 has a breaking change with `uglify` step renamed to `uglify` to be consistent with `grunt-contrib-uglify` task which name is `uglify` (and not `uglifyjs`).\n+\n+Stick to 3.0.0 while we find a good solution to not have a breaking change while having name consistency.\n+\n+## [Maintainer wanted](https://github.com/yeoman/grunt-usemin/issues/313)\n+\n+## Notice\n+\n+`grunt-usemin` is going under some major developments to tackle the long list of issues. As they might break with `master` they are merged into [dev branch](https://github.com/yeoman/grunt-usemin/tree/dev).\n+\n+Currently what has been merged:\n+\n+- Support for a `resolveSource` function option\n+- Warning for any missing files instead of silent errors\n+- Migrate from regex to HTML parser\n+- Support for multiple target *(current)*\n \n \n ## Getting Started\n+\n If you haven't used [grunt][] before, be sure to check out the [Getting Started][] guide, as it explains how to create a [gruntfile][Getting Started] as well as install and use grunt plugins. Once you're familiar with that process, install this plugin with this command:\n \n-```shell\n-npm install grunt-usemin --save-dev\n+```\n+$ npm install grunt-usemin --save-dev\n ```\n \n [grunt]: http://gruntjs.com/\n-[Getting Started]: https://github.com/gruntjs/grunt/blob/devel/docs/getting_started.md\n+[Getting Started]: http://gruntjs.com/getting-started\n \n-## Workflow\n \n-usemin is composed of 2 different tasks (`useminPrepare` and `usemin`) that are part of the same workflow:\n+## Tasks\n \n-- **useminPrepare**: detects special construction (blocks) in the HTML files and update the `grunt` config to run `concat`/`uglify`/`cssmin`/`requirejs` on the files referenced in the block. It does not changes the HTML files it is working on.\n-- **usemin**: in the HTML and CSS files it treats, it replaces the blocks by a reference to a single file, as well as all references to images, scripts, CSS files, by their minified/revved/.. version if it is found on the disk. As such this target rewrites the HTML and CSS files it is working on.\n+`usemin` replaces the references of scripts, stylesheets and other assets within HTML files dynamically with optimized versions of them. To do this `usemin` exports 2 built-in tasks called `useminPrepare` and `usemin` and utilizes a couple of other Grunt plugins for the optimization process. `usemin` does this by generating the subtasks for these Grunt plugins dynamically.\n+\n+The built-in tasks of `usemin`:\n+* `useminPrepare` prepares the configuration to transform specific blocks in the scrutinized file into a single line, targeting an optimized version of the files. This is done by generating subtasks called `generated` for each of the optimization steps handled by the Grunt plugins listed below.\n+* `usemin` replaces the blocks by the file they reference, and replaces all references to assets by their revisioned version if it is found on the disk. This target modifies the files it is working on.\n+\n+Grunt plugins which `usemin` can use to optimize files:\n+* [`concat`](https://github.com/gruntjs/grunt-contrib-concat) concatenates files (usually JS or CSS).\n+* [`uglify`](https://github.com/gruntjs/grunt-contrib-uglify) minifies JS files.\n+* [`cssmin`](https://github.com/gruntjs/grunt-contrib-cssmin) minifies CSS files.\n+* [`filerev`](https://github.com/yeoman/grunt-filerev) revisions static assets through a file content hash.\n+\n+To install these plugins, run:\n+\n+```\n+$ npm install grunt-contrib-concat grunt-contrib-uglify grunt-contrib-cssmin grunt-filerev --save-dev\n+```\n+\n+**Important**: _You still need to manually install and load these dependencies_.\n+\n+In a typical `usemin` setup you launch `useminPrepare` first, then call every optimization step you want through their `generated` subtask and call `usemin` in the end. It could look like this:\n+\n+```js\n+// simple build task\n+grunt.registerTask('build', [\n+  'useminPrepare',\n+  'concat:generated',\n+  'cssmin:generated',\n+  'uglify:generated',\n+  'filerev',\n+  'usemin'\n+]);\n+```\n \n-Usually, `useminPrepare` is launched first, then the `concat`, `uglify`, `cssmin` and `requirejs` tasks are launched (they will created the minified/revved version of the referenced files), and then, in the end `usemin` is launched.\n \n ## The useminPrepare task\n \n-A special task which uses the build block HTML comments in markup to get back the list of files to handle, and initialize the grunt configuration appropriately, and automatically.\n+`useminPrepare` task updates the grunt configuration to apply a configured transformation flow to tagged files (i.e. blocks).\n+By default the transformation flow is composed of `concat` and `uglify` for JS files, but it can be configured.\n+\n+### Blocks\n \n-Custom HTML \"block\" comments are provided as an API for interacting with the build script. These comments adhere to the following pattern:\n+Blocks are expressed as:\n \n ```html\n-<!-- build:<type> <path> -->\n",
+					"match": false,
+					"packageHash": "e0e8efbffb4daffe72cbd4f6c079af0877544de24ce25391f9c4c804db6687ee",
+					"size": 4560,
+					"sourceHash": "d4e8f9a2c03397be06a80ce9eab6e04ee7e4be3c1118b0e61c3af76ef3a6a6ee",
+					"status": "content"
+				},
+				"contributing.md": {
+					"match": false,
+					"packageHash": "ddc68296c5c6358335eeff2418685ae092c64e5a7e7b9893efa417f5de8961da",
+					"size": 90,
+					"status": "missing-in-source"
+				},
+				"lib/cssprocessor.js": {
+					"match": false,
+					"packageHash": "cfce31c82b700e478f9b59f6be563f70eea4d30b1801c35244bb952063be86ca",
+					"size": 1567,
+					"status": "missing-in-source"
+				},
+				"lib/htmlprocessor.js": {
+					"match": false,
+					"packageHash": "194edca15167e3e07d7cf7a768b104a83bc4d7a9a629ce94899cfcaaa2ff03b7",
+					"size": 7937,
+					"status": "missing-in-source"
+				},
+				"lib/revvedfinder.js": {
+					"diff": "--- published/lib/revvedfinder.js\n+++ rebuilt/lib/revvedfinder.js\n@@ -1,29 +1,133 @@\n 'use strict';\n+var debug = require('debug')('revvedfinder');\n var path = require('path');\n+var _ = require('lodash');\n \n-// Allow to find, on disk, the revved version of a furnished file, bellow a given\n-// directory\n+// Allow to find, on disk, the revved version of a furnished file\n //\n-// +expandfn+ : a function that will return a list of file matching a given pattern (for example grunt.file.expand)\n-// +dirs+: restrict the search to these subdirectories\n+// +locator+ : this is either:\n+//    - a hash mapping files with their revved versions\n+//    - a function that will return a list of file matching a given pattern (for example grunt.file.expand)\n //\n-var RevvedFinder = module.exports = function (expandfn, dirs) {\n-    this.expandfn = expandfn;\n-    this.dirs = dirs;\n-\n-    if (!dirs || dirs.length === 0) {\n-        this.dirs_string = '';\n-    } else if (dirs.length == 1) {\n-        this.dirs_string = dirs[0] + '/';\n-    } else {\n-        this.dirs_string = '{' + dirs.join(',') + '}/';\n-    }\n-  };\n+var RevvedFinder = module.exports = function (locator) {\n+  if (_.isFunction(locator)) {\n+    debug('using function locator');\n+    this.expandfn = locator;\n+  } else {\n+    debug('using file locator %s', locator);\n+    this.mapping = locator;\n+  }\n+};\n+\n+var regexpQuote = function (str) {\n+  return (str + '').replace(/([.?*+\\^$\\[\\]\\\\(){}|\\-])/g, '\\\\$1');\n+};\n+\n+RevvedFinder.prototype.getCandidatesFromMapping = function (file, searchPaths) {\n+  var dirname = path.dirname(file);\n+  var filepath = dirname === '.' ? '' : dirname + '/';\n+  var candidates = [];\n+  var self = this;\n+\n+  searchPaths.forEach(function (sp) {\n+    var key = path.normalize(path.join(sp, file));\n+    debug('Looking at mapping for %s (from %s/%s)', key, sp, file);\n+\n+    if (self.mapping[key]) {\n+      // We need to transform the actual file to a form that matches the one we received\n+      // For example if we received file 'foo/images/test.png' with searchPaths == ['dist'],\n+      // and found in mapping that 'dist/foo/images/test.png' has been renamed\n+      // 'dist/foo/images/test.1234.png' by grunt-rev, then we need to return\n+      // 'foo/images/test.1234.png'\n+      var cfile = path.basename(self.mapping[key]);\n+      candidates.push(filepath + cfile);\n+      debug('Found a candidate: %s/%s', dirname, cfile);\n+    }\n+  });\n+\n+  return candidates;\n+};\n+\n+RevvedFinder.prototype.getCandidatesFromFS = function (file, searchPaths) {\n+  var extname = path.extname(file);\n+  var basename = path.basename(file, extname);\n+  var dirname = path.dirname(file);\n+  var hex = '[0-9a-fA-F]+';\n+  var regPrefix = '(' + hex + '\\\\.' + regexpQuote(basename) + ')';\n+  var regSuffix = '(' + regexpQuote(basename) + '\\\\.' + hex + regexpQuote(extname) + ')';\n+  var revvedRx = new RegExp(regPrefix + '|' + regSuffix);\n+  var candidates = [];\n+  var self = this;\n+\n+  searchPaths.forEach(function (sp) {\n+    var searchString = path.join(sp, dirname, basename + '.*' + extname);\n+    var prefixSearchString = path.join(sp, dirname, '*.' + basename + extname);\n+\n+    if (searchString.indexOf('#') === 0) {\n+      // patterns starting with # are treated as comments by the glob implementation which returns undefined,\n+      // which would cause an unhandled exception in self.expandfn below so the file is never written\n+      return;\n+    }\n+\n+    debug('Looking for %s and %s on disk', searchString, prefixSearchString);\n+\n+    var files = self.expandfn([searchString, prefixSearchString]);\n+\n+    debug('Found ', files);\n+\n+    // Keep only files that look like a revved file\n+    var goodFiles = files.filter(function (f) {\n+      return f.match(revvedRx);\n+    });\n",
+					"match": false,
+					"packageHash": "36cf470fc4d49703751e77eb796bb6ab97423f39dbb794d49f5db3a6855a9071",
+					"size": 3165,
+					"sourceHash": "c2928c6f6ef590e53e68ada5ffffd04b6e499303dfbd527dfe221106ae17b855",
+					"status": "content"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -1,36 +1,44 @@\n {\n   \"name\": \"grunt-usemin\",\n-  \"version\": \"0.1.6\",\n-  \"description\": \"Grunt task replaces references to non-optimized scripts or stylesheets into a set of HTML files (or any templates/views).\",\n+  \"version\": \"3.1.1\",\n+  \"license\": \"BSD-2-Clause\",\n+  \"author\": \"Yeoman\",\n+  \"description\": \"Replaces references to non-optimized scripts or stylesheets into a set of HTML files (or any templates/views)\",\n   \"keywords\": [\n     \"gruntplugin\",\n-    \"grunt\",\n     \"usemin\",\n     \"yeoman\",\n-    \"html\"\n+    \"html\",\n+    \"css\",\n+    \"optimize\"\n   ],\n-  \"homepage\": \"https://github.com/yeoman/grunt-usemin\",\n-  \"bugs\": \"https://github.com/yeoman/grunt-usemin/issues\",\n-  \"author\": \"Chrome Developer Relations\",\n-  \"main\": \"Gruntfile.js\",\n-  \"repository\": {\n-    \"type\": \"git\",\n-    \"url\": \"git://github.com/yeoman/grunt-usemin.git\"\n-  },\n+  \"repository\": \"yeoman/grunt-usemin\",\n   \"scripts\": {\n-    \"test\": \"node node_modules/mocha/bin/mocha test/test-*.js\"\n+    \"test\": \"grunt test\"\n+  },\n+  \"dependencies\": {\n+    \"chalk\": \"^1.1.1\",\n+    \"debug\": \"^2.1.3\",\n+    \"lodash\": \"^3.6.0\",\n+    \"path-exists\": \"^1.0.0\"\n   },\n   \"devDependencies\": {\n-    \"grunt\": \"~0.4.0\",\n-    \"mocha\": \"~1.7.4\",\n-    \"mkdirp\": \"~0.3.1\",\n-    \"rimraf\": \"~2.0.1\",\n-    \"grunt-contrib-jshint\": \"~0.1.1\"\n+    \"grunt\": \"^0.4.5\",\n+    \"grunt-cli\": \"^0.1.13\",\n+    \"grunt-contrib-jshint\": \"^0.11.1\",\n+    \"grunt-jscs\": \"^1.6.0\",\n+    \"grunt-mocha-cli\": \"^1.13.0\",\n+    \"mkdirp\": \"^0.5.0\",\n+    \"rimraf\": \"^2.3.2\"\n+  },\n+  \"peerDependencies\": {\n+    \"grunt\": \">=0.4.0\"\n   },\n   \"engines\": {\n-    \"node\": \">=0.8.0\"\n+    \"node\": \">=0.10.0\"\n   },\n-  \"licenses\": {\n-    \"type\": \"BSD\"\n-  }\n+  \"files\": [\n+    \"lib\",\n+    \"tasks\"\n+  ]\n }\n",
+					"match": false,
+					"packageHash": "45ff78a3de5a8b4b26c063af7647e318b872cd51a8940ab15ef7ee66a194d727",
+					"size": 887,
+					"sourceHash": "1dd610a2fa8bb683d804c3c6d62d40504860062e029bad3954001586abfc686b",
+					"status": "content"
+				},
+				"tasks/usemin.js": {
+					"diff": "--- published/tasks/usemin.js\n+++ rebuilt/tasks/usemin.js\n@@ -1,9 +1,53 @@\n 'use strict';\n var util = require('util');\n-var path = require('path');\n+var chalk = require('chalk');\n \n-var inspect = function (obj) {\n-  return util.inspect(obj, false, 4, true);\n+// Retrieve the flow config from the furnished configuration. It can be:\n+//  - a dedicated one for the furnished target\n+//  - a general one\n+//  - the default one\n+var getFlowFromConfig = function (config, target) {\n+  var Flow = require('../lib/flow');\n+  var flow = new Flow({\n+    steps: {\n+      js: ['concat', 'uglify'],\n+      css: ['concat', 'cssmin']\n+    },\n+    post: {}\n+  });\n+  if (config.options && config.options.flow) {\n+    if (config.options.flow[target]) {\n+      flow.setSteps(config.options.flow[target].steps);\n+      flow.setPost(config.options.flow[target].post);\n+    } else {\n+      flow.setSteps(config.options.flow.steps);\n+      flow.setPost(config.options.flow.post);\n+    }\n+  }\n+  return flow;\n+};\n+\n+//\n+// Return which locator to use to get the revisioned version (revved) of the files, with, by order of\n+// preference:\n+// - a map object passed in option (revmap)\n+// - a map object produced by grunt-filerev if available\n+// - a disk lookup\n+//\n+var getLocator = function (grunt, options) {\n+  var locator;\n+  if (options.revmap) {\n+    locator = grunt.file.readJSON(options.revmap);\n+  } else if (grunt.filerev && grunt.filerev.summary) {\n+    locator = grunt.filerev.summary;\n+  } else {\n+    locator = function (p) {\n+      return grunt.file.expand({\n+        filter: 'isFile'\n+      }, p);\n+    };\n+  }\n+  return locator;\n };\n \n //\n@@ -52,162 +96,115 @@\n // initializes for you the corresponding Grunt config for the concat / uglify tasks\n // when `type=js`, the concat / cssmin tasks when `type=css`.\n //\n-// The task also handles use of RequireJS, for the scenario where you specify\n-// the main entry point for your application using the \"data-main\" attribute\n-// as follows:\n-//\n-//     <!-- build:js js/app.min.js -->\n-//     <script data-main=\"js/main\" src=\"js/vendor/require.js\"></script>\n-//     <!-- -->\n-//\n-// One doesn't need to specify a concat/uglify/cssmin or requirejs configuration anymore.\n-//\n-// Inspired by previous work in https://gist.github.com/3024891\n-// For related sample, see: cli/test/tasks/usemin-handler/index.html\n-//\n \n module.exports = function (grunt) {\n-  var HTMLProcessor = require('../lib/htmlprocessor');\n-  var CSSProcessor = require('../lib/cssprocessor');\n+  var FileProcessor = require('../lib/fileprocessor');\n   var RevvedFinder = require('../lib/revvedfinder');\n+  var ConfigWriter = require('../lib/configwriter');\n+  var _ = require('lodash');\n \n   grunt.registerMultiTask('usemin', 'Replaces references to non-minified scripts / stylesheets', function () {\n-    var processors = {\n-      css: CSSProcessor,\n-      html: HTMLProcessor\n-    };\n-    var name = this.target;\n-    var data = this.data;\n-    var options = this.options();\n-    var files = grunt.file.expand({filter: 'isFile'}, data);\n+    var debug = require('debug')('usemin:usemin');\n+    var options = this.options({\n+      type: this.target\n+    });\n+    var blockReplacements = options.blockReplacements || {};\n \n",
+					"match": false,
+					"packageHash": "090084dd5f3c97601ab9c026bd7fc78f091f7ef468078749d33ad5efe04b4d23",
+					"size": 7641,
+					"sourceHash": "e0d4ef8affb790665e35e229c94b72f81f12fecd473ca2e23d3439a7b9de4d40",
+					"status": "content"
+				},
+				"LICENSE": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/config/concat.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/config/cssmin.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/config/requirejs.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/config/uglify.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/configwriter.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/file.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/fileprocessor.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/flow.js": {
+					"match": false,
+					"status": "missing-in-package"
+				}
+			},
+			"summary": {
+				"differentFiles": 4,
+				"matchingFiles": 0,
+				"missingInPackage": 9,
+				"missingInSource": 7,
+				"score": 0,
+				"totalFiles": 20
+			}
+		},
+		"prodDependencies": [
+			{
+				"name": "ansi-regex",
+				"version": "2.1.1"
+			},
+			{
+				"name": "ansi-styles",
+				"version": "2.2.1"
+			},
+			{
+				"name": "chalk",
+				"version": "1.1.3"
+			},
+			{
+				"name": "debug",
+				"version": "2.6.9"
+			},
+			{
+				"name": "escape-string-regexp",
+				"version": "1.0.5"
+			},
+			{
+				"name": "has-ansi",
+				"version": "2.0.0"
+			},
+			{
+				"name": "lodash",
+				"version": "3.10.1"
+			},
+			{
+				"name": "ms",
+				"version": "2.0.0"
+			},
+			{
+				"name": "path-exists",
+				"version": "1.0.0"
+			},
+			{
+				"name": "strip-ansi",
+				"version": "3.0.1"
+			},
+			{
+				"name": "supports-color",
+				"version": "2.0.0"
+			}
+		]
+	}
+]
