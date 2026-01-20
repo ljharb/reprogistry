@@ -1,0 +1,3889 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-19T22:00:00.109Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:6.4.1",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "metro-cache@0.48.4",
+			"name": "metro-cache",
+			"version": "0.48.4",
+			"location": "https://registry.npmjs.org/metro-cache/-/metro-cache-0.48.4.tgz",
+			"integrity": "sha512-jJVHNzzNaYPEhQvvjraynmj/0SeKOGk5Wkk3Ar5pEyp0p8EZJwCtd2EorI/Tl+t1XExWJhZTG3UFQpU6lT0aUw==",
+			"publishedAt": "2018-12-12T16:04:22.166Z",
+			"publishedWith": {
+				"node": "10.14.2",
+				"npm": "6.4.1"
+			},
+			"dependencies": {
+				"mkdirp": "^0.5.1",
+				"rimraf": "^2.5.4",
+				"metro-core": "0.48.4",
+				"jest-serializer": "24.0.0-alpha.2"
+			}
+		},
+		"source": {
+			"integrity": null,
+			"location": "git+ssh://git@github.com/facebook/metro.git",
+			"spec": "github:facebook/metro#HEAD"
+		},
+		"comparisonHash": "9ef46a5bd31291e57cbab41e2f17c57bd6da0b5b",
+		"diff": {
+			"files": {
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -1,24 +1,80 @@\n {\n-  \"version\": \"0.48.4\",\n-  \"name\": \"metro-cache\",\n-  \"description\": \"🚇 Cache layers for Metro\",\n-  \"main\": \"src/index.js\",\n-  \"repository\": {\n-    \"type\": \"git\",\n-    \"url\": \"git@github.com:facebook/metro.git\"\n+  \"name\": \"@metro/monorepo\",\n+  \"version\": \"0.0.0\",\n+  \"private\": true,\n+  \"devDependencies\": {\n+    \"@babel/core\": \"^7.25.2\",\n+    \"@babel/plugin-syntax-class-properties\": \"^7.12.13\",\n+    \"@babel/plugin-transform-flow-strip-types\": \"^7.25.2\",\n+    \"@babel/plugin-transform-modules-commonjs\": \"^7.24.8\",\n+    \"@babel/plugin-transform-react-jsx\": \"^7.25.2\",\n+    \"@babel/types\": \"^7.25.2\",\n+    \"@tsconfig/node20\": \"^20.1.4\",\n+    \"@typescript-eslint/eslint-plugin\": \"^8.36.0\",\n+    \"@typescript-eslint/parser\": \"^8.36.0\",\n+    \"acorn\": \"^8.7.1\",\n+    \"babel-jest\": \"^29.7.0\",\n+    \"babel-plugin-syntax-hermes-parser\": \"0.33.3\",\n+    \"babel-plugin-transform-flow-enums\": \"^0.0.2\",\n+    \"chalk\": \"^4.0.0\",\n+    \"debug\": \"^4.4.0\",\n+    \"eslint\": \"^8.57.0\",\n+    \"eslint-config-fb-strict\": \"^27.0.0\",\n+    \"eslint-config-prettier\": \"^8.5.0\",\n+    \"eslint-plugin-babel\": \"^5.3.1\",\n+    \"eslint-plugin-ft-flow\": \"^2.0.1\",\n+    \"eslint-plugin-import\": \"^2.32.0\",\n+    \"eslint-plugin-jest\": \"^29.0.1\",\n+    \"eslint-plugin-jsx-a11y\": \"^6.6.0\",\n+    \"eslint-plugin-lint\": \"^1.0.0\",\n+    \"eslint-plugin-react\": \"^7.37.5\",\n+    \"eslint-plugin-relay\": \"^1.8.3\",\n+    \"flow-api-translator\": \"0.33.3\",\n+    \"flow-bin\": \"^0.297.0\",\n+    \"hermes-eslint\": \"0.33.3\",\n+    \"invariant\": \"^2.2.4\",\n+    \"istanbul-api\": \"3.0.0\",\n+    \"istanbul-lib-coverage\": \"3.0.0\",\n+    \"jest\": \"^29.7.0\",\n+    \"jest-junit\": \"^16.0.0\",\n+    \"jest-watch-typeahead\": \"^2.2.0\",\n+    \"jsonc-eslint-parser\": \"^2.3.0\",\n+    \"metro-babel-register\": \"*\",\n+    \"micromatch\": \"^4.0.4\",\n+    \"prettier\": \"3.6.2\",\n+    \"prettier-plugin-hermes-parser\": \"0.33.2\",\n+    \"progress\": \"^2.0.0\",\n+    \"tinyglobby\": \"^0.2.15\",\n+    \"typescript\": \"5.8.3\"\n   },\n   \"scripts\": {\n-    \"prepare-release\": \"test -d build && rm -rf src.real && mv src src.real && mv build src\",\n-    \"cleanup-release\": \"test ! -e build && mv src build && mv src.real src\"\n-  },\n-  \"dependencies\": {\n-    \"jest-serializer\": \"24.0.0-alpha.2\",\n-    \"metro-core\": \"0.48.4\",\n-    \"mkdirp\": \"^0.5.1\",\n-    \"rimraf\": \"^2.5.4\"\n+    \"build-clean\": \"rm -rf ./packages/*/build\",\n+    \"build\": \"node ./scripts/build.js\",\n+    \"build-ts-defs\": \"node -r @babel/register ./scripts/generateTypeScriptDefinitions.js\",\n+    \"clean-all\": \"rm -rf ./node_modules && rm -rf ./packages/*/node_modules && yarn run build-clean\",\n+    \"lint-fix\": \"eslint . --fix --cache && prettier --write .\",\n+    \"lint\": \"eslint . --cache && prettier --check .\",\n+    \"postpublish\": \"npm run cleanup-release --workspaces --if-present\",\n+    \"publish\": \"yarn run build-clean && yarn run build && npm run prepare-release --workspaces --if-present && npm publish --workspaces\",\n+    \"start\": \"node packages/metro/src/cli\",\n+    \"test\": \"yarn run typecheck && yarn run lint && yarn run build && yarn run jest\",\n+    \"test-coverage\": \"yarn run build && yarn run jest --coverage -i && node scripts/mapCoverage.js\",\n+    \"test-smoke\": \"yarn start build --config packages/metro/src/integration_tests/metro.config.js TestBundle.js --out /tmp/TestBundle\",\n+    \"typecheck\": \"flow check\",\n+    \"typecheck-ts\": \"tsc --project tsconfig.json\",\n+    \"update-babel-flow-lib-defs\": \"node -r @babel/register ./scripts/updateBabelFlowLibraryDefinitions\",\n+    \"update-version\": \"node ./scripts/updateVersion\"\n   },\n-  \"devDependencies\": {\n-    \"metro-memory-fs\": \"0.48.4\"\n+  \"workspaces\": [\n+    \"packages/*\",\n+    \"private/*\"\n+  ],\n+  \"license\": \"MIT\",\n+  \"dependencies\": {},\n+  \"engines\": {\n+    \"node\": \">=20.19.4\"\n   },\n-  \"license\": \"MIT\"\n+  \"resolutions\": {\n+    \"**/json5\": \"2.2.3\"\n+  }\n",
+					"match": false,
+					"packageHash": "0c69ac83fb256f71cdd76180e39b525aac1181483b8951f72b70832a7a8786d5",
+					"size": 625,
+					"sourceHash": "cb90781073061f051a4a5c7555da8cc40ccacd7645ff9ee3f79e4e69acfbeba0",
+					"status": "content"
+				},
+				"src/Cache.js": {
+					"match": false,
+					"packageHash": "ddc06cd20385b1a2f2bf54d3c8c2866efe2915f96ee4dd46c96e76c4f8698f11",
+					"size": 3170,
+					"status": "missing-in-source"
+				},
+				"src/Cache.js.flow": {
+					"match": false,
+					"packageHash": "fbf45238b5417dd9fb62e1da3f9a8e581ff2a2503c819c617eacae187fac609c",
+					"size": 2532,
+					"status": "missing-in-source"
+				},
+				"src/index.js": {
+					"match": false,
+					"packageHash": "f5d362a0851bb26d17089bb1ffa359aa9e4916ac94ff37f9cdda4d73695017fe",
+					"size": 684,
+					"status": "missing-in-source"
+				},
+				"src/index.js.flow": {
+					"match": false,
+					"packageHash": "64dfd4dc055d993147355f77f9e42289c931a10fcb91e3f4b9f69b46b6c51d15",
+					"size": 864,
+					"status": "missing-in-source"
+				},
+				"src/stableHash.js": {
+					"match": false,
+					"packageHash": "34e7c648391f0c9b4b460daa2f3dc592aeae3160b7cec9abf72f8bfd5ebf66ee",
+					"size": 504,
+					"status": "missing-in-source"
+				},
+				"src/stableHash.js.flow": {
+					"match": false,
+					"packageHash": "68599aeefad51d8a99f0b8665039e4a87f1f84291e42d82db4cf6dfb1b89e4b5",
+					"size": 516,
+					"status": "missing-in-source"
+				},
+				"src/stores/AutoCleanFileStore.js": {
+					"match": false,
+					"packageHash": "51c99401d9cd2e80dd90c2d8d6c66f6b0426e09d2ab3a8c571ba20cf1ee0fa33",
+					"size": 1946,
+					"status": "missing-in-source"
+				},
+				"src/stores/AutoCleanFileStore.js.flow": {
+					"match": false,
+					"packageHash": "2f5f67570ffcb8e012a6f2566c4f6801e1f62d42b60839c3a9bf07f5d07a5337",
+					"size": 2297,
+					"status": "missing-in-source"
+				},
+				"src/stores/FileStore.js": {
+					"match": false,
+					"packageHash": "5360e2b648b60e76b8cdc6df55028a588206e9737a88c73bcd61f6a78949bf1e",
+					"size": 1693,
+					"status": "missing-in-source"
+				},
+				"src/stores/FileStore.js.flow": {
+					"match": false,
+					"packageHash": "6b34b8a683b89eaf1e25f6beea77265bca058e297c2d07250a3b8e48ebcb6a1a",
+					"size": 1828,
+					"status": "missing-in-source"
+				},
+				"src/stores/HttpError.js": {
+					"match": false,
+					"packageHash": "4df06f6f42e9894df56371dda2f676fd06ca7b8c64ac5834d42d9e47b65459fc",
+					"size": 371,
+					"status": "missing-in-source"
+				},
+				"src/stores/HttpError.js.flow": {
+					"match": false,
+					"packageHash": "64808316e3f2cdb4e19d075bbfbbeae0567318f7b370d77a7faa3563acd5debc",
+					"size": 409,
+					"status": "missing-in-source"
+				},
+				"src/stores/HttpStore.js": {
+					"match": false,
+					"packageHash": "006be53f454bac0ca9bfc9ec561531072c1cae7a465e91772499b3becd1cb134",
+					"size": 3701,
+					"status": "missing-in-source"
+				},
+				"src/stores/HttpStore.js.flow": {
+					"match": false,
+					"packageHash": "51a2aa4b259031472aa9bc53b577e9cf42e06fa67bb75adf040649440adb29c9",
+					"size": 4027,
+					"status": "missing-in-source"
+				},
+				"src/stores/NetworkError.js": {
+					"match": false,
+					"packageHash": "9431d809bb478cf530989fbc602dadda9e2f6dccd37ea2bb67bd6038416ec42e",
+					"size": 377,
+					"status": "missing-in-source"
+				},
+				"src/stores/NetworkError.js.flow": {
+					"match": false,
+					"packageHash": "50e881458c63e6ae27ed0bd8486a92ead6f7046bfba39b214b3c5212814bb0a6",
+					"size": 415,
+					"status": "missing-in-source"
+				},
+				"src/types.flow.js": {
+					"match": false,
+					"packageHash": "8a60078d78897dd7402d6c88d76bb95b4d89bf3b18cc96a8fc3d5d61289a8626",
+					"size": 229,
+					"status": "missing-in-source"
+				},
+				"src/types.flow.js.flow": {
+					"match": false,
+					"packageHash": "5f690e79547235b943f5481ecba177d1c35a40fa360e61db37f17c3b0c940b78",
+					"size": 391,
+					"status": "missing-in-source"
+				},
+				".editorconfig": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				".eslintignore": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				".eslintrc.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				".flowconfig": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				".gitattributes": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				".github/ISSUE_TEMPLATE.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				".github/PULL_REQUEST_TEMPLATE.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				".github/actions/yarn-install/action.yml": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				".github/dependabot.yml": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				".github/scripts/install_codecov.sh": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				".github/scripts/publish.sh": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				".github/workflows/build-test-and-deploy.yml": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				".github/workflows/deploy-website.yml": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				".github/workflows/nightly-tests.yml": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				".github/workflows/test.yml": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				".prettierrc.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				".watchmanconfig": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"CHANGELOG.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"CODE_OF_CONDUCT.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"CONTRIBUTING.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"LICENSE": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"README.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"babel.config.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"codecov.yml": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"docs/API.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"docs/Bundling.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"docs/CLI.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"docs/Caching.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"docs/Concepts.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"docs/Configuration.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"docs/GettingStarted.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"docs/LocalDevelopment.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"docs/ModuleAPI.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"docs/PackageExports.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"docs/Resolution.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"docs/SourceMapFormat.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"docs/Troubleshooting.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"flow-typed/accepts.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"flow-typed/console.js.flow": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"flow-typed/environment/bom.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"flow-typed/environment/cssom.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"flow-typed/environment/dom.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"flow-typed/environment/node.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"flow-typed/environment/serviceworkers.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"flow-typed/environment/streams.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"flow-typed/environment/utility-types.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"flow-typed/eventemitter3.js.flow": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"flow-typed/fb-watchman.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"flow-typed/graceful-fs.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"flow-typed/jest-snapshot-serializer-raw.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"flow-typed/jest-worker.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"flow-typed/jest.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"flow-typed/npm/babel-plugin-tester_v6.x.x.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"flow-typed/npm/babel-traverse_v7.x.x.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"flow-typed/npm/babel-types_v7.x.x.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"flow-typed/npm/babel_v7.x.x.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"flow-typed/npm/chalk_v4.x.x.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"flow-typed/npm/ci-info_v2.x.x.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"flow-typed/npm/connect_v3.x.x.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"flow-typed/npm/debug_v4.4.x.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"flow-typed/npm/exponential-backoff_v3.x.x.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"flow-typed/npm/https-proxy-agent_v7.x.x.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"flow-typed/npm/memfs_v4.x.x.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"flow-typed/npm/react-test-renderer_v16.x.x.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"flow-typed/npm/strip-ansi_v3.x.x.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"flow-typed/npm/ws_v7.x.x.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"flow-typed/npm/yargs_v17.x.x.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"flow-typed/prettier.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"flow-typed/uglify.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"jest.config.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"metro.code-workspace": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/buck-worker-tool/package.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/buck-worker-tool/src/CommandFailedError.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/buck-worker-tool/src/__tests__/worker-test.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/buck-worker-tool/src/profiling.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/buck-worker-tool/src/third-party/JSONStream.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/buck-worker-tool/src/third-party/LICENSE.MIT": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/buck-worker-tool/src/worker-tool.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/README.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/package.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/Assets.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/Bundler/__tests__/__snapshots__/util-test.js.snap": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/Bundler/__tests__/util-test.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/Bundler/util.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/Bundler.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/DeltaBundler/DeltaCalculator.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/DeltaBundler/Graph.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/DeltaBundler/Serializers/__tests__/__snapshots__/getRamBundleInfo-test.js.snap": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/DeltaBundler/Serializers/__tests__/baseJSBundle-test.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/DeltaBundler/Serializers/__tests__/getAllFiles-test.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/DeltaBundler/Serializers/__tests__/getAssets-test.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/DeltaBundler/Serializers/__tests__/getRamBundleInfo-test.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/DeltaBundler/Serializers/__tests__/hmrJSBundle-test.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/DeltaBundler/Serializers/__tests__/sourceMapString-test.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/DeltaBundler/Serializers/baseJSBundle.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/DeltaBundler/Serializers/getAllFiles.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/DeltaBundler/Serializers/getAssets.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/DeltaBundler/Serializers/getExplodedSourceMap.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/DeltaBundler/Serializers/getRamBundleInfo.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/DeltaBundler/Serializers/helpers/__tests__/getTransitiveDependencies-test.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/DeltaBundler/Serializers/helpers/__tests__/js-test.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/DeltaBundler/Serializers/helpers/getInlineSourceMappingURL.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/DeltaBundler/Serializers/helpers/getSourceMapInfo.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/DeltaBundler/Serializers/helpers/getTransitiveDependencies.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/DeltaBundler/Serializers/helpers/js.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/DeltaBundler/Serializers/helpers/processModules.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/DeltaBundler/Serializers/hmrJSBundle.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/DeltaBundler/Serializers/sourceMapGenerator.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/DeltaBundler/Serializers/sourceMapObject.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/DeltaBundler/Serializers/sourceMapString.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/DeltaBundler/Transformer.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/DeltaBundler/Worker.flow.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/DeltaBundler/Worker.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/DeltaBundler/WorkerFarm.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/DeltaBundler/__fixtures__/hasteImpl.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/DeltaBundler/__tests__/DeltaBundler-test.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/DeltaBundler/__tests__/DeltaCalculator-context-test.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/DeltaBundler/__tests__/DeltaCalculator-test.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/DeltaBundler/__tests__/Graph-test.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/DeltaBundler/__tests__/Transformer-test.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/DeltaBundler/__tests__/WorkerFarm-test.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/DeltaBundler/__tests__/__snapshots__/Graph-test.js.snap": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/DeltaBundler/__tests__/__snapshots__/resolver-test.js.snap": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/DeltaBundler/__tests__/buildSubgraph-test.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/DeltaBundler/__tests__/mergeDeltas-test.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/DeltaBundler/__tests__/resolver-test.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/DeltaBundler/buildSubgraph.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/DeltaBundler/getTransformCacheKey.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/DeltaBundler/mergeDeltas.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/DeltaBundler/types.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/DeltaBundler.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/HmrServer.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/IncrementalBundler/GraphNotFoundError.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/IncrementalBundler/ResourceNotFoundError.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/IncrementalBundler/RevisionNotFoundError.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/IncrementalBundler.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/ModuleGraph/test-helpers.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/ModuleGraph/worker/JsFileWrapping.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/ModuleGraph/worker/__tests__/JsFileWrapping-test.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/ModuleGraph/worker/__tests__/__snapshots__/collectDependencies-test.js.snap": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/ModuleGraph/worker/__tests__/collectDependencies-test.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/ModuleGraph/worker/__tests__/importLocationsPlugin-test.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/ModuleGraph/worker/collectDependencies.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/ModuleGraph/worker/generateImportNames.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/ModuleGraph/worker/importLocationsPlugin.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/Server/MultipartResponse.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/Server/__tests__/MultipartResponse-test.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/Server/__tests__/Server-test.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/Server/symbolicate.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/Server.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/__mocks__/debug.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/__tests__/Assets-test.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/__tests__/HmrServer-test.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/cli/__tests__/parseKeyValueParamArray-test.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/cli/parseKeyValueParamArray.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/cli-utils.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/cli.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/commands/build.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/commands/dependencies.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/commands/serve.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/index.flow.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/index.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/integration_tests/__tests__/__snapshots__/build-errors-test.js.snap": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/integration_tests/__tests__/__snapshots__/build-test.js.snap": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/integration_tests/__tests__/__snapshots__/buildGraph-test.js.snap": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/integration_tests/__tests__/__snapshots__/import-export-test.js.snap": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/integration_tests/__tests__/__snapshots__/rambundle-test.js.snap": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/integration_tests/__tests__/__snapshots__/require-context-test.js.snap": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/integration_tests/__tests__/__snapshots__/server-test.js.snap": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/integration_tests/__tests__/build-errors-test.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/integration_tests/__tests__/build-test.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/integration_tests/__tests__/buildGraph-test.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/integration_tests/__tests__/import-export-test.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/integration_tests/__tests__/optional-dependencies-test.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/integration_tests/__tests__/rambundle-test.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/integration_tests/__tests__/require-context-test.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/integration_tests/__tests__/require-resolveWeak-test.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/integration_tests/__tests__/server-test.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/integration_tests/__tests__/server-torn-down-test.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/integration_tests/__tests__/sourcemap-test.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/integration_tests/basic_bundle/AssetRegistry.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/integration_tests/basic_bundle/Bar.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/integration_tests/basic_bundle/ErrorBundle.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/integration_tests/basic_bundle/Foo.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/integration_tests/basic_bundle/TestBigInt.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/integration_tests/basic_bundle/TestBundle.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/integration_tests/basic_bundle/TestPolyfill.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/integration_tests/basic_bundle/TypeScript.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/integration_tests/basic_bundle/build-errors/cannot-resolve-import.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/integration_tests/basic_bundle/build-errors/cannot-resolve-multi-line-import-with-escapes.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/integration_tests/basic_bundle/build-errors/cannot-resolve-multi-line-import.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/integration_tests/basic_bundle/build-errors/cannot-resolve-require-with-embedded-comment.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/integration_tests/basic_bundle/build-errors/cannot-resolve-require.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/integration_tests/basic_bundle/build-errors/cannot-resolve-specifier-with-escapes.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/integration_tests/basic_bundle/build-errors/inline-requires-cannot-resolve-import.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/integration_tests/basic_bundle/build-errors/inline-requires-cannot-resolve-require.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/integration_tests/basic_bundle/excluded_from_file_map.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/integration_tests/basic_bundle/import-export/export-1.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/integration_tests/basic_bundle/import-export/export-2.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/integration_tests/basic_bundle/import-export/export-3.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/integration_tests/basic_bundle/import-export/export-4.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/integration_tests/basic_bundle/import-export/export-5.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/integration_tests/basic_bundle/import-export/export-6.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/integration_tests/basic_bundle/import-export/export-7.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/integration_tests/basic_bundle/import-export/export-8.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/integration_tests/basic_bundle/import-export/export-null.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/integration_tests/basic_bundle/import-export/export-primitive-default.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/integration_tests/basic_bundle/import-export/index.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/integration_tests/basic_bundle/import-export/utils.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/integration_tests/basic_bundle/loadBundleAsyncForTest.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/integration_tests/basic_bundle/not_a_source_file.xyz": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/integration_tests/basic_bundle/optional-dependencies/index.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/integration_tests/basic_bundle/optional-dependencies/optional-b.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/integration_tests/basic_bundle/optional-dependencies/optional-c.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/integration_tests/basic_bundle/optional-dependencies/required-a.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/integration_tests/basic_bundle/polyfill.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/integration_tests/basic_bundle/require-context/conflict.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/integration_tests/basic_bundle/require-context/empty.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/integration_tests/basic_bundle/require-context/matching.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/integration_tests/basic_bundle/require-context/mode-eager.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/integration_tests/basic_bundle/require-context/mode-lazy-once.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/integration_tests/basic_bundle/require-context/mode-lazy.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/integration_tests/basic_bundle/require-context/mode-sync.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/integration_tests/basic_bundle/require-context/subdir/a.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/integration_tests/basic_bundle/require-context/subdir/b.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/integration_tests/basic_bundle/require-context/subdir/c.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/integration_tests/basic_bundle/require-context/subdir/nested/d.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/integration_tests/basic_bundle/require-context/subdir-conflict/index.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/integration_tests/basic_bundle/require-context/utils.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/integration_tests/basic_bundle/require-resolveWeak/import-and-resolveWeak.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/integration_tests/basic_bundle/require-resolveWeak/multiple.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/integration_tests/basic_bundle/require-resolveWeak/never-required.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/integration_tests/basic_bundle/require-resolveWeak/require-and-resolveWeak.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/integration_tests/basic_bundle/require-resolveWeak/subdir/counter-module.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/integration_tests/basic_bundle/require-resolveWeak/subdir/throwing-module.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/integration_tests/basic_bundle/require-resolveWeak/utils.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/integration_tests/basic_bundle/test.png": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/integration_tests/execBundle.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/integration_tests/metro.config.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/lib/BatchProcessor.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/lib/CountingSet.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/lib/JsonReporter.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/lib/RamBundleParser.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/lib/TerminalReporter.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/lib/__mocks__/GlobalTransformCache.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/lib/__mocks__/declareOpts.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/lib/__mocks__/getAbsolutePath.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/lib/__tests__/BatchProcessor-test.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/lib/__tests__/CountingSet-test.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/lib/__tests__/JsonReporter-test.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/lib/__tests__/__snapshots__/contextModuleTemplates-test.js.snap": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/lib/__tests__/bundleToString-test.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/lib/__tests__/contextModule-test.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/lib/__tests__/contextModuleTemplates-test.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/lib/__tests__/debounceAsyncQueue-test.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/lib/__tests__/formatBundlingError-test.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/lib/__tests__/getGraphId-test.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/lib/__tests__/getPreludeCode-test.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/lib/__tests__/logToConsole-test.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/lib/__tests__/parseBundleOptionsFromBundleRequestUrl-test.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/lib/__tests__/parseCustomResolverOptions-test.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/lib/__tests__/parseCustomTransformOptions-test.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/lib/bundleToString.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/lib/contextModule.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/lib/contextModuleTemplates.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/lib/countLines.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/lib/createWebsocketServer.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/lib/debounceAsyncQueue.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/lib/formatBundlingError.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/lib/getAppendScripts.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/lib/getGraphId.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/lib/getPreludeCode.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/lib/getPrependedScripts.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/lib/isResolvedDependency.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/lib/logToConsole.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/lib/parseBundleOptionsFromBundleRequestUrl.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/lib/parseCustomResolverOptions.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/lib/parseCustomTransformOptions.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/lib/parseJsonBody.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/lib/pathUtils.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/lib/relativizeSourceMap.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/lib/reporting.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/lib/splitBundleOptions.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/lib/transformHelpers.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/node-haste/DependencyGraph/ModuleResolution.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/node-haste/DependencyGraph/createFileMap.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/node-haste/DependencyGraph.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/node-haste/Package.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/node-haste/PackageCache.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/node-haste/__mocks__/graceful-fs.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/node-haste/lib/AssetPaths.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/node-haste/lib/__tests__/AssetPaths-test.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/node-haste/lib/__tests__/parsePlatformFilePath-test.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/node-haste/lib/parsePlatformFilePath.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/shared/output/RamBundle/as-assets.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/shared/output/RamBundle/as-indexed-file.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/shared/output/RamBundle/buildSourcemapWithMetadata.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/shared/output/RamBundle/magic-number.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/shared/output/RamBundle/util.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/shared/output/RamBundle/write-sourcemap.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/shared/output/RamBundle.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/shared/output/__tests__/__snapshots__/meta-test.js.snap": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/shared/output/__tests__/meta-test.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/shared/output/bundle.flow.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/shared/output/bundle.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/shared/output/meta.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/shared/output/unbundle.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/shared/output/writeFile.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/src/shared/types.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/types/Asset.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/types/Bundler.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/types/DeltaBundler/Graph.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/types/DeltaBundler/Serializers/getExplodedSourceMap.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/types/DeltaBundler/Serializers/getRamBundleInfo.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/types/DeltaBundler/Worker.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/types/DeltaBundler/types.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/types/DeltaBundler.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/types/IncrementalBundler.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/types/ModuleGraph/worker/collectDependencies.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/types/Server/MultipartResponse.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/types/Server/symbolicate.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/types/Server.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/types/index.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/types/lib/CountingSet.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/types/lib/TerminalReporter.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/types/lib/contextModule.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/types/lib/getGraphId.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/types/lib/reporting.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/types/node-haste/DependencyGraph.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/types/shared/output/bundle.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro/types/shared/types.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-babel-register/package.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-babel-register/src/__tests__/parses-without-transpilation-test.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-babel-register/src/babel-register.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-babel-register/src/plugins/babel-plugin-metro-replace-ts-require-assignment.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-babel-transformer/package.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-babel-transformer/src/__tests__/transform-test.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-babel-transformer/src/index.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-babel-transformer/types/index.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-cache/package.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-cache/src/Cache.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-cache/src/__tests__/Cache-test.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-cache/src/__tests__/stableHash-test.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-cache/src/index.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-cache/src/stableHash.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-cache/src/stores/AutoCleanFileStore.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-cache/src/stores/FileStore.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-cache/src/stores/HttpError.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-cache/src/stores/HttpGetStore.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-cache/src/stores/HttpStore.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-cache/src/stores/NetworkError.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-cache/src/stores/__tests__/AutoCleanFileStore-test.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-cache/src/stores/__tests__/FileStore-test.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-cache/src/stores/__tests__/HttpGetStore-test.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-cache/src/stores/__tests__/HttpStore-test.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-cache/src/types.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-cache/types/Cache.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-cache/types/index.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-cache/types/stableHash.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-cache/types/stores/AutoCleanFileStore.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-cache/types/stores/FileStore.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-cache/types/stores/HttpError.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-cache/types/stores/HttpGetStore.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-cache/types/stores/HttpStore.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-cache/types/stores/NetworkError.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-cache/types/types.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-cache-key/package.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-cache-key/src/__tests__/index-test.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-cache-key/src/index.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-config/README.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-config/package.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-config/src/__fixtures__/bad-root.metro.config.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-config/src/__fixtures__/bad-server.metro.config.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-config/src/__fixtures__/basic.config.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-config/src/__fixtures__/cachestores.config.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-config/src/__fixtures__/cjs-promise.metro.config.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-config/src/__fixtures__/cjs-sync-function.metro.config.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-config/src/__fixtures__/custom-path.metro.config.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-config/src/__fixtures__/merged.metro.config.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-config/src/__fixtures__/metro.config.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-config/src/__fixtures__/yaml-extensionless": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-config/src/__flowtests__/types-flowtest.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-config/src/__tests__/__snapshots__/loadConfig-test.js.snap": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-config/src/__tests__/loadConfig-test.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-config/src/__tests__/mergeConfig-test.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-config/src/defaults/__tests__/exclusionList-test.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-config/src/defaults/__tests__/getMaxWorkers-test.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-config/src/defaults/createModuleIdFactory.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-config/src/defaults/defaults.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-config/src/defaults/exclusionList.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-config/src/defaults/getMaxWorkers.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-config/src/defaults/index.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-config/src/defaults/validConfig.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-config/src/index.flow.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-config/src/index.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-config/src/loadConfig.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-config/src/types.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-config/types/defaults/createModuleIdFactory.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-config/types/defaults/defaults.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-config/types/defaults/exclusionList.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-config/types/defaults/getMaxWorkers.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-config/types/defaults/index.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-config/types/defaults/validConfig.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-config/types/index.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-config/types/loadConfig.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-config/types/types.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-core/README.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-core/package.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-core/src/Logger.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-core/src/Terminal.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-core/src/__tests__/Logger-test.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-core/src/__tests__/Terminal-test.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-core/src/__tests__/canonicalize-test.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-core/src/canonicalize.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-core/src/errors/AmbiguousModuleResolutionError.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-core/src/errors/PackageResolutionError.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-core/src/errors.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-core/src/index.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-core/types/Logger.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-core/types/Terminal.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-core/types/canonicalize.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-core/types/errors/AmbiguousModuleResolutionError.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-core/types/errors/PackageResolutionError.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-core/types/errors.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-core/types/index.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-file-map/README.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-file-map/package.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-file-map/src/Watcher.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-file-map/src/__tests__/__snapshots__/index-test.js.snap": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-file-map/src/__tests__/dependencyExtractor.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-file-map/src/__tests__/haste_impl.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-file-map/src/__tests__/includes_dotfiles-test.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-file-map/src/__tests__/index-test.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-file-map/src/__tests__/test_dotfiles_root/.eslintrc.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-file-map/src/__tests__/test_dotfiles_root/index.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-file-map/src/__tests__/worker-test.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-file-map/src/cache/DiskCacheManager.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-file-map/src/cache/__tests__/DiskCacheManager-test.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-file-map/src/constants.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-file-map/src/crawlers/__fixtures__/directory/bar.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-file-map/src/crawlers/__fixtures__/directory/other.file": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-file-map/src/crawlers/__fixtures__/foo.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-file-map/src/crawlers/__fixtures__/ignored/hidden.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-file-map/src/crawlers/__tests__/integration-test.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-file-map/src/crawlers/__tests__/node-test.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-file-map/src/crawlers/__tests__/watchman-test.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-file-map/src/crawlers/node/hasNativeFindSupport.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-file-map/src/crawlers/node/index.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-file-map/src/crawlers/watchman/__tests__/index-test.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-file-map/src/crawlers/watchman/__tests__/planQuery-test.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-file-map/src/crawlers/watchman/index.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-file-map/src/crawlers/watchman/planQuery.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-file-map/src/flow-types.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-file-map/src/index.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-file-map/src/lib/FileProcessor.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-file-map/src/lib/RootPathUtils.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-file-map/src/lib/TreeFS.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-file-map/src/lib/__tests__/FileProcessor-test.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-file-map/src/lib/__tests__/RootPathUtils-test.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-file-map/src/lib/__tests__/TreeFS-test.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-file-map/src/lib/__tests__/checkWatchmanCapabilities-test.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-file-map/src/lib/__tests__/dependencyExtractor-test.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-file-map/src/lib/__tests__/normalizePathSeparatorsToSystem-test.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-file-map/src/lib/__tests__/rootRelativeCacheKeys-test.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-file-map/src/lib/checkWatchmanCapabilities.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-file-map/src/lib/dependencyExtractor.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-file-map/src/lib/normalizePathSeparatorsToPosix.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-file-map/src/lib/normalizePathSeparatorsToSystem.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-file-map/src/lib/rootRelativeCacheKeys.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-file-map/src/lib/sorting.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-file-map/src/plugins/HastePlugin.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-file-map/src/plugins/MockPlugin.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-file-map/src/plugins/haste/DuplicateHasteCandidatesError.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-file-map/src/plugins/haste/HasteConflictsError.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-file-map/src/plugins/haste/__tests__/HastePlugin-test.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-file-map/src/plugins/haste/__tests__/getPlatformExtension-test.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-file-map/src/plugins/haste/computeConflicts.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-file-map/src/plugins/haste/getPlatformExtension.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-file-map/src/plugins/haste/worker.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-file-map/src/plugins/mocks/__tests__/MockPlugin-test.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-file-map/src/plugins/mocks/__tests__/getMockName-test.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-file-map/src/plugins/mocks/getMockName.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-file-map/src/watchers/AbstractWatcher.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-file-map/src/watchers/FallbackWatcher.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-file-map/src/watchers/NativeWatcher.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-file-map/src/watchers/RecrawlWarning.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-file-map/src/watchers/WatchmanWatcher.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-file-map/src/watchers/__tests__/WatchmanWatcher-test.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-file-map/src/watchers/__tests__/helpers.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-file-map/src/watchers/__tests__/integration-test.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-file-map/src/watchers/common.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-file-map/src/worker.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-file-map/src/workerExclusionList.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-file-map/types/Watcher.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-file-map/types/cache/DiskCacheManager.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-file-map/types/flow-types.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-file-map/types/index.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-file-map/types/lib/DuplicateHasteCandidatesError.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-minify-terser/package.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-minify-terser/src/__tests__/minify-test.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-minify-terser/src/__tests__/terser-issue-1341-test.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-minify-terser/src/index.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-minify-terser/src/minifier.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-resolver/README.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-resolver/package.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-resolver/src/PackageExportsResolve.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-resolver/src/PackageImportsResolve.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-resolver/src/PackageResolve.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-resolver/src/__tests__/__snapshots__/index-test.js.snap": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-resolver/src/__tests__/assets-test.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-resolver/src/__tests__/browser-spec-test.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-resolver/src/__tests__/index-test.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-resolver/src/__tests__/package-exports-test.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-resolver/src/__tests__/package-imports-test.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-resolver/src/__tests__/platform-extensions-test.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-resolver/src/__tests__/symlinks-test.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-resolver/src/__tests__/utils.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-resolver/src/createDefaultContext.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-resolver/src/errors/FailedToResolveNameError.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-resolver/src/errors/FailedToResolvePathError.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-resolver/src/errors/FailedToResolveUnsupportedError.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-resolver/src/errors/InvalidPackageConfigurationError.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-resolver/src/errors/InvalidPackageError.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-resolver/src/errors/PackageImportNotResolvedError.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-resolver/src/errors/PackagePathNotExportedError.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-resolver/src/errors/formatFileCandidates.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-resolver/src/index.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-resolver/src/resolve.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-resolver/src/resolveAsset.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-resolver/src/types.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-resolver/src/utils/isAssetFile.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-resolver/src/utils/isSubpathDefinedInExportsLike.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-resolver/src/utils/matchSubpathFromExportsLike.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-resolver/src/utils/matchSubpathPattern.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-resolver/src/utils/reduceExportsLikeMap.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-resolver/src/utils/toPosixPath.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-resolver/types/PackageExportsResolve.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-resolver/types/PackageImportsResolve.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-resolver/types/PackageResolve.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-resolver/types/createDefaultContext.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-resolver/types/errors/FailedToResolveNameError.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-resolver/types/errors/FailedToResolvePathError.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-resolver/types/errors/FailedToResolveUnsupportedError.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-resolver/types/errors/InvalidPackageConfigurationError.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-resolver/types/errors/InvalidPackageError.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-resolver/types/errors/PackageImportNotResolvedError.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-resolver/types/errors/PackagePathNotExportedError.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-resolver/types/errors/formatFileCandidates.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-resolver/types/index.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-resolver/types/resolve.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-resolver/types/resolveAsset.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-resolver/types/types.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-resolver/types/utils/isAssetFile.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-resolver/types/utils/isSubpathDefinedInExportsLike.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-resolver/types/utils/matchSubpathFromExportsLike.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-resolver/types/utils/matchSubpathPattern.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-resolver/types/utils/reduceExportsLikeMap.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-resolver/types/utils/toPosixPath.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-runtime/package.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-runtime/src/modules/HMRClient.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-runtime/src/modules/__tests__/HMRClient-test.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-runtime/src/modules/__tests__/__snapshots__/HMRClient-test.js.snap": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-runtime/src/modules/asyncRequire.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-runtime/src/modules/empty-module.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-runtime/src/modules/null-module.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-runtime/src/modules/types.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-runtime/src/modules/vendor/eventemitter3.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-runtime/src/modules/vendor/eventemitter3.js.flow": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-runtime/src/polyfills/.babelrc.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-runtime/src/polyfills/__tests__/MetroFastRefreshMockRuntime.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-runtime/src/polyfills/__tests__/fast-refresh-integration-test.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-runtime/src/polyfills/__tests__/require-test.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-runtime/src/polyfills/require.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-source-map/README.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-source-map/package.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-source-map/src/B64Builder.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-source-map/src/BundleBuilder.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-source-map/src/Consumer/AbstractConsumer.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-source-map/src/Consumer/DelegatingConsumer.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-source-map/src/Consumer/MappingsConsumer.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-source-map/src/Consumer/SectionsConsumer.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-source-map/src/Consumer/constants.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-source-map/src/Consumer/createConsumer.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-source-map/src/Consumer/index.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-source-map/src/Consumer/normalizeSourcePath.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-source-map/src/Consumer/positionMath.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-source-map/src/Consumer/search.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-source-map/src/Consumer/types.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-source-map/src/Generator.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-source-map/src/__tests__/B64Builder-test.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-source-map/src/__tests__/BundleBuilder-test.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-source-map/src/__tests__/Consumer-test.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-source-map/src/__tests__/Generator-test.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-source-map/src/__tests__/__fixtures__/1.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-source-map/src/__tests__/__fixtures__/2.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-source-map/src/__tests__/__fixtures__/ignore_1.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-source-map/src/__tests__/__fixtures__/ignore_2.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-source-map/src/__tests__/__fixtures__/merged_1_2.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-source-map/src/__tests__/__fixtures__/merged_ignore.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-source-map/src/__tests__/__snapshots__/source-map-test.js.snap": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-source-map/src/__tests__/composeSourceMaps-test.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-source-map/src/__tests__/generateFunctionMap-test.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-source-map/src/__tests__/source-map-test.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-source-map/src/composeSourceMaps.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-source-map/src/encode.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-source-map/src/generateFunctionMap.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-source-map/src/source-map.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-source-map/types/B64Builder.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-source-map/types/BundleBuilder.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-source-map/types/Consumer/AbstractConsumer.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-source-map/types/Consumer/DelegatingConsumer.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-source-map/types/Consumer/MappingsConsumer.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-source-map/types/Consumer/SectionsConsumer.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-source-map/types/Consumer/constants.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-source-map/types/Consumer/createConsumer.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-source-map/types/Consumer/index.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-source-map/types/Consumer/normalizeSourcePath.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-source-map/types/Consumer/positionMath.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-source-map/types/Consumer/search.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-source-map/types/Consumer/types.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-source-map/types/Generator.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-source-map/types/composeSourceMaps.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-source-map/types/encode.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-source-map/types/generateFunctionMap.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-source-map/types/source-map.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-symbolicate/package.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-symbolicate/src/ChromeHeapSnapshot.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-symbolicate/src/GoogleIgnoreListConsumer.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-symbolicate/src/SourceMetadataMapConsumer.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-symbolicate/src/Symbolication.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-symbolicate/src/__tests__/ChromeHeapSnapshotProcessor-test.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-symbolicate/src/__tests__/GoogleIgnoreListConsumer-test.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-symbolicate/src/__tests__/SourceMetadataMapConsumer-test.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-symbolicate/src/__tests__/Symbolication-test.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-symbolicate/src/__tests__/__fixtures__/GenSampleHeapSnapshotBundle.js.heaptimeline": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-symbolicate/src/__tests__/__fixtures__/GenSampleHeapSnapshotBundle.js.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-symbolicate/src/__tests__/__fixtures__/coverageStackTrace.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-symbolicate/src/__tests__/__fixtures__/coverageStackTraceCJS.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-symbolicate/src/__tests__/__fixtures__/directory/foo.js.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-symbolicate/src/__tests__/__fixtures__/directory/subdir1/bar.js.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-symbolicate/src/__tests__/__fixtures__/directory/test.stack": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-symbolicate/src/__tests__/__fixtures__/hermes.js.hbc.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-symbolicate/src/__tests__/__fixtures__/hermesStackTrace.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-symbolicate/src/__tests__/__fixtures__/hermesStackTraceCJS-SegmentID.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-symbolicate/src/__tests__/__fixtures__/hermesStackTraceCJS.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-symbolicate/src/__tests__/__fixtures__/hermescjs.js.hbc.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-symbolicate/src/__tests__/__fixtures__/testfile.attribution.input": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-symbolicate/src/__tests__/__fixtures__/testfile.cpuprofile": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-symbolicate/src/__tests__/__fixtures__/testfile.cpuprofile.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-symbolicate/src/__tests__/__fixtures__/testfile.js.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-symbolicate/src/__tests__/__fixtures__/testfile.node.stack": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-symbolicate/src/__tests__/__fixtures__/testfile.partial.js.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-symbolicate/src/__tests__/__fixtures__/testfile.profmap": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-symbolicate/src/__tests__/__fixtures__/testfile.ram.js.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-symbolicate/src/__tests__/__fixtures__/testfile.ram.stack": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-symbolicate/src/__tests__/__fixtures__/testfile.sectioned.js.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-symbolicate/src/__tests__/__fixtures__/testfile.stack": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-symbolicate/src/__tests__/__fixtures__/with-function-map.js.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-symbolicate/src/__tests__/__fixtures__/with-function-map.stack": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-symbolicate/src/__tests__/__fixtures__/with-ignore-list.js.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-symbolicate/src/__tests__/__fixtures__/with-ignore-list.stack": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-symbolicate/src/__tests__/__snapshots__/symbolicate-heap-snapshot-test.js.snap": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-symbolicate/src/__tests__/__snapshots__/symbolicate-test.js.snap": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-symbolicate/src/__tests__/symbolicate-heap-snapshot-test.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-symbolicate/src/__tests__/symbolicate-test.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-symbolicate/src/index.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-symbolicate/src/symbolicate.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-transform-plugins/package.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-transform-plugins/src/__mocks__/test-helpers.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-transform-plugins/src/__tests__/__snapshots__/inline-requires-plugin-test.js.snap": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-transform-plugins/src/__tests__/addParamsToDefineCall-test.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-transform-plugins/src/__tests__/constant-folding-plugin-test.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-transform-plugins/src/__tests__/import-export-plugin-test.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-transform-plugins/src/__tests__/inline-plugin-test.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-transform-plugins/src/__tests__/inline-requires-plugin-test.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-transform-plugins/src/__tests__/normalizePseudoGlobals-test.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-transform-plugins/src/__tests__/validateOutputAst.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-transform-plugins/src/addParamsToDefineCall.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-transform-plugins/src/constant-folding-plugin.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-transform-plugins/src/import-export-plugin.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-transform-plugins/src/index.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-transform-plugins/src/inline-plugin.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-transform-plugins/src/inline-requires-plugin.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-transform-plugins/src/normalizePseudoGlobals.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-transform-plugins/src/utils/createInlinePlatformChecks.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-transform-worker/package.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-transform-worker/src/__mocks__/index.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-transform-worker/src/__tests__/__snapshots__/index-test.js.snap": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-transform-worker/src/__tests__/index-test.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-transform-worker/src/index.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-transform-worker/src/utils/assetTransformer.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-transform-worker/src/utils/getMinifier.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-transform-worker/types/index.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-transform-worker/types/utils/assetTransformer.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/metro-transform-worker/types/utils/getMinifier.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/ob1/README.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/ob1/package.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/ob1/src/__flowtests__/ob1-flowtest.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/ob1/src/__tests__/ob1-test.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/ob1/src/ob1.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"packages/ob1/types/ob1.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"private/metro-memory-fs/package.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"private/metro-memory-fs/src/__tests__/__snapshots__/index-test.js.snap": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"private/metro-memory-fs/src/__tests__/index-test.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"private/metro-memory-fs/src/index.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"scripts/__tests__/babel-lib-defs-test.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"scripts/__tests__/subpackages-test.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"scripts/__tests__/ts-defs-sync-test.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"scripts/_getPackages.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"scripts/babelJestTransformer.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"scripts/build.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"scripts/eslint/base.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"scripts/eslint/rules/__tests__/metro-deep-imports-test.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"scripts/eslint/rules/__tests__/strictly-null-test.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"scripts/eslint/rules/metro-deep-imports.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"scripts/eslint/rules/sort-imports.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"scripts/eslint/rules/strictly-null.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"scripts/eslint/typescript.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"scripts/generateTypeScriptDefinitions.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"scripts/jestFilter.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"scripts/mapCoverage.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"scripts/setupJest.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"scripts/support/generateBabelFlowLibraryDefinitions.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"scripts/support/generateBabelTypesFlowLibraryDefinition.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"scripts/support/updateBabelTraverseFlowLibraryDefinition.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"scripts/updateBabelFlowLibraryDefinitions.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"scripts/updateVersion.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"tsconfig.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/README.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/docusaurus.config.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/package.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/sidebars.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/css/custom.scss": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/pages/help/index.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/pages/index.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/src/pages/styles.module.css": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/static/CNAME": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/static/img/content/atom.png": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/static/img/content/high-speed-train.png": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/static/img/content/scales.png": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/static/img/favicon.png": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/static/img/language.svg": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/static/img/metro.svg": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/static/img/opengraph.png": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/static/img/oss_logo.svg": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"website/yarn.lock": {
+					"match": false,
+					"status": "missing-in-package"
+				}
+			},
+			"summary": {
+				"differentFiles": 1,
+				"matchingFiles": 0,
+				"missingInPackage": 746,
+				"missingInSource": 18,
+				"score": 0,
+				"totalFiles": 765
+			}
+		},
+		"prodDependencies": [
+			{
+				"name": "@ampproject/remapping",
+				"version": "2.2.1"
+			},
+			{
+				"name": "@babel/code-frame",
+				"version": "7.26.2"
+			},
+			{
+				"name": "@babel/compat-data",
+				"version": "7.26.8"
+			},
+			{
+				"name": "@babel/core",
+				"version": "7.26.9"
+			},
+			{
+				"name": "@babel/generator",
+				"version": "7.26.9"
+			},
+			{
+				"name": "@babel/helper-annotate-as-pure",
+				"version": "7.25.9"
+			},
+			{
+				"name": "@babel/helper-compilation-targets",
+				"version": "7.26.5"
+			},
+			{
+				"name": "@babel/helper-create-class-features-plugin",
+				"version": "7.26.9"
+			},
+			{
+				"name": "@babel/helper-member-expression-to-functions",
+				"version": "7.25.9"
+			},
+			{
+				"name": "@babel/helper-module-imports",
+				"version": "7.25.9"
+			},
+			{
+				"name": "@babel/helper-module-transforms",
+				"version": "7.26.0"
+			},
+			{
+				"name": "@babel/helper-optimise-call-expression",
+				"version": "7.25.9"
+			},
+			{
+				"name": "@babel/helper-plugin-utils",
+				"version": "7.26.5"
+			},
+			{
+				"name": "@babel/helper-replace-supers",
+				"version": "7.26.5"
+			},
+			{
+				"name": "@babel/helper-skip-transparent-expression-wrappers",
+				"version": "7.25.9"
+			},
+			{
+				"name": "@babel/helper-string-parser",
+				"version": "7.25.9"
+			},
+			{
+				"name": "@babel/helper-validator-identifier",
+				"version": "7.25.9"
+			},
+			{
+				"name": "@babel/helper-validator-option",
+				"version": "7.25.9"
+			},
+			{
+				"name": "@babel/helpers",
+				"version": "7.26.9"
+			},
+			{
+				"name": "@babel/parser",
+				"version": "7.26.9"
+			},
+			{
+				"name": "@babel/plugin-proposal-export-namespace-from",
+				"version": "7.18.9"
+			},
+			{
+				"name": "@babel/plugin-syntax-export-namespace-from",
+				"version": "7.8.3"
+			},
+			{
+				"name": "@babel/plugin-syntax-flow",
+				"version": "7.26.0"
+			},
+			{
+				"name": "@babel/plugin-syntax-jsx",
+				"version": "7.25.9"
+			},
+			{
+				"name": "@babel/plugin-syntax-typescript",
+				"version": "7.25.9"
+			},
+			{
+				"name": "@babel/plugin-transform-flow-strip-types",
+				"version": "7.26.5"
+			},
+			{
+				"name": "@babel/plugin-transform-modules-commonjs",
+				"version": "7.26.3"
+			},
+			{
+				"name": "@babel/plugin-transform-typescript",
+				"version": "7.26.8"
+			},
+			{
+				"name": "@babel/preset-typescript",
+				"version": "7.26.0"
+			},
+			{
+				"name": "@babel/register",
+				"version": "7.25.9"
+			},
+			{
+				"name": "@babel/runtime",
+				"version": "7.26.9"
+			},
+			{
+				"name": "@babel/template",
+				"version": "7.26.9"
+			},
+			{
+				"name": "@babel/traverse",
+				"version": "7.26.9"
+			},
+			{
+				"name": "@babel/traverse--for-generate-function-map",
+				"version": "7.26.9"
+			},
+			{
+				"name": "@babel/types",
+				"version": "7.26.9"
+			},
+			{
+				"name": "@jest/schemas",
+				"version": "29.6.3"
+			},
+			{
+				"name": "@jest/types",
+				"version": "29.6.3"
+			},
+			{
+				"name": "@jridgewell/gen-mapping",
+				"version": "0.3.5"
+			},
+			{
+				"name": "@jridgewell/resolve-uri",
+				"version": "3.1.1"
+			},
+			{
+				"name": "@jridgewell/set-array",
+				"version": "1.2.1"
+			},
+			{
+				"name": "@jridgewell/source-map",
+				"version": "0.3.2"
+			},
+			{
+				"name": "@jridgewell/sourcemap-codec",
+				"version": "1.4.15"
+			},
+			{
+				"name": "@jridgewell/trace-mapping",
+				"version": "0.3.25"
+			},
+			{
+				"name": "@sinclair/typebox",
+				"version": "0.27.8"
+			},
+			{
+				"name": "@types/color-name",
+				"version": "1.1.1"
+			},
+			{
+				"name": "@types/istanbul-lib-coverage",
+				"version": "2.0.1"
+			},
+			{
+				"name": "@types/istanbul-lib-report",
+				"version": "3.0.0"
+			},
+			{
+				"name": "@types/istanbul-reports",
+				"version": "3.0.0"
+			},
+			{
+				"name": "@types/node",
+				"version": "20.17.16"
+			},
+			{
+				"name": "@types/yargs",
+				"version": "17.0.12"
+			},
+			{
+				"name": "@types/yargs-parser",
+				"version": "15.0.0"
+			},
+			{
+				"name": "accepts",
+				"version": "2.0.0"
+			},
+			{
+				"name": "acorn",
+				"version": "8.10.0"
+			},
+			{
+				"name": "agent-base",
+				"version": "7.1.1"
+			},
+			{
+				"name": "ansi-regex",
+				"version": "5.0.1"
+			},
+			{
+				"name": "ansi-styles",
+				"version": "4.2.1"
+			},
+			{
+				"name": "babel-plugin-replace-ts-export-assignment",
+				"version": "0.0.2"
+			},
+			{
+				"name": "babel-plugin-syntax-hermes-parser",
+				"version": "0.33.3"
+			},
+			{
+				"name": "babel-plugin-transform-flow-enums",
+				"version": "0.0.2"
+			},
+			{
+				"name": "braces",
+				"version": "3.0.3"
+			},
+			{
+				"name": "browserslist",
+				"version": "4.24.4"
+			},
+			{
+				"name": "bser",
+				"version": "2.1.1"
+			},
+			{
+				"name": "buffer-from",
+				"version": "1.1.1"
+			},
+			{
+				"name": "caniuse-lite",
+				"version": "1.0.30001702"
+			},
+			{
+				"name": "chalk",
+				"version": "4.0.0"
+			},
+			{
+				"name": "ci-info",
+				"version": "2.0.0"
+			},
+			{
+				"name": "cliui",
+				"version": "8.0.1"
+			},
+			{
+				"name": "clone-deep",
+				"version": "4.0.1"
+			},
+			{
+				"name": "color-convert",
+				"version": "2.0.1"
+			},
+			{
+				"name": "color-name",
+				"version": "1.1.4"
+			},
+			{
+				"name": "commander",
+				"version": "2.20.3"
+			},
+			{
+				"name": "commondir",
+				"version": "1.0.1"
+			},
+			{
+				"name": "connect",
+				"version": "3.7.0"
+			},
+			{
+				"name": "debug",
+				"version": "2.6.9"
+			},
+			{
+				"name": "ms",
+				"version": "2.0.0"
+			},
+			{
+				"name": "convert-source-map",
+				"version": "2.0.0"
+			},
+			{
+				"name": "debug",
+				"version": "4.4.0"
+			},
+			{
+				"name": "duplexer",
+				"version": "0.1.1"
+			},
+			{
+				"name": "ee-first",
+				"version": "1.1.1"
+			},
+			{
+				"name": "electron-to-chromium",
+				"version": "1.5.112"
+			},
+			{
+				"name": "encodeurl",
+				"version": "1.0.2"
+			},
+			{
+				"name": "error-stack-parser",
+				"version": "2.0.6"
+			},
+			{
+				"name": "escalade",
+				"version": "3.2.0"
+			},
+			{
+				"name": "escape-html",
+				"version": "1.0.3"
+			},
+			{
+				"name": "exponential-backoff",
+				"version": "3.1.1"
+			},
+			{
+				"name": "fb-watchman",
+				"version": "2.0.1"
+			},
+			{
+				"name": "fill-range",
+				"version": "7.1.1"
+			},
+			{
+				"name": "finalhandler",
+				"version": "1.1.2"
+			},
+			{
+				"name": "find-cache-dir",
+				"version": "2.1.0"
+			},
+			{
+				"name": "flow-enums-runtime",
+				"version": "0.0.6"
+			},
+			{
+				"name": "gensync",
+				"version": "1.0.0-beta.2"
+			},
+			{
+				"name": "get-caller-file",
+				"version": "2.0.5"
+			},
+			{
+				"name": "globals",
+				"version": "11.12.0"
+			},
+			{
+				"name": "graceful-fs",
+				"version": "4.2.10"
+			},
+			{
+				"name": "has-flag",
+				"version": "4.0.0"
+			},
+			{
+				"name": "hermes-estree",
+				"version": "0.33.3"
+			},
+			{
+				"name": "hermes-parser",
+				"version": "0.33.3"
+			},
+			{
+				"name": "https-proxy-agent",
+				"version": "7.0.5"
+			},
+			{
+				"name": "image-size",
+				"version": "1.0.2"
+			},
+			{
+				"name": "inherits",
+				"version": "2.0.4"
+			},
+			{
+				"name": "invariant",
+				"version": "2.2.4"
+			},
+			{
+				"name": "is-fullwidth-code-point",
+				"version": "3.0.0"
+			},
+			{
+				"name": "is-number",
+				"version": "7.0.0"
+			},
+			{
+				"name": "is-plain-object",
+				"version": "2.0.4"
+			},
+			{
+				"name": "isobject",
+				"version": "3.0.1"
+			},
+			{
+				"name": "jest-get-type",
+				"version": "29.6.3"
+			},
+			{
+				"name": "jest-util",
+				"version": "29.7.0"
+			},
+			{
+				"name": "ci-info",
+				"version": "3.3.0"
+			},
+			{
+				"name": "picomatch",
+				"version": "2.3.0"
+			},
+			{
+				"name": "jest-validate",
+				"version": "29.7.0"
+			},
+			{
+				"name": "camelcase",
+				"version": "6.3.0"
+			},
+			{
+				"name": "jest-worker",
+				"version": "29.7.0"
+			},
+			{
+				"name": "supports-color",
+				"version": "8.1.1"
+			},
+			{
+				"name": "js-tokens",
+				"version": "4.0.0"
+			},
+			{
+				"name": "jsc-safe-url",
+				"version": "0.2.2"
+			},
+			{
+				"name": "jsesc",
+				"version": "3.1.0"
+			},
+			{
+				"name": "json5",
+				"version": "2.2.3"
+			},
+			{
+				"name": "jsonparse",
+				"version": "1.3.1"
+			},
+			{
+				"name": "kind-of",
+				"version": "6.0.3"
+			},
+			{
+				"name": "leven",
+				"version": "3.1.0"
+			},
+			{
+				"name": "lodash.throttle",
+				"version": "4.1.1"
+			},
+			{
+				"name": "loose-envify",
+				"version": "1.4.0"
+			},
+			{
+				"name": "lru-cache",
+				"version": "5.1.1"
+			},
+			{
+				"name": "make-dir",
+				"version": "2.1.0"
+			},
+			{
+				"name": "semver",
+				"version": "5.7.2"
+			},
+			{
+				"name": "makeerror",
+				"version": "1.0.12"
+			},
+			{
+				"name": "merge-stream",
+				"version": "2.0.0"
+			},
+			{
+				"name": "micromatch",
+				"version": "4.0.8"
+			},
+			{
+				"name": "picomatch",
+				"version": "2.3.1"
+			},
+			{
+				"name": "mime-db",
+				"version": "1.54.0"
+			},
+			{
+				"name": "mime-types",
+				"version": "3.0.1"
+			},
+			{
+				"name": "ms",
+				"version": "2.1.3"
+			},
+			{
+				"name": "negotiator",
+				"version": "1.0.0"
+			},
+			{
+				"name": "node-int64",
+				"version": "0.4.0"
+			},
+			{
+				"name": "node-releases",
+				"version": "2.0.19"
+			},
+			{
+				"name": "nullthrows",
+				"version": "1.1.1"
+			},
+			{
+				"name": "on-finished",
+				"version": "2.3.0"
+			},
+			{
+				"name": "p-try",
+				"version": "2.2.0"
+			},
+			{
+				"name": "parseurl",
+				"version": "1.3.3"
+			},
+			{
+				"name": "picocolors",
+				"version": "1.1.1"
+			},
+			{
+				"name": "pify",
+				"version": "4.0.1"
+			},
+			{
+				"name": "pirates",
+				"version": "4.0.6"
+			},
+			{
+				"name": "pkg-dir",
+				"version": "3.0.0"
+			},
+			{
+				"name": "find-up",
+				"version": "3.0.0"
+			},
+			{
+				"name": "locate-path",
+				"version": "3.0.0"
+			},
+			{
+				"name": "p-limit",
+				"version": "2.3.0"
+			},
+			{
+				"name": "p-locate",
+				"version": "3.0.0"
+			},
+			{
+				"name": "path-exists",
+				"version": "3.0.0"
+			},
+			{
+				"name": "pretty-format",
+				"version": "29.7.0"
+			},
+			{
+				"name": "ansi-styles",
+				"version": "5.2.0"
+			},
+			{
+				"name": "queue",
+				"version": "6.0.2"
+			},
+			{
+				"name": "react-is",
+				"version": "18.2.0"
+			},
+			{
+				"name": "regenerator-runtime",
+				"version": "0.14.1"
+			},
+			{
+				"name": "require-directory",
+				"version": "2.1.1"
+			},
+			{
+				"name": "semver",
+				"version": "6.3.1"
+			},
+			{
+				"name": "serialize-error",
+				"version": "2.1.0"
+			},
+			{
+				"name": "shallow-clone",
+				"version": "3.0.1"
+			},
+			{
+				"name": "source-map",
+				"version": "0.6.1"
+			},
+			{
+				"name": "source-map-support",
+				"version": "0.5.21"
+			},
+			{
+				"name": "stackframe",
+				"version": "1.1.1"
+			},
+			{
+				"name": "statuses",
+				"version": "1.5.0"
+			},
+			{
+				"name": "string-width",
+				"version": "4.2.3"
+			},
+			{
+				"name": "emoji-regex",
+				"version": "8.0.0"
+			},
+			{
+				"name": "strip-ansi",
+				"version": "6.0.1"
+			},
+			{
+				"name": "supports-color",
+				"version": "7.1.0"
+			},
+			{
+				"name": "terser",
+				"version": "5.15.0"
+			},
+			{
+				"name": "throat",
+				"version": "5.0.0"
+			},
+			{
+				"name": "through",
+				"version": "2.3.8"
+			},
+			{
+				"name": "tmpl",
+				"version": "1.0.5"
+			},
+			{
+				"name": "to-regex-range",
+				"version": "5.0.1"
+			},
+			{
+				"name": "undici-types",
+				"version": "6.19.8"
+			},
+			{
+				"name": "unpipe",
+				"version": "1.0.0"
+			},
+			{
+				"name": "update-browserslist-db",
+				"version": "1.1.3"
+			},
+			{
+				"name": "utils-merge",
+				"version": "1.0.1"
+			},
+			{
+				"name": "vlq",
+				"version": "1.0.1"
+			},
+			{
+				"name": "walker",
+				"version": "1.0.8"
+			},
+			{
+				"name": "wrap-ansi",
+				"version": "7.0.0"
+			},
+			{
+				"name": "ws",
+				"version": "7.5.10"
+			},
+			{
+				"name": "y18n",
+				"version": "5.0.8"
+			},
+			{
+				"name": "yallist",
+				"version": "3.1.1"
+			},
+			{
+				"name": "yaml",
+				"version": "2.6.1"
+			},
+			{
+				"name": "yargs",
+				"version": "17.7.1"
+			},
+			{
+				"name": "yargs-parser",
+				"version": "21.1.1"
+			},
+			{
+				"name": "escape-string-regexp",
+				"version": "1.0.5"
+			},
+			{
+				"name": "source-map",
+				"version": "0.5.7"
+			}
+		]
+	}
+]
