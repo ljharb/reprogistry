@@ -1,0 +1,83 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-20T07:44:05.267Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:11.7.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "growly@1.0.0",
+			"name": "growly",
+			"version": "1.0.0",
+			"location": "https://registry.npmjs.org/growly/-/growly-1.0.0.tgz",
+			"integrity": "sha512-5q7MW6BEHmU1BzbjKBEPg4Y+ltUT1EVn08WYFNWaJlkbctWEChV3U74IRjVHh3Cp9CU375OhGYKmpOu5fQKBtg==",
+			"publishedAt": "2012-09-08T02:07:52.329Z",
+			"publishedWith": {
+				"node": null,
+				"npm": null
+			},
+			"dependencies": {}
+		},
+		"source": {
+			"integrity": "sha512-w36mB2al6OnqbYzQX4P46/LmgbBTqoKajV7Zf26O03sJjze1SZxeb2wKTN19QXMeqiRTs7eRMsjAbcsSKi1y0g==",
+			"location": "http://github.com/theabraham/growly",
+			"spec": "github:theabraham/growly#HEAD"
+		},
+		"comparisonHash": "9ef46a5bd31291e57cbab41e2f17c57bd6da0b5b",
+		"diff": {
+			"files": {
+				"README.md": {
+					"diff": "--- published/README.md\n+++ rebuilt/README.md\n@@ -32,11 +32,11 @@\n \n ## Usage ##\n \n-The growly module exposes only two methods: `Growly.register()` and `Growly.notify()`. \n+The growly module exposes only three methods: `Growly.register()`, `Growly.notify()`, and `Growly.setHost()`.\n \n-### Growly.register(appname, [appicon], [notifications]) ###\n+### Growly.register(appname, [appicon], [notifications], [callback]) ###\n \n-Registers a new application with Growl. Registration is completely optional. Useful if you want your application, with its own icon and types of notifications, to show up in Growl's prefence panel.\n+Registers a new application with Growl. Registration is completely optional since it will be performed automatically for you with sensible defaults. Useful if you want your application, with its own icon and types of notifications, to show up in Growl's prefence panel.\n \n   - `appname` the name of the application (required.)\n   - `appicon` url, file path, or Buffer instance for an application icon image.\n@@ -44,6 +44,7 @@\n     - `.label` name used to identify the type of notification being used (required.)\n     - `.dispname` name users will see in Growl's preference panel (defaults to `.label`.)\n     - `.enabled` whether or not notifications of this type are enabled (defaults to true.)\n+  - `callback` called when the registration completes; if registration fails, the first argument will be an Error object.\n \n An example:\n \n@@ -51,19 +52,23 @@\n growly.register('My Application', 'path/to/icon.png', [\n     { label: 'success', dispname: 'Success' },\n     { label: 'warning', dispname: 'Warning', enabled: false }\n-]);\n+], function(err) {\n+    console.log(err || 'Registration successful!');\n+});\n ```\n \n ### Growly.notify(text, [opts], [callback]) ###\n \n-Sends a Growl notification. If an application wasn't registered beforehand with `growly.register()`, a default application will be used internally.\n+Sends a Growl notification. If an application wasn't registered beforehand with `growly.register()`, a default application will automatically be registered beforesending the notification.\n \n   - `text` the body of the notification.\n   - `opts` an object with the following properties:\n     - `.title` title of the notification.\n+    - `.icon` url, file path, or Buffer instance for the notification's icon.\n     - `.sticky` whether or not to sticky the notification (defaults to false.)\n     - `.label` type of notification to use (defaults to the first registered notification type.)\n     - `.priority` the priority of the notification from lowest (-2) to highest (2).\n+    - `.coalescingId` replace/update the matching previous notification. May be ignored.\n   - `callback` called when the user has closed/clicked the notification. The callback is passed an Error object `err` as the first argument when the notification fails; otherwise, the second argument `action` is a string that'll describe which action has been taken by the user (either 'closed' or 'clicked'.)\n \n An example:\n@@ -75,9 +80,13 @@\n });\n ```\n \n+### Growly.setHost(host, port) ###\n+\n+Set the host and port that Growl (GNTP) requests will be sent to. Using this method is optional since GNTP defaults to using host 'localhost' and port 23053.\n+\n ## License ##\n \n-Copyright (C) 2012 Ibrahim Al-Rajhi <abrahamalrajhi@gmail.com>\n+Copyright (C) 2014 Ibrahim Al-Rajhi <abrahamalrajhi@gmail.com>\n \n Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the \"Software\"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:\n \n",
+					"match": false,
+					"packageHash": "3f9515884f6f241f07b9b1b542d4d75f6e70613b972505bbd4b2c75cd3e80a3c",
+					"size": 3947,
+					"sourceHash": "d2fdf9d441ad5d574c0e82412b7c91020d6a346f4a09f3a70d4243e39d6d1f3d",
+					"status": "content"
+				},
+				"example/bakery.js": {
+					"diff": "--- published/example/bakery.js\n+++ rebuilt/example/bakery.js\n@@ -1,16 +1,22 @@\n var growly = require('../lib/growly.js');\n \n-var muffinopts = { label: 'muffin', icon: 'muffin.png' },\n+var notifications = [\n+        { label: 'muffin', dispname: 'Muffin' },\n+        { label: 'cake', dispname: 'Cake' }\n+    ],\n+    muffinopts = { label: 'muffin', icon: 'muffin.png' },\n     cakeopts = { label: 'cake', title: 'Cake is ready!', icon: 'cake.png', sticky: true };\n \n-growly.register('Bakery', 'muffin.png', [\n-    { label: 'muffin', dispname: 'Muffin' },\n-    { label: 'cake', dispname: 'Cake' }\n-]);\n+growly.register('Bakery', 'muffin.png', notifications, function(err) {\n+    if (err) { \n+        console.log(err);\n+        return;\n+    }\n \n-growly.notify('Looks like it is half past muffin time!', muffinopts);\n+    growly.notify('Looks like it is half past muffin time!', muffinopts);\n \n-growly.notify('Click to deliver', cakeopts, function(err, action) {\n-    console.log('You', action, 'the notification, so the cake is on its way!');\n+    growly.notify('Click to deliver', cakeopts, function(err, action) {\n+        console.log('You', action, 'the notification, so the cake is on its way!');\n+    });\n });\n \n",
+					"match": false,
+					"packageHash": "a6d24c6f78665a2e3911e306cc005cfdcf12a03cd8467098fbab7ea2d8a060b4",
+					"size": 549,
+					"sourceHash": "eda831f46a46edf54da023a3fecea415ac8eca5b0930712f33d0424783e03a2d",
+					"status": "content"
+				},
+				"lib/growly.js": {
+					"diff": "--- published/lib/growly.js\n+++ rebuilt/lib/growly.js\n@@ -1,199 +1,8 @@\n-var net = require('net'),\n-    crypto = require('crypto'),\n-    fs = require('fs');\n-\n-var nl = '\\r\\n';\n-\n-/**\n- * Create a new GNTP request of the given `type`.\n- *\n- * @param {String} type either NOTIFY or REGISTER\n- * @api private\n- */\n-\n-function GNTP(type) {\n-    this.host = 'localhost';\n-    this.port = 23053;\n-    this.type = type;\n-    this.request = 'GNTP/1.0 ' + type + ' NONE' + nl;\n-    this.resources = [];\n-    this.attempts = 0;\n-    this.maxAttempts = 5;\n-}\n-\n-/**\n- * Build a response object from the given `resp` response string.\n- *\n- * The response object has a key/value pair for every header in the response, and \n- * a `.state` property equal to either OK, ERROR, or CALLBACK.\n- *\n- * An example GNTP response:\n- *\n- *     GNTP/1.0 -OK NONE\\r\\n\n- *     Response-Action: REGISTER\\r\\n\n- *     \\r\\n\n- *\n- *  Which would parse to:\n- *      \n- *      { state: 'OK', 'Response-Action': 'REGISTER' }\n- *\n- * @param {String} resp\n- * @return {Object}\n- * @api private\n- */\n-\n-GNTP.prototype.parseResp = function(resp) {\n-    var parsed = {}, head, body;\n-    resp = resp.slice(0, resp.indexOf(nl + nl)).split(nl);\n-    head = resp[0];\n-    body = resp.slice(1);\n-\n-    parsed.state = head.match(/-(OK|ERROR|CALLBACK)/)[0].slice(1);\n-    body.forEach(function(ln) {\n-        ln = ln.split(': ');\n-        parsed[ln[0]] = ln[1];\n-    });\n-\n-    return parsed;\n-};\n-\n-/**\n- * Call `GNTP.send()` with the given arguments after a certain delay.\n- *\n- * @api private\n- */\n-\n-GNTP.prototype.retry = function() {\n-    var self = this, \n-        args = arguments;\n-    setTimeout(function() {\n-        self.send.apply(self, args);\n-    }, 750);\n-};\n-\n-\n-/**\n- * Add a resource to the GNTP request.\n- *\n- * @param {Buffer} file\n- * @return {String}\n- * @api private\n- */\n-\n-GNTP.prototype.addResource = function(file) {\n-    var id = crypto.createHash('md5').update(file).digest('hex'),\n-        header = 'Identifier: ' + id + nl + 'Length: ' + file.length + nl + nl;\n-    this.resources.push({ header: header, file: file });\n-    return 'x-growl-resource://' + id;\n-};\n-\n-/**\n- * Append another header `name` with a value of `val` to the request. If `val` is\n- * undefined, the header will be left out.\n- *\n- * @param {String} name\n- * @param {String} val\n- * @api public\n- */\n",
+					"match": false,
+					"packageHash": "14103af41f77e5d2555b026751b8b5bc0a89ccf97ee07158c802d51b90e9d5d1",
+					"size": 9924,
+					"sourceHash": "86065ee95703286ff0923be3b72d8dc51d1bfac7813d250147fc47dcee6ab9df",
+					"status": "content"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -1,6 +1,6 @@\n {\n     \"name\": \"growly\",\n-    \"version\": \"1.0.0\",\n+    \"version\": \"1.3.0\",\n     \"description\": \"Simple zero-dependency Growl notifications using GNTP.\",\n     \"keywords\": [\"growl\", \"growly\", \"snarl\", \"notifications\", \"gntp\", \"messages\"],\n     \"author\": \"Ibrahim Al-Rajhi <abrahamalrajhi@gmail.com> (http://ibrahimalrajhi.com/)\",\n",
+					"match": false,
+					"packageHash": "4722778887654296896dd704845c7a180e511d3375feb3d2c1c98e0c0689d89a",
+					"size": 544,
+					"sourceHash": "3cd89bff1fd1da692351f369c2e3524b304d9fbf176a6e977e90048344db006e",
+					"status": "content"
+				},
+				"HISTORY.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/gntp.js": {
+					"match": false,
+					"status": "missing-in-package"
+				}
+			},
+			"summary": {
+				"differentFiles": 4,
+				"matchingFiles": 3,
+				"missingInPackage": 2,
+				"missingInSource": 0,
+				"score": 0.3333333333333333,
+				"totalFiles": 9
+			}
+		},
+		"prodDependencies": []
+	}
+]

@@ -1,0 +1,75 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-20T07:41:48.823Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:11.7.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "growly@1.1.1",
+			"name": "growly",
+			"version": "1.1.1",
+			"location": "https://registry.npmjs.org/growly/-/growly-1.1.1.tgz",
+			"integrity": "sha512-7xPUy2lV6FAWUzdoYvWbll6SmFlS6XJzVBXihu0aovgP5J2VSy1vYcwvUDAbkv0GN056V8hx/lyAlKnd39e8UA==",
+			"publishedAt": "2013-02-08T16:36:44.351Z",
+			"publishedWith": {
+				"node": null,
+				"npm": "1.1.61"
+			},
+			"dependencies": {}
+		},
+		"source": {
+			"integrity": "sha512-w36mB2al6OnqbYzQX4P46/LmgbBTqoKajV7Zf26O03sJjze1SZxeb2wKTN19QXMeqiRTs7eRMsjAbcsSKi1y0g==",
+			"location": "http://github.com/theabraham/growly",
+			"spec": "github:theabraham/growly#HEAD"
+		},
+		"comparisonHash": "9ef46a5bd31291e57cbab41e2f17c57bd6da0b5b",
+		"diff": {
+			"files": {
+				"README.md": {
+					"diff": "--- published/README.md\n+++ rebuilt/README.md\n@@ -32,7 +32,7 @@\n \n ## Usage ##\n \n-The growly module exposes only two methods: `Growly.register()` and `Growly.notify()`. \n+The growly module exposes only three methods: `Growly.register()`, `Growly.notify()`, and `Growly.setHost()`.\n \n ### Growly.register(appname, [appicon], [notifications], [callback]) ###\n \n@@ -68,6 +68,7 @@\n     - `.sticky` whether or not to sticky the notification (defaults to false.)\n     - `.label` type of notification to use (defaults to the first registered notification type.)\n     - `.priority` the priority of the notification from lowest (-2) to highest (2).\n+    - `.coalescingId` replace/update the matching previous notification. May be ignored.\n   - `callback` called when the user has closed/clicked the notification. The callback is passed an Error object `err` as the first argument when the notification fails; otherwise, the second argument `action` is a string that'll describe which action has been taken by the user (either 'closed' or 'clicked'.)\n \n An example:\n@@ -79,9 +80,13 @@\n });\n ```\n \n+### Growly.setHost(host, port) ###\n+\n+Set the host and port that Growl (GNTP) requests will be sent to. Using this method is optional since GNTP defaults to using host 'localhost' and port 23053.\n+\n ## License ##\n \n-Copyright (C) 2012 Ibrahim Al-Rajhi <abrahamalrajhi@gmail.com>\n+Copyright (C) 2014 Ibrahim Al-Rajhi <abrahamalrajhi@gmail.com>\n \n Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the \"Software\"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:\n \n",
+					"match": false,
+					"packageHash": "8a3ee9677dc159f54ad925089c095bfeb7c9a7aedf2e5b8c69e2e8d7dc730793",
+					"size": 4342,
+					"sourceHash": "d2fdf9d441ad5d574c0e82412b7c91020d6a346f4a09f3a70d4243e39d6d1f3d",
+					"status": "content"
+				},
+				"lib/gntp.js": {
+					"diff": "--- published/lib/gntp.js\n+++ rebuilt/lib/gntp.js\n@@ -12,10 +12,11 @@\n  * @api private\n  */\n \n-function GNTP(type) {\n-    this.host = 'localhost';\n-    this.port = 23053;\n+function GNTP(type, opts) {\n+    opts = opts || {};\n     this.type = type;\n+    this.host = opts.host || 'localhost';\n+    this.port = opts.port || 23053;\n     this.request = 'GNTP/1.0 ' + type + ' NONE' + nl;\n     this.resources = [];\n     this.attempts = 0;\n",
+					"match": false,
+					"packageHash": "b9c1551a4acf23dce60f68ee0ce5b8270eb598a21e5d1bb6f8cb7737126d854a",
+					"size": 5105,
+					"sourceHash": "190b69962a89cc91f26abe85d7099bfaa569b59fc945ba0be86a0c331cff7607",
+					"status": "content"
+				},
+				"lib/growly.js": {
+					"diff": "--- published/lib/growly.js\n+++ rebuilt/lib/growly.js\n@@ -12,10 +12,12 @@\n     this.labels = undefined;\n     this.count = 0;\n     this.registered = false;\n+    this.host = undefined;\n+    this.port = undefined;\n }\n \n /**\n- * Returns an array of label strings extracted from each notification object in \n+ * Returns an array of label strings extracted from each notification object in\n  * `Growly.notifications`.\n  *\n  * @param {Array} notifications\n@@ -30,8 +32,21 @@\n };\n \n /**\n- * Register an application with the name `appname` (required), icon `appicon`, and \n- * a list of notification types `notifications`. If provided, `callback` will be \n+ * Set the host to be used by GNTP requests.\n+ *\n+ * @param {String} host\n+ * @param {Number} port\n+ * @api public\n+ */\n+\n+Growly.prototype.setHost = function(host, port) {\n+    this.host = host;\n+    this.port = port;\n+};\n+\n+/**\n+ * Register an application with the name `appname` (required), icon `appicon`, and\n+ * a list of notification types `notifications`. If provided, `callback` will be\n  * called when the request completes with the first argument being an `err` error\n  * object if the request failed.\n  *\n@@ -44,7 +59,7 @@\n  *  - `.icon` default icon notifications of this type should use (url, file path, or Buffer object)\n  *\n  *  Example registration:\n- *      \n+ *\n  *      growl.register('My Application', 'path/to/icon.png', [\n  *          { label: 'success', dispname: 'Success', icon: 'path/to/success.png' },\n  *          { label: 'warning', dispname: 'Warning', icon: 'path/to/warning.png', enabled: false }\n@@ -80,7 +95,7 @@\n     this.labels = this.getLabels();\n     this.registered = true;\n \n-    gntp = new GNTP('REGISTER');\n+    gntp = new GNTP('REGISTER', { host: this.host, port: this.port });\n     gntp.add('Application-Name', appname);\n     gntp.add('Application-Icon', appicon);\n     gntp.add('Notifications-Count', notifications.length);\n@@ -109,6 +124,7 @@\n  *  - `.icon` url, file path, or Buffer instance for the notification's icon.\n  *  - `.sticky` whether or not to sticky the notification (defaults to false)\n  *  - `.priority` the priority of the notification from lowest (-2) to highest (2)\n+ *  - `.coalescingId` replace/update the matching previous notification. May be ignored.\n  *\n  * If provided, `callback` will be called when the user interacts with the notification.\n  * The first argument will be an `err` error object, and the second argument an `action`\n@@ -127,13 +143,13 @@\n  */\n \n Growly.prototype.notify = function(text, opts, callback) {\n-    var self = this, \n+    var self = this,\n         gntp;\n \n     /* Lazy registration. */\n     if (!this.registered) {\n         this.register(this.appname, function(err) {\n-            if (err) console.log(err); \n+            if (err) console.log(err);\n             self.notify.call(self, text, opts, callback);\n         });\n         return;\n@@ -146,7 +162,7 @@\n         opts = {};\n     }\n \n-    gntp = new GNTP('NOTIFY');\n+    gntp = new GNTP('NOTIFY', { host: this.host, port: this.port });\n     gntp.add('Application-Name', this.appname);\n     gntp.add('Notification-Name', opts.label || this.labels[0]);\n     gntp.add('Notification-ID', ++this.count);\n@@ -155,7 +171,7 @@\n     gntp.add('Notification-Sticky', opts.sticky ? 'True' : 'False');\n     gntp.add('Notification-Priority', opts.priority);\n     gntp.add('Notification-Icon', opts.icon);\n-    gntp.add('Notification-Coalescing-ID', undefined);\n+    gntp.add('Notification-Coalescing-ID', opts.coalescingId || undefined);\n     gntp.add('Notification-Callback-Context', callback ? 'context' : undefined);\n     gntp.add('Notification-Callback-Context-Type', callback ? 'string' : undefined);\n     gntp.add('Notification-Callback-Target', undefined);\n",
+					"match": false,
+					"packageHash": "c6f6a74e8cd873515dce42be26ef90aeae571fdd11faf802ee947ae716c4730d",
+					"size": 5884,
+					"sourceHash": "86065ee95703286ff0923be3b72d8dc51d1bfac7813d250147fc47dcee6ab9df",
+					"status": "content"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -1,6 +1,6 @@\n {\n     \"name\": \"growly\",\n-    \"version\": \"1.1.1\",\n+    \"version\": \"1.3.0\",\n     \"description\": \"Simple zero-dependency Growl notifications using GNTP.\",\n     \"keywords\": [\"growl\", \"growly\", \"snarl\", \"notifications\", \"gntp\", \"messages\"],\n     \"author\": \"Ibrahim Al-Rajhi <abrahamalrajhi@gmail.com> (http://ibrahimalrajhi.com/)\",\n",
+					"match": false,
+					"packageHash": "d0d7d8dd2bc6eb8050403717a744983c655d4bac50caa1d46bf2cb214d3f6787",
+					"size": 544,
+					"sourceHash": "3cd89bff1fd1da692351f369c2e3524b304d9fbf176a6e977e90048344db006e",
+					"status": "content"
+				}
+			},
+			"summary": {
+				"differentFiles": 4,
+				"matchingFiles": 5,
+				"missingInPackage": 0,
+				"missingInSource": 0,
+				"score": 0.5555555555555556,
+				"totalFiles": 9
+			}
+		},
+		"prodDependencies": []
+	}
+]
