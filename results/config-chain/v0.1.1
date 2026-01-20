@@ -1,0 +1,90 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-20T14:25:51.146Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:11.7.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "config-chain@0.1.1",
+			"name": "config-chain",
+			"version": "0.1.1",
+			"location": "https://registry.npmjs.org/config-chain/-/config-chain-0.1.1.tgz",
+			"integrity": "sha512-bFZaCsKyqFruDkTTsNlX4kxEn50vG+OD5F46JPVWayomBNMUTuC6W/Q1ETunHLsVSJOQpeU8OTF0WB1gLS8iHg==",
+			"publishedAt": "2012-07-30T20:09:57.328Z",
+			"publishedWith": {
+				"node": null,
+				"npm": null
+			},
+			"dependencies": {
+				"proto-list": "1"
+			}
+		},
+		"source": {
+			"integrity": null,
+			"location": "https://github.com/dominictarr/config-chain.git",
+			"spec": "github:dominictarr/config-chain#HEAD"
+		},
+		"comparisonHash": "9ef46a5bd31291e57cbab41e2f17c57bd6da0b5b",
+		"diff": {
+			"files": {
+				".npmignore": {
+					"match": false,
+					"packageHash": "a1cd9589c07a23e3a67e8c6017e10a46d26085a85c7b55dee70192c788b1d1f8",
+					"size": 42,
+					"status": "missing-in-source"
+				},
+				"index.js": {
+					"diff": "--- published/index.js\n+++ rebuilt/index.js\n@@ -1,47 +1,282 @@\n-\n var ProtoList = require('proto-list')\n   , path = require('path')\n   , fs = require('fs')\n+  , ini = require('ini')\n+  , EE = require('events').EventEmitter\n+  , url = require('url')\n+  , http = require('http')\n \n var exports = module.exports = function () {\n   var args = [].slice.call(arguments)\n-    , conf = new ProtoList()\n-    conf.push(conf.store = {})\n+    , conf = new ConfigChain()\n+\n   while(args.length) {\n     var a = args.shift()\n     if(a) conf.push\n-          ( 'string' === typeof a \n-            ? json(a) \n+          ( 'string' === typeof a\n+            ? json(a)\n             : a )\n   }\n \n   return conf\n }\n+\n //recursively find a file...\n \n var find = exports.find = function () {\n   var rel = path.join.apply(null, [].slice.call(arguments))\n-  \n+\n   function find(start, rel) {\n     var file = path.join(start, rel)\n     try {\n       fs.statSync(file)\n       return file\n     } catch (err) {\n-      if(start != '/')\n+      if(path.dirname(start) !== start) // root\n         return find(path.dirname(start), rel)\n     }\n   }\n   return find(__dirname, rel)\n }\n \n+var parse = exports.parse = function (content, file, type) {\n+  content = '' + content\n+  // if we don't know what it is, try json and fall back to ini\n+  // if we know what it is, then it must be that.\n+  if (!type) {\n+    try { return JSON.parse(content) }\n+    catch (er) { return ini.parse(content) }\n+  } else if (type === 'json') {\n+    if (this.emit) {\n+      try { return JSON.parse(content) }\n+      catch (er) { this.emit('error', er) }\n+    } else {\n+      return JSON.parse(content)\n+    }\n+  } else {\n+    return ini.parse(content)\n+  }\n+}\n+\n var json = exports.json = function () {\n-  var file = path.join.apply(null, [].slice.call(arguments))\n-  \n+  var args = [].slice.call(arguments).filter(function (arg) { return arg != null })\n+  var file = path.join.apply(null, args)\n+  var content\n   try {\n-    return JSON.parse(fs.readFileSync(file,'utf-8'))\n+    content = fs.readFileSync(file,'utf-8')\n   } catch (err) {\n-    err.message += ' when attempting to read configuration from:' + file\n-    throw err\n+    return\n+  }\n+  return parse(content, file, 'json')\n+}\n+\n+var env = exports.env = function (prefix, env) {\n+  env = env || process.env\n+  var obj = {}\n+  var l = prefix.length\n+  for(var k in env) {\n+    if(k.indexOf(prefix) === 0)\n+      obj[k.substring(l)] = env[k]\n+  }\n+\n+  return obj\n+}\n+\n+exports.ConfigChain = ConfigChain\n",
+					"match": false,
+					"packageHash": "131100137f96110b70f3aa9d38559aeb8c91096d7ea4135138321802557e2abd",
+					"size": 1058,
+					"sourceHash": "07928a3382f69cd611618740c15bef670b32470e978bfc3f1307af29fa251d42",
+					"status": "content"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -1,12 +1,30 @@\n-{ \"name\": \"config-chain\"\n-, \"version\": \"0.1.1\"\n-, \"description\": \"HANDLE CONFIGURATION ONCE AND FOR ALL\"\n-, \"homepage\": \"http://github.com/dominictarr/config-chain\"\n-, \"repository\": \n-  { \"type\": \"git\"\n-  , \"url\": \"https://github.com/dominictarr/config-chain.git\" }\n-, \"dependencies\": {\n-    \"proto-list\": \"1\"\n+{\n+  \"name\": \"config-chain\",\n+  \"version\": \"1.1.12\",\n+  \"licenses\": [\n+    {\n+      \"type\": \"MIT\",\n+      \"url\": \"https://raw.githubusercontent.com/dominictarr/config-chain/master/LICENCE\"\n+    }\n+  ],\n+  \"description\": \"HANDLE CONFIGURATION ONCE AND FOR ALL\",\n+  \"homepage\": \"http://github.com/dominictarr/config-chain\",\n+  \"repository\": {\n+    \"type\": \"git\",\n+    \"url\": \"https://github.com/dominictarr/config-chain.git\"\n+  },\n+  \"files\": [\n+    \"index.js\"\n+  ],\n+  \"dependencies\": {\n+    \"proto-list\": \"~1.2.1\",\n+    \"ini\": \"^1.3.4\"\n+  },\n+  \"devDependencies\": {\n+    \"tap\": \"0.3.0\"\n+  },\n+  \"author\": \"Dominic Tarr <dominic.tarr@gmail.com> (http://dominictarr.com)\",\n+  \"scripts\": {\n+    \"test\": \"tap test/*\"\n   }\n-, \"author\": \"Dominic Tarr <dominic.tarr@gmail.com> (http://dominictarr.com)\"\n }\n",
+					"match": false,
+					"packageHash": "ff0f68eba8f4dc255f7c1b37792f6911809dca48547b8496f160b32c74345c1b",
+					"size": 385,
+					"sourceHash": "465c2504ae2b1bc1c8cb3a3652b92d93cb53586a115f39a0862c3c02c77db52d",
+					"status": "content"
+				},
+				"readme.markdown": {
+					"diff": "--- published/readme.markdown\n+++ rebuilt/readme.markdown\n@@ -1,10 +1,49 @@\n-#config-chain\n+# config-chain\n \n-USE THIS MODULE TO LOAD ALL YOUR CONFIGURATIONS\n+A module for loading custom configurations\n+\n+## NOTE: Feature Freeze\n+\n+[![locked](http://badges.github.io/stability-badges/dist/locked.svg)](http://github.com/badges/stability-badges)\n+\n+This module is frozen.\n+\n+In general, we recommend using [rc](https://github.com/dominictarr/rc) instead,\n+but as [npm](https://github.com/npmjs/npm) depends on this, it cannot be changed.\n+\n+\n+## Install\n+\n+```sh \n+yarn add config-chain\n+\n+# npm users\n+npm install --save config-chain\n+```\n+\n+## Usage\n+\n+```js\n+const cc = require('config-chain');\n+\n+console.log(cc.env('TERM_', process.env));\n+/*\n+{ SESSION_ID: 'w1:5F38',\n+  PROGRAM_VERSION: '3.1.2',\n+  PROGRAM: 'iTerm.app' }\n+*/\n+```\n+\n+The `.env` function gets all the keys on the provided object which are\n+prefixed by the specified prefix, removes the prefix, and puts the values on a new object.\n+\n+<br/>\n+\n+## Full Usage\n \n ``` js\n \n-  //npm install config-chain\n+  // npm install config-chain\n \n   var cc = require('config-chain')\n     , opts = require('optimist').argv //ALWAYS USE OPTIMIST FOR COMMAND LINE OPTIONS.\n@@ -17,45 +56,202 @@\n   //strings are interpereted as filenames.\n   //will be loaded synchronously\n \n-  var conf = \n+  var conf =\n   cc(\n     //OVERRIDE SETTINGS WITH COMMAND LINE OPTS\n-    opts,  \n-    \n+    opts,\n+\n+    //ENV VARS IF PREFIXED WITH 'myApp_'\n+\n+    cc.env('myApp_'), //myApp_foo = 'like this'\n+\n     //FILE NAMED BY ENV\n-    path.join(__dirname,  'config.' + env + '.json'), \n+    path.join(__dirname,  'config.' + env + '.json'),\n \n     //IF `env` is PRODUCTION\n-    env === 'prod' \n+    env === 'prod'\n       ? path.join(__dirname, 'special.json') //load a special file\n       : null //NULL IS IGNORED!\n \n     //SUBDIR FOR ENV CONFIG\n-    path.join(__dirname,  'config', env, 'config.json'), \n-    \n+    path.join(__dirname,  'config', env, 'config.json'),\n+\n     //SEARCH PARENT DIRECTORIES FROM CURRENT DIR FOR FILE\n     cc.find('config.json'),\n-    \n+\n     //PUT DEFAULTS LAST\n-    { \n+    {\n       host: 'localhost'\n       port: 8000\n     })\n \n   var host = conf.get('host')\n-  \n+\n",
+					"match": false,
+					"packageHash": "8cdc9d0659badecd0d2ed11729f5592e2d2ce8c1647bb79c3e377a52572447fc",
+					"size": 1468,
+					"sourceHash": "fcc64669d019226a1c2fe5b1e4e0eb6626c54c1ea02c694b11925adeae675f11",
+					"status": "content"
+				},
+				"test/find-file.js": {
+					"match": false,
+					"packageHash": "d00398f97f40f6b83646febeed7b8a57517b627cb7c77e5a58239ac2226896c0",
+					"size": 294,
+					"status": "missing-in-source"
+				}
+			},
+			"summary": {
+				"differentFiles": 3,
+				"matchingFiles": 1,
+				"missingInPackage": 0,
+				"missingInSource": 2,
+				"score": 0.16666666666666666,
+				"totalFiles": 6
+			}
+		},
+		"prodDependencies": [
+			{
+				"name": "ini",
+				"version": "1.3.8"
+			},
+			{
+				"name": "proto-list",
+				"version": "1.2.4"
+			}
+		]
+	}
+]
