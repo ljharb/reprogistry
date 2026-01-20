@@ -1,0 +1,184 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-20T07:31:02.485Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:11.7.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "gunzip-maybe@0.0.0",
+			"name": "gunzip-maybe",
+			"version": "0.0.0",
+			"location": "https://registry.npmjs.org/gunzip-maybe/-/gunzip-maybe-0.0.0.tgz",
+			"integrity": "sha512-Zszo7OxmalHl6al8twrRFA5NAgB6ZtyjAdm+tE8OspAnVNVu+SPVZ7nbTTjqxgugMEQmNt+wq401UF9s818+4Q==",
+			"publishedAt": "2014-05-07T16:24:34.361Z",
+			"publishedWith": {
+				"node": null,
+				"npm": "1.4.9"
+			},
+			"dependencies": {
+				"through2": "^0.4.1"
+			}
+		},
+		"source": {
+			"integrity": null,
+			"location": "git://github.com/mafintosh/gunzip-maybe",
+			"spec": "github:mafintosh/gunzip-maybe#HEAD"
+		},
+		"comparisonHash": "9ef46a5bd31291e57cbab41e2f17c57bd6da0b5b",
+		"diff": {
+			"files": {
+				".npmignore": {
+					"match": false,
+					"packageHash": "16d30e4462189fb14dd611bdb708c510630c576a1f35b9383e89a4352da36c97",
+					"size": 13,
+					"status": "missing-in-source"
+				},
+				"README.md": {
+					"diff": "--- published/README.md\n+++ rebuilt/README.md\n@@ -1,14 +1,18 @@\n # gunzip-maybe\n \n-Transform stream that gunzips its input if it is gunzipped and just echoes it if not.\n+Transform stream that gunzips its input if it is gzipped and just echoes it if not.\n \n-\tnpm install gunzip-maybe\n+```\n+npm install gunzip-maybe\n+```\n \n [![build status](http://img.shields.io/travis/mafintosh/gunzip-maybe.svg?style=flat)](http://travis-ci.org/mafintosh/gunzip-maybe)\n+[![js-standard-style](https://img.shields.io/badge/code%20style-standard-brightgreen.svg?style=flat)](https://github.com/feross/standard)\n \n ## Usage\n \n-Simply pipe a gzipped (or not gzipped) stream to `gunzip()` and read the unzipped content.\n+Simply pipe a gzipped (or not gzipped) stream to `gunzip([maxRecursion = 3])` and read the unzipped content.\n+`maxRecursion` protects the unzip mechanism from an infinite recursion in case of a malicious archive.\n \n ``` js\n // this will gunzip gzippedStream\n@@ -18,6 +22,14 @@\n plainTextStream.pipe(gunzip()).pipe(process.stdout);\n ```\n \n+## CLI usage\n+\n+```\n+npm install -g gunzip-maybe\n+gunzip-maybe --help # will print out usage\n+```\n+\n+\n ## License\n \n-MIT\n\\ No newline at end of file\n+MIT\n",
+					"match": false,
+					"packageHash": "4942841ab2c44b7cedf7f2d266c7bc30cecc47a3eba4eea3c7413ea1d7e9a65c",
+					"size": 569,
+					"sourceHash": "e28aea1c9bf0a2d5e29a201b300e82c49395bd0c7879a14f699879ac931bdfd2",
+					"status": "content"
+				},
+				"index.js": {
+					"diff": "--- published/index.js\n+++ rebuilt/index.js\n@@ -1,45 +1,32 @@\n-var zlib = require('zlib');\n-var through2 = require('through2');\n+var zlib = require('zlib')\n+var peek = require('peek-stream')\n+var through = require('through2')\n+var pumpify = require('pumpify')\n+var isGzip = require('is-gzip')\n+var isDeflate = require('is-deflate')\n+\n+var isCompressed = function (data) {\n+  if (isGzip(data)) return 1\n+  if (isDeflate(data)) return 2\n+  return 0\n+}\n+\n+var gunzip = function (maxRecursion) {\n+  if (maxRecursion === undefined) maxRecursion = 3\n+\n+  return peek({newline: false, maxBuffer: 10}, function (data, swap) {\n+    if (maxRecursion < 0) return swap(new Error('Maximum recursion reached'))\n+    switch (isCompressed(data)) {\n+      case 1:\n+        swap(null, pumpify(zlib.createGunzip(), gunzip(maxRecursion - 1)))\n+        break\n+      case 2:\n+        swap(null, pumpify(zlib.createInflate(), gunzip(maxRecursion - 1)))\n+        break\n+      default:\n+        swap(null, through())\n+    }\n+  })\n+}\n \n-module.exports = function() {\n-\tvar gunzip = zlib.createGunzip();\n-\tvar buffer = [];\n-\tvar callback;\n-\n-\tvar writeRaw = function(chunk, enc, cb) {\n-\t\tcb(null, chunk);\n-\t};\n-\n-\tvar writeGunzip = function(chunk, enc, cb) {\n-\t\tif (buffer) {\n-\t\t\tbuffer.push(chunk);\n-\t\t\tcallback = cb;\n-\t\t}\n-\n-\t\tgunzip.write(chunk, enc, function(err) {\n-\t\t\tif (err) return cb(err);\n-\n-\t\t\tvar data;\n-\t\t\twhile ((data = gunzip.read())) {\n-\t\t\t\ttransform.push(data);\n-\t\t\t\tbuffer = null;\n-\t\t\t}\n-\n-\t\t\tcb();\n-\t\t});\n-\t};\n-\n-\tgunzip.once('error', function() {\n-\t\twrite = writeRaw;\n-\t\twhile (buffer.length) transform.push(buffer.shift());\n-\t\tbuffer = null;\n-\t\treturn callback();\n-\t});\n-\n-\tvar write = writeGunzip;\n-\tvar transform = through2(function(chunk, enc, cb) {\n-\t\twrite(chunk, enc, cb);\n-\t});\n-\n-\treturn transform;\n-};\n+module.exports = gunzip\n",
+					"match": false,
+					"packageHash": "a88fb4891d89c874e6305b65c04b4eac7add238cce1162aca27f02ba0942e296",
+					"size": 818,
+					"sourceHash": "29c4c3f988710dae62ca5669dc46264255b2a027a2b492312e58bf9d1df650a8",
+					"status": "content"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -1,16 +1,42 @@\n {\n   \"name\": \"gunzip-maybe\",\n-  \"description\": \"Transform stream that gunzips its input if it is gunzipped and just echoes it if not\",\n-  \"version\": \"0.0.0\",\n-  \"repository\": \"mafintosh/gunzip-maybe\",\n+  \"description\": \"Transform stream that gunzips its input if it is gzipped and just echoes it if not\",\n+  \"version\": \"1.4.2\",\n+  \"repository\": {\n+    \"type\": \"git\",\n+    \"url\": \"https://github.com/mafintosh/gunzip-maybe\"\n+  },\n+  \"license\": \"MIT\",\n   \"dependencies\": {\n-    \"through2\": \"^0.4.1\"\n+    \"browserify-zlib\": \"^0.1.4\",\n+    \"is-deflate\": \"^1.0.0\",\n+    \"is-gzip\": \"^1.0.0\",\n+    \"peek-stream\": \"^1.1.0\",\n+    \"pumpify\": \"^1.3.3\",\n+    \"through2\": \"^2.0.3\"\n   },\n   \"devDependencies\": {\n     \"concat-stream\": \"^1.4.5\",\n-    \"tape\": \"^2.12.3\"\n+    \"standard\": \"^9.0.0\",\n+    \"tape\": \"^4.6.3\"\n   },\n   \"scripts\": {\n-    \"test\": \"tape test.js\"\n-  }\n+    \"test\": \"standard && tape test.js\"\n+  },\n+  \"bin\": {\n+    \"gunzip-maybe\": \"./bin.js\"\n+  },\n+  \"browser\": {\n+    \"zlib\": \"browserify-zlib\"\n+  },\n+  \"bugs\": {\n+    \"url\": \"https://github.com/mafintosh/gunzip-maybe/issues\"\n+  },\n+  \"homepage\": \"https://github.com/mafintosh/gunzip-maybe\",\n+  \"main\": \"index.js\",\n+  \"author\": \"Mathias Buus (@mafintosh)\",\n+  \"coordinates\": [\n+    55.6666904,\n+    12.5797771\n+  ]\n }\n",
+					"match": false,
+					"packageHash": "7b54be20af0bc0d4f93c6caf46873b31cb87f8c529dd5a9654d6a18416353461",
+					"size": 376,
+					"sourceHash": "9eeec4a22b9800d6e384d64f69f000353ef654b52abf6acbbee1e7cba5e10b6e",
+					"status": "content"
+				},
+				"test.js": {
+					"diff": "--- published/test.js\n+++ rebuilt/test.js\n@@ -1,24 +1,70 @@\n-var tape = require('tape');\n-var zlib = require('zlib');\n-var concat = require('concat-stream');\n-var fs = require('fs');\n-var gunzip = require('./');\n-\n-tape('gunzipped input', function(t) {\n-\tfs.createReadStream(__filename)\n-\t\t.pipe(zlib.createGzip())\n-\t\t.pipe(gunzip())\n-\t\t.pipe(concat(function(data) {\n-\t\t\tt.same(data, fs.readFileSync(__filename));\n-\t\t\tt.end();\n-\t\t}))\n-});\n-\n-tape('regular input', function(t) {\n-\tfs.createReadStream(__filename)\n-\t\t.pipe(gunzip())\n-\t\t.pipe(concat(function(data) {\n-\t\t\tt.same(data, fs.readFileSync(__filename));\n-\t\t\tt.end();\n-\t\t}))\n-});\n\\ No newline at end of file\n+var tape = require('tape')\n+var zlib = require('zlib')\n+var concat = require('concat-stream')\n+var fs = require('fs')\n+var gunzip = require('./')\n+\n+tape('deflated input', function (t) {\n+  fs.createReadStream(__filename)\n+    .pipe(zlib.createDeflate())\n+    .pipe(gunzip())\n+    .pipe(concat(function (data) {\n+      t.same(data, fs.readFileSync(__filename))\n+      t.end()\n+    }))\n+})\n+\n+tape('deflated multiple times', function (t) {\n+  fs.createReadStream(__filename)\n+    .pipe(zlib.createDeflate())\n+    .pipe(zlib.createDeflate())\n+    .pipe(gunzip())\n+    .pipe(concat(function (data) {\n+      t.same(data, fs.readFileSync(__filename))\n+      t.end()\n+    }))\n+})\n+\n+tape('gunzipped input', function (t) {\n+  fs.createReadStream(__filename)\n+    .pipe(zlib.createGzip())\n+    .pipe(gunzip())\n+    .pipe(concat(function (data) {\n+      t.same(data, fs.readFileSync(__filename))\n+      t.end()\n+    }))\n+})\n+\n+tape('gunzipped multiple times', function (t) {\n+  fs.createReadStream(__filename)\n+    .pipe(zlib.createGzip())\n+    .pipe(zlib.createGzip())\n+    .pipe(gunzip())\n+    .pipe(concat(function (data) {\n+      t.same(data, fs.readFileSync(__filename))\n+      t.end()\n+    }))\n+})\n+\n+tape('regular input', function (t) {\n+  fs.createReadStream(__filename)\n+    .pipe(gunzip())\n+    .pipe(concat(function (data) {\n+      t.same(data, fs.readFileSync(__filename))\n+      t.end()\n+    }))\n+})\n+\n+tape('limited recursion', function (t) {\n+  t.plan(1)\n+  fs.createReadStream(__filename)\n+    .pipe(zlib.createGzip())\n+    .pipe(zlib.createGzip())\n+    .pipe(gunzip(1))\n+    .on('finish', function () {\n+      t.fail('should not finish')\n+    })\n+    .on('error', function (err) {\n+      t.same(err.message, 'Maximum recursion reached')\n+    })\n+})\n",
+					"match": false,
+					"packageHash": "ef308eccf06e1b725299196235a90208b1f171f5ed947d966a86586b20f6a2ed",
+					"size": 551,
+					"sourceHash": "ffb33891c306b38843c06c17bf7deaea67a18d3bb63637e7a2cbf692be7d0801",
+					"status": "content"
+				},
+				"LICENSE": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"bin.js": {
+					"match": false,
+					"status": "missing-in-package"
+				}
+			},
+			"summary": {
+				"differentFiles": 4,
+				"matchingFiles": 1,
+				"missingInPackage": 2,
+				"missingInSource": 1,
+				"score": 0.125,
+				"totalFiles": 8
+			}
+		},
+		"prodDependencies": [
+			{
+				"name": "browserify-zlib",
+				"version": "0.1.4"
+			},
+			{
+				"name": "buffer-from",
+				"version": "1.1.2"
+			},
+			{
+				"name": "core-util-is",
+				"version": "1.0.3"
+			},
+			{
+				"name": "duplexify",
+				"version": "3.7.1"
+			},
+			{
+				"name": "end-of-stream",
+				"version": "1.4.5"
+			},
+			{
+				"name": "inherits",
+				"version": "2.0.4"
+			},
+			{
+				"name": "is-deflate",
+				"version": "1.0.0"
+			},
+			{
+				"name": "is-gzip",
+				"version": "1.0.0"
+			},
+			{
+				"name": "isarray",
+				"version": "1.0.0"
+			},
+			{
+				"name": "once",
+				"version": "1.4.0"
+			},
+			{
+				"name": "pako",
+				"version": "0.2.9"
+			},
+			{
+				"name": "peek-stream",
+				"version": "1.1.3"
+			},
+			{
+				"name": "process-nextick-args",
+				"version": "2.0.1"
+			},
+			{
+				"name": "pump",
+				"version": "2.0.1"
+			},
+			{
+				"name": "pumpify",
+				"version": "1.5.1"
+			},
+			{
+				"name": "readable-stream",
+				"version": "2.3.8"
+			},
+			{
+				"name": "safe-buffer",
+				"version": "5.1.2"
+			},
+			{
+				"name": "stream-shift",
+				"version": "1.0.3"
+			},
+			{
+				"name": "string_decoder",
+				"version": "1.1.1"
+			},
+			{
+				"name": "through2",
+				"version": "2.0.5"
+			},
+			{
+				"name": "util-deprecate",
+				"version": "1.0.2"
+			},
+			{
+				"name": "wrappy",
+				"version": "1.0.2"
+			},
+			{
+				"name": "xtend",
+				"version": "4.0.2"
+			}
+		]
+	}
+]
