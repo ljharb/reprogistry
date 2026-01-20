@@ -1,0 +1,108 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-20T13:59:32.434Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:3.10.9",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "capture-exit@1.0.1",
+			"name": "capture-exit",
+			"version": "1.0.1",
+			"location": "https://registry.npmjs.org/capture-exit/-/capture-exit-1.0.1.tgz",
+			"integrity": "sha512-KuLO0OGdMdwD/E3UoUF1M5bgBqNrEvDNpQAdsDEq9PsrzqjRU3Bq+Dunhoi1ABvRfJeTOTljVglrnhtkrKHv2A==",
+			"publishedAt": "2016-11-15T07:01:33.252Z",
+			"publishedWith": {
+				"node": "7.1.0",
+				"npm": "3.10.9"
+			},
+			"dependencies": {
+				"rsvp": "^3.3.3"
+			}
+		},
+		"source": {
+			"integrity": null,
+			"location": "git+https://github.com/stefanpenner/capture-exit.git",
+			"spec": "github:stefanpenner/capture-exit#6190e2d74eb0514df1838dd92c36145d8efade78"
+		},
+		"comparisonHash": "9ef46a5bd31291e57cbab41e2f17c57bd6da0b5b",
+		"diff": {
+			"files": {
+				".npmignore": {
+					"match": false,
+					"packageHash": "16d30e4462189fb14dd611bdb708c510630c576a1f35b9383e89a4352da36c97",
+					"size": 13,
+					"status": "missing-in-source"
+				},
+				".travis.yml": {
+					"match": false,
+					"packageHash": "025c5ff2172ed04cecb404ed7c7e2eef22ed403e3abab768f01e880f44cb649a",
+					"size": 448,
+					"status": "missing-in-source"
+				},
+				"README.md": {
+					"diff": "--- published/README.md\n+++ rebuilt/README.md\n@@ -1,7 +1,7 @@\n # capture-exit\n \n [![Build status](https://ci.appveyor.com/api/projects/status/8044m918rwic8b9n/branch/master?svg=true)](https://ci.appveyor.com/project/embercli/capture-exit/branch/master)\n-[![Build Status](https://travis-ci.org/stefanpenner/capture-exit.svg?branch=master)](https://travis-ci.org/stefanpenner/capture-exit)\n+[![Build Status](https://travis-ci.org/ember-cli/capture-exit.svg?branch=master)](https://travis-ci.org/ember-cli/capture-exit)\n \n Allow cooprative async exit handlers, we unfortunately must hijack\n process.exit.\n@@ -10,3 +10,29 @@\n similar handlers\n \n for example, see: [sindresorhus/ora#27](https://github.com/sindresorhus/ora/issues/27)\n+\n+Differences between `process.on('exit')` and `captureExit.onExit(...)` => https://github.com/ember-cli/capture-exit/issues/12\n+\n+\n+### Installation\n+\n+```sh\n+yarn add capture-exit\n+// or\n+npm install --save capture-exit\n+```\n+\n+### Usage\n+\n+```js\n+// as early in startup as possible\n+require('capture-exit').captureExit();\n+\n+// when you want to schedule some work on exit:\n+function onExit() {\n+  return something.processWillExit(); // you can return promises, which will pause exit until fulfilled\n+}\n+\n+require('capture-exit').onExit(onExit); // add an exit handler\n+require('capture-exit').offExit(onExit); // allows one to remove an exit handle if it is not longer required\n+```\n",
+					"match": false,
+					"packageHash": "14121adc70f1e865a8d5c533966901003d8abb8fcf20660c6d31d25371a3107b",
+					"size": 587,
+					"sourceHash": "d1453595ae1d1ecde35919965c62f22c54875ecff40641f701d9b7406ebc7077",
+					"status": "content"
+				},
+				"appveyor.yml": {
+					"match": false,
+					"packageHash": "71ccc063cd3765d8d5f575ae39cf37c6ebe150f81823446e242cd2b8a44ddd95",
+					"size": 812,
+					"status": "missing-in-source"
+				},
+				"example.js": {
+					"match": false,
+					"packageHash": "c489aceb02ca069898a5e9426e1deb8336dd73c5c5a20a8c5080010a2836cade",
+					"size": 493,
+					"status": "missing-in-source"
+				},
+				"index.js": {
+					"diff": "--- published/index.js\n+++ rebuilt/index.js\n@@ -3,6 +3,36 @@\n var exit;\n var handlers = [];\n var lastTime;\n+var isExiting = false;\n+\n+process.on('beforeExit', function (code) {\n+  if (handlers.length === 0) { return; }\n+\n+  var own = lastTime = module.exports._flush(lastTime, code)\n+    .finally(function () {\n+      // if an onExit handler has called process.exit, do not disturb\n+      // `lastTime`.\n+      //\n+      // Otherwise, clear `lastTime` so that we know to synchronously call the\n+      // real `process.exit` with the given exit code, when our captured\n+      // `process.exit` is called during a `process.on('exit')` handler\n+      //\n+      // This is impossible to reason about, don't feel bad.  Just look at\n+      // test-natural-exit-subprocess-error.js\n+      if (own === lastTime) {\n+        lastTime = undefined;\n+      }\n+    });\n+});\n+\n+// This exists only for testing\n+module.exports._reset = function () {\n+  module.exports.releaseExit();\n+  handlers = [];\n+  lastTime = undefined;\n+  isExiting = false;\n+  firstExitCode = undefined;\n+}\n \n /*\n  * To allow cooperative async exit handlers, we unfortunately must hijack\n@@ -21,6 +51,8 @@\n   }\n };\n \n+var firstExitCode;\n+\n module.exports.captureExit = function() {\n   if (exit) {\n     // already captured, no need to do more work\n@@ -29,15 +61,39 @@\n   exit = process.exit;\n \n   process.exit = function(code) {\n-    var own = lastTime = module.exports._flush(lastTime, code)\n+    if (handlers.length === 0 && lastTime === undefined) {\n+      // synchronously exit.\n+      //\n+      // We do this brecause either\n+      //\n+      //  1.  The process exited due to a call to `process.exit` but we have no\n+      //      async work to do because no handlers had been attached.  It\n+      //      doesn't really matter whether we take this branch or not in this\n+      //      case.\n+      //\n+      //  2.  The process exited naturally.  We did our async work during\n+      //      `beforeExit` and are in this function because someone else has\n+      //      called `process.exit` during an `on('exit')` hook.  The only way\n+      //      for us to preserve the exit code in this case is to exit\n+      //      synchronously.\n+      //\n+      return exit.call(process, code);\n+    }\n+\n+    if (firstExitCode === undefined) {\n+      firstExitCode = code;\n+    }\n+    var own = lastTime = module.exports._flush(lastTime, firstExitCode)\n       .then(function() {\n         // if another chain has started, let it exit\n         if (own !== lastTime) { return; }\n-        exit.call(process, code);\n+        exit.call(process, firstExitCode);\n       })\n       .catch(function(error) {\n         // if another chain has started, let it exit\n-        if (own !== lastTime) { return; }\n+        if (own !== lastTime) {\n+          throw error;\n+        }\n         console.error(error);\n         exit.call(process, 1);\n       });\n@@ -46,17 +102,34 @@\n \n module.exports._handlers = handlers;\n module.exports._flush = function(lastTime, code) {\n+  isExiting = true;\n   var work = handlers.splice(0, handlers.length);\n \n   return RSVP.Promise.resolve(lastTime).\n     then(function() {\n",
+					"match": false,
+					"packageHash": "24b0e7e3a824390f700dcc47d9d930d05e895ecf42073ccd95ea025971ffc449",
+					"size": 1733,
+					"sourceHash": "361b1642b5168020c16368d06cd03dc6bdd3f78a762504b5a4d60762eb29f79e",
+					"status": "content"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -1,28 +1,32 @@\n {\n   \"name\": \"capture-exit\",\n-  \"version\": \"1.0.1\",\n+  \"version\": \"2.0.0\",\n   \"description\": \"safely cleanup in signal handlers\",\n   \"main\": \"index.js\",\n   \"scripts\": {\n     \"test\": \"mocha test\",\n     \"test:debug\": \"mocha debug test\"\n   },\n-  \"repository\": {\n-    \"type\": \"git\",\n-    \"url\": \"git+https://github.com/stefanpenner/capture-exit.git\"\n-  },\n+  \"files\": [\n+    \"index.js\"\n+  ],\n+  \"repository\": \"https://github.com/ember-cli/capture-exit\",\n   \"author\": \"Stefan Penner <stefan.penner@gmail.com>\",\n-  \"license\": \"ISC\",\n+  \"license\": \"MIT\",\n   \"bugs\": {\n-    \"url\": \"https://github.com/stefanpenner/capture-exit/issues\"\n+    \"url\": \"https://github.com/ember-cli/capture-exit/issues\"\n   },\n-  \"homepage\": \"https://github.com/stefanpenner/capture-exit#readme\",\n+  \"homepage\": \"https://github.com/ember-cli/capture-exit#readme\",\n   \"devDependencies\": {\n-    \"chai\": \"^3.5.0\",\n-    \"mocha\": \"^3.1.2\",\n-    \"ora\": \"^0.3.0\"\n+    \"chai\": \"^4.3.4\",\n+    \"execa\": \"1.0.0\",\n+    \"mocha\": \"^6.2.2\",\n+    \"ora\": \"^3.4.0\"\n   },\n   \"dependencies\": {\n-    \"rsvp\": \"^3.3.3\"\n+    \"rsvp\": \"^4.8.5\"\n+  },\n+  \"engines\": {\n+    \"node\": \"6.* || 8.* || >= 10.*\"\n   }\n }\n",
+					"match": false,
+					"packageHash": "0f7784ab9ca07c22dbf7d94f540d446a29d16eece961c4787665e81c85bb2bb3",
+					"size": 683,
+					"sourceHash": "ff35e9255c317d464237265fe677ffbe23a5e88df07b0747300b0799b76a2aec",
+					"status": "content"
+				},
+				"test.js": {
+					"match": false,
+					"packageHash": "2990d065e1ba6bbe3d7b42207ba1d20b0a32fb108e90105053a125b2a4caae4d",
+					"size": 5535,
+					"status": "missing-in-source"
+				},
+				"LICENCE": {
+					"match": false,
+					"status": "missing-in-package"
+				}
+			},
+			"summary": {
+				"differentFiles": 3,
+				"matchingFiles": 0,
+				"missingInPackage": 1,
+				"missingInSource": 5,
+				"score": 0,
+				"totalFiles": 9
+			}
+		},
+		"prodDependencies": [
+			{
+				"name": "rsvp",
+				"version": "4.8.5"
+			}
+		]
+	}
+]
