@@ -1,0 +1,103 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-21T20:46:26.160Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:11.7.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "koa-cors@0.0.3",
+			"name": "koa-cors",
+			"version": "0.0.3",
+			"location": "https://registry.npmjs.org/koa-cors/-/koa-cors-0.0.3.tgz",
+			"integrity": "sha512-hVb0mWLRe8xTWeOVt3YwcX14EIwaupZEpfW1KzYTo8XAjCcICUCHQqXpc57DUevL9zc/Ogj/NqLbQ7WjK1kK9w==",
+			"publishedAt": "2013-12-30T04:37:17.243Z",
+			"publishedWith": {
+				"node": null,
+				"npm": "1.3.9"
+			},
+			"dependencies": {}
+		},
+		"source": {
+			"integrity": null,
+			"location": "https://github.com/evert0n/koa-cors.git",
+			"spec": "github:evert0n/koa-cors#HEAD"
+		},
+		"comparisonHash": "9ef46a5bd31291e57cbab41e2f17c57bd6da0b5b",
+		"diff": {
+			"files": {
+				".npmignore": {
+					"match": false,
+					"packageHash": "d11ca7319245e37c399ba3a881caf35ab073d95bf755351df4ec899077173ba3",
+					"size": 97,
+					"status": "missing-in-source"
+				},
+				"README.md": {
+					"diff": "--- published/README.md\n+++ rebuilt/README.md\n@@ -31,33 +31,49 @@\n ## Options\n \n ### origin\n-Configures the **Access-Control-Allow-Origin** CORS header. Expects a string (ex: http://example.com). Set to `true` to reflect the [request origin](http://tools.ietf.org/html/draft-abarth-origin-09), as defined by `req.header('Origin')`. Set to `false` to disable CORS. Can also be set to a function, which takes the request as the first parameter.\n \n-### methods\n-Configures the **Access-Control-Allow-Methods** CORS header. Expects a comma-delimited string (ex: 'GET,PUT,POST') or an array (ex: `['GET', 'PUT', 'POST']`).\n+Configures the **Access-Control-Allow-Origin** CORS header. Expects a string\n+(ex: http://example.com). Set to `true` to reflect the\n+[request origin](http://tools.ietf.org/html/draft-abarth-origin-09), as defined\n+by `req.header('Origin')`. Set to `false` to disable CORS. Can also be set to a\n+function, which takes the request as the first parameter.\n+\n+### expose\n+\n+Configures the **Access-Control-Expose-Headers** CORS header. Expects a\n+comma-delimited string (ex: 'WWW-Authenticate,Server-Authorization') or an array\n+(ex: `['WWW-Authenticate', 'Server-Authorization']`). Set this to pass the\n+header, otherwise it is omitted.\n \n-### headers\n-Configures the **Access-Control-Allow-Headers** CORS header. Expects a comma-delimited string (ex: 'Content-Type,Authorization') or an array (ex: `['Content-Type', 'Authorization]`). If not specified, defaults to reflecting the headers specified in the request's **Access-Control-Request-Headers** header.\n+### maxAge\n+\n+Configures the **Access-Control-Max-Age** CORS header. Set to an integer to pass\n+the header, otherwise it is omitted.\n \n ### credentials\n-Configures the **Access-Control-Allow-Credentials** CORS header. Set to `true` to pass the header, otherwise it is omitted.\n \n-### maxAge\n-Configures the **Access-Control-Allow-Max-Age** CORS header. Set to an integer to pass the header, otherwise it is omitted.\n+Configures the **Access-Control-Allow-Credentials** CORS header. Set to `true`\n+to pass the header, otherwise it is omitted.\n \n-For details on the effect of each CORS header, [read this article on HTML5 Rocks](http://www.html5rocks.com/en/tutorials/cors/).\n+### methods\n \n-## Todo\n+Configures the **Access-Control-Allow-Methods** CORS header. Expects a\n+comma-delimited string (ex: 'GET,PUT,POST') or an array (ex: `['GET', 'PUT',\n+'POST']`).\n+\n+### headers\n+Configures the **Access-Control-Allow-Headers** CORS header. Expects a\n+comma-delimited string (ex: 'Content-Type,Authorization') or an array (ex:\n+`['Content-Type', 'Authorization']`). If not specified, defaults to reflecting\n+the headers specified in the request's **Access-Control-Request-Headers**\n+header.\n+\n+\n+For details on the effect of each CORS header,\n+[read this article on HTML5 Rocks](http://www.html5rocks.com/en/tutorials/cors/).\n \n-- Unit tests\n-- Live demo\n-- More examples\n-- Enable CORS for a single route\n \n ## License\n \n [MIT License](http://www.opensource.org/licenses/mit-license.php)\n \n-## Author\n-\n-[Everton Yoshitani](https://github.com/evert0n) ([everton@notreve.com](mailto:everton@notreve.com))\n",
+					"match": false,
+					"packageHash": "05271eecb8844295b29f65137eb301c750db6f5c88f9e9a7d37636745c4e85c1",
+					"size": 2030,
+					"sourceHash": "5f3e4652fa506b7952823912417f9c73d146d474466a8b0ef68a29192b5c3906",
+					"status": "content"
+				},
+				"example.js": {
+					"match": false,
+					"packageHash": "372fd3d3166971384addeec8689fa4431daf30e133cfc5e6b509023db4c2f1c0",
+					"size": 227,
+					"status": "missing-in-source"
+				},
+				"index.js": {
+					"diff": "--- published/index.js\n+++ rebuilt/index.js\n@@ -1,88 +1,122 @@\n+'use strict';\n+\n /**\n  * CORS middleware\n  *\n  * @param {Object} [options]\n- * @return {Function}\n+ * @return {GeneratorFunction}\n  * @api public\n  */\n-module.exports = function(settings) {\n+module.exports = function getMiddleware(options) {\n   \n+  options = options || {};\n+\n   var defaults = {\n-    origin: '*',\n+    origin: true,\n     methods: 'GET,HEAD,PUT,POST,DELETE'\n   };\n \n-  settings = settings || defaults;\n+  // Set defaults\n+  for (var key in defaults) {\n+    if (!options.hasOwnProperty(key)) {\n+      options[key] = defaults[key];\n+    }\n+  }\n+\n+  // Set expose\n+  if (Array.isArray(options.expose)) {\n+    options.expose = options.expose.join(',');\n+  }\n+\n+  // Set maxAge\n+  if (typeof options.maxAge === 'number') {\n+    options.maxAge = options.maxAge.toString();\n+  } else {\n+    options.maxAge = null;\n+  }\n+\n+  // Set methods\n+  if (Array.isArray(options.methods)) {\n+    options.methods = options.methods.join(',');\n+  }\n+\n+  // Set headers\n+  if (Array.isArray(options.headers)) {\n+    options.headers = options.headers.join(',');\n+  }\n \n   return function* cors(next) {\n     \n-    var options = settings;\n-    \n-    if (typeof options === 'function') {\n-      options = options(this.request);\n-    }\n-  \n-    if (typeof options.origin === 'function') {\n-      options.origin = options.origin(this.request);\n-    }\n-  \n     /**\n      * Access Control Allow Origin\n      */\n-    if (options.origin === false) {\n-      return;\n+    var origin;\n+\n+    if (typeof options.origin === 'string') {\n+      origin = options.origin;\n     } else if (options.origin === true) {\n-      options.origin = this.header.origin;\n-    } else if (!options.origin) {\n-      options.origin = '*';\n+      origin = this.get('origin') || '*';\n+    } else if (options.origin === false) {\n+      origin = options.origin;\n+    } else if (typeof options.origin === 'function') {\n+      origin = options.origin(this.request);\n     }\n-    this.set('Access-Control-Allow-Origin', options.origin);\n-    \n+\n+    if (origin === false) {\n+       yield next; \n+       return ;\n+    }\n+\n+    this.set('Access-Control-Allow-Origin', origin);\n+\n     /**\n-     * Access Control Allow Methods\n+     * Access Control Expose Headers\n      */\n-    if (options.methods.join) {\n",
+					"match": false,
+					"packageHash": "caac88e4d49fab9826375c4fd7a7049af8830f0dd1f2ea751e42129f4fe7acdf",
+					"size": 1996,
+					"sourceHash": "4ed222f8877cc03f1370c16e474bf2da41123c4a38fbe90329be8bb20942c06f",
+					"status": "content"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -1,10 +1,10 @@\n {\n   \"name\": \"koa-cors\",\n-  \"version\": \"0.0.3\",\n-  \"description\": \"CORS middleware for koa\",\n+  \"version\": \"0.0.16\",\n+  \"description\": \"CORS middleware for Koa\",\n   \"main\": \"index.js\",\n   \"scripts\": {\n-    \"test\": \"npm test\"\n+    \"test\": \"mocha --harmony test\"\n   },\n   \"repository\": {\n     \"type\": \"git\",\n@@ -20,5 +20,11 @@\n   \"bugs\": {\n     \"url\": \"https://github.com/evert0n/koa-cors/issues\"\n   },\n-  \"homepage\": \"https://github.com/evert0n/koa-cors\"\n+  \"homepage\": \"https://github.com/evert0n/koa-cors\",\n+  \"devDependencies\": {\n+    \"koa\": \"^0.18.0\",\n+    \"chai\": \"^2.0.0\",\n+    \"mocha\": \"^2.1.0\",\n+    \"superagent\": \"^0.21.0\"\n+  }\n }\n",
+					"match": false,
+					"packageHash": "82bc60c01c9a2b18566af513b648020bf9ae9f9710eb98596f3b59f4f1d06c21",
+					"size": 486,
+					"sourceHash": "6b5bb6a1ccdddd953171c65dfb915dd878bad0d98a8a7a43ba6f05876a3227e9",
+					"status": "content"
+				},
+				".jshintrc": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"Makefile": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"examples/basic-auth-and-cors.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"examples/custom-options.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"examples/defaults-options.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"test/index.js": {
+					"match": false,
+					"status": "missing-in-package"
+				}
+			},
+			"summary": {
+				"differentFiles": 3,
+				"matchingFiles": 1,
+				"missingInPackage": 6,
+				"missingInSource": 2,
+				"score": 0.08333333333333333,
+				"totalFiles": 12
+			}
+		},
+		"prodDependencies": []
+	}
+]
