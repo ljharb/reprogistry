@@ -1,0 +1,904 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-22T07:24:16.834Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:11.8.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "kafka-node@0.1.6",
+			"name": "kafka-node",
+			"version": "0.1.6",
+			"location": "https://registry.npmjs.org/kafka-node/-/kafka-node-0.1.6.tgz",
+			"integrity": "sha512-ERQD/GBMkYESFEU3Gik807TDZmLzaSWApj90uUgAWHJbo6CBIz0KWnHLRQVxRrOlv+lwDd5C06ahtV1ooLUVVA==",
+			"publishedAt": "2014-03-23T03:31:06.562Z",
+			"publishedWith": {
+				"node": null,
+				"npm": "1.3.24"
+			},
+			"dependencies": {
+				"buffermaker": "0.0.11",
+				"binary": "~0.3.0",
+				"buffer-crc32": "~0.2.1",
+				"node-zookeeper-client": "*",
+				"lodash": "~2.2.1"
+			}
+		},
+		"source": {
+			"integrity": null,
+			"location": "git@github.com:SOHU-Co/kafka-node.git",
+			"spec": "github:SOHU-Co/kafka-node#HEAD"
+		},
+		"comparisonHash": "9ef46a5bd31291e57cbab41e2f17c57bd6da0b5b",
+		"diff": {
+			"files": {
+				".npmignore": {
+					"match": false,
+					"packageHash": "359acf20523219f4211a4c57c28a95838777404c57ef4707366f7c01656b56fc",
+					"size": 45,
+					"status": "missing-in-source"
+				},
+				"LICENSE": {
+					"diff": "--- published/LICENSE\n+++ rebuilt/LICENSE\n@@ -1,4 +1,4 @@\n-Copyright (c) 2013 sohu.com\n+Copyright (c) 2015 sohu.com\n \n Permission is hereby granted, free of charge, to any person obtaining a copy of\n this software and associated documentation files (the \"Software\"), to deal in\n",
+					"match": false,
+					"packageHash": "71613e0841659903a38fcbf52cc2e7da47de5319a1a5322d669590fef244f2fe",
+					"size": 1053,
+					"sourceHash": "000ed7f0afc107b5ae976477cfd2e6e66f114da9f168bd455df65e74c0693256",
+					"status": "content"
+				},
+				"Makefile": {
+					"match": false,
+					"packageHash": "af71f577eea2e5025d72b7c0dfacc3cdabd9d3545a47a115818353b9cb6624af",
+					"size": 240,
+					"status": "missing-in-source"
+				},
+				"README.md": {
+					"diff": "--- published/README.md\n+++ rebuilt/README.md\n@@ -1,67 +1,275 @@\n Kafka-node\n ==========\n \n-Kafka-node is a nodejs client with zookeeper integration for apache Kafka, only support the latest version of kafka 0.8 which is still under development, so this module\n-is `not production ready` so far.\n-Zookeeper does the following jobs:\n+[![Build Status](https://travis-ci.org/SOHU-Co/kafka-node.svg?branch=master)](https://travis-ci.org/SOHU-Co/kafka-node)\n+[![Coverage Status](https://coveralls.io/repos/github/SOHU-Co/kafka-node/badge.svg?branch=master)](https://coveralls.io/github/SOHU-Co/kafka-node?branch=master)\n \n-* Load broker metadata from zookeeper before we can communicate with kafka server\n-* Watch broker state, if broker changed, client will refresh broker and topic metadata stored in client\n+[![NPM](https://nodei.co/npm/kafka-node.png)](https://nodei.co/npm/kafka-node/)\n+<!--[![NPM](https://nodei.co/npm-dl/kafka-node.png?height=3)](https://nodei.co/npm/kafka-node/)-->\n \n-# Install kafka\n-Follow the [instructions](https://cwiki.apache.org/KAFKA/kafka-08-quick-start.html) on the Kafka wiki to build Kafka 0.8 and get a test broker up and running.\n+\n+Kafka-node is a Node.js client for Apache Kafka 0.9 and later.\n+\n+# Table of Contents\n+<!-- START doctoc generated TOC please keep comment here to allow auto update -->\n+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->\n+\n+\n+- [Features](#features)\n+- [Install Kafka](#install-kafka)\n+- [API](#api)\n+  - [KafkaClient](#kafkaclient)\n+  - [Producer](#producer)\n+  - [HighLevelProducer](#highlevelproducer)\n+  - [ProducerStream](#producerstream)\n+  - [Consumer](#consumer)\n+  - [ConsumerStream](#consumerstream)\n+  - [ConsumerGroup](#consumergroup)\n+  - [ConsumerGroupStream](#consumergroupstream)\n+  - [Offset](#offset)\n+  - [Admin](#admin)\n+- [Troubleshooting / FAQ](#troubleshooting--faq)\n+  - [HighLevelProducer with KeyedPartitioner errors on first send](#highlevelproducer-with-keyedpartitioner-errors-on-first-send)\n+  - [How do I debug an issue?](#how-do-i-debug-an-issue)\n+  - [For a new consumer how do I start consuming from the latest message in a partition?](#for-a-new-consumer-how-do-i-start-consuming-from-the-latest-message-in-a-partition)\n+  - [ConsumerGroup does not consume on all partitions](#consumergroup-does-not-consume-on-all-partitions)\n+  - [How to throttle messages / control the concurrency of processing messages](#how-to-throttle-messages--control-the-concurrency-of-processing-messages)\n+  - [How do I produce and consume binary data?](#how-do-i-produce-and-consume-binary-data)\n+  - [What are these node-gyp and snappy errors?](#what-are-these-node-gyp-and-snappy-errors)\n+  - [How do I configure the log output?](#how-do-i-configure-the-log-output)\n+  - [Error: Not a message set. Magic byte is 2](#error-not-a-message-set-magic-byte-is-2)\n+- [Running Tests](#running-tests)\n+- [LICENSE - \"MIT\"](#license---mit)\n+\n+<!-- END doctoc generated TOC please keep comment here to allow auto update -->\n+\n+# Features\n+* Consumer\n+* Producer and High Level Producer\n+* Node Stream Producer (Kafka 0.9+)\n+* Node Stream Consumers (ConsumerGroupStream Kafka 0.9+)\n+* Manage topic Offsets\n+* SSL connections to brokers (Kafka 0.9+)\n+* SASL/PLAIN Authentication (Kafka 0.10+)\n+* Consumer Groups managed by Kafka coordinator (Kafka 0.9+)\n+* Connect directly to brokers (Kafka 0.9+)\n+* Administrative APIs\n+\t* List Groups\n+\t* Describe Groups\n+\t* Create Topics\n+\n+# Install Kafka\n+Follow the [instructions](http://kafka.apache.org/documentation.html#quickstart) on the Kafka wiki to build Kafka and get a test broker up and running.\n \n # API\n-## Client\n-### Client(connectionString, clientId, [zkOptions])\n-* `connectionString`: Zookeeper connection string, default `localhost:2181/kafka0.8`\n-* `clientId`: This is a user supplied identifier for the client application, default `kafka-node-client`\n-* `zkOptions`: **Object**, Zookeeper options, see [node-zookeeper-client](https://github.com/alexguan/node-zookeeper-client#client-createclientconnectionstring-options)\n+\n+## KafkaClient\n+\n+New KafkaClient connects directly to Kafka brokers.\n+\n+### Options\n+* `kafkaHost` : A string of kafka broker/host combination delimited by comma for example: `kafka-1.us-east-1.myapp.com:9093,kafka-2.us-east-1.myapp.com:9093,kafka-3.us-east-1.myapp.com:9093` default: `localhost:9092`.\n+* `connectTimeout` : in ms it takes to wait for a successful connection before moving to the next host default: `10000`\n+* `requestTimeout` : in ms for a kafka request to timeout default: `30000`\n+* `autoConnect` : automatically connect when KafkaClient is instantiated otherwise you need to manually call `connect` default: `true`\n+* `connectRetryOptions` : object hash that applies to the initial connection. see [retry](https://www.npmjs.com/package/retry) module for these options.\n+* `idleConnection` : allows the broker to disconnect an idle connection from a client (otherwise the clients continues to O after being disconnected). The value is elapsed time in ms without any data written to the TCP socket. default: 5 minutes\n+* `reconnectOnIdle` : when the connection is closed due to client idling, client will attempt to auto-reconnect. default: true\n+* `maxAsyncRequests` : maximum async operations at a time toward the kafka cluster. default: 10\n+* `sslOptions`: **Object**, options to be passed to the tls broker sockets, ex. `{ rejectUnauthorized: false }` (Kafka 0.9+)\n+* `sasl`: **Object**, SASL authentication configuration (only SASL/PLAIN is currently supported), ex. `{ mechanism: 'plain', username: 'foo', password: 'bar' }` (Kafka 0.10+)\n+\n+### Example\n+\n+```javascript\n+const client = new kafka.KafkaClient({kafkaHost: '10.3.100.196:9092'});\n",
+					"match": false,
+					"packageHash": "2df20414fdb9be14d8df6bf4446c7aae5bf9687a39bd14fa0b38251f5974d016",
+					"size": 8131,
+					"sourceHash": "88b40c708719286db4beb3724f5cc971d25de427a84c6d5f36e22ffa09313947",
+					"status": "content"
+				},
+				"example/consumer.js": {
+					"match": false,
+					"packageHash": "144f2c68e598ef072ac86f9a0d26626d3d7205f1b414db19881dc2ce5db1afdc",
+					"size": 1112,
+					"status": "missing-in-source"
+				},
+				"example/metadata.js": {
+					"match": false,
+					"packageHash": "6e63ab737740def96fee51d0056a93e77903e8072e9c1d6307a950d12a43b47c",
+					"size": 611,
+					"status": "missing-in-source"
+				},
+				"example/offset.js": {
+					"match": false,
+					"packageHash": "7b8c5e53b58fd294ec2e185199b7f386e68167a78f8aeabc076670ca84d6372a",
+					"size": 780,
+					"status": "missing-in-source"
+				},
+				"example/producer.js": {
+					"match": false,
+					"packageHash": "990950c979f4c6a424c5fe3b662c569e14300d47f169852c30c96aba29cb0ecd",
+					"size": 647,
+					"status": "missing-in-source"
+				},
+				"example/topics.js": {
+					"match": false,
+					"packageHash": "6620d11437525c571074655198230c0c341cf3cdc448892a3c0c03f37ab826fa",
+					"size": 1116,
+					"status": "missing-in-source"
+				},
+				"kafka.js": {
+					"diff": "--- published/kafka.js\n+++ rebuilt/kafka.js\n@@ -1,4 +1,18 @@\n+'use strict';\n+\n+exports.HighLevelProducer = require('./lib/highLevelProducer');\n+exports.ProducerStream = require('./lib/producerStream');\n+exports.ConsumerGroup = require('./lib/consumerGroup');\n+exports.ConsumerGroupStream = require('./lib/consumerGroupStream');\n exports.Consumer = require('./lib/consumer');\n+exports.ConsumerStream = require('./lib/consumerStream');\n exports.Producer = require('./lib/producer');\n-exports.Client = require('./lib/client')\n-exports.Offset = require('./lib/offset')\n+exports.KafkaClient = require('./lib/kafkaClient');\n+exports.Offset = require('./lib/offset');\n+exports.Admin = require('./lib/admin');\n+exports.KeyedMessage = require('./lib/protocol').KeyedMessage;\n+exports.DefaultPartitioner = require('./lib/partitioner').DefaultPartitioner;\n+exports.CyclicPartitioner = require('./lib/partitioner').CyclicPartitioner;\n+exports.RandomPartitioner = require('./lib/partitioner').RandomPartitioner;\n+exports.KeyedPartitioner = require('./lib/partitioner').KeyedPartitioner;\n+exports.CustomPartitioner = require('./lib/partitioner').CustomPartitioner;\n",
+					"match": false,
+					"packageHash": "ad75371ff57dd02d2fc0e9416c0b5d5f34321a772ddca1e9060b15fe0a2e2e02",
+					"size": 174,
+					"sourceHash": "8b58de328b077ed1cc6f01e2ef8fee7f6ac41e28e26054e64a0b7fa1c39bafe8",
+					"status": "content"
+				},
+				"lib/cache.js": {
+					"match": false,
+					"packageHash": "849f9c1c4f1e40391f707f8862dff6cc03444fe44bd499f71136be0bff2a3c3c",
+					"size": 1128,
+					"status": "missing-in-source"
+				},
+				"lib/client.js": {
+					"match": false,
+					"packageHash": "471afb1293f3f688d56139182f5f5e097923fcd8f6ccd0ee8674adb22e310f83",
+					"size": 12436,
+					"status": "missing-in-source"
+				},
+				"lib/consumer.js": {
+					"diff": "--- published/lib/consumer.js\n+++ rebuilt/lib/consumer.js\n@@ -1,212 +1,324 @@\n 'use strict';\n \n-var util = require('util'),\n-    _ = require('lodash'),\n-    events = require('events'),\n-    Client = require('./client'),\n-    protocol = require('./protocol'),\n-    Offset = require('./offset'),\n-    errors = require('./errors')\n+var util = require('util');\n+var _ = require('lodash');\n+var EventEmitter = require('events');\n+var logger = require('./logging')('kafka-node:Consumer');\n+var utils = require('./utils');\n \n var DEFAULTS = {\n-    groupId: 'kafka-node-group',\n-    // Auto commit config\n-    autoCommit: true,\n-    autoCommitMsgCount: 100,\n-    autoCommitIntervalMs: 5000,\n-    // Fetch message config\n-    fetchMaxWaitMs: 100,\n-    fetchMinBytes: 1,\n-    fetchMaxBytes: 1024 * 1024,\n-    fromOffset: false\n+  groupId: 'kafka-node-group',\n+  // Auto commit config\n+  autoCommit: true,\n+  autoCommitIntervalMs: 5000,\n+  // Fetch message config\n+  fetchMaxWaitMs: 100,\n+  fetchMinBytes: 1,\n+  fetchMaxBytes: 1024 * 1024,\n+  fromOffset: false,\n+  encoding: 'utf8'\n };\n \n var nextId = (function () {\n-    var id = 0;\n-    return function () {\n-        return id++;\n-    }\n+  var id = 0;\n+  return function () {\n+    return id++;\n+  };\n })();\n \n-var Consumer = function (client, topics, options) {\n-    if (!topics) {\n-        throw new Error('Must have payloads');\n-    }\n-\n-    this.fetchCount = 0;\n-    this.client = client;\n-    this.options = _.defaults( (options||{}), DEFAULTS );\n-    this.ready = false;\n-    this.id = nextId();\n-    this.payloads = this.buildPayloads(topics);\n-    this.connect();\n+function Consumer (client, topics, options) {\n+  EventEmitter.call(this);\n+  if (!topics) {\n+    throw new Error('Must have payloads');\n+  }\n+\n+  utils.validateTopics(topics);\n+\n+  this.fetchCount = 0;\n+  this.client = client;\n+  this.options = _.defaults((options || {}), DEFAULTS);\n+  this.ready = false;\n+  this.paused = this.options.paused;\n+  this.id = nextId();\n+  this.payloads = this.buildPayloads(topics);\n+  this.connect();\n+  this.encoding = this.options.encoding;\n+\n+  if (this.options.groupId) {\n+    utils.validateConfig('options.groupId', this.options.groupId);\n+  }\n }\n-util.inherits(Consumer, events.EventEmitter);\n+util.inherits(Consumer, EventEmitter);\n \n Consumer.prototype.buildPayloads = function (payloads) {\n-    var self = this;\n-    return payloads.map(function (p) {\n-        if (typeof p !== 'object') p = { topic: p };\n-        p.partition = p.partition || 0;\n-        p.offset = p.offset || 0;\n-        p.maxBytes = self.options.fetchMaxBytes;\n-        p.metadata = 'm'; // metadata can be arbitrary\n-        return p;\n-    });\n-}\n",
+					"match": false,
+					"packageHash": "96133b87f24ba85fb3b8c5e121cb510c559cb8b552e6298a2ccfe98f80cf2422",
+					"size": 5782,
+					"sourceHash": "2757735c81b294e403f90041381e1208614094df9ac1bff3532241c4206e8f6b",
+					"status": "content"
+				},
+				"lib/errors/TopicsNotExistError.js": {
+					"diff": "--- published/lib/errors/TopicsNotExistError.js\n+++ rebuilt/lib/errors/TopicsNotExistError.js\n@@ -1,4 +1,4 @@\n-var util = require('util')\n+var util = require('util');\n \n /**\n  * One or more topics did not exist for the requested action\n@@ -8,12 +8,12 @@\n  * @constructor\n  */\n var TopicsNotExistError = function (topics) {\n-    Error.captureStackTrace(this, this)\n-    this.topics = topics\n-    this.message = 'The topic(s) ' + topics.toString() + ' do not exist'\n-}\n+  Error.captureStackTrace(this, this);\n+  this.topics = topics;\n+  this.message = 'The topic(s) ' + topics.toString() + ' do not exist';\n+};\n \n-util.inherits(TopicsNotExistError, Error)\n-TopicsNotExistError.prototype.name = 'TopicsNotExistError'\n+util.inherits(TopicsNotExistError, Error);\n+TopicsNotExistError.prototype.name = 'TopicsNotExistError';\n \n-module.exports = TopicsNotExistError\n\\ No newline at end of file\n+module.exports = TopicsNotExistError;\n",
+					"match": false,
+					"packageHash": "cd0792e4b309e278a5bc50e2992e6e9d8b22379b20370ef6608f04837391c7b6",
+					"size": 516,
+					"sourceHash": "dfd2273a868ae14abb7010b79c13cac38e734eb611e9aadcf13ccd6e2a461701",
+					"status": "content"
+				},
+				"lib/errors/index.js": {
+					"diff": "--- published/lib/errors/index.js\n+++ rebuilt/lib/errors/index.js\n@@ -1,3 +1,20 @@\n module.exports = {\n-    TopicsNotExistError: require('./TopicsNotExistError')\n-}\n\\ No newline at end of file\n+  ApiNotSupportedError: require('./ApiNotSupportedError'),\n+  BrokerNotAvailableError: require('./BrokerNotAvailableError'),\n+  TopicsNotExistError: require('./TopicsNotExistError'),\n+  FailedToRegisterConsumerError: require('./FailedToRegisterConsumerError'),\n+  InvalidConsumerOffsetError: require('./InvalidConsumerOffsetError'),\n+  FailedToRebalanceConsumerError: require('./FailedToRebalanceConsumerError'),\n+  InvalidConfigError: require('./InvalidConfigError'),\n+  SaslAuthenticationError: require('./SaslAuthenticationError'),\n+  InvalidRequestError: require('./InvalidRequestError'),\n+  ConsumerGroupErrors: [\n+    require('./GroupCoordinatorNotAvailableError'),\n+    require('./GroupLoadInProgressError'),\n+    require('./HeartbeatTimeoutError'),\n+    require('./IllegalGenerationError'),\n+    require('./NotCoordinatorForGroupError'),\n+    require('./RebalanceInProgressError'),\n+    require('./UnknownMemberIdError')\n+  ]\n+};\n",
+					"match": false,
+					"packageHash": "7f25ad6c49aa41e90e1a5a371cb9c625ad5769c4f239d43fcae578c763227bd6",
+					"size": 78,
+					"sourceHash": "bf5c4f9787033ce9eecc916169e04ac93060d57326b5af0143b86ff64600a7aa",
+					"status": "content"
+				},
+				"lib/offset.js": {
+					"diff": "--- published/lib/offset.js\n+++ rebuilt/lib/offset.js\n@@ -1,40 +1,125 @@\n 'use strict';\n \n-var Offset = function (client) {\n-    this.client = client;\n-    this.ready = this.client.ready;\n-    this.client.once('connect', function () {\n-        this.ready = true;\n-    }.bind(this));\n+var util = require('util');\n+var async = require('async');\n+var EventEmitter = require('events');\n+\n+function Offset (client) {\n+  EventEmitter.call(this);\n+  var self = this;\n+  this.client = client;\n+  this.ready = this.client.ready;\n+  this.client.on('ready', function () {\n+    self.ready = true;\n+    self.emit('ready');\n+  });\n+  this.client.once('connect', function () {\n+    self.emit('connect');\n+  });\n+  this.client.on('error', function (err) {\n+    self.emit('error', err);\n+  });\n }\n+util.inherits(Offset, EventEmitter);\n \n Offset.prototype.fetch = function (payloads, cb) {\n-    if (!this.ready) {\n-        setTimeout(function () {\n-            this.fetch(payloads, cb);\n-        }.bind(this), 100); \n-        return;\n-    } \n-    this.client.sendOffsetRequest(this.buildPayloads(payloads),cb);   \n-}\n+  if (!this.ready) {\n+    this.once('ready', () => this.fetch(payloads, cb));\n+    return;\n+  }\n+  this.client.sendOffsetRequest(this.buildPayloads(payloads), cb);\n+};\n \n-Offset.prototype.buildPayloads = function (paylaods) {\n-    return paylaods.map(function (p) {\n-        p.partition = p.partition || 0;\n-        p.time = p.time || Date.now();\n-        p.maxNum = p.maxNum || 1;\n-        p.metadata = 'm'; // metadata can be arbitrary\n-        return p;\n-    });\n-}\n+Offset.prototype.buildPayloads = function (payloads) {\n+  return payloads.map(function (p) {\n+    p.partition = p.partition || 0;\n+    p.time = p.time || Date.now();\n+    p.maxNum = p.maxNum || 1;\n+    p.metadata = 'm'; // metadata can be arbitrary\n+    return p;\n+  });\n+};\n+\n+Offset.prototype.buildOffsetFetchV1Payloads = function (payloads) {\n+  return payloads.reduce(function (out, p) {\n+    out[p.topic] = out[p.topic] || [];\n+    out[p.topic].push(p.partition || 0);\n+    return out;\n+  }, {});\n+};\n \n Offset.prototype.commit = function (groupId, payloads, cb) {\n-    if (!this.ready) {\n-       setTimeout(function () {\n-           this.commit(groupId, payloads, cb);\n-       }.bind(this), 100);\n-       return;\n+  if (!this.ready) {\n+    this.once('ready', () => this.commit(groupId, payloads, cb));\n+    return;\n+  }\n+  this.client.sendOffsetCommitRequest(groupId, this.buildPayloads(payloads), cb);\n+};\n+\n+Offset.prototype.fetchCommits = Offset.prototype.fetchCommitsV1 = function (groupId, payloads, cb) {\n+  if (!this.ready) {\n+    this.once('ready', () => this.fetchCommitsV1(groupId, payloads, cb));\n+    return;\n+  }\n+  this.client.setCoordinatorIdAndSendOffsetFetchV1Request(groupId, this.buildOffsetFetchV1Payloads(payloads), cb);\n+};\n+\n+Offset.prototype.fetchLatestOffsets = function (topics, cb) {\n+  fetchOffsets(this, topics, cb, -1);\n+};\n",
+					"match": false,
+					"packageHash": "0f5eda166056e59db883fbce91ab553adecd1969036ca6a9ee749d812da19e33",
+					"size": 1089,
+					"sourceHash": "552ebd04d10c253281cdff7902bb9458862a9293bf24e571de2bea19f225769e",
+					"status": "content"
+				},
+				"lib/producer.js": {
+					"diff": "--- published/lib/producer.js\n+++ rebuilt/lib/producer.js\n@@ -1,94 +1,15 @@\n 'use strict';\n \n-var util = require('util'),\n-    events = require('events'),\n-    _ = require('lodash'),\n-    Client = require('./client'),\n-    protocol = require('./protocol'),\n-    Message = protocol.Message,\n-    ProduceRequest = protocol.ProduceRequest,\n-    DEFAULTS = {\n-        requireAcks: 1,\n-        ackTimeoutMs: 100\n-    };\n+var util = require('util');\n+var BaseProducer = require('./baseProducer');\n \n-var Producer = function (client) {\n-    this.ready = false;\n-    this.client = client;\n-    this.buildOptions(Array.prototype.slice.call(arguments,2));\n-    this.connect();\n+/** @inheritdoc */\n+function Producer (client, options, customPartitioner) {\n+  BaseProducer.call(this, client, options, BaseProducer.PARTITIONER_TYPES.default, customPartitioner);\n }\n-util.inherits(Producer, events.EventEmitter);\n \n-Producer.prototype.buildOptions = function (args) {\n-    this.requireAcks = DEFAULTS.requireAcks;\n-    this.ackTimeoutMs = DEFAULTS.ackTimeoutMs;\n-}\n-\n-Producer.prototype.connect = function () {\n-    // emiter...\n-    var self = this;\n-    this.ready = this.client.ready;\n-    if (this.ready) self.emit('ready');\n-    this.client.on('ready', function () {\n-        if (!self.ready) self.emit('ready'); \n-        self.ready = true;\n-    });\n-    this.client.on('error', function (err) {\n-    });\n-    this.client.on('close', function () {\n-    });\n-}\n+util.inherits(Producer, BaseProducer);\n \n-Producer.prototype.send = function (payloads, cb) {\n-   this.client.sendProduceRequest(this.buildPayloads(payloads), this.requireAcks, this.ackTimeoutMs, cb);\n-}\n-\n-Producer.prototype.buildPayloads = function (payloads) {\n-    return payloads.map(function (p) {\n-        p.partition = p.partition || 0;\n-        var messages = _.isArray(p.messages) ? p.messages : [p.messages];\n-        messages = messages.map(function (message) {\n-            return new Message(0,0,'',message);\n-        }); \n-        return new ProduceRequest(p.topic, p.partition, messages);\n-    });\n-}\n+Producer.PARTITIONER_TYPES = BaseProducer.PARTITIONER_TYPES;\n \n-Producer.prototype.createTopics = function (topics, async, cb) {\n-    var self = this;\n-    if (!this.ready) {\n-        setTimeout(function () {\n-            self.createTopics(topics, async, cb); \n-        }, 100);\n-        return;\n-    }\n-    topics = typeof topic === 'string' ? [topics] : topics;\n-    if (typeof async === 'function' && typeof cb === 'undefined') {\n-        cb = async;\n-        async = true;\n-    }\n-\n-    // first, load metadata to create topics\n-    this.client.loadMetadataForTopics(topics, function (err, resp) {\n-        if (err) return cb && cb(err);\n-        if (async) return cb && cb(null, 'All requests sent');\n-        var topicMetadata = resp[1].metadata;\n-        // ommit existed topics\n-        var topicsNotExists = \n-            _.pairs(topicMetadata)\n-            .filter(function (pairs) { return _.isEmpty(pairs[1]) })\n-            .map(function (pairs) { return pairs[0] });\n-\n-        if (!topicsNotExists.length) return  cb && cb(null, 'All created');\n-        // check from zookeeper to make sure topic created\n-        self.client.createTopics(topicsNotExists, function (err, created) {\n-            cb && cb(null, 'All created');\n-        });\n-    });\n-}\n-\n",
+					"match": false,
+					"packageHash": "ec815e6b813b116b3622ec8ebce29a5f0959b9dc8c442dfe907776dc995e5394",
+					"size": 2892,
+					"sourceHash": "df9bcfef0965a1901061252e2e3fabaad126c47d082d9748889792b9a58111f8",
+					"status": "content"
+				},
+				"lib/protocol/index.js": {
+					"diff": "--- published/lib/protocol/index.js\n+++ rebuilt/lib/protocol/index.js\n@@ -1,7 +1,7 @@\n 'use strict';\n \n-var _ = require('lodash'),\n-    struct = require('./protocol_struct'),\n-    protocol = require('./protocol');\n+var _ = require('lodash');\n+var struct = require('./protocol_struct');\n+var protocol = require('./protocol');\n \n exports = _.extend(exports, struct, protocol);\n",
+					"match": false,
+					"packageHash": "13282d155e1f330d07a11bca89cd626f1672f08ff35e3800a456f50f6e335ed0",
+					"size": 171,
+					"sourceHash": "3bbe67ae0be0177b2b98145f4f32a4aac6b60459813a7524ffbd7262bfb06f20",
+					"status": "content"
+				},
+				"lib/protocol/protocol.js": {
+					"diff": "--- published/lib/protocol/protocol.js\n+++ rebuilt/lib/protocol/protocol.js\n@@ -1,502 +1,1883 @@\n 'use strict';\n \n-var Binary = require('binary'),\n-    Buffermaker = require('buffermaker'),\n-    _  = require('lodash'),\n-    crc32 = require('buffer-crc32'),\n-    protocol = require('./protocol_struct'),\n-    KEYS = protocol.KEYS,\n-    REQUEST_TYPE = protocol.REQUEST_TYPE,\n-    ERROR_CODE = protocol.ERROR_CODE,\n-    FetchResponse = protocol.FetchResponse,\n-    PartitionMetadata = protocol.PartitionMetadata;\n-\n-var API_VERSION = 0,\n-    REPLICA_ID = -1,\n-    CODEC_NONE = 0,\n-    CODEC_GZIP = 1,\n-    CODEC_SNAPPY = 2;\n-\n-function groupByTopic(payloads) {\n-    return payloads.reduce(function (out, p) { \n-        out[p.topic] = out[p.topic] || {};\n-        out[p.topic][p.partition] = p;\n-        return out;\n-    }, {});\n-}\n-\n-function encodeRequestWithLength(request) {\n-    return new Buffermaker()\n-        .Int32BE(request.length)\n-        .string(request)\n+var Binary = require('binary');\n+var Buffermaker = require('buffermaker');\n+var _ = require('lodash');\n+var crc32 = require('buffer-crc32');\n+var protocol = require('./protocol_struct');\n+var getCodec = require('../codec');\n+var REQUEST_TYPE = protocol.REQUEST_TYPE;\n+var ERROR_CODE = protocol.ERROR_CODE;\n+var GROUP_ERROR = protocol.GROUP_ERROR;\n+var PartitionMetadata = protocol.PartitionMetadata;\n+const API_KEY_TO_NAME = _.invert(REQUEST_TYPE);\n+const MessageSizeTooLarge = require('../errors/MessageSizeTooLargeError');\n+const SaslAuthenticationError = require('../errors/SaslAuthenticationError');\n+const InvalidRequestError = require('../errors/InvalidRequestError');\n+const async = require('async');\n+\n+var API_VERSION = 0;\n+var REPLICA_ID = -1;\n+var GROUPS_PROTOCOL_TYPE = 'consumer';\n+\n+function groupByTopic (payloads) {\n+  return payloads.reduce(function (out, p) {\n+    out[p.topic] = out[p.topic] || {};\n+    out[p.topic][p.partition] = p;\n+    return out;\n+  }, {});\n+}\n+\n+function encodeRequestWithLength (request) {\n+  return new Buffermaker().Int32BE(request.length).string(request).make();\n+}\n+\n+function encodeRequestHeader (clientId, correlationId, apiKey, apiVersion) {\n+  return new Buffermaker()\n+    .Int16BE(apiKey)\n+    .Int16BE(apiVersion || API_VERSION)\n+    .Int32BE(correlationId)\n+    .Int16BE(clientId.length)\n+    .string(clientId);\n+}\n+\n+function encodeSaslHandshakeRequest (clientId, correlationId, apiVersion, mechanism) {\n+  var request = encodeRequestHeader(clientId, correlationId, REQUEST_TYPE.saslHandshake, apiVersion);\n+  request.Int16BE(mechanism.length).string(mechanism.toUpperCase());\n+  return encodeRequestWithLength(request.make());\n+}\n+\n+function decodeSaslHandshakeResponse (resp) {\n+  var mechanisms = [];\n+  var errorCode = null;\n+\n+  Binary.parse(resp)\n+    .word32bs('size')\n+    .word32bs('correlationId')\n+    .word16bs('errorCode')\n+    .tap(function (vars) {\n+      errorCode = vars.errorCode;\n+    })\n+    .word32bs('numMechanisms')\n+    .loop(_decodeMechanisms);\n+\n+  function _decodeMechanisms (end, vars) {\n+    if (vars.numMechanisms-- === 0) {\n+      return end();\n+    }\n+    this\n",
+					"match": false,
+					"packageHash": "453e90218f42c7b5718bc8290801e42d52f95b63b3a0547f09f4ee47532f455c",
+					"size": 16485,
+					"sourceHash": "87ce000940bde5e144500372bc1ea4f0e93662f263123a3ed4fb76d876a345b6",
+					"status": "content"
+				},
+				"lib/protocol/protocol_struct.js": {
+					"diff": "--- published/lib/protocol/protocol_struct.js\n+++ rebuilt/lib/protocol/protocol_struct.js\n@@ -1,56 +1,105 @@\n 'use strict';\n \n-function createStruct() {\n-    var args = arguments[0];\n-    return function () {\n-        for (var i=0; i<args.length; i++) {\n-            this[args[i]] = arguments[i];\n-        }\n+function createStruct () {\n+  var args = arguments[0];\n+  return function () {\n+    for (var i = 0; i < args.length; i++) {\n+      this[args[i]] = arguments[i];\n     }\n+  };\n }\n \n var KEYS = {\n-    FetchRequest: ['topic', 'partition', 'offset', 'maxBytes'],\n-    FetchResponse: ['topic', 'fetchPartitions'],\n-    OffsetCommitRequest: ['topic', 'partition', 'offset', 'metadata', 'committing', 'autoCommitIntervalMs'],\n-    OffsetCommitResponse: [],\n-    TopicAndPartition: ['topic', 'partition'],\n-    PartitionMetadata: ['topic', 'partition', 'leader', 'replicas', 'isr'],\n-    Message: ['magic', 'attributes', 'key', 'value'],\n-    ProduceRequest: ['topic', 'partition', 'messages'],\n-    Request: ['payloads', 'encoder', 'decoder', 'callback']\n-}\n+  FetchRequest: ['topic', 'partition', 'offset', 'maxBytes'],\n+  FetchResponse: ['topic', 'fetchPartitions'],\n+  OffsetCommitRequest: ['topic', 'partition', 'offset', 'metadata', 'committing', 'autoCommitIntervalMs'],\n+  OffsetCommitResponse: [],\n+  TopicAndPartition: ['topic', 'partition'],\n+  PartitionMetadata: ['topic', 'partition', 'leader', 'replicas', 'isr'],\n+  Message: ['magic', 'attributes', 'key', 'value', 'timestamp'],\n+  ProduceRequest: ['topic', 'partition', 'messages', 'attributes'],\n+  Request: ['payloads', 'encoder', 'decoder', 'callback']\n+};\n \n var ERROR_CODE = {\n-    '0': 'NoError',\n-    '-1': 'Unknown',\n-    '1': 'OffsetOutOfRange',\n-    '2': 'InvalidMessage',\n-    '3': 'UnknownTopicOrPartition',\n-    '4': 'InvalidMessageSize',\n-    '5': 'LeaderNotAvailable',\n-    '6': 'NotLeaderForPartition',\n-    '7': 'RequestTimedOut',\n-    '8': 'BrokerNotAvailable',\n-    '9': 'ReplicaNotAvailable',\n-    '10': 'MessageSizeTooLarge',\n-    '11': 'StaleControllerEpochCode',\n-    '12': 'OffsetMetadataTooLargeCode'\n-}\n+  '0': 'NoError',\n+  '-1': 'Unknown',\n+  '1': 'OffsetOutOfRange',\n+  '2': 'InvalidMessage',\n+  '3': 'UnknownTopicOrPartition',\n+  '4': 'InvalidMessageSize',\n+  '5': 'LeaderNotAvailable',\n+  '6': 'NotLeaderForPartition',\n+  '7': 'RequestTimedOut',\n+  '8': 'BrokerNotAvailable',\n+  '9': 'ReplicaNotAvailable',\n+  '10': 'MessageSizeTooLarge',\n+  '11': 'StaleControllerEpochCode',\n+  '12': 'OffsetMetadataTooLargeCode',\n+  '14': 'GroupLoadInProgress',\n+  '15': 'GroupCoordinatorNotAvailable',\n+  '16': 'NotCoordinatorForGroup',\n+  '17': 'InvalidTopic',\n+  '18': 'RecordListTooLarge',\n+  '19': 'NotEnoughReplicas',\n+  '20': 'NotEnoughReplicasAfterAppend',\n+  '21': 'InvalidRequiredAcks',\n+  '22': 'IllegalGeneration',\n+  '23': 'InconsistentGroupProtocol',\n+  '25': 'UnknownMemberId',\n+  '26': 'InvalidSessionTimeout',\n+  '27': 'RebalanceInProgress',\n+  '28': 'InvalidCommitOffsetSize',\n+  '29': 'TopicAuthorizationFailed',\n+  '30': 'GroupAuthorizationFailed',\n+  '31': 'ClusterAuthorizationFailed',\n+  '41': 'NotController',\n+  '42': 'InvalidRequest'\n+};\n \n-var REQUEST_TYPE = {\n-    produce: 0,\n-    fetch: 1,\n-    offset: 2,\n-    metadata: 3,\n-    leader: 4,\n-    stopReplilca: 5,\n",
+					"match": false,
+					"packageHash": "a1f970288243fbfa7bf0051805e65f48f6295f50253c50dc1eda07f34645f7bf",
+					"size": 1548,
+					"sourceHash": "2cffd57192db1689e2af20b86d7a5645877ad7d8b00ba12b727e1c4830ab253c",
+					"status": "content"
+				},
+				"lib/zookeeper.js": {
+					"match": false,
+					"packageHash": "b21748744e73744ba994e77aea08086750088b0c9f192b947f0db49d2c8e214a",
+					"size": 3074,
+					"status": "missing-in-source"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -1,26 +1,77 @@\n {\n   \"name\": \"kafka-node\",\n-  \"description\": \"node client for Apache kafka, only support kafka 0.8 and above\",\n-  \"version\": \"0.1.6\",\n+  \"description\": \"Client for Apache Kafka v0.9.x, v0.10.x and v0.11.x\",\n+  \"keywords\": [\n+    \"kafka\",\n+    \"consumer\",\n+    \"producer\",\n+    \"broker\"\n+  ],\n+  \"files\": [\n+    \"kafka.js\",\n+    \"logging.js\",\n+    \"lib\",\n+    \"types\"\n+  ],\n+  \"bugs\": \"https://github.com/SOHU-co/kafka-node/issues\",\n+  \"version\": \"5.0.0\",\n   \"main\": \"kafka.js\",\n+  \"types\": \"types/index.d.ts\",\n+  \"license\": \"MIT\",\n   \"dependencies\": {\n-    \"buffermaker\": \"0.0.11\",\n+    \"async\": \"^2.6.2\",\n     \"binary\": \"~0.3.0\",\n-    \"buffer-crc32\": \"~0.2.1\",\n-    \"node-zookeeper-client\": \"*\",\n-    \"lodash\": \"~2.2.1\"\n+    \"bl\": \"^2.2.0\",\n+    \"buffer-crc32\": \"~0.2.5\",\n+    \"buffermaker\": \"~1.2.0\",\n+    \"debug\": \"^2.1.3\",\n+    \"denque\": \"^1.3.0\",\n+    \"lodash\": \"^4.17.4\",\n+    \"minimatch\": \"^3.0.2\",\n+    \"nested-error-stacks\": \"^2.0.0\",\n+    \"optional\": \"^0.1.3\",\n+    \"retry\": \"^0.10.1\",\n+    \"uuid\": \"^3.0.0\"\n+  },\n+  \"engines\": {\n+    \"node\": \">=8.5.1\"\n+  },\n+  \"optionalDependencies\": {\n+    \"snappy\": \"^6.0.1\"\n   },\n   \"devDependencies\": {\n-    \"mocha\": \"~1.12.0\",\n-    \"should\": \"~1.2.2\",\n-    \"line-by-line\": \"~0.1.1\",\n-    \"optimist\": \"~0.6.0\"\n+    \"@types/node\": \"^10.12.27\",\n+    \"coveralls\": \"^2.11.12\",\n+    \"doctoc\": \"^1.2.0\",\n+    \"eslint\": \"^5.14.1\",\n+    \"eslint-config-semistandard\": \"^13.0.0\",\n+    \"eslint-config-standard\": \"^12.0.0\",\n+    \"eslint-plugin-dependencies\": \"^2.2.0\",\n+    \"eslint-plugin-import\": \"^2.16.0\",\n+    \"eslint-plugin-node\": \"^8.0.1\",\n+    \"eslint-plugin-promise\": \"^4.0.1\",\n+    \"eslint-plugin-standard\": \"^4.0.0\",\n+    \"execa\": \"^0.6.1\",\n+    \"istanbul\": \"^0.4.4\",\n+    \"mocha\": \"^3.1.0\",\n+    \"optimist\": \"^0.6.1\",\n+    \"proxyquire\": \"^1.7.10\",\n+    \"should\": \"^6.0.0\",\n+    \"sinon\": \"^2.0.0\",\n+    \"through2\": \"^2.0.3\",\n+    \"tslint\": \"^5.13.0\",\n+    \"tslint-config-semistandard\": \"^7.0.0\",\n+    \"typescript\": \"^2.8.3\"\n   },\n   \"repository\": {\n     \"type\": \"git\",\n-    \"url\": \"git@github.com:SOHU-Co/kafka-node.git\"\n+    \"url\": \"https://github.com/SOHU-Co/kafka-node.git\"\n   },\n   \"scripts\": {\n-    \"test\": \"make test\"\n+    \"test:ts\": \"tslint --project ./types/tsconfig.json --config ./types/tslint.json && tsc --project types\",\n+    \"test\": \"eslint . && npm run test:ts && ./run-tests.sh\",\n+    \"startDocker\": \"./start-docker.sh\",\n+    \"stopDocker\": \"docker-compose down\",\n+    \"updateToc\": \"doctoc README.md --maxlevel 2 --notitle\"\n   }\n }\n",
+					"match": false,
+					"packageHash": "bc89b99a44526ac42342f32fba62577c26e9f4385ca05fa0b7fcc4833e8322b3",
+					"size": 587,
+					"sourceHash": "3773a076c260f4f1f751161abf0510b5918c14ee924c5ec9faa3ce1b3d95ddeb",
+					"status": "content"
+				},
+				"test/mocha.opts": {
+					"match": false,
+					"packageHash": "34708d07f421110b81aab21ae833486f14b34918a4b23d1c714b173c28c09b64",
+					"size": 65,
+					"status": "missing-in-source"
+				},
+				"test/test.consumer.js": {
+					"match": false,
+					"packageHash": "558e5ffd43a5130056284ef2a4b014fd05ef215c51e500d3c89ff339cdc74c09",
+					"size": 8886,
+					"status": "missing-in-source"
+				},
+				"test/test.offset.js": {
+					"match": false,
+					"packageHash": "e8cfa1796b73bc97c2be54c93cd6f88bb2d66ff64443263ef4e510ce535b80fb",
+					"size": 1489,
+					"status": "missing-in-source"
+				},
+				"test/test.producer.js": {
+					"match": false,
+					"packageHash": "486df9212a0438b188c7e865bf4364396790ad02c38e6e71ab35a80b5d23598c",
+					"size": 2047,
+					"status": "missing-in-source"
+				},
+				"test/test.zookeeper.js": {
+					"match": false,
+					"packageHash": "81f3e8a61f85c6d7a2f9c04ca1d2c81e5de659705cbeeb4d80c5fa3af20c1066",
+					"size": 2141,
+					"status": "missing-in-source"
+				},
+				"lib/admin.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/assignment/index.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/assignment/range.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/assignment/roundrobin.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/baseClient.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/baseProducer.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/batch/KafkaBuffer.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/codec/index.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/codec/snappy.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/commitStream.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/consumerGroup.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/consumerGroupHeartbeat.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/consumerGroupRecovery.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/consumerGroupStream.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/consumerStream.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/errors/ApiNotSupportedError.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/errors/BrokerNotAvailableError.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/errors/FailedToRebalanceConsumerError.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/errors/FailedToRegisterConsumerError.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/errors/GroupCoordinatorNotAvailableError.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/errors/GroupLoadInProgressError.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/errors/HeartbeatTimeoutError.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/errors/IllegalGenerationError.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/errors/InvalidConfigError.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/errors/InvalidConsumerOffsetError.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/errors/InvalidRequestError.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/errors/MessageSizeTooLargeError.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/errors/NotControllerError.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/errors/NotCoordinatorForGroupError.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/errors/RebalanceInProgressError.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/errors/SaslAuthenticationError.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/errors/TimeoutError.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/errors/UnknownMemberIdError.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/highLevelProducer.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/kafkaClient.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/logging.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/partitioner.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/producerStream.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/protocol/protocolVersions.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/resources/index.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/utils.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/wrapper/BrokerReadable.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/wrapper/BrokerTransform.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"lib/wrapper/BrokerWrapper.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"logging.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"types/index.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"types/kafka-node-tests.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"types/tsconfig.json": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"types/tslint.json": {
+					"match": false,
+					"status": "missing-in-package"
+				}
+			},
+			"summary": {
+				"differentFiles": 12,
+				"matchingFiles": 0,
+				"missingInPackage": 49,
+				"missingInSource": 15,
+				"score": 0,
+				"totalFiles": 76
+			}
+		},
+		"prodDependencies": [
+			{
+				"name": "ansi-regex",
+				"version": "3.0.1"
+			},
+			{
+				"name": "aproba",
+				"version": "1.2.0"
+			},
+			{
+				"name": "are-we-there-yet",
+				"version": "1.1.7"
+			},
+			{
+				"name": "async",
+				"version": "2.6.4"
+			},
+			{
+				"name": "available-typed-arrays",
+				"version": "1.0.7"
+			},
+			{
+				"name": "balanced-match",
+				"version": "1.0.2"
+			},
+			{
+				"name": "binary",
+				"version": "0.3.0"
+			},
+			{
+				"name": "bindings",
+				"version": "1.5.0"
+			},
+			{
+				"name": "bl",
+				"version": "2.2.1"
+			},
+			{
+				"name": "brace-expansion",
+				"version": "1.1.12"
+			},
+			{
+				"name": "buffer-alloc",
+				"version": "1.2.0"
+			},
+			{
+				"name": "buffer-alloc-unsafe",
+				"version": "1.1.0"
+			},
+			{
+				"name": "buffer-crc32",
+				"version": "0.2.13"
+			},
+			{
+				"name": "buffer-fill",
+				"version": "1.0.0"
+			},
+			{
+				"name": "buffermaker",
+				"version": "1.2.1"
+			},
+			{
+				"name": "buffers",
+				"version": "0.1.1"
+			},
+			{
+				"name": "call-bind",
+				"version": "1.0.8"
+			},
+			{
+				"name": "call-bind-apply-helpers",
+				"version": "1.0.2"
+			},
+			{
+				"name": "call-bound",
+				"version": "1.0.4"
+			},
+			{
+				"name": "chainsaw",
+				"version": "0.1.0"
+			},
+			{
+				"name": "chownr",
+				"version": "1.1.4"
+			},
+			{
+				"name": "code-point-at",
+				"version": "1.1.0"
+			},
+			{
+				"name": "concat-map",
+				"version": "0.0.1"
+			},
+			{
+				"name": "console-control-strings",
+				"version": "1.1.0"
+			},
+			{
+				"name": "core-util-is",
+				"version": "1.0.3"
+			},
+			{
+				"name": "debug",
+				"version": "2.6.9"
+			},
+			{
+				"name": "decompress-response",
+				"version": "3.3.0"
+			},
+			{
+				"name": "deep-extend",
+				"version": "0.6.0"
+			},
+			{
+				"name": "define-data-property",
+				"version": "1.1.4"
+			},
+			{
+				"name": "delegates",
+				"version": "1.0.0"
+			},
+			{
+				"name": "denque",
+				"version": "1.5.1"
+			},
+			{
+				"name": "detect-libc",
+				"version": "1.0.3"
+			},
+			{
+				"name": "dunder-proto",
+				"version": "1.0.1"
+			},
+			{
+				"name": "end-of-stream",
+				"version": "1.4.5"
+			},
+			{
+				"name": "es-define-property",
+				"version": "1.0.1"
+			},
+			{
+				"name": "es-errors",
+				"version": "1.3.0"
+			},
+			{
+				"name": "es-object-atoms",
+				"version": "1.1.1"
+			},
+			{
+				"name": "expand-template",
+				"version": "2.0.3"
+			},
+			{
+				"name": "file-uri-to-path",
+				"version": "1.0.0"
+			},
+			{
+				"name": "for-each",
+				"version": "0.3.5"
+			},
+			{
+				"name": "fs-constants",
+				"version": "1.0.0"
+			},
+			{
+				"name": "function-bind",
+				"version": "1.1.2"
+			},
+			{
+				"name": "gauge",
+				"version": "2.7.4"
+			},
+			{
+				"name": "ansi-regex",
+				"version": "2.1.1"
+			},
+			{
+				"name": "is-fullwidth-code-point",
+				"version": "1.0.0"
+			},
+			{
+				"name": "string-width",
+				"version": "1.0.2"
+			},
+			{
+				"name": "strip-ansi",
+				"version": "3.0.1"
+			},
+			{
+				"name": "get-intrinsic",
+				"version": "1.3.0"
+			},
+			{
+				"name": "get-proto",
+				"version": "1.0.1"
+			},
+			{
+				"name": "github-from-package",
+				"version": "0.0.0"
+			},
+			{
+				"name": "gopd",
+				"version": "1.2.0"
+			},
+			{
+				"name": "has-property-descriptors",
+				"version": "1.0.2"
+			},
+			{
+				"name": "has-symbols",
+				"version": "1.1.0"
+			},
+			{
+				"name": "has-tostringtag",
+				"version": "1.0.2"
+			},
+			{
+				"name": "has-unicode",
+				"version": "2.0.1"
+			},
+			{
+				"name": "hasown",
+				"version": "2.0.2"
+			},
+			{
+				"name": "inherits",
+				"version": "2.0.4"
+			},
+			{
+				"name": "ini",
+				"version": "1.3.8"
+			},
+			{
+				"name": "is-callable",
+				"version": "1.2.7"
+			},
+			{
+				"name": "is-fullwidth-code-point",
+				"version": "2.0.0"
+			},
+			{
+				"name": "is-typed-array",
+				"version": "1.1.15"
+			},
+			{
+				"name": "isarray",
+				"version": "1.0.0"
+			},
+			{
+				"name": "lodash",
+				"version": "4.17.23"
+			},
+			{
+				"name": "long",
+				"version": "1.1.2"
+			},
+			{
+				"name": "math-intrinsics",
+				"version": "1.1.0"
+			},
+			{
+				"name": "mimic-response",
+				"version": "1.0.1"
+			},
+			{
+				"name": "minimatch",
+				"version": "3.1.2"
+			},
+			{
+				"name": "minimist",
+				"version": "1.2.0"
+			},
+			{
+				"name": "mkdirp",
+				"version": "0.5.6"
+			},
+			{
+				"name": "minimist",
+				"version": "1.2.8"
+			},
+			{
+				"name": "ms",
+				"version": "2.0.0"
+			},
+			{
+				"name": "nan",
+				"version": "2.24.0"
+			},
+			{
+				"name": "napi-build-utils",
+				"version": "1.0.2"
+			},
+			{
+				"name": "nested-error-stacks",
+				"version": "2.1.1"
+			},
+			{
+				"name": "node-abi",
+				"version": "2.30.1"
+			},
+			{
+				"name": "noop-logger",
+				"version": "0.1.1"
+			},
+			{
+				"name": "npmlog",
+				"version": "4.1.2"
+			},
+			{
+				"name": "number-is-nan",
+				"version": "1.0.1"
+			},
+			{
+				"name": "object-assign",
+				"version": "4.1.1"
+			},
+			{
+				"name": "once",
+				"version": "1.4.0"
+			},
+			{
+				"name": "optional",
+				"version": "0.1.4"
+			},
+			{
+				"name": "os-homedir",
+				"version": "1.0.2"
+			},
+			{
+				"name": "possible-typed-array-names",
+				"version": "1.1.0"
+			},
+			{
+				"name": "prebuild-install",
+				"version": "5.3.0"
+			},
+			{
+				"name": "tunnel-agent",
+				"version": "0.6.0"
+			},
+			{
+				"name": "process-nextick-args",
+				"version": "2.0.1"
+			},
+			{
+				"name": "pump",
+				"version": "2.0.1"
+			},
+			{
+				"name": "rc",
+				"version": "1.2.8"
+			},
+			{
+				"name": "readable-stream",
+				"version": "2.3.8"
+			},
+			{
+				"name": "safe-buffer",
+				"version": "5.1.2"
+			},
+			{
+				"name": "retry",
+				"version": "0.10.1"
+			},
+			{
+				"name": "safe-buffer",
+				"version": "5.2.1"
+			},
+			{
+				"name": "semver",
+				"version": "5.7.2"
+			},
+			{
+				"name": "set-blocking",
+				"version": "2.0.0"
+			},
+			{
+				"name": "set-function-length",
+				"version": "1.2.2"
+			},
+			{
+				"name": "signal-exit",
+				"version": "3.0.7"
+			},
+			{
+				"name": "simple-concat",
+				"version": "1.0.1"
+			},
+			{
+				"name": "simple-get",
+				"version": "2.8.2"
+			},
+			{
+				"name": "snappy",
+				"version": "6.3.5"
+			},
+			{
+				"name": "string_decoder",
+				"version": "1.1.1"
+			},
+			{
+				"name": "string-width",
+				"version": "2.1.1"
+			},
+			{
+				"name": "strip-ansi",
+				"version": "4.0.0"
+			},
+			{
+				"name": "strip-json-comments",
+				"version": "2.0.1"
+			},
+			{
+				"name": "tar-fs",
+				"version": "1.16.6"
+			},
+			{
+				"name": "pump",
+				"version": "1.0.3"
+			},
+			{
+				"name": "tar-stream",
+				"version": "1.6.2"
+			},
+			{
+				"name": "bl",
+				"version": "1.2.3"
+			},
+			{
+				"name": "to-buffer",
+				"version": "1.2.2"
+			},
+			{
+				"name": "isarray",
+				"version": "2.0.5"
+			},
+			{
+				"name": "traverse",
+				"version": "0.3.9"
+			},
+			{
+				"name": "typed-array-buffer",
+				"version": "1.0.3"
+			},
+			{
+				"name": "util-deprecate",
+				"version": "1.0.2"
+			},
+			{
+				"name": "uuid",
+				"version": "3.4.0"
+			},
+			{
+				"name": "which-pm-runs",
+				"version": "1.1.0"
+			},
+			{
+				"name": "which-typed-array",
+				"version": "1.1.20"
+			},
+			{
+				"name": "wide-align",
+				"version": "1.1.5"
+			},
+			{
+				"name": "wrappy",
+				"version": "1.0.2"
+			},
+			{
+				"name": "xtend",
+				"version": "4.0.2"
+			}
+		]
+	}
+]
