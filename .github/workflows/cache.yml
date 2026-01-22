@@ -234,15 +234,22 @@ jobs:
           PACKAGE="${{ needs.setup.outputs.package }}"
           REMAINING="${{ needs.setup.outputs.remaining }}"
 
-          echo "${PACKAGE}||${REMAINING}" >> cache-queue.txt
-          QUEUE_SIZE=$(wc -l < cache-queue.txt)
-          echo "::notice::Requeued remaining versions for ${PACKAGE}, queue now has ${QUEUE_SIZE} entries"
+          # Use new directory format: queue/<package>/<version>
+          mkdir -p "queue/${PACKAGE}"
+          for VERSION in $(echo "${REMAINING}" | tr '|' '\n' | grep .); do
+            touch "queue/${PACKAGE}/${VERSION}"
+          done
+          VERSION_COUNT=$(echo "${REMAINING}" | tr '|' '\n' | grep -c . || echo 0)
+          echo "::notice::Requeued ${VERSION_COUNT} versions for ${PACKAGE}"
 
       - name: Commit and push queue
         run: |
+          PACKAGE="${{ needs.setup.outputs.package }}"
+          REMAINING="${{ needs.setup.outputs.remaining }}"
+
           git config --global user.email "${GITHUB_ACTOR}@users.noreply.github.com"
           git config --global user.name "${GITHUB_ACTOR}"
-          git add cache-queue.txt
+          git add "queue/"
           git commit -m 'queue: requeue overflow versions for `${{ needs.setup.outputs.package }}`'
 
           # Retry loop for push conflicts
@@ -257,8 +264,12 @@ jobs:
               git rebase --abort 2>/dev/null || true
               git reset --hard HEAD~1
               git pull --rebase origin queue
-              echo "${{ needs.setup.outputs.package }}||${{ needs.setup.outputs.remaining }}" >> cache-queue.txt
-              git add cache-queue.txt
+              # Re-add versions after reset
+              mkdir -p "queue/${PACKAGE}"
+              for VERSION in $(echo "${REMAINING}" | tr '|' '\n' | grep .); do
+                touch "queue/${PACKAGE}/${VERSION}"
+              done
+              git add "queue/"
               git commit -m 'queue: requeue overflow versions for `${{ needs.setup.outputs.package }}`' || true
               if git push; then
                 echo "::notice::Successfully pushed on attempt $i (via reset)"
@@ -350,13 +361,15 @@ jobs:
               fs.writeFileSync(packagesFile, updated.join('\n') + '\n');
             }
 
-            // Write queue entries: pkg||v1||v2||v3
+            // Write queue entries as JSON for easier processing
             const queueEntries = [];
+            let totalVersions = 0;
             for (const [pkg, versions] of allDeps) {
-              queueEntries.push(pkg + '||' + [...versions].join('||'));
+              queueEntries.push({ package: pkg, versions: [...versions] });
+              totalVersions += versions.size;
             }
-            fs.writeFileSync('/tmp/queue-entries.txt', queueEntries.join('\n'));
-            console.log('Queue entries:', queueEntries.length);
+            fs.writeFileSync('/tmp/queue-entries.json', JSON.stringify(queueEntries));
+            console.log('Queue entries:', queueEntries.length, 'packages,', totalVersions, 'versions');
 
             // Output for GitHub
             fs.appendFileSync(process.env.GITHUB_OUTPUT, 'new_packages=' + newPackages.length + '\n');
@@ -405,13 +418,31 @@ jobs:
       - name: Queue dependency versions
         if: steps.check.outputs.has_deps == 'true' && steps.process-deps.outputs.queue_entries != '0'
         run: |
-          cat /tmp/queue-entries.txt >> cache-queue.txt
-          QUEUE_SIZE=$(wc -l < cache-queue.txt)
-          echo "::notice::Added ${{ steps.process-deps.outputs.queue_entries }} dep entries, queue now has ${QUEUE_SIZE} entries"
+          # Create queue directory entries from JSON
+          node -e "
+            const fs = require('fs');
+            const path = require('path');
+
+            const entries = JSON.parse(fs.readFileSync('/tmp/queue-entries.json', 'utf8'));
+            let totalVersions = 0;
+
+            for (const { package: pkg, versions } of entries) {
+              const pkgDir = path.join('queue', pkg);
+              fs.mkdirSync(pkgDir, { recursive: true });
+              for (const version of versions) {
+                fs.writeFileSync(path.join(pkgDir, version), '');
+                totalVersions++;
+              }
+            }
+
+            console.log('Created', entries.length, 'package dirs with', totalVersions, 'version files');
+          "
+
+          echo "::notice::Added ${{ steps.process-deps.outputs.queue_entries }} dep entries to queue"
 
           git config --global user.email "${GITHUB_ACTOR}@users.noreply.github.com"
           git config --global user.name "${GITHUB_ACTOR}"
-          git add cache-queue.txt
+          git add queue/
           git commit -m 'queue: add dependency versions from `${{ needs.setup.outputs.package }}`'
 
           # Retry loop for push conflicts
@@ -426,8 +457,21 @@ jobs:
               git rebase --abort 2>/dev/null || true
               git reset --hard HEAD~1
               git pull --rebase origin queue
-              cat /tmp/queue-entries.txt >> cache-queue.txt
-              git add cache-queue.txt
+              # Re-create queue entries after reset
+              node -e "
+                const fs = require('fs');
+                const path = require('path');
+
+                const entries = JSON.parse(fs.readFileSync('/tmp/queue-entries.json', 'utf8'));
+                for (const { package: pkg, versions } of entries) {
+                  const pkgDir = path.join('queue', pkg);
+                  fs.mkdirSync(pkgDir, { recursive: true });
+                  for (const version of versions) {
+                    fs.writeFileSync(path.join(pkgDir, version), '');
+                  }
+                }
+              "
+              git add queue/
               git commit -m 'queue: add dependency versions from `${{ needs.setup.outputs.package }}`' || true
               if git push; then
                 echo "::notice::Successfully pushed on attempt $i (via merge)"
