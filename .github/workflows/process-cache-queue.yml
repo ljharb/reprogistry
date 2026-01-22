@@ -62,30 +62,85 @@ jobs:
         id: get-tasks
         run: |
           QUEUE_FILE="cache-queue.txt"
+          QUEUE_DIR="queue"
           MAX_VERSIONS=200  # Limit per package to avoid payload size issues
           BATCH_SIZE="${{ inputs.batch_size || '15' }}"
 
-          if [ ! -f "${QUEUE_FILE}" ] || [ ! -s "${QUEUE_FILE}" ]; then
+          # Check if either queue format has entries
+          HAS_TXT_QUEUE=false
+          HAS_DIR_QUEUE=false
+          if [ -f "${QUEUE_FILE}" ] && [ -s "${QUEUE_FILE}" ]; then
+            HAS_TXT_QUEUE=true
+          fi
+          if [ -d "${QUEUE_DIR}" ] && [ "$(ls -A "${QUEUE_DIR}" 2>/dev/null)" ]; then
+            HAS_DIR_QUEUE=true
+          fi
+
+          if [ "${HAS_TXT_QUEUE}" = "false" ] && [ "${HAS_DIR_QUEUE}" = "false" ]; then
             echo "::notice::Cache queue is empty"
             echo "empty=true" >> $GITHUB_OUTPUT
             echo "tasks=[]" >> $GITHUB_OUTPUT
             exit 0
           fi
 
-          # Remove any leading empty lines first
-          sed -i '/./,$!d' "${QUEUE_FILE}"
+          # Remove any leading empty lines from txt queue
+          if [ "${HAS_TXT_QUEUE}" = "true" ]; then
+            sed -i '/./,$!d' "${QUEUE_FILE}"
+          fi
 
           # Initialize arrays for JSON output
           TASKS_JSON="["
-          REQUEUE_LINES=""
           PROCESSED=0
 
-          # Process up to BATCH_SIZE packages
-          while [ "${PROCESSED}" -lt "${BATCH_SIZE}" ]; do
+          # Helper to process a package with versions
+          process_package() {
+            local PACKAGE="$1"
+            local ALL_VERSIONS="$2"
+
+            # Validate package name
+            if [ -z "${PACKAGE}" ] || [ "${PACKAGE:0:1}" = "-" ]; then
+              echo "::warning::Skipping invalid package name: ${PACKAGE}"
+              return 1
+            fi
+
+            # Count versions and split if needed
+            local VERSION_COUNT=$(echo "${ALL_VERSIONS}" | tr '|' '\n' | grep -c . || echo 0)
+            echo "::notice::Package ${PACKAGE} has ${VERSION_COUNT} versions"
+
+            local VERSIONS
+            if [ "${VERSION_COUNT}" -gt "${MAX_VERSIONS}" ]; then
+              VERSIONS=$(echo "${ALL_VERSIONS}" | tr '|' '\n' | head -n "${MAX_VERSIONS}" | tr '\n' '|' | sed 's/|$//' | sed 's/||*$//')
+              local REMAINING_VERSIONS=$(echo "${ALL_VERSIONS}" | tr '|' '\n' | tail -n +$((MAX_VERSIONS + 1)))
+              # Requeue remaining versions using new directory format
+              for V in ${REMAINING_VERSIONS}; do
+                mkdir -p "${QUEUE_DIR}/${PACKAGE}"
+                touch "${QUEUE_DIR}/${PACKAGE}/${V}"
+              done
+              echo "::notice::Processing first ${MAX_VERSIONS} versions, requeueing $((VERSION_COUNT - MAX_VERSIONS)) remaining"
+            else
+              VERSIONS="${ALL_VERSIONS}"
+            fi
+
+            # Add to JSON array (escape special chars)
+            local PACKAGE_ESC=$(echo "${PACKAGE}" | sed 's/"/\\"/g')
+            local VERSIONS_ESC=$(echo "${VERSIONS}" | sed 's/"/\\"/g')
+            if [ "${PROCESSED}" -gt 0 ]; then
+              TASKS_JSON="${TASKS_JSON},"
+            fi
+            TASKS_JSON="${TASKS_JSON}{\"package\":\"${PACKAGE_ESC}\",\"versions\":\"${VERSIONS_ESC}\"}"
+
+            PROCESSED=$((PROCESSED + 1))
+            echo "::notice::Queued ${PACKAGE} for processing"
+            return 0
+          }
+
+          # First, process entries from txt queue (legacy format)
+          while [ "${PROCESSED}" -lt "${BATCH_SIZE}" ] && [ "${HAS_TXT_QUEUE}" = "true" ]; do
             # Get the first non-empty line
             TASK=$(head -n 1 "${QUEUE_FILE}" | grep '.' || true)
 
             if [ -z "${TASK}" ]; then
+              HAS_TXT_QUEUE=false
               break
             fi
 
@@ -97,36 +152,73 @@ jobs:
             PACKAGE=$(echo "${TASK}" | awk -F'\\|\\|' '{print $1}')
             ALL_VERSIONS=$(echo "${TASK}" | awk -F'\\|\\|' '{for(i=2;i<=NF;i++) printf "%s%s", (i>2?"||":""), $i}')
 
-            # Validate package name
-            if [ -z "${PACKAGE}" ] || [ "${PACKAGE:0:1}" = "-" ]; then
-              echo "::warning::Skipping invalid package name: ${PACKAGE}"
-              continue
-            fi
-
-            # Count versions and split if needed
-            VERSION_COUNT=$(echo "${ALL_VERSIONS}" | tr '|' '\n' | grep -c . || echo 0)
-            echo "::notice::Package ${PACKAGE} has ${VERSION_COUNT} versions"
-
-            if [ "${VERSION_COUNT}" -gt "${MAX_VERSIONS}" ]; then
-              VERSIONS=$(echo "${ALL_VERSIONS}" | tr '|' '\n' | head -n "${MAX_VERSIONS}" | tr '\n' '|' | sed 's/|$//' | sed 's/||*$//')
-              REMAINING_VERSIONS=$(echo "${ALL_VERSIONS}" | tr '|' '\n' | tail -n +$((MAX_VERSIONS + 1)) | tr '\n' '|' | sed 's/|$//' | sed 's/||*$//')
-              REQUEUE_LINES="${REQUEUE_LINES}${PACKAGE}||${REMAINING_VERSIONS}\n"
-              echo "::notice::Processing first ${MAX_VERSIONS} versions, requeueing $((VERSION_COUNT - MAX_VERSIONS)) remaining"
-            else
-              VERSIONS="${ALL_VERSIONS}"
-            fi
-
-            # Add to JSON array (escape special chars)
-            PACKAGE_ESC=$(echo "${PACKAGE}" | sed 's/"/\\"/g')
-            VERSIONS_ESC=$(echo "${VERSIONS}" | sed 's/"/\\"/g')
-            if [ "${PROCESSED}" -gt 0 ]; then
-              TASKS_JSON="${TASKS_JSON},"
-            fi
-            TASKS_JSON="${TASKS_JSON}{\"package\":\"${PACKAGE_ESC}\",\"versions\":\"${VERSIONS_ESC}\"}"
-
-            PROCESSED=$((PROCESSED + 1))
-            echo "::notice::Queued ${PACKAGE} for processing"
+            process_package "${PACKAGE}" "${ALL_VERSIONS}" || continue
           done
+
+          # Then, process entries from directory queue (new format)
+          if [ "${PROCESSED}" -lt "${BATCH_SIZE}" ] && [ "${HAS_DIR_QUEUE}" = "true" ]; then
+            for PKG_DIR in "${QUEUE_DIR}"/*; do
+              [ "${PROCESSED}" -ge "${BATCH_SIZE}" ] && break
+              [ ! -d "${PKG_DIR}" ] && continue
+
+              PACKAGE=$(basename "${PKG_DIR}")
+              # Handle scoped packages (directory name has @ prefix)
+              if [ "${PACKAGE:0:1}" = "@" ]; then
+                # For scoped packages, the structure is queue/@scope/package/version
+                for SCOPED_PKG_DIR in "${PKG_DIR}"/*; do
+                  [ "${PROCESSED}" -ge "${BATCH_SIZE}" ] && break
+                  [ ! -d "${SCOPED_PKG_DIR}" ] && continue
+
+                  SCOPED_NAME=$(basename "${SCOPED_PKG_DIR}")
+                  FULL_PACKAGE="${PACKAGE}/${SCOPED_NAME}"
+
+                  # Collect all versions
+                  VERSIONS_LIST=""
+                  for VERSION_FILE in "${SCOPED_PKG_DIR}"/*; do
+                    [ ! -f "${VERSION_FILE}" ] && continue
+                    VERSION=$(basename "${VERSION_FILE}")
+                    if [ -n "${VERSIONS_LIST}" ]; then
+                      VERSIONS_LIST="${VERSIONS_LIST}||${VERSION}"
+                    else
+                      VERSIONS_LIST="${VERSION}"
+                    fi
+                    # Remove the version file
+                    rm "${VERSION_FILE}"
+                  done
+
+                  # Remove empty directories
+                  rmdir "${SCOPED_PKG_DIR}" 2>/dev/null || true
+
+                  if [ -n "${VERSIONS_LIST}" ]; then
+                    process_package "${FULL_PACKAGE}" "${VERSIONS_LIST}" || continue
+                  fi
+                done
+                # Remove empty scope directory
+                rmdir "${PKG_DIR}" 2>/dev/null || true
+              else
+                # Non-scoped package
+                VERSIONS_LIST=""
+                for VERSION_FILE in "${PKG_DIR}"/*; do
+                  [ ! -f "${VERSION_FILE}" ] && continue
+                  VERSION=$(basename "${VERSION_FILE}")
+                  if [ -n "${VERSIONS_LIST}" ]; then
+                    VERSIONS_LIST="${VERSIONS_LIST}||${VERSION}"
+                  else
+                    VERSIONS_LIST="${VERSION}"
+                  fi
+                  # Remove the version file
+                  rm "${VERSION_FILE}"
+                done
+
+                # Remove empty directory
+                rmdir "${PKG_DIR}" 2>/dev/null || true
+
+                if [ -n "${VERSIONS_LIST}" ]; then
+                  process_package "${PACKAGE}" "${VERSIONS_LIST}" || continue
+                fi
+              fi
+            done
+          fi
 
           TASKS_JSON="${TASKS_JSON}]"
 
@@ -137,14 +229,19 @@ jobs:
             exit 0
           fi
 
-          # Save requeue lines for later
-          echo -e "${REQUEUE_LINES}" > /tmp/requeue.txt
-
           echo "tasks=${TASKS_JSON}" >> $GITHUB_OUTPUT
           echo "empty=false" >> $GITHUB_OUTPUT
 
-          REMAINING=$(wc -l < "${QUEUE_FILE}")
-          echo "::notice::Processed ${PROCESSED} packages, ${REMAINING} tasks remaining in queue"
+          # Count remaining entries
+          TXT_REMAINING=0
+          DIR_REMAINING=0
+          if [ -f "${QUEUE_FILE}" ]; then
+            TXT_REMAINING=$(wc -l < "${QUEUE_FILE}" | tr -d ' ')
+          fi
+          if [ -d "${QUEUE_DIR}" ]; then
+            DIR_REMAINING=$(find "${QUEUE_DIR}" -type f 2>/dev/null | wc -l | tr -d ' ')
+          fi
+          echo "::notice::Processed ${PROCESSED} packages, ${TXT_REMAINING} txt entries + ${DIR_REMAINING} dir entries remaining"
 
       - name: Commit updated queue
         if: steps.get-tasks.outputs.empty == 'false'
@@ -152,12 +249,8 @@ jobs:
           git config --global user.email "${GITHUB_ACTOR}@users.noreply.github.com"
           git config --global user.name "${GITHUB_ACTOR}"
 
-          # Add requeue entries if any
-          if [ -s /tmp/requeue.txt ]; then
-            cat /tmp/requeue.txt >> cache-queue.txt
-          fi
-
-          git add cache-queue.txt
+          # Stage all queue changes (both txt file and directory)
+          git add cache-queue.txt queue/ 2>/dev/null || true
           git commit -m 'queue: process batch of cache tasks' || true
 
           # Retry push with conflict resolution
@@ -172,7 +265,7 @@ jobs:
             else
               echo "::warning::Rebase conflict on attempt $i, using merge with ours strategy..."
               git rebase --abort 2>/dev/null || true
-              # For queue file, accept all changes (union merge) - both our removals and remote additions
+              # For queue, accept all changes (union merge) - both our removals and remote additions
               git merge origin/queue -X ours -m 'queue: merge remote changes' || {
                 # If merge still fails, just reset to remote (our changes were just line removals)
                 git merge --abort 2>/dev/null || true
