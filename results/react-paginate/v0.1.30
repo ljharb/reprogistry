@@ -1,0 +1,267 @@
+[
+	{
+		"reproduceVersion": "0.0.0-local",
+		"timestamp": "2026-01-22T15:04:04.063Z",
+		"os": "linux",
+		"arch": "x64",
+		"strategy": "npm:11.8.0",
+		"reproduced": false,
+		"attested": false,
+		"package": {
+			"spec": "react-paginate@0.1.30",
+			"name": "react-paginate",
+			"version": "0.1.30",
+			"location": "https://registry.npmjs.org/react-paginate/-/react-paginate-0.1.30.tgz",
+			"integrity": "sha512-Y6oOFeEnzutUXXn7VeHahmejyRlGN7ekUbnO1rLAOUgZW/72Mbc3a2l7xBhALesJOS5LmStGh7FJzkqhKDTgZg==",
+			"publishedAt": "2015-05-21T14:05:48.839Z",
+			"publishedWith": {
+				"node": null,
+				"npm": "1.4.6"
+			},
+			"dependencies": {
+				"classnames": "^1.2.0",
+				"underscore": "^1.7.0"
+			}
+		},
+		"source": {
+			"integrity": "sha512-NEgSxkxTqWyKU5kWwS0nuK86GrfcE33NDCtfb5F82leUyYFjCHt9+caZ7F2O89uOKXDmPEssbIxavCRwBc4jHg==",
+			"location": "https://github.com/AdeleD/react-paginate",
+			"spec": "github:AdeleD/react-paginate#HEAD"
+		},
+		"comparisonHash": "9ef46a5bd31291e57cbab41e2f17c57bd6da0b5b",
+		"diff": {
+			"files": {
+				".bowerrc": {
+					"match": false,
+					"packageHash": "4ce7da8b8b3efe6ec2ae27cc5f6ddebeca8cc810063062dc6ec0fe738b317fc6",
+					"size": 35,
+					"status": "missing-in-source"
+				},
+				".editorconfig": {
+					"match": false,
+					"packageHash": "245cb158dca045168e61ef5db96f77567df6e732f4e8ee0dae4fe4af7d032195",
+					"size": 272,
+					"status": "missing-in-source"
+				},
+				".jshintrc": {
+					"match": false,
+					"packageHash": "9e6877a373a36713903847ad53ad62d595da4c6babca0072483280acba116e71",
+					"size": 1149,
+					"status": "missing-in-source"
+				},
+				".npmignore": {
+					"match": false,
+					"packageHash": "ad962df1388a3255a6f1e8a55cb2194c0669d5f187aae42b8ee1f9f01551d801",
+					"size": 78,
+					"status": "missing-in-source"
+				},
+				"Makefile": {
+					"match": false,
+					"packageHash": "4cc84a7ea48fa1e5242d36c75357d02c97cc842998638864f4bf197627c3f249",
+					"size": 165,
+					"status": "missing-in-source"
+				},
+				"README.md": {
+					"diff": "--- published/README.md\n+++ rebuilt/README.md\n@@ -1,73 +1,176 @@\n # react-paginate\n \n+[![NPM](https://nodei.co/npm/react-paginate.png?downloads=true)](https://nodei.co/npm/react-paginate/)\n+[![Build Status](https://travis-ci.org/AdeleD/react-paginate.svg?branch=master)](https://travis-ci.org/AdeleD/react-paginate)\n+\n **A ReactJS component to render a pagination.**\n \n By installing this component and writing only a little bit of CSS you can obtain this:\n+Note: You should write your own css to obtain this UI. This package do not provide any css.\n \n-<img src=\"./docs/img/pagination2.png\" alt=\"Pagination sample 2\" />\n+<img src=\"https://cloud.githubusercontent.com/assets/2084833/24840237/7accb75a-1d1e-11e7-9abb-818431398b91.png\" alt=\"Pagination demo 2\" />\n \n or\n \n-<img src=\"./docs/img/pagination1.png\" alt=\"Pagination sample 1\" />\n+<img src=\"https://cloud.githubusercontent.com/assets/2084833/24840230/594e4ea4-1d1e-11e7-8b34-bde943b4793d.png\" alt=\"Pagination demo 1\" />\n \n ## Installation\n \n Install `react-paginate` with [npm](https://www.npmjs.com/):\n \n ```\n-$ npm install react-paginate\n+npm install react-paginate --save\n ```\n \n-For [CommonJS](http://wiki.commonjs.org/wiki/CommonJS) users:\n+## Usage\n \n ```javascript\n-var ReactPaginate = require('react-paginate');\n-```\n-\n-Read the code of [sample/sample.jsx][1]. You will quickly understand\n-how to make `react-paginate` work with a list of objects.\n+import React, { useEffect, useState } from 'react';\n+import ReactDOM from 'react-dom';\n+import ReactPaginate from 'react-paginate';\n+\n+// Example items, to simulate fetching from another resources.\n+const items = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14];\n+\n+function Items({ currentItems }) {\n+  return (\n+    <>\n+      {currentItems &&\n+        currentItems.map((item) => (\n+          <div>\n+            <h3>Item #{item}</h3>\n+          </div>\n+        ))}\n+    </>\n+  );\n+}\n+\n+function PaginatedItems({ itemsPerPage }) {\n+  // Here we use item offsets; we could also use page offsets\n+  // following the API or data you're working with.\n+  const [itemOffset, setItemOffset] = useState(0);\n+\n+  // Simulate fetching items from another resources.\n+  // (This could be items from props; or items loaded in a local state\n+  // from an API endpoint with useEffect and useState)\n+  const endOffset = itemOffset + itemsPerPage;\n+  console.log(`Loading items from ${itemOffset} to ${endOffset}`);\n+  const currentItems = items.slice(itemOffset, endOffset);\n+  const pageCount = Math.ceil(items.length / itemsPerPage);\n+\n+  // Invoke when user click to request another page.\n+  const handlePageClick = (event) => {\n+    const newOffset = (event.selected * itemsPerPage) % items.length;\n+    console.log(\n+      `User requested page number ${event.selected}, which is offset ${newOffset}`\n+    );\n+    setItemOffset(newOffset);\n+  };\n+\n+  return (\n+    <>\n+      <Items currentItems={currentItems} />\n+      <ReactPaginate\n+        breakLabel=\"...\"\n+        nextLabel=\"next >\"\n+        onPageChange={handlePageClick}\n+        pageRangeDisplayed={5}\n+        pageCount={pageCount}\n+        previousLabel=\"< previous\"\n+        renderOnZeroPageCount={null}\n+      />\n+    </>\n+  );\n+}\n+\n+// Add a <div id=\"container\"> to your HTML to see the component rendered.\n+ReactDOM.render(\n+  <PaginatedItems itemsPerPage={4} />,\n",
+					"match": false,
+					"packageHash": "40db1ba9022b7949cee70919fb1e1cb13d49e5c159589f433885264fef27444f",
+					"size": 1365,
+					"sourceHash": "1fd07de85b1989f5220d923e1939ef548ce86523de4569274050491e9f47bf62",
+					"status": "content"
+				},
+				"__tests__/PaginationBoxView-test.js": {
+					"match": false,
+					"packageHash": "db8c096b61f96be70006ff20faf153a9b9fe75498a6c6d6aa18f7b58578c49d1",
+					"size": 2208,
+					"status": "missing-in-source"
+				},
+				"bower.json": {
+					"match": false,
+					"packageHash": "43623601b0430a5ca32a297418bbbcbb1063f60f2d91add17ef862f14ff84f3a",
+					"size": 101,
+					"status": "missing-in-source"
+				},
+				"dist/PageView.js": {
+					"match": false,
+					"packageHash": "bfc864e8cb21b741f587d3b157d9a4fafa40e89cf8028174c78583c2cfb5cac4",
+					"size": 731,
+					"status": "missing-in-source"
+				},
+				"dist/PaginationBoxView.js": {
+					"match": false,
+					"packageHash": "8be1596be7a3cb01d21d063138e68fe5e8b77b4e1bfa8e5141b4e397399d1632",
+					"size": 3552,
+					"status": "missing-in-source"
+				},
+				"dist/PaginationListView.js": {
+					"match": false,
+					"packageHash": "65f44643b9d6748bf41bf62f2a132aca5fcb656568b8201357e8d70472428282",
+					"size": 2589,
+					"status": "missing-in-source"
+				},
+				"dist/react-paginate.js": {
+					"diff": "--- published/dist/react-paginate.js\n+++ rebuilt/dist/react-paginate.js\n@@ -1,3 +1,2 @@\n-'use strict';\n-\n-module.exports = require('./PaginationBoxView');\n\\ No newline at end of file\n+!function(e,a){\"object\"==typeof exports&&\"object\"==typeof module?module.exports=a(require(\"react\")):\"function\"==typeof define&&define.amd?define([\"react\"],a):\"object\"==typeof exports?exports.ReactPaginate=a(require(\"react\")):e.ReactPaginate=a(e.React)}(this,(e=>(()=>{var a={703:(e,a,t)=>{\"use strict\";var r=t(414);function n(){}function i(){}i.resetWarningCache=n,e.exports=function(){function e(e,a,t,n,i,s){if(s!==r){var o=new Error(\"Calling PropTypes validators directly is not supported by the `prop-types` package. Use PropTypes.checkPropTypes() to call them. Read more at http://fb.me/use-check-prop-types\");throw o.name=\"Invariant Violation\",o}}function a(){return e}e.isRequired=e;var t={array:e,bigint:e,bool:e,func:e,number:e,object:e,string:e,symbol:e,any:e,arrayOf:a,element:e,elementType:e,instanceOf:a,node:e,objectOf:a,oneOf:a,oneOfType:a,shape:a,exact:a,checkPropTypes:i,resetWarningCache:n};return t.PropTypes=t,t}},697:(e,a,t)=>{e.exports=t(703)()},414:e=>{\"use strict\";e.exports=\"SECRET_DO_NOT_PASS_THIS_OR_YOU_WILL_BE_FIRED\"},98:a=>{\"use strict\";a.exports=e}},t={};function r(e){var n=t[e];if(void 0!==n)return n.exports;var i=t[e]={exports:{}};return a[e](i,i.exports,r),i.exports}r.n=e=>{var a=e&&e.__esModule?()=>e.default:()=>e;return r.d(a,{a}),a},r.d=(e,a)=>{for(var t in a)r.o(a,t)&&!r.o(e,t)&&Object.defineProperty(e,t,{enumerable:!0,get:a[t]})},r.o=(e,a)=>Object.prototype.hasOwnProperty.call(e,a),r.r=e=>{\"undefined\"!=typeof Symbol&&Symbol.toStringTag&&Object.defineProperty(e,Symbol.toStringTag,{value:\"Module\"}),Object.defineProperty(e,\"__esModule\",{value:!0})};var n={};return(()=>{\"use strict\";r.r(n),r.d(n,{default:()=>k});var e=r(98),a=r.n(e),t=r(697),i=r.n(t);function s(){return s=Object.assign?Object.assign.bind():function(e){for(var a=1;a<arguments.length;a++){var t=arguments[a];for(var r in t)Object.prototype.hasOwnProperty.call(t,r)&&(e[r]=t[r])}return e},s.apply(this,arguments)}var o=function(e){var t=e.pageClassName,r=e.pageLinkClassName,n=e.page,i=e.selected,o=e.activeClassName,l=e.activeLinkClassName,c=e.getEventListener,p=e.pageSelectedHandler,u=e.href,g=e.extraAriaContext,d=e.pageLabelBuilder,f=e.rel,b=e.ariaLabel||\"Page \"+n+(g?\" \"+g:\"\"),v=null;return i&&(v=\"page\",b=e.ariaLabel||\"Page \"+n+\" is your current page\",t=void 0!==t?t+\" \"+o:o,void 0!==r?void 0!==l&&(r=r+\" \"+l):r=l),a().createElement(\"li\",{className:t},a().createElement(\"a\",s({rel:f,role:u?void 0:\"button\",className:r,href:u,tabIndex:i?\"-1\":\"0\",\"aria-label\":b,\"aria-current\":v,onKeyPress:p},c(p)),d(n)))};o.propTypes={pageSelectedHandler:i().func.isRequired,selected:i().bool.isRequired,pageClassName:i().string,pageLinkClassName:i().string,activeClassName:i().string,activeLinkClassName:i().string,extraAriaContext:i().string,href:i().string,ariaLabel:i().string,page:i().number.isRequired,getEventListener:i().func.isRequired,pageLabelBuilder:i().func.isRequired,rel:i().string};const l=o;function c(){return c=Object.assign?Object.assign.bind():function(e){for(var a=1;a<arguments.length;a++){var t=arguments[a];for(var r in t)Object.prototype.hasOwnProperty.call(t,r)&&(e[r]=t[r])}return e},c.apply(this,arguments)}var p=function(e){var t=e.breakLabel,r=e.breakAriaLabel,n=e.breakClassName,i=e.breakLinkClassName,s=e.breakHandler,o=e.getEventListener,l=n||\"break\";return a().createElement(\"li\",{className:l},a().createElement(\"a\",c({className:i,role:\"button\",tabIndex:\"0\",\"aria-label\":r,onKeyPress:s},o(s)),t))};p.propTypes={breakLabel:i().oneOfType([i().string,i().node]),breakAriaLabel:i().string,breakClassName:i().string,breakLinkClassName:i().string,breakHandler:i().func.isRequired,getEventListener:i().func.isRequired};const u=p;function g(e){var a=arguments.length>1&&void 0!==arguments[1]?arguments[1]:\"\";return null!=e?e:a}function d(e){return d=\"function\"==typeof Symbol&&\"symbol\"==typeof Symbol.iterator?function(e){return typeof e}:function(e){return e&&\"function\"==typeof Symbol&&e.constructor===Symbol&&e!==Symbol.prototype?\"symbol\":typeof e},d(e)}function f(){return f=Object.assign?Object.assign.bind():function(e){for(var a=1;a<arguments.length;a++){var t=arguments[a];for(var r in t)Object.prototype.hasOwnProperty.call(t,r)&&(e[r]=t[r])}return e},f.apply(this,arguments)}function b(e,a){for(var t=0;t<a.length;t++){var r=a[t];r.enumerable=r.enumerable||!1,r.configurable=!0,\"value\"in r&&(r.writable=!0),Object.defineProperty(e,r.key,r)}}function v(e,a){return v=Object.setPrototypeOf?Object.setPrototypeOf.bind():function(e,a){return e.__proto__=a,e},v(e,a)}function h(e,a){if(a&&(\"object\"===d(a)||\"function\"==typeof a))return a;if(void 0!==a)throw new TypeError(\"Derived constructors may only return object or undefined\");return m(e)}function m(e){if(void 0===e)throw new ReferenceError(\"this hasn't been initialised - super() hasn't been called\");return e}function y(e){return y=Object.setPrototypeOf?Object.getPrototypeOf.bind():function(e){return e.__proto__||Object.getPrototypeOf(e)},y(e)}function C(e,a,t){return a in e?Object.defineProperty(e,a,{value:t,enumerable:!0,configurable:!0,writable:!0}):e[a]=t,e}var P=function(e){!function(e,a){if(\"function\"!=typeof a&&null!==a)throw new TypeError(\"Super expression must either be null or a function\");e.prototype=Object.create(a&&a.prototype,{constructor:{value:e,writable:!0,configurable:!0}}),Object.defineProperty(e,\"prototype\",{writable:!1}),a&&v(e,a)}(o,e);var t,r,n,i,s=(n=o,i=function(){if(\"undefined\"==typeof Reflect||!Reflect.construct)return!1;if(Reflect.construct.sham)return!1;if(\"function\"==typeof Proxy)return!0;try{return Boolean.prototype.valueOf.call(Reflect.construct(Boolean,[],(function(){}))),!0}catch(e){return!1}}(),function(){var e,a=y(n);if(i){var t=y(this).constructor;e=Reflect.construct(a,arguments,t)}else e=a.apply(this,arguments);return h(this,e)});function o(e){var t,r;return function(e,a){if(!(e instanceof a))throw new TypeError(\"Cannot call a class as a function\")}(this,o),C(m(t=s.call(this,e)),\"handlePreviousPage\",(function(e){var a=t.state.selected;t.handleClick(e,null,a>0?a-1:void 0,{isPrevious:!0})})),C(m(t),\"handleNextPage\",(function(e){var a=t.state.selected,r=t.props.pageCount;t.handleClick(e,null,a<r-1?a+1:void 0,{isNext:!0})})),C(m(t),\"handlePageSelected\",(function(e,a){if(t.state.selected===e)return t.callActiveCallback(e),void t.handleClick(a,null,void 0,{isActive:!0});t.handleClick(a,null,e)})),C(m(t),\"handlePageChange\",(function(e){t.state.selected!==e&&(t.setState({selected:e}),t.callCallback(e))})),C(m(t),\"getEventListener\",(function(e){return C({},t.props.eventListener,e)})),C(m(t),\"handleClick\",(function(e,a,r){var n=arguments.length>3&&void 0!==arguments[3]?arguments[3]:{},i=n.isPrevious,s=void 0!==i&&i,o=n.isNext,l=void 0!==o&&o,c=n.isBreak,p=void 0!==c&&c,u=n.isActive,g=void 0!==u&&u;e.preventDefault?e.preventDefault():e.returnValue=!1;var d=t.state.selected,f=t.props.onClick,b=r;if(f){var v=f({index:a,selected:d,nextSelectedPage:r,event:e,isPrevious:s,isNext:l,isBreak:p,isActive:g});if(!1===v)return;Number.isInteger(v)&&(b=v)}void 0!==b&&t.handlePageChange(b)})),C(m(t),\"handleBreakClick\",(function(e,a){var r=t.state.selected;t.handleClick(a,e,r<e?t.getForwardJump():t.getBackwardJump(),{isBreak:!0})})),C(m(t),\"callCallback\",(function(e){void 0!==t.props.onPageChange&&\"function\"==typeof t.props.onPageChange&&t.props.onPageChange({selected:e})})),C(m(t),\"callActiveCallback\",(function(e){void 0!==t.props.onPageActive&&\"function\"==typeof t.props.onPageActive&&t.props.onPageActive({selected:e})})),C(m(t),\"getElementPageRel\",(function(e){var a=t.state.selected,r=t.props,n=r.nextPageRel,i=r.prevPageRel,s=r.selectedPageRel;return a-1===e?i:a===e?s:a+1===e?n:void 0})),C(m(t),\"pagination\",(function(){var e=[],r=t.props,n=r.pageRangeDisplayed,i=r.pageCount,s=r.marginPagesDisplayed,o=r.breakLabel,l=r.breakClassName,c=r.breakLinkClassName,p=r.breakAriaLabels,g=t.state.selected;if(i<=n)for(var d=0;d<i;d++)e.push(t.getPageElement(d));else{var f=n/2,b=n-f;g>i-n/2?f=n-(b=i-g):g<n/2&&(b=n-(f=g));var v,h,m=function(e){return t.getPageElement(e)},y=[];for(v=0;v<i;v++){var C=v+1;if(C<=s)y.push({type:\"page\",index:v,display:m(v)});else if(C>i-s)y.push({type:\"page\",index:v,display:m(v)});else if(v>=g-f&&v<=g+(0===g&&n>1?b-1:b))y.push({type:\"page\",index:v,display:m(v)});else if(o&&y.length>0&&y[y.length-1].display!==h&&(n>0||s>0)){var P=v<g?p.backward:p.forward;h=a().createElement(u,{key:v,breakAriaLabel:P,breakLabel:o,breakClassName:l,breakLinkClassName:c,breakHandler:t.handleBreakClick.bind(null,v),getEventListener:t.getEventListener}),y.push({type:\"break\",index:v,display:h})}}y.forEach((function(a,t){var r=a;\"break\"===a.type&&y[t-1]&&\"page\"===y[t-1].type&&y[t+1]&&\"page\"===y[t+1].type&&y[t+1].index-y[t-1].index<=2&&(r={type:\"page\",index:a.index,display:m(a.index)}),e.push(r.display)}))}return e})),void 0!==e.initialPage&&void 0!==e.forcePage&&console.warn(\"(react-paginate): Both initialPage (\".concat(e.initialPage,\") and forcePage (\").concat(e.forcePage,\") props are provided, which is discouraged.\")+\" Use exclusively forcePage prop for a controlled component.\\nSee https://reactjs.org/docs/forms.html#controlled-components\"),r=e.initialPage?e.initialPage:e.forcePage?e.forcePage:0,t.state={selected:r},t}return t=o,(r=[{key:\"componentDidMount\",value:function(){var e=this.props,a=e.initialPage,t=e.disableInitialCallback,r=e.extraAriaContext,n=e.pageCount,i=e.forcePage;void 0===a||t||this.callCallback(a),r&&console.warn(\"DEPRECATED (react-paginate): The extraAriaContext prop is deprecated. You should now use the ariaLabelBuilder instead.\"),Number.isInteger(n)||console.warn(\"(react-paginate): The pageCount prop value provided is not an integer (\".concat(n,\"). Did you forget a Math.ceil()?\")),void 0!==a&&a>n-1&&console.warn(\"(react-paginate): The initialPage prop provided is greater than the maximum page index from pageCount prop (\".concat(a,\" > \").concat(n-1,\").\")),void 0!==i&&i>n-1&&console.warn(\"(react-paginate): The forcePage prop provided is greater than the maximum page index from pageCount prop (\".concat(i,\" > \").concat(n-1,\").\"))}},{key:\"componentDidUpdate\",value:function(e){void 0!==this.props.forcePage&&this.props.forcePage!==e.forcePage&&(this.props.forcePage>this.props.pageCount-1&&console.warn(\"(react-paginate): The forcePage prop provided is greater than the maximum page index from pageCount prop (\".concat(this.props.forcePage,\" > \").concat(this.props.pageCount-1,\").\")),this.setState({selected:this.props.forcePage})),Number.isInteger(e.pageCount)&&!Number.isInteger(this.props.pageCount)&&console.warn(\"(react-paginate): The pageCount prop value provided is not an integer (\".concat(this.props.pageCount,\"). Did you forget a Math.ceil()?\"))}},{key:\"getForwardJump\",value:function(){var e=this.state.selected,a=this.props,t=a.pageCount,r=e+a.pageRangeDisplayed;return r>=t?t-1:r}},{key:\"getBackwardJump\",value:function(){var e=this.state.selected-this.props.pageRangeDisplayed;return e<0?0:e}},{key:\"getElementHref\",value:function(e){var a=this.props,t=a.hrefBuilder,r=a.pageCount,n=a.hrefAllControls;if(t)return n||e>=0&&e<r?t(e+1,r,this.state.selected):void 0}},{key:\"ariaLabelBuilder\",value:function(e){var a=e===this.state.selected;if(this.props.ariaLabelBuilder&&e>=0&&e<this.props.pageCount){var t=this.props.ariaLabelBuilder(e+1,a);return this.props.extraAriaContext&&!a&&(t=t+\" \"+this.props.extraAriaContext),t}}},{key:\"getPageElement\",value:function(e){var t=this.state.selected,r=this.props,n=r.pageClassName,i=r.pageLinkClassName,s=r.activeClassName,o=r.activeLinkClassName,c=r.extraAriaContext,p=r.pageLabelBuilder;return a().createElement(l,{key:e,pageSelectedHandler:this.handlePageSelected.bind(null,e),selected:t===e,rel:this.getElementPageRel(e),pageClassName:n,pageLinkClassName:i,activeClassName:s,activeLinkClassName:o,extraAriaContext:c,href:this.getElementHref(e),ariaLabel:this.ariaLabelBuilder(e),page:e+1,pageLabelBuilder:p,getEventListener:this.getEventListener})}},{key:\"render\",value:function(){var e=this.props.renderOnZeroPageCount;if(0===this.props.pageCount&&void 0!==e)return e?e(this.props):e;var t=this.props,r=t.disabledClassName,n=t.disabledLinkClassName,i=t.pageCount,s=t.className,o=t.containerClassName,l=t.previousLabel,c=t.previousClassName,p=t.previousLinkClassName,u=t.previousAriaLabel,d=t.prevRel,b=t.nextLabel,v=t.nextClassName,h=t.nextLinkClassName,m=t.nextAriaLabel,y=t.nextRel,C=this.state.selected,P=0===C,k=C===i-1,x=\"\".concat(g(c)).concat(P?\" \".concat(g(r)):\"\"),L=\"\".concat(g(v)).concat(k?\" \".concat(g(r)):\"\"),N=\"\".concat(g(p)).concat(P?\" \".concat(g(n)):\"\"),O=\"\".concat(g(h)).concat(k?\" \".concat(g(n)):\"\"),R=P?\"true\":\"false\",E=k?\"true\":\"false\";return a().createElement(\"ul\",{className:s||o,role:\"navigation\",\"aria-label\":\"Pagination\"},a().createElement(\"li\",{className:x},a().createElement(\"a\",f({className:N,href:this.getElementHref(C-1),tabIndex:P?\"-1\":\"0\",role:\"button\",onKeyPress:this.handlePreviousPage,\"aria-disabled\":R,\"aria-label\":u,rel:d},this.getEventListener(this.handlePreviousPage)),l)),this.pagination(),a().createElement(\"li\",{className:L},a().createElement(\"a\",f({className:O,href:this.getElementHref(C+1),tabIndex:k?\"-1\":\"0\",role:\"button\",onKeyPress:this.handleNextPage,\"aria-disabled\":E,\"aria-label\":m,rel:y},this.getEventListener(this.handleNextPage)),b)))}}])&&b(t.prototype,r),Object.defineProperty(t,\"prototype\",{writable:!1}),o}(e.Component);C(P,\"propTypes\",{pageCount:i().number.isRequired,pageRangeDisplayed:i().number,marginPagesDisplayed:i().number,previousLabel:i().node,previousAriaLabel:i().string,prevPageRel:i().string,prevRel:i().string,nextLabel:i().node,nextAriaLabel:i().string,nextPageRel:i().string,nextRel:i().string,breakLabel:i().oneOfType([i().string,i().node]),breakAriaLabels:i().shape({forward:i().string,backward:i().string}),hrefBuilder:i().func,hrefAllControls:i().bool,onPageChange:i().func,onPageActive:i().func,onClick:i().func,initialPage:i().number,forcePage:i().number,disableInitialCallback:i().bool,containerClassName:i().string,className:i().string,pageClassName:i().string,pageLinkClassName:i().string,pageLabelBuilder:i().func,activeClassName:i().string,activeLinkClassName:i().string,previousClassName:i().string,nextClassName:i().string,previousLinkClassName:i().string,nextLinkClassName:i().string,disabledClassName:i().string,disabledLinkClassName:i().string,breakClassName:i().string,breakLinkClassName:i().string,extraAriaContext:i().string,ariaLabelBuilder:i().func,eventListener:i().string,renderOnZeroPageCount:i().func,selectedPageRel:i().string}),C(P,\"defaultProps\",{pageRangeDisplayed:2,marginPagesDisplayed:3,activeClassName:\"selected\",previousLabel:\"Previous\",previousClassName:\"previous\",previousAriaLabel:\"Previous page\",prevPageRel:\"prev\",prevRel:\"prev\",nextLabel:\"Next\",nextClassName:\"next\",nextAriaLabel:\"Next page\",nextPageRel:\"next\",nextRel:\"next\",breakLabel:\"...\",breakAriaLabels:{forward:\"Jump forward\",backward:\"Jump backward\"},disabledClassName:\"disabled\",disableInitialCallback:!1,pageLabelBuilder:function(e){return e},eventListener:\"onClick\",renderOnZeroPageCount:void 0,selectedPageRel:\"canonical\",hrefAllControls:!1});const k=P})(),n})()));\n+//# sourceMappingURL=react-paginate.js.map\n\\ No newline at end of file\n",
+					"match": false,
+					"packageHash": "5f3df89b544782a6fa72259037bd26c7375faf5ee1b9112e83f3a7f383b78b2c",
+					"size": 63,
+					"sourceHash": "00a966c0563f5a91c046c622e5accab3e80d0bc319ae7bff7e2ade27bd8b1291",
+					"status": "content"
+				},
+				"docs/img/pagination1.png": {
+					"match": false,
+					"packageHash": "45831f5d3d31a63e95a7635421f66b8bf36d886fa9b5d2fe96edcd6b8734921a",
+					"size": 7961,
+					"status": "missing-in-source"
+				},
+				"docs/img/pagination2.png": {
+					"match": false,
+					"packageHash": "c3dcfddf594d5556253394f5bb622075cd44ca697a9a87ba4ad3175cc470b0b4",
+					"size": 7005,
+					"status": "missing-in-source"
+				},
+				"gulpfile.js": {
+					"match": false,
+					"packageHash": "bd7fa9fd6b1f288242ddbaac509efb4abd47d2c49370fba67b690dd01470a79e",
+					"size": 1866,
+					"status": "missing-in-source"
+				},
+				"package.json": {
+					"diff": "--- published/package.json\n+++ rebuilt/package.json\n@@ -1,6 +1,6 @@\n {\n   \"name\": \"react-paginate\",\n-  \"version\": \"0.1.30\",\n+  \"version\": \"8.3.0\",\n   \"description\": \"A ReactJS component that creates a pagination.\",\n   \"main\": \"./dist/react-paginate.js\",\n   \"repository\": {\n@@ -16,42 +16,56 @@\n   \"author\": {\n     \"name\": \"Adèle Delamarche\"\n   },\n-  \"license\": \"BSD-2-Clause\",\n+  \"license\": \"MIT\",\n   \"bugs\": {\n     \"url\": \"https://github.com/AdeleD/react-paginate/issues\"\n   },\n   \"dependencies\": {\n-    \"underscore\": \"^1.7.0\",\n-    \"classnames\": \"^1.2.0\"\n+    \"prop-types\": \"^15\"\n+  },\n+  \"peerDependencies\": {\n+    \"react\": \"^16 || ^17 || ^18 || ^19\"\n   },\n   \"devDependencies\": {\n-    \"babelify\": \"^6.0.2\",\n-    \"browserify\": \"~6.0.3\",\n-    \"express\": \"^4.12.1\",\n-    \"gulp\": \"~3.8.8\",\n-    \"gulp-babel\": \"^5.1.0\",\n-    \"gulp-nodemon\": \"^1.0.5\",\n-    \"gulp-uglify\": \"^1.1.0\",\n-    \"jest-cli\": \"^0.2.2\",\n-    \"jquery\": \"^2.1.3\",\n-    \"react\": \"~0.13.1\",\n-    \"react-tools\": \"~0.12.2\",\n-    \"serve-static\": \"^1.9.1\",\n-    \"vinyl-buffer\": \"^1.0.0\",\n-    \"vinyl-source-stream\": \"~1.0.0\",\n-    \"watchify\": \"~2.1\"\n+    \"@babel/core\": \"^7\",\n+    \"@babel/eslint-parser\": \"^7\",\n+    \"@babel/preset-env\": \"^7\",\n+    \"@babel/preset-react\": \"^7\",\n+    \"@pmmmwh/react-refresh-webpack-plugin\": \"^0.5.8\",\n+    \"@testing-library/react\": \"^13\",\n+    \"babel-loader\": \"^9\",\n+    \"core-js\": \"^3\",\n+    \"eslint\": \"^7\",\n+    \"eslint-plugin-react\": \"^7\",\n+    \"express\": \"^4\",\n+    \"husky\": \"^8\",\n+    \"jest-cli\": \"^29\",\n+    \"jest-environment-jsdom\": \"^29.2.2\",\n+    \"jquery\": \"^3.6\",\n+    \"prettier\": \"^2.7\",\n+    \"react\": \"^18\",\n+    \"react-dom\": \"^18\",\n+    \"react-refresh\": \"^0.14.0\",\n+    \"serve-static\": \"^1\",\n+    \"styled-components\": \"^5\",\n+    \"webpack\": \"^5\",\n+    \"webpack-cli\": \"^4\",\n+    \"webpack-dev-middleware\": \"^5\",\n+    \"webpack-hot-middleware\": \"^2.25.2\"\n   },\n-  \"peerDependencies\": {},\n   \"scripts\": {\n-    \"test\": \"jest\"\n-  },\n-  \"jest\": {\n-    \"scriptPreprocessor\": \"<rootDir>/preprocessor.js\",\n-    \"unmockedModulePathPatterns\": [\n-      \"<rootDir>/node_modules/react\"\n-    ],\n-    \"testPathDirs\": [\n-      \"<rootDir>/__tests__\"\n-    ]\n+    \"test\": \"jest\",\n+    \"test-watch\": \"jest --watch\",\n+    \"build\": \"webpack --config webpack.config.js --mode=production\",\n+    \"demo\": \"node demo/data.js && node demo/server.js\",\n+    \"start\": \"npm run demo\",\n+    \"format\": \"prettier --write .\",\n+    \"lint\": \"eslint .\",\n+    \"lint:fix\": \"eslint . --fix\"\n+  },\n+  \"husky\": {\n+    \"hooks\": {\n+      \"pre-commit\": \"npm run lint\"\n+    }\n   }\n }\n",
+					"match": false,
+					"packageHash": "798a0c59306e0fdff22ba84a1e3da7fea797ac8d435bcd63cb1f892659829ca7",
+					"size": 1301,
+					"sourceHash": "03b6ab63ce6f10bda088ed1b73d574e9b00038e6bb36a4a703a1f59cc71e8a54",
+					"status": "content"
+				},
+				"preprocessor.js": {
+					"match": false,
+					"packageHash": "587e87dfae0ac17a1936fab6dc05e73c3018c7f211a7b74a6f05fcfd98f8df23",
+					"size": 148,
+					"status": "missing-in-source"
+				},
+				"react_components/PageView.js": {
+					"diff": "--- published/react_components/PageView.js\n+++ rebuilt/react_components/PageView.js\n@@ -1,18 +1,81 @@\n 'use strict';\n \n-var React = require('react');\n+import React from 'react';\n+import PropTypes from 'prop-types';\n \n-var PageView = React.createClass({\n-  render: function() {\n-    if (this.props.selected) {\n-      var cssClass = this.props.activeClass || 'selected';\n+const PageView = (props) => {\n+  let { pageClassName, pageLinkClassName } = props;\n+  const {\n+    page,\n+    selected,\n+    activeClassName,\n+    activeLinkClassName,\n+    getEventListener,\n+    pageSelectedHandler,\n+    href,\n+    extraAriaContext,\n+    pageLabelBuilder,\n+    rel,\n+  } = props;\n+\n+  let ariaLabel =\n+    props.ariaLabel ||\n+    'Page ' + page + (extraAriaContext ? ' ' + extraAriaContext : '');\n+  let ariaCurrent = null;\n+\n+  if (selected) {\n+    ariaCurrent = 'page';\n+\n+    ariaLabel = props.ariaLabel || 'Page ' + page + ' is your current page';\n+\n+    if (typeof pageClassName !== 'undefined') {\n+      pageClassName = pageClassName + ' ' + activeClassName;\n+    } else {\n+      pageClassName = activeClassName;\n+    }\n+\n+    if (typeof pageLinkClassName !== 'undefined') {\n+      if (typeof activeLinkClassName !== 'undefined') {\n+        pageLinkClassName = pageLinkClassName + ' ' + activeLinkClassName;\n+      }\n+    } else {\n+      pageLinkClassName = activeLinkClassName;\n     }\n-    return (\n-        <li className={cssClass}>\n-            <a {...this.props} href=\"\">{this.props.page}</a>\n-        </li>\n-    );\n   }\n-});\n \n-module.exports = PageView;\n+  return (\n+    <li className={pageClassName}>\n+      <a\n+        rel={rel}\n+        role={!href ? 'button' : undefined}\n+        className={pageLinkClassName}\n+        href={href}\n+        tabIndex={selected ? '-1' : '0'}\n+        aria-label={ariaLabel}\n+        aria-current={ariaCurrent}\n+        onKeyPress={pageSelectedHandler}\n+        {...getEventListener(pageSelectedHandler)}\n+      >\n+        {pageLabelBuilder(page)}\n+      </a>\n+    </li>\n+  );\n+};\n+\n+PageView.propTypes = {\n+  pageSelectedHandler: PropTypes.func.isRequired,\n+  selected: PropTypes.bool.isRequired,\n+  pageClassName: PropTypes.string,\n+  pageLinkClassName: PropTypes.string,\n+  activeClassName: PropTypes.string,\n+  activeLinkClassName: PropTypes.string,\n+  extraAriaContext: PropTypes.string,\n+  href: PropTypes.string,\n+  ariaLabel: PropTypes.string,\n+  page: PropTypes.number.isRequired,\n+  getEventListener: PropTypes.func.isRequired,\n+  pageLabelBuilder: PropTypes.func.isRequired,\n+  rel: PropTypes.string,\n+};\n+\n+export default PageView;\n",
+					"match": false,
+					"packageHash": "a965d07319c2029ab1b4e5c9115a50e396bbc2207764e6983f1bb81654b6e7ff",
+					"size": 365,
+					"sourceHash": "e32de978d1e55a9d53464892ea98a2b6d5af25fbd7a841ed16fbf1dab5ff17b6",
+					"status": "content"
+				},
+				"react_components/PaginationBoxView.js": {
+					"diff": "--- published/react_components/PaginationBoxView.js\n+++ rebuilt/react_components/PaginationBoxView.js\n@@ -1,109 +1,616 @@\n 'use strict';\n \n-var React              = require('react');\n-var classNames         = require('classnames');\n-var PaginationListView = require('./PaginationListView');\n-\n-var PaginationBoxView = React.createClass({\n-\n-  propTypes: {\n-    pageNum               : React.PropTypes.number.isRequired,\n-    pageRangeDisplayed    : React.PropTypes.number.isRequired,\n-    marginPagesDisplayed  : React.PropTypes.number.isRequired,\n-    previousLabel         : React.PropTypes.node,\n-    nextLabel             : React.PropTypes.node,\n-    breakLabel            : React.PropTypes.node,\n-    clickCallback         : React.PropTypes.func,\n-    initialSelected       : React.PropTypes.number,\n-    forceSelected         : React.PropTypes.number,\n-    containerClassName    : React.PropTypes.string,\n-    subContainerClassName : React.PropTypes.string,\n-    activeClass           : React.PropTypes.string\n-  },\n+import React, { Component } from 'react';\n+import PropTypes from 'prop-types';\n+import PageView from './PageView';\n+import BreakView from './BreakView';\n+import { classNameIfDefined } from './utils';\n+\n+export default class PaginationBoxView extends Component {\n+  static propTypes = {\n+    pageCount: PropTypes.number.isRequired,\n+    pageRangeDisplayed: PropTypes.number,\n+    marginPagesDisplayed: PropTypes.number,\n+    previousLabel: PropTypes.node,\n+    previousAriaLabel: PropTypes.string,\n+    prevPageRel: PropTypes.string,\n+    prevRel: PropTypes.string,\n+    nextLabel: PropTypes.node,\n+    nextAriaLabel: PropTypes.string,\n+    nextPageRel: PropTypes.string,\n+    nextRel: PropTypes.string,\n+    breakLabel: PropTypes.oneOfType([PropTypes.string, PropTypes.node]),\n+    breakAriaLabels: PropTypes.shape({\n+      forward: PropTypes.string,\n+      backward: PropTypes.string,\n+    }),\n+    hrefBuilder: PropTypes.func,\n+    hrefAllControls: PropTypes.bool,\n+    onPageChange: PropTypes.func,\n+    onPageActive: PropTypes.func,\n+    onClick: PropTypes.func,\n+    initialPage: PropTypes.number,\n+    forcePage: PropTypes.number,\n+    disableInitialCallback: PropTypes.bool,\n+    containerClassName: PropTypes.string,\n+    className: PropTypes.string,\n+    pageClassName: PropTypes.string,\n+    pageLinkClassName: PropTypes.string,\n+    pageLabelBuilder: PropTypes.func,\n+    activeClassName: PropTypes.string,\n+    activeLinkClassName: PropTypes.string,\n+    previousClassName: PropTypes.string,\n+    nextClassName: PropTypes.string,\n+    previousLinkClassName: PropTypes.string,\n+    nextLinkClassName: PropTypes.string,\n+    disabledClassName: PropTypes.string,\n+    disabledLinkClassName: PropTypes.string,\n+    breakClassName: PropTypes.string,\n+    breakLinkClassName: PropTypes.string,\n+    extraAriaContext: PropTypes.string,\n+    ariaLabelBuilder: PropTypes.func,\n+    eventListener: PropTypes.string,\n+    renderOnZeroPageCount: PropTypes.func,\n+    selectedPageRel: PropTypes.string,\n+  };\n+\n+  static defaultProps = {\n+    pageRangeDisplayed: 2,\n+    marginPagesDisplayed: 3,\n+    activeClassName: 'selected',\n+    previousLabel: 'Previous',\n+    previousClassName: 'previous',\n+    previousAriaLabel: 'Previous page',\n+    prevPageRel: 'prev',\n+    prevRel: 'prev',\n+    nextLabel: 'Next',\n+    nextClassName: 'next',\n+    nextAriaLabel: 'Next page',\n+    nextPageRel: 'next',\n+    nextRel: 'next',\n+    breakLabel: '...',\n+    breakAriaLabels: { forward: 'Jump forward', backward: 'Jump backward' },\n+    disabledClassName: 'disabled',\n+    disableInitialCallback: false,\n+    pageLabelBuilder: (page) => page,\n+    eventListener: 'onClick',\n+    renderOnZeroPageCount: undefined,\n",
+					"match": false,
+					"packageHash": "2d73b3c7cd20b4dab1f2820284fe6eea128097de3214d2ee2fe1a008b428de05",
+					"size": 3361,
+					"sourceHash": "e1753ec16f030b9be7941dde77713a7786a0b931f55f42a5c4c1422fc5c1ce65",
+					"status": "content"
+				},
+				"react_components/PaginationListView.js": {
+					"match": false,
+					"packageHash": "7f28f836cf7d0f7eb277e8cae6679e6c8e50aa68b1ffb585a2ab6b730850292e",
+					"size": 2587,
+					"status": "missing-in-source"
+				},
+				"react_components/react-paginate.js": {
+					"match": false,
+					"packageHash": "7685df91f255b23a8e8dd19f92e6e8f295711cd9ac7b9d38f1a0d24d5a510602",
+					"size": 64,
+					"status": "missing-in-source"
+				},
+				"sample/index.html": {
+					"match": false,
+					"packageHash": "9fdb83f9e8c5d13d16af77ea521a9a9772b0effc85fa77864120519ba89a4927",
+					"size": 1904,
+					"status": "missing-in-source"
+				},
+				"sample/sample.jsx": {
+					"match": false,
+					"packageHash": "e10eada18715854f35547488cfdebaab102140e715e9070e49ecef0a10bf9d18",
+					"size": 2366,
+					"status": "missing-in-source"
+				},
+				"sample/styles/style.css": {
+					"match": false,
+					"packageHash": "7523d7b8cda147b07993438577494bc7e3fbd50bba1e880d1fddcbada2399677",
+					"size": 201,
+					"status": "missing-in-source"
+				},
+				"server.js": {
+					"match": false,
+					"packageHash": "a3693c407611ab06961be15c1872d64acb404ba5d2927e6bf39cbdf9c2f34eda",
+					"size": 1520,
+					"status": "missing-in-source"
+				},
+				"CHANGELOG.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"CONTRIBUTE.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"LICENSE": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"dist/react-paginate.js.map": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"index.d.ts": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"react_components/BreakView.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"react_components/index.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"react_components/utils.js": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"theme/basic/README.md": {
+					"match": false,
+					"status": "missing-in-package"
+				},
+				"theme/basic/react-paginate.css": {
+					"match": false,
+					"status": "missing-in-package"
+				}
+			},
+			"summary": {
+				"differentFiles": 5,
+				"matchingFiles": 0,
+				"missingInPackage": 10,
+				"missingInSource": 20,
+				"score": 0,
+				"totalFiles": 35
+			}
+		},
+		"prodDependencies": [
+			{
+				"name": "js-tokens",
+				"version": "4.0.0"
+			},
+			{
+				"name": "loose-envify",
+				"version": "1.4.0"
+			},
+			{
+				"name": "object-assign",
+				"version": "4.1.1"
+			},
+			{
+				"name": "prop-types",
+				"version": "15.8.1"
+			},
+			{
+				"name": "react-is",
+				"version": "16.13.1"
+			}
+		]
+	}
+]
